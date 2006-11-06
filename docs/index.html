@@ -51,8 +51,8 @@ from scratch). The main features (call it USP) are:</p>
 times, <i>Xerces-DOM</i> - ~20 times <a href="#annot-1"><sup>1</sup></a></li>
 <li>extremely high parsing speed (well, I'm repeating myself, but it's so fast, that it outperforms
 <i>expat</i> by <b>2 times</b> on test XML) <a href="#annot-2"><sup>2</sup></a></li>
-<li>more or less standard-conformant (it will parse any standard-compliant file correctly in w3c-
-compliance mode, with the exception of DTD related issues and XML namespaces)</li>
+<li>more or less standard-conformant (it will parse any standard-compliant file correctly in w3c-compliance
+mode, with the exception of DTD related issues and XML namespaces)</li>
 <li>pretty much error-ignorant (it will not choke on something like &lt;text&gt;You &amp; Me&lt;/text&gt;,
 like <i>expat</i> will; it will try to recover the state even if meeting an error (like finding matching
 tags for closing ones); it will parse files with data in wrong encoding; and so on)</li>
@@ -170,7 +170,7 @@ the necessary amount of memory (equivalent to stream's size) and read everything
 <dl>
 <dt>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >void</font></b> <font color="#000000" >parse(std::istream&amp;</font> <font color="#000000" >stream,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_noset);</font></font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+        <b><font color="#0000ff" >void</font></b> <font color="#000000" >parse(std::istream&amp;</font> <font color="#000000" >stream,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_noset);</font></font></pre></td></tr></table>
 <dd>This function will create a buffer with the size equal to that of provided <code>stream</code>,
 read the chunk of data from the stream and parse it with provided options (<code>optmsk</code>).
 The stream does not have to persist after the call to the function, the lifetime of internal buffer
@@ -181,7 +181,7 @@ with stream's data is managed by <i>pugixml</i>.
 <dt>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >parse(</font><b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_noset);</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 <dd>This function parses the provided string with provided options, and returns the position where the
 parsing stopped (do not expect, that parsing will stop on every error, or on most of them - as I've
 said, <i>pugixml</i> is error ignorant). The input string is modified. The string must persist for the
@@ -190,13 +190,13 @@ lifetime of the parser.
 <dt>&nbsp;</dt>
 <dt>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_parser(std::istream&amp;</font> <font color="#000000" >stream,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+        <font color="#000000" >xml_parser(std::istream&amp;</font> <font color="#000000" >stream,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
 <dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
 </dt>
 <dt>&nbsp;</dt>
 <dt>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_parser(</font><b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+        <font color="#000000" >xml_parser(</font><b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
 <dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
 </dt>
 </dl>
@@ -211,7 +211,7 @@ using the following functions:</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >operator</font></b> <font color="#000000" >xml_node()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >document()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Ok, easy part behind - now let's dive into parsing options. There is a variety of them, and you
 must choose them wisely to get the needed results and the best speed/least memory overhead. At first,
@@ -262,8 +262,9 @@ is performed for PCDATA content
 <br>Default value: on
 <br>In W3C mode: off</li>
 <li>If <b>parse_trim_attribute</b> is on, then the trimming of leading/trailing space-like characters
-is performed for attribute values
-<br>Default value: on
+is performed for attribute values (this is non-standard behavior and is here only for compatibility
+reasons (PugXML had this flag).
+<br>Default value: off
 <br>In W3C mode: off</li>
 <li>If <b>parse_escapes_pcdata</b> is on, then the character reference expansion is done for PCDATA
 content (replacing &lt;lt; with &lt;, &amp;#4c; with L, etc.).
@@ -287,10 +288,15 @@ values (this is a subset of whitespace normalization, and includes only replacin
 with spaces). If <b>parse_wnorm_attribute</b> is on, this flag has no effect.
 <br>Default value: on
 <br>In W3C mode: on</li>
-<li>If <b>parse_eol_cdata</b> is on, then the end-of-line handling is done for CDATA content (this
+<li>If <b>parse_eol_pcdata</b> is on, then the end-of-line handling is done for PCDATA content (this
 includes converting any pair of 0x0d 0x0a characters to a single 0x0a and converting any standalone
-0x0d to 0x0a). Note, that end-of-line handling is done for all content (PCDATA, attribute values)
-except CDATA sections (if this flag is off).
+0x0d to 0x0a). 
+<br>Default value: on
+<br>In W3C mode: on</li>
+<li>If <b>parse_eol_attribute</b> is on, then the end-of-line handling is done for attribute values.
+<br>Default value: on
+<br>In W3C mode: on</li>
+<li>If <b>parse_eol_cdata</b> is on, then the end-of-line handling is done for CDATA content.
 <br>Default value: on
 <br>In W3C mode: on</li>
 </ul>
@@ -333,7 +339,7 @@ You can access the current options of parser by <b>options()</b> method:
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >options()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >options(</font><b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk);</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 (the latter one returns previous options). These options are used when <b>parse_noset</b> flag set is
 passed to <b>parse()</b> functions (which is the default value of corresponding parameter).
 </p>
@@ -369,14 +375,14 @@ strings like 'ell_23_xref', 'cell_0_x' or 'cell_0a_x'.</p>
         <i><font color="#808080" >/// Access iterators for this node's collection of siblings.</font></i>
         <font color="#000000" >iterator</font> <font color="#000000" >siblings_begin()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >iterator</font> <font color="#000000" >siblings_end()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Functions, returning the iterators to walk through children/siblings/attributes. More on that in
 <a href="#Doc_Iterators">Iterators</a> section.</p>
 	
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >operator</font></b> <font color="#000000" >unspecified_bool_type()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>This is a safe bool-like conversion operator. You can check node's validity (<b>if (xml_node)</b>,
  <b>if (!xml_node)</b>, <b>if (node1 && node2 && !node3 && cond1 && ...)</b> - you get the idea) with
@@ -390,13 +396,13 @@ it.
         <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >>(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" ><=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >>=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Comparison operators</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >bool</font></b> <font color="#000000" >empty()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p><code>if (node.empty())</code> is equivalent to <code>if (!node)</code></p>
 
@@ -404,7 +410,7 @@ it.
         <font color="#000000" >xml_node_type</font> <font color="#000000" >type()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >value()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Access node's properties (type, name and value). If there is no name/value, the corresponding functions
 return <b>""</b> - they <u>never</u> return NULL.</p>	
@@ -412,7 +418,7 @@ return <b>""</b> - they <u>never</u> return NULL.</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_node</font> <font color="#000000" >child(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >child_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get a child node with specified name, or <b>xml_node()</b> (this is an invalid node) if nothing is
 found</p>
@@ -420,7 +426,7 @@ found</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_attribute</font> <font color="#000000" >attribute(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_attribute</font> <font color="#000000" >attribute_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get an attribute with specified name, or <b>xml_attribute()</b> (this is an invalid attribute) if
 nothing is found</p>
@@ -428,7 +434,7 @@ nothing is found</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_node</font> <font color="#000000" >sibling(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >sibling_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get a node's sibling with specified name, or <b>xml_node()</b> if nothing is found.<br>
 <code>node.sibling(name)</code> is equivalent to <code>node.parent().child(name)</code>.</p>
@@ -437,7 +443,7 @@ nothing is found</p>
         <font color="#000000" >xml_node</font> <font color="#000000" >next_sibling(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >next_sibling_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >next_sibling()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>These functions get the next sibling, that is, one of the siblings of that node, that is to the
 right. <code>next_sibling()</code> just returns the right brother of the node (or <b>xml_node()</b>),
@@ -447,29 +453,41 @@ the two other functions are searching for the sibling with the given name</p>
         <font color="#000000" >xml_node</font> <font color="#000000" >previous_sibling(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >previous_sibling_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >previous_sibling()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>These functions do exactly the same as <code>next_sibling</code> ones, with the exception that they
 search for the left siblings.</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_node</font> <font color="#000000" >parent()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get a parent node. The parent node for the root one (the document) is considered to be the document
 itself.</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >child_value()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Look for the first node of type <b>node_pcdata</b> or <b>node_cdata</b> among the
 children of the current node and return its contents (or <b>""</b> if nothing is found)</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
+    <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >child_value(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
+</font></pre></td></tr></table>
+
+<p>This is the convenient way of looking into child's child value - that is, node.child_value(name) is equivalent to node.child(name).child_value().</p>
+
+<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
+    <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >child_value_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
+</font></pre></td></tr></table>
+
+<p>This is the convenient way of looking into child's child value - that is, node.child_value_w(name) is equivalent to node.child_w(name).child_value().</p>
+
+<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_attribute</font> <font color="#000000" >first_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_attribute</font> <font color="#000000" >last_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>These functions get the first and last attributes of the node (or <b>xml_attribute()</b> if the node
 has no attributes).</p>
@@ -477,7 +495,7 @@ has no attributes).</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_node</font> <font color="#000000" >first_child()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >last_child()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>These functions get the first and last children of the node (or <b>xml_node()</b> if the node has
 no children).</p>
@@ -485,7 +503,7 @@ no children).</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >OutputIterator&gt;</font> <b><font color="#0000ff" >void</font></b> <font color="#000000" >all_elements_by_name(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <font color="#000000" >OutputIterator</font> <font color="#000000" >it)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >OutputIterator&gt;</font> <b><font color="#0000ff" >void</font></b> <font color="#000000" >all_elements_by_name_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <font color="#000000" >OutputIterator</font> <font color="#000000" >it)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get all elements with the specified name in the subtree (depth-first search) and return them with
 the help of output iterator (i.e. std::back_inserter)</p>
@@ -494,7 +512,7 @@ the help of output iterator (i.e. std::back_inserter)</p>
         <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >Predicate&gt;</font> <font color="#000000" >xml_attribute</font> <font color="#000000" >find_attribute(Predicate</font> <font color="#000000" >pred)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >Predicate&gt;</font> <font color="#000000" >xml_node</font> <font color="#000000" >find_child(Predicate</font> <font color="#000000" >pred)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >Predicate&gt;</font> <font color="#000000" >xml_node</font> <font color="#000000" >find_element(Predicate</font> <font color="#000000" >pred)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Find attribute, child or a node in the subtree (find_element - depth-first search) with the help
 of the given predicate. Predicate should behave like a function which accepts a <b>xml_node</b> or
@@ -514,7 +532,7 @@ or <b>xml_attribute()</b> is returned.</p>
 
         <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_attribute(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_attribute_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Find the first node (depth-first search), which corresponds to the given criteria (i.e. either has
 a matching name, or a matching value, or has an attribute with given name/value, or has an attribute
@@ -522,20 +540,20 @@ and has a matching name). Note that <b>_w</b> versions treat all parameters as w
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_node</font> <font color="#000000" >first_node(xml_node_type</font> <font color="#000000" >type)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Return a first node (depth-first search) with a given type, or <b>xml_node()</b>.</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >std::string</font> <font color="#000000" >path(</font><b><font color="#0000ff" >char</font></b> <font color="#000000" >delimiter</font> <font color="#000000" >=</font> <font color="#ff0000" >'/'</font><font color="#000000" >)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get a path of the node (i.e. the string of names of the nodes on the path from the DOM tree root
 to the node, separated with delimiter (/ by default).</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_path(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >path,</font> <b><font color="#0000ff" >char</font></b> <font color="#000000" >delimiter</font> <font color="#000000" >=</font> <font color="#ff0000" >'/'</font><font color="#000000" >)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get the first element that has the following path. The path can be absolute (beginning with delimiter) or
 relative, '..' means 'up-level' (so if we are at the path <b>mesh/fragment/geometry/stream</b>, <b>../..</b>
@@ -543,7 +561,7 @@ will lead us to <b>mesh/fragment</b>, and <b>/mesh</b> will lead us to <b>mesh</
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >bool</font></b> <font color="#000000" >traverse(xml_tree_walker&amp;</font> <font color="#000000" >walker)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Traverse the subtree (beginning with current node) with the walker, return the result. See
 <a href="#Doc_Misc">Miscellaneous</a> section for details.</p>
@@ -560,19 +578,19 @@ will lead us to <b>mesh/fragment</b>, and <b>/mesh</b> will lead us to <b>mesh</
         <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >&gt;(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >&lt;=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >&gt;=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Comparison operators.</p>	
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >operator</font></b> <font color="#000000" >unspecified_bool_type()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Safe bool conversion - like in <b>xml_node</b>, use this to check for validity.</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >bool</font></b> <font color="#000000" >empty()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Like with <b>xml_node</b>, <code>if (attr.empty())</code> is equivalent to <code>if (!attr)</code>.
 </p>
@@ -580,7 +598,7 @@ will lead us to <b>mesh/fragment</b>, and <b>/mesh</b> will lead us to <b>mesh</
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_attribute</font> <font color="#000000" >next_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <font color="#000000" >xml_attribute</font> <font color="#000000" >previous_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get the next/previous attribute of the node, that owns the current attribute. Return <b>xml_attribute()</b>
 if no such attribute is found.</p>
@@ -588,7 +606,7 @@ if no such attribute is found.</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >value()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get the name and value of the attribute. These methods never return NULL - they return <b>""</b> instead.</p>
 
@@ -596,14 +614,14 @@ if no such attribute is found.</p>
         <b><font color="#0000ff" >int</font></b> <font color="#000000" >as_int()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >double</font></b> <font color="#000000" >as_double()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
         <b><font color="#0000ff" >float</font></b> <font color="#000000" >as_float()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Convert the value of an attribute to the desired type. If the conversion is not successfull, return
 default value (0 for int, 0.0 for double, 0.0f for float). These functions rely on CRT functions ato*.</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >bool</font></b> <font color="#000000" >as_bool()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Convert the value of an attribute to bool. This method returns true if the first character of the
 value is '1', 't', 'T', 'y' or 'Y'. Otherwise it returns false.</p>
@@ -629,7 +647,7 @@ do something like:
         <font color="#000000" >xml_attribute</font> <font color="#000000" >last_attrib</font> <font color="#000000" >=</font> <font color="#000000" >*(--node.attributes_end());</font>
         <font color="#000000" >...</font>
     <font color="#000000" >}</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 </p>
 
 <a name="Doc_Misc">
@@ -642,7 +660,7 @@ do something like:
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >bool</font></b> <font color="#000000" >begin(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;);</font>
         <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >bool</font></b> <font color="#000000" >end(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;);</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>These functions are called when the processing of the node starts/ends. First <b>begin()</b>
 is called, then all children of the node are processed recursively, then <b>end()</b> is called. If
@@ -652,14 +670,14 @@ returns false.</p>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >void</font></b> <font color="#000000" >push();</font>
         <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >void</font></b> <font color="#000000" >pop();</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>These functions are called before and after the processing of node's children. If node has no children,
 none of these is called. The default behavior is to increment/decrement current node depth.</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >depth()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>Get the current depth. You can use this function to do your own indentation, for example.</p>
 
@@ -667,7 +685,7 @@ none of these is called. The default behavior is to increment/decrement current 
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <b><font color="#0000ff" >bool</font></b> <font color="#000000" >value</font> <font color="#000000" >=</font> <font color="#000000" >node.child(</font><font color="#ff0000" >"stream"</font><font color="#000000" >).attribute(</font><font color="#ff0000" >"compress"</font><font color="#000000" >).as_bool();</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 If node has a child with the name 'geometry', and this child has an attribute 'compress', than everything
 is ok. If node has a child with the name 'geometry' with no attribute 'compress', then attribute("compress")
@@ -768,7 +786,7 @@ it (name, value, attributes list, nearby nodes in a tree - siblings, parent and 
         <font color="#000000" >}</font>
     <font color="#000000" >}</font>
 <font color="#000000" >}</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <p>We can also write a class that will traverse the DOM tree and store the information from nodes based
 on their names, depths, attributes, etc. This way is well known by the users of SAX parsers. To do that,
@@ -830,7 +848,7 @@ we have to write an implementation of <b>xml_tree_walker</b> interface </p>
     <b><font color="#0000ff" >if</font></b> <font color="#000000" >(!parser.document().traverse(mp))</font>
         <i><font color="#808080" >// generate an error</font></i>
 <font color="#000000" >}</font>
-</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+</font></pre></td></tr></table>
 
 <hr>
 
@@ -921,7 +939,7 @@ parsers already.</p>
 <a name="FAQ">
 <h2>FAQ</h2>
 
-<p>I'm always open for questions; feel free to write them to <a href="mailto:zeux@mathcentre.com">zeux@mathcentre.com</a>.
+<p>I'm always open for questions; feel free to write them to <a href="mailto:arseny.kapoulkine@gmail.com">arseny.kapoulkine@gmail.com</a>.
 </p>
 
 <hr>
@@ -929,11 +947,14 @@ parsers already.</p>
 <a name="Bugs">
 <h2>Bugs</h2>
 
-<p>I'm always open for bug reports; feel free to write them to <a href="mailto:zeux@mathcentre.com">zeux@mathcentre.com</a>.
+<p>I'm always open for bug reports; feel free to write them to <a href="mailto:arseny.kapoulkine@gmail.com">arseny.kapoulkine@gmail.com</a>.
 Please provide as much information as possible - version of <i>pugixml</i>, compiling and OS environment
 (compiler and it's version, STL version, OS version, etc.), the description of the situation in which
 the bug arises, the code and data files that show the bug, etc. - the more, the better. Though, please,
 do not send executable files.</p>
+
+<p>Note, that you can also submit bug reports/suggestions at
+<a href="http://code.google.com/p/pugixml/issues/list">project page</a>.
 
 <hr>
 
@@ -952,7 +973,7 @@ if necessary)
 changes)
 <li>Externally provided entity reference table (or perhaps even taken from DOCTYPE?)
 <li>More intelligent parsing of DOCTYPE (it does not always skip DOCTYPE for now)
-<li>XML 1.1 changes (changed EOL handling, normalization issues, 
+<li>XML 1.1 changes (changed EOL handling, normalization issues, etc.)
 <li>XPath support
 <li>Name your own?
 </ul>
@@ -965,6 +986,15 @@ changes)
 <dl>
 <dt>15.07.2006 - v0.1
 <dd>First private release for testing purposes
+</dt>
+<dt>6.11.2006 - v0.2
+<dd>First public release. Changes: <ul>
+<li>Introduced child_value(name) and child_value_w(name)
+<li>Fixed child_value() (for empty nodes)
+<li>Fixed xml_parser_impl warning at W4
+<li>parse_eol_pcdata and parse_eol_attribute flags + parse_minimal optimizations
+<li>Optimizations of strconv_t
+</ul>
 </dt>
 </dl>
 
@@ -983,11 +1013,36 @@ changes)
 <a name="License">
 <h2>License</h2>
 
-<p>The <i>pugixml</i> parser is released into the public domain (though this may change).</p>
+<p>The <i>pugixml</i> parser is distributed under the MIT license:</p>
+
+<pre>
+Copyright (c) 2006 Arseny Kapoulkine
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+</pre>
 
 <hr>
 
-<p>Revised 15 July, 2006</p>
-<p><i>&copy; Copyright <a href="mailto:zeux@mathcentre.com">Zeux</a> 2006. All Rights Reserved.</i></p>
+<p>Revised 6 November, 2006</p>
+<p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006. All Rights Reserved.</i></p>
 </body>
 </html>
