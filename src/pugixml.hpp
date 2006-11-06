@@ -46,10 +46,13 @@ namespace pugi
 	const unsigned int parse_wnorm_pcdata		= 0x00000200; ///< Normalize spaces in pcdata
 	const unsigned int parse_wnorm_attribute	= 0x00000400; ///< Normalize spaces in attributes
 	const unsigned int parse_wconv_attribute	= 0x00000800; ///< Convert space-like characters to spaces in attributes (only if wnorm is not set)
-	const unsigned int parse_eol_cdata			= 0x00001000; ///< Perform EOL handling in CDATA sections
-	const unsigned int parse_check_end_tags		= 0x00002000; ///< Check start and end tag names and return error if names mismatch
-	const unsigned int parse_match_end_tags		= 0x00004000; ///< Try to find corresponding start tag for an end tag
-	const unsigned int parse_default			= 0x0000FFFF & ~parse_ws_pcdata; ///< Set all flags, except parse_ws_pcdata
+	const unsigned int parse_eol_pcdata			= 0x00001000; ///< Perform EOL handling in pcdata
+	const unsigned int parse_eol_attribute		= 0x00002000; ///< Perform EOL handling in attrobites
+	const unsigned int parse_eol_cdata			= 0x00004000; ///< Perform EOL handling in CDATA sections
+	const unsigned int parse_check_end_tags		= 0x00010000; ///< Check start and end tag names and return error if names mismatch
+	const unsigned int parse_match_end_tags		= 0x00020000; ///< Try to find corresponding start tag for an end tag
+	///< Set all flags, except parse_ws_pcdata and parse_trim_attribute
+	const unsigned int parse_default			= 0x00FFFFFF & ~parse_ws_pcdata & ~parse_trim_attribute;
 	const unsigned int parse_noset				= 0x80000000; ///< Parse with flags in xml_parser
 
 	const unsigned int parse_w3c				= parse_pi | parse_comments | parse_cdata |
@@ -266,6 +269,13 @@ namespace pugi
 		/// Return PCDATA/CDATA that is child of current node. If none, return empty string.
 		const char* child_value() const;
 
+		/// Return PCDATA/CDATA that is child of specified child node. If none, return empty string.
+		const char* child_value(const char* name) const;
+
+		/// Return PCDATA/CDATA that is child of specified child node. If none, return empty string.
+		/// Enable wildcard matching.
+		const char* child_value_w(const char* name) const;
+
 	public:
 		/// Access node's first attribute if any, else xml_attribute()
 		xml_attribute first_attribute() const;
@@ -472,7 +482,7 @@ namespace pugi
 		std::vector<char>	_buffer; ///< character buffer
 
 		xml_memory_block	_memory; ///< Memory block
-
+		
 		xml_node_struct*	_xmldoc; ///< Pointer to current XML document tree root.
 		unsigned int		_optmsk; ///< Parser options.
 	

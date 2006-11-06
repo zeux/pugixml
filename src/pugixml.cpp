@@ -101,9 +101,7 @@ namespace pugi
 }
 
 namespace
-{
-	using namespace pugi;
-	
+{	
 	namespace utf8
 	{
 		const unsigned char BYTE_MASK = 0xBF;
@@ -111,9 +109,12 @@ namespace
 		const unsigned char BYTE_MASK_READ = 0x3F;
 		const unsigned char FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 	}
+}
 
+namespace pugi
+{
 	// Get the size that is needed for strutf16_utf8 applied to all s characters
-	size_t strutf16_utf8_size(const wchar_t* s)
+	static size_t strutf16_utf8_size(const wchar_t* s)
 	{
 		size_t length = 0;
 
@@ -133,7 +134,7 @@ namespace
 	// \param ch - char
 	// \return position after the last char
 	// \rem yes, this is trom TinyXML. How would you write it the other way, without switch trick?..
-	char* strutf16_utf8(char* s, unsigned int ch)
+	static char* strutf16_utf8(char* s, unsigned int ch)
 	{
 		unsigned int length;
 
@@ -165,7 +166,7 @@ namespace
 	}
 
 	// Get the size that is needed for strutf8_utf16 applied to all s characters
-	size_t strutf8_utf16_size(const char* s)
+	static size_t strutf8_utf16_size(const char* s)
 	{
 		size_t length = 0;
 
@@ -181,7 +182,7 @@ namespace
 	// \param s - pointer to string
 	// \param ch - char
 	// \return position after the last char
-	const char* strutf8_utf16(const char* s, unsigned int& ch)
+	static const char* strutf8_utf16(const char* s, unsigned int& ch)
 	{
 		unsigned int length;
 
@@ -248,14 +249,28 @@ namespace
 		static bool chartype_lbracket(char c) { return c == '['; }
 		static bool chartype_rbracket(char c) { return c == ']'; }
 
-		template <bool opt_trim, bool opt_escape, bool opt_wnorm, bool opt_wconv> static void strconv_t(char** s)
+		template <bool opt_trim, bool opt_escape, bool opt_wnorm, bool opt_wconv, bool opt_eol> static void strconv_t(char** s)
 		{
 			if (!s || !*s) return;
 
+			if (!opt_trim && !opt_escape && !opt_wnorm && !opt_wconv && !opt_eol) return;
+
 			// Trim whitespaces
 			if (opt_trim) while (chartype_space(**s)) ++(*s);
-
+			
 			char* str = *s;
+			
+			// Skip usual symbols
+			if (opt_escape || opt_wnorm || opt_wconv || opt_eol)
+			{
+				while (*str)
+				{
+					if (opt_wconv && *str == '&') break;
+					if ((opt_wnorm || opt_wconv || opt_eol) && chartype_space(*str)) break;
+					++str;
+				}
+			}
+
 			char* lastpos = str;
 
 			if (!*str) return;
@@ -359,6 +374,14 @@ namespace
 						}
 					}
 				}
+				else if (chartype_space(*str) && opt_wnorm)
+				{
+					*lastpos++ = ' ';
+		
+					while (chartype_space(*str)) ++str;
+
+					continue;
+				}
 				else if (chartype_space(*str) && opt_wconv)
 				{
 					if (*str == 0x0d && *(str + 1) == 0x0a) ++str;
@@ -368,19 +391,11 @@ namespace
 
 					continue;
 				}
-				else if (*str == 0x0d && !opt_wnorm)
+				else if (*str == 0x0d && !opt_wnorm && opt_eol)
 				{
 					if (*(str + 1) == 0x0a) ++str;
 					++str;
 					*lastpos++ = 0x0a;
-
-					continue;
-				}
-				else if (chartype_space(*str) && opt_wnorm)
-				{
-					*lastpos++ = ' ';
-		
-					while (chartype_space(*str)) ++str;
 
 					continue;
 				}
@@ -395,64 +410,128 @@ namespace
 			}
 			else *lastpos = 0;
 		}
-
-		static void strconv_setup(void (*&func)(char**), unsigned int opt_trim, unsigned int opt_escape, unsigned int opt_wnorm, unsigned int opt_wconv)
+	
+		static void strconv_setup(void (*&func)(char**), unsigned int opt_trim, unsigned int opt_escape, unsigned int opt_wnorm, unsigned int opt_wconv, unsigned int opt_eol)
 		{
-			if (opt_wconv)
+			if (opt_eol)
 			{
-				if (opt_trim)
+				if (opt_wconv)
 				{
-					if (opt_escape)
+					if (opt_trim)
 					{
-						if (opt_wnorm) func = &strconv_t<true, true, true, true>;
-						else func = &strconv_t<true, true, false, true>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<true, true, true, true, true>;
+							else func = &strconv_t<true, true, false, true, true>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<true, false, true, true, true>;
+							else func = &strconv_t<true, false, false, true, true>;
+						}
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<true, false, true, true>;
-						else func = &strconv_t<true, false, false, true>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<false, true, true, true, true>;
+							else func = &strconv_t<false, true, false, true, true>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<false, false, true, true, true>;
+							else func = &strconv_t<false, false, false, true, true>;
+						}
 					}
 				}
 				else
 				{
-					if (opt_escape)
+					if (opt_trim)
 					{
-						if (opt_wnorm) func = &strconv_t<false, true, true, true>;
-						else func = &strconv_t<false, true, false, true>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<true, true, true, false, true>;
+							else func = &strconv_t<true, true, false, false, true>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<true, false, true, false, true>;
+							else func = &strconv_t<true, false, false, false, true>;
+						}
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<false, false, true, true>;
-						else func = &strconv_t<false, false, false, true>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<false, true, true, false, true>;
+							else func = &strconv_t<false, true, false, false, true>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<false, false, true, false, true>;
+							else func = &strconv_t<false, false, false, false, true>;
+							}
 					}
 				}
 			}
 			else
 			{
-				if (opt_trim)
+				if (opt_wconv)
 				{
-					if (opt_escape)
+					if (opt_trim)
 					{
-						if (opt_wnorm) func = &strconv_t<true, true, true, false>;
-						else func = &strconv_t<true, true, false, false>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<true, true, true, true, false>;
+							else func = &strconv_t<true, true, false, true, false>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<true, false, true, true, false>;
+							else func = &strconv_t<true, false, false, true, false>;
+						}
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<true, false, true, false>;
-						else func = &strconv_t<true, false, false, false>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<false, true, true, true, false>;
+							else func = &strconv_t<false, true, false, true, false>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<false, false, true, true, false>;
+							else func = &strconv_t<false, false, false, true, false>;
+						}
 					}
 				}
 				else
 				{
-					if (opt_escape)
+					if (opt_trim)
 					{
-						if (opt_wnorm) func = &strconv_t<false, true, true, false>;
-						else func = &strconv_t<false, true, false, false>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<true, true, true, false, false>;
+							else func = &strconv_t<true, true, false, false, false>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<true, false, true, false, false>;
+							else func = &strconv_t<true, false, false, false, false>;
+						}
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<false, false, true, false>;
-						else func = &strconv_t<false, false, false, false>;
+						if (opt_escape)
+						{
+							if (opt_wnorm) func = &strconv_t<false, true, true, false, false>;
+							else func = &strconv_t<false, true, false, false, false>;
+						}
+						else
+						{
+							if (opt_wnorm) func = &strconv_t<false, false, true, false, false>;
+							else func = &strconv_t<false, false, false, false, false>;
+						}
 					}
 				}
 			}
@@ -526,8 +605,8 @@ namespace
 			void (*strconv_pcdata)(char**);
 			void (*strconv_attribute)(char**);
 
-			strconv_setup(strconv_attribute, OPTSET(parse_trim_attribute), OPTSET(parse_escapes_attribute), OPTSET(parse_wnorm_attribute), OPTSET(parse_wconv_attribute));
-			strconv_setup(strconv_pcdata, OPTSET(parse_trim_pcdata), OPTSET(parse_escapes_pcdata), OPTSET(parse_wnorm_pcdata), false);
+			strconv_setup(strconv_attribute, OPTSET(parse_trim_attribute), OPTSET(parse_escapes_attribute), OPTSET(parse_wnorm_attribute), OPTSET(parse_wconv_attribute), OPTSET(parse_eol_attribute));
+			strconv_setup(strconv_pcdata, OPTSET(parse_trim_pcdata), OPTSET(parse_escapes_pcdata), OPTSET(parse_wnorm_pcdata), false, OPTSET(parse_eol_pcdata));
 
 			char ch = 0; // Current char, in cases where we must null-terminate before we test.
 			xml_node_struct* cursor = xmldoc; // Tree node cursor.
@@ -622,7 +701,7 @@ namespace
 
 									if (OPTSET(parse_eol_cdata))
 									{
-										strconv_t<false, false, false, false>(&cursor->value);
+										strconv_t<false, false, false, false, true>(&cursor->value);
 									}
 
 									POPNODE(); // Pop since this is a standalone.
@@ -860,10 +939,13 @@ namespace
 			}
 			return s;
 		}
+		
+	private:
+		const xml_parser_impl& operator=(const xml_parser_impl&);
 	};
 
 	// Compare lhs with [rhs_begin, rhs_end)
-	int strcmprange(const char* lhs, const char* rhs_begin, const char* rhs_end)
+	static int strcmprange(const char* lhs, const char* rhs_begin, const char* rhs_end)
 	{
 		while (*lhs && rhs_begin != rhs_end && *lhs == *rhs_begin)
 		{
@@ -876,7 +958,7 @@ namespace
 	}
 	
 	// Character set pattern match.
-	int strcmpwild_cset(const char** src, const char** dst)
+	static int strcmpwild_cset(const char** src, const char** dst)
 	{
 		int find = 0, excl = 0, star = 0;
 		
@@ -909,22 +991,14 @@ namespace
 	
 		return find;
 	}
-}
 
-namespace pugi
-{
 	namespace impl
 	{
 		int strcmpwild(const char* src, const char* dst);
 	}
-}
-
-namespace
-{
-	using namespace pugi;
 
 	// Wildcard pattern match.
-	int strcmpwild_astr(const char** src, const char** dst)
+	static int strcmpwild_astr(const char** src, const char** dst)
 	{
 		int find = 1;
 		++(*src);
@@ -952,10 +1026,7 @@ namespace
 			return find;
 		}
 	}
-}
 
-namespace pugi
-{
 	namespace impl
 	{
 		// Compare two strings, with globbing, and character sets.
@@ -977,15 +1048,17 @@ namespace pugi
 		}
 	}
 
-	extern "C"
+	int strcmp(const char* lhs, const char* rhs)
 	{
-		int strcmpwildimpl(const char* src, const char* dst)
-		{
-			return impl::strcmpwild(src, dst);
-		}
-
-		typedef int (*strcmpfunc)(const char*, const char*);
+		return ::strcmp(lhs, rhs);
 	}
+
+	int strcmpwildimpl(const char* src, const char* dst)
+	{
+		return impl::strcmpwild(src, dst);
+	}
+
+	typedef int (*strcmpfunc)(const char*, const char*);
 
 	xml_attribute_struct::xml_attribute_struct(): name(0), value(0), prev_attribute(0), next_attribute(0)
 	{
@@ -1355,10 +1428,21 @@ namespace pugi
 
 	const char* xml_node::child_value() const
 	{
-		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if ((i->type == node_pcdata || i->type == node_cdata) && i->value)
-				return i->value;
+		if (!empty())
+			for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+				if ((i->type == node_pcdata || i->type == node_cdata) && i->value)
+					return i->value;
 		return "";
+	}
+
+	const char* xml_node::child_value(const char* name) const
+	{
+		return child(name).child_value();
+	}
+
+	const char* xml_node::child_value_w(const char* name) const
+	{
+		return child_w(name).child_value();
 	}
 
 	xml_attribute xml_node::first_attribute() const
