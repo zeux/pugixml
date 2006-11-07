@@ -45,12 +45,12 @@ that is left as is is wildcard matching code, the rest was either heavily refact
 from scratch). The main features (call it USP) are:</p>
 
 <ul>
-<li>low memory consumption and fragmentation (the win over <i>pugxml</i> is ~1.5 times, <i>TinyXML</i>
-- ~4.5 times, <i>Xerces (DOM)</i> - ~7 times <a href="#annot-1"><sup>1</sup></a>)</li>
-<li>extremely high parsing speed (the win over <i>pugxml</i> is ~11.8 times, <i>TinyXML</i> - ~13.6
-times, <i>Xerces-DOM</i> - ~20 times <a href="#annot-1"><sup>1</sup></a></li>
+<li>low memory consumption and fragmentation (the win over <i>pugxml</i> is ~1.3 times, <i>TinyXML</i>
+- ~2.5 times, <i>Xerces (DOM)</i> - ~4.3 times <a href="#annot-1"><sup>1</sup></a>)</li>
+<li>extremely high parsing speed (the win over <i>pugxml</i> is ~6 times, <i>TinyXML</i> - ~10
+times, <i>Xerces-DOM</i> - ~17.6 times <a href="#annot-1"><sup>1</sup></a></li>
 <li>extremely high parsing speed (well, I'm repeating myself, but it's so fast, that it outperforms
-<i>expat</i> by <b>2 times</b> on test XML) <a href="#annot-2"><sup>2</sup></a></li>
+<i>expat</i> by <b>2.8 times</b> on test XML) <a href="#annot-2"><sup>2</sup></a></li>
 <li>more or less standard-conformant (it will parse any standard-compliant file correctly in w3c-compliance
 mode, with the exception of DTD related issues and XML namespaces)</li>
 <li>pretty much error-ignorant (it will not choke on something like &lt;text&gt;You &amp; Me&lt;/text&gt;,
@@ -91,7 +91,8 @@ that, though it is a thing that will likely be in the next release.</li>
 <hr>
 
 <a name="annot-1"><sup>1</sup><small> The tests were done on a 1 mb XML file with a 4 levels deep tree
-with a small amount of text. The times are that of building DOM tree.</small> <br>
+with a small amount of text. The times are that of building DOM tree. <i>pugixml</i> was run in default
+parsing mode, so differences in speed are even bigger with minimal settings.</small> <br>
 <a name="annot-2"><sup>2</sup><small> Obviously, you can't estimate time of building DOM tree for a
 SAX parser, so the times of reading the data into storage that closely represented the structure of
 an XML file were measured.</small>
@@ -1042,7 +1043,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 6 November, 2006</p>
+<p>Revised 7 November, 2006</p>
 <p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006. All Rights Reserved.</i></p>
 </body>
 </html>
