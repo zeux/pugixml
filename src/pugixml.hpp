@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <string>
+#include <istream>
 
 /// The PugiXML Parser namespace.
 namespace pugi
