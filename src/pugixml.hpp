@@ -14,6 +14,9 @@
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
+#include <vector>
+#include <string>
+
 /// The PugiXML Parser namespace.
 namespace pugi
 {
