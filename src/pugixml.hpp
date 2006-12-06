@@ -28,7 +28,7 @@ namespace pugi
 		node_null,			///< An undifferentiated entity.
 		node_document,		///< A document tree's absolute root.
 		node_element,		///< E.g. '<...>'
-		node_pcdata,		///< E.g. '<...>'
+		node_pcdata,		///< E.g. '>...<'
 		node_cdata,			///< E.g. '<![CDATA[...]]>'
 		node_comment,		///< E.g. '<!--...-->'
 		node_pi				///< E.g. '<?...?>'
