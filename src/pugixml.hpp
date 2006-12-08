@@ -507,6 +507,8 @@ namespace pugi
 		xml_parser(const xml_parser&);
 		const xml_parser& operator=(const xml_parser&);
 
+		void free();	///< free memory
+
 	public:
 		/// Constructor.
 		/// \param optmsk - Options mask.

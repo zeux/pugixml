@@ -1870,6 +1870,14 @@ namespace pugi
 
 	xml_parser::~xml_parser()
 	{
+		free();
+	}
+
+	void xml_parser::free()
+	{
+		delete _buffer;
+		_buffer = 0;
+
 		xml_memory_block* current = _memory.next;
 
 		while (current)
@@ -1878,6 +1886,9 @@ namespace pugi
 			delete current;
 			current = next;
 		}
+		
+		_memory.next = 0;
+		_memory.size = 0;
 	}
 
 	xml_parser::operator xml_node() const
@@ -1905,6 +1916,8 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	void xml_parser::parse(std::istream& stream,unsigned int optmsk)
 	{
+		free();
+
 		int length = 0, pos = stream.tellg();
 		stream.seekg(0, std::ios_base::end);
 		length = stream.tellg();
@@ -1920,6 +1933,8 @@ namespace pugi
 
 	char* xml_parser::parse(char* xmlstr,unsigned int optmsk)
 	{
+		free();
+
 		if(!xmlstr) return 0;
 
 		xml_allocator alloc(&_memory);
@@ -1935,9 +1950,10 @@ namespace pugi
 	
 	char* xml_parser::parse(const transfer_ownership_tag&, char* xmlstr,unsigned int optmsk)
 	{
+		free();
+
 		if(!xmlstr) return 0;
 
-		delete[] _buffer;
 		_buffer = xmlstr;
 
 		xml_allocator alloc(&_memory);
