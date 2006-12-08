@@ -13,6 +13,11 @@
 
 #include "pugixml.hpp"
 
+#include <cstring>
+#include <cstdlib>
+
+#include <new>
+
 namespace pugi
 {
 	/// A 'name=value' XML attribute structure.
@@ -539,7 +544,7 @@ namespace pugi
 		// \return pointer to the new node
 		xml_node_struct* append_node(xml_node_struct* parent, xml_node_type type = node_element)
 		{
-			if(!parent) return NULL; // Must have a parent.
+			if(!parent) return 0; // Must have a parent.
 
 			xml_node_struct* child = alloc.allocate<xml_node_struct>(type); // Allocate a new child.
 			child->parent = parent; // Set it's parent pointer.
@@ -558,7 +563,7 @@ namespace pugi
 		// \return pointer to appended xml_attribute_struct.
 		xml_attribute_struct* append_attribute(xml_node_struct* node)
 		{
-			if(!node) return NULL;
+			if(!node) return 0;
 			xml_attribute_struct* a = alloc.allocate<xml_attribute_struct>();
 
 			if (node->last_attribute)
@@ -594,7 +599,7 @@ namespace pugi
 		// \param s - pointer to XML-formatted string.
 		// \param xmldoc - pointer to root.
 		// \param optmsk - parse options mask.
-		// \return last string position or null.
+		// \return last string position or NULL.
 		char* parse(register char* s,xml_node_struct* xmldoc,unsigned int optmsk = parse_default)
 		{
 			if(!s || !xmldoc) return s;
@@ -1098,7 +1103,7 @@ namespace pugi
 		return true;
 	}
 
-	xml_attribute::xml_attribute(): _attr(NULL)
+	xml_attribute::xml_attribute(): _attr(0)
 	{
 	}
 
@@ -1189,7 +1194,7 @@ namespace pugi
 
 	bool xml_attribute::empty() const
 	{
-		return (_attr == NULL);
+		return (_attr == 0);
 	}
 
 	const char* xml_attribute::name() const
@@ -1915,7 +1920,7 @@ namespace pugi
 
 	char* xml_parser::parse(char* xmlstr,unsigned int optmsk)
 	{
-		if(!xmlstr) return NULL;
+		if(!xmlstr) return 0;
 
 		xml_allocator alloc(&_memory);
 		
@@ -1930,7 +1935,7 @@ namespace pugi
 	
 	char* xml_parser::parse(const transfer_ownership_tag&, char* xmlstr,unsigned int optmsk)
 	{
-		if(!xmlstr) return NULL;
+		if(!xmlstr) return 0;
 
 		delete[] _buffer;
 		_buffer = xmlstr;

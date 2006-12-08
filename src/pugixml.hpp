@@ -14,6 +14,9 @@
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
+// Uncomment this to disable STL
+// #define PUGIXML_NO_STL
+
 #ifndef PUGIXML_NO_STL
 #	include <string>
 #	include <istream>
