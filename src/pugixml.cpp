@@ -1621,6 +1621,7 @@ namespace pugi
 		return xml_node(); // Not found.
 	}
 
+#ifndef PUGIXML_NO_STL
 	std::string xml_node::path(char delimiter) const
 	{
 		std::string path;
@@ -1641,6 +1642,7 @@ namespace pugi
 
 		return path;
 	}
+#endif
 
 	xml_node xml_node::first_element_by_path(const char* path, char delimiter) const
 	{
@@ -1844,14 +1846,21 @@ namespace pugi
 	{
 	}
 
+#ifndef PUGIXML_NO_STL
 	xml_parser::xml_parser(std::istream& stream,unsigned int optmsk): _xmldoc(0), _optmsk(optmsk)
 	{
 		parse(stream, _optmsk);
 	}
+#endif
 
 	xml_parser::xml_parser(char* xmlstr,unsigned int optmsk): _xmldoc(0), _optmsk(optmsk)
 	{
 		parse(xmlstr, _optmsk);
+	}
+
+	xml_parser::xml_parser(const transfer_ownership_tag& tag, char* xmlstr,unsigned int optmsk): _xmldoc(0), _optmsk(optmsk), _buffer(0)
+	{
+		parse(tag, xmlstr, _optmsk);
 	}
 
 	xml_parser::~xml_parser()
@@ -1888,6 +1897,7 @@ namespace pugi
 		return prev;
 	}
 
+#ifndef PUGIXML_NO_STL
 	void xml_parser::parse(std::istream& stream,unsigned int optmsk)
 	{
 		int length = 0, pos = stream.tellg();
@@ -1895,12 +1905,13 @@ namespace pugi
 		length = stream.tellg();
 		stream.seekg(pos, std::ios_base::beg);
 
-		_buffer.resize(length + 1);
-		stream.read(&_buffer[0], length);
+		_buffer = new char[length + 1];
+		stream.read(_buffer, length);
 		_buffer[length] = 0;
 
-		parse(&_buffer[0],optmsk); // Parse the input string.
+		parse(_buffer, optmsk); // Parse the input string.
 	}
+#endif
 
 	char* xml_parser::parse(char* xmlstr,unsigned int optmsk)
 	{
@@ -1917,6 +1928,25 @@ namespace pugi
 		return parser.parse(xmlstr,_xmldoc,_optmsk); // Parse the input string.
 	}
 	
+	char* xml_parser::parse(const transfer_ownership_tag&, char* xmlstr,unsigned int optmsk)
+	{
+		if(!xmlstr) return NULL;
+
+		delete[] _buffer;
+		_buffer = xmlstr;
+
+		xml_allocator alloc(&_memory);
+		
+		_xmldoc = alloc.allocate<xml_node_struct>(node_document); // Allocate a new root.
+		_xmldoc->parent = _xmldoc; // Point to self.
+		if(optmsk != parse_noset) _optmsk = optmsk;
+		
+		xml_parser_impl parser(alloc);
+		
+		return parser.parse(xmlstr,_xmldoc,_optmsk); // Parse the input string.
+	}
+
+#ifndef PUGIXML_NO_STL
 	std::string utf8(const wchar_t* str)
 	{
 		std::string result;
@@ -1946,4 +1976,5 @@ namespace pugi
 
 		return result;
 	}
+#endif
 }

@@ -14,9 +14,10 @@
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
-#include <vector>
-#include <string>
-#include <istream>
+#ifndef PUGIXML_NO_STL
+#	include <string>
+#	include <istream>
+#endif
 
 /// The PugiXML Parser namespace.
 namespace pugi
@@ -479,11 +480,13 @@ namespace pugi
 		char data[memory_block_size];
 	};
 
+	struct transfer_ownership_tag {};
+
 	/// Provides a high-level interface to the XML parser.
 	class xml_parser
 	{
 	private:
-		std::vector<char>	_buffer; ///< character buffer
+		char*				_buffer; ///< character buffer
 
 		xml_memory_block	_memory; ///< Memory block
 		
@@ -504,11 +507,19 @@ namespace pugi
 		/// \see parse
 		xml_parser(char* xmlstr, unsigned int optmsk = parse_default);
 
+		/// Parse constructor that gains ownership.
+		/// \param xmlstr - readwrite string with xml data
+		/// \param optmsk - Options mask.
+		/// \see parse
+		xml_parser(const transfer_ownership_tag&, char* xmlstr, unsigned int optmsk = parse_default);
+
+#ifndef PUGIXML_NO_STL
 		/// Parse constructor.
 		/// \param stream - stream with xml data
 		/// \param optmsk - Options mask.
 		/// \see parse
 		xml_parser(std::istream& stream, unsigned int optmsk = parse_default);
+#endif
 
 		/// Dtor
 		~xml_parser();
@@ -528,10 +539,12 @@ namespace pugi
 		unsigned int options(unsigned int optmsk);
 
 	public:
+#ifndef PUGIXML_NO_STL
 		/// Parse the given XML stream
 		/// \param stream - stream with xml data
 		/// \param optmsk - Options mask.
 		void parse(std::istream& stream, unsigned int optmsk = parse_noset);
+#endif
 
 		/// Parse the given XML string in-situ.
 		/// \param xmlstr - readwrite string with xml data
@@ -539,15 +552,24 @@ namespace pugi
 		/// \return last position or NULL
 		/// \rem input string is zero-segmented
 		char* parse(char* xmlstr, unsigned int optmsk = parse_noset);
+		
+		/// Parse the given XML string in-situ (gains ownership).
+		/// \param xmlstr - readwrite string with xml data
+		/// \param optmsk - Options mask.
+		/// \return last position or NULL
+		/// \rem input string is zero-segmented
+		char* parse(const transfer_ownership_tag&, char* xmlstr, unsigned int optmsk = parse_noset);
 	};
 
 	/// Utility functions for xml
 	
+#ifndef PUGIXML_NO_STL
 	/// Convert utf16 to utf8
 	std::string utf8(const wchar_t* str);
 	
 	/// Convert utf8 to utf16
 	std::wstring utf16(const char* str);
+#endif
 }
 
 /// Inline implementation
