@@ -193,6 +193,15 @@ lifetime of the parser.
 <dt>&nbsp;</dt>
 <dt>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
+        <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >parse(</font><b><font color="#0000ff" >const</font></b> <font color="#000000">ownership_transfer_tag&amp;,</font> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_noset);</font>
+</font></pre></td></tr></table>
+<dd>This function parses the provided string with provided options, and returns the position where the
+parsing stopped (do not expect, that parsing will stop on every error, or on most of them - as I've
+said, <i>pugixml</i> is error ignorant). The input string is modified. The string's ownership is
+managed by parser (string's memory is freed automatically when parser's destructor is called).</dt>
+<dt>&nbsp;</dt>
+<dt>
+<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_parser(std::istream&amp;</font> <font color="#000000" >stream,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
 <dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
 </dt>
@@ -200,6 +209,12 @@ lifetime of the parser.
 <dt>
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
         <font color="#000000" >xml_parser(</font><b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
+<dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
+</dt>
+<dt>&nbsp;</dt>
+<dt>
+<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
+        <font color="#000000" >xml_parser(</font><b><font color="#0000ff" >const</font></b> <font color="#000000">ownership_transfer_tag&amp;,</font> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
 <dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
 </dt>
 </dl>
@@ -216,7 +231,7 @@ using the following functions:</p>
         <font color="#000000" >xml_node</font> <font color="#000000" >document()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
 </font></pre></td></tr></table>
 
-<p>Ok, easy part behind - now let's dive into parsing options. There is a variety of them, and you
+<p>Ok, easy part is behind - now let's dive into parsing options. There is a variety of them, and you
 must choose them wisely to get the needed results and the best speed/least memory overhead. At first,
 there are flags that determine which parts of the document will be put into DOM tree, and which will
 be just skipped:</p>
@@ -1020,6 +1035,13 @@ off. The test system is AMD Sempron 2500+, 512 Mb RAM.</p>
 <a name="FAQ">
 <h2>FAQ</h2>
 
+<p><b>Q:</b> I do not have/want STL support. How can I compile <i>pugixml</i> without STL?</p>
+<p><b>A:</b> There is an undocumented define PUGIXML_NO_STL. If you uncomment the relevant line
+in <i>pugixml</i> header file, it will compile without any STL classes. The reason it is undocumented
+are that it will make some documented functions not available (specifically, xml_parser() ctor and
+parse() function that operate on std::istream, xml_node::path function, utf16 and utf8 conversion
+functions). Otherwise, it will work fine.</p>
+
 <p>I'm always open for questions; feel free to write them to <a href="mailto:arseny.kapoulkine@gmail.com">arseny.kapoulkine@gmail.com</a>.
 </p>
 
@@ -1123,7 +1145,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 7 November, 2006</p>
+<p>Revised 8 December, 2006</p>
 <p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006. All Rights Reserved.</i></p>
 </body>
 </html>
