@@ -353,10 +353,12 @@ namespace pugi
 		/// Use for shallow drill-downs.
 		xml_node first_node(xml_node_type type) const;
 
+#ifndef PUGIXML_NO_STL
 		/// Compile the absolute node path from root as a text string.
 		/// \param delimiter - Delimiter character to insert between element names.
 		/// \return path string (e.g. with '/' as delimiter, '/document/.../this'.
 		std::string path(char delimiter = '/') const;
+#endif
 
 		/// Search for a node by path.
 		/// \param path - Path string; e.g. './foo/bar' (relative to node), '/foo/bar' (relative 
@@ -370,7 +372,10 @@ namespace pugi
 	};
 
 	/// Child node iterator.
-	class xml_node_iterator: public std::iterator<std::bidirectional_iterator_tag, const xml_node>
+	class xml_node_iterator
+#ifndef PUGIXML_NO_STL
+	: public std::iterator<std::bidirectional_iterator_tag, const xml_node>
+#endif
 	{
 		friend class xml_node;
 
@@ -404,7 +409,10 @@ namespace pugi
 	};
 
 	/// Attribute iterator.
-	class xml_attribute_iterator: public std::iterator<std::bidirectional_iterator_tag, const xml_attribute>
+	class xml_attribute_iterator
+#ifndef PUGIXML_NO_STL
+	: public std::iterator<std::bidirectional_iterator_tag, const xml_attribute>
+#endif
 	{
 		friend class xml_node;
 
