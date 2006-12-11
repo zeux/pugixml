@@ -13,7 +13,6 @@
 
 #include "pugixml.hpp"
 
-#include <cstring>
 #include <cstdlib>
 
 #include <new>
@@ -174,7 +173,9 @@ namespace pugi
 
 		for (; *s; ++s)
 		{
-			if (*s < 0x80 || (*s >= 0xC0 && *s < 0xFC)) ++length;
+			unsigned char ch = static_cast<unsigned char>(*s);
+
+			if (ch < 0x80 || (ch >= 0xC0 && ch < 0xFC)) ++length;
 		}
 
 		return length;
@@ -1066,7 +1067,7 @@ namespace pugi
 	{
 	}
 	
-	xml_node_struct::xml_node_struct(xml_node_type type): name(0), value(0), prev_sibling(0), next_sibling(0), first_child(0), last_child(0), first_attribute(0), last_attribute(0), type(type)
+	xml_node_struct::xml_node_struct(xml_node_type type): type(type), parent(0), name(0), value(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), first_attribute(0), last_attribute(0)
 	{
 	}
 

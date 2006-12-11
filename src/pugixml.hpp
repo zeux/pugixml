@@ -22,6 +22,9 @@
 #	include <istream>
 #endif
 
+#include <cstddef>
+#include <cstring>
+
 /// The PugiXML Parser namespace.
 namespace pugi
 {
