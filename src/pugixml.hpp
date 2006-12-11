@@ -59,8 +59,8 @@ namespace pugi
 	const unsigned int parse_eol_cdata			= 0x00004000; ///< Perform EOL handling in CDATA sections
 	const unsigned int parse_check_end_tags		= 0x00010000; ///< Check start and end tag names and return error if names mismatch
 	const unsigned int parse_match_end_tags		= 0x00020000; ///< Try to find corresponding start tag for an end tag
-	///< Set all flags, except parse_ws_pcdata and parse_trim_attribute
-	const unsigned int parse_default			= 0x00FFFFFF & ~parse_ws_pcdata & ~parse_trim_attribute;
+	///< Set all flags, except parse_ws_pcdata, parse_trim_attribute, parse_pi and parse_comments
+	const unsigned int parse_default			= 0x00FFFFFF & ~parse_ws_pcdata & ~parse_trim_attribute & ~parse_pi & ~parse_comments;
 	const unsigned int parse_noset				= 0x80000000; ///< Parse with flags in xml_parser
 
 	const unsigned int parse_w3c				= parse_pi | parse_comments | parse_cdata |
