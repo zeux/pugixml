@@ -1728,7 +1728,7 @@ namespace pugi
 	{
 	}
 		
-	xml_node_iterator::xml_node_iterator(const xml_node_struct* ref, const xml_node_struct* prev): _wrap(ref), _prev(prev)
+	xml_node_iterator::xml_node_iterator(const xml_node_struct* ref, const xml_node_struct* prev): _prev(prev), _wrap(ref)
 	{
 	}
 
@@ -1792,7 +1792,7 @@ namespace pugi
 	{
 	}
 		
-	xml_attribute_iterator::xml_attribute_iterator(const xml_attribute_struct* ref, const xml_attribute_struct* prev): _wrap(ref), _prev(prev)
+	xml_attribute_iterator::xml_attribute_iterator(const xml_attribute_struct* ref, const xml_attribute_struct* prev): _prev(prev), _wrap(ref)
 	{
 	}
 
@@ -1848,23 +1848,23 @@ namespace pugi
 	{
 	}
 
-	xml_parser::xml_parser(unsigned int optmsk): _xmldoc(0), _optmsk(optmsk)
+	xml_parser::xml_parser(unsigned int optmsk): _buffer(0), _xmldoc(0), _optmsk(optmsk)
 	{
 	}
 
 #ifndef PUGIXML_NO_STL
-	xml_parser::xml_parser(std::istream& stream,unsigned int optmsk): _xmldoc(0), _optmsk(optmsk)
+	xml_parser::xml_parser(std::istream& stream,unsigned int optmsk): _buffer(0), _xmldoc(0), _optmsk(optmsk)
 	{
 		parse(stream, _optmsk);
 	}
 #endif
 
-	xml_parser::xml_parser(char* xmlstr,unsigned int optmsk): _xmldoc(0), _optmsk(optmsk)
+	xml_parser::xml_parser(char* xmlstr,unsigned int optmsk): _buffer(0), _xmldoc(0), _optmsk(optmsk)
 	{
 		parse(xmlstr, _optmsk);
 	}
 
-	xml_parser::xml_parser(const transfer_ownership_tag& tag, char* xmlstr,unsigned int optmsk): _xmldoc(0), _optmsk(optmsk), _buffer(0)
+	xml_parser::xml_parser(const transfer_ownership_tag& tag, char* xmlstr ,unsigned int optmsk): _buffer(0), _xmldoc(0), _optmsk(optmsk)
 	{
 		parse(tag, xmlstr, _optmsk);
 	}
