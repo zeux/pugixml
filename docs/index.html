@@ -895,7 +895,7 @@ by XML standard are:
 document)</li>
 <li>White space normalization for attribute values (converting space-like characters to spaces (0x20),
 sometimes trimming leading/trailing spaces and converting sequences of spaces to a single space</li>
-<li>Character reference expansion (&amp;lt; and alike, &lt;#0a; and alike, &lt;40; and alike)</li>
+<li>Character reference expansion (&amp;lt; and alike, &amp;#0a; and alike, &amp;40; and alike)</li>
 <li>Entity reference expansion (&amp;entityname;)</li>
 </ul>
 
@@ -1041,6 +1041,9 @@ in <i>pugixml</i> header file, it will compile without any STL classes. The reas
 are that it will make some documented functions not available (specifically, xml_parser() ctor and
 parse() function that operate on std::istream, xml_node::path function, utf16 and utf8 conversion
 functions). Otherwise, it will work fine.</p>
+
+<p><b>Q:</b> Do paths that are accepted by <b>first_element_by_path</b> have to end with delimiter?</p>
+<p><b>A:</b> Either way will work, both /path/to/node/ and /path/to/node is fine.</p>
 
 <p>I'm always open for questions; feel free to write them to <a href="mailto:arseny.kapoulkine@gmail.com">arseny.kapoulkine@gmail.com</a>.
 </p>
