@@ -238,7 +238,7 @@ namespace pugi
 		xml_allocator& alloc;
 		bool chartype_symbol_table[256];
 
-		bool chartype_symbol(char c) { return chartype_symbol_table[(unsigned char)c]; }
+		bool chartype_symbol(char c) const { return chartype_symbol_table[(unsigned char)c]; }
 		
 		static bool chartype_space(char c) { return c < '!' && c > 0; }
 		static bool chartype_enter(char c) { return c == '<'; }
@@ -993,11 +993,6 @@ namespace pugi
 		if (find == 1) ++(*dst);
 	
 		return find;
-	}
-
-	namespace impl
-	{
-		int strcmpwild(const char* src, const char* dst);
 	}
 
 	// Wildcard pattern match.
@@ -1934,6 +1929,9 @@ namespace pugi
 
 	char* xml_parser::parse(char* xmlstr,unsigned int optmsk)
 	{
+		if (xmlstr == _buffer)
+			_buffer = 0;
+
 		free();
 
 		if(!xmlstr) return 0;
@@ -1951,6 +1949,9 @@ namespace pugi
 	
 	char* xml_parser::parse(const transfer_ownership_tag&, char* xmlstr,unsigned int optmsk)
 	{
+		if (xmlstr == _buffer)
+			_buffer = 0;
+
 		free();
 
 		if(!xmlstr) return 0;
