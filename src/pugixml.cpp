@@ -1919,19 +1919,16 @@ namespace pugi
 		length = stream.tellg();
 		stream.seekg(pos, std::ios_base::beg);
 
-		_buffer = new char[length + 1];
-		stream.read(_buffer, length);
-		_buffer[length] = 0;
+		char* s = new char[length + 1];
+		stream.read(s, length);
+		s[length] = 0;
 
-		parse(_buffer, optmsk); // Parse the input string.
+		parse(transfer_ownership_tag(), s, optmsk); // Parse the input string.
 	}
 #endif
 
 	char* xml_parser::parse(char* xmlstr,unsigned int optmsk)
 	{
-		if (xmlstr == _buffer)
-			_buffer = 0;
-
 		free();
 
 		if(!xmlstr) return 0;
@@ -1949,9 +1946,6 @@ namespace pugi
 	
 	char* xml_parser::parse(const transfer_ownership_tag&, char* xmlstr,unsigned int optmsk)
 	{
-		if (xmlstr == _buffer)
-			_buffer = 0;
-
 		free();
 
 		if(!xmlstr) return 0;
