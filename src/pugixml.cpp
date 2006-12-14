@@ -268,7 +268,7 @@ namespace pugi
 			{
 				while (*str)
 				{
-					if (opt_wconv && *str == '&') break;
+					if (opt_escape && *str == '&') break;
 					if ((opt_wnorm || opt_wconv || opt_eol) && chartype_space(*str)) break;
 					++str;
 				}
