@@ -1914,7 +1914,7 @@ namespace pugi
 	{
 		free();
 
-		int length = 0, pos = stream.tellg();
+		std::streamoff length = 0, pos = stream.tellg();
 		stream.seekg(0, std::ios_base::end);
 		length = stream.tellg();
 		stream.seekg(pos, std::ios_base::beg);
