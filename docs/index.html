@@ -275,30 +275,13 @@ So, these are the processing flags:
 </p>
 
 <ul>
-<li>If <b>parse_trim_pcdata</b> is on, then the trimming of leading/trailing space-like characters
-is performed for PCDATA content
-<br>Default value: on
-<br>In W3C mode: off</li>
-<li>If <b>parse_trim_attribute</b> is on, then the trimming of leading/trailing space-like characters
-is performed for attribute values (this is non-standard behavior and is here only for compatibility
-reasons (PugXML had this flag).
-<br>Default value: off
-<br>In W3C mode: off</li>
-<li>If <b>parse_escapes_pcdata</b> is on, then the character reference expansion is done for PCDATA
-content (replacing &lt;lt; with &lt;, &amp;#4c; with L, etc.).
+<li>If <b>parse_escapes</b> is on, then the character reference expansion is done for PCDATA content
+and for attribute values (replacing &lt;lt; with &lt;, &amp;#4c; with L, etc.).
 <br>Default value: on
 <br>In W3C mode: on</li>
-<li>If <b>parse_escapes_attribute</b> is on, then the character reference expansion is done for
-attribute values (replacing &lt;lt; with &lt;, &amp;#4c; with L, etc.).
-<br>Default value: on
-<br>In W3C mode: on</li>
-<li>If <b>parse_wnorm_pcdata</b> is on, then the whitespace normalisation is done for PCDATA content
-(this includes replacing any space-like character by a space character and converting sequences of
-spaces into a single space)
-<br>Default value: on
-<br>In W3C mode: off</li>
 <li>If <b>parse_wnorm_attribute</b> is on, then the whitespace normalisation is done for attribute
-values
+values (this includes replacing any space-like character by a space character, converting sequences of
+spaces into a single space and trimming of leading/trailing spaces)
 <br>Default value: on
 <br>In W3C mode: off</li>
 <li>If <b>parse_wconv_attribute</b> is on, then the whitespace conversion is done for attribute
@@ -306,15 +289,9 @@ values (this is a subset of whitespace normalization, and includes only replacin
 with spaces). If <b>parse_wnorm_attribute</b> is on, this flag has no effect.
 <br>Default value: on
 <br>In W3C mode: on</li>
-<li>If <b>parse_eol_pcdata</b> is on, then the end-of-line handling is done for PCDATA content (this
-includes converting any pair of 0x0d 0x0a characters to a single 0x0a and converting any standalone
-0x0d to 0x0a). 
-<br>Default value: on
-<br>In W3C mode: on</li>
-<li>If <b>parse_eol_attribute</b> is on, then the end-of-line handling is done for attribute values.
-<br>Default value: on
-<br>In W3C mode: on</li>
-<li>If <b>parse_eol_cdata</b> is on, then the end-of-line handling is done for CDATA content.
+<li>If <b>parse_eol</b> is on, then the end-of-line handling is done for PCDATA/CDATA content and for
+attribute values (this includes converting any pair of 0x0d 0x0a characters to a single 0x0a and
+converting any standalone 0x0d to 0x0a).
 <br>Default value: on
 <br>In W3C mode: on</li>
 </ul>
@@ -329,7 +306,7 @@ correctly). This is controlled by <b>parse_match_end_tags</b>, which is on by de
 <li>just treat the tag as a closing tag for the node (so that <b>&lt;foo&gt; ... &lt;/bar&gt;</b> will
 be parsed as <b>&lt;foo&gt; ... &lt;/foo&gt;</b>). This is the fastest way, and this is what <i>pugxml</i>
 is doing, but it can corrupt your DOM tree. This way is chosen if both <b>parse_check_end_tags</b> and
-<b>parsse_match_end_tags</b> are off.
+<b>parse_match_end_tags</b> are off.
 </ul>
 Note, that these 2 flags are mutually exclusive.
 </p>

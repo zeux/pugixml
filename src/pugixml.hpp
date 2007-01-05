@@ -48,28 +48,21 @@ namespace pugi
 	const unsigned int parse_pi					= 0x00000001; ///< Parse '<?...?>'
 	const unsigned int parse_comments			= 0x00000002; ///< Parse '<!--...-->'
 	const unsigned int parse_cdata				= 0x00000004; ///< Parse '<![CDATA[...]]>'
-	const unsigned int parse_ws_pcdata			= 0x00000008; ///< Skip PCDATA that consists only of whitespaces
-	const unsigned int parse_ext_pcdata			= 0x00000010; ///< Skip PCDATA that is outside all tags (i.e. root)
-	const unsigned int parse_trim_pcdata		= 0x00000020; ///< Trim '>...<'
-	const unsigned int parse_trim_attribute		= 0x00000040; ///< Trim 'foo="..."'.
-	const unsigned int parse_escapes_pcdata		= 0x00000080; ///< Parse &lt;, &gt;, &amp;, &quot;, &apos;, &#.. sequences
-	const unsigned int parse_escapes_attribute 	= 0x00000100; ///< Parse &lt;, &gt;, &amp;, &quot;, &apos;, &#.. sequences
-	const unsigned int parse_wnorm_pcdata		= 0x00000200; ///< Normalize spaces in pcdata
-	const unsigned int parse_wnorm_attribute	= 0x00000400; ///< Normalize spaces in attributes
-	const unsigned int parse_wconv_attribute	= 0x00000800; ///< Convert space-like characters to spaces in attributes (only if wnorm is not set)
-	const unsigned int parse_eol_pcdata			= 0x00001000; ///< Perform EOL handling in pcdata
-	const unsigned int parse_eol_attribute		= 0x00002000; ///< Perform EOL handling in attrobites
-	const unsigned int parse_eol_cdata			= 0x00004000; ///< Perform EOL handling in CDATA sections
-	const unsigned int parse_check_end_tags		= 0x00010000; ///< Check start and end tag names and return error if names mismatch
-	const unsigned int parse_match_end_tags		= 0x00020000; ///< Try to find corresponding start tag for an end tag
+	const unsigned int parse_ws_pcdata			= 0x00000008; ///< Do not skip PCDATA that consists only of whitespaces
+	const unsigned int parse_ext_pcdata			= 0x00000010; ///< Do not skip PCDATA that is outside all tags (i.e. root)
+	const unsigned int parse_escapes			= 0x00000020; ///< Parse &lt;, &gt;, &amp;, &quot;, &apos;, &#.. sequences
+	const unsigned int parse_wnorm_attribute	= 0x00000080; ///< Normalize spaces in attributes (convert space-like characters to spaces + merge adjacent spaces + trim leading/trailing spaces)
+	const unsigned int parse_wconv_attribute	= 0x00000100; ///< Convert space-like characters to spaces in attributes (only if wnorm is not set)
+	const unsigned int parse_eol				= 0x00000200; ///< Perform EOL handling
+	const unsigned int parse_check_end_tags		= 0x00000400; ///< Check start and end tag names and return error if names mismatch
+	const unsigned int parse_match_end_tags		= 0x00000800; ///< Try to find corresponding start tag for an end tag
 	///< Set all flags, except parse_ws_pcdata, parse_trim_attribute, parse_pi and parse_comments
-	const unsigned int parse_default			= 0x00FFFFFF & ~parse_ws_pcdata & ~parse_trim_attribute & ~parse_pi & ~parse_comments;
+	const unsigned int parse_default			= parse_cdata | parse_ext_pcdata | parse_escapes | parse_wconv_attribute | parse_eol | parse_check_end_tags;
 	const unsigned int parse_noset				= 0x80000000; ///< Parse with flags in xml_parser
 
 	const unsigned int parse_w3c				= parse_pi | parse_comments | parse_cdata |
-												parse_escapes_pcdata | parse_escapes_attribute |
-												parse_wconv_attribute | parse_check_end_tags |
-												parse_ws_pcdata | parse_eol_cdata;
+												parse_escapes | parse_wconv_attribute |
+												parse_check_end_tags | parse_ws_pcdata | parse_eol;
 
 	/// Forward declarations
 	struct xml_attribute_struct;

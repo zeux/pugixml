@@ -252,14 +252,14 @@ namespace pugi
 		static bool chartype_lbracket(char c) { return c == '['; }
 		static bool chartype_rbracket(char c) { return c == ']'; }
 
-		template <bool opt_trim, bool opt_escape, bool opt_wnorm, bool opt_wconv, bool opt_eol> static void strconv_t(char** s)
+		template <bool opt_escape, bool opt_wnorm, bool opt_wconv, bool opt_eol> static void strconv_t(char** s)
 		{
 			if (!s || !*s) return;
 
-			if (!opt_trim && !opt_escape && !opt_wnorm && !opt_wconv && !opt_eol) return;
+			if (!opt_escape && !opt_wnorm && !opt_wconv && !opt_eol) return;
 
 			// Trim whitespaces
-			if (opt_trim) while (chartype_space(**s)) ++(*s);
+			if (opt_wnorm) while (chartype_space(**s)) ++(*s);
 			
 			char* str = *s;
 			
@@ -270,6 +270,7 @@ namespace pugi
 				{
 					if (opt_escape && *str == '&') break;
 					if ((opt_wnorm || opt_wconv || opt_eol) && chartype_space(*str)) break;
+
 					++str;
 				}
 			}
@@ -406,7 +407,7 @@ namespace pugi
 				*lastpos++ = *str++;
 			}
 
-			if (opt_trim)
+			if (opt_wnorm)
 			{
 				do *lastpos-- = 0;
 				while (chartype_space(*lastpos));
@@ -414,66 +415,34 @@ namespace pugi
 			else *lastpos = 0;
 		}
 	
-		static void strconv_setup(void (*&func)(char**), unsigned int opt_trim, unsigned int opt_escape, unsigned int opt_wnorm, unsigned int opt_wconv, unsigned int opt_eol)
+		static void strconv_setup(void (*&func)(char**), unsigned int opt_escape, unsigned int opt_wnorm, unsigned int opt_wconv, unsigned int opt_eol)
 		{
 			if (opt_eol)
 			{
 				if (opt_wconv)
 				{
-					if (opt_trim)
+					if (opt_escape)
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<true, true, true, true, true>;
-							else func = &strconv_t<true, true, false, true, true>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<true, false, true, true, true>;
-							else func = &strconv_t<true, false, false, true, true>;
-						}
+						if (opt_wnorm) func = &strconv_t<true, true, true, true>;
+						else func = &strconv_t<true, false, true, true>;
 					}
 					else
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<false, true, true, true, true>;
-							else func = &strconv_t<false, true, false, true, true>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<false, false, true, true, true>;
-							else func = &strconv_t<false, false, false, true, true>;
-						}
+						if (opt_wnorm) func = &strconv_t<false, true, true, true>;
+						else func = &strconv_t<false, false, true, true>;
 					}
 				}
 				else
 				{
-					if (opt_trim)
+					if (opt_escape)
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<true, true, true, false, true>;
-							else func = &strconv_t<true, true, false, false, true>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<true, false, true, false, true>;
-							else func = &strconv_t<true, false, false, false, true>;
-						}
+						if (opt_wnorm) func = &strconv_t<true, true, false, true>;
+						else func = &strconv_t<true, false, false, true>;
 					}
 					else
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<false, true, true, false, true>;
-							else func = &strconv_t<false, true, false, false, true>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<false, false, true, false, true>;
-							else func = &strconv_t<false, false, false, false, true>;
-							}
+						if (opt_wnorm) func = &strconv_t<false, true, false, true>;
+						else func = &strconv_t<false, false, false, true>;
 					}
 				}
 			}
@@ -481,64 +450,33 @@ namespace pugi
 			{
 				if (opt_wconv)
 				{
-					if (opt_trim)
+					if (opt_escape)
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<true, true, true, true, false>;
-							else func = &strconv_t<true, true, false, true, false>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<true, false, true, true, false>;
-							else func = &strconv_t<true, false, false, true, false>;
-						}
+						if (opt_wnorm) func = &strconv_t<true, true, true, false>;
+						else func = &strconv_t<true, false, true, false>;
 					}
 					else
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<false, true, true, true, false>;
-							else func = &strconv_t<false, true, false, true, false>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<false, false, true, true, false>;
-							else func = &strconv_t<false, false, false, true, false>;
-						}
+						if (opt_wnorm) func = &strconv_t<false, true, true, false>;
+						else func = &strconv_t<false, false, true, false>;
 					}
 				}
 				else
 				{
-					if (opt_trim)
+					if (opt_escape)
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<true, true, true, false, false>;
-							else func = &strconv_t<true, true, false, false, false>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<true, false, true, false, false>;
-							else func = &strconv_t<true, false, false, false, false>;
-						}
+						if (opt_wnorm) func = &strconv_t<true, true, false, false>;
+						else func = &strconv_t<true, false, false, false>;
 					}
 					else
 					{
-						if (opt_escape)
-						{
-							if (opt_wnorm) func = &strconv_t<false, true, true, false, false>;
-							else func = &strconv_t<false, true, false, false, false>;
-						}
-						else
-						{
-							if (opt_wnorm) func = &strconv_t<false, false, true, false, false>;
-							else func = &strconv_t<false, false, false, false, false>;
-						}
+						if (opt_wnorm) func = &strconv_t<false, true, false, false>;
+						else func = &strconv_t<false, false, false, false>;
 					}
 				}
 			}
 		}
+
 		// Allocate & append a new xml_node_struct onto the given parent.
 		// \param parent - pointer to parent node.
 		// \param type - desired node type.
@@ -608,8 +546,8 @@ namespace pugi
 			void (*strconv_pcdata)(char**);
 			void (*strconv_attribute)(char**);
 
-			strconv_setup(strconv_attribute, OPTSET(parse_trim_attribute), OPTSET(parse_escapes_attribute), OPTSET(parse_wnorm_attribute), OPTSET(parse_wconv_attribute), OPTSET(parse_eol_attribute));
-			strconv_setup(strconv_pcdata, OPTSET(parse_trim_pcdata), OPTSET(parse_escapes_pcdata), OPTSET(parse_wnorm_pcdata), false, OPTSET(parse_eol_pcdata));
+			strconv_setup(strconv_attribute, OPTSET(parse_escapes), OPTSET(parse_wnorm_attribute), OPTSET(parse_wconv_attribute), OPTSET(parse_eol));
+			strconv_setup(strconv_pcdata, OPTSET(parse_escapes), false, false, OPTSET(parse_eol));
 
 			char ch = 0; // Current char, in cases where we must null-terminate before we test.
 			xml_node_struct* cursor = xmldoc; // Tree node cursor.
@@ -702,9 +640,9 @@ namespace pugi
 									SCANFOR(chartype_rbracket(*s) && chartype_rbracket(*(s+1)) && chartype_leave(*(s+2)));
 									ENDSEG(); // Zero-terminate this segment.
 
-									if (OPTSET(parse_eol_cdata))
+									if (OPTSET(parse_eol))
 									{
-										strconv_t<false, false, false, false, true>(&cursor->value);
+										strconv_t<false, false, false, true>(&cursor->value);
 									}
 
 									POPNODE(); // Pop since this is a standalone.
