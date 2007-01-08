@@ -2,7 +2,9 @@
 //
 // Pug Improved XML Parser - Version 0.2
 // --------------------------------------------------------
-// Copyright (C) 2006, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+// Copyright (C) 2006-2007, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+// Thanks to Palvelev Artyom (cppguru@mail.ru) for hints about optimizing
+// conversion functions.
 // This work is based on the pugxml parser, which is:
 // Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
 // Released into the Public Domain. Use at your own risk.
@@ -109,6 +111,43 @@ namespace
 		const unsigned char BYTE_MARK = 0x80;
 		const unsigned char BYTE_MASK_READ = 0x3F;
 		const unsigned char FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+	}
+
+	enum chartype
+	{
+		ct_parse_pcdata = 1,	// \0, &, \r, <
+		ct_parse_attr = 2,		// \0, &, \r, ', "
+		ct_parse_attr_ws = 4,	// \0, &, \r, ', ", \n, space, tab
+		ct_space = 8,			// \r, \n, space, tab
+		ct_parse_cdata = 16,	// \0, ], >, \r
+		ct_parse_comment = 32	// \0, -, >, \r
+		
+	};
+	
+	static unsigned char chartype_table[256] =
+	{
+		55, 0, 0, 0, 0, 0, 0, 0,		0, 12, 12, 0, 0, 63, 0, 0,	// 0-15
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 16-31
+		12, 0, 6, 0, 0, 0, 7, 6,		0, 0, 0, 0, 0, 32, 0, 0,	// 32-47
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 1, 0, 48, 0,	// 48-63
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 64-79
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 16, 0, 0,	// 80-95
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 96-111
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 112-127
+
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0
+	};
+	
+	bool is_chartype(char c, chartype ct)
+	{
+		return !!(chartype_table[static_cast<unsigned char>(c)] & ct);
 	}
 }
 
@@ -237,185 +276,341 @@ namespace pugi
 	{
 		xml_allocator& alloc;
 		bool chartype_symbol_table[256];
-
+		
 		bool chartype_symbol(char c) const { return chartype_symbol_table[(unsigned char)c]; }
 		
-		static bool chartype_space(char c) { return c < '!' && c > 0; }
-		static bool chartype_enter(char c) { return c == '<'; }
-		static bool chartype_leave(char c) { return c == '>'; }
-		static bool chartype_close(char c)	{ return c == '/'; }
-		static bool chartype_equals(char c) { return c == '='; }
-		static bool chartype_special(char c) { return c == '!'; }
-		static bool chartype_pi(char c) { return c == '?'; }
-		static bool chartype_dash(char c) { return c == '-'; }
-		static bool chartype_quote(char c) { return c == '"' || c == '\''; }
-		static bool chartype_lbracket(char c) { return c == '['; }
-		static bool chartype_rbracket(char c) { return c == ']'; }
-
-		template <bool opt_escape, bool opt_wnorm, bool opt_wconv, bool opt_eol> static void strconv_t(char** s)
+		struct gap
 		{
-			if (!s || !*s) return;
-
-			if (!opt_escape && !opt_wnorm && !opt_wconv && !opt_eol) return;
-
-			// Trim whitespaces
-			if (opt_wnorm) while (chartype_space(**s)) ++(*s);
+			char* end;
+			size_t size;
 			
-			char* str = *s;
-			
-			// Skip usual symbols
-			if (opt_escape || opt_wnorm || opt_wconv || opt_eol)
+			gap(): end(0), size(0)
 			{
-				while (*str)
-				{
-					if (opt_escape && *str == '&') break;
-					if ((opt_wnorm || opt_wconv || opt_eol) && chartype_space(*str)) break;
-
-					++str;
-				}
 			}
-
-			char* lastpos = str;
-
-			if (!*str) return;
-
-			while (*str)
+			
+			// Push new gap, move s count bytes further (skipping the gap).
+			// Collapse previous gap.
+			void push(char*& s, size_t count)
 			{
-				if (*str == '&' && opt_escape)	// &
+				if (end) // there was a gap already; collapse it
 				{
-					char* stre = str + 1;
-
-					switch (*stre)
-					{
-						case '#':	// &#...
-						{
-							unsigned int ucsc = 0;
-
-							++stre;
-
-							if (*stre == 'x') // &#x... (hex code)
-							{
-								++stre;
-								
-								while (*stre)
-								{
-									if (*stre >= '0' && *stre <= '9')
-										ucsc = 16 * ucsc + (*stre++ - '0');
-									else if (*stre >= 'A' && *stre <= 'F')
-										ucsc = 16 * ucsc + (*stre++ - 'A' + 10);
-									else if (*stre >= 'a' && *stre <= 'f')
-										ucsc = 16 * ucsc + (*stre++ - 'a' + 10);
-									else break;
-								}
-
-								if (*stre == ';') ++stre;
-							}
-							else	// &#... (dec code)
-							{
-								while (*stre >= '0' && *stre <= '9')
-									ucsc = 10 * ucsc + (*stre++ - '0');
-
-								if (*stre == ';') ++stre;
-							}
-
-							str = stre;
-							lastpos = strutf16_utf8(lastpos, ucsc);
-							continue;
-						}
-						case 'a':	// &a
-						{
-							++stre;
-
-							if (*stre == 'm') // &am
-							{
-								if (*++stre == 'p' && *++stre == ';') // &amp;
-								{
-									*lastpos++ = '&';
-									str = ++stre;
-									continue;
-								}
-							}
-							else if (*stre == 'p') // &ap
-							{
-								if (*++stre == 'o' && *++stre == 's' && *++stre == ';') // &apos;
-								{
-									*lastpos++ = '\'';
-									str = ++stre;
-									continue;
-								}
-							}
-							break;
-						}
-						case 'g': // &g
-						{
-							if (*++stre == 't' && *++stre == ';') // &gt;
-							{
-								*lastpos++ = '>';
-								str = ++stre;
-								continue;
-							}
-							break;
-						}
-						case 'l': // &l
-						{
-							if (*++stre == 't' && *++stre == ';') // &lt;
-							{
-								*lastpos++ = '<';
-								str = ++stre;
-								continue;
-							}
-							break;
-						}
-						case 'q': // &q
-						{
-							if (*++stre == 'u' && *++stre == 'o' && *++stre == 't' && *++stre == ';') // &quot;
-							{
-								*lastpos++ = '"';
-								str = ++stre;
-								continue;
-							}
-							break;
-						}
-					}
-				}
-				else if (chartype_space(*str) && opt_wnorm)
-				{
-					*lastpos++ = ' ';
-		
-					while (chartype_space(*str)) ++str;
-
-					continue;
-				}
-				else if (chartype_space(*str) && opt_wconv)
-				{
-					if (*str == 0x0d && *(str + 1) == 0x0a) ++str;
-
-					++str;
-					*lastpos++ = ' ';
-
-					continue;
-				}
-				else if (*str == 0x0d && !opt_wnorm && opt_eol)
-				{
-					if (*(str + 1) == 0x0a) ++str;
-					++str;
-					*lastpos++ = 0x0a;
-
-					continue;
+					// Move [old_gap_end, new_gap_start) to [old_gap_start, ...)
+					memmove(end - size, end, s - end);
 				}
 				
-				*lastpos++ = *str++;
+				s += count; // end of current gap
+				
+				// "merge" two gaps
+				end = s;
+				size += count;
 			}
+			
+			// Collapse all gaps, return past-the-end pointer
+			char* flush(char* s)
+			{
+				if (end)
+				{
+					// Move [old_gap_end, current_pos) to [old_gap_start, ...)
+					memmove(end - size, end, s - end);
 
+					return s - size;
+				}
+				else return s;
+			}
+		};
+		
+		static char* strconv_escape(char* s, gap& g)
+		{
+			char* stre = s + 1;
+
+			switch (*stre)
+			{
+				case '#':	// &#...
+				{
+					unsigned int ucsc = 0;
+
+					++stre;
+
+					if (*stre == 'x') // &#x... (hex code)
+					{
+						++stre;
+						
+						while (*stre)
+						{
+							if (*stre >= '0' && *stre <= '9')
+								ucsc = 16 * ucsc + (*stre++ - '0');
+							else if (*stre >= 'A' && *stre <= 'F')
+								ucsc = 16 * ucsc + (*stre++ - 'A' + 10);
+							else if (*stre >= 'a' && *stre <= 'f')
+								ucsc = 16 * ucsc + (*stre++ - 'a' + 10);
+							else break;
+						}
+
+						if (*stre == ';') ++stre;
+					}
+					else	// &#... (dec code)
+					{
+						while (*stre >= '0' && *stre <= '9')
+							ucsc = 10 * ucsc + (*stre++ - '0');
+
+						if (*stre == ';') ++stre;
+					}
+
+					s = strutf16_utf8(s, ucsc);
+					
+					g.push(s, stre - s);
+					return stre;
+				}
+				case 'a':	// &a
+				{
+					++stre;
+
+					if (*stre == 'm') // &am
+					{
+						if (*++stre == 'p' && *++stre == ';') // &amp;
+						{
+							*s++ = '&';
+							++stre;
+							
+							g.push(s, stre - s);
+							return stre;
+						}
+					}
+					else if (*stre == 'p') // &ap
+					{
+						if (*++stre == 'o' && *++stre == 's' && *++stre == ';') // &apos;
+						{
+							*s++ = '\'';
+							++stre;
+
+							g.push(s, stre - s);
+							return stre;
+						}
+					}
+					break;
+				}
+				case 'g': // &g
+				{
+					if (*++stre == 't' && *++stre == ';') // &gt;
+					{
+						*s++ = '>';
+						++stre;
+						
+						g.push(s, stre - s);
+						return stre;
+					}
+					break;
+				}
+				case 'l': // &l
+				{
+					if (*++stre == 't' && *++stre == ';') // &lt;
+					{
+						*s++ = '<';
+						++stre;
+						
+						g.push(s, stre - s);
+						return stre;
+					}
+					break;
+				}
+				case 'q': // &q
+				{
+					if (*++stre == 'u' && *++stre == 'o' && *++stre == 't' && *++stre == ';') // &quot;
+					{
+						*s++ = '"';
+						++stre;
+						
+						g.push(s, stre - s);
+						return stre;
+					}
+					break;
+				}
+			}
+			
+			return stre;
+		}
+
+		static char* strconv_comment(char* s)
+		{
+			if (!*s) return 0;
+			
+			gap g;
+			
+			while (true)
+			{
+				while (!is_chartype(*s, ct_parse_comment)) ++s;
+				
+				if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
+				{
+					*s++ = '\n'; // replace first one with 0x0a
+					
+					if (*s == '\n') g.push(s, 1);
+				}
+				else if (*s == '-' && *(s+1) == '-' && *(s+2) == '>') // comment ends here
+				{
+					*g.flush(s) = 0;
+					
+					return s + 3;
+				}
+				else if (*s == 0)
+				{
+					return 0;
+				}
+				else ++s;
+			}
+		}
+
+		static char* strconv_cdata(char* s)
+		{
+			if (!*s) return 0;
+			
+			gap g;
+			
+			while (true)
+			{
+				while (!is_chartype(*s, ct_parse_cdata)) ++s;
+				
+				if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
+				{
+					*s++ = '\n'; // replace first one with 0x0a
+					
+					if (*s == '\n') g.push(s, 1);
+				}
+				else if (*s == ']' && *(s+1) == ']' && *(s+2) == '>') // CDATA ends here
+				{
+					*g.flush(s) = 0;
+					
+					return s + 1;
+				}
+				else if (*s == 0)
+				{
+					return 0;
+				}
+				else ++s;
+			}
+		}
+		
+		template <bool opt_escape, bool opt_eol> static char* strconv_pcdata(char* s)
+		{
+			if (!*s) return 0;
+
+			gap g;
+			
+			while (true)
+			{
+				while (!is_chartype(*s, ct_parse_pcdata)) ++s;
+				
+				if (opt_eol && *s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
+				{
+					*s++ = '\n'; // replace first one with 0x0a
+					
+					if (*s == '\n') g.push(s, 1);
+				}
+				else if (opt_escape && *s == '&')
+				{
+					s = strconv_escape(s, g);
+				}
+				else if (*s == '<') // PCDATA ends here
+				{
+					*g.flush(s) = 0;
+					
+					return s + 1;
+				}
+				else if (*s == 0)
+				{
+					return 0;
+				}
+				else ++s;
+			}
+		}
+
+		static char* strconv_pcdata(char* s, unsigned int opt_escape, unsigned int opt_eol)
+		{
+			if (opt_escape)
+				return opt_eol ? strconv_pcdata<true, true>(s) : strconv_pcdata<true, false>(s);
+			else
+				return opt_eol ? strconv_pcdata<false, true>(s) : strconv_pcdata<false, false>(s);
+		}
+
+		template <bool opt_escape, bool opt_wnorm, bool opt_wconv, bool opt_eol> static char* strconv_attr(char* s, char end_quote)
+		{
+			if (!*s) return 0;
+			
+			gap g;
+
+			// Trim whitespaces
 			if (opt_wnorm)
 			{
-				do *lastpos-- = 0;
-				while (chartype_space(*lastpos));
+				char* str = s;
+				
+				while (is_chartype(*str, ct_space)) ++str;
+				
+				if (str != s)
+					g.push(s, str - s);
 			}
-			else *lastpos = 0;
+			
+			while (true)
+			{
+				while (!is_chartype(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
+				
+				if (opt_escape && *s == '&')
+				{
+					s = strconv_escape(s, g);
+				}
+				else if (opt_wnorm && is_chartype(*s, ct_space))
+				{
+					*s++ = ' ';
+		
+					if (is_chartype(*s, ct_space))
+					{
+						char* str = s + 1;
+						while (is_chartype(*str, ct_space)) ++str;
+						
+						g.push(s, str - s);
+					}
+				}
+				else if (opt_wconv && is_chartype(*s, ct_space))
+				{
+					if (opt_eol)
+					{
+						if (*s == '\r')
+						{
+							*s++ = ' ';
+					
+							if (*s == '\n') g.push(s, 1);
+						}
+						else *s++ = ' ';
+					}
+					else *s++ = ' ';
+				}
+				else if (opt_eol && *s == '\r')
+				{
+					*s++ = '\n';
+					
+					if (*s == '\n') g.push(s, 1);
+				}
+				else if (*s == end_quote)
+				{
+					char* str = g.flush(s);
+					
+					if (opt_wnorm)
+					{
+						do *str-- = 0;
+						while (is_chartype(*str, ct_space));
+					}
+					else *str = 0;
+					
+					return s + 1;
+				}
+				else if (!*s)
+				{
+					return 0;
+				}
+				else ++s;
+			}
 		}
 	
-		static void strconv_setup(void (*&func)(char**), unsigned int opt_escape, unsigned int opt_wnorm, unsigned int opt_wconv, unsigned int opt_eol)
+		static void strconv_attr_setup(char* (*&func)(char*, char), unsigned int opt_escape, unsigned int opt_wnorm, unsigned int opt_wconv, unsigned int opt_eol)
 		{
 			if (opt_eol)
 			{
@@ -423,26 +618,26 @@ namespace pugi
 				{
 					if (opt_escape)
 					{
-						if (opt_wnorm) func = &strconv_t<true, true, true, true>;
-						else func = &strconv_t<true, false, true, true>;
+						if (opt_wnorm) func = &strconv_attr<true, true, true, true>;
+						else func = &strconv_attr<true, false, true, true>;
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<false, true, true, true>;
-						else func = &strconv_t<false, false, true, true>;
+						if (opt_wnorm) func = &strconv_attr<false, true, true, true>;
+						else func = &strconv_attr<false, false, true, true>;
 					}
 				}
 				else
 				{
 					if (opt_escape)
 					{
-						if (opt_wnorm) func = &strconv_t<true, true, false, true>;
-						else func = &strconv_t<true, false, false, true>;
+						if (opt_wnorm) func = &strconv_attr<true, true, false, true>;
+						else func = &strconv_attr<true, false, false, true>;
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<false, true, false, true>;
-						else func = &strconv_t<false, false, false, true>;
+						if (opt_wnorm) func = &strconv_attr<false, true, false, true>;
+						else func = &strconv_attr<false, false, false, true>;
 					}
 				}
 			}
@@ -452,26 +647,26 @@ namespace pugi
 				{
 					if (opt_escape)
 					{
-						if (opt_wnorm) func = &strconv_t<true, true, true, false>;
-						else func = &strconv_t<true, false, true, false>;
+						if (opt_wnorm) func = &strconv_attr<true, true, true, false>;
+						else func = &strconv_attr<true, false, true, false>;
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<false, true, true, false>;
-						else func = &strconv_t<false, false, true, false>;
+						if (opt_wnorm) func = &strconv_attr<false, true, true, false>;
+						else func = &strconv_attr<false, false, true, false>;
 					}
 				}
 				else
 				{
 					if (opt_escape)
 					{
-						if (opt_wnorm) func = &strconv_t<true, true, false, false>;
-						else func = &strconv_t<true, false, false, false>;
+						if (opt_wnorm) func = &strconv_attr<true, true, false, false>;
+						else func = &strconv_attr<true, false, false, false>;
 					}
 					else
 					{
-						if (opt_wnorm) func = &strconv_t<false, true, false, false>;
-						else func = &strconv_t<false, false, false, false>;
+						if (opt_wnorm) func = &strconv_attr<false, true, false, false>;
+						else func = &strconv_attr<false, false, false, false>;
 					}
 				}
 			}
@@ -517,7 +712,7 @@ namespace pugi
 		}
 		
 		// Parser utilities.
-		#define SKIPWS()			{ while(chartype_space(*s)) ++s; if(*s==0) return s; }
+		#define SKIPWS()			{ while(is_chartype(*s, ct_space)) ++s; if(*s==0) return s; }
 		#define OPTSET(OPT)			( optmsk & OPT )
 		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor,TYPE); }
 		#define POPNODE()			{ cursor = cursor->parent; }
@@ -543,11 +738,9 @@ namespace pugi
 		{
 			if(!s || !xmldoc) return s;
 
-			void (*strconv_pcdata)(char**);
-			void (*strconv_attribute)(char**);
+			char* (*strconv_attribute)(char*, char);
 
-			strconv_setup(strconv_attribute, OPTSET(parse_escapes), OPTSET(parse_wnorm_attribute), OPTSET(parse_wconv_attribute), OPTSET(parse_eol));
-			strconv_setup(strconv_pcdata, OPTSET(parse_escapes), false, false, OPTSET(parse_eol));
+			strconv_attr_setup(strconv_attribute, OPTSET(parse_escapes), OPTSET(parse_wnorm_attribute), OPTSET(parse_wconv_attribute), OPTSET(parse_eol));
 
 			char ch = 0; // Current char, in cases where we must null-terminate before we test.
 			xml_node_struct* cursor = xmldoc; // Tree node cursor.
@@ -555,12 +748,12 @@ namespace pugi
 			while(*s!=0)
 			{
 			LOC_SEARCH: // Obliviously search for next element.
-				SCANFOR(chartype_enter(*s)); // Find the next '<'.
-				if(chartype_enter(*s))
+				SCANFOR(*s == '<'); // Find the next '<'.
+				if(*s == '<')
 				{
 					++s;
 				LOC_CLASSIFY: // What kind of element?
-					if(chartype_pi(*s)) // '<?...'
+					if(*s == '?') // '<?...'
 					{
 						++s;
 						if(chartype_symbol(*s) && OPTSET(parse_pi))
@@ -573,7 +766,7 @@ namespace pugi
 
 							cursor->name = mark;
 
-							if (chartype_space(ch))
+							if (is_chartype(ch, ct_space))
 							{
 								SKIPWS();
 
@@ -581,7 +774,7 @@ namespace pugi
 							}
 							else mark = 0;
 
-							SCANFOR(chartype_pi(*s) && chartype_leave(*(s+1))); // Look for '?>'.
+							SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
 							ENDSEG();
 
 							cursor->value = mark;
@@ -592,18 +785,18 @@ namespace pugi
 						}
 						else // Bad PI or parse_pi not set.
 						{
-							SCANFOR(chartype_pi(*s) && chartype_leave(*(s+1))); // Look for '?>'.
+							SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
 							++s;
 							goto LOC_LEAVE;
 						}
 					}
-					else if(chartype_special(*s)) // '<!...'
+					else if(*s == '!') // '<!...'
 					{
 						++s;
-						if(chartype_dash(*s)) // '<!-...'
+						if(*s == '-') // '<!-...'
 						{
 							++s;
-							if(chartype_dash(*s)) // '<!--...'
+							if(*s == '-') // '<!--...'
 							{
 								++s;
 								
@@ -613,36 +806,53 @@ namespace pugi
 									cursor->value = s; // Save the offset.
 								}
 
-								// Scan for terminating '-->'.
-								SCANFOR(chartype_dash(*s) && chartype_dash(*(s+1)) && chartype_leave(*(s+2)));
+								if (OPTSET(parse_eol) && OPTSET(parse_comments))
+								{
+									s = strconv_comment(s);
+									
+									if (!s) return s;
+								}
+								else
+								{
+									// Scan for terminating '-->'.
+									SCANFOR(*s == '-' && *(s+1) == '-' && *(s+2) == '>');
+								
+									if (OPTSET(parse_comments))
+										*s = 0; // Zero-terminate this segment at the first terminating '-'.
+									
+									s += 2; // Step over the '\0-'.
+								}
 								
 								if (OPTSET(parse_comments))
 								{
-									*s = 0; // Zero-terminate this segment at the first terminating '-'.
 									POPNODE(); // Pop since this is a standalone.
 								}
 								
-								s += 2; // Step over the '\0-'.
 								goto LOC_LEAVE; // Look for any following PCDATA.
 							}
 						}
-						else if(chartype_lbracket(*s))
+						else if(*s == '[')
 						{
 							// '<![CDATA[...'
-							if(*++s=='C' && *++s=='D' && *++s=='A' && *++s=='T' && *++s=='A' && chartype_lbracket(*++s))
+							if(*++s=='C' && *++s=='D' && *++s=='A' && *++s=='T' && *++s=='A' && *++s == '[')
 							{
 								++s;
 								if(OPTSET(parse_cdata))
 								{
 									PUSHNODE(node_cdata); // Append a new node on the tree.
 									cursor->value = s; // Save the offset.
-									// Scan for terminating ']]>'.
-									SCANFOR(chartype_rbracket(*s) && chartype_rbracket(*(s+1)) && chartype_leave(*(s+2)));
-									ENDSEG(); // Zero-terminate this segment.
 
 									if (OPTSET(parse_eol))
 									{
-										strconv_t<false, false, false, true>(&cursor->value);
+										s = strconv_cdata(s);
+										
+										if (!s) return s;
+									}
+									else
+									{
+										// Scan for terminating ']]>'.
+										SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
+										ENDSEG(); // Zero-terminate this segment.
 									}
 
 									POPNODE(); // Pop since this is a standalone.
@@ -650,7 +860,7 @@ namespace pugi
 								else // Flagged for discard, but we still have to scan for the terminator.
 								{
 									// Scan for terminating ']]>'.
-									SCANFOR(chartype_rbracket(*s) && chartype_rbracket(*(s+1)) && chartype_leave(*(s+2)));
+									SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
 									++s;
 								}
 								++s; // Step over the last ']'.
@@ -663,27 +873,27 @@ namespace pugi
 							++s;
 							SKIPWS(); // Eat any whitespace.
 						LOC_DOCTYPE:
-							SCANWHILE(chartype_quote(*s) || chartype_lbracket(*s) || chartype_leave(*s));
-							if(chartype_quote(*s)) // '...SYSTEM "..."
+							SCANWHILE(*s == '\'' || *s == '"' || *s == '[' || *s == '>');
+							if(*s == '\'' || *s == '"') // '...SYSTEM "..."
 							{
 								ch = *s++;
 								SCANFOR(*s == ch);
 								++s;
 								goto LOC_DOCTYPE;
 							}
-							if(chartype_lbracket(*s)) // '...[...'
+							if(*s == '[') // '...[...'
 							{
 								++s;
 								unsigned int bd = 1; // Bracket depth counter.
 								while(*s!=0) // Loop till we're out of all brackets.
 								{
-									if(chartype_rbracket(*s)) --bd;
-									else if(chartype_lbracket(*s)) ++bd;
+									if(*s == ']') --bd;
+									else if(*s == '[') ++bd;
 									if(bd == 0) break;
 									++s;
 								}
 								// Note: 's' now points to end of DTD, i.e.: ']'.
-								SCANFOR(chartype_leave(*s));
+								SCANFOR(*s == '>');
 								continue;
 							}
 							// Fall-through
@@ -697,19 +907,19 @@ namespace pugi
 						cursor->name = s;
 						SCANWHILE(chartype_symbol(*s)); // Scan for a terminator.
 						ENDSEG(); // Save char in 'ch', terminate & step over.
-						if (*s!=0 && chartype_close(ch)) // '</...'
+						if (*s!=0 && ch == '/') // '</...'
 						{
-							SCANFOR(chartype_leave(*s)); // Scan for '>'
+							SCANFOR(*s == '>'); // Scan for '>'
 							POPNODE(); // Pop.
 							goto LOC_LEAVE;
 						}
-						else if(*s!=0 && !chartype_space(ch))
+						else if(*s!=0 && !is_chartype(ch, ct_space))
 						{
-							if (!chartype_leave(ch)) SCANWHILE(!chartype_leave(*s));
+							if (ch != '>') SCANWHILE(*s != '>');
 							if (!*s) return s;
 							goto LOC_PCDATA; // No attributes, so scan for PCDATA.
 						}
-						else if(*s!=0 && chartype_space(ch))
+						else if(*s!=0 && is_chartype(ch, ct_space))
 						{
 							SKIPWS(); // Eat any whitespace.
 						LOC_ATTRIBUTE:
@@ -719,34 +929,34 @@ namespace pugi
 								a->name = s; // Save the offset.
 								SCANWHILE(chartype_symbol(*s)); // Scan for a terminator.
 								ENDSEG(); // Save char in 'ch', terminate & step over.
-								if(*s!=0 && chartype_space(ch)) SKIPWS(); // Eat any whitespace.
-								if(*s!=0 && (chartype_equals(ch) || chartype_equals(*s))) // '<... #=...'
+								if(*s!=0 && is_chartype(ch, ct_space)) SKIPWS(); // Eat any whitespace.
+								if(*s!=0 && (ch == '=' || *s == '=')) // '<... #=...'
 								{
-									if(chartype_equals(*s)) ++s;
+									if(*s == '=') ++s;
 									SKIPWS(); // Eat any whitespace.
-									if(chartype_quote(*s)) // '<... #="...'
+									if(*s == '\'' || *s == '"') // '<... #="...'
 									{
 										ch = *s; // Save quote char to avoid breaking on "''" -or- '""'.
 										++s; // Step over the quote.
 										a->value = s; // Save the offset.
-										SCANFOR(*s == ch); // Scan for the terminating quote
-										ENDSEG(); // Save char in 'ch', terminate & step over.
 
-										strconv_attribute(&a->value);
+										s = strconv_attribute(s, ch);
+										
+										if (!s) return s;
 
-										if(chartype_leave(*s))
+										if(*s == '>')
 										{
 											++s;
 											goto LOC_PCDATA;
 										}
-										else if(chartype_close(*s))
+										else if(*s == '/')
 										{
 											++s;
 											POPNODE();
 											SKIPWS(); // Eat any whitespace.
 											goto LOC_LEAVE;
 										}
-										else if(chartype_space(*s)) // This may indicate a following attribute.
+										else if(is_chartype(*s, ct_space)) // This may indicate a following attribute.
 										{
 											SKIPWS(); // Eat any whitespace.
 											goto LOC_ATTRIBUTE; // Go scan for additional attributes.
@@ -756,19 +966,19 @@ namespace pugi
 								goto LOC_ATTRIBUTE;
 							}
 
-							SCANWHILE(!chartype_leave(*s) && !chartype_close(*s));
+							SCANWHILE(*s != '>' && *s != '/');
 						}
 					LOC_LEAVE:
-						if(chartype_leave(*s)) // '...>'
+						if(*s == '>') // '...>'
 						{
 							++s; // Step over the '>'.
 						LOC_PCDATA: // '>...<'
 							mark = s; // Save this offset while searching for a terminator.
 							SKIPWS(); // Eat whitespace if no genuine PCDATA here.
 							// We hit a '<...', with only whitespace, so don't bother storing anything.
- 							if((mark == s || !OPTSET(parse_ws_pcdata)) && chartype_enter(*s))
+ 							if((mark == s || !OPTSET(parse_ws_pcdata)) && *s == '<')
 							{
-								if(chartype_close(*(s+1))) // '</...'
+								if(*(s+1) == '/') // '</...'
 								{
 								    ++s;
 									goto LOC_CLOSE;
@@ -784,34 +994,29 @@ namespace pugi
 							{
 								PUSHNODE(node_pcdata); // Append a new node on the tree.
 								cursor->value = s; // Save the offset.
-							}
-													
-							while (*s && !chartype_enter(*s)) ++s; // '...<'
-							
-							if (preserve)
-							{
-								if (*s) ENDSEG(); // Save char in 'ch', terminate & step over.
 
-								strconv_pcdata(&cursor->value);
+								s = strconv_pcdata(s, OPTSET(parse_escapes), OPTSET(parse_eol));
+								
+								if (!s) return s;
 								
 								POPNODE(); // Pop since this is a standalone.
 							}
-
-							if (!*s) return s;
-
-							if(chartype_enter(ch)) // Did we hit a '<...'?
+							else
 							{
-								if(chartype_close(*s)) goto LOC_CLOSE;
-								else if(chartype_special(*s)) goto LOC_CLASSIFY; // We hit a '<!...'. We must test this here if we want comments intermixed w/PCDATA.
-								else if(*s) goto LOC_CLASSIFY;
-								else return s;
+								SCANFOR(*s == '<'); // '...<'
 							}
+
+							// We're after '<...', otherwise we would not get here
+							if(*s == '/') goto LOC_CLOSE;
+							else if(*s == '!') goto LOC_CLASSIFY; // We hit a '<!...'. We must test this here if we want comments intermixed w/PCDATA.
+							else if(*s) goto LOC_CLASSIFY;
+							else return s;
 						}
 						// Fall-through A.
-						else if(chartype_close(*s)) // '.../'
+						else if(*s == '/') // '.../'
 						{
 							++s;
-							if(chartype_leave(*s)) // '.../>'
+							if(*s == '>') // '.../>'
 							{
 								POPNODE(); // Pop.
 								goto LOC_LEAVE;
@@ -819,7 +1024,7 @@ namespace pugi
 						}
 					}
 					// Fall-through B.
-					else if(chartype_close(*s)) // '.../'
+					else if(*s == '/') // '.../'
 					{
 					LOC_CLOSE:
 						++s;
@@ -868,7 +1073,7 @@ namespace pugi
 						}
 						else
 						{
-							SCANFOR(chartype_leave(*s)); // '...>'
+							SCANFOR(*s == '>'); // '...>'
 							POPNODE(); // Pop.
 						}
 
