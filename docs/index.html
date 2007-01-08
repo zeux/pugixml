@@ -42,7 +42,7 @@
 <h2>Introduction</h2>
 <p><i>pugixml</i> is just another XML parser. This is a successor to
 <a href="http://www.codeproject.com/soap/pugxml.asp">pugxml</a> (well, to be honest, the only part
-that is left as is is wildcard matching code, the rest was either heavily refactored or rewritten
+that is left as is is wildcard matching code; the rest was either heavily refactored or rewritten
 from scratch). The main features (call it USP) are:</p>
 
 <ul>
@@ -59,7 +59,7 @@ mode, with the exception of DTD related issues and XML namespaces)</li>
 like <i>expat</i> will; it will try to recover the state even if meeting an error (like finding matching
 tags for closing ones); it will parse files with data in wrong encoding; and so on)</li>
 <li>clean interface (a heavily refactored pugxml's one)</li>
-<li>more or less unicode-aware (actually, it assumes UTF-8 encoding of the input data, though
+<li>more or less Unicode-aware (actually, it assumes UTF-8 encoding of the input data, though
 it will readily work with ANSI - no UTF-16 for now (see <a href="#Future_work">Future work</a>), with
 helper conversion functions (UTF-8 <-> UTF-16/32 (whatever is the default for std::wstring & wchar_t))</li>
 <li>fully standard compliant code (approved by <a href="http://www.comeaucomputing.com/tryitout/">Comeau</a>
@@ -238,16 +238,16 @@ be just skipped:</p>
 
 <ul>
 <li>If <b>parse_pi</b> is on, then processing instructions (<b>&lt;? ... ?&gt;</b>) are put into DOM
-tree (with node type <b>node_pi</b>, otherwise they are discarded. Note that for now the prolog
+tree (with node type <b>node_pi</b>) otherwise they are discarded. Note that for now the prolog
 (&lt;?xml ... ?&gt;) is parsed as a processing instruction.
 <br>Default value: off
 <br>In W3C mode: on</li>
 <li>If <b>parse_comments</b> is on, then comments (<b>&lt;!-- ... --&gt;</b>) are put into DOM
-tree (with node type <b>node_comment</b>, otherwise they are discarded.
+tree (with node type <b>node_comment</b>) otherwise they are discarded.
 <br>Default value: off
 <br>In W3C mode: on</li>
 <li>If <b>parse_cdata</b> is on, then the content of CDATA section (<b>&lt;![CDATA[[ ... ]]&gt;</b>)
-is put into DOM tree (with node type <b>node_cdata</b>, otherwise it is discarded.
+is put into DOM tree (with node type <b>node_cdata</b>) otherwise it is discarded.
 <br>Default value: on
 <br>In W3C mode: on</li>
 <li>If <b>parse_ws_pcdata</b> is off, then the content of PCDATA section (it's the plain text
@@ -282,7 +282,7 @@ and for attribute values (replacing &lt;lt; with &lt;, &amp;#4c; with L, etc.).
 <li>If <b>parse_wnorm_attribute</b> is on, then the whitespace normalisation is done for attribute
 values (this includes replacing any space-like character by a space character, converting sequences of
 spaces into a single space and trimming of leading/trailing spaces)
-<br>Default value: on
+<br>Default value: off
 <br>In W3C mode: off</li>
 <li>If <b>parse_wconv_attribute</b> is on, then the whitespace conversion is done for attribute
 values (this is a subset of whitespace normalization, and includes only replacing space-like characters
@@ -324,7 +324,7 @@ These are:
 <p>A couple of words on flag usage. The parsing options are just a set of bits, with each bit corresponding
 to one flag. You can turn the flag on by OR-ing the options value with this flag's constant:
 <pre>
-	parse_w3c | parse_wnorm_pcdata
+	parse_w3c | parse_wnorm_attribute
 </pre>
 or turn the flag off by AND-ing the options value with the NEGation of this flag's constant:
 <pre>

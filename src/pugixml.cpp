@@ -3,8 +3,6 @@
 // Pug Improved XML Parser - Version 0.2
 // --------------------------------------------------------
 // Copyright (C) 2006-2007, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
-// Thanks to Palvelev Artyom (cppguru@mail.ru) for hints about optimizing
-// conversion functions.
 // This work is based on the pugxml parser, which is:
 // Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
 // Released into the Public Domain. Use at your own risk.
@@ -120,29 +118,30 @@ namespace
 		ct_parse_attr_ws = 4,	// \0, &, \r, ', ", \n, space, tab
 		ct_space = 8,			// \r, \n, space, tab
 		ct_parse_cdata = 16,	// \0, ], >, \r
-		ct_parse_comment = 32	// \0, -, >, \r
+		ct_parse_comment = 32,	// \0, -, >, \r
+		ct_symbol = 64			// Any symbol > 127, a-z, A-Z, 0-9, _, :, -, .
 		
 	};
-	
+
 	static unsigned char chartype_table[256] =
 	{
-		55, 0, 0, 0, 0, 0, 0, 0,		0, 12, 12, 0, 0, 63, 0, 0,	// 0-15
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 16-31
-		12, 0, 6, 0, 0, 0, 7, 6,		0, 0, 0, 0, 0, 32, 0, 0,	// 32-47
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 1, 0, 48, 0,	// 48-63
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 64-79
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 16, 0, 0,	// 80-95
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 96-111
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,		// 112-127
+		55, 0, 0, 0, 0, 0, 0, 0,				0, 12, 12, 0, 0, 63, 0, 0,			// 0-15
+		0, 0, 0, 0, 0, 0, 0, 0,					0, 0, 0, 0, 0, 0, 0, 0,				// 16-31
+		12, 0, 6, 0, 0, 0, 7, 6,				0, 0, 0, 0, 0, 96, 64, 0,			// 32-47
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 0, 1, 0, 48, 0,			// 48-63
+		0, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,		// 64-79
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 0, 0, 16, 0, 64,		// 80-95
+		0, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,		// 96-111
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 0, 0, 0, 0, 0,			// 112-127
 
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,			0, 0, 0, 0, 0, 0, 0, 0
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64,
+		64, 64, 64, 64, 64, 64, 64, 64,			64, 64, 64, 64, 64, 64, 64, 64
 	};
 	
 	bool is_chartype(char c, chartype ct)
@@ -275,9 +274,6 @@ namespace pugi
 	struct xml_parser_impl
 	{
 		xml_allocator& alloc;
-		bool chartype_symbol_table[256];
-		
-		bool chartype_symbol(char c) const { return chartype_symbol_table[(unsigned char)c]; }
 		
 		struct gap
 		{
@@ -724,8 +720,6 @@ namespace pugi
 		{
 			for (unsigned int c = 0; c < 256; ++c)
 			{
-				chartype_symbol_table[c] = c > 127 || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-										(c >= '0' && c <= '9') || c == '_' || c == ':' || c == '-' || c == '.';
 			}
 		}
 		
@@ -756,10 +750,10 @@ namespace pugi
 					if(*s == '?') // '<?...'
 					{
 						++s;
-						if(chartype_symbol(*s) && OPTSET(parse_pi))
+						if(is_chartype(*s, ct_symbol) && OPTSET(parse_pi))
 						{
 							mark = s;
-							SCANWHILE(chartype_symbol(*s)); // Read PI target
+							SCANWHILE(is_chartype(*s, ct_symbol)); // Read PI target
 							ENDSEG();
 							
 							PUSHNODE(node_pi); // Append a new node on the tree.
@@ -900,12 +894,12 @@ namespace pugi
 							continue;
 						}
 					}
-					else if(chartype_symbol(*s)) // '<#...'
+					else if(is_chartype(*s, ct_symbol)) // '<#...'
 					{
 						cursor = append_node(cursor); // Append a new node to the tree.
 
 						cursor->name = s;
-						SCANWHILE(chartype_symbol(*s)); // Scan for a terminator.
+						SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
 						ENDSEG(); // Save char in 'ch', terminate & step over.
 						if (*s!=0 && ch == '/') // '</...'
 						{
@@ -923,11 +917,11 @@ namespace pugi
 						{
 							SKIPWS(); // Eat any whitespace.
 						LOC_ATTRIBUTE:
-							if(chartype_symbol(*s)) // <... #...
+							if(is_chartype(*s, ct_symbol)) // <... #...
 							{
 								xml_attribute_struct* a = append_attribute(cursor); // Make space for this attribute.
 								a->name = s; // Save the offset.
-								SCANWHILE(chartype_symbol(*s)); // Scan for a terminator.
+								SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
 								ENDSEG(); // Save char in 'ch', terminate & step over.
 								if(*s!=0 && is_chartype(ch, ct_space)) SKIPWS(); // Eat any whitespace.
 								if(*s!=0 && (ch == '=' || *s == '=')) // '<... #=...'
@@ -1040,7 +1034,7 @@ namespace pugi
 								
 								if (name)
 								{
-									while (*tagname && chartype_symbol(*tagname))
+									while (*tagname && is_chartype(*tagname, ct_symbol))
 									{
 										if (*tagname++ != *name++) goto TAG_NEXTMATCH;
 									}
@@ -1063,7 +1057,7 @@ namespace pugi
 							char* name = cursor->name;
 							if (!name) return s;
 						
-							while (*s && chartype_symbol(*s))
+							while (*s && is_chartype(*s, ct_symbol))
 							{
 								if (*s++ != *name++) return s;
 							}
