@@ -15,17 +15,8 @@
 <h2>Contents</h2>
 <dl class="index">
   <dt><a href="#Introduction">Introduction</a></dt>
-  <dt><a href="#DOM">Document Object Model</a></dt>
-  <dt><a href="#Documentation">Documentation</a>
-	<dd><a href="#Doc_Introduction">Introduction</a></dd>
-	<dd><a href="#Doc_Parser">xml_parser class</a></dd>
-	<dd><a href="#Doc_Node">xml_node class</a></dd>
-	<dd><a href="#Doc_Attribute">xml_attribute class</a></dd>
-	<dd><a href="#Doc_Iterators">Iterators</a></dd>
-	<dd><a href="#Doc_Misc">Miscellaneous</a></dd>
-	<dd><a href="#Doc_Lifetime">Lifetime issues and memory management</a></dd>
-  </dt>
-  <dt><a href="#Parsing">Parsing process</a></dt>
+  <dt><a href="#QuickStart">Quick start</a></dt>
+  <dt><a href="#Reference">Reference</a></dt>
   <dt><a href="#Compliance">W3C compliance</a></dt>
   <dt><a href="#ComparisonTable">Comparison with existing parsers</a></dt>
   <dt><a href="#FAQ">FAQ</a></dt>
@@ -43,7 +34,7 @@
 <p><i>pugixml</i> is just another XML parser. This is a successor to
 <a href="http://www.codeproject.com/soap/pugxml.asp">pugxml</a> (well, to be honest, the only part
 that is left as is is wildcard matching code; the rest was either heavily refactored or rewritten
-from scratch). The main features (call it USP) are:</p>
+from scratch). The main features are:</p>
 
 <ul>
 <li>low memory consumption and fragmentation (the win over <i>pugxml</i> is ~1.3 times, <i>TinyXML</i>
@@ -53,17 +44,17 @@ be seen in <a href="#ComparisonTable">Comparison with existing parsers</a> secti
 times, <i>Xerces-DOM</i> - ~17.6 times <a href="#annot-1"><sup>1</sup></a></li>
 <li>extremely high parsing speed (well, I'm repeating myself, but it's so fast, that it outperforms
 <i>Expat</i> by <b>2.8 times</b> on test XML) <a href="#annot-2"><sup>2</sup></a></li>
-<li>more or less standard-conformant (it will parse any standard-compliant file correctly in w3c-compliance
-mode, with the exception of DTD related issues and XML namespaces)</li>
+<li>more or less standard-conformant (it will parse any standard-compliant file correctly, with the
+exception of DTD related issues)</li>
 <li>pretty much error-ignorant (it will not choke on something like &lt;text&gt;You &amp; Me&lt;/text&gt;,
-like <i>expat</i> will; it will try to recover the state even if meeting an error (like finding matching
-tags for closing ones); it will parse files with data in wrong encoding; and so on)</li>
+like <i>expat</i> will; it will parse files with data in wrong encoding; and so on)</li>
 <li>clean interface (a heavily refactored pugxml's one)</li>
 <li>more or less Unicode-aware (actually, it assumes UTF-8 encoding of the input data, though
 it will readily work with ANSI - no UTF-16 for now (see <a href="#Future_work">Future work</a>), with
 helper conversion functions (UTF-8 <-> UTF-16/32 (whatever is the default for std::wstring & wchar_t))</li>
-<li>fully standard compliant code (approved by <a href="http://www.comeaucomputing.com/tryitout/">Comeau</a>
-strict mode), multiplatform (tested on win32 only ^_^)</li>
+<li>fully standard compliant C++ code (approved by <a href="http://www.comeaucomputing.com/tryitout/">Comeau</a>
+strict mode); the library is multiplatform (see <a href="#Reference">reference</a> for platforms
+list)</li>
 <li>high flexibility. You can control many aspects of file parsing and DOM tree building via parsing
 options.
 </ul>
@@ -84,10 +75,8 @@ ok with DOM - it should not be a problem, because the overall memory consumption
 you'll need a contiguous chunk of memory, which can be a problem).</li>
 <li>lack of validation, DTD processing, XML namespaces, proper handling of encoding. If you need those -
 go take MSXML or XercesC or anything like that.</li>
-<li>lack of XPath & UTF-16/32 parsing. These are not implemented for now, but they are the features
-for the next release.</li>
-<li>immutability of DOM tree. It's constant. You can't change it. There are good reasons for prohibiting
-that, though it is a thing that will likely be in the next release.</li>
+<li>lack of UTF-16/32 parsing. This is not implemented for now, but this is the features for the next
+release.</li>
 </ul>
 
 <hr>
@@ -101,803 +90,345 @@ an XML file were measured.</small>
 
 <hr>
 
-<a name="DOM">
-<h2>Document Object Model</h2>
+<a name="QuickStart">
+<h2>Quick start</h2>
 
-<p><i>pugixml</i> is a DOM-based parser. This means, that the XML document is converted to a tree.
-Each XML tag is converted to a node in DOM tree. If a tag is contained in some other tag, its node
-is a child to the outer tag's one. Comments, CDATA sections and PIs (Processing Instructions) also are
-transformed into tree nodes, as is the standalone text. Each node has its type.</p>
+<p>Here there is a small collection of code snippets to help the reader begin using <i>pugixml</i>.</p>
 
-<p>Here is an example of an XML document:
-
-<pre>
-<span style='color:#004a43; '>&lt;?</span><span style='color:#004a43; '>xml</span> <span style='color:#004a43; '>version</span><span style='color:#808030; '>=</span><span style='color:#008c00; '>"1.0"</span><span style='color:#004a43; '>?></span>
-<span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>mesh</span> <span style='color:#274796; '>name</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>mesh_root</span><span style='color:#0000e6; '>"</span><span style='color:#a65700; '>></span>
-    <span style='color:#696969; '>&lt;!--</span><span style='color:#696969; '> here is a mesh node </span><span style='color:#696969; '>--></span>
-    some text
-    <span style='color:#606060; '>&lt;![CDATA[</span>[someothertext<span style='color:#606060; '>]]></span>
-    some more text
-    <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>node</span> <span style='color:#274796; '>attr1</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>value1</span><span style='color:#0000e6; '>"</span> <span style='color:#a65700; '>/></span>
-    <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>node</span> <span style='color:#274796; '>attr1</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>value2</span><span style='color:#0000e6; '>"</span><span style='color:#a65700; '>></span>
-        <span style='color:#004a43; '>&lt;?</span><span style='color:#004a43; '>TARGET</span><span style='color:#004a43; '> somedata</span><span style='color:#004a43; '>?></span>
-        <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>innernode</span><span style='color:#a65700; '>/></span>
-    <span style='color:#a65700; '>&lt;/</span><span style='color:#5f5035; '>node</span><span style='color:#a65700; '>></span>
-<span style='color:#a65700; '>&lt;/</span><span style='color:#5f5035; '>mesh</span><span style='color:#a65700; '>></span>
-</pre>
-
-It gets converted to the following tree (note, that with some parsing options comments, PIs and CDATA
-sections are not stored in the tree, and with some options there are also nodes with whitespaces
-and the contents of PCDATA sections is a bit different (with trailing/leading whitespaces). So generally
-the resulting DOM tree depends on the parsing options):</p>
-
-<p><img src="tree.png"></p>
-
-<p>The parent-children relations are shown with lines. Some nodes have previous and next siblings
-(for example, the next sibling for node_comment node is node_pcdata with value "some text", and the
-previous sibling for node_element with name "mesh" is node_pi with target "xml" (target for PI nodes
-is stored in the node name)).</p>
-<hr>
-
-<a name="Documentation">
-<h2>Documentation</h2>
-
-<a name="Doc_Introduction">
-<h3>Introduction</h3>
-
-<p><i>pugixml</i> is a library for parsing XML files, which means that you give it XML data some way,
-and it gives you the DOM tree and the ways to traverse it and to get some useful information from it.
-The library source consist of two files, the header <b>pugixml.hpp</b>, and the source code <b>pugixml.cpp</b>.
-You can either compile cpp file in your project, or build a static library (or perhaps even a DLL),
-or make the whole code use inline linkage and make one big file (as it was done in <i>pugxml</i>).
-All library classes reside in namespace <b>pugi</b>, so you can either use fully qualified
-names (<b>pugi::xml_node</b>) or write a using declaration (<b>using namespace pugi;</b>, <b>using
-pugi::xml_node</b>) and use plain names. All classes have the <b>xml_</b> prefix.</p>
-
-<p>By default it's supposed that you compile the source file with your project (add it into your
-project, or add relevant entry in your Makefile, or do whatever you need to do with your compilation
-environment). The library is written in standard-conformant C++ and was tested on win32 platform
-(MSVC 7.1 (2003), MSVC 8.0 (2005)).</p>
-
-<a name="Doc_Parser">
-<h3>xml_parser class</h3>
-
-<p><b>xml_parser</b> class is the core of parsing process; you initiate parsing with it, you get DOM
-tree from it, the nodes and attributes are stored in it. You have two ways to load a file: either
-provide a string with XML-data (it has to be null-terminated, and it will be modified during parsing
-process, so it can not be a piece of read-only memory), or with an <b>std::istream</b> object (any input
-stream, like <b>std::ifstream</b>, <b>std::istringstream</b>, etc.) - in this case the parser will allocate
-the necessary amount of memory (equivalent to stream's size) and read everything from the stream.</p>
-
-<p>The functions for parsing are:
-<dl>
-<dt>
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >void</font></b> <font color="#000000" >parse(std::istream&amp;</font> <font color="#000000" >stream,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_noset);</font></font></pre></td></tr></table>
-<dd>This function will create a buffer with the size equal to that of provided <code>stream</code>,
-read the chunk of data from the stream and parse it with provided options (<code>optmsk</code>).
-The stream does not have to persist after the call to the function, the lifetime of internal buffer
-with stream's data is managed by <i>pugixml</i>.
-</dd>
-</dt>
-<dt>&nbsp;</dt>
-<dt>
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >parse(</font><b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_noset);</font>
-</font></pre></td></tr></table>
-<dd>This function parses the provided string with provided options, and returns the position where the
-parsing stopped (do not expect, that parsing will stop on every error, or on most of them - as I've
-said, <i>pugixml</i> is error ignorant). The input string is modified. The string must persist for the
-lifetime of the parser.
-</dt>
-<dt>&nbsp;</dt>
-<dt>
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >parse(</font><b><font color="#0000ff" >const</font></b> <font color="#000000">ownership_transfer_tag&amp;,</font> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_noset);</font>
-</font></pre></td></tr></table>
-<dd>This function parses the provided string with provided options, and returns the position where the
-parsing stopped (do not expect, that parsing will stop on every error, or on most of them - as I've
-said, <i>pugixml</i> is error ignorant). The input string is modified. The string's ownership is
-managed by parser (string's memory is freed automatically when parser's destructor is called).</dt>
-<dt>&nbsp;</dt>
-<dt>
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_parser(std::istream&amp;</font> <font color="#000000" >stream,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
-<dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
-</dt>
-<dt>&nbsp;</dt>
-<dt>
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_parser(</font><b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
-<dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
-</dt>
-<dt>&nbsp;</dt>
-<dt>
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_parser(</font><b><font color="#0000ff" >const</font></b> <font color="#000000">ownership_transfer_tag&amp;,</font> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >xmlstr,</font> <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk</font> <font color="#000000" >=</font> <font color="#000000" >parse_default);</font></font></pre></td></tr></table>
-<dd>Just a convenience ctor, that calls the corresponding parse() function.</dd>
-</dt>
-</dl>
-
-<p>If you want to provide XML data after the creation of the parser, use the default ctor. Otherwise
-you are free to use either parsing ctors or default ctor and later - parsing function.</p>
-
-<p>After parsing an XML file, you'll get a DOM tree. To get access to it (or, more precisely, to its
-root), call either <b>document()</b> function or cast <b>xml_parser</b> object to <b>xml_node</b> by
-using the following functions:</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >operator</font></b> <font color="#000000" >xml_node()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >document()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Ok, easy part is behind - now let's dive into parsing options. There is a variety of them, and you
-must choose them wisely to get the needed results and the best speed/least memory overhead. At first,
-there are flags that determine which parts of the document will be put into DOM tree, and which will
-be just skipped:</p>
-
-<ul>
-<li>If <b>parse_pi</b> is on, then processing instructions (<b>&lt;? ... ?&gt;</b>) are put into DOM
-tree (with node type <b>node_pi</b>) otherwise they are discarded. Note that for now the prolog
-(&lt;?xml ... ?&gt;) is parsed as a processing instruction.
-<br>Default value: off
-<br>In W3C mode: on</li>
-<li>If <b>parse_comments</b> is on, then comments (<b>&lt;!-- ... --&gt;</b>) are put into DOM
-tree (with node type <b>node_comment</b>) otherwise they are discarded.
-<br>Default value: off
-<br>In W3C mode: on</li>
-<li>If <b>parse_cdata</b> is on, then the content of CDATA section (<b>&lt;![CDATA[[ ... ]]&gt;</b>)
-is put into DOM tree (with node type <b>node_cdata</b>) otherwise it is discarded.
-<br>Default value: on
-<br>In W3C mode: on</li>
-<li>If <b>parse_ws_pcdata</b> is off, then the content of PCDATA section (it's the plain text
-in the node, like in <b>&lt;some_tag&gt;Hello!&lt;/some_tag&gt;</b>) is discarded if it consists only
-of space-like characters (spaces, tabs and newlines).
-<br>Default value: off
-<br>In W3C mode: on</li>
-<li>If <b>parse_ext_pcdata</b> is off, then the content of PCDATA section is discarded if it belongs
-to root (document) node, that is it does not have a parent tag.
-<br>Default value: on
-<br>In W3C mode: off</li>
-</ul>
-
-<p>Then there are flags that determine how the processing of the retrieved data is done. There are
-several reasons for these flags, mainly:
-<ul>
-<li>parsing speed. The less processing - the more speed.</li>
-<li>data fetching comfort. Sometimes you're ok with messed linefeeds, sometimes you're not. Sometimes
-you want your PCDATA trimmed, sometimes you do not. Sometimes you want your attribute values normalized,
-sometimes you do not. Some of these are normally specified in DOCTYPE, though...
-<li>...parser is not DOCTYPE aware (and will never be), so you need a way to set those properties -
-if not on per-node basis, then on per-document</li>
-</ul>
-So, these are the processing flags:
-</p>
-
-<ul>
-<li>If <b>parse_escapes</b> is on, then the character reference expansion is done for PCDATA content
-and for attribute values (replacing &lt;lt; with &lt;, &amp;#4c; with L, etc.).
-<br>Default value: on
-<br>In W3C mode: on</li>
-<li>If <b>parse_wnorm_attribute</b> is on, then the whitespace normalisation is done for attribute
-values (this includes replacing any space-like character by a space character, converting sequences of
-spaces into a single space and trimming of leading/trailing spaces)
-<br>Default value: off
-<br>In W3C mode: off</li>
-<li>If <b>parse_wconv_attribute</b> is on, then the whitespace conversion is done for attribute
-values (this is a subset of whitespace normalization, and includes only replacing space-like characters
-with spaces). If <b>parse_wnorm_attribute</b> is on, this flag has no effect.
-<br>Default value: on
-<br>In W3C mode: on</li>
-<li>If <b>parse_eol</b> is on, then the end-of-line handling is done for PCDATA/CDATA content and for
-attribute values (this includes converting any pair of 0x0d 0x0a characters to a single 0x0a and
-converting any standalone 0x0d to 0x0a).
-<br>Default value: on
-<br>In W3C mode: on</li>
-</ul>
-
-<p>Finally, there are two more flags, that indicate closing tag parsing. When <i>pugixml</i> meets a
-close tags, there are three ways:
-<ul>
-<li>check that the tag name matches the opening tag, return an error if it does not. This is a
-standard-compliant way, is controlled by <b>parse_check_end_tags</b> flag, which is on in W3C mode</li>
-<li>try to find the corresponding tag name (so that <b>&lt;foo&gt; &lt;bar&gt; &lt;/foo&gt;</b> will be parsed
-correctly). This is controlled by <b>parse_match_end_tags</b>, which is on by default</li>
-<li>just treat the tag as a closing tag for the node (so that <b>&lt;foo&gt; ... &lt;/bar&gt;</b> will
-be parsed as <b>&lt;foo&gt; ... &lt;/foo&gt;</b>). This is the fastest way, and this is what <i>pugxml</i>
-is doing, but it can corrupt your DOM tree. This way is chosen if both <b>parse_check_end_tags</b> and
-<b>parse_match_end_tags</b> are off.
-</ul>
-Note, that these 2 flags are mutually exclusive.
-</p>
-
-<p>Did I say finally? Ok, so <b>finally</b> there are some helper flags, or better groups of flags.
-These are:
-<ul>
-<li><b>parse_minimal</b> - no flag is set (this also means the fastest parsing)</li>
-<li><b>parse_default</b> - default set of flags</li>
-<li><b>parse_noset</b> - use the current parser options (see below)</li>
-<li><b>parse_w3c</b> - use the W3C compliance mode</li>
-</ul>
-</p>
-
-<p>A couple of words on flag usage. The parsing options are just a set of bits, with each bit corresponding
-to one flag. You can turn the flag on by OR-ing the options value with this flag's constant:
-<pre>
-	parse_w3c | parse_wnorm_attribute
-</pre>
-or turn the flag off by AND-ing the options value with the NEGation of this flag's constant:
-<pre>
-	parse_w3c & ~parse_comments
-</pre>
-You can access the current options of parser by <b>options()</b> method:
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >options()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >options(</font><b><font color="#0000ff" >unsigned</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >optmsk);</font>
-</font></pre></td></tr></table>
-(the latter one returns previous options). These options are used when <b>parse_noset</b> flag set is
-passed to <b>parse()</b> functions (which is the default value of corresponding parameter).
-</p>
-
-<a name="Doc_Node">
-<h3>xml_node class</h3>
-
-<p>If <b>xml_parser</b> is a heart of constructing a DOM tree from file, <b>xml_node</b> is a heart
-of processing the tree. This is a simple wrapper, so it's small (4/8 bytes, depending on the size of
-pointer), you're free to copy it and it does not own anything. I'll continue with a list of methods
-with their description, with one note in advance. Some functions, that do something according to a
-string-like parameter, have a pair with a suffix <b>_w</b>. The <b>_w</b> suffix tells, that this
-function is doing a wildcard matching, instead of simple string comparison. You're free to use wildcards
-<b>*</b> (that is equal to any sequence of characters (possibly empty)), <b>?</b> (that is equal to
-any character) and character sets (<b>[Abc]</b> means 'any symbol of A, b and c', <b>[A-Z4]</b> means
-'any symbol from A to Z, or 4', <b>[!0-9]</b> means 'any symbol, that is not a digit'). So the wildcard
-<b>?ell_[0-9][0-9]_*</b> will match strings like 'cell_23_xref', 'hell_00_', but will not match the
-strings like 'ell_23_xref', 'cell_0_x' or 'cell_0a_x'.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <i><font color="#808080" >/// Access iterators for this node's collection of child nodes.</font></i>
-        <font color="#000000" >iterator</font> <font color="#000000" >begin()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >iterator</font> <font color="#000000" >end()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        
-        <i><font color="#808080" >/// Access iterators for this node's collection of child nodes (same as begin/end).</font></i>
-        <font color="#000000" >iterator</font> <font color="#000000" >children_begin()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >iterator</font> <font color="#000000" >children_end()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-    
-        <i><font color="#808080" >/// Access iterators for this node's collection of attributes.</font></i>
-        <font color="#000000" >attribute_iterator</font> <font color="#000000" >attributes_begin()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >attribute_iterator</font> <font color="#000000" >attributes_end()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-
-        <i><font color="#808080" >/// Access iterators for this node's collection of siblings.</font></i>
-        <font color="#000000" >iterator</font> <font color="#000000" >siblings_begin()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >iterator</font> <font color="#000000" >siblings_end()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Functions, returning the iterators to walk through children/siblings/attributes. More on that in
-<a href="#Doc_Iterators">Iterators</a> section.</p>
-	
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >operator</font></b> <font color="#000000" >unspecified_bool_type()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>This is a safe bool-like conversion operator. You can check node's validity (<b>if (xml_node)</b>,
- <b>if (!xml_node)</b>, <b>if (node1 && node2 && !node3 && cond1 && ...)</b> - you get the idea) with
-it.
-</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >==(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >!=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" ><(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >>(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" ><=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >>=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Comparison operators</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >bool</font></b> <font color="#000000" >empty()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p><code>if (node.empty())</code> is equivalent to <code>if (!node)</code></p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node_type</font> <font color="#000000" >type()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >value()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Access node's properties (type, name and value). If there is no name/value, the corresponding functions
-return <b>""</b> - they <u>never</u> return NULL.</p>	
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >child(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >child_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get a child node with specified name, or <b>xml_node()</b> (this is an invalid node) if nothing is
-found</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_attribute</font> <font color="#000000" >attribute(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_attribute</font> <font color="#000000" >attribute_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get an attribute with specified name, or <b>xml_attribute()</b> (this is an invalid attribute) if
-nothing is found</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >sibling(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >sibling_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get a node's sibling with specified name, or <b>xml_node()</b> if nothing is found.<br>
-<code>node.sibling(name)</code> is equivalent to <code>node.parent().child(name)</code>.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >next_sibling(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >next_sibling_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >next_sibling()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>These functions get the next sibling, that is, one of the siblings of that node, that is to the
-right. <code>next_sibling()</code> just returns the right brother of the node (or <b>xml_node()</b>),
-the two other functions are searching for the sibling with the given name</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >previous_sibling(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >previous_sibling_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >previous_sibling()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>These functions do exactly the same as <code>next_sibling</code> ones, with the exception that they
-search for the left siblings.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >parent()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get a parent node. The parent node for the root one (the document) is considered to be the document
-itself.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >child_value()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Look for the first node of type <b>node_pcdata</b> or <b>node_cdata</b> among the
-children of the current node and return its contents (or <b>""</b> if nothing is found)</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-    <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >child_value(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>This is the convenient way of looking into child's child value - that is, node.child_value(name) is equivalent to node.child(name).child_value().</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-    <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >child_value_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>This is the convenient way of looking into child's child value - that is, node.child_value_w(name) is equivalent to node.child_w(name).child_value().</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_attribute</font> <font color="#000000" >first_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_attribute</font> <font color="#000000" >last_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>These functions get the first and last attributes of the node (or <b>xml_attribute()</b> if the node
-has no attributes).</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_child()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >last_child()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>These functions get the first and last children of the node (or <b>xml_node()</b> if the node has
-no children).</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >OutputIterator&gt;</font> <b><font color="#0000ff" >void</font></b> <font color="#000000" >all_elements_by_name(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <font color="#000000" >OutputIterator</font> <font color="#000000" >it)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >OutputIterator&gt;</font> <b><font color="#0000ff" >void</font></b> <font color="#000000" >all_elements_by_name_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <font color="#000000" >OutputIterator</font> <font color="#000000" >it)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get all elements with the specified name in the subtree (depth-first search) and return them with
-the help of output iterator (i.e. std::back_inserter)</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >Predicate&gt;</font> <font color="#000000" >xml_attribute</font> <font color="#000000" >find_attribute(Predicate</font> <font color="#000000" >pred)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >Predicate&gt;</font> <font color="#000000" >xml_node</font> <font color="#000000" >find_child(Predicate</font> <font color="#000000" >pred)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >template</font></b> <font color="#000000" >&lt;</font><b><font color="#0000ff" >typename</font></b> <font color="#000000" >Predicate&gt;</font> <font color="#000000" >xml_node</font> <font color="#000000" >find_element(Predicate</font> <font color="#000000" >pred)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Find attribute, child or a node in the subtree (find_element - depth-first search) with the help
-of the given predicate. Predicate should behave like a function which accepts a <b>xml_node</b> or
-<b>xml_attribute</b> (for find_attribute) parameter and returns <b>bool</b>. The first entity for which
-the predicate returned true is returned. If predicate returned false for all entities, <b>xml_node()</b>
-or <b>xml_attribute()</b> is returned.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_value(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_value_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_attribute(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_attribute_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_attribute(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_attribute_w(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_name,</font> <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >attr_value)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Find the first node (depth-first search), which corresponds to the given criteria (i.e. either has
-a matching name, or a matching value, or has an attribute with given name/value, or has an attribute
-and has a matching name). Note that <b>_w</b> versions treat all parameters as wildcards.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_node(xml_node_type</font> <font color="#000000" >type)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Return a first node (depth-first search) with a given type, or <b>xml_node()</b>.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >std::string</font> <font color="#000000" >path(</font><b><font color="#0000ff" >char</font></b> <font color="#000000" >delimiter</font> <font color="#000000" >=</font> <font color="#ff0000" >'/'</font><font color="#000000" >)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get a path of the node (i.e. the string of names of the nodes on the path from the DOM tree root
-to the node, separated with delimiter (/ by default).</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_node</font> <font color="#000000" >first_element_by_path(</font><b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >path,</font> <b><font color="#0000ff" >char</font></b> <font color="#000000" >delimiter</font> <font color="#000000" >=</font> <font color="#ff0000" >'/'</font><font color="#000000" >)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get the first element that has the following path. The path can be absolute (beginning with delimiter) or
-relative, '..' means 'up-level' (so if we are at the path <b>mesh/fragment/geometry/stream</b>, <b>../..</b>
-will lead us to <b>mesh/fragment</b>, and <b>/mesh</b> will lead us to <b>mesh</b>).</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >bool</font></b> <font color="#000000" >traverse(xml_tree_walker&amp;</font> <font color="#000000" >walker)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Traverse the subtree (beginning with current node) with the walker, return the result. See
-<a href="#Doc_Misc">Miscellaneous</a> section for details.</p>
-
-<a name="Doc_Attribute">
-<h3>xml_attribute class</h3>
-
-<p>Like <b>xml_node</b>, <b>xml_attribute</b> is a simple wrapper of the node's attribute.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >==(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >!=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >&lt;(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >&gt;(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >&lt;=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >bool</font></b> <b><font color="#0000ff" >operator</font></b><font color="#000000" >&gt;=(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_attribute&amp;</font> <font color="#000000" >r)</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Comparison operators.</p>	
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >operator</font></b> <font color="#000000" >unspecified_bool_type()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Safe bool conversion - like in <b>xml_node</b>, use this to check for validity.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >bool</font></b> <font color="#000000" >empty()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Like with <b>xml_node</b>, <code>if (attr.empty())</code> is equivalent to <code>if (!attr)</code>.
-</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <font color="#000000" >xml_attribute</font> <font color="#000000" >next_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <font color="#000000" >xml_attribute</font> <font color="#000000" >previous_attribute()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get the next/previous attribute of the node, that owns the current attribute. Return <b>xml_attribute()</b>
-if no such attribute is found.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >name()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >const</font></b> <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >value()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get the name and value of the attribute. These methods never return NULL - they return <b>""</b> instead.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >int</font></b> <font color="#000000" >as_int()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >double</font></b> <font color="#000000" >as_double()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-        <b><font color="#0000ff" >float</font></b> <font color="#000000" >as_float()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Convert the value of an attribute to the desired type. If the conversion is not successfull, return
-default value (0 for int, 0.0 for double, 0.0f for float). These functions rely on CRT functions ato*.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >bool</font></b> <font color="#000000" >as_bool()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Convert the value of an attribute to bool. This method returns true if the first character of the
-value is '1', 't', 'T', 'y' or 'Y'. Otherwise it returns false.</p>
-
-<a name="Doc_Iterators">
-<h3>Iterators</h3>
-
-<p>Sometimes you have to cycle through the children or the attributes of the node. You can do it either
-by using <b>next_sibling</b>, <b>previous_sibling</b>, <b>next_attribute</b> and <b>previous_attribute</b>
-(along with <b>first_child</b>, <b>last_child</b>, <b>first_attribute</b> and <b>last_attribute</b>),
-or you can use an iterator-like interface. There are two iterator types, <b>xml_node_iterator</b> and
-<b>xml_attribute_iterator</b>. They are bidirectional constant iterators, which means that you can
-either increment or decrement them, and use dereferencing and member access operators to get constant
-access to node/attribute (the constness of iterators may change with the introducing of mutable trees).</p>
-
-<p>In order to get the iterators, use corresponding functions of <b>xml_node</b>. Note that <b>_end()</b>
-functions return past-the-end iterator, that is, in order to get the last attribute, you'll have to
-do something like:
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-    <b><font color="#0000ff" >if</font></b> <font color="#000000" >(node.attributes_begin()</font> <font color="#000000" >!=</font> <font color="#000000" >node.attributes_end())</font> <i><font color="#808080" >// we have at least one attribute</font></i>
-    <font color="#000000" >{</font>
-        <font color="#000000" >xml_attribute</font> <font color="#000000" >last_attrib</font> <font color="#000000" >=</font> <font color="#000000" >*(--node.attributes_end());</font>
-        <font color="#000000" >...</font>
-    <font color="#000000" >}</font>
-</font></pre></td></tr></table>
-</p>
-
-<a name="Doc_Misc">
-<h3>Miscellaneous</h3>
-
-<p>If you want to traverse a subtree, you can use <b>traverse</b> function. There is a class
-<b>xml_tree_walker</b>, which has some functions that you can override in order to get custom traversing
-(the default one just does nothing).
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >bool</font></b> <font color="#000000" >begin(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;);</font>
-        <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >bool</font></b> <font color="#000000" >end(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;);</font>
-</font></pre></td></tr></table>
-
-<p>These functions are called when the processing of the node starts/ends. First <b>begin()</b>
-is called, then all children of the node are processed recursively, then <b>end()</b> is called. If
-any of these functions returns false, the traversing is stopped and the <b>traverse()</b> function
-returns false.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >void</font></b> <font color="#000000" >push();</font>
-        <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >void</font></b> <font color="#000000" >pop();</font>
-</font></pre></td></tr></table>
-
-<p>These functions are called before and after the processing of node's children. If node has no children,
-none of these is called. The default behavior is to increment/decrement current node depth.</p>
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >int</font></b> <font color="#000000" >depth()</font> <b><font color="#0000ff" >const</font></b><font color="#000000" >;</font>
-</font></pre></td></tr></table>
-
-<p>Get the current depth. You can use this function to do your own indentation, for example.</p>
-
-<p>Lets get to some minor notes. You can safely write something like:
-
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
-        <b><font color="#0000ff" >bool</font></b> <font color="#000000" >value</font> <font color="#000000" >=</font> <font color="#000000" >node.child(</font><font color="#ff0000" >"stream"</font><font color="#000000" >).attribute(</font><font color="#ff0000" >"compress"</font><font color="#000000" >).as_bool();</font>
-</font></pre></td></tr></table>
-
-If node has a child with the name 'geometry', and this child has an attribute 'compress', than everything
-is ok. If node has a child with the name 'geometry' with no attribute 'compress', then attribute("compress")
-will return xml_attribute(), and the corresponding call to as_bool() will return default value (false).
-If there is no child node 'geometry', the child(...) call will return xml_node(), the subsequent call
-to attribute(...) will return xml_attribute() (because there are no attributes belonging to invalid
-node), and as_bool() will again return false, so this call sequence is perfectly safe.</p>
-
-<a name="Doc_Lifetime">
-<h3>Lifetime issues and memory management</h3>
-
-<p>As parsing is done in-situ, the XML data is to persist during the lifetime of <b>xml_parser</b>. If
-the parsing is called via a function of <b>xml_parser</b>, that accepts <b>char*</b>, you have to ensure
-yourself, that the string will outlive the <b>xml_parser</b> object.</p>
-
-<p>The memory for nodes and attributes is allocated in blocks of data (the blocks form a linked list;
-the default size of the block is 32 kb, though you can change it via changing a <b>memory_block_size</b>
-constant in <b>pugixml.hpp</b> file. Remember that the first block is allocated on stack (it resides
-inside <b>xml_parser</b> object), and all subsequent blocks are allocated on heap, so expect a stack overflow
-when setting too large memory block size), so the <b>xml_parser</b> object (which contains the blocks)
-should outlive all <b>xml_node</b> and <b>xml_attribute</b> objects (as well as iterators), which belong
-to the parser's tree. Again, you should ensure it yourself.</p>
-
-<hr>
-
-<a name="Example">
-<h2>Example</h2>
-
-<p>Ok, so you are not much of documentation reader, are you? So am I. Let's assume that you're going
-to parse an xml file... something like this:
-
-<pre>
-<span style='color:#004a43; '>&lt;?</span><span style='color:#004a43; '>xml</span> <span style='color:#004a43; '>version</span><span style='color:#808030; '>=</span><span style='color:#008c00; '>"1.0"</span> <span style='color:#004a43; '>encoding</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"UTF-8"</span><span style='color:#004a43; '>?></span>
-<span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>mesh</span> <span style='color:#274796; '>name</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>Cathedral</span><span style='color:#0000e6; '>"</span><span style='color:#a65700; '>></span>
-    <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>fragment</span> <span style='color:#274796; '>name</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>Cathedral</span><span style='color:#0000e6; '>"</span><span style='color:#a65700; '>></span>    
-        <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>geometry</span><span style='color:#a65700; '>></span>
-            <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>stream</span> <span style='color:#274796; '>usage</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>main</span><span style='color:#0000e6; '>"</span> <span style='color:#274796; '>source</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>StAnna.dmesh</span><span style='color:#0000e6; '>"</span> <span style='color:#274796; '>compress</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>true</span><span style='color:#0000e6; '>"</span> <span style='color:#a65700; '>/></span>
-            <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>stream</span> <span style='color:#274796; '>usage</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>ao</span><span style='color:#0000e6; '>"</span> <span style='color:#274796; '>source</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>StAnna.ao</span><span style='color:#0000e6; '>"</span> <span style='color:#a65700; '>/></span>
-        <span style='color:#a65700; '>&lt;/</span><span style='color:#5f5035; '>geometry</span><span style='color:#a65700; '>></span>
-    <span style='color:#a65700; '>&lt;/</span><span style='color:#5f5035; '>fragment</span><span style='color:#a65700; '>></span>
-    <span style='color:#a65700; '>&lt;</span><span style='color:#5f5035; '>fragment</span> <span style='color:#274796; '>name</span><span style='color:#808030; '>=</span><span style='color:#0000e6; '>"</span><span style='color:#0000e6; '>Cathedral</span><span style='color:#0000e6; '>"</span><span style='color:#a65700; '>></span>    
-    	...
-    <span style='color:#a65700; '>&lt;/</span><span style='color:#5f5035; '>fragment</span><span style='color:#a65700; '>></span>
-	...
-<span style='color:#a65700; '>&lt;/</span><span style='color:#5f5035; '>mesh</span><span style='color:#a65700; '>></span>
-</pre>
-
-<p>&lt;mesh&gt; is a root node, it has 0 or more &lt;fragment&gt;s, each of them has a &lt;geometry&gt;
-node, and there are &lt;stream&gt; nodes with the shown attributes. We'd like to parse the file and...
-well, and do something with it's contents. There are several methods of doing that; I'll show 2 of them
-(the remaining one is using iterators).</p>
-
-<p>Here we exploit the knowledge of the strict hierarchy of our XML document and read the nodes from
-DOM tree accordingly. When we have an <b>xml_node</b> object, we can get the desired information from
-it (name, value, attributes list, nearby nodes in a tree - siblings, parent and children).</p>
+<p>For everything you can do with <i>pugixml</i>, you need a document. There are several ways to obtain it:</p>
 
 <table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
 <font color="#008000" >#include</font> <font color="#ff0000" >&lt;fstream&gt;</font>
-<font color="#008000" >#include</font> <font color="#ff0000" >&lt;vector&gt;</font>
-<font color="#008000" >#include</font> <font color="#ff0000" >&lt;algorithm&gt;</font>
-<font color="#008000" >#include</font> <font color="#ff0000" >&lt;iterator&gt;</font>
+<font color="#008000" >#include</font> <font color="#ff0000" >&lt;iostream&gt;</font>
 
 <font color="#008000" >#include</font> <font color="#ff0000" >"pugixml.hpp"</font>
 
+<b><font color="#0000ff" >using</font></b> <b><font color="#0000ff" >namespace</font></b> <font color="#000000" >std;</font>
 <b><font color="#0000ff" >using</font></b> <b><font color="#0000ff" >namespace</font></b> <font color="#000000" >pugi;</font>
 
 <b><font color="#0000ff" >int</font></b> <font color="#000000" >main()</font>
 <font color="#000000" >{</font>
-    <font color="#000000" >std::ifstream</font> <font color="#000000" >in(</font><font color="#ff0000" >"mesh.xml"</font><font color="#000000" >);</font>
-    <font color="#000000" >in.unsetf(std::ios::skipws);</font>
-                
-    <font color="#000000" >std::vector&lt;</font><b><font color="#0000ff" >char</font></b><font color="#000000" >&gt;</font> <font color="#000000" >buf;</font>
-    <font color="#000000" >std::copy(std::istream_iterator&lt;</font><b><font color="#0000ff" >char</font></b><font color="#000000" >&gt;(in),</font> <font color="#000000" >std::istream_iterator&lt;</font><b><font color="#0000ff" >char</font></b><font color="#000000" >&gt;(),</font> <font color="#000000" >std::back_inserter(buf));</font>
-    <font color="#000000" >buf.push_back(</font><b><font color="#40b440" >0</font></b><font color="#000000" >);</font> <i><font color="#808080" >// zero-terminate</font></i>
-    
-    <font color="#000000" >xml_parser</font> <font color="#000000" >parser(&amp;buf[</font><b><font color="#40b440" >0</font></b><font color="#000000" >],</font> <font color="#000000" >pugi::parse_w3c);</font>
+    <i><font color="#808080" >// Several ways to get XML document</font></i>
 
-    <font color="#000000" >xml_node</font> <font color="#000000" >doc</font> <font color="#000000" >=</font> <font color="#000000" >parser.document();</font>
-        
-    <b><font color="#0000ff" >if</font></b> <font color="#000000" >(xml_node</font> <font color="#000000" >mesh</font> <font color="#000000" >=</font> <font color="#000000" >doc.first_element(</font><font color="#ff0000" >"mesh"</font><font color="#000000" >))</font>
     <font color="#000000" >{</font>
-        <i><font color="#808080" >// store mesh.attribute("name").value()</font></i>
+        <i><font color="#808080" >// Load from string</font></i>
+        <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
 
-        <b><font color="#0000ff" >for</font></b> <font color="#000000" >(xml_node</font> <font color="#000000" >fragment</font> <font color="#000000" >=</font> <font color="#000000" >mesh.first_element(</font><font color="#ff0000" >"fragment"</font><font color="#000000" >);</font> <font color="#000000" >fragment;</font> <font color="#000000" >fragment</font> <font color="#000000" >=</font> <font color="#000000" >fragment.next_sibling())</font>
-        <font color="#000000" >{</font>
-            <i><font color="#808080" >// store fragment.attribute("name").value()</font></i>
-    
-            <b><font color="#0000ff" >if</font></b> <font color="#000000" >(xml_node</font> <font color="#000000" >geometry</font> <font color="#000000" >=</font> <font color="#000000" >fragment.first_element(</font><font color="#ff0000" >"geometry"</font><font color="#000000" >))</font>
-                <b><font color="#0000ff" >for</font></b> <font color="#000000" >(xml_node</font> <font color="#000000" >stream</font> <font color="#000000" >=</font> <font color="#000000" >geometry.first_element(</font><font color="#ff0000" >"stream"</font><font color="#000000" >);</font> <font color="#000000" >stream;</font> <font color="#000000" >stream</font> <font color="#000000" >=</font> <font color="#000000" >stream.next_sibling())</font>
-                <font color="#000000" >{</font>
-                    <i><font color="#808080" >// store stream.attribute("usage").value()</font></i>
-                    <i><font color="#808080" >// store stream.attribute("source").value()</font></i>
-                    
-                    <b><font color="#0000ff" >if</font></b> <font color="#000000" >(stream.attribute(</font><font color="#ff0000" >"compress"</font><font color="#000000" >))</font>
-                        <i><font color="#808080" >// store stream.attribute("compress").as_bool()</font></i>
-    
-                <font color="#000000" >}</font>
-        <font color="#000000" >}</font>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.load(</font><font color="#ff0000" >"&lt;sample-xml&gt;some text &lt;b&gt;in bold&lt;/b&gt; here&lt;/sample-xml&gt;"</font><font color="#000000" >)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+    <font color="#000000" >}</font>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// Load from file</font></i>
+        <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
+
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.load_file(</font><font color="#ff0000" >"sample.xml"</font><font color="#000000" >)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+    <font color="#000000" >}</font>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// Load from any input stream (STL)</font></i>
+        <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
+
+        <font color="#000000" >std::ifstream</font> <font color="#000000" >in(</font><font color="#ff0000" >"sample.xml"</font><font color="#000000" >);</font>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.load(in)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+    <font color="#000000" >}</font>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// More advanced: parse the specified string without duplicating it</font></i>
+        <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
+
+        <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >s</font> <font color="#000000" >=</font> <font color="#000000" >new</font> <b><font color="#0000ff" >char</font></b><font color="#000000" >[</font><b><font color="#40b440" >100</font></b><font color="#000000" >];</font>
+        <font color="#000000" >strcpy(s,</font> <font color="#ff0000" >"&lt;sample-xml&gt;some text &lt;b&gt;in bold&lt;/b&gt; here&lt;/sample-xml&gt;"</font><font color="#000000" >);</font>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.parse(transfer_ownership_tag(),</font> <font color="#000000" >s)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+    <font color="#000000" >}</font>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// Even more advanced: assume manual lifetime control</font></i>
+        <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
+
+        <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >s</font> <font color="#000000" >=</font> <font color="#000000" >new</font> <b><font color="#0000ff" >char</font></b><font color="#000000" >[</font><b><font color="#40b440" >100</font></b><font color="#000000" >];</font>
+        <font color="#000000" >strcpy(s,</font> <font color="#ff0000" >"&lt;sample-xml&gt;some text &lt;b&gt;in bold&lt;/b&gt; here&lt;/sample-xml&gt;"</font><font color="#000000" >);</font>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.parse(transfer_ownership_tag(),</font> <font color="#000000" >s)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+
+        <font color="#000000" >delete[]</font> <font color="#000000" >s;</font> <i><font color="#808080" >// &lt;-- after this point, all string contents of document is invalid!</font></i>
+    <font color="#000000" >}</font>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// Or just create document from code?</font></i>
+        <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
+
+        <i><font color="#808080" >// add nodes to document (see next samples)</font></i>
     <font color="#000000" >}</font>
 <font color="#000000" >}</font>
-</font></pre></td></tr></table>
+</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
 
-<p>We can also write a class that will traverse the DOM tree and store the information from nodes based
-on their names, depths, attributes, etc. This way is well known by the users of SAX parsers. To do that,
-we have to write an implementation of <b>xml_tree_walker</b> interface </p>
+<p>This sample should print a row of 1, meaning that all load/parse functions returned true (of course, if sample.xml does not exist or is malformed, there will be 0's)</p>
 
-<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">                   
-<font color="#008000" >#include</font> <font color="#ff0000" >&lt;fstream&gt;</font>
-<font color="#008000" >#include</font> <font color="#ff0000" >&lt;vector&gt;</font>
-<font color="#008000" >#include</font> <font color="#ff0000" >&lt;algorithm&gt;</font>
-<font color="#008000" >#include</font> <font color="#ff0000" >&lt;iterator&gt;</font>
+<p>Once you have your document, there are several ways to extract data from it.</p>
+
+<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
+<font color="#008000" >#include</font> <font color="#ff0000" >&lt;iostream&gt;</font>
 
 <font color="#008000" >#include</font> <font color="#ff0000" >"pugixml.hpp"</font>
 
+<b><font color="#0000ff" >using</font></b> <b><font color="#0000ff" >namespace</font></b> <font color="#000000" >std;</font>
 <b><font color="#0000ff" >using</font></b> <b><font color="#0000ff" >namespace</font></b> <font color="#000000" >pugi;</font>
 
-<b><font color="#0000ff" >struct</font></b> <font color="#000000" >mesh_parser:</font> <b><font color="#0000ff" >public</font></b> <font color="#000000" >xml_tree_walker</font>
+<b><font color="#0000ff" >struct</font></b> <font color="#000000" >bookstore_traverser:</font> <b><font color="#0000ff" >public</font></b> <font color="#000000" >xml_tree_walker</font>
 <font color="#000000" >{</font>
-    <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >bool</font></b> <font color="#000000" >begin(</font><b><font color="#0000ff" >const</font></b> <font color="#000000" >xml_node&amp;</font> <font color="#000000" >node)</font>
+    <b><font color="#0000ff" >virtual</font></b> <b><font color="#0000ff" >bool</font></b> <font color="#000000" >for_each(xml_node&amp;</font> <font color="#000000" >n)</font>
     <font color="#000000" >{</font>
-        <b><font color="#0000ff" >if</font></b> <font color="#000000" >(strcmp(node.name(),</font> <font color="#ff0000" >"mesh"</font><font color="#000000" >)</font> <font color="#000000" >==</font> <b><font color="#40b440" >0</font></b><font color="#000000" >)</font>
-        <font color="#000000" >{</font>
-            <i><font color="#808080" >// store node.attribute("name").value()</font></i>
-        <font color="#000000" >}</font>
-        <b><font color="#0000ff" >else</font></b> <b><font color="#0000ff" >if</font></b> <font color="#000000" >(strcmp(node.name(),</font> <font color="#ff0000" >"fragment"</font><font color="#000000" >)</font> <font color="#000000" >==</font> <b><font color="#40b440" >0</font></b><font color="#000000" >)</font>
-        <font color="#000000" >{</font>
-            <i><font color="#808080" >// store node.attribute("name").value()</font></i>
-        <font color="#000000" >}</font>   
-        <b><font color="#0000ff" >else</font></b> <b><font color="#0000ff" >if</font></b> <font color="#000000" >(strcmp(node.name(),</font> <font color="#ff0000" >"geometry"</font><font color="#000000" >)</font> <font color="#000000" >==</font> <b><font color="#40b440" >0</font></b><font color="#000000" >)</font>
-        <font color="#000000" >{</font>
-            <i><font color="#808080" >// ...</font></i>
-        <font color="#000000" >}</font>
-        <b><font color="#0000ff" >else</font></b> <b><font color="#0000ff" >if</font></b> <font color="#000000" >(strcmp(node.name(),</font> <font color="#ff0000" >"stream"</font><font color="#000000" >)</font> <font color="#000000" >==</font> <b><font color="#40b440" >0</font></b><font color="#000000" >)</font>
-        <font color="#000000" >{</font>
-            <i><font color="#808080" >// store node.attribute("usage").value()</font></i>
-            <i><font color="#808080" >// store node.attribute("source").value()</font></i>
-                    
-            <b><font color="#0000ff" >if</font></b> <font color="#000000" >(node.attribute(</font><font color="#ff0000" >"compress"</font><font color="#000000" >))</font>
-                <i><font color="#808080" >// store stream.attribute("compress").as_bool()</font></i>
-        <font color="#000000" >}</font>
-        <b><font color="#0000ff" >else</font></b> <b><font color="#0000ff" >return</font></b> <b><font color="#0000ff" >false</font></b><font color="#000000" >;</font>
+        <b><font color="#0000ff" >for</font></b> <font color="#000000" >(</font><b><font color="#0000ff" >int</font></b> <font color="#000000" >i</font> <font color="#000000" >=</font> <b><font color="#40b440" >0</font></b><font color="#000000" >;</font> <font color="#000000" >i</font> <font color="#000000" >&lt;</font> <font color="#000000" >depth();</font> <font color="#000000" >++i)</font> <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#ff0000" >"  "</font><font color="#000000" >;</font> <i><font color="#808080" >// indentation</font></i>
 
-        <b><font color="#0000ff" >return</font></b> <b><font color="#0000ff" >true</font></b><font color="#000000" >;</font>
+        <b><font color="#0000ff" >if</font></b> <font color="#000000" >(n.type()</font> <font color="#000000" >==</font> <font color="#000000" >node_element)</font> <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >n.name()</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+        <b><font color="#0000ff" >else</font></b> <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >n.value()</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+
+        <b><font color="#0000ff" >return</font></b> <b><font color="#0000ff" >true</font></b><font color="#000000" >;</font> <i><font color="#808080" >// continue traversal</font></i>
     <font color="#000000" >}</font>
 <font color="#000000" >};</font>
 
 <b><font color="#0000ff" >int</font></b> <font color="#000000" >main()</font>
 <font color="#000000" >{</font>
-    <font color="#000000" >std::ifstream</font> <font color="#000000" >in(</font><font color="#ff0000" >"mesh.xml"</font><font color="#000000" >);</font>
-    <font color="#000000" >in.unsetf(std::ios::skipws);</font>
-                
-    <font color="#000000" >std::vector&lt;</font><b><font color="#0000ff" >char</font></b><font color="#000000" >&gt;</font> <font color="#000000" >buf;</font>
-    <font color="#000000" >std::copy(std::istream_iterator&lt;</font><b><font color="#0000ff" >char</font></b><font color="#000000" >&gt;(in),</font> <font color="#000000" >std::istream_iterator&lt;</font><b><font color="#0000ff" >char</font></b><font color="#000000" >&gt;(),</font> <font color="#000000" >std::back_inserter(buf));</font>
-    <font color="#000000" >buf.push_back(</font><b><font color="#40b440" >0</font></b><font color="#000000" >);</font> <i><font color="#808080" >// zero-terminate</font></i>
+    <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
+    <font color="#000000" >doc.load(</font><font color="#ff0000" >"&lt;bookstore&gt;&lt;book title='ShaderX'&gt;&lt;price&gt;3&lt;/price&gt;&lt;/book&gt;&lt;book title='GPU Gems'&gt;&lt;price&gt;4&lt;/price&gt;&lt;/book&gt;&lt;/bookstore&gt;"</font><font color="#000000" >);</font>
+
+    <i><font color="#808080" >// If you want to iterate through nodes...</font></i>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// Get a bookstore node</font></i>
+        <font color="#000000" >xml_node</font> <font color="#000000" >bookstore</font> <font color="#000000" >=</font> <font color="#000000" >doc.child(</font><font color="#ff0000" >"bookstore"</font><font color="#000000" >);</font>
+
+        <i><font color="#808080" >// Iterate through books</font></i>
+        <b><font color="#0000ff" >for</font></b> <font color="#000000" >(xml_node</font> <font color="#000000" >book</font> <font color="#000000" >=</font> <font color="#000000" >bookstore.child(</font><font color="#ff0000" >"book"</font><font color="#000000" >);</font> <font color="#000000" >book;</font> <font color="#000000" >book</font> <font color="#000000" >=</font> <font color="#000000" >book.next_sibling(</font><font color="#ff0000" >"book"</font><font color="#000000" >))</font>
+        <font color="#000000" >{</font>
+            <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#ff0000" >"Book "</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >book.attribute(</font><font color="#ff0000" >"title"</font><font color="#000000" >).value()</font> <font color="#000000" >&lt;&lt;</font> <font color="#ff0000" >", price "</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >book.child(</font><font color="#ff0000" >"price"</font><font color="#000000" >).first_child().value()</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+        <font color="#000000" >}</font>
+
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// Book ShaderX, price 3</font></i>
+        <i><font color="#808080" >// Book GPU Gems, price 4</font></i>
+    <font color="#000000" >}</font>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// Alternative way to get a bookstore node (wildcards)</font></i>
+        <font color="#000000" >xml_node</font> <font color="#000000" >bookstore</font> <font color="#000000" >=</font> <font color="#000000" >doc.child_w(</font><font color="#ff0000" >"*[sS]tore"</font><font color="#000000" >);</font> <i><font color="#808080" >// this will select bookstore, anyStore, Store, etc.</font></i>
+
+        <i><font color="#808080" >// Iterate through books with STL compatible iterators</font></i>
+        <b><font color="#0000ff" >for</font></b> <font color="#000000" >(xml_node::iterator</font> <font color="#000000" >it</font> <font color="#000000" >=</font> <font color="#000000" >bookstore.begin();</font> <font color="#000000" >it</font> <font color="#000000" >!=</font> <font color="#000000" >bookstore.end();</font> <font color="#000000" >++it)</font>
+        <font color="#000000" >{</font>
+            <i><font color="#808080" >// Note the use of helper function child_value()</font></i>
+            <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#ff0000" >"Book "</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >it-&gt;attribute(</font><font color="#ff0000" >"title"</font><font color="#000000" >).value()</font> <font color="#000000" >&lt;&lt;</font> <font color="#ff0000" >", price "</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >it-&gt;child_value(</font><font color="#ff0000" >"price"</font><font color="#000000" >)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+        <font color="#000000" >}</font>
+        
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// Book ShaderX, price 3</font></i>
+        <i><font color="#808080" >// Book GPU Gems, price 4</font></i>
+    <font color="#000000" >}</font>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// You can also traverse the whole tree (or a subtree)</font></i>
+        <font color="#000000" >bookstore_traverser</font> <font color="#000000" >t;</font>
+
+        <font color="#000000" >doc.traverse(t);</font>
+        
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// bookstore</font></i>
+        <i><font color="#808080" >//   book</font></i>
+        <i><font color="#808080" >//     price</font></i>
+        <i><font color="#808080" >//       3</font></i>
+        <i><font color="#808080" >//   book</font></i>
+        <i><font color="#808080" >//     price</font></i>
+        <i><font color="#808080" >//       4</font></i>
+
+        <font color="#000000" >doc.first_child().traverse(t);</font>
+
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// book</font></i>
+        <i><font color="#808080" >//   price</font></i>
+        <i><font color="#808080" >//     3</font></i>
+        <i><font color="#808080" >// book</font></i>
+        <i><font color="#808080" >//   price</font></i>
+        <i><font color="#808080" >//     4</font></i>
+    <font color="#000000" >}</font>
+
+    <i><font color="#808080" >// If you want a distinct node...</font></i>
+
+    <font color="#000000" >{</font>
+        <i><font color="#808080" >// You can specify the way to it through child() functions</font></i>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.child(</font><font color="#ff0000" >"bookstore"</font><font color="#000000" >).child(</font><font color="#ff0000" >"book"</font><font color="#000000" >).next_sibling().attribute(</font><font color="#ff0000" >"title"</font><font color="#000000" >).value()</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// GPU Gems</font></i>
     
-    <font color="#000000" >xml_parser</font> <font color="#000000" >parser(&amp;buf[</font><b><font color="#40b440" >0</font></b><font color="#000000" >],</font> <font color="#000000" >pugi::parse_w3c);</font>
+        <i><font color="#808080" >// You can use a sometimes convenient path function</font></i>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.first_element_by_path(</font><font color="#ff0000" >"bookstore/book/price"</font><font color="#000000" >).child_value()</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+        
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// 3</font></i>
 
-    <font color="#000000" >mesh_parser</font> <font color="#000000" >mp;</font>
+        <i><font color="#808080" >// And you can use powerful XPath expressions</font></i>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.select_single_node(</font><font color="#ff0000" >"/bookstore/book[@title = 'ShaderX']/price"</font><font color="#000000" >).node().child_value()</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+        
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// 3</font></i>
 
-    <b><font color="#0000ff" >if</font></b> <font color="#000000" >(!parser.document().traverse(mp))</font>
-        <i><font color="#808080" >// generate an error</font></i>
+        <i><font color="#808080" >// Of course, XPath is much more powerful</font></i>
+
+        <i><font color="#808080" >// Compile query that prints total price of all Gems book in store</font></i>
+        <font color="#000000" >xpath_query</font> <font color="#000000" >query(</font><font color="#ff0000" >"sum(/bookstore/book[contains(@title, 'Gems')]/price)"</font><font color="#000000" >);</font>
+
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >query.evaluate_number(doc)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// 4</font></i>
+
+        <i><font color="#808080" >// You can apply the same XPath query to any document. For example, let's add another Gems</font></i>
+        <i><font color="#808080" >// book (more detail about modifying tree in next sample):</font></i>
+        <font color="#000000" >xml_node</font> <font color="#000000" >book</font> <font color="#000000" >=</font> <font color="#000000" >doc.child(</font><font color="#ff0000" >"bookstore"</font><font color="#000000" >).append_child();</font>
+        <font color="#000000" >book.set_name(</font><font color="#ff0000" >"book"</font><font color="#000000" >);</font>
+        <font color="#000000" >book.append_attribute(</font><font color="#ff0000" >"title"</font><font color="#000000" >)</font> <font color="#000000" >=</font> <font color="#ff0000" >"Game Programming Gems 2"</font><font color="#000000" >;</font>
+        
+        <font color="#000000" >xml_node</font> <font color="#000000" >price</font> <font color="#000000" >=</font> <font color="#000000" >book.append_child();</font>
+        <font color="#000000" >price.set_name(</font><font color="#ff0000" >"price"</font><font color="#000000" >);</font>
+
+        <font color="#000000" >xml_node</font> <font color="#000000" >price_text</font> <font color="#000000" >=</font> <font color="#000000" >price.append_child(node_pcdata);</font>
+        <font color="#000000" >price_text.set_value(</font><font color="#ff0000" >"5.3"</font><font color="#000000" >);</font>
+    
+        <i><font color="#808080" >// Now let's reevaluate query</font></i>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >query.evaluate_number(doc)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+
+        <i><font color="#808080" >// Output:</font></i>
+        <i><font color="#808080" >// 9.3</font></i>
+    <font color="#000000" >}</font>
 <font color="#000000" >}</font>
-</font></pre></td></tr></table>
+</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+
+<p>Finally, let's get into more details about tree modification and saving.</p>
+
+<table width = "100%" bgcolor="#e6e6e6"><tr><td><pre><font color="white">
+<font color="#008000" >#include</font> <font color="#ff0000" >&lt;iostream&gt;</font>
+
+<font color="#008000" >#include</font> <font color="#ff0000" >"pugixml.hpp"</font>
+
+<b><font color="#0000ff" >using</font></b> <b><font color="#0000ff" >namespace</font></b> <font color="#000000" >std;</font>
+<b><font color="#0000ff" >using</font></b> <b><font color="#0000ff" >namespace</font></b> <font color="#000000" >pugi;</font>
+
+<b><font color="#0000ff" >int</font></b> <font color="#000000" >main()</font>
+<font color="#000000" >{</font>
+    <i><font color="#808080" >// For this example, we'll start with an empty document and create nodes in it from code</font></i>
+    <font color="#000000" >xml_document</font> <font color="#000000" >doc;</font>
+
+    <i><font color="#808080" >// Append several children and set values/names at once</font></i>
+    <font color="#000000" >doc.append_child(node_comment).set_value(</font><font color="#ff0000" >"This is a test comment"</font><font color="#000000" >);</font>
+    <font color="#000000" >doc.append_child().set_name(</font><font color="#ff0000" >"application"</font><font color="#000000" >);</font>
+
+    <i><font color="#808080" >// Let's add a few modules</font></i>
+    <font color="#000000" >xml_node</font> <font color="#000000" >application</font> <font color="#000000" >=</font> <font color="#000000" >doc.child(</font><font color="#ff0000" >"application"</font><font color="#000000" >);</font>
+
+    <i><font color="#808080" >// Save node wrapper for convenience</font></i>
+    <font color="#000000" >xml_node</font> <font color="#000000" >module_a</font> <font color="#000000" >=</font> <font color="#000000" >application.append_child();</font>
+    <font color="#000000" >module_a.set_name(</font><font color="#ff0000" >"module"</font><font color="#000000" >);</font>
+    
+    <i><font color="#808080" >// Add an attribute, immediately setting it's value</font></i>
+    <font color="#000000" >module_a.append_attribute(</font><font color="#ff0000" >"name"</font><font color="#000000" >).set_value(</font><font color="#ff0000" >"A"</font><font color="#000000" >);</font>
+
+    <i><font color="#808080" >// You can use operator=</font></i>
+    <font color="#000000" >module_a.append_attribute(</font><font color="#ff0000" >"folder"</font><font color="#000000" >)</font> <font color="#000000" >=</font> <font color="#ff0000" >"/work/app/module_a"</font><font color="#000000" >;</font>
+
+    <i><font color="#808080" >// Or even assign numbers</font></i>
+    <font color="#000000" >module_a.append_attribute(</font><font color="#ff0000" >"status"</font><font color="#000000" >)</font> <font color="#000000" >=</font> <b><font color="#40b440" >85.4</font></b><font color="#000000" >;</font>
+
+    <i><font color="#808080" >// Let's add another module</font></i>
+    <font color="#000000" >xml_node</font> <font color="#000000" >module_c</font> <font color="#000000" >=</font> <font color="#000000" >application.append_child();</font>
+    <font color="#000000" >module_c.set_name(</font><font color="#ff0000" >"module"</font><font color="#000000" >);</font>
+    <font color="#000000" >module_c.append_attribute(</font><font color="#ff0000" >"name"</font><font color="#000000" >)</font> <font color="#000000" >=</font> <font color="#ff0000" >"C"</font><font color="#000000" >;</font>
+    <font color="#000000" >module_c.append_attribute(</font><font color="#ff0000" >"folder"</font><font color="#000000" >)</font> <font color="#000000" >=</font> <font color="#ff0000" >"/work/app/module_c"</font><font color="#000000" >;</font>
+
+    <i><font color="#808080" >// Oh, we missed module B. Not a problem, let's insert it before module C</font></i>
+    <font color="#000000" >xml_node</font> <font color="#000000" >module_b</font> <font color="#000000" >=</font> <font color="#000000" >application.insert_child_before(node_element,</font> <font color="#000000" >module_c);</font>
+    <font color="#000000" >module_b.set_name(</font><font color="#ff0000" >"module"</font><font color="#000000" >);</font>
+    <font color="#000000" >module_b.append_attribute(</font><font color="#ff0000" >"folder"</font><font color="#000000" >)</font> <font color="#000000" >=</font> <font color="#ff0000" >"/work/app/module_b"</font><font color="#000000" >;</font>
+
+    <i><font color="#808080" >// We can do the same thing for attributes</font></i>
+    <font color="#000000" >module_b.insert_attribute_before(</font><font color="#ff0000" >"name"</font><font color="#000000" >,</font> <font color="#000000" >module_b.attribute(</font><font color="#ff0000" >"folder"</font><font color="#000000" >))</font> <font color="#000000" >=</font> <font color="#ff0000" >"B"</font><font color="#000000" >;</font>
+    
+    <i><font color="#808080" >// Let's add some text in module A</font></i>
+    <font color="#000000" >module_a.append_child(node_pcdata).set_value(</font><font color="#ff0000" >"Module A description"</font><font color="#000000" >);</font>
+
+    <i><font color="#808080" >// Well, there's not much left to do here. Let's output our document to file using several formatting options</font></i>
+
+    <font color="#000000" >doc.save_file(</font><font color="#ff0000" >"sample_saved_1.xml"</font><font color="#000000" >);</font>
+    
+    <i><font color="#808080" >// Contents of file sample_saved_1.xml (tab size = 4):</font></i>
+    <i><font color="#808080" >// &lt;?xml version="1.0"?&gt;</font></i>
+    <i><font color="#808080" >// &lt;!--This is a test comment--&gt;</font></i>
+    <i><font color="#808080" >// &lt;application&gt;</font></i>
+    <i><font color="#808080" >//     &lt;module name="A" folder="/work/app/module_a" status="85.4"&gt;Module A description&lt;/module&gt;</font></i>
+    <i><font color="#808080" >//     &lt;module name="B" folder="/work/app/module_b" /&gt;</font></i>
+    <i><font color="#808080" >//     &lt;module name="C" folder="/work/app/module_c" /&gt;</font></i>
+    <i><font color="#808080" >// &lt;/application&gt;</font></i>
+
+    <i><font color="#808080" >// Let's use two spaces for indentation instead of tab character</font></i>
+    <font color="#000000" >doc.save_file(</font><font color="#ff0000" >"sample_saved_2.xml"</font><font color="#000000" >,</font> <font color="#ff0000" >"  "</font><font color="#000000" >);</font>
+
+    <i><font color="#808080" >// Contents of file sample_saved_2.xml:</font></i>
+    <i><font color="#808080" >// &lt;?xml version="1.0"?&gt;</font></i>
+    <i><font color="#808080" >// &lt;!--This is a test comment--&gt;</font></i>
+    <i><font color="#808080" >// &lt;application&gt;</font></i>
+    <i><font color="#808080" >//   &lt;module name="A" folder="/work/app/module_a" status="85.4"&gt;Module A description&lt;/module&gt;</font></i>
+    <i><font color="#808080" >//   &lt;module name="B" folder="/work/app/module_b" /&gt;</font></i>
+    <i><font color="#808080" >//   &lt;module name="C" folder="/work/app/module_c" /&gt;</font></i>
+    <i><font color="#808080" >// &lt;/application&gt;</font></i>
+    
+    <i><font color="#808080" >// Let's save a raw XML file</font></i>
+    <font color="#000000" >doc.save_file(</font><font color="#ff0000" >"sample_saved_3.xml"</font><font color="#000000" >,</font> <font color="#ff0000" >""</font><font color="#000000" >,</font> <font color="#000000" >format_raw);</font>
+    
+    <i><font color="#808080" >// Contents of file sample_saved_3.xml:</font></i>
+    <i><font color="#808080" >// &lt;?xml version="1.0"?&gt;&lt;!--This is a test comment--&gt;&lt;application&gt;&lt;module name="A" folder="/work/app/module_a" status="85.4"&gt;Module A description&lt;/module&gt;&lt;module name="B" folder="/work/app/module_b" /&gt;&lt;module name="C" folder="/work/app/module_c" /&gt;&lt;/application&gt;</font></i>
+
+    <i><font color="#808080" >// Finally, you can print a subtree to any output stream (including cout)</font></i>
+    <font color="#000000" >doc.child(</font><font color="#ff0000" >"application"</font><font color="#000000" >).child(</font><font color="#ff0000" >"module"</font><font color="#000000" >).print(cout);</font>
+
+    <i><font color="#808080" >// Output:</font></i>
+    <i><font color="#808080" >// &lt;module name="A" folder="/work/app/module_a" status="85.4"&gt;Module A description&lt;/module&gt;</font></i>
+<font color="#000000" >}</font>
+</font></pre></td></tr><tr><td align="right"><b><i><a href="http://dobrokot.nm.ru/WinnieColorizer.html"><font color="#666666">_Winnie C++ Colorizer</font></a></i></b></td></tr></table>
+
+<p>Note, that these examples do not cover the whole <i>pugixml</i> API. For further information, look into reference section.</p>
 
 <hr>
 
-<a name="Parsing">
-<h2>Parsing process</h2>
+<a name="Reference">
+<h2>Reference</h2>
 
-<p>So, let's talk a bit about parsing process, and about the reason for providing XML data as a contiguous
-writeable block of memory. Parsing is done in-situ. This means, that the strings, representing the
-parts of DOM tree (node names, attribute names and values, CDATA content, etc.) are not separately
-allocated on heap, but instead are parts of the original data. This is the keypoint to parsing speed,
-because it helps achieve the minimal amount of memory allocations (more on that below) and minimal
-amount of copying data.</p>
+<p><i>pugixml</i> is a library for parsing XML files, which means that you give it XML data some way,
+and it gives you the DOM tree and the ways to traverse it and to get some useful information from it.
+The library source consist of two headers, <b>pugixml.hpp</b> and <b>pugiconfig.hpp</b>, and two source
+files, <b>pugixml.cpp</b> and <b>pugixpath.cpp</b>.
+You can either compile cpp files in your project, or build a static library.
+All library classes reside in namespace <b>pugi</b>, so you can either use fully qualified
+names (<b>pugi::xml_node</b>) or write a using declaration (<b>using namespace pugi;</b>, <b>using
+pugi::xml_node</b>) and use plain names. All classes have eitther <b>xml_</b> or <b>xpath_</b> prefix.</p>
 
-<p>In-situ parsing can be done in two ways, with zero-segmenting the string (that is, set the past-the-end
-character for the part of XML string to 0, see <a href="http://www.codeproject.com/soap/pugxml/pugxml_steps.gif">
-this image</a> for further details), and storing pointer + size of the string instead of pointer to
-the beginning of ASCIIZ string.</p>
+<p>By default it's supposed that you compile the source file with your project (add it into your
+project, or add relevant entry in your Makefile, or do whatever you need to do with your compilation
+environment). The library is written in standard-conformant C++ and was tested on following platforms:</p>
 
-<p>Originally, <i>pugxml</i> had only the first way, but then authors added the second method, 'non-segmenting'
-or non-destructive parsing. The advantages of this method are: you no longer need non-constant storage;
-you can even read data from memory-mapped files directly. Well, there are disadvantages.
-For one thing, you can not do any of the transformations in-situ. The transformations that are required
-by XML standard are:
+<p>
 <ul>
-<li>End of line handling (replacing 0x0d 0x0a with 0x0a and any standalone 0x0d with 0x0a) (for the whole
-document)</li>
-<li>White space normalization for attribute values (converting space-like characters to spaces (0x20),
-sometimes trimming leading/trailing spaces and converting sequences of spaces to a single space</li>
-<li>Character reference expansion (&amp;lt; and alike, &amp;#x0a; and alike, &amp;#40; and alike)</li>
-<li>Entity reference expansion (&amp;entityname;)</li>
+<li>Windows 32-bit (MSVC<sup><a href="#annot-3">3</a></sup> 7.0 (2002), MSVC 7.1 (2003), MSVC 8.0 (2005), ICC<sup><a href="#annot-4">4</a></sup> 8.0, ICC 8.1, GCC 3.4.2 (MinGW), BCC<sup><a href="#annot-5">5</a></sup> 5.82)
+<li>Linux 32-bit (GCC 3.2)
+<li>Sony Playstation Portable (GCC 3.4.2; in PUGIXML_NO_STL mode)
+<li>Microsoft Xbox (MSVC 7.1)
 </ul>
+</p>
 
-None of these can be done in-situ. <i>pugxml</i> did neither character nor entity reference expansion,
-and allocated new memory when normalizing white spaces when in non-destructive mode. I chose complete
-in-situ parsing (the good thing about it is that any transformation, except entity reference, can be
-done in-situ because it does not increase the amount of characters - even converting a character
-reference to UTF-8). There is no entity reference expansion because of this and because I do not want
-to parse DOCTYPE and, moreover, use DOCTYPE in following parsing (performing selective whitespace
-normalization in attributes and CDATA sections and so on).</p>
+<p>The documentation for <i>pugixml</i> classes, functions and constants <a href="html/index.html">is available here</a>.</p>
 
-<p>In order to be able to modify the tree (change attribute/node names & values) with in-situ parsing,
-one needs to implement two ways of storing data (both in-situ and not). The DOM tree is now mutable,
-but it will change in the future releases (without introducing speed/memory overhead, except on clean-
-up stage).</p>
+<hr>
 
-<p>The parsing process itself is more or less straightforward, when you see it - but the impression
-is fake, because the explicit jumps are made (i.e. we know, that if we come to a closing brace (&gt;),
-we should expect CDATA after it (or a new tag), so let's just jump to the corresponding code), and,
-well, there can be bugs (see <a href="#Bugs">Bugs</a> section).</p>
-
-<p>And, to make things worse, memory allocation (which is done only for node and attribute structures)
-is done in pools. The pools are single-linked lists with predefined block size (32 kb by default), and
-well, it increases speed a lot (allocations are slow, and the memory gets fragmented when allocating
-a bunch of 16-byte (attribute) or 40-byte (node) structures)</p>
+<a name="annot-3"><sup>3</sup><small> MSVC is Microsoft Visual C++ Compiler</small> <br>
+<a name="annot-4"><sup>4</sup><small> ICC is Intel C++ Compiler</small> <br>
+<a name="annot-5"><sup>5</sup><small> BCC is Borland C++ Compiler</small>
 
 <hr>
 
@@ -913,20 +444,17 @@ of ones when using <b>parse_w3c</b> mode):
 correctly, let alone use them for parsing
 <li>It accepts multiple attributes with the same name in one node
 <li>It is charset-ignorant
-<li>It accepts invalid names of tags
 <li>It accepts invalid attribute values (those with &lt; in them) and does not reject invalid entity
 references or character references (in fact, it does not do DOCTYPE parsing, so it does not perform
 entity reference expansion)
 <li>It does not reject comments with -- inside
-<li>It does not reject PI with the names of 'xml' and alike; in fact, it parses prolog as a PI, which
-is not conformant
-<li>All characters from #x1 to #x20 are considered to be whitespaces
+<li>It does not reject PI with the names of 'xml' and alike
 <li>And some other things that I forgot to mention
 </ul>
 
-In short, it accepts most malformed XML files and does not do anything that is related to DOCTYPE.
-This is because the main goal was developing fast, easy-to-use and error ignorant (so you can always
-get something even from a malformed document) parser, there are some good validating and conformant
+In short, it accepts some malformed XML files and does not do anything that is related to DOCTYPE.
+This is because the main goal was developing fast, easy-to-use and error ignorant (so you can get
+something even from a malformed document) parser, there are some good validating and conformant
 parsers already.</p>
 
 <hr>
@@ -1015,9 +543,10 @@ off. The test system is AMD Sempron 2500+, 512 Mb RAM.</p>
 <p><b>Q:</b> I do not have/want STL support. How can I compile <i>pugixml</i> without STL?</p>
 <p><b>A:</b> There is an undocumented define PUGIXML_NO_STL. If you uncomment the relevant line
 in <i>pugixml</i> header file, it will compile without any STL classes. The reason it is undocumented
-are that it will make some documented functions not available (specifically, xml_parser() ctor and
-parse() function that operate on std::istream, xml_node::path function, utf16 and utf8 conversion
-functions). Otherwise, it will work fine.</p>
+are that it will make some documented functions not available (specifically, xml_document::load, that
+operates on std::istream, xml_node::path function, saving functions (xml_node::print, xml_document::save),
+XPath-related functions and classes and as_utf16 and as_utf8 conversion functions). Otherwise, it will
+work fine.</p>
 
 <p><b>Q:</b> Do paths that are accepted by <b>first_element_by_path</b> have to end with delimiter?</p>
 <p><b>A:</b> Either way will work, both /path/to/node/ and /path/to/node is fine.</p>
@@ -1048,16 +577,10 @@ do not send executable files.</p>
 upper ones will get there sooner).</p>
 
 <ul>
-<li>Support for altering the tree (both changing nodes'/attributes' names and values and adding/deleting
-attributes/nodes) and writing the tree to stream
 <li>Support for UTF-16 files (parsing BOM to get file's type and converting UTF-16 file to UTF-8 buffer
 if necessary)
-<li>Improved API (I'm going to look at SelectNode from MS XML and perhaps there will be some other
-changes)
-<li>Externally provided entity reference table (or perhaps even taken from DOCTYPE?)
 <li>More intelligent parsing of DOCTYPE (it does not always skip DOCTYPE for now)
 <li>XML 1.1 changes (changed EOL handling, normalization issues, etc.)
-<li>XPath support
 <li>Name your own?
 </ul>
 
@@ -1079,6 +602,28 @@ changes)
 <li>Optimizations of strconv_t
 </ul>
 </dt>
+<dt>21.02.2007 - v0.3
+<dd>Refactored, reworked and improved version. Changes: <ul>
+<li>Interface: <ul>
+<li>Added XPath 
+<li>Added tree modification functions 
+<li>Added no STL compilation mode 
+<li>Added saving document to file 
+<li>Refactored parsing flags 
+<li>Removed xml_parser class in favor of xml_document 
+<li>Added transfer ownership parsing mode 
+<li>Modified the way xml_tree_walker works
+<li>Iterators are now non-constant
+</ul>
+<li>Implementation:  <ul>
+<li>Support of several compilers and platforms 
+<li>Refactored and sped up parsing core 
+<li>Improved standard compliancy 
+<li>Added XPath implementation 
+<li>Fixed several bugs 
+</ul>
+</dd>
+</dt>
 </dl>
 
 <hr>
@@ -1099,7 +644,7 @@ changes)
 <p>The <i>pugixml</i> parser is distributed under the MIT license:</p>
 
 <pre>
-Copyright (c) 2006 Arseny Kapoulkine
+Copyright (c) 2006-2007 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -1125,7 +670,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 8 December, 2006</p>
-<p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006. All Rights Reserved.</i></p>
+<p>Revised 21 February, 2007</p>
+<p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2007. All Rights Reserved.</i></p>
 </body>
 </html>
