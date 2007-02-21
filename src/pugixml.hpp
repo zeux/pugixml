@@ -1723,7 +1723,7 @@ namespace pugi
 				
 				if (node.first_child())
 				{
-					xml_node found = node.find_element(pred);
+					xml_node found = node.find_node(pred);
 					if (found) return found;
 				}
 			}
