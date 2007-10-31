@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Pug Improved XML Parser - Version 0.3
+// Pug Improved XML Parser - Version 0.34
 // --------------------------------------------------------
 // Copyright (C) 2006-2007, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
 // This work is based on the pugxml parser, which is:
@@ -18,6 +18,10 @@
 
 #include <new>
 
+#if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_EXCEPTIONS)
+#error No exception mode can't be used with XPath support
+#endif
+
 #ifndef PUGIXML_NO_STL
 # include <fstream>
 #endif
@@ -32,10 +36,17 @@
 #	pragma warn -8066 // unreachable code
 #endif
 
-#define STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed; }
+#ifdef __BORLANDC__
+// BC workaround
+using std::memmove;
+#endif
+
+#define STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
 
 namespace pugi
 {
+	struct xml_document_struct;
+
 	class xml_allocator
 	{
 	public:
@@ -43,17 +54,9 @@ namespace pugi
 		{
 		}
 
-		template <typename T> T* allocate()
-		{
-			void* buf = memalloc(sizeof(T));
-			return new (buf) T();
-		}
-		
-		template <typename T, typename U> T* allocate(U val)
-		{
-			void* buf = memalloc(sizeof(T));
-			return new (buf) T(val);
-		}
+		xml_document_struct* allocate_document();
+		xml_node_struct* allocate_node(xml_node_type type);
+		xml_attribute_struct* allocate_attribute();
 
 	private:
 		xml_memory_block* _root;
@@ -86,7 +89,7 @@ namespace pugi
 		{
 		}
 
-		void free()
+		void destroy()
 		{
 			if (!name_insitu) delete[] name;
 			if (!value_insitu) delete[] value;
@@ -112,21 +115,21 @@ namespace pugi
 		{
 		}
 
-		void free()
+		void destroy()
 		{
 			if (!name_insitu) delete[] name;
 			if (!value_insitu) delete[] value;
 
-			for (xml_node_struct* cur = first_child; cur; cur = cur->next_sibling)
-				cur->free();
-			
-			for (xml_attribute_struct* cur = first_attribute; cur; cur = cur->next_attribute)
-				cur->free();
+			for (xml_attribute_struct* attr = first_attribute; attr; attr = attr->next_attribute)
+				attr->destroy();
+
+			for (xml_node_struct* node = first_child; node; node = node->next_sibling)
+				node->destroy();
 		}
 
 		xml_node_struct* append_node(xml_allocator& alloc, xml_node_type type = node_element)
 		{
-			xml_node_struct* child = alloc.allocate<xml_node_struct>(type);
+			xml_node_struct* child = alloc.allocate_node(type);
 			child->parent = this;
 			
 			if (last_child)
@@ -142,7 +145,7 @@ namespace pugi
 
 		xml_attribute_struct* append_attribute(xml_allocator& alloc)
 		{
-			xml_attribute_struct* a = alloc.allocate<xml_attribute_struct>();
+			xml_attribute_struct* a = alloc.allocate_attribute();
 
 			if (last_attribute)
 			{
@@ -183,6 +186,21 @@ namespace pugi
 
 		xml_allocator allocator;
 	};
+
+	xml_document_struct* xml_allocator::allocate_document()
+	{
+		return new(memalloc(sizeof(xml_document_struct))) xml_document_struct;
+	}
+
+	xml_node_struct* xml_allocator::allocate_node(xml_node_type type)
+	{
+		return new(memalloc(sizeof(xml_node_struct))) xml_node_struct(type);
+	}
+
+	xml_attribute_struct* xml_allocator::allocate_attribute()
+	{
+		return new(memalloc(sizeof(xml_attribute_struct))) xml_attribute_struct;
+	}
 }
 
 namespace
@@ -246,14 +264,19 @@ namespace
 		{
 			char* buf;
 
+		#ifndef PUGIXML_NO_EXCEPTIONS
 			try
 			{
+		#endif
 				buf = new char[source_size + 1];
+				if (!buf) return false;
+		#ifndef PUGIXML_NO_EXCEPTIONS
 			}
 			catch (const std::bad_alloc&)
 			{
 				return false;
 			}
+		#endif
 
 			strcpy(buf, source);
 
@@ -382,16 +405,41 @@ namespace
 		return reinterpret_cast<const char*>(str);
 	}
 
-#ifndef PUGIXML_NO_STL
-	template <bool quotes, bool utf8> void text_output_escaped(std::ostream& os, const char* s)
+	template <bool _1, bool _2> struct opt2_to_type
 	{
+		static const bool o1;
+		static const bool o2;
+	};
+
+	template <bool _1, bool _2> const bool opt2_to_type<_1, _2>::o1 = _1;
+	template <bool _1, bool _2> const bool opt2_to_type<_1, _2>::o2 = _2;
+
+	template <bool _1, bool _2, bool _3, bool _4> struct opt4_to_type
+	{
+		static const bool o1;
+		static const bool o2;
+		static const bool o3;
+		static const bool o4;
+	};
+
+	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o1 = _1;
+	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o2 = _2;
+	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o3 = _3;
+	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o4 = _4;
+
+#ifndef PUGIXML_NO_STL
+	template <typename opt2> void text_output_escaped(std::ostream& os, const char* s, opt2)
+	{
+		const bool attribute = opt2::o1;
+		const bool utf8 = opt2::o2;
+
 		while (*s)
 		{
 			const char* prev = s;
 			
 			// While *s is a usual symbol
-			while (*s && *s != '&' && *s != '<' && *s != '>' && ((*s != '"' && *s != '\'') || !quotes)
-					&& (*s >= 32 || *s == '\r' || *s == '\n' || *s == '\t'))
+			while (*s && *s != '&' && *s != '<' && *s != '>' && ((*s != '"' && *s != '\'') || !attribute)
+					&& (*s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
 				++s;
 		
 			if (prev != s) os.write(prev, static_cast<std::streamsize>(s - prev));
@@ -417,6 +465,14 @@ namespace
 					break;
 				case '\'':
 					os << "&apos;";
+					++s;
+					break;
+				case '\r':
+					os << "&#13;";
+					++s;
+					break;
+				case '\n':
+					os << "&#10;";
 					++s;
 					break;
 				default: // s is not a usual symbol
@@ -451,7 +507,7 @@ namespace
 			if (end) // there was a gap already; collapse it
 			{
 				// Move [old_gap_end, new_gap_start) to [old_gap_start, ...)
-				std::memmove(end - size, end, s - end);
+				memmove(end - size, end, s - end);
 			}
 				
 			s += count; // end of current gap
@@ -467,7 +523,7 @@ namespace
 			if (end)
 			{
 				// Move [old_gap_end, current_pos) to [old_gap_start, ...)
-				std::memmove(end - size, end, s - end);
+				memmove(end - size, end, s - end);
 
 				return s - size;
 			}
@@ -653,8 +709,11 @@ namespace
 		}
 	}
 		
-	template <bool opt_eol, bool opt_escape> char* strconv_pcdata_t(char* s)
+	template <typename opt2> char* strconv_pcdata_t(char* s, opt2)
 	{
+		const bool opt_eol = opt2::o1;
+		const bool opt_escape = opt2::o2;
+
 		if (!*s) return 0;
 
 		gap g;
@@ -693,16 +752,21 @@ namespace
 
 		switch ((optmask >> 4) & 3) // get bitmask for flags (eol escapes)
 		{
-		case 0: return strconv_pcdata_t<0, 0>(s);
-		case 1: return strconv_pcdata_t<0, 1>(s);
-		case 2: return strconv_pcdata_t<1, 0>(s);
-		case 3: return strconv_pcdata_t<1, 1>(s);
+		case 0: return strconv_pcdata_t(s, opt2_to_type<0, 0>());
+		case 1: return strconv_pcdata_t(s, opt2_to_type<0, 1>());
+		case 2: return strconv_pcdata_t(s, opt2_to_type<1, 0>());
+		case 3: return strconv_pcdata_t(s, opt2_to_type<1, 1>());
 		default: return 0; // should not get here
 		}
 	}
 
-	template <bool opt_wconv, bool opt_wnorm, bool opt_eol, bool opt_escape> char* strconv_attribute_t(char* s, char end_quote)
+	template <typename opt4> char* strconv_attribute_t(char* s, char end_quote, opt4)
 	{
+		const bool opt_wconv = opt4::o1;
+		const bool opt_wnorm = opt4::o2;
+		const bool opt_eol = opt4::o3;
+		const bool opt_escape = opt4::o4;
+
 		if (!*s) return 0;
 			
 		gap g;
@@ -717,16 +781,12 @@ namespace
 			if (str != s)
 				g.push(s, str - s);
 		}
-			
+
 		while (true)
 		{
 			while (!is_chartype(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
 			
-			if (opt_escape && *s == '&')
-			{
-				s = strconv_escape(s, g);
-			}
-			else if (opt_wnorm && is_chartype(*s, ct_space))
+			if (opt_wnorm && is_chartype(*s, ct_space))
 			{
 				*s++ = ' ';
 	
@@ -771,6 +831,10 @@ namespace
 			
 				return s + 1;
 			}
+			else if (opt_escape && *s == '&')
+			{
+				s = strconv_escape(s, g);
+			}
 			else if (!*s)
 			{
 				return 0;
@@ -782,25 +846,25 @@ namespace
 	char* strconv_attribute(char* s, char end_quote, unsigned int optmask)
 	{
 		STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20 && parse_wnorm_attribute == 0x40 && parse_wconv_attribute == 0x80);
-	
+		
 		switch ((optmask >> 4) & 15) // get bitmask for flags (wconv wnorm eol escapes)
 		{
-		case 0: return strconv_attribute_t <0, 0, 0, 0>(s, end_quote);
-		case 1: return strconv_attribute_t <0, 0, 0, 1>(s, end_quote);
-		case 2: return strconv_attribute_t <0, 0, 1, 0>(s, end_quote);
-		case 3: return strconv_attribute_t <0, 0, 1, 1>(s, end_quote);
-		case 4: return strconv_attribute_t <0, 1, 0, 0>(s, end_quote);
-		case 5: return strconv_attribute_t <0, 1, 0, 1>(s, end_quote);
-		case 6: return strconv_attribute_t <0, 1, 1, 0>(s, end_quote);
-		case 7: return strconv_attribute_t <0, 1, 1, 1>(s, end_quote);
-		case 8: return strconv_attribute_t <1, 0, 0, 0>(s, end_quote);
-		case 9: return strconv_attribute_t <1, 0, 0, 1>(s, end_quote);
-		case 10: return strconv_attribute_t<1, 0, 1, 0>(s, end_quote);
-		case 11: return strconv_attribute_t<1, 0, 1, 1>(s, end_quote);
-		case 12: return strconv_attribute_t<1, 1, 0, 0>(s, end_quote);
-		case 13: return strconv_attribute_t<1, 1, 0, 1>(s, end_quote);
-		case 14: return strconv_attribute_t<1, 1, 1, 0>(s, end_quote);
-		case 15: return strconv_attribute_t<1, 1, 1, 1>(s, end_quote);
+		case 0:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 0, 0>());
+		case 1:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 0, 1>());
+		case 2:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 1, 0>());
+		case 3:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 1, 1>());
+		case 4:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 0, 0>());
+		case 5:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 0, 1>());
+		case 6:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 1, 0>());
+		case 7:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 1, 1>());
+		case 8:  return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 0, 0>());
+		case 9:  return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 0, 1>());
+		case 10: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 1, 0>());
+		case 11: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 1, 1>());
+		case 12: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 0, 0>());
+		case 13: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 0, 1>());
+		case 14: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 1, 0>());
+		case 15: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 1, 1>());
 		default: return 0; // should not get here
 		}
 	}
@@ -1356,10 +1420,17 @@ namespace pugi
 	{
 	}
 
+#ifdef __MWERKS__
+	xml_attribute::operator xml_attribute::unspecified_bool_type() const
+	{
+      	return empty() ? 0 : &xml_attribute::empty;
+   	}
+#else
 	xml_attribute::operator xml_attribute::unspecified_bool_type() const
 	{
       	return empty() ? 0 : &xml_attribute::_attr;
    	}
+#endif
 
    	bool xml_attribute::operator!() const
    	{
@@ -1532,10 +1603,17 @@ namespace pugi
 	{
 	}
 	
+#ifdef __MWERKS__
+	xml_node::operator xml_node::unspecified_bool_type() const
+	{
+      	return empty() ? 0 : &xml_node::empty;
+   	}
+#else
 	xml_node::operator xml_node::unspecified_bool_type() const
 	{
       	return empty() ? 0 : &xml_node::_root;
    	}
+#endif
 
    	bool xml_node::operator!() const
    	{
@@ -1829,7 +1907,7 @@ namespace pugi
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
-		xml_attribute a(get_allocator().allocate<xml_attribute_struct>());
+		xml_attribute a(get_allocator().allocate_attribute());
 		a.set_name(name);
 
 		if (attr._attr->prev_attribute)
@@ -1855,7 +1933,7 @@ namespace pugi
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
-		xml_attribute a(get_allocator().allocate<xml_attribute_struct>());
+		xml_attribute a(get_allocator().allocate_attribute());
 		a.set_name(name);
 
 		if (attr._attr->next_attribute)
@@ -1882,7 +1960,7 @@ namespace pugi
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		if (node.parent() != *this) return xml_node();
 	
-		xml_node n(get_allocator().allocate<xml_node_struct>(type));
+		xml_node n(get_allocator().allocate_node(type));
 		n._root->parent = _root;
 		
 		if (node._root->prev_sibling)
@@ -1902,7 +1980,7 @@ namespace pugi
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		if (node.parent() != *this) return xml_node();
 	
-		xml_node n(get_allocator().allocate<xml_node_struct>(type));
+		xml_node n(get_allocator().allocate_node(type));
 		n._root->parent = _root;
 	
 		if (node._root->next_sibling)
@@ -1939,7 +2017,7 @@ namespace pugi
 		if (a._attr->prev_attribute) a._attr->prev_attribute->next_attribute = a._attr->next_attribute;
 		else _root->first_attribute = a._attr->next_attribute;
 
-		a._attr->free();
+		a._attr->destroy();
 	}
 
 	void xml_node::remove_child(const char* name)
@@ -1957,7 +2035,7 @@ namespace pugi
 		if (n._root->prev_sibling) n._root->prev_sibling->next_sibling = n._root->next_sibling;
 		else _root->first_child = n._root->next_sibling;
         
-        n._root->free();
+        n._root->destroy();
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -2117,9 +2195,11 @@ namespace pugi
 		switch (type())
 		{
 		case node_document:
+		{
 			for (xml_node n = first_child(); n; n = n.next_sibling())
 				n.print(os, indent, flags, depth);
 			break;
+		}
 			
 		case node_element:
 		{
@@ -2130,9 +2210,9 @@ namespace pugi
 				os << ' ' << a.name() << "=\"";
 
 				if (flags & format_utf8)
-					text_output_escaped<true, true>(os, a.value());
+					text_output_escaped(os, a.value(), opt2_to_type<1, 1>());
 				else
-					text_output_escaped<true, false>(os, a.value());
+					text_output_escaped(os, a.value(), opt2_to_type<1, 0>());
 
 				os << "\"";
 			}
@@ -2156,9 +2236,9 @@ namespace pugi
 				os << ">";
 				
 				if (flags & format_utf8)
-					text_output_escaped<false, true>(os, first_child().value());
+					text_output_escaped(os, first_child().value(), opt2_to_type<0, 1>());
 				else
-					text_output_escaped<false, false>(os, first_child().value());
+					text_output_escaped(os, first_child().value(), opt2_to_type<0, 0>());
 					
 				os << "</" << name() << ">\n";
 			}
@@ -2177,11 +2257,12 @@ namespace pugi
 
 			break;
 		}
+		
 		case node_pcdata:
 			if (flags & format_utf8)
-				text_output_escaped<false, true>(os, value());
+				text_output_escaped(os, value(), opt2_to_type<0, 1>());
 			else
-				text_output_escaped<false, false>(os, value());
+				text_output_escaped(os, value(), opt2_to_type<0, 0>());
 			break;
 
 		case node_cdata:
@@ -2358,24 +2439,24 @@ namespace pugi
 
 	xml_document::~xml_document()
 	{
-		free();
+		destroy();
 	}
 
 	void xml_document::create()
 	{
 		xml_allocator alloc(&_memory);
 		
-		_root = alloc.allocate<xml_document_struct>(); // Allocate a new root.
+		_root = alloc.allocate_document(); // Allocate a new root.
 		xml_allocator& a = static_cast<xml_document_struct*>(_root)->allocator;
 		a = alloc;
 	}
 
-	void xml_document::free()
+	void xml_document::destroy()
 	{
 		delete[] _buffer;
 		_buffer = 0;
 
-		if (_root) _root->free();
+		if (_root) _root->destroy();
 
 		xml_memory_block* current = _memory.next;
 
@@ -2395,34 +2476,42 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	bool xml_document::load(std::istream& stream, unsigned int options)
 	{
+		destroy();
+
 		if (!stream.good()) return false;
 
 		std::streamoff length, pos = stream.tellg();
-		stream.seekg(0, std::ios_base::end);
+		stream.seekg(0, std::ios::end);
 		length = stream.tellg();
-		stream.seekg(pos, std::ios_base::beg);
+		stream.seekg(pos, std::ios::beg);
 
 		if (!stream.good()) return false;
 
 		char* s;
 
+	#ifndef PUGIXML_NO_EXCEPTIONS
 		try
 		{
+	#endif
 			s = new char[length + 1];
+			if (!s) return false;
+	#ifndef PUGIXML_NO_EXCEPTIONS
 		}
 		catch (const std::bad_alloc&)
 		{
 			return false;
 		}
+	#endif
 
 		stream.read(s, length);
-		s[length] = 0;
 
-		if (!stream.good())
+		if (stream.gcount() > length || stream.gcount() == 0)
 		{
 			delete[] s;
 			return false;
 		}
+
+		s[stream.gcount()] = 0;
 
 		return parse(transfer_ownership_tag(), s, options); // Parse the input string.
 	}
@@ -2430,16 +2519,23 @@ namespace pugi
 
 	bool xml_document::load(const char* contents, unsigned int options)
 	{
+		destroy();
+
 		char* s;
 
+	#ifndef PUGIXML_NO_EXCEPTIONS
 		try
 		{
+	#endif
 			s = new char[strlen(contents) + 1];
+			if (!s) return false;
+	#ifndef PUGIXML_NO_EXCEPTIONS
 		}
 		catch (const std::bad_alloc&)
 		{
 			return false;
 		}
+	#endif
 
 		strcpy(s, contents);
 
@@ -2448,6 +2544,8 @@ namespace pugi
 
 	bool xml_document::load_file(const char* name, unsigned int options)
 	{
+		destroy();
+
 		FILE* file = fopen(name, "rb");
 		if (!file) return false;
 
@@ -2463,15 +2561,20 @@ namespace pugi
 		
 		char* s;
 
+	#ifndef PUGIXML_NO_EXCEPTIONS
 		try
 		{
+	#endif
 			s = new char[length + 1];
+			if (!s) return false;
+	#ifndef PUGIXML_NO_EXCEPTIONS
 		}
 		catch (const std::bad_alloc&)
 		{
 			fclose(file);
 			return false;
 		}
+	#endif
 
 		size_t read = fread(s, (size_t)length, 1, file);
 		fclose(file);
@@ -2489,7 +2592,7 @@ namespace pugi
 
 	bool xml_document::parse(char* xmlstr, unsigned int options)
 	{
-		free();
+		destroy();
 
 		xml_allocator& alloc = static_cast<xml_document_struct*>(_root)->allocator;
 		
@@ -2503,6 +2606,7 @@ namespace pugi
 		bool res = parse(xmlstr, options);
 
 		if (res) _buffer = xmlstr;
+		else delete[] xmlstr;
 
 		return res;
 	}

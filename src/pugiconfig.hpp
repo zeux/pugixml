@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Pug Improved XML Parser - Version 0.3
+// Pug Improved XML Parser - Version 0.34
 // --------------------------------------------------------
 // Copyright (C) 2006-2007, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
 // This work is based on the pugxml parser, which is:
@@ -19,5 +19,9 @@
 
 // Uncomment this to disable XPath
 // #define PUGIXML_NO_XPATH
+
+// Uncomment this to disable exceptions
+// Note: you can't use XPath with PUGIXML_NO_EXCEPTIONS
+// #define PUGIXML_NO_EXCEPTIONS
 
 #endif

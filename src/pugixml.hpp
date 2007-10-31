@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Pug Improved XML Parser - Version 0.3
+// Pug Improved XML Parser - Version 0.34
 // --------------------------------------------------------
 // Copyright (C) 2006-2007, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
 // This work is based on the pugxml parser, which is:
@@ -29,8 +29,8 @@
 #	endif
 #endif
 
-#include <cstddef>
-#include <cstring>
+#include <stddef.h>
+#include <string.h>
 
 /// The PugiXML Parser namespace.
 namespace pugi
@@ -311,7 +311,11 @@ namespace pugi
 		xml_attribute_struct* _attr;
 	
     	/// \internal Safe bool type
+#ifdef __MWERKS__
+    	typedef bool (xml_attribute::*unspecified_bool_type)() const;
+#else
     	typedef xml_attribute_struct* xml_attribute::*unspecified_bool_type;
+#endif
 
 		/// \internal Initializing ctor
 		explicit xml_attribute(xml_attribute_struct* attr);
@@ -519,7 +523,11 @@ namespace pugi
 		xml_node_struct* _root;
 
     	/// \internal Safe bool type
+#ifdef __MWERKS__
+    	typedef bool (xml_node::*unspecified_bool_type)() const;
+#else
     	typedef xml_node_struct* xml_node::*unspecified_bool_type;
+#endif
 
 		/// \internal Initializing ctor
 		explicit xml_node(xml_node_struct* p);
@@ -1315,7 +1323,7 @@ namespace pugi
 		const xml_document& operator=(const xml_document&);
 
 		void create();
-		void free();
+		void destroy();
 
 	public:
 		/**

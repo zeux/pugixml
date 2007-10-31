@@ -415,10 +415,12 @@ environment). The library is written in standard-conformant C++ and was tested o
 
 <p>
 <ul>
-<li>Windows 32-bit (MSVC<sup><a href="#annot-3">3</a></sup> 7.0 (2002), MSVC 7.1 (2003), MSVC 8.0 (2005), ICC<sup><a href="#annot-4">4</a></sup> 8.0, ICC 8.1, GCC 3.4.2 (MinGW), BCC<sup><a href="#annot-5">5</a></sup> 5.82)
+<li>Windows 32-bit (MSVC<sup><a href="#annot-3">3</a></sup> 6.0, MSVC 7.0 (2002), MSVC 7.1 (2003), MSVC 8.0 (2005), ICC<sup><a href="#annot-4">4</a></sup> 8.0, ICC 8.1, GCC 3.4.2 (MinGW), BCC<sup><a href="#annot-5">5</a></sup> 5.82, DMC<sup><a href="#annot-6">6</a></sup> 8.50, Comeau C++ 4.3.3, PGI<sup><a href="#annot-7">7</a></sup> 6.2, CW<sup><a href="#annot-8">8</a></sup> 8.0)
 <li>Linux 32-bit (GCC 3.2)
 <li>Sony Playstation Portable (GCC 3.4.2; in PUGIXML_NO_STL mode)
+<li>Sony Playstation 3 (GCC 4.0.2; in PUGIXML_NO_EXCEPTIONS mode (-fno-exceptions))
 <li>Microsoft Xbox (MSVC 7.1)
+<li>Microsoft Xbox 360 (MSVC 8.0)
 </ul>
 </p>
 
@@ -428,7 +430,10 @@ environment). The library is written in standard-conformant C++ and was tested o
 
 <a name="annot-3"><sup>3</sup><small> MSVC is Microsoft Visual C++ Compiler</small> <br>
 <a name="annot-4"><sup>4</sup><small> ICC is Intel C++ Compiler</small> <br>
-<a name="annot-5"><sup>5</sup><small> BCC is Borland C++ Compiler</small>
+<a name="annot-5"><sup>5</sup><small> BCC is Borland C++ Compiler</small> <br>
+<a name="annot-6"><sup>6</sup><small> DMC is Digital Mars C++ Compiler</small> <br>
+<a name="annot-7"><sup>7</sup><small> PGI is Portland Group C++ Compiler</small>
+<a name="annot-8"><sup>8</sup><small> CW is Metrowerks CodeWarrior</small>
 
 <hr>
 
@@ -624,6 +629,17 @@ if necessary)
 </ul>
 </dd>
 </dt>
+<dt>31.10.2007 - v0.34
+<dd>Maintenance release. Changes: <ul>
+<li>Improved compatibility (supported Digital Mars C++, MSVC 6, CodeWarrior 8, PGI C++, Comeau, supported PS3 and XBox360)
+<li>Fixed bug with loading from text-mode iostreams
+<li>Fixed leak when transfer_ownership is true and parsing is failing
+<li>Fixed bug in saving (\r and \n are now escaped in attribute values)
+<li>PUGIXML_NO_EXCEPTION flag for platforms without exception handling
+<li>Renamed free() to destroy() - some macro conflicts were reported
+</ul>
+</dd>
+</dt>
 </dl>
 
 <hr>
@@ -670,7 +686,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 21 February, 2007</p>
+<p>Revised 31 October, 2007</p>
 <p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2007. All Rights Reserved.</i></p>
 </body>
 </html>
