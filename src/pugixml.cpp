@@ -434,60 +434,6 @@ namespace
 	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o3 = _3;
 	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o4 = _4;
 
-#ifndef PUGIXML_NO_STL
-	template <typename opt1> void text_output_escaped(std::ostream& os, const char* s, opt1)
-	{
-		const bool attribute = opt1::o1;
-
-		while (*s)
-		{
-			const char* prev = s;
-			
-			// While *s is a usual symbol
-			while (*s && *s != '&' && *s != '<' && *s != '>' && (*s != '"' || !attribute)
-					&& (*s < 0 || *s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
-				++s;
-		
-			if (prev != s) os.write(prev, static_cast<std::streamsize>(s - prev));
-
-			switch (*s)
-			{
-				case 0: break;
-				case '&':
-					os << "&amp;";
-					++s;
-					break;
-				case '<':
-					os << "&lt;";
-					++s;
-					break;
-				case '>':
-					os << "&gt;";
-					++s;
-					break;
-				case '"':
-					os << "&quot;";
-					++s;
-					break;
-				case '\r':
-					os << "&#13;";
-					++s;
-					break;
-				case '\n':
-					os << "&#10;";
-					++s;
-					break;
-				default: // s is not a usual symbol
-				{
-					unsigned int ch = (unsigned char)*s++;
-
-					os << "&#" << ch << ";";
-				}
-			}
-		}
-	}
-#endif
-
 	struct gap
 	{
 		char* end;
@@ -1361,6 +1307,236 @@ namespace
 			return find;
 		}
 	}
+
+	// Output facilities
+	struct xml_buffered_writer
+	{
+		xml_buffered_writer(const xml_buffered_writer&);
+		xml_buffered_writer& operator=(const xml_buffered_writer&);
+
+		xml_buffered_writer(xml_writer& writer): writer(writer), bufsize(0)
+		{
+		}
+
+		~xml_buffered_writer()
+		{
+			flush();
+		}
+
+		void flush()
+		{
+			if (bufsize > 0) writer.write(buffer, bufsize);
+			bufsize = 0;
+		}
+
+		void write(const void* data, size_t size)
+		{
+			if (bufsize + size > sizeof(buffer))
+			{
+				flush();
+
+				if (size > sizeof(buffer))
+				{
+					writer.write(data, size);
+					return;
+				}
+			}
+			else
+			{
+				memcpy(buffer + bufsize, data, size);
+				bufsize += size;
+			}
+		}
+
+		void write(const char* data)
+		{
+			write(data, strlen(data));
+		}
+
+		void write(char data)
+		{
+			if (bufsize + 1 > sizeof(buffer)) flush();
+
+			buffer[bufsize++] = data;
+		}
+
+		xml_writer& writer;
+		char buffer[8192];
+		size_t bufsize;
+	};
+
+	template <typename opt1> void text_output_escaped(xml_buffered_writer& writer, const char* s, opt1)
+	{
+		const bool attribute = opt1::o1;
+
+		while (*s)
+		{
+			const char* prev = s;
+			
+			// While *s is a usual symbol
+			while (*s && *s != '&' && *s != '<' && *s != '>' && (*s != '"' || !attribute)
+					&& (*s < 0 || *s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
+				++s;
+		
+			writer.write(prev, static_cast<size_t>(s - prev));
+
+			switch (*s)
+			{
+				case 0: break;
+				case '&':
+					writer.write("&amp;");
+					++s;
+					break;
+				case '<':
+					writer.write("&lt;");
+					++s;
+					break;
+				case '>':
+					writer.write("&gt;");
+					++s;
+					break;
+				case '"':
+					writer.write("&quot;");
+					++s;
+					break;
+				case '\r':
+					writer.write("&#13;");
+					++s;
+					break;
+				case '\n':
+					writer.write("&#10;");
+					++s;
+					break;
+				default: // s is not a usual symbol
+				{
+					unsigned int ch = (unsigned char)*s++;
+
+					char buf[8];
+					sprintf(buf, "&#%d;", ch);
+
+					writer.write(buf);
+				}
+			}
+		}
+	}
+
+	void node_output(xml_buffered_writer& writer, const xml_node& node, const char* indent, unsigned int flags, unsigned int depth)
+	{
+		if ((flags & format_indent) != 0 && (flags & format_raw) == 0)
+			for (unsigned int i = 0; i < depth; ++i) writer.write(indent);
+
+		switch (node.type())
+		{
+		case node_document:
+		{
+			for (xml_node n = node.first_child(); n; n = n.next_sibling())
+				node_output(writer, n, indent, flags, depth);
+			break;
+		}
+			
+		case node_element:
+		{
+			writer.write('<');
+			writer.write(node.name());
+
+			for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
+			{
+				writer.write(' ');
+				writer.write(a.name());
+				writer.write('=');
+				writer.write('"');
+
+				text_output_escaped(writer, a.value(), opt1_to_type<1>());
+
+				writer.write('"');
+			}
+
+			if (flags & format_raw)
+			{
+				if (!node.first_child())
+					writer.write(" />");
+				else
+				{
+					writer.write('>');
+
+					for (xml_node n = node.first_child(); n; n = n.next_sibling())
+						node_output(writer, n, indent, flags, depth + 1);
+
+					writer.write('<');
+					writer.write('/');
+					writer.write(node.name());
+					writer.write('>');
+				}
+			}
+			else if (!node.first_child())
+				writer.write(" />\n");
+			else if (node.first_child() == node.last_child() && node.first_child().type() == node_pcdata)
+			{
+				writer.write('>');
+
+				text_output_escaped(writer, node.first_child().value(), opt1_to_type<0>());
+
+				writer.write('<');
+				writer.write('/');
+				writer.write(node.name());
+				writer.write('>');
+				writer.write('\n');
+			}
+			else
+			{
+				writer.write('>');
+				writer.write('\n');
+				
+				for (xml_node n = node.first_child(); n; n = n.next_sibling())
+					node_output(writer, n, indent, flags, depth + 1);
+
+				if ((flags & format_indent) != 0 && (flags & format_raw) == 0)
+					for (unsigned int i = 0; i < depth; ++i) writer.write(indent);
+				
+				writer.write('<');
+				writer.write('/');
+				writer.write(node.name());
+				writer.write('>');
+				writer.write('\n');
+			}
+
+			break;
+		}
+		
+		case node_pcdata:
+			text_output_escaped(writer, node.value(), opt1_to_type<0>());
+			break;
+
+		case node_cdata:
+			writer.write("<![CDATA[");
+			writer.write(node.value());
+			writer.write("]]>");
+			if ((flags & format_raw) == 0) writer.write('\n');
+			break;
+
+		case node_comment:
+			writer.write("<!--");
+			writer.write(node.value());
+			writer.write("-->");
+			if ((flags & format_raw) == 0) writer.write('\n');
+			break;
+
+		case node_pi:
+			writer.write("<?");
+			writer.write(node.name());
+			if (node.value()[0])
+			{
+				writer.write(' ');
+				writer.write(node.value());
+			}
+			writer.write("?>");
+			if ((flags & format_raw) == 0) writer.write('\n');
+			break;
+		
+		default:
+			;
+		}
+	}
 }
 
 namespace pugi
@@ -1385,6 +1561,26 @@ namespace pugi
 			return (find == 1 && *dst == 0 && *src == 0) ? 0 : 1;
 		}
 	}
+
+	xml_writer_file::xml_writer_file(void* file): file(file)
+	{
+	}
+
+	void xml_writer_file::write(const void* data, size_t size)
+	{
+		fwrite(data, size, 1, static_cast<FILE*>(file));
+	}
+
+#ifndef PUGIXML_NO_STL
+	xml_writer_stream::xml_writer_stream(std::ostream& stream): stream(&stream)
+	{
+	}
+
+	void xml_writer_stream::write(const void* data, size_t size)
+	{
+		stream->write(reinterpret_cast<const char*>(data), size);
+	}
+#endif
 
 	xml_tree_walker::xml_tree_walker(): _depth(0)
 	{
@@ -2181,100 +2377,14 @@ namespace pugi
 		}
 	}
 
-#ifndef PUGIXML_NO_STL
-	void xml_node::print(std::ostream& os, const char* indent, unsigned int flags, unsigned int depth)
+	void xml_node::print(xml_writer& writer, const char* indent, unsigned int flags, unsigned int depth)
 	{
 		if (empty()) return;
 
-		if ((flags & format_indent) != 0 && (flags & format_raw) == 0)
-			for (unsigned int i = 0; i < depth; ++i) os << indent;
+		xml_buffered_writer buffered_writer(writer);
 
-		switch (type())
-		{
-		case node_document:
-		{
-			for (xml_node n = first_child(); n; n = n.next_sibling())
-				n.print(os, indent, flags, depth);
-			break;
-		}
-			
-		case node_element:
-		{
-			os << '<' << name();
-
-			for (xml_attribute a = first_attribute(); a; a = a.next_attribute())
-			{
-				os << ' ' << a.name() << "=\"";
-
-				text_output_escaped(os, a.value(), opt1_to_type<1>());
-
-				os << "\"";
-			}
-
-			if (flags & format_raw)
-			{
-				if (!_root->first_child) // 0 children
-					os << " />";
-				else
-				{
-					os << ">";
-					for (xml_node n = first_child(); n; n = n.next_sibling())
-						n.print(os, indent, flags, depth + 1);
-					os << "</" << name() << ">";
-				}
-			}
-			else if (!_root->first_child) // 0 children
-				os << " />\n";
-			else if (_root->first_child == _root->last_child && first_child().type() == node_pcdata)
-			{
-				os << ">";
-				
-				text_output_escaped(os, first_child().value(), opt1_to_type<0>());
-					
-				os << "</" << name() << ">\n";
-			}
-			else
-			{
-				os << ">\n";
-				
-				for (xml_node n = first_child(); n; n = n.next_sibling())
-					n.print(os, indent, flags, depth + 1);
-
-				if ((flags & format_indent) != 0 && (flags & format_raw) == 0)
-					for (unsigned int i = 0; i < depth; ++i) os << indent;
-				
-				os << "</" << name() << ">\n";
-			}
-
-			break;
-		}
-		
-		case node_pcdata:
-			text_output_escaped(os, value(), opt1_to_type<0>());
-			break;
-
-		case node_cdata:
-			os << "<![CDATA[" << value() << "]]>";
-			if ((flags & format_raw) == 0) os << "\n";
-			break;
-
-		case node_comment:
-			os << "<!--" << value() << "-->";
-			if ((flags & format_raw) == 0) os << "\n";
-			break;
-
-		case node_pi:
-			os << "<?" << name();
-			if (value()[0]) os << ' ' << value();
-			os << "?>";
-			if ((flags & format_raw) == 0) os << "\n";
-			break;
-		
-		default:
-			;
-		}
+		node_output(buffered_writer, *this, indent, flags, depth);
 	}
-#endif
 
 #ifdef __BORLANDC__
 	bool operator&&(const xml_node& lhs, bool rhs)
@@ -2599,25 +2709,34 @@ namespace pugi
 		return res;
 	}
 
-#ifndef PUGIXML_NO_STL
-	bool xml_document::save_file(const char* name, const char* indent, unsigned int flags)
+	void xml_document::save(xml_writer& writer, const char* indent, unsigned int flags)
 	{
-		std::ofstream out(name, std::ios::out);
-		if (!out) return false;
+		xml_buffered_writer buffered_writer(writer);
 
 		if (flags & format_write_bom_utf8)
 		{
 			static const unsigned char utf8_bom[] = {0xEF, 0xBB, 0xBF};
-			out.write(reinterpret_cast<const char*>(utf8_bom), 3);
+			buffered_writer.write(utf8_bom, 3);
 		}
 
-		out << "<?xml version=\"1.0\"?>";
-		if (!(flags & format_raw)) out << "\n";
-		print(out, indent, flags);
+		buffered_writer.write("<?xml version=\"1.0\"?>");
+		if (!(flags & format_raw)) buffered_writer.write("\n");
 		
+		node_output(buffered_writer, *this, indent, flags, 0);
+	}
+
+	bool xml_document::save_file(const char* name, const char* indent, unsigned int flags)
+	{
+		FILE* file = fopen(name, "wb");
+		if (!file) return false;
+
+		xml_writer_file writer(file);
+		save(writer, indent, flags);
+
+		fclose(file);
+
 		return true;
 	}
-#endif
 
 	void xml_document::precompute_document_order()
 	{

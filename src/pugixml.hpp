@@ -289,6 +289,67 @@ namespace pugi
 	#endif
 	
 	/**
+	 * Abstract writer class
+	 * \see xml_node::print
+	 */
+	class xml_writer
+	{
+	public:
+		/**
+		 * Virtual dtor
+		 */
+		virtual ~xml_writer() {}
+
+		/**
+		 * Write memory chunk into stream/file/whatever
+		 *
+		 * \param data - data pointer
+		 * \param size - data size
+		 */
+		virtual void write(const void* data, size_t size) = 0;
+	};
+
+	/** xml_writer implementation for FILE*
+	 * \see xml_writer
+	 */
+	class xml_writer_file: public xml_writer
+	{
+	public:
+		/**
+		 * Construct writer instance
+		 *
+		 * \param file - this is FILE* object, void* is used to avoid header dependencies on stdio
+		 */
+		xml_writer_file(void* file);
+
+		virtual void write(const void* data, size_t size);
+
+	private:
+		void* file;
+	};
+
+	#ifndef PUGIXML_NO_STL
+	/** xml_writer implementation for streams
+	 * \see xml_writer
+	 */
+	class xml_writer_stream: public xml_writer
+	{
+	public:
+		/**
+		 * Construct writer instance
+		 *
+		 * \param stream - output stream object
+		 */
+		xml_writer_stream(std::ostream& stream);
+
+		virtual void write(const void* data, size_t size);
+
+	private:
+		std::ostream* stream;
+	};
+	#endif
+
+	/**
 	 * A light-weight wrapper for manipulating attributes in DOM tree.
 	 * Note: xml_attribute does not allocate any memory for the attribute it wraps; it only wraps a
 	 * pointer to existing attribute.
@@ -947,7 +1008,7 @@ namespace pugi
 		 */
 		template <typename Predicate> xml_node find_node(Predicate pred) const;
 
-#ifndef PUGIXML_NO_STL
+	#ifndef PUGIXML_NO_STL
 		/**
 		 * Get the absolute node path from root as a text string.
 		 *
@@ -955,7 +1016,7 @@ namespace pugi
 		 * \return path string (e.g. '/bookstore/book/author').
 		 */
 		std::string path(char delimiter = '/') const;
-#endif
+	#endif
 
 		/**
 		 * Search for a node by path.
@@ -1014,17 +1075,15 @@ namespace pugi
 		/// \internal Document order or 0 if not set
 		unsigned int document_order() const;
 
-	#ifndef PUGIXML_NO_STL
 		/**
-		 * Print subtree to stream
+		 * Print subtree to writer
 		 *
-		 * \param os - output stream
+		 * \param writer - writer object
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
 		 * \param depth - starting depth (used for indentation)
 		 */
-		void print(std::ostream& os, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
-	#endif
+		void print(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
 	};
 
 #ifdef __BORLANDC__
@@ -1381,7 +1440,15 @@ namespace pugi
 		 */
 		bool parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options = parse_default);
 		
-#ifndef PUGIXML_NO_STL
+		/**
+		 * Save XML to writer
+		 *
+		 * \param writer - writer object
+		 * \param indent - indentation string
+		 * \param flags - formatting flags
+		 */
+		void save(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default);
+
 		/**
 		 * Save XML to file
 		 *
@@ -1391,7 +1458,6 @@ namespace pugi
 		 * \return success flag
 		 */
 		bool save_file(const char* name, const char* indent = "\t", unsigned int flags = format_default);
-#endif
 
 		/**
 		 * Compute document order for the whole tree
