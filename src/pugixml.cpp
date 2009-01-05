@@ -2605,13 +2605,10 @@ namespace pugi
 		std::ofstream out(name, std::ios::out);
 		if (!out) return false;
 
-		if (flags & format_write_bom)
+		if (flags & format_write_bom_utf8)
 		{
-			if (flags & format_utf8)
-			{
-				static const unsigned char utf8_bom[] = {0xEF, 0xBB, 0xBF};
-				out.write(reinterpret_cast<const char*>(utf8_bom), 3);
-			}
+			static const unsigned char utf8_bom[] = {0xEF, 0xBB, 0xBF};
+			out.write(reinterpret_cast<const char*>(utf8_bom), 3);
 		}
 
 		out << "<?xml version=\"1.0\"?>";

@@ -179,7 +179,7 @@ namespace pugi
 	 *
 	 * This flag is off by default.
 	 */
-	const unsigned int format_write_bom	= 0x02;
+	const unsigned int format_write_bom_utf8 = 0x02;
 	
 	/**
 	 * If this flag is on, no indentation is performed and no line breaks are written to output file.
