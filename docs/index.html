@@ -386,7 +386,8 @@ an XML file were measured.</small>
     <i><font color="#808080" >// &lt;?xml version="1.0"?&gt;&lt;!--This is a test comment--&gt;&lt;application&gt;&lt;module name="A" folder="/work/app/module_a" status="85.4"&gt;Module A description&lt;/module&gt;&lt;module name="B" folder="/work/app/module_b" /&gt;&lt;module name="C" folder="/work/app/module_c" /&gt;&lt;/application&gt;</font></i>
 
     <i><font color="#808080" >// Finally, you can print a subtree to any output stream (including cout)</font></i>
-    <font color="#000000" >doc.child(</font><font color="#ff0000" >"application"</font><font color="#000000" >).child(</font><font color="#ff0000" >"module"</font><font color="#000000" >).print(cout);</font>
+    <font color="#000000" >xml_writer_stream writer(cout);</font>
+    <font color="#000000" >doc.child(</font><font color="#ff0000" >"application"</font><font color="#000000" >).child(</font><font color="#ff0000" >"module"</font><font color="#000000" >).print(writer);</font>
 
     <i><font color="#808080" >// Output:</font></i>
     <i><font color="#808080" >// &lt;module name="A" folder="/work/app/module_a" status="85.4"&gt;Module A description&lt;/module&gt;</font></i>
@@ -549,9 +550,8 @@ off. The test system is AMD Sempron 2500+, 512 Mb RAM.</p>
 <p><b>A:</b> There is an undocumented define PUGIXML_NO_STL. If you uncomment the relevant line
 in <i>pugixml</i> header file, it will compile without any STL classes. The reason it is undocumented
 are that it will make some documented functions not available (specifically, xml_document::load, that
-operates on std::istream, xml_node::path function, saving functions (xml_node::print, xml_document::save),
-XPath-related functions and classes and as_utf16 and as_utf8 conversion functions). Otherwise, it will
-work fine.</p>
+operates on std::istream, xml_node::path function, XPath-related functions and classes and as_utf16/as_utf8
+conversion functions). Otherwise, it will work fine.</p>
 
 <p><b>Q:</b> Do paths that are accepted by <b>first_element_by_path</b> have to end with delimiter?</p>
 <p><b>A:</b> Either way will work, both /path/to/node/ and /path/to/node is fine.</p>
