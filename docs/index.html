@@ -147,7 +147,7 @@ an XML file were measured.</small>
 
         <b><font color="#0000ff" >char</font></b><font color="#000000" >*</font> <font color="#000000" >s</font> <font color="#000000" >=</font> <font color="#000000" >new</font> <b><font color="#0000ff" >char</font></b><font color="#000000" >[</font><b><font color="#40b440" >100</font></b><font color="#000000" >];</font>
         <font color="#000000" >strcpy(s,</font> <font color="#ff0000" >"&lt;sample-xml&gt;some text &lt;b&gt;in bold&lt;/b&gt; here&lt;/sample-xml&gt;"</font><font color="#000000" >);</font>
-        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.parse(transfer_ownership_tag(),</font> <font color="#000000" >s)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
+        <font color="#000000" >cout</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >doc.parse(</font><font color="#000000" >s)</font> <font color="#000000" >&lt;&lt;</font> <font color="#000000" >endl;</font>
 
         <font color="#000000" >delete[]</font> <font color="#000000" >s;</font> <i><font color="#808080" >// &lt;-- after this point, all string contents of document is invalid!</font></i>
     <font color="#000000" >}</font>
