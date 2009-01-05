@@ -405,6 +405,13 @@ namespace
 		return reinterpret_cast<const char*>(str);
 	}
 
+	template <bool _1> struct opt1_to_type
+	{
+		static const bool o1;
+	};
+
+	template <bool _1> const bool opt1_to_type<_1>::o1 = _1;
+
 	template <bool _1, bool _2> struct opt2_to_type
 	{
 		static const bool o1;
@@ -428,18 +435,17 @@ namespace
 	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o4 = _4;
 
 #ifndef PUGIXML_NO_STL
-	template <typename opt2> void text_output_escaped(std::ostream& os, const char* s, opt2)
+	template <typename opt1> void text_output_escaped(std::ostream& os, const char* s, opt1)
 	{
-		const bool attribute = opt2::o1;
-		const bool utf8 = opt2::o2;
+		const bool attribute = opt1::o1;
 
 		while (*s)
 		{
 			const char* prev = s;
 			
 			// While *s is a usual symbol
-			while (*s && *s != '&' && *s != '<' && *s != '>' && ((*s != '"' && *s != '\'') || !attribute)
-					&& (*s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
+			while (*s && *s != '&' && *s != '<' && *s != '>' && (*s != '"' || !attribute)
+					&& (*s < 0 || *s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
 				++s;
 		
 			if (prev != s) os.write(prev, static_cast<std::streamsize>(s - prev));
@@ -463,10 +469,6 @@ namespace
 					os << "&quot;";
 					++s;
 					break;
-				case '\'':
-					os << "&apos;";
-					++s;
-					break;
 				case '\r':
 					os << "&#13;";
 					++s;
@@ -477,12 +479,7 @@ namespace
 					break;
 				default: // s is not a usual symbol
 				{
-					unsigned int ch;
-					
-					if (utf8)
-						s = strutf8_utf16(s, ch);
-					else
-						ch = (unsigned char)*s++;
+					unsigned int ch = (unsigned char)*s++;
 
 					os << "&#" << ch << ";";
 				}
@@ -2209,10 +2206,7 @@ namespace pugi
 			{
 				os << ' ' << a.name() << "=\"";
 
-				if (flags & format_utf8)
-					text_output_escaped(os, a.value(), opt2_to_type<1, 1>());
-				else
-					text_output_escaped(os, a.value(), opt2_to_type<1, 0>());
+				text_output_escaped(os, a.value(), opt1_to_type<1>());
 
 				os << "\"";
 			}
@@ -2235,10 +2229,7 @@ namespace pugi
 			{
 				os << ">";
 				
-				if (flags & format_utf8)
-					text_output_escaped(os, first_child().value(), opt2_to_type<0, 1>());
-				else
-					text_output_escaped(os, first_child().value(), opt2_to_type<0, 0>());
+				text_output_escaped(os, first_child().value(), opt1_to_type<0>());
 					
 				os << "</" << name() << ">\n";
 			}
@@ -2259,10 +2250,7 @@ namespace pugi
 		}
 		
 		case node_pcdata:
-			if (flags & format_utf8)
-				text_output_escaped(os, value(), opt2_to_type<0, 1>());
-			else
-				text_output_escaped(os, value(), opt2_to_type<0, 0>());
+			text_output_escaped(os, value(), opt1_to_type<0>());
 			break;
 
 		case node_cdata:

@@ -175,20 +175,11 @@ namespace pugi
 	const unsigned int format_indent	= 0x01;
 	
 	/**
-	 * This flag determines how the non-printable symbols are written to output stream - they are
-	 * either considered UTF-8 and are written as UTF-8 character, escaped with &#...;, or they are
-	 * considered to be ASCII and each ASCII character is escaped separately.
-	 *
-	 * This flag is on by default.
-	 */
-	const unsigned int format_utf8		= 0x02;
-	
-	/**
 	 * This flag determines if UTF-8 BOM is to be written to output stream.
 	 *
 	 * This flag is off by default.
 	 */
-	const unsigned int format_write_bom	= 0x04;
+	const unsigned int format_write_bom	= 0x02;
 	
 	/**
 	 * If this flag is on, no indentation is performed and no line breaks are written to output file.
@@ -196,13 +187,13 @@ namespace pugi
 	 *
 	 * This flag is off by default.
 	 */
-	const unsigned int format_raw		= 0x08;
+	const unsigned int format_raw		= 0x04;
 	
 	/**
 	 * This is the default set of formatting flags. It includes indenting nodes depending on their
-	 * depth in DOM tree and considering input data to be UTF-8.
+	 * depth in DOM tree.
 	 */
-	const unsigned int format_default	= format_indent | format_utf8;
+	const unsigned int format_default	= format_indent;
 		
 	// Forward declarations
 	struct xml_attribute_struct;
