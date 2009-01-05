@@ -30,17 +30,6 @@
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER == 1200
-// MSVC6 workaround
-namespace std
-{
-	template <typename T> const T& min(const T& a, const T& b)
-	{
-		return _cpp_min(a, b);
-	}
-}
-#endif
-
 namespace
 {
 	using namespace pugi;
@@ -2185,8 +2174,11 @@ namespace pugi
 				
 				size_t pos = first < 1 ? 1 : (size_t)first;
 				size_t end = last >= s.length() + 1 ? s.length() + 1 : (size_t)last;
+
+				size_t size_requested = end - pos;
+				size_t size_to_end = s.length() - pos + 1;
 				
-				return s.substr(pos - 1, std::min(end - pos, s.length() - pos + 1));
+				return s.substr(pos - 1, size_requested < size_to_end ? size_requested : size_to_end);
 			}
 
 			case ast_func_normalize_space_0:
