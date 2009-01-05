@@ -459,6 +459,14 @@ namespace pugi
 		int as_int() const;
 
 		/**
+		 * Cast attribute value as unsigned int.
+		 *
+		 * \return attribute value as unsigned int, or 0 if conversion did not succeed or attribute is empty
+		 * \note values out of non-negative int range (usually [0, 2^31-1]) get clamped to range boundaries
+		 */
+		unsigned int as_uint() const;
+
+		/**
 		 * Cast attribute value as double.
 		 *
 		 * \return attribute value as double, or 0.0 if conversion did not succeed or attribute is empty
@@ -500,6 +508,14 @@ namespace pugi
          */
 		xml_attribute& operator=(int rhs);
 	
+		/**
+         * Set attribute value to \a rhs.
+         *
+         * \param rhs - new attribute value
+         * \return self
+         */
+		xml_attribute& operator=(unsigned int rhs);
+
 		/**
          * Set attribute value to \a rhs.
          *

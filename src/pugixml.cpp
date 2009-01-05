@@ -1676,6 +1676,13 @@ namespace pugi
 		return atoi(_attr->value);
 	}
 
+	unsigned int xml_attribute::as_uint() const
+	{
+		if(empty() || !_attr->value) return 0;
+		int result = atoi(_attr->value);
+		return result < 0 ? 0 : static_cast<unsigned int>(result);
+	}
+
 	double xml_attribute::as_double() const
 	{
 		if(empty() || !_attr->value) return 0.0;
@@ -1736,6 +1743,14 @@ namespace pugi
 	{
 		char buf[128];
 		sprintf(buf, "%d", rhs);
+		set_value(buf);
+		return *this;
+	}
+
+	xml_attribute& xml_attribute::operator=(unsigned int rhs)
+	{
+		char buf[128];
+		sprintf(buf, "%u", rhs);
 		set_value(buf);
 		return *this;
 	}
