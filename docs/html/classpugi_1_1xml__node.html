@@ -227,9 +227,9 @@ bool&nbsp;</td><td class="memItemRight" valign="bottom"><b>operator!</b> () cons
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="5008c4bc71bc148973d629d4033f27c4"></a><!-- doxytag: member="pugi::xml_node::document_order" ref="5008c4bc71bc148973d629d4033f27c4" args="() const " -->
 unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>document_order</b> () const </td></tr>
 
-<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__node.html#8a0a9d086cc2e5c1f92cb79452695949">print</a> (std::ostream &amp;os, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>, unsigned int depth=0)</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__node.html#89036df09e55056e88b93c4b517f9a5d">print</a> (<a class="el" href="classpugi_1_1xml__writer.html">xml_writer</a> &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>, unsigned int depth=0)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Print subtree to stream.  <a href="#8a0a9d086cc2e5c1f92cb79452695949"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Print subtree to writer.  <a href="#89036df09e55056e88b93c4b517f9a5d"></a><br></td></tr>
 <tr><td colspan="2"><br><h2>Protected Types</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="303b18f86fd1e917afe4f8a9c70ab545"></a><!-- doxytag: member="pugi::xml_node::unspecified_bool_type" ref="303b18f86fd1e917afe4f8a9c70ab545" args="" -->
 typedef xml_node_struct *xml_node::*&nbsp;</td><td class="memItemRight" valign="bottom"><b>unspecified_bool_type</b></td></tr>
@@ -2407,7 +2407,7 @@ Select node set by evaluating XPath query.
     </td>
   </tr>
 </table>
-<a class="anchor" name="8a0a9d086cc2e5c1f92cb79452695949"></a><!-- doxytag: member="pugi::xml_node::print" ref="8a0a9d086cc2e5c1f92cb79452695949" args="(std::ostream &amp;os, const char *indent=&quot;\t&quot;, unsigned int flags=format_default, unsigned int depth=0)" --><p>
+<a class="anchor" name="89036df09e55056e88b93c4b517f9a5d"></a><!-- doxytag: member="pugi::xml_node::print" ref="89036df09e55056e88b93c4b517f9a5d" args="(xml_writer &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=format_default, unsigned int depth=0)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -2415,8 +2415,8 @@ Select node set by evaluating XPath query.
         <tr>
           <td class="md" nowrap valign="top">void pugi::xml_node::print           </td>
           <td class="md" valign="top">(&nbsp;</td>
-          <td class="md" nowrap valign="top">std::ostream &amp;&nbsp;</td>
-          <td class="mdname" nowrap> <em>os</em>, </td>
+          <td class="md" nowrap valign="top"><a class="el" href="classpugi_1_1xml__writer.html">xml_writer</a> &amp;&nbsp;</td>
+          <td class="mdname" nowrap> <em>writer</em>, </td>
         </tr>
         <tr>
           <td class="md" nowrap align="right"></td>
@@ -2453,11 +2453,11 @@ Select node set by evaluating XPath query.
     <td>
 
 <p>
-Print subtree to stream. 
+Print subtree to writer. 
 <p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>os</em>&nbsp;</td><td>- output stream </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>writer</em>&nbsp;</td><td>- writer object </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>indent</em>&nbsp;</td><td>- indentation string </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>flags</em>&nbsp;</td><td>- formatting flags </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>depth</em>&nbsp;</td><td>- starting depth (used for indentation) </td></tr>
@@ -2466,7 +2466,7 @@ Print subtree to stream.
     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Wed Oct 31 20:23:43 2007 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Tue Jan 6 01:30:47 2009 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>
