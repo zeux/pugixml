@@ -1745,6 +1745,38 @@ namespace pugi
 	 */
 	std::wstring as_utf16(const char* str);
 #endif
+
+	/**
+	 * Memory allocation function
+	 *
+	 * \param size - allocation size
+	 * \return pointer to allocated memory on success, NULL on failure
+	 */
+	typedef void* (*allocation_function)(size_t size);
+	
+	/**
+	 * Memory deallocation function
+	 *
+	 * \param ptr - pointer to memory previously allocated by allocation function
+	 */
+    typedef void (*deallocation_function)(void* ptr);
+
+    /**
+     * Override default memory management functions
+     *
+     * All subsequent allocations/deallocations will be performed via supplied functions. Take care not to
+     * change memory management functions if any xml_document instances are still alive - this is considered
+     * undefined behaviour (expect crashes/memory damages/etc.).
+     *
+     * \param allocate - allocation function
+     * \param deallocate - deallocation function
+     * 
+     * \note XPath-related allocations, as well as allocations in functions that return std::string (xml_node::path, as_utf8, as_utf16)
+     * are not performed via these functions.
+     * \note If you're using parse() with ownership transfer, you have to allocate the buffer you pass to parse() with allocation
+     * function you set via this function.
+     */
+    void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
 }
 
 // Inline implementation

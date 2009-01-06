@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <string.h>
 
+// For placement new
 #include <new>
-#include <exception>
 
 #if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_EXCEPTIONS)
 #error No exception mode can't be used with XPath support
@@ -46,6 +46,22 @@ using std::memcpy;
 #endif
 
 #define STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
+
+namespace
+{
+	void* default_allocate(size_t size)
+	{
+		return malloc(size);
+	}
+
+	void default_deallocate(void* ptr)
+	{
+		free(ptr);
+	}
+
+	pugi::allocation_function global_allocate = default_allocate;
+	pugi::deallocation_function global_deallocate = default_deallocate;
+}
 
 namespace pugi
 {
@@ -75,7 +91,9 @@ namespace pugi
 			}
 			else
 			{
-				_root->next = new xml_memory_block();
+				void* new_block = global_allocate(sizeof(xml_memory_block));
+
+				_root->next = new (new_block) xml_memory_block();
 				_root = _root->next;
 
 				_root->size = size;
@@ -193,17 +211,17 @@ namespace pugi
 
 	xml_document_struct* xml_allocator::allocate_document()
 	{
-		return new(memalloc(sizeof(xml_document_struct))) xml_document_struct;
+		return new (memalloc(sizeof(xml_document_struct))) xml_document_struct;
 	}
 
 	xml_node_struct* xml_allocator::allocate_node(xml_node_type type)
 	{
-		return new(memalloc(sizeof(xml_node_struct))) xml_node_struct(type);
+		return new (memalloc(sizeof(xml_node_struct))) xml_node_struct(type);
 	}
 
 	xml_attribute_struct* xml_allocator::allocate_attribute()
 	{
-		return new(memalloc(sizeof(xml_attribute_struct))) xml_attribute_struct;
+		return new (memalloc(sizeof(xml_attribute_struct))) xml_attribute_struct;
 	}
 }
 
@@ -266,25 +284,12 @@ namespace
 		}
 		else
 		{
-			char* buf;
-
-		#ifndef PUGIXML_NO_EXCEPTIONS
-			try
-			{
-		#endif
-				buf = new char[source_size + 1];
-				if (!buf) return false;
-		#ifndef PUGIXML_NO_EXCEPTIONS
-			}
-			catch (const std::bad_alloc&)
-			{
-				return false;
-			}
-		#endif
+			char* buf = static_cast<char*>(global_allocate(source_size + 1));
+			if (!buf) return false;
 
 			strcpy(buf, source);
 
-			if (!insitu) delete[] dest;
+			if (!insitu) global_deallocate(dest);
 			
 			dest = buf;
 			insitu = false;
@@ -2625,7 +2630,7 @@ namespace pugi
 
 	void xml_document::destroy()
 	{
-		delete[] _buffer;
+		global_deallocate(_buffer);
 		_buffer = 0;
 
 		if (_root) _root->destroy();
@@ -2635,7 +2640,7 @@ namespace pugi
 		while (current)
 		{
 			xml_memory_block* next = current->next;
-			delete current;
+			global_deallocate(current);
 			current = next;
 		}
 		
@@ -2659,27 +2664,14 @@ namespace pugi
 
 		if (!stream.good()) return false;
 
-		char* s;
-
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		try
-		{
-	#endif
-			s = new char[length + 1];
-			if (!s) return false;
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		}
-		catch (const std::bad_alloc&)
-		{
-			return false;
-		}
-	#endif
+		char* s = static_cast<char*>(global_allocate(length + 1));
+		if (!s) return false;
 
 		stream.read(s, length);
 
 		if (stream.gcount() > length || stream.gcount() == 0)
 		{
-			delete[] s;
+			global_deallocate(s);
 			return false;
 		}
 
@@ -2693,21 +2685,8 @@ namespace pugi
 	{
 		destroy();
 
-		char* s;
-
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		try
-		{
-	#endif
-			s = new char[strlen(contents) + 1];
-			if (!s) return false;
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		}
-		catch (const std::bad_alloc&)
-		{
-			return false;
-		}
-	#endif
+		char* s = static_cast<char*>(global_allocate(strlen(contents) + 1));
+		if (!s) return false;
 
 		strcpy(s, contents);
 
@@ -2731,29 +2710,20 @@ namespace pugi
 			return false;
 		}
 		
-		char* s;
+		char* s = static_cast<char*>(global_allocate(length + 1));
 
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		try
-		{
-	#endif
-			s = new char[length + 1];
-			if (!s) return false;
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		}
-		catch (const std::bad_alloc&)
+		if (!s)
 		{
 			fclose(file);
 			return false;
 		}
-	#endif
 
 		size_t read = fread(s, (size_t)length, 1, file);
 		fclose(file);
 
 		if (read != 1)
 		{
-			delete[] s;
+			global_deallocate(s);
 			return false;
 		}
 
@@ -2778,7 +2748,7 @@ namespace pugi
 		bool res = parse(xmlstr, options);
 
 		if (res) _buffer = xmlstr;
-		else delete[] xmlstr;
+		else global_deallocate(xmlstr);
 
 		return res;
 	}
@@ -2851,4 +2821,10 @@ namespace pugi
 		return result;
 	}
 #endif
+
+    void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate)
+    {
+    	global_allocate = allocate;
+    	global_deallocate = deallocate;
+    }
 }
