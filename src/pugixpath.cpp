@@ -17,12 +17,13 @@
 
 #include <algorithm>
 
-#include <cassert>
+#include <assert.h>
 
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
 #include <ctype.h>
+#include <string.h>
 
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4127) // conditional expression is constant

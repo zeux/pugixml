@@ -15,15 +15,18 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <new>
+#include <exception>
 
 #if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_EXCEPTIONS)
 #error No exception mode can't be used with XPath support
 #endif
 
 #ifndef PUGIXML_NO_STL
-# include <fstream>
+#	include <istream>
+#	include <ostream>
 #endif
 
 #ifdef _MSC_VER
@@ -39,6 +42,7 @@
 #ifdef __BORLANDC__
 // BC workaround
 using std::memmove;
+using std::memcpy;
 #endif
 
 #define STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
@@ -1412,7 +1416,7 @@ namespace
 					unsigned int ch = (unsigned char)*s++;
 
 					char buf[8];
-					sprintf(buf, "&#%d;", ch);
+					sprintf(buf, "&#%u;", ch);
 
 					writer.write(buf);
 				}
@@ -1578,7 +1582,7 @@ namespace pugi
 
 	void xml_writer_stream::write(const void* data, size_t size)
 	{
-		stream->write(reinterpret_cast<const char*>(data), size);
+		stream->write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
 	}
 #endif
 
