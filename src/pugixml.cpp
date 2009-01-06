@@ -859,7 +859,7 @@ namespace
 
 						if (!is_chartype(*s, ct_start_symbol)) // bad PI
 							return false;
-						else if (OPTSET(parse_pi))
+						else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
 						{
 							mark = s;
 							SCANWHILE(is_chartype(*s, ct_symbol)); // Read PI target
@@ -880,8 +880,16 @@ namespace
 								if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
 									&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
 								{
+									if (OPTSET(parse_declaration))
+									{
+										PUSHNODE(node_declaration);
+
+										cursor->name = mark;
+
+										POPNODE();
+									}
 								}
-								else
+								else if (OPTSET(parse_pi))
 								{
 									PUSHNODE(node_pi); // Append a new node on the tree.
 
@@ -894,15 +902,35 @@ namespace
 							else if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
 								&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
 							{
-								SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
-								CHECK_ERROR();
-								s += 2;
+								if (OPTSET(parse_declaration))
+								{
+									PUSHNODE(node_declaration);
+
+									cursor->name = mark;
+
+									// scan for tag end
+									mark = s;
+
+									SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
+									CHECK_ERROR();
+
+									// replace ending ? with / to terminate properly
+									*s = '/';
+
+									// parse attributes
+									s = mark;
+
+									goto LOC_ATTRIBUTES;
+								}
 							}
 							else
 							{
-								PUSHNODE(node_pi); // Append a new node on the tree.
+								if (OPTSET(parse_pi))
+								{
+									PUSHNODE(node_pi); // Append a new node on the tree.
 
-								cursor->name = mark;
+									cursor->name = mark;
+								}
 
 								if (is_chartype(ch, ct_space))
 								{
@@ -921,9 +949,12 @@ namespace
 
 								++s; // Step over >
 
-								cursor->value = mark;
+								if (OPTSET(parse_pi))
+								{
+									cursor->value = mark;
 
-								POPNODE();
+									POPNODE();
+								}
 							}
 						}
 						else // not parsing PI
@@ -1087,6 +1118,7 @@ namespace
 						}
 						else if (is_chartype(ch, ct_space))
 						{
+						LOC_ATTRIBUTES:
 						    while (*s)
 						    {
 								SKIPWS(); // Eat any whitespace.
@@ -1537,6 +1569,28 @@ namespace
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 		
+		case node_declaration:
+		{
+			writer.write("<?");
+			writer.write(node.name());
+
+			for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
+			{
+				writer.write(' ');
+				writer.write(a.name());
+				writer.write('=');
+				writer.write('"');
+
+				text_output_escaped(writer, a.value(), opt1_to_type<1>());
+
+				writer.write('"');
+			}
+
+			writer.write("?>");
+			if ((flags & format_raw) == 0) writer.write('\n');
+			break;
+		}
+
 		default:
 			;
 		}
@@ -2063,6 +2117,7 @@ namespace pugi
 		switch (type())
 		{
 		case node_pi:
+		case node_declaration:
 		case node_element:
 		{
 			bool insitu = _root->name_insitu;
@@ -2100,7 +2155,7 @@ namespace pugi
 
 	xml_attribute xml_node::append_attribute(const char* name)
 	{
-		if (type() != node_element) return xml_attribute();
+		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
 		xml_attribute a(_root->append_attribute(get_allocator()));
 		a.set_name(name);
@@ -2110,7 +2165,7 @@ namespace pugi
 
 	xml_attribute xml_node::insert_attribute_before(const char* name, const xml_attribute& attr)
 	{
-		if (type() != node_element || attr.empty()) return xml_attribute();
+		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
 		
 		// check that attribute belongs to *this
 		xml_attribute_struct* cur = attr._attr;
@@ -2136,7 +2191,7 @@ namespace pugi
 
 	xml_attribute xml_node::insert_attribute_after(const char* name, const xml_attribute& attr)
 	{
-		if (type() != node_element || attr.empty()) return xml_attribute();
+		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
 		
 		// check that attribute belongs to *this
 		xml_attribute_struct* cur = attr._attr;
@@ -2738,9 +2793,12 @@ namespace pugi
 			buffered_writer.write(utf8_bom, 3);
 		}
 
-		buffered_writer.write("<?xml version=\"1.0\"?>");
-		if (!(flags & format_raw)) buffered_writer.write("\n");
-		
+		if (!(flags & format_no_declaration))
+		{
+			buffered_writer.write("<?xml version=\"1.0\"?>");
+			if (!(flags & format_raw)) buffered_writer.write("\n");
+		}
+
 		node_output(buffered_writer, *this, indent, flags, 0);
 	}
 

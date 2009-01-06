@@ -42,7 +42,8 @@ namespace pugi
 		node_pcdata,		///< E.g. '>...<'
 		node_cdata,			///< E.g. '<![CDATA[...]]>'
 		node_comment,		///< E.g. '<!--...-->'
-		node_pi				///< E.g. '<?...?>'
+		node_pi,			///< E.g. '<?...?>'
+		node_declaration	///< E.g. '<?xml ...?>'
 	};
 
 	// Parsing options
@@ -155,6 +156,18 @@ namespace pugi
  	const unsigned int parse_wconv_attribute	= 0x0080;
 	
 	/**
+	 * This flag determines if XML document declaration (this node has the form of <?xml ... ?> in XML)
+	 * are to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed
+	 * and checked for correctness.
+	 *
+	 * The corresponding node in DOM tree will have type node_declaration, name "xml" and attributes,
+	 * if any.
+	 *
+	 * This flag is off by default.
+	 */
+	const unsigned int parse_declaration		= 0x0100;
+
+	/**
      * This is the default set of flags. It includes parsing CDATA sections (comments/PIs are not
      * parsed), performing character and entity reference expansion, replacing whitespace characters
      * with spaces in attribute values and performing EOL handling. Note, that PCDATA sections
@@ -187,6 +200,15 @@ namespace pugi
 	 */
 	const unsigned int format_raw		= 0x04;
 	
+	/**
+	 * If this flag is on, no default XML declaration is written to output file.
+	 * This means that there will be no XML declaration in output stream unless there was one in XML document
+	 * (i.e. if it was parsed with parse_declaration flag).
+	 *
+	 * This flag is off by default.
+	 */
+	const unsigned int format_no_declaration = 0x08;
+
 	/**
 	 * This is the default set of formatting flags. It includes indenting nodes depending on their
 	 * depth in DOM tree.
