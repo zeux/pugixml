@@ -922,6 +922,32 @@ namespace pugi
 		xml_attribute insert_attribute_before(const char* name, const xml_attribute& attr);
 
 		/**
+		 * Add a copy of the specified attribute (for element nodes)
+		 *
+		 * \param proto - attribute prototype which is to be copied
+		 * \return inserted attribute, or empty attribute if there was an error (wrong node type)
+		 */
+		xml_attribute append_copy(const xml_attribute& proto);
+
+		/**
+		 * Insert a copy of the specified attribute after \a attr (for element nodes)
+		 *
+		 * \param proto - attribute prototype which is to be copied
+		 * \param attr - attribute to insert a new one after
+		 * \return inserted attribute, or empty attribute if there was an error (wrong node type, or attr does not belong to node)
+		 */
+		xml_attribute insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
+
+		/**
+		 * Insert a copy of the specified attribute before \a attr (for element nodes)
+		 *
+		 * \param proto - attribute prototype which is to be copied
+		 * \param attr - attribute to insert a new one before
+		 * \return inserted attribute, or empty attribute if there was an error (wrong node type, or attr does not belong to node)
+		 */
+		xml_attribute insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
+
+		/**
 		 * Add child node with specified type (for element nodes)
 		 *
 		 * \param type - node type
@@ -946,6 +972,32 @@ namespace pugi
 		 * \return inserted node, or empty node if there was an error (wrong node type, or \a node is not a child of this node)
 		 */
 		xml_node insert_child_before(xml_node_type type, const xml_node& node);
+
+		/**
+		 * Add a copy of the specified node as a child (for element nodes)
+		 *
+		 * \param proto - node prototype which is to be copied
+		 * \return inserted node, or empty node if there was an error (wrong node type)
+		 */
+		xml_node append_copy(const xml_node& proto);
+
+		/**
+		 * Insert a copy of the specified node after \a node (for element nodes)
+		 *
+		 * \param proto - node prototype which is to be copied
+		 * \param node - node to insert a new one after
+		 * \return inserted node, or empty node if there was an error (wrong node type, or \a node is not a child of this node)
+		 */
+		xml_node insert_copy_after(const xml_node& proto, const xml_node& node);
+
+		/**
+		 * Insert a copy of the specified node before \a node (for element nodes)
+		 *
+		 * \param proto - node prototype which is to be copied
+		 * \param node - node to insert a new one before
+		 * \return inserted node, or empty node if there was an error (wrong node type, or \a node is not a child of this node)
+		 */
+		xml_node insert_copy_before(const xml_node& proto, const xml_node& node);
 
 		/**
 		 * Remove specified attribute

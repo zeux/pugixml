@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 // For placement new
 #include <new>
@@ -1597,7 +1598,50 @@ namespace
 		}
 
 		default:
-			;
+			assert(false);
+		}
+	}
+
+	void recursive_copy_skip(xml_node& dest, const xml_node& source, const xml_node& skip)
+	{
+		assert(dest.type() == source.type());
+
+		switch (source.type())
+		{
+		case node_element:
+		{
+			dest.set_name(source.name());
+
+			for (xml_attribute a = source.first_attribute(); a; a = a.next_attribute())
+				dest.append_attribute(a.name()).set_value(a.value());
+
+			for (xml_node c = source.first_child(); c; c = c.next_sibling())
+			{
+				if (c == skip) continue;
+
+				xml_node cc = dest.append_child(c.type());
+				assert(cc);
+
+				recursive_copy_skip(cc, c, skip);
+			}
+
+			break;
+		}
+
+		case node_pcdata:
+		case node_cdata:
+		case node_comment:
+		case node_pi:
+			dest.set_value(source.value());
+			break;
+
+		case node_declaration:
+			dest.set_name(source.name());
+			dest.set_value(source.value());
+			break;
+
+		default:
+			assert(false);
 		}
 	}
 }
@@ -2220,6 +2264,36 @@ namespace pugi
 		return a;
 	}
 
+	xml_attribute xml_node::append_copy(const xml_attribute& proto)
+	{
+		if (!proto) return xml_attribute();
+
+		xml_attribute result = append_attribute(proto.name());
+		result.set_value(proto.value());
+
+		return result;
+	}
+
+	xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr)
+	{
+		if (!proto) return xml_attribute();
+
+		xml_attribute result = insert_attribute_after(proto.name(), attr);
+		result.set_value(proto.value());
+
+		return result;
+	}
+
+	xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr)
+	{
+		if (!proto) return xml_attribute();
+
+		xml_attribute result = insert_attribute_before(proto.name(), attr);
+		result.set_value(proto.value());
+
+		return result;
+	}
+
 	xml_node xml_node::append_child(xml_node_type type)
 	{
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
@@ -2265,6 +2339,33 @@ namespace pugi
 		node._root->next_sibling = n._root;
 
 		return n;
+	}
+
+	xml_node xml_node::append_copy(const xml_node& proto)
+	{
+		xml_node result = append_child(proto.type());
+
+		if (result) recursive_copy_skip(result, proto, result);
+
+		return result;
+	}
+
+	xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node)
+	{
+		xml_node result = insert_child_after(proto.type(), node);
+
+		if (result) recursive_copy_skip(result, proto, result);
+
+		return result;
+	}
+
+	xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node)
+	{
+		xml_node result = insert_child_before(proto.type(), node);
+
+		if (result) recursive_copy_skip(result, proto, result);
+
+		return result;
 	}
 
 	void xml_node::remove_attribute(const char* name)
