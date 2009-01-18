@@ -203,11 +203,12 @@ namespace pugi
 
 	struct xml_document_struct: public xml_node_struct
 	{
-		xml_document_struct(): xml_node_struct(node_document), allocator(0)
+		xml_document_struct(): xml_node_struct(node_document), allocator(0), buffer(0)
 		{
 		}
 
 		xml_allocator allocator;
+		const char* buffer;
 	};
 
 	xml_document_struct* xml_allocator::allocate_document()
@@ -2620,6 +2621,36 @@ namespace pugi
 		node_output(buffered_writer, *this, indent, flags, depth);
 	}
 
+	int xml_node::offset_debug() const
+	{
+		xml_node_struct* r = root()._root;
+
+		if (!r) return -1;
+
+		const char* buffer = static_cast<xml_document_struct*>(r)->buffer;
+
+		if (!buffer) return -1;
+
+		switch (type())
+		{
+		case node_document:
+			return 0;
+
+		case node_element:
+		case node_declaration:
+			return _root->name_insitu ? _root->name - buffer : -1;
+
+		case node_pcdata:
+		case node_cdata:
+		case node_comment:
+		case node_pi:
+			return _root->value_insitu ? _root->value - buffer : -1;
+
+		default:
+			return -1;
+		}
+	}
+
 #ifdef __BORLANDC__
 	bool operator&&(const xml_node& lhs, bool rhs)
 	{
@@ -2890,6 +2921,9 @@ namespace pugi
 	bool xml_document::parse(char* xmlstr, unsigned int options)
 	{
 		destroy();
+
+		// for offset_debug
+		static_cast<xml_document_struct*>(_root)->buffer = xmlstr;
 
 		xml_allocator& alloc = static_cast<xml_document_struct*>(_root)->allocator;
 		

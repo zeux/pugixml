@@ -1210,6 +1210,16 @@ namespace pugi
 		 * \param depth - starting depth (used for indentation)
 		 */
 		void print(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
+
+		/**
+		 * Get node offset in parsed file/string (in bytes) for debugging purposes
+		 *
+		 * \return offset in bytes to start of node data, or -1 in case of error
+		 * \note This will return -1 if node information changed to the extent that it's no longer possible to calculate offset, for example
+		 * if element node name has significantly changed; this is guaranteed to return correct offset only for nodes that have not changed
+		 * since parsing.
+		 */
+		int offset_debug() const;
 	};
 
 #ifdef __BORLANDC__
