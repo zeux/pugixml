@@ -1096,6 +1096,44 @@ namespace pugi
 		 */
 		template <typename Predicate> xml_node find_node(Predicate pred) const;
 
+		/**
+		 * Find child node with the specified name that has specified attribute
+		 *
+		 * \param name - child node name
+		 * \param attr_name - attribute name of child node
+		 * \param attr_value - attribute value of child node
+		 * \return first matching child node, or empty node
+		 */
+		xml_node find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value);
+
+		/**
+		 * Find child node with the specified name that has specified attribute (use pattern matching for node name and attribute name/value)
+		 *
+		 * \param name - pattern for child node name
+		 * \param attr_name - pattern for attribute name of child node
+		 * \param attr_value - pattern for attribute value of child node
+		 * \return first matching child node, or empty node
+		 */
+		xml_node find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value);
+
+		/**
+		 * Find child node that has specified attribute
+		 *
+		 * \param attr_name - attribute name of child node
+		 * \param attr_value - attribute value of child node
+		 * \return first matching child node, or empty node
+		 */
+		xml_node find_child_by_attribute(const char* attr_name, const char* attr_value);
+
+		/**
+		 * Find child node that has specified attribute (use pattern matching for attribute name/value)
+		 *
+		 * \param attr_name - pattern for attribute name of child node
+		 * \param attr_value - pattern for attribute value of child node
+		 * \return first matching child node, or empty node
+		 */
+		xml_node find_child_by_attribute_w(const char* attr_name, const char* attr_value);
+
 	#ifndef PUGIXML_NO_STL
 		/**
 		 * Get the absolute node path from root as a text string.

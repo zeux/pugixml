@@ -2411,6 +2411,60 @@ namespace pugi
         n._root->destroy();
 	}
 
+	xml_node xml_node::find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value)
+	{
+		if (empty()) return xml_node();
+		
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if (i->name && !strcmp(name, i->name))
+			{
+				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
+					if (!strcmp(attr_name, a->name) && !strcmp(attr_value, a->value))
+						return xml_node(i);
+			}
+
+		return xml_node();
+	}
+
+	xml_node xml_node::find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value)
+	{
+		if (empty()) return xml_node();
+		
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if (i->name && !impl::strcmpwild(name, i->name))
+			{
+				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
+					if (!impl::strcmpwild(attr_name, a->name) && !impl::strcmpwild(attr_value, a->value))
+						return xml_node(i);
+			}
+
+		return xml_node();
+	}
+
+	xml_node xml_node::find_child_by_attribute(const char* attr_name, const char* attr_value)
+	{
+		if (empty()) return xml_node();
+		
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
+				if (!strcmp(attr_name, a->name) && !strcmp(attr_value, a->value))
+					return xml_node(i);
+
+		return xml_node();
+	}
+
+	xml_node xml_node::find_child_by_attribute_w(const char* attr_name, const char* attr_value)
+	{
+		if (empty()) return xml_node();
+		
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
+				if (!impl::strcmpwild(attr_name, a->name) && !impl::strcmpwild(attr_value, a->value))
+					return xml_node(i);
+
+		return xml_node();
+	}
+
 #ifndef PUGIXML_NO_STL
 	std::string xml_node::path(char delimiter) const
 	{
