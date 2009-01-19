@@ -125,6 +125,45 @@ namespace
 		}
 	}
 	
+	unsigned int node_height(xml_node n)
+	{
+	    unsigned int result = 0;
+	    
+	    while (n)
+	    {
+	        ++result;
+	        n = n.parent();
+	    }
+	    
+	    return result;
+	}
+	
+	// precondition: node_height of ln is <= node_height of rn, ln != rn
+	bool node_is_before(xml_node ln, unsigned int lh, xml_node rn, unsigned int rh)
+	{
+	    assert(lh <= rh);
+	    
+	    while (lh < rh)
+	    {
+	        --rh;
+	        rn = rn.parent();
+	    }
+	    
+	    if (ln == rn) return true;
+	    
+	    while (ln.parent() != rn.parent())
+	    {
+	        ln = ln.parent();
+	        rn = rn.parent();
+	    }
+	    
+        for (; ln; ln = ln.next_sibling())
+            if (ln == rn)
+                return true;
+                
+        return false;
+    }
+    
 	struct document_order_comparator
 	{
 		bool operator()(const xpath_node& lhs, const xpath_node& rhs) const
@@ -139,7 +178,14 @@ namespace
 
 			if (lhs.attribute() && rhs.attribute())
 			{
-				if (lhs.parent() == rhs.parent()) return lhs.attribute() < rhs.attribute();
+				if (lhs.parent() == rhs.parent())
+				{
+				    for (xml_attribute a = lhs.attribute(); a; a = a.next_attribute())
+				        if (a == rhs.attribute())
+				            return true;
+				    
+				    return false;
+				}
 				
 				ln = lhs.parent();
 				rn = rhs.parent();
@@ -158,31 +204,11 @@ namespace
 			}
 
 			if (ln == rn) return false;
-				
-			xml_node lp = ln, rp = rn;
-				
-			while (lp != rp)
-			{
-				ln = lp;
-				lp = lp.parent();
-					
-				if (lp != rp)
-				{
-					rn = rp;
-					rp = rp.parent();
-				}
-			}
-				
-			if (!lp) // no common parent - ???
-				return false;
-			else // lp is parent, ln & rn are distinct siblings
-			{
-				for (; ln; ln = ln.next_sibling())
-					if (ln == rn)
-						return true;
 			
-				return false;
-			}
+			unsigned int lh = node_height(ln);
+			unsigned int rh = node_height(rn);
+			
+			return (lh <= rh) ? node_is_before(ln, lh, rn, rh) : !node_is_before(rn, rh, ln, lh);
 		}
 	};
 
