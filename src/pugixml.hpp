@@ -621,7 +621,7 @@ namespace pugi
 		explicit xml_node(xml_node_struct* p);
 
 		/// \internal Precompute document order (valid only for document node)
-		void precompute_document_order_impl();
+		void precompute_document_order_impl(unsigned int mask);
 
 		/// \internal Get allocator
 		xml_allocator& get_allocator() const;
@@ -1600,6 +1600,13 @@ namespace pugi
 		 * Sometimes this makes evaluation of XPath queries faster.
 		 */
 		void precompute_document_order();
+		
+		/**
+		 * Invalidate document order for the whole tree
+		 * If you precomputed document order for the tree and inserted new nodes/attributes after that,
+		 * XPath queries will sometimes give incorrect results.
+		 */
+		void invalidate_document_order();
 	};
 
 #ifndef PUGIXML_NO_XPATH

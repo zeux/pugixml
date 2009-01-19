@@ -140,8 +140,19 @@ namespace pugi
 
 		void destroy()
 		{
-			if (!name_insitu) delete[] name;
-			if (!value_insitu) delete[] value;
+		    parent = 0;
+		    
+			if (!name_insitu)
+			{
+			    delete[] name;
+			    name = 0;
+			}
+			
+			if (!value_insitu)
+			{
+			    delete[] value;
+			    value = 0;
+            }
 
 			for (xml_attribute_struct* attr = first_attribute; attr; attr = attr->next_attribute)
 				attr->destroy();
@@ -2584,7 +2595,7 @@ namespace pugi
 		return empty() ? 0 : _root->document_order;
 	}
 
-	void xml_node::precompute_document_order_impl()
+	void xml_node::precompute_document_order_impl(unsigned int mask)
 	{
 		if (type() != node_document) return;
 
@@ -2593,10 +2604,10 @@ namespace pugi
 
 		for (;;)
 		{
-			cur._root->document_order = current++;
+			cur._root->document_order = mask & current++;
 			
 			for (xml_attribute a = cur.first_attribute(); a; a = a.next_attribute())
-				a._attr->document_order = current++;
+				a._attr->document_order = mask & current++;
 					
 			if (cur.first_child())
 				cur = cur.first_child();
@@ -2976,9 +2987,14 @@ namespace pugi
 
 	void xml_document::precompute_document_order()
 	{
-		precompute_document_order_impl();
+		precompute_document_order_impl(~0u);
 	}
 
+    void xml_document::invalidate_document_order()
+    {
+        precompute_document_order_impl(0);
+    }
+    
 #ifndef PUGIXML_NO_STL
 	std::string as_utf8(const wchar_t* str)
 	{
