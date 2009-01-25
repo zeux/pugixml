@@ -1211,6 +1211,19 @@ namespace pugi
 		 */
 		void print(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
 
+	#ifndef PUGIXML_NO_STL
+		/**
+		 * Print subtree to stream
+		 *
+		 * \param os - output stream
+		 * \param indent - indentation string
+		 * \param flags - formatting flags
+		 * \param depth - starting depth (used for indentation)
+		 * \deprecated
+		 */
+		void print(std::ostream& os, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
+	#endif
+
 		/**
 		 * Get node offset in parsed file/string (in bytes) for debugging purposes
 		 *

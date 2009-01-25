@@ -2647,6 +2647,13 @@ namespace pugi
 		node_output(buffered_writer, *this, indent, flags, depth);
 	}
 
+	void xml_node::print(std::ostream& stream, const char* indent, unsigned int flags, unsigned int depth)
+	{
+		xml_writer_stream writer(stream);
+
+		print(writer, indent, flags, depth);
+	}
+
 	int xml_node::offset_debug() const
 	{
 		xml_node_struct* r = root()._root;
