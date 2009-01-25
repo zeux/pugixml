@@ -807,7 +807,7 @@ namespace
 			else ++s;
 		}
 	}
-	
+
 	char* strconv_attribute(char* s, char end_quote, unsigned int optmask)
 	{
 		STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20 && parse_wnorm_attribute == 0x40 && parse_wconv_attribute == 0x80);
@@ -834,6 +834,14 @@ namespace
 		}
 	}
 
+	inline xml_parse_result make_parse_result(xml_parse_status status, unsigned int offset, unsigned int line)
+	{
+		xml_parse_result result = {status, offset, line};
+		return result;
+	}
+
+	#define MAKE_PARSE_RESULT(status) make_parse_result(status, 0, __LINE__)
+
 	struct xml_parser
 	{
 		xml_allocator& alloc;
@@ -846,15 +854,18 @@ namespace
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define SCANWHILE(X)		{ while ((X)) ++s; }
 		#define ENDSEG()			{ ch = *s; *s = 0; ++s; }
-		#define CHECK_ERROR()		{ if (*s == 0) return false; }
+		#define ERROR(err, m)		make_parse_result(err, static_cast<unsigned int>(m - buffer_start), __LINE__)
+		#define CHECK_ERROR(err, m)	{ if (*s == 0) return ERROR(err, m); }
 		
 		xml_parser(xml_allocator& alloc): alloc(alloc)
 		{
 		}
 		
-		bool parse(char* s, xml_node_struct* xmldoc, unsigned int optmsk = parse_default)
+		xml_parse_result parse(char* s, xml_node_struct* xmldoc, unsigned int optmsk = parse_default)
 		{
-			if (!s || !xmldoc) return false;
+			if (!s || !xmldoc) return MAKE_PARSE_RESULT(status_internal_error);
+
+			char* buffer_start = s;
 
 			// UTF-8 BOM
 			if ((unsigned char)*s == 0xEF && (unsigned char)*(s+1) == 0xBB && (unsigned char)*(s+2) == 0xBF)
@@ -876,22 +887,22 @@ namespace
 						++s;
 
 						if (!is_chartype(*s, ct_start_symbol)) // bad PI
-							return false;
+							return ERROR(status_bad_pi, s);
 						else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
 						{
 							mark = s;
 							SCANWHILE(is_chartype(*s, ct_symbol)); // Read PI target
-							CHECK_ERROR();
+							CHECK_ERROR(status_bad_pi, s);
 
 							if (!is_chartype(*s, ct_space) && *s != '?') // Target has to end with space or ?
-								return false;
+								return ERROR(status_bad_pi, s);
 
 							ENDSEG();
-							CHECK_ERROR();
+							CHECK_ERROR(status_bad_pi, s);
 
 							if (ch == '?') // nothing except target present
 							{
-								if (*s != '>') return false;
+								if (*s != '>') return ERROR(status_bad_pi, s);
 								++s;
 
 								// stricmp / strcasecmp is not portable
@@ -930,7 +941,7 @@ namespace
 									mark = s;
 
 									SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
-									CHECK_ERROR();
+									CHECK_ERROR(status_bad_pi, s);
 
 									// replace ending ? with / to terminate properly
 									*s = '/';
@@ -953,17 +964,17 @@ namespace
 								if (is_chartype(ch, ct_space))
 								{
 									SKIPWS();
-									CHECK_ERROR();
+									CHECK_ERROR(status_bad_pi, s);
 	
 									mark = s;
 								}
 								else mark = 0;
 
 								SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
-								CHECK_ERROR();
+								CHECK_ERROR(status_bad_pi, s);
 
 								ENDSEG();
-								CHECK_ERROR();
+								CHECK_ERROR(status_bad_pi, s);
 
 								++s; // Step over >
 
@@ -978,7 +989,7 @@ namespace
 						else // not parsing PI
 						{
 							SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
-							CHECK_ERROR();
+							CHECK_ERROR(status_bad_pi, s);
 
 							s += 2;
 						}
@@ -1005,13 +1016,13 @@ namespace
 								{
 									s = strconv_comment(s);
 									
-									if (!s) return false;
+									if (!s) return ERROR(status_bad_comment, cursor->value);
 								}
 								else
 								{
 									// Scan for terminating '-->'.
 									SCANFOR(*s == '-' && *(s+1) == '-' && *(s+2) == '>');
-									CHECK_ERROR();
+									CHECK_ERROR(status_bad_comment, s);
 								
 									if (OPTSET(parse_comments))
 										*s = 0; // Zero-terminate this segment at the first terminating '-'.
@@ -1024,12 +1035,12 @@ namespace
 									POPNODE(); // Pop since this is a standalone.
 								}
 							}
-							else return false;
+							else return ERROR(status_bad_comment, s);
 						}
-						else if(*s == '[')
+						else if (*s == '[')
 						{
 							// '<![CDATA[...'
-							if(*++s=='C' && *++s=='D' && *++s=='A' && *++s=='T' && *++s=='A' && *++s == '[')
+							if (*++s=='C' && *++s=='D' && *++s=='A' && *++s=='T' && *++s=='A' && *++s == '[')
 							{
 								++s;
 								
@@ -1042,16 +1053,16 @@ namespace
 									{
 										s = strconv_cdata(s);
 										
-										if (!s) return false;
+										if (!s) return ERROR(status_bad_cdata, cursor->value);
 									}
 									else
 									{
 										// Scan for terminating ']]>'.
 										SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
-										CHECK_ERROR();
+										CHECK_ERROR(status_bad_cdata, s);
 
 										ENDSEG(); // Zero-terminate this segment.
-										CHECK_ERROR();
+										CHECK_ERROR(status_bad_cdata, s);
 									}
 
 									POPNODE(); // Pop since this is a standalone.
@@ -1060,31 +1071,31 @@ namespace
 								{
 									// Scan for terminating ']]>'.
 									SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
-									CHECK_ERROR();
+									CHECK_ERROR(status_bad_cdata, s);
 
 									++s;
 								}
 
 								s += 2; // Step over the last ']>'.
 							}
-							else return false;
+							else return ERROR(status_bad_cdata, s);
 						}
 						else if (*s=='D' && *++s=='O' && *++s=='C' && *++s=='T' && *++s=='Y' && *++s=='P' && *++s=='E')
 						{
 							++s;
 
 							SKIPWS(); // Eat any whitespace.
-							CHECK_ERROR();
+							CHECK_ERROR(status_bad_doctype, s);
 
 						LOC_DOCTYPE:
 							SCANFOR(*s == '\'' || *s == '"' || *s == '[' || *s == '>');
-							CHECK_ERROR();
+							CHECK_ERROR(status_bad_doctype, s);
 
 							if (*s == '\'' || *s == '"') // '...SYSTEM "..."
 							{
 								ch = *s++;
 								SCANFOR(*s == ch);
-								CHECK_ERROR();
+								CHECK_ERROR(status_bad_doctype, s);
 
 								++s;
 								goto LOC_DOCTYPE;
@@ -1104,11 +1115,11 @@ namespace
 							}
 							
 							SCANFOR(*s == '>');
-							CHECK_ERROR();
+							CHECK_ERROR(status_bad_doctype, s);
 
 							++s;
 						}
-						else return false;
+						else return ERROR(status_unrecognized_tag, s);
 					}
 					else if (is_chartype(*s, ct_start_symbol)) // '<#...'
 					{
@@ -1117,14 +1128,14 @@ namespace
 						cursor->name = s;
 
 						SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
-						CHECK_ERROR();
+						CHECK_ERROR(status_bad_start_element, s);
 
 						ENDSEG(); // Save char in 'ch', terminate & step over.
-						CHECK_ERROR();
+						CHECK_ERROR(status_bad_start_element, s);
 
 						if (ch == '/') // '<#.../'
 						{
-							if (*s != '>') return false;
+							if (*s != '>') return ERROR(status_bad_start_element, s);
 							
 							POPNODE(); // Pop.
 
@@ -1137,10 +1148,10 @@ namespace
 						else if (is_chartype(ch, ct_space))
 						{
 						LOC_ATTRIBUTES:
-						    while (*s)
+						    while (true)
 						    {
 								SKIPWS(); // Eat any whitespace.
-								CHECK_ERROR();
+								CHECK_ERROR(status_bad_start_element, s);
 						
 								if (is_chartype(*s, ct_start_symbol)) // <... #...
 								{
@@ -1148,15 +1159,15 @@ namespace
 									a->name = s; // Save the offset.
 
 									SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
-									CHECK_ERROR();
+									CHECK_ERROR(status_bad_attribute, s);
 
 									ENDSEG(); // Save char in 'ch', terminate & step over.
-									CHECK_ERROR();
+									CHECK_ERROR(status_bad_attribute, s);
 
 									if (is_chartype(ch, ct_space))
 									{
 										SKIPWS(); // Eat any whitespace.
-										CHECK_ERROR();
+										CHECK_ERROR(status_bad_attribute, s);
 
 										ch = *s;
 										++s;
@@ -1165,7 +1176,7 @@ namespace
 									if (ch == '=') // '<... #=...'
 									{
 										SKIPWS(); // Eat any whitespace.
-										CHECK_ERROR();
+										CHECK_ERROR(status_bad_attribute, s);
 
 										if (*s == '\'' || *s == '"') // '<... #="...'
 										{
@@ -1175,22 +1186,24 @@ namespace
 
 											s = strconv_attribute(s, ch, optmsk);
 										
-											if (!s) return false;
+											if (!s) return ERROR(status_bad_attribute, a->value);
 
 											// After this line the loop continues from the start;
-											// Whitespaces, / and > are ok, symbols are wrong,
+											// Whitespaces, / and > are ok, symbols and EOF are wrong,
 											// everything else will be detected
-											if (is_chartype(*s, ct_start_symbol)) return false;
+											if (is_chartype(*s, ct_start_symbol)) return ERROR(status_bad_attribute, s);
+
+											CHECK_ERROR(status_bad_start_element, s);
 										}
-										else return false;
+										else return ERROR(status_bad_attribute, s);
 									}
-									else return false;
+									else return ERROR(status_bad_attribute, s);
 								}
 								else if (*s == '/')
 								{
 									++s;
 
-									if (*s != '>') return false;
+									if (*s != '>') return ERROR(status_bad_start_element, s);
 							
 									POPNODE(); // Pop.
 
@@ -1204,36 +1217,38 @@ namespace
 
 									break;
 								}
-								else return false;
+								else return ERROR(status_bad_start_element, s);
 							}
+
+							// !!!
 						}
-						else return false;
+						else return ERROR(status_bad_start_element, s);
 					}
 					else if (*s == '/')
 					{
 						++s;
 
-						if (!cursor) return false;
+						if (!cursor) return ERROR(status_bad_end_element, s);
 
 						char* name = cursor->name;
-						if (!name) return false;
+						if (!name) return ERROR(status_end_element_mismatch, s);
 						
 						while (*s && is_chartype(*s, ct_symbol))
 						{
-							if (*s++ != *name++) return false;
+							if (*s++ != *name++) return ERROR(status_end_element_mismatch, s);
 						}
 
-						if (*name) return false;
+						if (*name) return ERROR(status_end_element_mismatch, s);
 							
 						POPNODE(); // Pop.
 
 						SKIPWS();
-						CHECK_ERROR();
+						CHECK_ERROR(status_bad_end_element, s);
 
-						if (*s != '>') return false;
+						if (*s != '>') return ERROR(status_bad_end_element, s);
 						++s;
 					}
-					else return false;
+					else return ERROR(status_unrecognized_tag, s);
 				}
 				else
 				{
@@ -1255,7 +1270,7 @@ namespace
 
 						s = strconv_pcdata(s, optmsk);
 								
-						if (!s) return false;
+						if (!s) return ERROR(status_bad_pcdata, cursor->value);
 								
 						POPNODE(); // Pop since this is a standalone.
 						
@@ -1274,9 +1289,9 @@ namespace
 				}
 			}
 
-			if (cursor != xmldoc) return false;
+			if (cursor != xmldoc) return ERROR(status_end_element_mismatch, s);
 			
-			return true;
+			return ERROR(status_ok, s);
 		}
 		
 	private:
@@ -2595,7 +2610,7 @@ namespace pugi
 		return empty() ? 0 : _root->document_order;
 	}
 
-	void xml_node::precompute_document_order_impl(unsigned int mask)
+	void xml_node::precompute_document_order_impl()
 	{
 		if (type() != node_document) return;
 
@@ -2604,10 +2619,10 @@ namespace pugi
 
 		for (;;)
 		{
-			cur._root->document_order = mask & current++;
+			cur._root->document_order = current++;
 			
 			for (xml_attribute a = cur.first_attribute(); a; a = a.next_attribute())
-				a._attr->document_order = mask & current++;
+				a._attr->document_order = current++;
 					
 			if (cur.first_child())
 				cur = cur.first_child();
@@ -2649,13 +2664,13 @@ namespace pugi
 
 		case node_element:
 		case node_declaration:
-			return _root->name_insitu ? _root->name - buffer : -1;
+			return _root->name_insitu ? static_cast<int>(_root->name - buffer) : -1;
 
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
 		case node_pi:
-			return _root->value_insitu ? _root->value - buffer : -1;
+			return _root->value_insitu ? static_cast<int>(_root->value - buffer) : -1;
 
 		default:
 			return -1;
@@ -2806,6 +2821,33 @@ namespace pugi
 	{
 	}
 
+	const char* xml_parse_result::description() const
+	{
+		switch (status)
+		{
+		case status_ok: return "No error";
+
+		case status_file_not_found: return "File was not found";
+		case status_io_error: return "Error reading from file/stream";
+		case status_out_of_memory: return "Could not allocate memory";
+		case status_internal_error: return "Internal error occured";
+
+		case status_unrecognized_tag: return "Could not determine tag type";
+
+		case status_bad_pi: return "Error parsing document declaration/processing instruction";
+		case status_bad_comment: return "Error parsing comment";
+		case status_bad_cdata: return "Error parsing CDATA section";
+		case status_bad_doctype: return "Error parsing document type declaration";
+		case status_bad_pcdata: return "Error parsing PCDATA section";
+		case status_bad_start_element: return "Error parsing start element tag";
+		case status_bad_attribute: return "Error parsing element attribute";
+		case status_bad_end_element: return "Error parsing end element tag";
+		case status_end_element_mismatch: return "Start-end tags mismatch";
+
+		default: return "Unknown error";
+		}
+	}
+
 	xml_document::xml_document(): _buffer(0)
 	{
 		create();
@@ -2848,28 +2890,28 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
-	bool xml_document::load(std::istream& stream, unsigned int options)
+	xml_parse_result xml_document::load(std::istream& stream, unsigned int options)
 	{
 		destroy();
 
-		if (!stream.good()) return false;
+		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
 
 		std::streamoff length, pos = stream.tellg();
 		stream.seekg(0, std::ios::end);
 		length = stream.tellg();
 		stream.seekg(pos, std::ios::beg);
 
-		if (!stream.good()) return false;
+		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
 
 		char* s = static_cast<char*>(global_allocate(length + 1));
-		if (!s) return false;
+		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
 
 		stream.read(s, length);
 
 		if (stream.gcount() > length || stream.gcount() == 0)
 		{
 			global_deallocate(s);
-			return false;
+			return MAKE_PARSE_RESULT(status_io_error);
 		}
 
 		s[stream.gcount()] = 0;
@@ -2878,24 +2920,24 @@ namespace pugi
 	}
 #endif
 
-	bool xml_document::load(const char* contents, unsigned int options)
+	xml_parse_result xml_document::load(const char* contents, unsigned int options)
 	{
 		destroy();
 
 		char* s = static_cast<char*>(global_allocate(strlen(contents) + 1));
-		if (!s) return false;
+		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
 
 		strcpy(s, contents);
 
 		return parse(transfer_ownership_tag(), s, options); // Parse the input string.
 	}
 
-	bool xml_document::load_file(const char* name, unsigned int options)
+	xml_parse_result xml_document::load_file(const char* name, unsigned int options)
 	{
 		destroy();
 
 		FILE* file = fopen(name, "rb");
-		if (!file) return false;
+		if (!file) return MAKE_PARSE_RESULT(status_file_not_found);
 
 		fseek(file, 0, SEEK_END);
 		long length = ftell(file);
@@ -2904,7 +2946,7 @@ namespace pugi
 		if (length < 0)
 		{
 			fclose(file);
-			return false;
+			return MAKE_PARSE_RESULT(status_io_error);
 		}
 		
 		char* s = static_cast<char*>(global_allocate(length + 1));
@@ -2912,7 +2954,7 @@ namespace pugi
 		if (!s)
 		{
 			fclose(file);
-			return false;
+			return MAKE_PARSE_RESULT(status_out_of_memory);
 		}
 
 		size_t read = fread(s, (size_t)length, 1, file);
@@ -2921,7 +2963,7 @@ namespace pugi
 		if (read != 1)
 		{
 			global_deallocate(s);
-			return false;
+			return MAKE_PARSE_RESULT(status_io_error);
 		}
 
 		s[length] = 0;
@@ -2929,7 +2971,7 @@ namespace pugi
 		return parse(transfer_ownership_tag(), s, options); // Parse the input string.
 	}
 
-	bool xml_document::parse(char* xmlstr, unsigned int options)
+	xml_parse_result xml_document::parse(char* xmlstr, unsigned int options)
 	{
 		destroy();
 
@@ -2943,9 +2985,9 @@ namespace pugi
 		return parser.parse(xmlstr, _root, options); // Parse the input string.
 	}
 		
-	bool xml_document::parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options)
+	xml_parse_result xml_document::parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options)
 	{
-		bool res = parse(xmlstr, options);
+		xml_parse_result res = parse(xmlstr, options);
 
 		if (res) _buffer = xmlstr;
 		else global_deallocate(xmlstr);
@@ -2987,14 +3029,9 @@ namespace pugi
 
 	void xml_document::precompute_document_order()
 	{
-		precompute_document_order_impl(~0u);
+		precompute_document_order_impl();
 	}
 
-    void xml_document::invalidate_document_order()
-    {
-        precompute_document_order_impl(0);
-    }
-    
 #ifndef PUGIXML_NO_STL
 	std::string as_utf8(const wchar_t* str)
 	{

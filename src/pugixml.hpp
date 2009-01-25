@@ -621,7 +621,7 @@ namespace pugi
 		explicit xml_node(xml_node_struct* p);
 
 		/// \internal Precompute document order (valid only for document node)
-		void precompute_document_order_impl(unsigned int mask);
+		void precompute_document_order_impl();
 
 		/// \internal Get allocator
 		xml_allocator& get_allocator() const;
@@ -1495,6 +1495,55 @@ namespace pugi
 	struct transfer_ownership_tag {};
 
 	/**
+	 * Parsing status enumeration, returned as part of xml_parse_result struct
+	 */
+	enum xml_parse_status
+	{
+		status_ok = 0, ///< No error
+
+		status_file_not_found, ///< File was not found during load_file()
+		status_io_error, ///< Error reading from file/stream
+		status_out_of_memory, ///< Could not allocate memory
+		status_internal_error, ///< Internal error occured
+
+		status_unrecognized_tag, ///< Parser could not determine tag type
+
+		status_bad_pi, ///< Parsing error occured while parsing document declaration/processing instruction (<?...?>)
+		status_bad_comment, ///< Parsing error occured while parsing comment (<!--...-->)
+		status_bad_cdata, ///< Parsing error occured while parsing CDATA section (<![CDATA[...]]>)
+		status_bad_doctype, ///< Parsing error occured while parsing document type declaration
+		status_bad_pcdata, ///< Parsing error occured while parsing PCDATA section (>...<)
+		status_bad_start_element, ///< Parsing error occured while parsing start element tag (<name ...>)
+		status_bad_attribute, ///< Parsing error occured while parsing element attribute
+		status_bad_end_element, ///< Parsing error occured while parsing end element tag (</name>)
+		status_end_element_mismatch ///< There was a mismatch of start-end tags (closing tag had incorrect name, some tag was not closed or there was an excessive closing tag)
+	};
+
+	/**
+	 * Parser result
+	 */
+	struct xml_parse_result
+	{
+		/// Parsing status (\see xml_parse_status)
+		xml_parse_status status;
+
+		/// Last parsed offset (in bytes from file/string start)
+		unsigned int offset;
+
+		/// Line in parser source which reported this
+		unsigned int line;
+
+		/// Cast to bool operator
+		operator bool() const
+		{
+			return status == status_ok;
+		}
+
+		/// Get error description
+		const char* description() const;
+	};
+
+	/**
 	 * Document class (DOM tree root).
 	 * This class has noncopyable semantics (private copy ctor/assignment operator).
 	 */
@@ -1529,9 +1578,9 @@ namespace pugi
 		 *
 		 * \param stream - stream with xml data
 		 * \param options - parsing options
-		 * \return success flag
+		 * \return parsing result
 		 */
-		bool load(std::istream& stream, unsigned int options = parse_default);
+		xml_parse_result load(std::istream& stream, unsigned int options = parse_default);
 #endif
 
 		/**
@@ -1539,18 +1588,18 @@ namespace pugi
 		 *
 		 * \param contents - input string
 		 * \param options - parsing options
-		 * \return success flag
+		 * \return parsing result
 		 */
-		bool load(const char* contents, unsigned int options = parse_default);
+		xml_parse_result load(const char* contents, unsigned int options = parse_default);
 
 		/**
 		 * Load document from file
 		 *
 		 * \param name - file name
 		 * \param options - parsing options
-		 * \return success flag
+		 * \return parsing result
 		 */
-		bool load_file(const char* name, unsigned int options = parse_default);
+		xml_parse_result load_file(const char* name, unsigned int options = parse_default);
 
 		/**
 		 * Parse the given XML string in-situ.
@@ -1560,9 +1609,9 @@ namespace pugi
 		 *
 		 * \param xmlstr - readwrite string with xml data
 		 * \param options - parsing options
-		 * \return success flag
+		 * \return parsing result
 		 */
-		bool parse(char* xmlstr, unsigned int options = parse_default);
+		xml_parse_result parse(char* xmlstr, unsigned int options = parse_default);
 		
 		/**
 		 * Parse the given XML string in-situ (gains ownership).
@@ -1572,9 +1621,9 @@ namespace pugi
 		 *
 		 * \param xmlstr - readwrite string with xml data
 		 * \param options - parsing options
-		 * \return success flag
+		 * \return parsing result
 		 */
-		bool parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options = parse_default);
+		xml_parse_result parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options = parse_default);
 		
 		/**
 		 * Save XML to writer
@@ -1600,13 +1649,6 @@ namespace pugi
 		 * Sometimes this makes evaluation of XPath queries faster.
 		 */
 		void precompute_document_order();
-		
-		/**
-		 * Invalidate document order for the whole tree
-		 * If you precomputed document order for the tree and inserted new nodes/attributes after that,
-		 * XPath queries will sometimes give incorrect results.
-		 */
-		void invalidate_document_order();
 	};
 
 #ifndef PUGIXML_NO_XPATH
