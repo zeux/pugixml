@@ -1219,7 +1219,7 @@ namespace pugi
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
 		 * \param depth - starting depth (used for indentation)
-		 * \deprecated
+		 * \deprecated Use print() with xml_writer_stream instead
 		 */
 		void print(std::ostream& os, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
 	#endif

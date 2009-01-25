@@ -10,6 +10,7 @@
     <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
     <li id="current"><a href="namespaces.html"><span>Namespaces</span></a></li>
     <li><a href="annotated.html"><span>Classes</span></a></li>
+    <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
   </ul></div>
 <div class="tabs">
   <ul>
@@ -56,6 +57,9 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structpugi_1_1transfer__ownership__tag.html">transfer_ownership_tag</a></td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Struct used to distinguish parsing with ownership transfer from parsing without it.  <a href="structpugi_1_1transfer__ownership__tag.html#_details">More...</a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a></td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parser result.  <a href="structpugi_1_1xml__parse__result.html#_details">More...</a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">class &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html">xml_document</a></td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Document class (DOM tree root).  <a href="classpugi_1_1xml__document.html#_details">More...</a><br></td></tr>
@@ -68,6 +72,13 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">class &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__node__set.html">xpath_node_set</a></td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Not necessarily ordered constant collection of XPath nodes.  <a href="classpugi_1_1xpath__node__set.html#_details">More...</a><br></td></tr>
+<tr><td colspan="2"><br><h2>Typedefs</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">typedef void *(*&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> )(size_t size)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Memory allocation function.  <a href="#15c8048c4bbfca2ad0ab9fc0b56ea522"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">typedef void(*&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> )(void *ptr)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Memory deallocation function.  <a href="#a6161e8d6344110788d7ff8a11ca680b"></a><br></td></tr>
 <tr><td colspan="2"><br><h2>Enumerations</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9">xml_node_type</a> { <br>
 &nbsp;&nbsp;<a class="el" href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9d58c55e810076e076318cc2268191b1f">node_null</a>, 
@@ -77,11 +88,35 @@ The PugiXML Parser namespace.
 <br>
 &nbsp;&nbsp;<a class="el" href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9df13d60a4dfd047be0700e1711aeb1ea">node_cdata</a>, 
 <a class="el" href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9445fef674a66777dfd28dbd6bab14fed">node_comment</a>, 
-<a class="el" href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9cd772b12b3d5442b9771151f45134440">node_pi</a>
+<a class="el" href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9cd772b12b3d5442b9771151f45134440">node_pi</a>, 
+<a class="el" href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9ad8024cc4a4afbc68c871f3826a00616">node_declaration</a>
 <br>
  }</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Tree node classification.  <a href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9">More...</a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555">xml_parse_status</a> { <br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55546ddc2abb6a54fdac07cf9086b45f10f">status_ok</a> =  0, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55532e05bc1b1356846e6a5fb0ec097d36b">status_file_not_found</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55528bb6318a65eec5abcf1ef8174b92246">status_io_error</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55559e75d024e9f5c213ca6f4db8102b978">status_out_of_memory</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55537a3c224657a16f27c950ec70954c981">status_internal_error</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55571a555b91e80b6d8f84aeb6a93904d28">status_unrecognized_tag</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555d7a57e8554aabea52ed8b0d6a0891622">status_bad_pi</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555563327f534e9b3ce55f9f7364aa746b2">status_bad_comment</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555a2ebdaf5e8bf5414bec3004270e102b8">status_bad_cdata</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55558d1b0d8787e97fc1b5b31ec5e4fabcf">status_bad_doctype</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555c5257467a3d1a971134c457066b21ee5">status_bad_pcdata</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b5553cf4e84a5b433ce50e6f3037df5c1bdd">status_bad_start_element</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b5552b34aa9968d63b28a6d51b30575ff95a">status_bad_attribute</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555261cbf22c7da45388bcc1e6759020790">status_bad_end_element</a>, 
+<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55507a5f6f8392474ccb2d5dc10fe2307a2">status_end_element_mismatch</a>
+<br>
+ }</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parsing status enumeration, returned as part of xml_parse_result struct.  <a href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555">More...</a><br></td></tr>
 <tr><td colspan="2"><br><h2>Functions</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">std::string&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#55c7bb5900e82254aa1b9671c61030fd">as_utf8</a> (const wchar_t *str)</td></tr>
 
@@ -89,6 +124,9 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">std::wstring&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#557d234d14b2da1cf7ad9b72a05d2698">as_utf16</a> (const char *str)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf8 to utf16.  <a href="#557d234d14b2da1cf7ad9b72a05d2698"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#d975898c8a080ae1a9f54ba21b6ccc09">set_memory_management_functions</a> (<a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> allocate, <a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> deallocate)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Override default memory management functions.  <a href="#d975898c8a080ae1a9f54ba21b6ccc09"></a><br></td></tr>
 <tr><td colspan="2"><br><h2>Variables</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#bdec38e04651950fe8f585c912143a27">memory_block_size</a> = 32768</td></tr>
 
@@ -120,6 +158,9 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#1e943812f2de36fc3ee14f7756afdbd7">parse_wconv_attribute</a> = 0x0080</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes, assuming that their type is CDATA.  <a href="#1e943812f2de36fc3ee14f7756afdbd7"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#db5db03ce720dcd90e900b9bb7e70427">parse_declaration</a> = 0x0100</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if XML document declaration (this node has the form of &lt;?xml .  <a href="#db5db03ce720dcd90e900b9bb7e70427"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a> = <a class="el" href="namespacepugi.html#47b679897f8bc15e4e152978fc88c208">parse_cdata</a> | <a class="el" href="namespacepugi.html#b5ef8454110599611900ff48012c8ad6">parse_escapes</a> | <a class="el" href="namespacepugi.html#1e943812f2de36fc3ee14f7756afdbd7">parse_wconv_attribute</a> | <a class="el" href="namespacepugi.html#d4e017365d2ff3ee04e226c35129b475">parse_eol</a></td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This is the default set of flags.  <a href="#d7c927d1c1752330637c3318b0d7b366"></a><br></td></tr>
@@ -132,9 +173,74 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#2dd811716b1c0a6a2431ceca43bc649e">format_raw</a> = 0x04</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">If this flag is on, no indentation is performed and no line breaks are written to output file.  <a href="#2dd811716b1c0a6a2431ceca43bc649e"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#0ec33e4db09260718f7003ed091f5a1b">format_no_declaration</a> = 0x08</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">If this flag is on, no default XML declaration is written to output file.  <a href="#0ec33e4db09260718f7003ed091f5a1b"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a> = <a class="el" href="namespacepugi.html#ce12e8dee65c5bae8ee42a64be7421d3">format_indent</a></td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This is the default set of formatting flags.  <a href="#325f48a35abbaeacdfd8b7fc9ed1713c"></a><br></td></tr>
+</table>
+<hr><h2>Typedef Documentation</h2>
+<a class="anchor" name="15c8048c4bbfca2ad0ab9fc0b56ea522"></a><!-- doxytag: member="pugi::allocation_function" ref="15c8048c4bbfca2ad0ab9fc0b56ea522" args=")(size_t size)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">typedef void*(* <a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">pugi::allocation_function</a>)(size_t size)          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Memory allocation function. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>size</em>&nbsp;</td><td>- allocation size </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>pointer to allocated memory on success, NULL on failure </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="a6161e8d6344110788d7ff8a11ca680b"></a><!-- doxytag: member="pugi::deallocation_function" ref="a6161e8d6344110788d7ff8a11ca680b" args=")(void *ptr)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">typedef void(* <a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">pugi::deallocation_function</a>)(void *ptr)          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Memory deallocation function. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>ptr</em>&nbsp;</td><td>- pointer to memory previously allocated by allocation function </td></tr>
+  </table>
+</dl>
+    </td>
+  </tr>
 </table>
 <hr><h2>Enumeration Type Documentation</h2>
 <a class="anchor" name="137e94a038e4ab0ada6477cf7f6153a9"></a><!-- doxytag: member="pugi::xml_node_type" ref="137e94a038e4ab0ada6477cf7f6153a9" args="" --><p>
@@ -175,6 +281,67 @@ E.g. '&lt;![CDATA[...]]&gt;'. </td></tr>
 E.g. ''. </td></tr>
 <tr><td valign="top"><em><a class="anchor" name="137e94a038e4ab0ada6477cf7f6153a9cd772b12b3d5442b9771151f45134440"></a><!-- doxytag: member="node_pi" ref="137e94a038e4ab0ada6477cf7f6153a9cd772b12b3d5442b9771151f45134440" args="" -->node_pi</em>&nbsp;</td><td>
 E.g. '&lt;?...?&gt;'. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="137e94a038e4ab0ada6477cf7f6153a9ad8024cc4a4afbc68c871f3826a00616"></a><!-- doxytag: member="node_declaration" ref="137e94a038e4ab0ada6477cf7f6153a9ad8024cc4a4afbc68c871f3826a00616" args="" -->node_declaration</em>&nbsp;</td><td>
+E.g. '&lt;?xml ...?&gt;'. </td></tr>
+</table>
+</dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b555"></a><!-- doxytag: member="pugi::xml_parse_status" ref="9054ca609e12afb8f3e5892fc6c0b555" args="" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">enum <a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555">pugi::xml_parse_status</a>          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Parsing status enumeration, returned as part of <a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> struct. 
+<p>
+<dl compact><dt><b>Enumerator: </b></dt><dd>
+<table border="0" cellspacing="2" cellpadding="0">
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55546ddc2abb6a54fdac07cf9086b45f10f"></a><!-- doxytag: member="status_ok" ref="9054ca609e12afb8f3e5892fc6c0b55546ddc2abb6a54fdac07cf9086b45f10f" args="" -->status_ok</em>&nbsp;</td><td>
+No error. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55532e05bc1b1356846e6a5fb0ec097d36b"></a><!-- doxytag: member="status_file_not_found" ref="9054ca609e12afb8f3e5892fc6c0b55532e05bc1b1356846e6a5fb0ec097d36b" args="" -->status_file_not_found</em>&nbsp;</td><td>
+File was not found during load_file(). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55528bb6318a65eec5abcf1ef8174b92246"></a><!-- doxytag: member="status_io_error" ref="9054ca609e12afb8f3e5892fc6c0b55528bb6318a65eec5abcf1ef8174b92246" args="" -->status_io_error</em>&nbsp;</td><td>
+Error reading from file/stream. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55559e75d024e9f5c213ca6f4db8102b978"></a><!-- doxytag: member="status_out_of_memory" ref="9054ca609e12afb8f3e5892fc6c0b55559e75d024e9f5c213ca6f4db8102b978" args="" -->status_out_of_memory</em>&nbsp;</td><td>
+Could not allocate memory. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55537a3c224657a16f27c950ec70954c981"></a><!-- doxytag: member="status_internal_error" ref="9054ca609e12afb8f3e5892fc6c0b55537a3c224657a16f27c950ec70954c981" args="" -->status_internal_error</em>&nbsp;</td><td>
+Internal error occured. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55571a555b91e80b6d8f84aeb6a93904d28"></a><!-- doxytag: member="status_unrecognized_tag" ref="9054ca609e12afb8f3e5892fc6c0b55571a555b91e80b6d8f84aeb6a93904d28" args="" -->status_unrecognized_tag</em>&nbsp;</td><td>
+Parser could not determine tag type. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b555d7a57e8554aabea52ed8b0d6a0891622"></a><!-- doxytag: member="status_bad_pi" ref="9054ca609e12afb8f3e5892fc6c0b555d7a57e8554aabea52ed8b0d6a0891622" args="" -->status_bad_pi</em>&nbsp;</td><td>
+Parsing error occured while parsing document declaration/processing instruction (&lt;?...?&gt;). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b555563327f534e9b3ce55f9f7364aa746b2"></a><!-- doxytag: member="status_bad_comment" ref="9054ca609e12afb8f3e5892fc6c0b555563327f534e9b3ce55f9f7364aa746b2" args="" -->status_bad_comment</em>&nbsp;</td><td>
+Parsing error occured while parsing comment (). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b555a2ebdaf5e8bf5414bec3004270e102b8"></a><!-- doxytag: member="status_bad_cdata" ref="9054ca609e12afb8f3e5892fc6c0b555a2ebdaf5e8bf5414bec3004270e102b8" args="" -->status_bad_cdata</em>&nbsp;</td><td>
+Parsing error occured while parsing CDATA section (&lt;![CDATA[...]]&gt;). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55558d1b0d8787e97fc1b5b31ec5e4fabcf"></a><!-- doxytag: member="status_bad_doctype" ref="9054ca609e12afb8f3e5892fc6c0b55558d1b0d8787e97fc1b5b31ec5e4fabcf" args="" -->status_bad_doctype</em>&nbsp;</td><td>
+Parsing error occured while parsing document type declaration. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b555c5257467a3d1a971134c457066b21ee5"></a><!-- doxytag: member="status_bad_pcdata" ref="9054ca609e12afb8f3e5892fc6c0b555c5257467a3d1a971134c457066b21ee5" args="" -->status_bad_pcdata</em>&nbsp;</td><td>
+Parsing error occured while parsing PCDATA section (&gt;...&lt;). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b5553cf4e84a5b433ce50e6f3037df5c1bdd"></a><!-- doxytag: member="status_bad_start_element" ref="9054ca609e12afb8f3e5892fc6c0b5553cf4e84a5b433ce50e6f3037df5c1bdd" args="" -->status_bad_start_element</em>&nbsp;</td><td>
+Parsing error occured while parsing start element tag (&lt;name ...&gt;). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b5552b34aa9968d63b28a6d51b30575ff95a"></a><!-- doxytag: member="status_bad_attribute" ref="9054ca609e12afb8f3e5892fc6c0b5552b34aa9968d63b28a6d51b30575ff95a" args="" -->status_bad_attribute</em>&nbsp;</td><td>
+Parsing error occured while parsing element attribute. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b555261cbf22c7da45388bcc1e6759020790"></a><!-- doxytag: member="status_bad_end_element" ref="9054ca609e12afb8f3e5892fc6c0b555261cbf22c7da45388bcc1e6759020790" args="" -->status_bad_end_element</em>&nbsp;</td><td>
+Parsing error occured while parsing end element tag (&lt;/name&gt;). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="9054ca609e12afb8f3e5892fc6c0b55507a5f6f8392474ccb2d5dc10fe2307a2"></a><!-- doxytag: member="status_end_element_mismatch" ref="9054ca609e12afb8f3e5892fc6c0b55507a5f6f8392474ccb2d5dc10fe2307a2" args="" -->status_end_element_mismatch</em>&nbsp;</td><td>
+There was a mismatch of start-end tags (closing tag had incorrect name, some tag was not closed or there was an excessive closing tag). </td></tr>
 </table>
 </dl>
     </td>
@@ -250,6 +417,54 @@ Convert utf8 to utf16.
   </table>
 </dl>
 <dl compact><dt><b>Returns:</b></dt><dd>output UTF16 string </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="d975898c8a080ae1a9f54ba21b6ccc09"></a><!-- doxytag: member="pugi::set_memory_management_functions" ref="d975898c8a080ae1a9f54ba21b6ccc09" args="(allocation_function allocate, deallocation_function deallocate)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">void pugi::set_memory_management_functions           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">allocation_function&nbsp;</td>
+          <td class="mdname" nowrap> <em>allocate</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>deallocation_function&nbsp;</td>
+          <td class="mdname" nowrap> <em>deallocate</em></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Override default memory management functions. 
+<p>
+All subsequent allocations/deallocations will be performed via supplied functions. Take care not to change memory management functions if any <a class="el" href="classpugi_1_1xml__document.html">xml_document</a> instances are still alive - this is considered undefined behaviour (expect crashes/memory damages/etc.).<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>allocate</em>&nbsp;</td><td>- allocation function </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>deallocate</em>&nbsp;</td><td>- deallocation function</td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Note:</b></dt><dd>XPath-related allocations, as well as allocations in functions that return std::string (<a class="el" href="classpugi_1_1xml__node.html#9d5ed8a5d73d252e5786f034d277d504">xml_node::path</a>, as_utf8, as_utf16) are not performed via these functions. <p>
+If you're using parse() with ownership transfer, you have to allocate the buffer you pass to parse() with allocation function you set via this function. </dd></dl>
     </td>
   </tr>
 </table>
@@ -515,6 +730,33 @@ This means, that whitespace characters (new line, tab and space) are replaced wi
 This flag is on by default.     </td>
   </tr>
 </table>
+<a class="anchor" name="db5db03ce720dcd90e900b9bb7e70427"></a><!-- doxytag: member="pugi::parse_declaration" ref="db5db03ce720dcd90e900b9bb7e70427" args="" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">const unsigned int <a class="el" href="namespacepugi.html#db5db03ce720dcd90e900b9bb7e70427">pugi::parse_declaration</a> = 0x0100          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+This flag determines if XML document declaration (this node has the form of &lt;?xml . 
+<p>
+.. ?&gt; in XML) are to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness.<p>
+The corresponding node in DOM tree will have type node_declaration, name "xml" and attributes, if any.<p>
+This flag is off by default.     </td>
+  </tr>
+</table>
 <a class="anchor" name="d7c927d1c1752330637c3318b0d7b366"></a><!-- doxytag: member="pugi::parse_default" ref="d7c927d1c1752330637c3318b0d7b366" args="" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
@@ -616,6 +858,32 @@ This means that the data is written to output stream as is.<p>
 This flag is off by default.     </td>
   </tr>
 </table>
+<a class="anchor" name="0ec33e4db09260718f7003ed091f5a1b"></a><!-- doxytag: member="pugi::format_no_declaration" ref="0ec33e4db09260718f7003ed091f5a1b" args="" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">const unsigned int <a class="el" href="namespacepugi.html#0ec33e4db09260718f7003ed091f5a1b">pugi::format_no_declaration</a> = 0x08          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+If this flag is on, no default XML declaration is written to output file. 
+<p>
+This means that there will be no XML declaration in output stream unless there was one in XML document (i.e. if it was parsed with parse_declaration flag).<p>
+This flag is off by default.     </td>
+  </tr>
+</table>
 <a class="anchor" name="325f48a35abbaeacdfd8b7fc9ed1713c"></a><!-- doxytag: member="pugi::format_default" ref="325f48a35abbaeacdfd8b7fc9ed1713c" args="" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
@@ -641,7 +909,7 @@ This is the default set of formatting flags.
 It includes indenting nodes depending on their depth in DOM tree.     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Tue Jan 6 01:30:46 2009 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Sun Jan 25 23:51:32 2009 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>

@@ -640,6 +640,32 @@ if necessary)
 </ul>
 </dd>
 </dt>
+<dt>18.01.2009 - v0.4
+<dd>Changes: <ul>
+<li>Bugs: <ul>
+<li>Documentation fix in samples for parse() with manual lifetime control
+<li>Fixed document order sorting in XPath (it caused wrong order of nodes after xpath_node_set::sort and wrong results of some XPath queries)
+</ul>
+<li>Node printing changes: <ul>
+<li>Single quotes are no longer escaped when printing nodes
+<li>Symbols in second half of ASCII table are no longer escaped when printing nodes; because of this, format_utf8 flag is deleted as it's no longer needed and
+format_write_bom is renamed to format_write_bom_utf8.
+<li>Reworked node printing - now it works via xml_writer interface; implementations for FILE* and std::ostream are available. As a side-effect, xml_document::save_file
+now works without STL.
+</ul>
+<li>New features: <ul>
+<li>Added unsigned integer support for attributes (xml_attribute::as_uint, xml_attribute::operator=)
+<li>Now document declaration (&lt;?xml ...?&gt;) is parsed as node with type node_declaration when parse_declaration flag is specified (access to encoding/version is performed as if they
+were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresponding flags for node printing were also added
+<li>Added support for custom memory management (see set_memory_management_functions for details)
+<li>Implemented node/attribute copying (see xml_node::insert_copy_* and xml_node::append_copy for details)
+<li>Added find_child_by_attribute and find_child_by_attribute_w to simplify parsing code in some cases (i.e. COLLADA files)
+<li>Added file offset information querying for debugging purposes (now you're able to determine exact location of any xml_node in parsed file, see xml_node::offset_debug for details)
+<li>Improved error handling for parsing - now load(), load_file() and parse() return xml_parse_result, which contains error code and last parsed offset; this does not break old interface as xml_parse_result can be implicitly casted to bool.
+</ul>
+</ul>
+</dd>
+</dt>
 </dl>
 
 <hr>
@@ -686,7 +712,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 31 October, 2007</p>
-<p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2007. All Rights Reserved.</i></p>
+<p>Revised 18 January, 2009</p>
+<p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2009. All Rights Reserved.</i></p>
 </body>
 </html>

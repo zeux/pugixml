@@ -10,6 +10,7 @@
     <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
     <li><a href="namespaces.html"><span>Namespaces</span></a></li>
     <li id="current"><a href="annotated.html"><span>Classes</span></a></li>
+    <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
   </ul></div>
 <div class="tabs">
   <ul>
@@ -64,6 +65,9 @@ bool&nbsp;</td><td class="memItemRight" valign="bottom"><b>operator!</b> () cons
 <tr><td class="memItemLeft" nowrap align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute.html#9f11964a8cef05be2c3410fc5da69064">as_int</a> () const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Cast attribute value as int.  <a href="#9f11964a8cef05be2c3410fc5da69064"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute.html#bc26acdd1767fd02fe0be6e6c3617aa3">as_uint</a> () const </td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Cast attribute value as unsigned int.  <a href="#bc26acdd1767fd02fe0be6e6c3617aa3"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute.html#e3bdc34a10c904a95c066b49249e75bd">as_double</a> () const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Cast attribute value as double.  <a href="#e3bdc34a10c904a95c066b49249e75bd"></a><br></td></tr>
@@ -82,6 +86,9 @@ unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><b>document_orde
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute.html#e39b0c95fe3a0a5fe852ca73230620c3">operator=</a> (int rhs)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Set attribute value to <em>rhs</em>.  <a href="#e39b0c95fe3a0a5fe852ca73230620c3"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute.html#7e5c85edc0dfbc67fedda8f9572e641f">operator=</a> (unsigned int rhs)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Set attribute value to <em>rhs</em>.  <a href="#7e5c85edc0dfbc67fedda8f9572e641f"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute.html#c6ad3bddf25651a059239ec01123f087">operator=</a> (double rhs)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Set attribute value to <em>rhs</em>.  <a href="#c6ad3bddf25651a059239ec01123f087"></a><br></td></tr>
@@ -477,6 +484,37 @@ Cast attribute value as int.
     </td>
   </tr>
 </table>
+<a class="anchor" name="bc26acdd1767fd02fe0be6e6c3617aa3"></a><!-- doxytag: member="pugi::xml_attribute::as_uint" ref="bc26acdd1767fd02fe0be6e6c3617aa3" args="() const " --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">unsigned int pugi::xml_attribute::as_uint           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="mdname1" valign="top" nowrap>          </td>
+          <td class="md" valign="top">&nbsp;)&nbsp;</td>
+          <td class="md" nowrap> const</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Cast attribute value as unsigned int. 
+<p>
+<dl compact><dt><b>Returns:</b></dt><dd>attribute value as unsigned int, or 0 if conversion did not succeed or attribute is empty </dd></dl>
+<dl compact><dt><b>Note:</b></dt><dd>values out of non-negative int range (usually [0, 2^31-1]) get clamped to range boundaries </dd></dl>
+    </td>
+  </tr>
+</table>
 <a class="anchor" name="e3bdc34a10c904a95c066b49249e75bd"></a><!-- doxytag: member="pugi::xml_attribute::as_double" ref="e3bdc34a10c904a95c066b49249e75bd" args="() const " --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
@@ -613,6 +651,42 @@ Set attribute value to <em>rhs</em>.
           <td class="md" nowrap valign="top"><a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a>&amp; pugi::xml_attribute::operator=           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">int&nbsp;</td>
+          <td class="mdname1" valign="top" nowrap> <em>rhs</em>          </td>
+          <td class="md" valign="top">&nbsp;)&nbsp;</td>
+          <td class="md" nowrap></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Set attribute value to <em>rhs</em>. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>rhs</em>&nbsp;</td><td>- new attribute value </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>self </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="7e5c85edc0dfbc67fedda8f9572e641f"></a><!-- doxytag: member="pugi::xml_attribute::operator=" ref="7e5c85edc0dfbc67fedda8f9572e641f" args="(unsigned int rhs)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a>&amp; pugi::xml_attribute::operator=           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">unsigned int&nbsp;</td>
           <td class="mdname1" valign="top" nowrap> <em>rhs</em>          </td>
           <td class="md" valign="top">&nbsp;)&nbsp;</td>
           <td class="md" nowrap></td>
@@ -874,7 +948,7 @@ Get attribute value.
     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Tue Jan 6 01:30:47 2009 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Sun Jan 25 23:51:33 2009 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>

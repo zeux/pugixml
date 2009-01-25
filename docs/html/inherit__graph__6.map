@@ -1,2 +1,4 @@
 base referer
-rect $classpugi_1_1xpath__exception.html 135,5 287,32
+rect $classpugi_1_1xml__writer.html 5,31 123,57
+rect $classpugi_1_1xml__writer__file.html 183,5 324,32
+rect $classpugi_1_1xml__writer__stream.html 171,56 336,83
