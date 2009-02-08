@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Pug Improved XML Parser - Version 0.4
+// Pug Improved XML Parser - Version 0.41
 // --------------------------------------------------------
 // Copyright (C) 2006-2009, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
 // This work is based on the pugxml parser, which is:
