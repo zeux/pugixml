@@ -1410,11 +1410,9 @@ namespace
 					return;
 				}
 			}
-			else
-			{
-				memcpy(buffer + bufsize, data, size);
-				bufsize += size;
-			}
+
+			memcpy(buffer + bufsize, data, size);
+			bufsize += size;
 		}
 
 		void write(const char* data)
