@@ -1442,7 +1442,7 @@ namespace
 			
 			// While *s is a usual symbol
 			while (*s && *s != '&' && *s != '<' && *s != '>' && (*s != '"' || !attribute)
-					&& (*s < 0 || *s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
+					&& ((unsigned char)*s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
 				++s;
 		
 			writer.write(prev, static_cast<size_t>(s - prev));
