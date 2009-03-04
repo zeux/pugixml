@@ -22,7 +22,7 @@
 #include <new>
 
 #if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_EXCEPTIONS)
-#error No exception mode can't be used with XPath support
+#error No exception mode can not be used with XPath support
 #endif
 
 #ifndef PUGIXML_NO_STL
