@@ -1104,7 +1104,7 @@ namespace pugi
 		 * \param attr_value - attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value);
+		xml_node find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value) const;
 
 		/**
 		 * Find child node with the specified name that has specified attribute (use pattern matching for node name and attribute name/value)
@@ -1114,7 +1114,7 @@ namespace pugi
 		 * \param attr_value - pattern for attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value);
+		xml_node find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value) const;
 
 		/**
 		 * Find child node that has specified attribute
@@ -1123,7 +1123,7 @@ namespace pugi
 		 * \param attr_value - attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute(const char* attr_name, const char* attr_value);
+		xml_node find_child_by_attribute(const char* attr_name, const char* attr_value) const;
 
 		/**
 		 * Find child node that has specified attribute (use pattern matching for attribute name/value)
@@ -1132,7 +1132,7 @@ namespace pugi
 		 * \param attr_value - pattern for attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute_w(const char* attr_name, const char* attr_value);
+		xml_node find_child_by_attribute_w(const char* attr_name, const char* attr_value) const;
 
 	#ifndef PUGIXML_NO_STL
 		/**

@@ -2436,7 +2436,7 @@ namespace pugi
         n._root->destroy();
 	}
 
-	xml_node xml_node::find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value)
+	xml_node xml_node::find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value) const
 	{
 		if (empty()) return xml_node();
 		
@@ -2451,7 +2451,7 @@ namespace pugi
 		return xml_node();
 	}
 
-	xml_node xml_node::find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value)
+	xml_node xml_node::find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value) const
 	{
 		if (empty()) return xml_node();
 		
@@ -2466,7 +2466,7 @@ namespace pugi
 		return xml_node();
 	}
 
-	xml_node xml_node::find_child_by_attribute(const char* attr_name, const char* attr_value)
+	xml_node xml_node::find_child_by_attribute(const char* attr_name, const char* attr_value) const
 	{
 		if (empty()) return xml_node();
 		
@@ -2478,7 +2478,7 @@ namespace pugi
 		return xml_node();
 	}
 
-	xml_node xml_node::find_child_by_attribute_w(const char* attr_name, const char* attr_value)
+	xml_node xml_node::find_child_by_attribute_w(const char* attr_name, const char* attr_value) const
 	{
 		if (empty()) return xml_node();
 		
