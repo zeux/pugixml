@@ -114,8 +114,17 @@ namespace pugi
 
 		void destroy()
 		{
-			if (!name_insitu) delete[] name;
-			if (!value_insitu) delete[] value;
+			if (!name_insitu)
+			{
+				global_deallocate(name);
+				name = 0;
+			}
+
+			if (!value_insitu)
+			{
+				global_deallocate(value);
+				value = 0;
+			}
 		}
 	
 		bool		name_insitu : 1;
@@ -144,13 +153,13 @@ namespace pugi
 		    
 			if (!name_insitu)
 			{
-			    delete[] name;
+			    global_deallocate(name);
 			    name = 0;
 			}
 			
 			if (!value_insitu)
 			{
-			    delete[] value;
+			    global_deallocate(value);
 			    value = 0;
             }
 
@@ -2876,8 +2885,11 @@ namespace pugi
 
 	void xml_document::destroy()
 	{
-		global_deallocate(_buffer);
-		_buffer = 0;
+		if (_buffer)
+		{
+			global_deallocate(_buffer);
+			_buffer = 0;
+		}
 
 		if (_root) _root->destroy();
 
