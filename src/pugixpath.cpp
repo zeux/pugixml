@@ -322,12 +322,12 @@ namespace
 		return (value != 0 && !is_nan(value));
 	}
 	
-	const char* convert_number_to_string(double value)
+	std::string convert_number_to_string(double value)
 	{
 		if (is_nan(value)) return "NaN";
 		else if (is_inf(value)) return value < 0 ? "-Infinity" : "Infinity";
 		
-		static char buf[100];
+		char buf[100];
 		
 		if (value == (int)value) sprintf(buf, "%d", (int)value);
 		else
