@@ -1070,6 +1070,10 @@ namespace pugi
 
 					m_cur_lexeme = lex_string;
 				}
+				else
+				{
+					throw xpath_exception("Unrecognized token");
+				}
 			}
 		}
 
@@ -3496,7 +3500,15 @@ namespace pugi
 
 		xpath_ast_node* parse()
 		{
-			return parse_expression();
+			xpath_ast_node* result = parse_expression();
+			
+			if (m_lexer.current() != lex_none)
+			{
+				// there are still unparsed tokens left, error
+				throw xpath_exception("Incorrect query");
+			}
+			
+			return result;
 		}
 	};
 
