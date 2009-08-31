@@ -1763,18 +1763,18 @@ namespace pugi
 #ifdef __MWERKS__
 	xml_attribute::operator xml_attribute::unspecified_bool_type() const
 	{
-      	return empty() ? 0 : &xml_attribute::empty;
+      	return _attr ? &xml_attribute::empty : 0;
    	}
 #else
 	xml_attribute::operator xml_attribute::unspecified_bool_type() const
 	{
-      	return empty() ? 0 : &xml_attribute::_attr;
+      	return _attr ? &xml_attribute::_attr : 0;
    	}
 #endif
 
    	bool xml_attribute::operator!() const
    	{
-   		return empty();
+   		return !_attr;
    	}
 
 	bool xml_attribute::operator==(const xml_attribute& r) const
@@ -1819,65 +1819,52 @@ namespace pugi
 
 	int xml_attribute::as_int() const
 	{
-		if(empty() || !_attr->value) return 0;
-		return atoi(_attr->value);
+		return (_attr && _attr->value) ? atoi(_attr->value) : 0;
 	}
 
 	unsigned int xml_attribute::as_uint() const
 	{
-		if(empty() || !_attr->value) return 0;
-		int result = atoi(_attr->value);
+		int result = (_attr && _attr->value) ? atoi(_attr->value) : 0;
 		return result < 0 ? 0 : static_cast<unsigned int>(result);
 	}
 
 	double xml_attribute::as_double() const
 	{
-		if(empty() || !_attr->value) return 0.0;
-		return atof(_attr->value);
+		return (_attr && _attr->value) ? atof(_attr->value) : 0;
 	}
 
 	float xml_attribute::as_float() const
 	{
-		if(empty() || !_attr->value) return 0.0f;
-		return (float)atof(_attr->value);
+		return (_attr && _attr->value) ? (float)atof(_attr->value) : 0;
 	}
 
 	bool xml_attribute::as_bool() const
 	{
-		if(empty() || !_attr->value) return false;
-		if(*(_attr->value))
-		{
-			return // Only look at first char:
-			(
-				*(_attr->value) == '1' || // 1*
-				*(_attr->value) == 't' || // t* (true)
-				*(_attr->value) == 'T' || // T* (true|true)
-				*(_attr->value) == 'y' || // y* (yes)
-				*(_attr->value) == 'Y' // Y* (Yes|YES)
-			)
-				? true : false; // Return true if matches above, else false.
-		}
-		else return false;
+		// only look at first char
+		char first = (_attr && _attr->value) ? *_attr->value : 0;
+
+		// 1*, t* (true), T* (True), y* (yes), Y* (YES)
+		return (first == '1' || first == 't' || first == 'T' || first == 'y' || first == 'Y');
 	}
 
 	bool xml_attribute::empty() const
 	{
-		return (_attr == 0);
+		return !_attr;
 	}
 
 	const char* xml_attribute::name() const
 	{
-		return (!empty() && _attr->name) ? _attr->name : "";
+		return (_attr && _attr->name) ? _attr->name : "";
 	}
 
 	const char* xml_attribute::value() const
 	{
-		return (!empty() && _attr->value) ? _attr->value : "";
+		return (_attr && _attr->value) ? _attr->value : "";
 	}
 
 	unsigned int xml_attribute::document_order() const
 	{
-		return empty() ? 0 : _attr->document_order;
+		return _attr ? _attr->document_order : 0;
 	}
 
 	xml_attribute& xml_attribute::operator=(const char* rhs)
@@ -1918,7 +1905,7 @@ namespace pugi
 
 	bool xml_attribute::set_name(const char* rhs)
 	{
-		if (empty()) return false;
+		if (!_attr) return false;
 		
 		bool insitu = _attr->name_insitu;
 		bool res = strcpy_insitu(_attr->name, insitu, rhs);
@@ -1929,7 +1916,7 @@ namespace pugi
 		
 	bool xml_attribute::set_value(const char* rhs)
 	{
-		if (empty()) return false;
+		if (!_attr) return false;
 
 		bool insitu = _attr->value_insitu;
 		bool res = strcpy_insitu(_attr->value, insitu, rhs);
@@ -1961,38 +1948,38 @@ namespace pugi
 #ifdef __MWERKS__
 	xml_node::operator xml_node::unspecified_bool_type() const
 	{
-      	return empty() ? 0 : &xml_node::empty;
+      	return _root ? &xml_node::empty : 0;
    	}
 #else
 	xml_node::operator xml_node::unspecified_bool_type() const
 	{
-      	return empty() ? 0 : &xml_node::_root;
+      	return _root ? &xml_node::_root : 0;
    	}
 #endif
 
    	bool xml_node::operator!() const
    	{
-   		return empty();
+   		return !_root;
    	}
 
 	xml_node::iterator xml_node::begin() const
 	{
-		return iterator(_root->first_child);
+		return _root ? iterator(_root->first_child) : iterator();
 	}
 
 	xml_node::iterator xml_node::end() const
 	{
-		return iterator(0, _root->last_child);
+		return _root ? iterator(0, _root->last_child) : iterator();
 	}
 	
 	xml_node::attribute_iterator xml_node::attributes_begin() const
 	{
-		return attribute_iterator(_root->first_attribute);
+		return _root ? attribute_iterator(_root->first_attribute) : attribute_iterator();
 	}
 
 	xml_node::attribute_iterator xml_node::attributes_end() const
 	{
-		return attribute_iterator(0, _root->last_attribute);
+		return _root ? attribute_iterator(0, _root->last_attribute) : attribute_iterator();
 	}
 
 	bool xml_node::operator==(const xml_node& r) const
@@ -2027,7 +2014,7 @@ namespace pugi
 
 	bool xml_node::empty() const
 	{
-		return (_root == 0);
+		return !_root;
 	}
 	
 	xml_allocator& xml_node::get_allocator() const
@@ -2039,7 +2026,7 @@ namespace pugi
 
 	const char* xml_node::name() const
 	{
-		return (!empty() && _root->name) ? _root->name : "";
+		return (_root && _root->name) ? _root->name : "";
 	}
 
 	xml_node_type xml_node::type() const
@@ -2049,23 +2036,25 @@ namespace pugi
 	
 	const char* xml_node::value() const
 	{
-		return (!empty() && _root->value) ? _root->value : "";
+		return (_root && _root->value) ? _root->value : "";
 	}
 	
 	xml_node xml_node::child(const char* name) const
 	{
-		if (!empty())
-			for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-				if (i->name && !strcmp(name, i->name)) return xml_node(i);
+		if (!_root) return xml_node();
+
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if (i->name && !strcmp(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
 
 	xml_node xml_node::child_w(const char* name) const
 	{
-		if (!empty())
-			for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-				if (i->name && !impl::strcmpwild(name, i->name)) return xml_node(i);
+		if (!_root) return xml_node();
+
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if (i->name && !impl::strcmpwild(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -2094,7 +2083,7 @@ namespace pugi
 
 	xml_node xml_node::next_sibling(const char* name) const
 	{
-		if(empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
 			if (i->name && !strcmp(name, i->name)) return xml_node(i);
@@ -2104,7 +2093,7 @@ namespace pugi
 
 	xml_node xml_node::next_sibling_w(const char* name) const
 	{
-		if(empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
 			if (i->name && !impl::strcmpwild(name, i->name)) return xml_node(i);
@@ -2114,7 +2103,7 @@ namespace pugi
 
 	xml_node xml_node::next_sibling() const
 	{
-		if(empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		if (_root->next_sibling) return xml_node(_root->next_sibling);
 		else return xml_node();
@@ -2122,7 +2111,7 @@ namespace pugi
 
 	xml_node xml_node::previous_sibling(const char* name) const
 	{
-		if (empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->prev_sibling; i; i = i->prev_sibling)
 			if (i->name && !strcmp(name, i->name)) return xml_node(i);
@@ -2132,7 +2121,7 @@ namespace pugi
 
 	xml_node xml_node::previous_sibling_w(const char* name) const
 	{
-		if (empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->prev_sibling; i; i = i->prev_sibling)
 			if (i->name && !impl::strcmpwild(name, i->name)) return xml_node(i);
@@ -2142,7 +2131,7 @@ namespace pugi
 
 	xml_node xml_node::previous_sibling() const
 	{
-		if(empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		if (_root->prev_sibling) return xml_node(_root->prev_sibling);
 		else return xml_node();
@@ -2150,7 +2139,7 @@ namespace pugi
 
 	xml_node xml_node::parent() const
 	{
-		return empty() ? xml_node() : xml_node(_root->parent);
+		return _root ? xml_node(_root->parent) : xml_node();
 	}
 
 	xml_node xml_node::root() const
@@ -2162,10 +2151,12 @@ namespace pugi
 
 	const char* xml_node::child_value() const
 	{
-		if (!empty())
-			for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-				if ((static_cast<xml_node_type>(i->type) == node_pcdata || static_cast<xml_node_type>(i->type) == node_cdata) && i->value)
-					return i->value;
+		if (!_root) return "";
+		
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if ((static_cast<xml_node_type>(i->type) == node_pcdata || static_cast<xml_node_type>(i->type) == node_cdata) && i->value)
+				return i->value;
+
 		return "";
 	}
 
@@ -2191,14 +2182,12 @@ namespace pugi
 
 	xml_node xml_node::first_child() const
 	{
-		if (_root) return xml_node(_root->first_child);
-		else return xml_node();
+		return _root ? xml_node(_root->first_child) : xml_node();
 	}
 
 	xml_node xml_node::last_child() const
 	{
-		if (_root) return xml_node(_root->last_child);
-		else return xml_node();
+		return _root ? xml_node(_root->last_child) : xml_node();
 	}
 
 	bool xml_node::set_name(const char* rhs)
@@ -2415,7 +2404,7 @@ namespace pugi
 
 	void xml_node::remove_attribute(const xml_attribute& a)
 	{
-		if (empty()) return;
+		if (!_root) return;
 
 		// check that attribute belongs to *this
 		xml_attribute_struct* attr = a._attr;
@@ -2440,7 +2429,7 @@ namespace pugi
 
 	void xml_node::remove_child(const xml_node& n)
 	{
-		if (empty() || n.parent() != *this) return;
+		if (!_root || n.parent() != *this) return;
 
 		if (n._root->next_sibling) n._root->next_sibling->prev_sibling = n._root->prev_sibling;
 		else _root->last_child = n._root->prev_sibling;
@@ -2453,7 +2442,7 @@ namespace pugi
 
 	xml_node xml_node::find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value) const
 	{
-		if (empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if (i->name && !strcmp(name, i->name))
@@ -2468,7 +2457,7 @@ namespace pugi
 
 	xml_node xml_node::find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value) const
 	{
-		if (empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if (i->name && !impl::strcmpwild(name, i->name))
@@ -2483,7 +2472,7 @@ namespace pugi
 
 	xml_node xml_node::find_child_by_attribute(const char* attr_name, const char* attr_value) const
 	{
-		if (empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
@@ -2495,7 +2484,7 @@ namespace pugi
 
 	xml_node xml_node::find_child_by_attribute_w(const char* attr_name, const char* attr_value) const
 	{
-		if (empty()) return xml_node();
+		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
@@ -2532,7 +2521,7 @@ namespace pugi
 	{
 		xml_node found = *this; // Current search context.
 
-		if (empty() || !path || !path[0]) return found;
+		if (!_root || !path || !path[0]) return found;
 
 		if (path[0] == delimiter)
 		{
@@ -2620,7 +2609,7 @@ namespace pugi
 
 	unsigned int xml_node::document_order() const
 	{
-		return empty() ? 0 : _root->document_order;
+		return _root ? _root->document_order : 0;
 	}
 
 	void xml_node::precompute_document_order_impl()
@@ -2653,7 +2642,7 @@ namespace pugi
 
 	void xml_node::print(xml_writer& writer, const char* indent, unsigned int flags, unsigned int depth)
 	{
-		if (empty()) return;
+		if (!_root) return;
 
 		xml_buffered_writer buffered_writer(writer);
 
@@ -2663,6 +2652,8 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	void xml_node::print(std::ostream& stream, const char* indent, unsigned int flags, unsigned int depth)
 	{
+		if (!_root) return;
+
 		xml_writer_stream writer(stream);
 
 		print(writer, indent, flags, depth);

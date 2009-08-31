@@ -1982,7 +1982,7 @@ namespace pugi
 
 	template <typename OutputIterator> void xml_node::all_elements_by_name(const char* name, OutputIterator it) const
 	{
-		if (empty()) return;
+		if (!_root) return;
 		
 		for (xml_node node = first_child(); node; node = node.next_sibling())
 		{
@@ -2001,7 +2001,7 @@ namespace pugi
 
 	template <typename OutputIterator> void xml_node::all_elements_by_name_w(const char* name, OutputIterator it) const
 	{
-		if (empty()) return;
+		if (!_root) return;
 		
 		for (xml_node node = first_child(); node; node = node.next_sibling())
 		{
@@ -2020,38 +2020,41 @@ namespace pugi
 	
 	template <typename Predicate> inline xml_attribute xml_node::find_attribute(Predicate pred) const
 	{
-		if (!empty())
-			for (xml_attribute attrib = first_attribute(); attrib; attrib = attrib.next_attribute())
-				if (pred(attrib))
-					return attrib;
+		if (!_root) return xml_attribute();
+		
+		for (xml_attribute attrib = first_attribute(); attrib; attrib = attrib.next_attribute())
+			if (pred(attrib))
+				return attrib;
 		
 		return xml_attribute();
 	}
 
 	template <typename Predicate> inline xml_node xml_node::find_child(Predicate pred) const
 	{
-		if (!empty())
-			for (xml_node node = first_child(); node; node = node.next_sibling())
-				if (pred(node))
-					return node;
+		if (!_root) return xml_node();
 
-		return xml_node();
+		for (xml_node node = first_child(); node; node = node.next_sibling())
+			if (pred(node))
+				return node;
+        
+        return xml_node();
 	}
 
 	template <typename Predicate> inline xml_node xml_node::find_node(Predicate pred) const
 	{
-		if (!empty())
-			for (xml_node node = first_child(); node; node = node.next_sibling())
-			{
-				if (pred(node))
-					return node;
+		if (!_root) return xml_node();
+
+		for (xml_node node = first_child(); node; node = node.next_sibling())
+		{
+			if (pred(node))
+				return node;
 				
-				if (node.first_child())
-				{
-					xml_node found = node.find_node(pred);
-					if (found) return found;
-				}
+			if (node.first_child())
+			{
+				xml_node found = node.find_node(pred);
+				if (found) return found;
 			}
+		}
 
 		return xml_node();
 	}
