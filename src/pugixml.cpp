@@ -1685,13 +1685,13 @@ namespace pugi
 	namespace impl
 	{
 		// Compare two strings
-		int strcmp(const char* src, const char* dst)
+		int PUGIXML_FUNCTION strcmp(const char* src, const char* dst)
 		{
 			return ::strcmp(src, dst);
 		}
 
 		// Compare two strings, with globbing, and character sets.
-		int strcmpwild(const char* src, const char* dst)
+		int PUGIXML_FUNCTION strcmpwild(const char* src, const char* dst)
 		{
 			int find = 1;
 			for(; *src != 0 && find == 1 && *dst != 0; ++src)
@@ -3058,7 +3058,7 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
-	std::string as_utf8(const wchar_t* str)
+	std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str)
 	{
 		std::string result;
 		result.reserve(strutf16_utf8_size(str));
@@ -3073,7 +3073,7 @@ namespace pugi
 	  	return result;
 	}
 	
-	std::wstring as_utf16(const char* str)
+	std::wstring PUGIXML_FUNCTION as_utf16(const char* str)
 	{
 		std::wstring result;
 		result.reserve(strutf8_utf16_size(str));
@@ -3089,7 +3089,7 @@ namespace pugi
 	}
 #endif
 
-    void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate)
+    void PUGIXML_FUNCTION set_memory_management_functions(allocation_function allocate, deallocation_function deallocate)
     {
     	global_allocate = allocate;
     	global_deallocate = deallocate;

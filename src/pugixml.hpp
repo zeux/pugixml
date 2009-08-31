@@ -28,6 +28,21 @@
 #	endif
 #endif
 
+// If no API is defined, assume default
+#ifndef PUGIXML_API
+#   define PUGIXML_API
+#endif
+
+// If no API for classes is defined, assume default
+#ifndef PUGIXML_CLASS
+#   define PUGIXML_CLASS PUGIXML_API
+#endif
+
+// If no API for functions is defined, assume default
+#ifndef PUGIXML_FUNCTION
+#   define PUGIXML_FUNCTION PUGIXML_API
+#endif
+
 #include <stddef.h>
 
 /// The PugiXML Parser namespace.
@@ -237,7 +252,7 @@ namespace pugi
 	/**
 	 * A class that holds compiled XPath query and allows to evaluate query result
 	 */
-	class xpath_query
+	class PUGIXML_CLASS xpath_query
 	{
 	private:
 		// Noncopyable semantics
@@ -312,7 +327,7 @@ namespace pugi
 	 * Abstract writer class
 	 * \see xml_node::print
 	 */
-	class xml_writer
+	class PUGIXML_CLASS xml_writer
 	{
 	public:
 		/**
@@ -332,7 +347,7 @@ namespace pugi
 	/** xml_writer implementation for FILE*
 	 * \see xml_writer
 	 */
-	class xml_writer_file: public xml_writer
+	class PUGIXML_CLASS xml_writer_file: public xml_writer
 	{
 	public:
 		/**
@@ -352,7 +367,7 @@ namespace pugi
 	/** xml_writer implementation for streams
 	 * \see xml_writer
 	 */
-	class xml_writer_stream: public xml_writer
+	class PUGIXML_CLASS xml_writer_stream: public xml_writer
 	{
 	public:
 		/**
@@ -374,7 +389,7 @@ namespace pugi
 	 * Note: xml_attribute does not allocate any memory for the attribute it wraps; it only wraps a
 	 * pointer to existing attribute.
 	 */
-	class xml_attribute
+	class PUGIXML_CLASS xml_attribute
 	{
 		friend class xml_attribute_iterator;
 		friend class xml_node;
@@ -594,8 +609,8 @@ namespace pugi
 
 #ifdef __BORLANDC__
 	// Borland C++ workaround
-	bool operator&&(const xml_attribute& lhs, bool rhs);
-	bool operator||(const xml_attribute& lhs, bool rhs);
+	bool PUGIXML_FUNCTION operator&&(const xml_attribute& lhs, bool rhs);
+	bool PUGIXML_FUNCTION operator||(const xml_attribute& lhs, bool rhs);
 #endif
 
 	/**
@@ -603,7 +618,7 @@ namespace pugi
 	 * Note: xml_node does not allocate any memory for the node it wraps; it only wraps a pointer to
 	 * existing node.
 	 */
-	class xml_node
+	class PUGIXML_CLASS xml_node
 	{
 		friend class xml_node_iterator;
 
@@ -1237,19 +1252,26 @@ namespace pugi
 
 #ifdef __BORLANDC__
 	// Borland C++ workaround
-	bool operator&&(const xml_node& lhs, bool rhs);
-	bool operator||(const xml_node& lhs, bool rhs);
+	bool PUGIXML_FUNCTION operator&&(const xml_node& lhs, bool rhs);
+	bool PUGIXML_FUNCTION operator||(const xml_node& lhs, bool rhs);
 #endif
 
 	/**
 	 * Child node iterator.
 	 * It's a bidirectional iterator with value type 'xml_node'.
 	 */
-	class xml_node_iterator
+	class PUGIXML_CLASS xml_node_iterator
 #ifndef PUGIXML_NO_STL
 	: public std::iterator<std::bidirectional_iterator_tag, xml_node>
 #endif
+#ifdef _MSC_VER
+#   pragma warning(push)
+#   pragma warning(disable: 4251 4275) // C4251 and C4275 can be ignored for _Container_base, as per MSDN
+#endif
 	{
+#ifdef _MSC_VER
+#    pragma warning(pop)
+#endif
 		friend class xml_node;
 
 	private:
@@ -1343,11 +1365,18 @@ namespace pugi
 	 * Attribute iterator.
 	 * It's a bidirectional iterator with value type 'xml_attribute'.
 	 */
-	class xml_attribute_iterator
+	class PUGIXML_CLASS xml_attribute_iterator
 #ifndef PUGIXML_NO_STL
-	: public std::iterator<std::bidirectional_iterator_tag, xml_attribute>
+        : public std::iterator<std::bidirectional_iterator_tag, xml_attribute>
+#endif
+#ifdef _MSC_VER
+#   pragma warning(push)
+#   pragma warning(disable: 4251 4275) // C4251 and C4275 can be ignored for _Container_base, as per MSDN
 #endif
 	{
+#ifdef _MSC_VER
+#    pragma warning(pop)
+#endif
 		friend class xml_node;
 
 	private:
@@ -1441,7 +1470,7 @@ namespace pugi
 	 * Abstract tree walker class
 	 * \see xml_node::traverse
 	 */
-	class xml_tree_walker
+	class PUGIXML_CLASS xml_tree_walker
 	{
 		friend class xml_node;
 
@@ -1491,7 +1520,7 @@ namespace pugi
 	};
 
 	/// \internal Memory block
-	struct xml_memory_block
+	struct PUGIXML_CLASS xml_memory_block
 	{
 		xml_memory_block();
 
@@ -1535,7 +1564,7 @@ namespace pugi
 	/**
 	 * Parser result
 	 */
-	struct xml_parse_result
+	struct PUGIXML_CLASS xml_parse_result
 	{
 		/// Parsing status (\see xml_parse_status)
 		xml_parse_status status;
@@ -1560,7 +1589,7 @@ namespace pugi
 	 * Document class (DOM tree root).
 	 * This class has noncopyable semantics (private copy ctor/assignment operator).
 	 */
-	class xml_document: public xml_node
+	class PUGIXML_CLASS xml_document: public xml_node
 	{
 	private:
 		char*				_buffer;
@@ -1668,7 +1697,7 @@ namespace pugi
 	/**
 	 * XPath exception class.
 	 */
-	class xpath_exception: public std::exception
+	class PUGIXML_CLASS xpath_exception: public std::exception
 	{
 	private:
 		const char* m_message;
@@ -1695,7 +1724,7 @@ namespace pugi
 	 * XPath defines node to be either xml_node or xml_attribute in pugixml terminology, so xpath_node
 	 * is either xml_node or xml_attribute.
 	 */
-	class xpath_node
+	class PUGIXML_CLASS xpath_node
 	{
 	private:
 		xml_node m_node;
@@ -1772,7 +1801,7 @@ namespace pugi
 	/**
 	 * Not necessarily ordered constant collection of XPath nodes
 	 */
-	class xpath_node_set
+	class PUGIXML_CLASS xpath_node_set
 	{
 		friend class xpath_ast_node;
 		
@@ -1897,7 +1926,7 @@ namespace pugi
 	 * \param str - input UTF16 string
 	 * \return output UTF8 string
 	 */
-	std::string as_utf8(const wchar_t* str);
+	std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str);
 	
 	/**
 	 * Convert utf8 to utf16
@@ -1905,7 +1934,7 @@ namespace pugi
 	 * \param str - input UTF8 string
 	 * \return output UTF16 string
 	 */
-	std::wstring as_utf16(const char* str);
+	std::wstring PUGIXML_FUNCTION as_utf16(const char* str);
 #endif
 
 	/**
@@ -1938,7 +1967,7 @@ namespace pugi
      * \note If you're using parse() with ownership transfer, you have to allocate the buffer you pass to parse() with allocation
      * function you set via this function.
      */
-    void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
+    void PUGIXML_FUNCTION set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
 }
 
 // Inline implementation
@@ -1947,8 +1976,8 @@ namespace pugi
 {
 	namespace impl
 	{
-		int strcmp(const char*, const char*);
-		int strcmpwild(const char*, const char*);
+		int PUGIXML_FUNCTION strcmp(const char*, const char*);
+		int PUGIXML_FUNCTION strcmpwild(const char*, const char*);
 	}
 
 	template <typename OutputIterator> void xml_node::all_elements_by_name(const char* name, OutputIterator it) const
