@@ -1947,6 +1947,7 @@ namespace pugi
 {
 	namespace impl
 	{
+		int strcmp(const char*, const char*);
 		int strcmpwild(const char*, const char*);
 	}
 
@@ -1958,7 +1959,7 @@ namespace pugi
 		{
 			if (node.type() == node_element)
 			{
-				if (!strcmp(name, node.name()))
+				if (!impl::strcmp(name, node.name()))
 				{
 					*it = node;
 					++it;

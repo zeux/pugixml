@@ -1684,6 +1684,12 @@ namespace pugi
 {
 	namespace impl
 	{
+		// Compare two strings
+		int strcmp(const char* src, const char* dst)
+		{
+			return ::strcmp(src, dst);
+		}
+
 		// Compare two strings, with globbing, and character sets.
 		int strcmpwild(const char* src, const char* dst)
 		{
