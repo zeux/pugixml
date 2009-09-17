@@ -118,15 +118,15 @@ The PugiXML Parser namespace.
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parsing status enumeration, returned as part of xml_parse_result struct.  <a href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555">More...</a><br></td></tr>
 <tr><td colspan="2"><br><h2>Functions</h2></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">std::string&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#55c7bb5900e82254aa1b9671c61030fd">as_utf8</a> (const wchar_t *str)</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">std::string PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#c66598a65cc30aa7a3f439fa5ad0f876">as_utf8</a> (const wchar_t *str)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf16 to utf8.  <a href="#55c7bb5900e82254aa1b9671c61030fd"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">std::wstring&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#557d234d14b2da1cf7ad9b72a05d2698">as_utf16</a> (const char *str)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf16 to utf8.  <a href="#c66598a65cc30aa7a3f439fa5ad0f876"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">std::wstring PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#dc6b6fcaa56cea6b0a2e5fbd8e212c25">as_utf16</a> (const char *str)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf8 to utf16.  <a href="#557d234d14b2da1cf7ad9b72a05d2698"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#d975898c8a080ae1a9f54ba21b6ccc09">set_memory_management_functions</a> (<a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> allocate, <a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> deallocate)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf8 to utf16.  <a href="#dc6b6fcaa56cea6b0a2e5fbd8e212c25"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#bc67229fed7dbe24a410d83b9233f916">set_memory_management_functions</a> (<a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> allocate, <a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> deallocate)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Override default memory management functions.  <a href="#d975898c8a080ae1a9f54ba21b6ccc09"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Override default memory management functions.  <a href="#bc67229fed7dbe24a410d83b9233f916"></a><br></td></tr>
 <tr><td colspan="2"><br><h2>Variables</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#bdec38e04651950fe8f585c912143a27">memory_block_size</a> = 32768</td></tr>
 
@@ -348,13 +348,13 @@ There was a mismatch of start-end tags (closing tag had incorrect name, some tag
   </tr>
 </table>
 <hr><h2>Function Documentation</h2>
-<a class="anchor" name="55c7bb5900e82254aa1b9671c61030fd"></a><!-- doxytag: member="pugi::as_utf8" ref="55c7bb5900e82254aa1b9671c61030fd" args="(const wchar_t *str)" --><p>
+<a class="anchor" name="c66598a65cc30aa7a3f439fa5ad0f876"></a><!-- doxytag: member="pugi::as_utf8" ref="c66598a65cc30aa7a3f439fa5ad0f876" args="(const wchar_t *str)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">std::string pugi::as_utf8           </td>
+          <td class="md" nowrap valign="top">std::string PUGIXML_FUNCTION pugi::as_utf8           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">const wchar_t *&nbsp;</td>
           <td class="mdname1" valign="top" nowrap> <em>str</em>          </td>
@@ -384,13 +384,13 @@ Convert utf16 to utf8.
     </td>
   </tr>
 </table>
-<a class="anchor" name="557d234d14b2da1cf7ad9b72a05d2698"></a><!-- doxytag: member="pugi::as_utf16" ref="557d234d14b2da1cf7ad9b72a05d2698" args="(const char *str)" --><p>
+<a class="anchor" name="dc6b6fcaa56cea6b0a2e5fbd8e212c25"></a><!-- doxytag: member="pugi::as_utf16" ref="dc6b6fcaa56cea6b0a2e5fbd8e212c25" args="(const char *str)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">std::wstring pugi::as_utf16           </td>
+          <td class="md" nowrap valign="top">std::wstring PUGIXML_FUNCTION pugi::as_utf16           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">const char *&nbsp;</td>
           <td class="mdname1" valign="top" nowrap> <em>str</em>          </td>
@@ -420,13 +420,13 @@ Convert utf8 to utf16.
     </td>
   </tr>
 </table>
-<a class="anchor" name="d975898c8a080ae1a9f54ba21b6ccc09"></a><!-- doxytag: member="pugi::set_memory_management_functions" ref="d975898c8a080ae1a9f54ba21b6ccc09" args="(allocation_function allocate, deallocation_function deallocate)" --><p>
+<a class="anchor" name="bc67229fed7dbe24a410d83b9233f916"></a><!-- doxytag: member="pugi::set_memory_management_functions" ref="bc67229fed7dbe24a410d83b9233f916" args="(allocation_function allocate, deallocation_function deallocate)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">void pugi::set_memory_management_functions           </td>
+          <td class="md" nowrap valign="top">void PUGIXML_FUNCTION pugi::set_memory_management_functions           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">allocation_function&nbsp;</td>
           <td class="mdname" nowrap> <em>allocate</em>, </td>
@@ -909,7 +909,7 @@ This is the default set of formatting flags.
 It includes indenting nodes depending on their depth in DOM tree.     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Sun Feb 8 10:42:16 2009 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Thu Sep 17 22:15:55 2009 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>
