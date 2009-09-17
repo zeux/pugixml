@@ -343,7 +343,7 @@ namespace
 			}
 		}
 		
-		return buf;
+		return std::string(buf);
 	}
 	
 	double convert_string_to_number(const char* string)

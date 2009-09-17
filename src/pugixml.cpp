@@ -1841,7 +1841,7 @@ namespace pugi
 	bool xml_attribute::as_bool() const
 	{
 		// only look at first char
-		char first = (_attr && _attr->value) ? *_attr->value : 0;
+		char first = (_attr && _attr->value) ? *_attr->value : '\0';
 
 		// 1*, t* (true), T* (True), y* (yes), Y* (YES)
 		return (first == '1' || first == 't' || first == 'T' || first == 'y' || first == 'Y');
