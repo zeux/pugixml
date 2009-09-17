@@ -672,6 +672,18 @@ were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresp
 </ul>
 </dd>
 </dt>
+<dt>8.02.2009 - v0.42
+<dd>Maintenance release. Changes: <ul>
+<li>Fixed deallocation in case of custom allocation functions or if delete[] / free are incompatible
+<li>XPath parser fixed for incorrect queries (i.e. incorrect XPath queries should now always fail to compile)
+<li>Added _API/_CLASS/_FUNCTION configuration macros to control class/function attributes
+<li>Const-correctness fixes for find_child_by_attribute
+<li>Improved compatibility (miscellaneous warning fixes, fixed cstring include dependency for GCC)
+<li>Fixed iterator begin/end and print function to work correctly for empty nodes
+<li>Added xml_attribute::set_value overloads for different types
+</ul>
+</dd>
+</dt>
 </dl>
 
 <hr>
@@ -718,7 +730,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 8 February, 2009</p>
+<p>Revised 17 September, 2009</p>
 <p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2009. All Rights Reserved.</i></p>
 </body>
 </html>
