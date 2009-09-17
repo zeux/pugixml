@@ -676,7 +676,7 @@ were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresp
 <dd>Maintenance release. Changes: <ul>
 <li>Fixed deallocation in case of custom allocation functions or if delete[] / free are incompatible
 <li>XPath parser fixed for incorrect queries (i.e. incorrect XPath queries should now always fail to compile)
-<li>Added _API/_CLASS/_FUNCTION configuration macros to control class/function attributes
+<li>Added PUGIXML_API/PUGIXML_CLASS/PUGIXML_FUNCTION configuration macros to control class/function attributes
 <li>Const-correctness fixes for find_child_by_attribute
 <li>Improved compatibility (miscellaneous warning fixes, fixed cstring include dependency for GCC)
 <li>Fixed iterator begin/end and print function to work correctly for empty nodes
