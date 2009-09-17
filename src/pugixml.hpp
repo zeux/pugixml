@@ -583,6 +583,38 @@ namespace pugi
 		 */
 		bool set_value(const char* rhs);
 
+		/**
+		 * Set attribute value to \a rhs.
+		 *
+		 * \param rhs - new attribute value
+		 * \return success flag (call fails if attribute is empty or there is not enough memory)
+		 */
+		bool set_value(int rhs);
+
+		/**
+		 * Set attribute value to \a rhs.
+		 *
+		 * \param rhs - new attribute value
+		 * \return success flag (call fails if attribute is empty or there is not enough memory)
+		 */
+		bool set_value(unsigned int rhs);
+
+		/**
+		 * Set attribute value to \a rhs.
+		 *
+		 * \param rhs - new attribute value
+		 * \return success flag (call fails if attribute is empty or there is not enough memory)
+		 */
+		bool set_value(double rhs);
+
+		/**
+		 * Set attribute value to either 'true' or 'false' (depends on whether \a rhs is true or false).
+		 *
+		 * \param rhs - new attribute value
+		 * \return success flag (call fails if attribute is empty or there is not enough memory)
+		 */
+		bool set_value(bool rhs);
+
 	public:
 		/**
 		 * Check if attribute is empty.

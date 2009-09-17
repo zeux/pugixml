@@ -1875,31 +1875,25 @@ namespace pugi
 	
 	xml_attribute& xml_attribute::operator=(int rhs)
 	{
-		char buf[128];
-		sprintf(buf, "%d", rhs);
-		set_value(buf);
+		set_value(rhs);
 		return *this;
 	}
 
 	xml_attribute& xml_attribute::operator=(unsigned int rhs)
 	{
-		char buf[128];
-		sprintf(buf, "%u", rhs);
-		set_value(buf);
+		set_value(rhs);
 		return *this;
 	}
 
 	xml_attribute& xml_attribute::operator=(double rhs)
 	{
-		char buf[128];
-		sprintf(buf, "%g", rhs);
-		set_value(buf);
+		set_value(rhs);
 		return *this;
 	}
 	
 	xml_attribute& xml_attribute::operator=(bool rhs)
 	{
-		set_value(rhs ? "true" : "false");
+		set_value(rhs);
 		return *this;
 	}
 
@@ -1923,6 +1917,32 @@ namespace pugi
 		_attr->value_insitu = insitu;
 		
 		return res;
+	}
+
+	bool xml_attribute::set_value(int rhs)
+	{
+		char buf[128];
+		sprintf(buf, "%d", rhs);
+		return set_value(buf);
+	}
+
+	bool xml_attribute::set_value(unsigned int rhs)
+	{
+		char buf[128];
+		sprintf(buf, "%u", rhs);
+		return set_value(buf);
+	}
+
+	bool xml_attribute::set_value(double rhs)
+	{
+		char buf[128];
+		sprintf(buf, "%g", rhs);
+		return set_value(buf);
+	}
+	
+	bool xml_attribute::set_value(bool rhs)
+	{
+		return set_value(rhs ? "true" : "false");
 	}
 
 #ifdef __BORLANDC__
