@@ -1,8 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Pug Improved XML Parser - Version 0.41
+// Pug Improved XML Parser - Version 0.42
 // --------------------------------------------------------
 // Copyright (C) 2006-2009, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+// Report bugs and download new versions at http://code.google.com/p/pugixml/
+//
 // This work is based on the pugxml parser, which is:
 // Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
 // Released into the Public Domain. Use at your own risk.
