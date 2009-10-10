@@ -2,7 +2,7 @@
 
 actions ObjectAction
 {
-	%MINGW_PATH%\bin\gcc -W -Wall -Wextra -Werror -ansi -pedantic -c $(>) -o $(<) $(CCFLAGS)
+	%MINGW_PATH%\bin\gcc -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
 }
 
 actions LibraryAction
@@ -17,7 +17,7 @@ actions LinkAction
 
 actions CoverageAction
 {
-	%MINGW_PATH%\bin\gcov $(>:\\) $(GCOVFLAGS)
+	%MINGW_PATH%\bin\gcov $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
 }
 
 actions RunAction
@@ -106,7 +106,7 @@ rule Application TARGET : SOURCES : LIBRARIES
 	# build application
 	MakeFileDir $(EXECUTABLE) ;
 	LinkAction $(EXECUTABLE) : $(OBJECTS) ;
-	Depends $(EXECUTABLE) : $(OBJECTS) $(LIBRARIES) ;
+	Depends $(EXECUTABLE) : $(OBJECTS) $($(LIBRARIES)_path) ;
 	
 	# make alias
 	Alias $(TARGET) : $(EXECUTABLE) ;
