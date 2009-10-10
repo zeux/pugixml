@@ -25,16 +25,21 @@ actions RunAction
 	$(>:\\)
 }
 
-actions quietly ignore MakeDir
+actions quietly ignore MakeDirAction
 {
 	mkdir $(<:\\) >nul 2>&1
+}
+
+actions quietly ignore DeleteAction
+{
+	del /F $(>:\\) >nul 2>&1
 }
 
 rule MakeFileDir TARGET
 {
 	local DIR = $(TARGET:D) ;
 
-	MakeDir $(DIR) ;
+	MakeDirAction $(DIR) ;
 	Needs $(TARGET) : $(DIR) ;
 }
 
@@ -118,6 +123,21 @@ rule Application TARGET : SOURCES : LIBRARIES
 	$(TARGET)_objects = $(OBJECTS) $($(LIBRARIES)_objects) ;
 }
 
+rule CleanCoverage TARGET 
+{
+	# make target
+	local CLEAN_TARGET = $(TARGET)_clean_coverage ;
+
+	NotFile $(CLEAN_TARGET) ;
+	Always $(CLEAN_TARGET) ;
+	Depends $(TARGET) : $(CLEAN_TARGET) ;
+	
+	# clean object files
+	local FILES = $($(SOURCE)_objects:S=.gcda) ;
+
+	DeleteAction $(CLEAN_TARGET) : $(FILES) ;
+}
+
 rule Test TARGET : SOURCE
 {
 	# make alias
@@ -128,6 +148,9 @@ rule Test TARGET : SOURCE
 
 	# remember executable objects for coverage
 	$(TARGET)_objects = $($(SOURCE)_objects) ;
+
+	# clean coverage files before run
+	CleanCoverage $(TARGET) ;
 }
 
 rule Coverage TARGET : SOURCE

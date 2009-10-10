@@ -13,6 +13,6 @@ LDFLAGS = -fprofile-arcs ;
 GCOVFLAGS = -n ;
 
 Library pugixml : src/pugixml.cpp src/pugixpath.cpp ;
-Application tests : tests/main.cpp : pugixml ;
+Application tests : tests/main.cpp [ Glob tests : test_*.cpp ] : pugixml ;
 Test run_tests : tests ;
 Coverage coverage : run_tests ;
