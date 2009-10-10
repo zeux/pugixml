@@ -1,0 +1,18 @@
+# Latest jamplus is needed to use this
+# Targets:
+# pugixml - build pugixml library
+# tests - build pugixml test suite
+# run_tests - run pugixml test suite
+# coverage - get test suite coverage
+
+include "Jamrules.jam" ;
+
+BUILD = build/mingw/debug ;
+CCFLAGS = -fprofile-arcs -ftest-coverage ;
+LDFLAGS = -fprofile-arcs ;
+GCOVFLAGS = -n ;
+
+Library pugixml : src/pugixml.cpp src/pugixpath.cpp ;
+Application tests : tests/main.cpp : pugixml ;
+Test run_tests : tests ;
+Coverage coverage : run_tests ;

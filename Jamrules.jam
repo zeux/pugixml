@@ -1,0 +1,142 @@
+# Rules for Jamfile.jam
+
+actions ObjectAction
+{
+	%MINGW_PATH%\bin\gcc -W -Wall -Wextra -Werror -ansi -pedantic -c $(>) -o $(<) $(CCFLAGS)
+}
+
+actions LibraryAction
+{
+	%MINGW_PATH%\bin\ar rc $(<) $(>)
+}
+
+actions LinkAction
+{
+	%MINGW_PATH%\bin\g++ $(>) -o $(<) $(LDFLAGS) 
+}
+
+actions CoverageAction
+{
+	%MINGW_PATH%\bin\gcov $(>:\\) $(GCOVFLAGS)
+}
+
+actions RunAction
+{
+	$(>:\\)
+}
+
+actions quietly ignore MakeDir
+{
+	mkdir $(<:\\) >nul 2>&1
+}
+
+rule MakeFileDir TARGET
+{
+	local DIR = $(TARGET:D) ;
+
+	MakeDir $(DIR) ;
+	Needs $(TARGET) : $(DIR) ;
+}
+
+rule Alias TARGET : SOURCE
+{
+	NotFile $(TARGET) ;
+	Always $(TARGET) ;
+	Depends $(TARGET) : $(SOURCE) ;
+}
+
+rule Object TARGET : SOURCE
+{
+	HDRRULE on $(SOURCE) = C.HdrRule ;
+	HDRSCAN on $(SOURCE) = $(C.HDRPATTERN) ;
+
+	MakeFileDir $(TARGET) ;
+	ObjectAction $(TARGET) : $(SOURCE) ;
+	Depends $(TARGET) : $(SOURCE) ;
+}
+
+rule Objects SOURCES
+{
+	local OBJECTS ;
+
+	for SOURCE in $(SOURCES)
+	{
+		local OBJECT = $(BUILD)/$(SOURCE:S=.o) ;
+
+		Object $(OBJECT) : $(SOURCE) ;
+		OBJECTS += $(OBJECT) ;
+	}
+
+	return $(OBJECTS) ;
+}
+
+rule Library TARGET : SOURCES
+{
+	# build object files
+	local OBJECTS = [ Objects $(SOURCES) ] ;
+
+	# build library
+	local LIBRARY = $(BUILD)/$(TARGET).a ;
+
+	MakeFileDir $(LIBRARY) ;
+	LibraryAction $(LIBRARY) : $(OBJECTS) ;
+	Depends $(LIBRARY) : $(OBJECTS) ;
+
+	# make alias
+	Alias $(TARGET) : $(LIBRARY) ;
+
+	# remember library path for linking
+	$(TARGET)_path = $(LIBRARY) ;
+
+	# remember library objects for coverage
+	$(TARGET)_objects = $(OBJECTS) ;
+}
+
+rule Application TARGET : SOURCES : LIBRARIES
+{
+	# build object files
+	local OBJECTS = [ Objects $(SOURCES) ] ;
+
+	# get binary path
+	local EXECUTABLE = $(BUILD)/$(TARGET).exe ;
+
+	# set libraries
+	LDFLAGS on $(EXECUTABLE) = $(LDFLAGS) $($(LIBRARIES)_path) ;
+
+	# build application
+	MakeFileDir $(EXECUTABLE) ;
+	LinkAction $(EXECUTABLE) : $(OBJECTS) ;
+	Depends $(EXECUTABLE) : $(OBJECTS) $(LIBRARIES) ;
+	
+	# make alias
+	Alias $(TARGET) : $(EXECUTABLE) ;
+
+	# remember executable path for running
+	$(TARGET)_path = $(EXECUTABLE) ;
+	
+	# remember executable objects for coverage
+	$(TARGET)_objects = $(OBJECTS) $($(LIBRARIES)_objects) ;
+}
+
+rule Test TARGET : SOURCE
+{
+	# make alias
+	Alias $(TARGET) : $(SOURCE) ;
+
+	# run tests
+	RunAction $(TARGET) : $($(SOURCE)_path) ;
+
+	# remember executable objects for coverage
+	$(TARGET)_objects = $($(SOURCE)_objects) ;
+}
+
+rule Coverage TARGET : SOURCE
+{
+	local FILES = $($(SOURCE)_objects:S=.gcda) ;
+
+	# disable "independent target" warnings
+	NotFile $(FILES) ;
+
+	CoverageAction $(TARGET) : $(FILES) ;
+	Depends $(TARGET) : $(SOURCE) ;
+}
