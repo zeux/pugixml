@@ -2249,10 +2249,12 @@ namespace pugi
 				{
 					std::string::size_type pos = from.find(*it);
 					
-					if (pos != std::string::npos && pos >= to.length())
+					if (pos == std::string::npos)
+						++it;
+					else if (pos >= to.length())
 						it = s.erase(it);
-					else if (pos != std::string::npos)
-						*it = to[pos];
+					else
+						*it++ = to[pos];
 				}
 				
 				return s;
