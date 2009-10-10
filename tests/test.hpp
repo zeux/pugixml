@@ -1,6 +1,13 @@
 #ifndef HEADER_TEST_HPP
 #define HEADER_TEST_HPP
 
+#include <string.h>
+
+inline bool test_string_equal(const char* lhs, const char* rhs)
+{
+	return (!lhs || !rhs) ? lhs == rhs : strcmp(lhs, rhs) == 0;
+}
+
 struct test_runner
 {
 	test_runner(const char* name)
@@ -55,5 +62,6 @@ struct dummy_fixture {};
 	TEST_FIXTURE(name, test_fixture_##name)
 
 #define CHECK(condition) if (condition) ; else throw #condition " is false"
+#define CHECK_STRING(value, expected) if (test_string_equal(value, expected)) ; else throw #value " is not equal to " #expected
 
 #endif
