@@ -1,6 +1,8 @@
 #include "common.hpp"
 
 #include <utility>
+#include <vector>
+#include <iterator>
 
 template <typename I> I move_iter(I base, int n)
 {
@@ -449,6 +451,238 @@ TEST_XML(dom_node_find_child_by_attribute, "<node><child1 attr='value1'/><child2
 
 	CHECK(node.find_child_by_attribute_w("*", "att?", "val*[0123456789]") == node.child("child1"));
 	CHECK(node.find_child_by_attribute_w("att?", "val*[0123456789]") == node.child("child1"));
+}
+
+TEST_XML(dom_node_all_elements_by_name, "<node><child><child/><child/></child></node>")
+{
+	std::vector<xml_node> v;
+
+	v.clear();
+	xml_node().all_elements_by_name("node", std::back_inserter(v));
+	CHECK(v.empty());
+
+	v.clear();
+	xml_node().all_elements_by_name_w("*", std::back_inserter(v));
+	CHECK(v.empty());
+
+	v.clear();
+	doc.all_elements_by_name("node", std::back_inserter(v));
+	CHECK(v.size() == 1 && v[0] == doc.child("node"));
+
+	v.clear();
+	doc.all_elements_by_name("child", std::back_inserter(v));
+	CHECK(v.size() == 3);
+	CHECK(v[0] == doc.child("node").child("child"));
+	CHECK(v[1] == doc.child("node").child("child").first_child());
+	CHECK(v[2] == doc.child("node").child("child").last_child());
+
+	v.clear();
+	doc.all_elements_by_name_w("*", std::back_inserter(v));
+	CHECK(v.size() == 4);
+	CHECK(v[0] == doc.child("node"));
+	CHECK(v[1] == doc.child("node").child("child"));
+	CHECK(v[2] == doc.child("node").child("child").first_child());
+	CHECK(v[3] == doc.child("node").child("child").last_child());
+}
+
+struct find_predicate_const
+{
+	bool result;
+
+	find_predicate_const(bool result): result(result)
+	{
+	}
+
+	template <typename T> bool operator()(const T&) const
+	{
+		return result;
+	}
+};
+
+struct find_predicate_prefix
+{
+	const char* prefix;
+
+	find_predicate_prefix(const char* prefix): prefix(prefix)
+	{
+	}
+
+	template <typename T> bool operator()(const T& obj) const
+	{
+		return strncmp(obj.name(), prefix, strlen(prefix)) == 0;
+	}
+};
+
+TEST_XML(dom_node_find_attribute, "<node attr1='0' attr2='1'/>")
+{
+	CHECK(xml_node().find_attribute(find_predicate_const(true)) == xml_attribute());
+
+	xml_node node = doc.child("node");
+
+	CHECK(doc.find_attribute(find_predicate_const(true)) == xml_attribute());
+	CHECK(node.find_attribute(find_predicate_const(true)) == node.first_attribute());
+	CHECK(node.find_attribute(find_predicate_const(false)) == xml_attribute());
+	CHECK(node.find_attribute(find_predicate_prefix("attr2")) == node.last_attribute());
+	CHECK(node.find_attribute(find_predicate_prefix("attr")) == node.first_attribute());
+}
+
+TEST_XML(dom_node_find_child, "<node><child1/><child2/></node>")
+{
+	CHECK(xml_node().find_child(find_predicate_const(true)) == xml_node());
+
+	xml_node node = doc.child("node");
+
+	CHECK(node.child("node").child("child1").find_child(find_predicate_const(true)) == xml_node());
+	CHECK(node.find_child(find_predicate_const(true)) == node.first_child());
+	CHECK(node.find_child(find_predicate_const(false)) == xml_node());
+	CHECK(node.find_child(find_predicate_prefix("child2")) == node.last_child());
+	CHECK(node.find_child(find_predicate_prefix("child")) == node.first_child());
+}
+
+TEST_XML(dom_node_find_node, "<node><child1/><child2/></node>")
+{
+	CHECK(xml_node().find_node(find_predicate_const(true)) == xml_node());
+
+	xml_node node = doc.child("node");
+
+	CHECK(node.child("node").child("child1").find_node(find_predicate_const(true)) == xml_node());
+	CHECK(node.find_node(find_predicate_const(true)) == node.first_child());
+	CHECK(node.find_node(find_predicate_const(false)) == xml_node());
+	CHECK(node.find_node(find_predicate_prefix("child2")) == node.last_child());
+	CHECK(node.find_node(find_predicate_prefix("child")) == node.first_child());
+	CHECK(doc.find_node(find_predicate_prefix("child")) == node.first_child());
+}
+
+TEST_XML(dom_node_path, "<node><child1>text<child2/></child1></node>")
+{
+	CHECK(xml_node().path() == "");
+	
+	CHECK(doc.path() == "");
+	CHECK(doc.child("node").path() == "/node");
+	CHECK(doc.child("node").child("child1").path() == "/node/child1");
+	CHECK(doc.child("node").child("child1").child("child2").path() == "/node/child1/child2");
+	CHECK(doc.child("node").child("child1").first_child().path() == "/node/child1/");
+	
+	CHECK(doc.child("node").child("child1").path('\\') == "\\node\\child1");
+}
+
+TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></node>")
+{
+	CHECK(xml_node().first_element_by_path("/") == xml_node());
+	
+	CHECK(doc.first_element_by_path("") == doc);
+	CHECK(doc.first_element_by_path("/") == doc);
+
+	CHECK(doc.first_element_by_path("/node/") == doc.child("node"));
+	CHECK(doc.first_element_by_path("node/") == doc.child("node"));
+	CHECK(doc.first_element_by_path("node") == doc.child("node"));
+	CHECK(doc.first_element_by_path("/node") == doc.child("node"));
+
+	CHECK(doc.first_element_by_path("/node/child1/child2").path() == "/node/child1/child2");
+	CHECK(doc.first_element_by_path("/node/child2") == xml_node());
+	
+	CHECK(doc.first_element_by_path("\\node\\child1", '\\') == doc.child("node").child("child1"));
+}
+
+struct test_walker: xml_tree_walker
+{
+	std::string log;
+	unsigned int call_count;
+	unsigned int stop_count;
+
+	test_walker(unsigned int stop_count = 0): call_count(0), stop_count(stop_count)
+	{
+	}
+
+	virtual bool begin(xml_node& node)
+	{
+		char buffer[32];
+		sprintf(buffer, "|%d <%s=%s", depth(), node.name(), node.value());
+
+		log += buffer;
+
+		return ++call_count != stop_count;
+	}
+
+	virtual bool for_each(xml_node& node)
+	{
+		char buffer[32];
+		sprintf(buffer, "|%d !%s=%s", depth(), node.name(), node.value());
+			
+		log += buffer;
+
+		return ++call_count != stop_count;
+	}
+
+	virtual bool end(xml_node& node)
+	{
+		char buffer[32];
+		sprintf(buffer, "|%d >%s=%s", depth(), node.name(), node.value());
+
+		log += buffer;
+
+		return ++call_count != stop_count;
+	}
+};
+
+TEST_XML(dom_node_traverse, "<node><child>text</child></node>")
+{
+	test_walker walker;
+
+	CHECK(doc.traverse(walker));
+
+	CHECK(walker.call_count == 5);
+	CHECK(walker.log == "|-1 <=|0 !node=|1 !child=|2 !=text|-1 >=");
+}
+
+TEST(dom_node_traverse_empty)
+{
+	test_walker walker;
+
+	CHECK(xml_node().traverse(walker));
+
+	CHECK(walker.call_count == 2);
+	CHECK(walker.log == "|-1 <=|-1 >=");
+}
+
+TEST_XML(dom_node_traverse_child, "<node><child>text</child></node>")
+{
+	test_walker walker;
+
+	CHECK(doc.child("node").traverse(walker));
+
+	CHECK(walker.call_count == 4);
+	CHECK(walker.log == "|-1 <node=|0 !child=|1 !=text|-1 >node=");
+}
+
+TEST_XML(dom_node_traverse_stop_begin, "<node><child>text</child></node>")
+{
+	test_walker walker(1);
+
+	CHECK(!doc.traverse(walker));
+
+	CHECK(walker.call_count == 1);
+	CHECK(walker.log == "|-1 <=");
+}
+
+TEST_XML(dom_node_traverse_stop_for_each, "<node><child>text</child></node>")
+{
+	test_walker walker(3);
+
+	CHECK(!doc.traverse(walker));
+
+	CHECK(walker.call_count == 3);
+	CHECK(walker.log == "|-1 <=|0 !node=|1 !child=");
+}
+
+TEST_XML(dom_node_traverse_stop_end, "<node><child>text</child></node>")
+{
+	test_walker walker(5);
+
+	CHECK(!doc.traverse(walker));
+
+	CHECK(walker.call_count == 5);
+	CHECK(walker.log == "|-1 <=|0 !node=|1 !child=|2 !=text|-1 >=");
 }
 
 TEST_XML_FLAGS(dom_offset_debug, "<?xml?><?pi?><!--comment--><node>pcdata<![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments | parse_declaration)
