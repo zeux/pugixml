@@ -2588,7 +2588,7 @@ namespace pugi
 
 	bool xml_node::traverse(xml_tree_walker& walker)
 	{
-		walker._depth = 0;
+		walker._depth = -1;
 		
 		if (!walker.begin(*this)) return false;
 
@@ -2596,6 +2596,8 @@ namespace pugi
 				
 		if (cur)
 		{
+			++walker._depth;
+
 			do 
 			{
 				if (!walker.for_each(cur))
