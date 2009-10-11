@@ -2664,7 +2664,7 @@ namespace pugi
 		}
 	}
 
-	void xml_node::print(xml_writer& writer, const char* indent, unsigned int flags, unsigned int depth)
+	void xml_node::print(xml_writer& writer, const char* indent, unsigned int flags, unsigned int depth) const
 	{
 		if (!_root) return;
 
@@ -2674,7 +2674,7 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
-	void xml_node::print(std::ostream& stream, const char* indent, unsigned int flags, unsigned int depth)
+	void xml_node::print(std::ostream& stream, const char* indent, unsigned int flags, unsigned int depth) const
 	{
 		if (!_root) return;
 
@@ -3035,7 +3035,7 @@ namespace pugi
 		return res;
 	}
 
-	void xml_document::save(xml_writer& writer, const char* indent, unsigned int flags)
+	void xml_document::save(xml_writer& writer, const char* indent, unsigned int flags) const
 	{
 		xml_buffered_writer buffered_writer(writer);
 
@@ -3054,7 +3054,7 @@ namespace pugi
 		node_output(buffered_writer, *this, indent, flags, 0);
 	}
 
-	bool xml_document::save_file(const char* name, const char* indent, unsigned int flags)
+	bool xml_document::save_file(const char* name, const char* indent, unsigned int flags) const
 	{
 		FILE* file = fopen(name, "wb");
 		if (!file) return false;

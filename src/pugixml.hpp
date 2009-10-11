@@ -1258,7 +1258,7 @@ namespace pugi
 		 * \param flags - formatting flags
 		 * \param depth - starting depth (used for indentation)
 		 */
-		void print(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
+		void print(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
 
 	#ifndef PUGIXML_NO_STL
 		/**
@@ -1270,7 +1270,7 @@ namespace pugi
 		 * \param depth - starting depth (used for indentation)
 		 * \deprecated Use print() with xml_writer_stream instead
 		 */
-		void print(std::ostream& os, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0);
+		void print(std::ostream& os, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
 	#endif
 
 		/**
@@ -1708,7 +1708,7 @@ namespace pugi
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
 		 */
-		void save(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default);
+		void save(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default) const;
 
 		/**
 		 * Save XML to file
@@ -1718,7 +1718,7 @@ namespace pugi
 		 * \param flags - formatting flags
 		 * \return success flag
 		 */
-		bool save_file(const char* name, const char* indent = "\t", unsigned int flags = format_default);
+		bool save_file(const char* name, const char* indent = "\t", unsigned int flags = format_default) const;
 
 		/**
 		 * Compute document order for the whole tree
