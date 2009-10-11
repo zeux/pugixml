@@ -2699,12 +2699,12 @@ namespace pugi
 
 		case node_element:
 		case node_declaration:
+		case node_pi:
 			return _root->name_insitu ? static_cast<int>(_root->name - buffer) : -1;
 
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
-		case node_pi:
 			return _root->value_insitu ? static_cast<int>(_root->value - buffer) : -1;
 
 		default:
