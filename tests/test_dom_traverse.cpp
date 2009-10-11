@@ -360,6 +360,7 @@ TEST_XML(dom_node_attribute, "<node attr1='0' attr2='1'/>")
 	CHECK(node.attribute("attr2") == node.last_attribute());
 
 	CHECK(node.attribute_w("*tt?[23456789]*") == node.attribute("attr2"));
+	CHECK(node.attribute_w("?") == xml_attribute());
 }
 
 TEST_XML(dom_node_next_previous_sibling, "<node><child1/><child2/><child3/></node>")
@@ -389,7 +390,9 @@ TEST_XML(dom_node_next_previous_sibling, "<node><child1/><child2/><child3/></nod
 	CHECK(child3.previous_sibling("child") == xml_node());
 
 	CHECK(child1.next_sibling_w("*[3456789]") == child3);
+	CHECK(child1.next_sibling_w("?") == xml_node());
 	CHECK(child3.previous_sibling_w("*[3456789]") == xml_node());
+	CHECK(child3.previous_sibling_w("?") == xml_node());
 }
 
 TEST_XML(dom_node_child_value, "<node><novalue/><child1>value1</child1><child2>value2<n/></child2><child3><![CDATA[value3]]></child3>value4</node>")
@@ -447,10 +450,14 @@ TEST_XML(dom_node_find_child_by_attribute, "<node><child1 attr='value1'/><child2
 	xml_node node = doc.child("node");
 
 	CHECK(node.find_child_by_attribute("child2", "attr", "value3") == node.last_child());
+	CHECK(node.find_child_by_attribute("child2", "attr3", "value3") == xml_node());
 	CHECK(node.find_child_by_attribute("attr", "value2") == node.child("child2"));
+	CHECK(node.find_child_by_attribute("attr3", "value") == xml_node());
 
 	CHECK(node.find_child_by_attribute_w("*", "att?", "val*[0123456789]") == node.child("child1"));
+	CHECK(node.find_child_by_attribute_w("*", "attr3", "val*[0123456789]") == xml_node());
 	CHECK(node.find_child_by_attribute_w("att?", "val*[0123456789]") == node.child("child1"));
+	CHECK(node.find_child_by_attribute_w("attr3", "val*[0123456789]") == xml_node());
 }
 
 TEST_XML(dom_node_all_elements_by_name, "<node><child><child/><child/></child></node>")
@@ -551,6 +558,8 @@ TEST_XML(dom_node_find_node, "<node><child1/><child2/></node>")
 	CHECK(node.find_node(find_predicate_prefix("child2")) == node.last_child());
 	CHECK(node.find_node(find_predicate_prefix("child")) == node.first_child());
 	CHECK(doc.find_node(find_predicate_prefix("child")) == node.first_child());
+	CHECK(doc.find_node(find_predicate_prefix("child2")) == node.last_child());
+	CHECK(doc.find_node(find_predicate_prefix("child3")) == xml_node());
 }
 
 TEST_XML(dom_node_path, "<node><child1>text<child2/></child1></node>")
@@ -582,6 +591,9 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 	CHECK(doc.first_element_by_path("/node/child2") == xml_node());
 	
 	CHECK(doc.first_element_by_path("\\node\\child1", '\\') == doc.child("node").child("child1"));
+
+	CHECK(doc.child("node").first_element_by_path("..") == doc);
+	CHECK(doc.child("node").first_element_by_path(".") == doc.child("node"));
 }
 
 struct test_walker: xml_tree_walker
@@ -601,7 +613,7 @@ struct test_walker: xml_tree_walker
 
 		log += buffer;
 
-		return ++call_count != stop_count;
+		return ++call_count != stop_count && xml_tree_walker::begin(node);
 	}
 
 	virtual bool for_each(xml_node& node)
@@ -611,7 +623,7 @@ struct test_walker: xml_tree_walker
 			
 		log += buffer;
 
-		return ++call_count != stop_count;
+		return ++call_count != stop_count && xml_tree_walker::end(node);
 	}
 
 	virtual bool end(xml_node& node)
@@ -633,6 +645,16 @@ TEST_XML(dom_node_traverse, "<node><child>text</child></node>")
 
 	CHECK(walker.call_count == 5);
 	CHECK(walker.log == "|-1 <=|0 !node=|1 !child=|2 !=text|-1 >=");
+}
+
+TEST_XML(dom_node_traverse_siblings, "<node><child/><child>text</child><child/></node>")
+{
+	test_walker walker;
+
+	CHECK(doc.traverse(walker));
+
+	CHECK(walker.call_count == 7);
+	CHECK(walker.log == "|-1 <=|0 !node=|1 !child=|1 !child=|2 !=text|1 !child=|-1 >=");
 }
 
 TEST(dom_node_traverse_empty)
