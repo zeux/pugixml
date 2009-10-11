@@ -3,6 +3,9 @@
 
 #include <string.h>
 #include <math.h>
+#include <sstream>
+
+#include "../src/pugixml.hpp"
 
 inline bool test_string_equal(const char* lhs, const char* rhs)
 {
@@ -12,6 +15,14 @@ inline bool test_string_equal(const char* lhs, const char* rhs)
 template <typename Node> inline bool test_node_name_value(const Node& node, const char* name, const char* value)
 {
 	return test_string_equal(node.name(), name) && test_string_equal(node.value(), value);
+}
+
+inline bool test_node(const pugi::xml_node& node, const char* contents)
+{
+	std::ostringstream oss;
+	node.print(oss, "", pugi::format_raw);
+
+	return oss.str() == contents;
 }
 
 struct test_runner
@@ -73,5 +84,6 @@ struct dummy_fixture {};
 #define CHECK_STRING(value, expected) if (test_string_equal(value, expected)) ; else throw #value " is not equal to " #expected
 #define CHECK_DOUBLE(value, expected) if (fabs(value - expected) < 1e-6) ; else throw #value " is not equal to " #expected
 #define CHECK_NAME_VALUE(node, name, value) if (test_node_name_value(node, name, value)) ; else throw #node " name/value do not match " #name " and " #value
+#define CHECK_NODE(node, expected) if (test_node(node, expected)) ; else throw #node " contents does not match " #expected
 
 #endif
