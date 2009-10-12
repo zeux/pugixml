@@ -1583,6 +1583,7 @@ namespace
 		
 		case node_pcdata:
 			text_output_escaped(writer, node.value(), opt1_to_type<0>());
+			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
 		case node_cdata:
