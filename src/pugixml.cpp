@@ -2426,7 +2426,7 @@ namespace pugi
 
 	void xml_node::remove_attribute(const xml_attribute& a)
 	{
-		if (!_root) return;
+		if (!_root || !a._attr) return;
 
 		// check that attribute belongs to *this
 		xml_attribute_struct* attr = a._attr;
