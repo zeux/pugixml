@@ -17,10 +17,10 @@ template <typename Node> inline bool test_node_name_value(const Node& node, cons
 	return test_string_equal(node.name(), name) && test_string_equal(node.value(), value);
 }
 
-inline bool test_node(const pugi::xml_node& node, const char* contents)
+inline bool test_node(const pugi::xml_node& node, const char* contents, const char* indent, unsigned int flags)
 {
 	std::ostringstream oss;
-	node.print(oss, "", pugi::format_raw);
+	node.print(oss, indent, flags);
 
 	return oss.str() == contents;
 }
@@ -80,10 +80,13 @@ struct dummy_fixture {};
 
 #define TEST_XML(name, xml) TEST_XML_FLAGS(name, xml, pugi::parse_default)
 
-#define CHECK(condition) if (condition) ; else throw #condition " is false"
-#define CHECK_STRING(value, expected) if (test_string_equal(value, expected)) ; else throw #value " is not equal to " #expected
-#define CHECK_DOUBLE(value, expected) if (fabs(value - expected) < 1e-6) ; else throw #value " is not equal to " #expected
-#define CHECK_NAME_VALUE(node, name, value) if (test_node_name_value(node, name, value)) ; else throw #node " name/value do not match " #name " and " #value
-#define CHECK_NODE(node, expected) if (test_node(node, expected)) ; else throw #node " contents does not match " #expected
+#define CHECK_TEXT(condition, text) if (condition) ; else throw text
+
+#define CHECK(condition) CHECK_TEXT(condition, #condition " is false")
+#define CHECK_STRING(value, expected) CHECK_TEXT(test_string_equal(value, expected), #value " is not equal to " #expected)
+#define CHECK_DOUBLE(value, expected) CHECK_TEXT(fabs(value - expected) < 1e-6, #value " is not equal to " #expected)
+#define CHECK_NAME_VALUE(node, name, value) CHECK_TEXT(test_node_name_value(node, name, value), #node " name/value do not match " #name " and " #value)
+#define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), #node " contents does not match " #expected)
+#define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, "", pugi::format_raw)
 
 #endif
