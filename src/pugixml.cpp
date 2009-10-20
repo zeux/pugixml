@@ -1668,13 +1668,20 @@ namespace
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
+			dest.set_value(source.value());
+			break;
+
 		case node_pi:
+			dest.set_name(source.name());
 			dest.set_value(source.value());
 			break;
 
 		case node_declaration:
 			dest.set_name(source.name());
-			dest.set_value(source.value());
+
+			for (xml_attribute a = source.first_attribute(); a; a = a.next_attribute())
+				dest.append_attribute(a.name()).set_value(a.value());
+
 			break;
 
 		default:
