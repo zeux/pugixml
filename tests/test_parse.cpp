@@ -90,7 +90,7 @@ TEST(parse_comments_error)
 {
 	xml_document doc;
 
-	unsigned int flag_sets[] = {parse_minimal, parse_minimal | parse_comments};
+	unsigned int flag_sets[] = {parse_minimal, parse_minimal | parse_comments, parse_minimal | parse_comments | parse_eol};
 
 	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
 	{
@@ -153,7 +153,7 @@ TEST(parse_cdata_error)
 {
 	xml_document doc;
 
-	unsigned int flag_sets[] = {parse_minimal, parse_minimal | parse_cdata};
+	unsigned int flag_sets[] = {parse_minimal, parse_minimal | parse_cdata, parse_minimal | parse_cdata | parse_eol};
 
 	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
 	{
@@ -265,8 +265,8 @@ TEST(parse_escapes_unicode)
 TEST(parse_escapes_error)
 {
 	xml_document doc;
-	CHECK(doc.load("<node>&#x03g;&#ab;&#quot</node>", parse_minimal | parse_escapes));
-	CHECK_STRING(doc.child_value("node"), "&#x03g;&#ab;&#quot");
+	CHECK(doc.load("<node>&#x03g;&#ab;&quot</node>", parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value("node"), "&#x03g;&#ab;&quot");
 }
 
 TEST(parse_attribute_quot)
