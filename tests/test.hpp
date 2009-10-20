@@ -42,6 +42,7 @@ struct test_runner
 	test_runner* _next;
 
 	static test_runner* _tests;
+	static size_t _memory_fail_threshold;
 };
 
 struct dummy_fixture {};
