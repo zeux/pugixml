@@ -275,3 +275,209 @@ TEST_XML(dom_node_remove_attribute, "<node a1='v1' a2='v2' a3='v3'><child a4='v4
 
 	CHECK_NODE(doc, "<node a2=\"v2\"><child /></node>");
 }
+
+TEST_XML(dom_node_append_child, "<node>foo<child/></node>")
+{
+	CHECK(xml_node().append_child() == xml_node());
+	CHECK(doc.child("node").first_child().append_child() == xml_node());
+	CHECK(doc.append_child(node_document) == xml_node());
+	CHECK(doc.append_child(node_null) == xml_node());
+	
+	xml_node n1 = doc.child("node").append_child();
+	CHECK(n1);
+	CHECK(n1.set_name("n1"));
+
+	xml_node n2 = doc.child("node").append_child();
+	CHECK(n2 && n1 != n2);
+	CHECK(n2.set_name("n2"));
+
+	xml_node n3 = doc.child("node").child("child").append_child(node_pcdata);
+	CHECK(n3 && n1 != n3 && n2 != n3);
+	CHECK(n3.set_value("n3"));
+	
+	xml_node n4 = doc.append_child(node_comment);
+	CHECK(n4 && n1 != n4 && n2 != n4 && n3 != n4);
+	CHECK(n4.set_value("n4"));
+
+	CHECK_NODE(doc, "<node>foo<child>n3</child><n1 /><n2 /></node><!--n4-->");
+}
+
+TEST_XML(dom_node_insert_child_after, "<node>foo<child/></node>")
+{
+	CHECK(xml_node().insert_child_after(node_element, xml_node()) == xml_node());
+	CHECK(doc.child("node").first_child().insert_child_after(node_element, xml_node()) == xml_node());
+	CHECK(doc.insert_child_after(node_document, xml_node()) == xml_node());
+	CHECK(doc.insert_child_after(node_null, xml_node()) == xml_node());
+
+	xml_node node = doc.child("node");
+	xml_node child = node.child("child");
+
+	CHECK(node.insert_child_after(node_element, node) == xml_node());
+	CHECK(child.insert_child_after(node_element, node) == xml_node());
+	
+	xml_node n1 = node.insert_child_after(node_element, child);
+	CHECK(n1 && n1 != node && n1 != child);
+	CHECK(n1.set_name("n1"));
+
+	xml_node n2 = node.insert_child_after(node_element, child);
+	CHECK(n2 && n2 != node && n2 != child && n2 != n1);
+	CHECK(n2.set_name("n2"));
+
+	xml_node n3 = node.insert_child_after(node_pcdata, n2);
+	CHECK(n3 && n3 != node && n3 != child && n3 != n1 && n3 != n2);
+	CHECK(n3.set_value("n3"));
+
+	xml_node n4 = node.insert_child_after(node_pi, node.first_child());
+	CHECK(n4 && n4 != node && n4 != child && n4 != n1 && n4 != n2 && n4 != n3);
+	CHECK(n4.set_name("n4"));
+
+	CHECK(child.insert_child_after(node_element, n3) == xml_node());
+
+	CHECK_NODE(doc, "<node>foo<?n4?><child /><n2 />n3<n1 /></node>");
+}
+
+TEST_XML(dom_node_insert_child_before, "<node>foo<child/></node>")
+{
+	CHECK(xml_node().insert_child_before(node_element, xml_node()) == xml_node());
+	CHECK(doc.child("node").first_child().insert_child_before(node_element, xml_node()) == xml_node());
+	CHECK(doc.insert_child_before(node_document, xml_node()) == xml_node());
+	CHECK(doc.insert_child_before(node_null, xml_node()) == xml_node());
+
+	xml_node node = doc.child("node");
+	xml_node child = node.child("child");
+
+	CHECK(node.insert_child_before(node_element, node) == xml_node());
+	CHECK(child.insert_child_before(node_element, node) == xml_node());
+	
+	xml_node n1 = node.insert_child_before(node_element, child);
+	CHECK(n1 && n1 != node && n1 != child);
+	CHECK(n1.set_name("n1"));
+
+	xml_node n2 = node.insert_child_before(node_element, child);
+	CHECK(n2 && n2 != node && n2 != child && n2 != n1);
+	CHECK(n2.set_name("n2"));
+
+	xml_node n3 = node.insert_child_before(node_pcdata, n2);
+	CHECK(n3 && n3 != node && n3 != child && n3 != n1 && n3 != n2);
+	CHECK(n3.set_value("n3"));
+
+	xml_node n4 = node.insert_child_before(node_pi, node.first_child());
+	CHECK(n4 && n4 != node && n4 != child && n4 != n1 && n4 != n2 && n4 != n3);
+	CHECK(n4.set_name("n4"));
+
+	CHECK(child.insert_child_before(node_element, n3) == xml_node());
+
+	CHECK_NODE(doc, "<node><?n4?>foo<n1 />n3<n2 /><child /></node>");
+}
+
+TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node>")
+{
+	xml_node().remove_child("a");
+	xml_node().remove_child(xml_node());
+	
+	xml_node node = doc.child("node");
+	xml_node child = node.child("child");
+
+	node.remove_child("a");
+	node.remove_child(xml_node());
+	node.remove_child(child.child("n4"));
+
+	CHECK_NODE(doc, "<node><n1 /><n2 /><n3 /><child><n4 /></child></node>");
+
+	node.remove_child("n1");
+	node.remove_child(node.child("n3"));
+	child.remove_child("n4");
+
+	CHECK_NODE(doc, "<node><n2 /><child /></node>");
+}
+
+TEST_XML(dom_node_append_copy, "<node>foo<child/></node>")
+{
+	CHECK(xml_node().append_copy(xml_node()) == xml_node());
+	CHECK(doc.child("node").first_child().append_copy(doc.child("node")) == xml_node());
+	CHECK(doc.append_copy(doc) == xml_node());
+	CHECK(doc.append_copy(xml_node()) == xml_node());
+	
+	xml_node n1 = doc.child("node").append_copy(doc.child("node").first_child());
+	CHECK(n1);
+	CHECK_STRING(n1.value(), "foo");
+	CHECK_NODE(doc, "<node>foo<child />foo</node>");
+
+	xml_node n2 = doc.child("node").append_copy(doc.child("node").child("child"));
+	CHECK(n2 && n2 != n1);
+	CHECK_STRING(n2.name(), "child");
+	CHECK_NODE(doc, "<node>foo<child />foo<child /></node>");
+
+	xml_node n3 = doc.child("node").child("child").append_copy(doc.child("node").first_child());
+	CHECK(n3 && n3 != n1 && n3 != n2);
+	CHECK_STRING(n3.value(), "foo");
+	CHECK_NODE(doc, "<node>foo<child>foo</child>foo<child /></node>");
+}
+
+TEST_XML(dom_node_insert_copy_after, "<node>foo<child/></node>")
+{
+	CHECK(xml_node().insert_copy_after(xml_node(), xml_node()) == xml_node());
+	CHECK(doc.child("node").first_child().insert_copy_after(doc.child("node"), doc.child("node")) == xml_node());
+	CHECK(doc.insert_copy_after(doc, doc) == xml_node());
+	CHECK(doc.insert_copy_after(xml_node(), doc.child("node")) == xml_node());
+	CHECK(doc.insert_copy_after(doc.child("node"), xml_node()) == xml_node());
+	
+	xml_node n1 = doc.child("node").insert_copy_after(doc.child("node").child("child"), doc.child("node").first_child());
+	CHECK(n1);
+	CHECK_STRING(n1.name(), "child");
+	CHECK_NODE(doc, "<node>foo<child /><child /></node>");
+
+	xml_node n2 = doc.child("node").insert_copy_after(doc.child("node").first_child(), doc.child("node").last_child());
+	CHECK(n2 && n2 != n1);
+	CHECK_STRING(n2.value(), "foo");
+	CHECK_NODE(doc, "<node>foo<child /><child />foo</node>");
+
+	xml_node n3 = doc.child("node").insert_copy_after(doc.child("node").first_child(), doc.child("node").first_child());
+	CHECK(n3 && n3 != n1 && n3 != n2);
+	CHECK_STRING(n3.value(), "foo");
+	CHECK_NODE(doc, "<node>foofoo<child /><child />foo</node>");
+}
+
+TEST_XML(dom_node_insert_copy_before, "<node>foo<child/></node>")
+{
+	CHECK(xml_node().insert_copy_before(xml_node(), xml_node()) == xml_node());
+	CHECK(doc.child("node").first_child().insert_copy_before(doc.child("node"), doc.child("node")) == xml_node());
+	CHECK(doc.insert_copy_before(doc, doc) == xml_node());
+	CHECK(doc.insert_copy_before(xml_node(), doc.child("node")) == xml_node());
+	CHECK(doc.insert_copy_before(doc.child("node"), xml_node()) == xml_node());
+	
+	xml_node n1 = doc.child("node").insert_copy_before(doc.child("node").child("child"), doc.child("node").first_child());
+	CHECK(n1);
+	CHECK_STRING(n1.name(), "child");
+	CHECK_NODE(doc, "<node><child />foo<child /></node>");
+
+	xml_node n2 = doc.child("node").insert_copy_before(doc.child("node").first_child(), doc.child("node").last_child());
+	CHECK(n2 && n2 != n1);
+	CHECK_STRING(n2.name(), "child");
+	CHECK_NODE(doc, "<node><child />foo<child /><child /></node>");
+
+	xml_node n3 = doc.child("node").insert_copy_before(doc.child("node").first_child().next_sibling(), doc.child("node").first_child());
+	CHECK(n3 && n3 != n1 && n3 != n2);
+	CHECK_STRING(n3.value(), "foo");
+	CHECK_NODE(doc, "<node>foo<child />foo<child /><child /></node>");
+}
+
+TEST_XML(dom_node_copy_recursive, "<node>foo<child/></node>")
+{
+	doc.child("node").append_copy(doc.child("node"));
+	CHECK_NODE(doc, "<node>foo<child /><node>foo<child /></node></node>");
+}
+
+TEST_XML(dom_node_copy_crossdoc, "<node/>")
+{
+	xml_document newdoc;
+	newdoc.append_copy(doc.child("node"));
+	CHECK_NODE(doc, "<node />");
+	CHECK_NODE(newdoc, "<node />");
+}
+
+TEST_XML_FLAGS(dom_node_copy_types, "<root><?xml version='1.0'?><?pi value?><!--comment--><node id='1'>pcdata<![CDATA[cdata]]></node></root>", parse_default | parse_pi | parse_comments | parse_declaration)
+{
+	doc.append_copy(doc.child("root"));
+	CHECK_NODE(doc, "<root><?xml version=\"1.0\"?><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?xml version=\"1.0\"?><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>");
+}
