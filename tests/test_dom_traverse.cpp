@@ -724,3 +724,27 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><?pi?><!--comment--><node>pcdata<![CDAT
 	CHECK((cit++)->offset_debug() == 33);
 	CHECK((cit++)->offset_debug() == 48);
 }
+
+TEST_XML(dom_node_wildcard_cset, "<node c='1'/>")
+{
+	xml_node node = doc.child("node");
+
+	CHECK(node.attribute_w("[A-Z]").as_int() == 0);
+	CHECK(node.attribute_w("[a-z]").as_int() == 1);
+	CHECK(node.attribute_w("[A-z]").as_int() == 1);
+	CHECK(node.attribute_w("[z-a]").as_int() == 0);
+	CHECK(node.attribute_w("[a-zA-Z]").as_int() == 1);
+	CHECK(node.attribute_w("[!A-Z]").as_int() == 1);
+	CHECK(node.attribute_w("[!A-Za-z]").as_int() == 0);
+}
+
+TEST_XML(dom_node_wildcard_star, "<node cd='1'/>")
+{
+	xml_node node = doc.child("node");
+
+	CHECK(node.attribute_w("*").as_int() == 1);
+	CHECK(node.attribute_w("?d*").as_int() == 1);
+	CHECK(node.attribute_w("?c*").as_int() == 0);
+	CHECK(node.attribute_w("*?*c*").as_int() == 0);
+	CHECK(node.attribute_w("*?*d*").as_int() == 1);
+}

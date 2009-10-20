@@ -273,6 +273,8 @@ TEST(parse_escapes_error)
 	xml_document doc;
 	CHECK(doc.load("<node>&#x03g;&#ab;&quot</node>", parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value("node"), "&#x03g;&#ab;&quot");
+
+	CHECK(!doc.load("<node id='&#x12"));
 }
 
 TEST(parse_attribute_spaces)
@@ -388,6 +390,8 @@ TEST(parse_tag_error)
 {
 	xml_document doc;
 	CHECK(doc.load("<", parse_minimal).status == status_unrecognized_tag);
+	CHECK(doc.load("<!", parse_minimal).status == status_unrecognized_tag);
+	CHECK(doc.load("<!D", parse_minimal).status == status_unrecognized_tag);
 	CHECK(doc.load("<#", parse_minimal).status == status_unrecognized_tag);
 	CHECK(doc.load("<node#", parse_minimal).status == status_bad_start_element);
 	CHECK(doc.load("<node", parse_minimal).status == status_bad_start_element);
@@ -442,4 +446,31 @@ TEST(parse_declaration_error)
 	}
 	
 	CHECK(doc.load("<?xml version='1?>", parse_minimal | parse_declaration).status == status_bad_attribute);
+}
+
+TEST(parse_doctype_skip)
+{
+	xml_document doc;
+	CHECK(doc.load("<!DOCTYPE doc>") && !doc.first_child());
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM 'foo'>") && !doc.first_child());
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM \"foo\">") && !doc.first_child());
+	CHECK(doc.load("<!DOCTYPE doc PUBLIC \"foo\" 'bar'>") && !doc.first_child());
+	CHECK(doc.load("<!DOCTYPE doc PUBLIC \"foo'\">") && !doc.first_child());
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>]>") && !doc.first_child());
+
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>]><node/>"));
+	CHECK_NODE(doc, "<node />");
+}
+
+TEST(parse_doctype_error)
+{
+	xml_document doc;
+	CHECK(doc.load("<!DOCTYPE").status == status_bad_doctype);
+	CHECK(doc.load("<!DOCTYPE doc").status == status_bad_doctype);
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM 'foo").status == status_bad_doctype);
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM \"foo").status == status_bad_doctype);
+	CHECK(doc.load("<!DOCTYPE doc PUBLIC \"foo\" 'bar").status == status_bad_doctype);
+	CHECK(doc.load("<!DOCTYPE doc PUBLIC \"foo'\"").status == status_bad_doctype);
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY").status == status_bad_doctype);
+	CHECK(doc.load("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>").status == status_bad_doctype);
 }
