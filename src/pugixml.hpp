@@ -151,8 +151,8 @@ namespace pugi
 	const unsigned int parse_eol				= 0x0020;
 	
  	/**
- 	 * This flag determines if attribute value normalization should be performed for all attributes,
- 	 * assuming that their type is not CDATA. This means, that:
+ 	 * This flag determines if attribute value normalization should be performed for all attributes.
+ 	 * This means, that:
  	 * 1. Whitespace characters (new line, tab and space) are replaced with space (' ')
  	 * 2. Afterwards sequences of spaces are replaced with a single space
  	 * 3. Leading/trailing whitespace characters are trimmed
@@ -162,11 +162,10 @@ namespace pugi
  	const unsigned int parse_wnorm_attribute	= 0x0040;
 
  	/**
- 	 * This flag determines if attribute value normalization should be performed for all attributes,
- 	 * assuming that their type is CDATA. This means, that whitespace characters (new line, tab and
- 	 * space) are replaced with space (' '). Note, that the actions performed while this flag is on
- 	 * are also performed if parse_wnorm_attribute is on, so this flag has no effect if
- 	 * parse_wnorm_attribute flag is set.
+ 	 * This flag determines if attribute value normalization should be performed for all attributes.
+ 	 * This means, that whitespace characters (new line, tab and space) are replaced with space (' ').
+ 	 * Note, that the actions performed while this flag is on are also performed if parse_wnorm_attribute
+ 	 * is on, so this flag has no effect if parse_wnorm_attribute flag is set.
  	 * 
  	 * This flag is on by default.
  	 */
