@@ -27,6 +27,13 @@ TEST(document_load_stream_error)
 	
 	std::ifstream fs2("con");
 	CHECK(doc.load(fs2).status == status_io_error);
+	
+	std::ifstream fs3("nul");
+	CHECK(doc.load(fs3).status == status_io_error);
+
+	test_runner::_memory_fail_threshold = 1;
+	std::istringstream iss("<node/>");
+	CHECK(doc.load(iss).status == status_out_of_memory);
 }
 
 TEST(document_load_string)
@@ -65,6 +72,10 @@ TEST(document_load_file_error)
 
 	CHECK(doc.load_file("").status == status_file_not_found);
 	CHECK(doc.load_file("con").status == status_io_error);
+	CHECK(doc.load_file("nul").status == status_io_error);
+
+	test_runner::_memory_fail_threshold = 1;
+	CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory);
 }
 
 TEST_XML(document_save, "<node/>")
@@ -119,7 +130,9 @@ TEST(document_parse)
 
 TEST(document_parse_transfer_ownership)
 {
-	char* text = static_cast<char*>(malloc(strlen("<node/>") + 1));
+	allocation_function alloc = get_memory_allocation_function();
+
+	char* text = static_cast<char*>(alloc(strlen("<node/>") + 1));
 	CHECK(text);
 
 	strcpy(text, "<node/>");
