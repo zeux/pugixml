@@ -409,7 +409,6 @@ namespace
 		else if (*str < 0xE0) length = 2;
 		else if (*str < 0xF0) length = 3;
 		else if (*str < 0xF8) length = 4;
-		else if (*str < 0xFC) length = 5;
 		else
 		{
 			ch = ' ';
@@ -421,9 +420,6 @@ namespace
 		// Scary scary fall throughs.
 		switch (length) 
 		{
-			case 5:
-				ch <<= 6;
-				ch += (*str++ & UTF8_BYTE_MASK_READ);
 			case 4:
 				ch <<= 6;
 				ch += (*str++ & UTF8_BYTE_MASK_READ);
@@ -972,14 +968,11 @@ namespace
 									cursor->name = mark;
 								}
 
-								if (is_chartype(ch, ct_space))
-								{
-									SKIPWS();
-									CHECK_ERROR(status_bad_pi, s);
+								// ch is a whitespace character, skip whitespaces
+								SKIPWS();
+								CHECK_ERROR(status_bad_pi, s);
 	
-									mark = s;
-								}
-								else mark = 0;
+								mark = s;
 
 								SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
 								CHECK_ERROR(status_bad_pi, s);
