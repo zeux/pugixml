@@ -2001,6 +2001,22 @@ namespace pugi
      * function you set via this function.
      */
     void PUGIXML_FUNCTION set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
+    
+    /**
+     * Get current memory allocation function
+     *
+     * \return memory allocation function
+     * \see set_memory_management_functions
+     */
+    allocation_function PUGIXML_FUNCTION get_memory_allocation_function();
+
+    /**
+     * Get current memory deallocation function
+     *
+     * \return memory deallocation function
+     * \see set_memory_management_functions
+     */
+    deallocation_function PUGIXML_FUNCTION get_memory_deallocation_function();
 }
 
 // Inline implementation

@@ -3110,4 +3110,14 @@ namespace pugi
     	global_allocate = allocate;
     	global_deallocate = deallocate;
     }
+
+    allocation_function PUGIXML_FUNCTION get_memory_allocation_function()
+    {
+    	return global_allocate;
+    }
+
+    deallocation_function PUGIXML_FUNCTION get_memory_deallocation_function()
+    {
+    	return global_deallocate;
+    }
 }
