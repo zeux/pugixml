@@ -233,6 +233,12 @@ TEST(parse_pcdata_skip_ext)
 	CHECK(doc.first_child().type() == node_element);
 }
 
+TEST(parse_pcdata_error)
+{
+	xml_document doc;
+	CHECK(doc.load("<root>pcdata", parse_minimal).status == status_end_element_mismatch);
+}
+
 TEST(parse_escapes_skip)
 {
 	xml_document doc;
@@ -267,6 +273,17 @@ TEST(parse_escapes_error)
 	xml_document doc;
 	CHECK(doc.load("<node>&#x03g;&#ab;&quot</node>", parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value("node"), "&#x03g;&#ab;&quot");
+}
+
+TEST(parse_attribute_spaces)
+{
+	xml_document doc;
+	CHECK(doc.load("<node id1='v1' id2 ='v2' id3= 'v3' id4 = 'v4' id5 \n\r\t = \r\t\n 'v5' />", parse_minimal));
+	CHECK_STRING(doc.child("node").attribute("id1").value(), "v1");
+	CHECK_STRING(doc.child("node").attribute("id2").value(), "v2");
+	CHECK_STRING(doc.child("node").attribute("id3").value(), "v3");
+	CHECK_STRING(doc.child("node").attribute("id4").value(), "v4");
+	CHECK_STRING(doc.child("node").attribute("id5").value(), "v5");
 }
 
 TEST(parse_attribute_quot)
@@ -308,8 +325,35 @@ TEST(parse_attribute_eol_wconv)
 TEST(parse_attribute_wnorm)
 {
 	xml_document doc;
-	CHECK(doc.load("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>", parse_minimal | parse_wnorm_attribute));
-	CHECK_STRING(doc.child("node").attribute("id").value(), "val1 val2 val3 val4");
+
+	for (int eol = 0; eol < 2; ++eol)
+		for (int wconv = 0; wconv < 2; ++wconv)
+		{
+			unsigned int flags = parse_minimal | parse_wnorm_attribute | (eol ? parse_eol : 0) | (wconv ? parse_wconv_attribute : 0);
+			CHECK(doc.load("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>", flags));
+			CHECK_STRING(doc.child("node").attribute("id").value(), "val1 val2 val3 val4");
+		}
+}
+
+TEST(parse_attribute_variations)
+{
+	xml_document doc;
+
+	for (int wnorm = 0; wnorm < 2; ++wnorm)
+		for (int eol = 0; eol < 2; ++eol)
+			for (int wconv = 0; wconv < 2; ++wconv)
+				for (int escapes = 0; escapes < 2; ++escapes)
+				{
+					unsigned int flags = parse_minimal;
+					
+					 flags |= (wnorm ? parse_wnorm_attribute : 0);
+					 flags |= (eol ? parse_eol : 0);
+					 flags |= (wconv ? parse_wconv_attribute : 0);
+					 flags |= (escapes ? parse_escapes : 0);
+
+					CHECK(doc.load("<node id='1'/>", flags));
+					CHECK_STRING(doc.child("node").attribute("id").value(), "1");
+				}
 }
 
 TEST(parse_attribute_error)
@@ -322,6 +366,8 @@ TEST(parse_attribute_error)
 	CHECK(doc.load("<node id=\"'/>", parse_minimal).status == status_bad_attribute);
 	CHECK(doc.load("<node id='\"/>", parse_minimal).status == status_bad_attribute);
 	CHECK(doc.load("<node id='\"/>", parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load("<node #/>", parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load("<node#/>", parse_minimal).status == status_bad_start_element);
 }
 
 TEST(parse_tag_single)

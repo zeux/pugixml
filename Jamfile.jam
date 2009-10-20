@@ -10,7 +10,7 @@ include "Jamrules.jam" ;
 BUILD = build/mingw/debug ;
 CCFLAGS = -fprofile-arcs -ftest-coverage ;
 LDFLAGS = -fprofile-arcs ;
-GCOVFLAGS = -n ;
+GCOVFLAGS = ;
 
 Library pugixml : src/pugixml.cpp src/pugixpath.cpp ;
 Application tests : tests/main.cpp [ Glob tests : test_*.cpp ] : pugixml ;

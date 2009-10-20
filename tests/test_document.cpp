@@ -129,3 +129,33 @@ TEST(document_parse_transfer_ownership)
 	CHECK(doc.parse(transfer_ownership_tag(), text));
 	CHECK_NODE(doc, "<node />");
 }
+
+TEST(document_parse_result_bool)
+{
+	xml_parse_result result;
+
+	result.status = status_ok;
+	CHECK(result);
+	CHECK(!!result);
+	CHECK(result == true);
+
+	for (int i = 1; i < 20; ++i)
+	{
+		result.status = (xml_parse_status)i;
+		CHECK(!result);
+		CHECK(result == false);
+	}
+}
+
+TEST(document_parse_result_description)
+{
+	xml_parse_result result;
+
+	for (int i = 0; i < 20; ++i)
+	{
+		result.status = (xml_parse_status)i;
+
+		CHECK(result.description() != 0);
+		CHECK(result.description()[0] != 0);
+	}
+}
