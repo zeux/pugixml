@@ -355,3 +355,45 @@ TEST(parse_tag_error)
 	CHECK(doc.load("<node></node ", parse_minimal).status == status_bad_end_element);
 	CHECK(doc.load("<node></nodes>", parse_minimal).status == status_end_element_mismatch);
 }
+
+TEST(parse_declaration_skip)
+{
+	xml_document doc;
+	CHECK(doc.load("<?xml?><?xml version='1.0'?>", parse_minimal));
+	CHECK(!doc.first_child());
+}
+
+TEST(parse_declaration_parse)
+{
+	xml_document doc;
+	CHECK(doc.load("<?xml?><?xml version='1.0'?>", parse_minimal | parse_declaration));
+
+	xml_node d1 = doc.first_child();
+	xml_node d2 = doc.last_child();
+
+	CHECK(d1 != d2);
+	CHECK(d1.type() == node_declaration);
+	CHECK_STRING(d1.name(), "xml");
+	CHECK(d2.type() == node_declaration);
+	CHECK_STRING(d2.name(), "xml");
+	CHECK_STRING(d2.attribute("version").value(), "1.0");
+}
+
+TEST(parse_declaration_error)
+{
+	xml_document doc;
+
+	unsigned int flag_sets[] = {parse_minimal, parse_minimal | parse_declaration};
+
+	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
+	{
+		unsigned int flags = flag_sets[i];
+
+		CHECK(doc.load("<?xml", flags).status == status_bad_pi);
+		CHECK(doc.load("<?xml?", flags).status == status_bad_pi);
+		CHECK(doc.load("<?xml>", flags).status == status_bad_pi);
+		CHECK(doc.load("<?xml version='1>", flags).status == status_bad_pi);
+	}
+	
+	CHECK(doc.load("<?xml version='1?>", parse_minimal | parse_declaration).status == status_bad_attribute);
+}

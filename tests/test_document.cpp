@@ -1,5 +1,7 @@
 #include "common.hpp"
 
+#include <fstream>
+
 TEST(document_create)
 {
 	pugi::xml_document doc;
@@ -14,6 +16,17 @@ TEST(document_load_stream)
 	std::istringstream iss("<node/>");
 	CHECK(doc.load(iss));
 	CHECK_NODE(doc, "<node />");
+}
+
+TEST(document_load_stream_error)
+{
+	pugi::xml_document doc;
+
+	std::ifstream fs1("");
+	CHECK(doc.load(fs1).status == status_io_error);
+	
+	std::ifstream fs2("con");
+	CHECK(doc.load(fs2).status == status_io_error);
 }
 
 TEST(document_load_string)
@@ -44,6 +57,14 @@ TEST(document_load_file_large)
 	oss << "</node>";
 
 	CHECK_NODE(doc, oss.str().c_str());
+}
+
+TEST(document_load_file_error)
+{
+	pugi::xml_document doc;
+
+	CHECK(doc.load_file("").status == status_file_not_found);
+	CHECK(doc.load_file("con").status == status_io_error);
 }
 
 TEST_XML(document_save, "<node/>")
