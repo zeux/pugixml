@@ -185,5 +185,35 @@ TEST(xpath_boolean_false)
 	CHECK_XPATH_FAIL("false(1)");
 }
 
+TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-uk'><subchild/></child></node><foo><bar/></foo>")
+{
+	xml_node c;
+	
+	// lang with 0 arguments
+	CHECK_XPATH_FAIL("lang()");
+
+	// lang with 1 argument, no language
+	CHECK_XPATH_BOOLEAN(c, "lang('en')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("foo"), "lang('en')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("foo"), "lang('')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("foo").child("bar"), "lang('en')", false);
+	
+	// lang with 1 argument, same language/prefix
+	CHECK_XPATH_BOOLEAN(doc.child("node"), "lang('en')", true);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child"), "lang('ru-uk')", true);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child"), "lang('ru')", true);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child").child("subchild"), "lang('ru')", true);
+
+	// lang with 1 argument, different language/prefix
+	CHECK_XPATH_BOOLEAN(doc.child("node"), "lang('')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("node"), "lang('e')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child"), "lang('en')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child"), "lang('ru-gb')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child"), "lang('r')", false);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child").child("subchild"), "lang('en')", false);
+
+	// lang with 2 arguments
+	CHECK_XPATH_FAIL("lang(1, 2)");
+}
+
 // $$$: string value of <node>123<child>789</child>100</node> should be 123789100 (?)
-// $$$: type -> node set conversion seems to be guarded via assert instead of exception
