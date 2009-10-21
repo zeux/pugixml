@@ -820,6 +820,7 @@ namespace pugi
 
 		void contents_clear()
 		{
+			if (m_cur_lexeme_contents) m_cur_lexeme_contents[0] = 0;
 			m_clc_size = 0;
 		}
 
@@ -1434,6 +1435,8 @@ namespace pugi
 
 		void step_push(xpath_node_set& ns, const xml_attribute& a, const xml_node& parent)
 		{
+			if (!a) return;
+
 			// There are no attribute nodes corresponding to attributes that declare namespaces
 			// That is, "xmlns:..." or "xmlns"
 			if (!strncmp(a.name(), "xmlns", 5) && (a.name()[5] == 0 || a.name()[5] == ':')) return;
@@ -1461,6 +1464,8 @@ namespace pugi
 		
 		void step_push(xpath_node_set& ns, const xml_node& n)
 		{
+			if (!n) return;
+
 			switch (m_test)
 			{
 			case nodetest_name:
