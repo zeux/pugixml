@@ -1086,7 +1086,7 @@ namespace pugi
 
 		const char* contents() const
 		{
-			return m_cur_lexeme_contents;
+			return m_cur_lexeme_contents ? m_cur_lexeme_contents : "";
 		}
 	};
 
