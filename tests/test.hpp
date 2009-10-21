@@ -46,6 +46,15 @@ inline bool test_xpath_number(const pugi::xml_node& node, const char* query, dou
 	return fabs(q.evaluate_number(node) - expected) < 1e-8f;
 }
 
+inline bool test_xpath_number_nan(const pugi::xml_node& node, const char* query)
+{
+	pugi::xpath_query q(query);
+
+	double r = q.evaluate_number(node);
+
+	return r != r;
+}
+
 inline bool test_xpath_fail_compile(const char* query)
 {
 	try
@@ -127,6 +136,7 @@ struct dummy_fixture {};
 #define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
 #define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
 #define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
+#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), #query " does not evaluate to NaN in context " #node)
 #define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), #query " should not compile")
 
 #endif
