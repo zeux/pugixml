@@ -1944,9 +1944,7 @@ namespace pugi
 				
 				std::string lang = m_left->eval_string(c);
 				
-				xml_node n = c.n.node();
-				
-				while (n.type() != node_document)
+				for (xml_node n = c.n.node(); n; n = n.parent())
 				{
 					xml_attribute a = n.attribute("xml:lang");
 					
@@ -1955,9 +1953,9 @@ namespace pugi
 						const char* value = a.value();
 						
 						// strnicmp / strncasecmp is not portable
-						for (std::string::iterator it = lang.begin(); it != lang.end(); ++it)
+						for (const char* lit = lang.c_str(); *lit; ++lit)
 						{
-							if (tolower(*it) != tolower(*value)) return false;
+							if (tolower(*lit) != tolower(*value)) return false;
 							++value;
 						}
 						
