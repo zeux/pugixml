@@ -275,6 +275,13 @@ TEST(parse_escapes_error)
 	CHECK_STRING(doc.child_value("node"), "&#x03g;&#ab;&quot");
 
 	CHECK(!doc.load("<node id='&#x12"));
+	CHECK(!doc.load("<node id='&g"));
+	CHECK(!doc.load("<node id='&gt"));
+	CHECK(!doc.load("<node id='&l"));
+	CHECK(!doc.load("<node id='&lt"));
+	CHECK(!doc.load("<node id='&a"));
+	CHECK(!doc.load("<node id='&amp"));
+	CHECK(!doc.load("<node id='&apos"));
 }
 
 TEST(parse_attribute_spaces)
