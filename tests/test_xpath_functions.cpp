@@ -185,7 +185,7 @@ TEST(xpath_boolean_false)
 	CHECK_XPATH_FAIL("false(1)");
 }
 
-TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-uk'><subchild/></child></node><foo><bar/></foo>")
+TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-UK'><subchild/></child></node><foo><bar/></foo>")
 {
 	xml_node c;
 	
@@ -203,6 +203,7 @@ TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-uk'><subch
 	CHECK_XPATH_BOOLEAN(doc.child("node").child("child"), "lang('ru-uk')", true);
 	CHECK_XPATH_BOOLEAN(doc.child("node").child("child"), "lang('ru')", true);
 	CHECK_XPATH_BOOLEAN(doc.child("node").child("child").child("subchild"), "lang('ru')", true);
+	CHECK_XPATH_BOOLEAN(doc.child("node").child("child").child("subchild"), "lang('RU')", true);
 
 	// lang with 1 argument, different language/prefix
 	CHECK_XPATH_BOOLEAN(doc.child("node"), "lang('')", false);
