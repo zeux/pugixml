@@ -25,6 +25,40 @@ inline bool test_node(const pugi::xml_node& node, const char* contents, const ch
 	return oss.str() == contents;
 }
 
+inline bool test_xpath_string(const pugi::xml_node& node, const char* query, const char* expected)
+{
+	pugi::xpath_query q(query);
+
+	return q.evaluate_string(node) == expected;
+}
+
+inline bool test_xpath_boolean(const pugi::xml_node& node, const char* query, bool expected)
+{
+	pugi::xpath_query q(query);
+
+	return q.evaluate_boolean(node) == expected;
+}
+
+inline bool test_xpath_number(const pugi::xml_node& node, const char* query, double expected)
+{
+	pugi::xpath_query q(query);
+
+	return fabs(q.evaluate_number(node) - expected) < 1e-8f;
+}
+
+inline bool test_xpath_fail_compile(const char* query)
+{
+	try
+	{
+		pugi::xpath_query q(query);
+		return false;
+	}
+	catch (const pugi::xpath_exception& e)
+	{
+		return true;
+	}
+}
+
 struct test_runner
 {
 	test_runner(const char* name)
@@ -89,5 +123,10 @@ struct dummy_fixture {};
 #define CHECK_NAME_VALUE(node, name, value) CHECK_TEXT(test_node_name_value(node, name, value), #node " name/value do not match " #name " and " #value)
 #define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), #node " contents does not match " #expected)
 #define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, "", pugi::format_raw)
+
+#define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
+#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
+#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
+#define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), #query " should not compile")
 
 #endif
