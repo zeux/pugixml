@@ -62,7 +62,7 @@ inline bool test_xpath_fail_compile(const char* query)
 		pugi::xpath_query q(query);
 		return false;
 	}
-	catch (const pugi::xpath_exception& e)
+	catch (const pugi::xpath_exception&)
 	{
 		return true;
 	}

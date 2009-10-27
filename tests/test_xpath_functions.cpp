@@ -218,6 +218,46 @@ TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-UK'><subch
 	CHECK_XPATH_FAIL("lang(1, 2)");
 }
 
+TEST_XML(xpath_string_string, "<node>123<child id='1'>789</child><child><![CDATA[200]]></child>100</node>")
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// string with 0 arguments
+	CHECK_XPATH_STRING(c, "string()", "");
+	CHECK_XPATH_STRING(n.child("child"), "string()", "789");
+
+	// string with 1 node-set argument
+	CHECK_XPATH_STRING(n, "string(child)", "789");
+	CHECK_XPATH_STRING(n, "string(child/@id)", "1");
+	CHECK_XPATH_STRING(n, "string(.)", "123789200100");
+
+	// string with 1 number argument
+	CHECK_XPATH_STRING(c, "string(0 div 0)", "NaN");
+	CHECK_XPATH_STRING(c, "string(0)", "0");
+	CHECK_XPATH_STRING(c, "string(-0)", "0");
+	CHECK_XPATH_STRING(c, "string(1 div 0)", "Infinity");
+	CHECK_XPATH_STRING(c, "string(-1 div 0)", "-Infinity");
+	CHECK_XPATH_STRING(c, "string(1234567)", "1234567");
+	CHECK_XPATH_STRING(c, "string(-1234567)", "-1234567");
+	CHECK_XPATH_STRING(c, "string(1234.5678)", "1234.5678");
+	CHECK_XPATH_STRING(c, "string(-1234.5678)", "-1234.5678");
+	CHECK_XPATH_STRING(c, "string(0.5678)", "0.5678");
+	CHECK_XPATH_STRING(c, "string(-0.5678)", "-0.5678");
+	CHECK_XPATH_STRING(c, "string(0.0)", "0");
+	CHECK_XPATH_STRING(c, "string(-0.0)", "0");
+
+	// string with 1 boolean argument
+	CHECK_XPATH_STRING(c, "string(true())", "true");
+	CHECK_XPATH_STRING(c, "string(false())", "false");
+
+	// string with 1 string argument
+	CHECK_XPATH_STRING(c, "string('abc')", "abc");
+
+	// string with 2 arguments
+	CHECK_XPATH_FAIL("string(1, 2)");
+}
+
 TEST(xpath_string_concat)
 {
 	xml_node c;
@@ -241,4 +281,220 @@ TEST(xpath_string_concat)
 	CHECK_XPATH_STRING(c, "concat('a', 'b', 'c', 'd', 'e', 'f', 'g')", "abcdefg");
 }
 
-// $$$: string value of <node>123<child>789</child>100</node> should be 123789100 (?)
+TEST(xpath_string_starts_with)
+{
+	xml_node c;
+
+	// starts-with with 0 arguments
+	CHECK_XPATH_FAIL("starts-with()");
+
+	// starts-with with 1 argument
+	CHECK_XPATH_FAIL("starts-with('a')");
+
+	// starts-with with 2 arguments
+	CHECK_XPATH_BOOLEAN(c, "starts-with('abc', '')", true);
+	CHECK_XPATH_BOOLEAN(c, "starts-with('abc', 'a')", true);
+	CHECK_XPATH_BOOLEAN(c, "starts-with('abc', 'abc')", true);
+	CHECK_XPATH_BOOLEAN(c, "starts-with('abc', 'abcd')", false);
+	CHECK_XPATH_BOOLEAN(c, "starts-with('bc', 'c')", false);
+	CHECK_XPATH_BOOLEAN(c, "starts-with('', 'c')", false);
+	CHECK_XPATH_BOOLEAN(c, "starts-with('', '')", true);
+
+	// starts-with with 3 arguments
+	CHECK_XPATH_FAIL("starts-with('a', 'b', 'c')");
+}
+
+TEST(xpath_string_contains)
+{
+	xml_node c;
+
+	// contains with 0 arguments
+	CHECK_XPATH_FAIL("contains()");
+
+	// contains with 1 argument
+	CHECK_XPATH_FAIL("contains('a')");
+
+	// contains with 2 arguments
+	CHECK_XPATH_BOOLEAN(c, "contains('abc', '')", true);
+	CHECK_XPATH_BOOLEAN(c, "contains('abc', 'a')", true);
+	CHECK_XPATH_BOOLEAN(c, "contains('abc', 'abc')", true);
+	CHECK_XPATH_BOOLEAN(c, "contains('abcd', 'bc')", true);
+	CHECK_XPATH_BOOLEAN(c, "contains('abc', 'abcd')", false);
+	CHECK_XPATH_BOOLEAN(c, "contains('b', 'bc')", false);
+	CHECK_XPATH_BOOLEAN(c, "contains('', 'c')", false);
+	CHECK_XPATH_BOOLEAN(c, "contains('', '')", true);
+
+	// contains with 3 arguments
+	CHECK_XPATH_FAIL("contains('a', 'b', 'c')");
+}
+
+TEST(xpath_string_substring_before)
+{
+	xml_node c;
+
+	// substring-before with 0 arguments
+	CHECK_XPATH_FAIL("substring-before()");
+
+	// substring-before with 1 argument
+	CHECK_XPATH_FAIL("substring-before('a')");
+	
+	// substring-before with 2 arguments
+	CHECK_XPATH_STRING(c, "substring-before('abc', 'abc')", "");
+	CHECK_XPATH_STRING(c, "substring-before('abc', 'a')", "");
+	CHECK_XPATH_STRING(c, "substring-before('abc', 'cd')", "");
+	CHECK_XPATH_STRING(c, "substring-before('abc', 'b')", "a");
+	CHECK_XPATH_STRING(c, "substring-before('abc', 'c')", "ab");
+	CHECK_XPATH_STRING(c, "substring-before('', '')", "");
+	
+	// substring-before with 2 arguments, from W3C standard
+	CHECK_XPATH_STRING(c, "substring-before(\"1999/04/01\",\"/\")", "1999");
+
+	// substring-before with 3 arguments
+	CHECK_XPATH_FAIL("substring-before('a', 'b', 'c')");
+}
+
+TEST(xpath_string_substring_after)
+{
+	xml_node c;
+
+	// substring-after with 0 arguments
+	CHECK_XPATH_FAIL("substring-after()");
+
+	// substring-after with 1 argument
+	CHECK_XPATH_FAIL("substring-after('a')");
+	
+	// substring-after with 2 arguments
+	CHECK_XPATH_STRING(c, "substring-after('abc', 'abc')", "");
+	CHECK_XPATH_STRING(c, "substring-after('abc', 'a')", "bc");
+	CHECK_XPATH_STRING(c, "substring-after('abc', 'cd')", "");
+	CHECK_XPATH_STRING(c, "substring-after('abc', 'b')", "c");
+	CHECK_XPATH_STRING(c, "substring-after('abc', 'c')", "");
+	CHECK_XPATH_STRING(c, "substring-after('', '')", "");
+
+	// substring-before with 2 arguments, from W3C standard
+	CHECK_XPATH_STRING(c, "substring-after(\"1999/04/01\",\"/\")", "04/01");
+	CHECK_XPATH_STRING(c, "substring-after(\"1999/04/01\",\"19\")", "99/04/01");
+
+	// substring-after with 3 arguments
+	CHECK_XPATH_FAIL("substring-after('a', 'b', 'c')");
+}
+
+TEST(xpath_string_substring)
+{
+	xml_node c;
+
+	// substring with 0 arguments
+	CHECK_XPATH_FAIL("substring()");
+	
+	// substring with 1 argument
+	CHECK_XPATH_FAIL("substring('')");
+	
+	// substring with 2 arguments
+	CHECK_XPATH_STRING(c, "substring('abcd', 2)", "bcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1)", "abcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1.1)", "abcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1.5)", "bcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1.8)", "bcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', 10)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', 0)", "abcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', -100)", "abcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', -1 div 0)", "abcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1 div 0)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', 0 div 0)", "");
+	CHECK_XPATH_STRING(c, "substring('', 1)", "");
+	CHECK_XPATH_STRING(c, "substring('', 0)", "");
+
+	// substring with 3 arguments
+	CHECK_XPATH_STRING(c, "substring('abcd', 2, 1)", "b");
+	CHECK_XPATH_STRING(c, "substring('abcd', 2, 2)", "bc");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1, 0)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1, 0.4)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1, 0.5)", "a");
+	CHECK_XPATH_STRING(c, "substring('abcd', 10, -5)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', 0, -1)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', -100, 100)", "abcd");
+	CHECK_XPATH_STRING(c, "substring('abcd', -1 div 0, 4)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', 1 div 0, 0 div 0)", "");
+	CHECK_XPATH_STRING(c, "substring('abcd', 0 div 0, 1)", "");
+	CHECK_XPATH_STRING(c, "substring('', 1, 2)", "");
+	CHECK_XPATH_STRING(c, "substring('', 0, 0)", "");
+
+	// substring with 3 arguments, from W3C standard
+	CHECK_XPATH_STRING(c, "substring('12345', 1.5, 2.6)", "234");
+	CHECK_XPATH_STRING(c, "substring('12345', 0, 3)", "12");
+	CHECK_XPATH_STRING(c, "substring('12345', 0 div 0, 3)", "");
+	CHECK_XPATH_STRING(c, "substring('12345', 1, 0 div 0)", "");
+	CHECK_XPATH_STRING(c, "substring('12345', -42, 1 div 0)", "12345");
+	CHECK_XPATH_STRING(c, "substring('12345', -1 div 0, 1 div 0)", "");
+
+	// substring with 4 arguments
+	CHECK_XPATH_FAIL("substring('', 1, 2, 3)");
+}
+
+TEST_XML(xpath_string_string_length, "<node>123</node>")
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// string-length with 0 arguments
+	CHECK_XPATH_NUMBER(c, "string-length()", 0);
+	CHECK_XPATH_NUMBER(n, "string-length()", 3);
+
+	// string-length with 1 argument
+	CHECK_XPATH_NUMBER(c, "string-length('')", 0);
+	CHECK_XPATH_NUMBER(c, "string-length('a')", 1);
+	CHECK_XPATH_NUMBER(c, "string-length('abcdef')", 6);
+
+	// string-length with 2 arguments
+	CHECK_XPATH_FAIL("string-length(1, 2)");
+}
+
+TEST_XML_FLAGS(xpath_string_normalize_space, "<node> \t\r\rval1  \rval2\r\nval3\nval4\r\r</node>", parse_minimal)
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// normalize-space with 0 arguments
+	CHECK_XPATH_STRING(c, "normalize-space()", "");
+	CHECK_XPATH_STRING(n, "normalize-space()", "val1 val2 val3 val4");
+	
+	// normalize-space with 1 argument
+	CHECK_XPATH_STRING(c, "normalize-space('')", "");
+	CHECK_XPATH_STRING(c, "normalize-space('abcd')", "abcd");
+	CHECK_XPATH_STRING(c, "normalize-space(' \r\nabcd')", "abcd");
+	CHECK_XPATH_STRING(c, "normalize-space('abcd \n\r')", "abcd");
+	CHECK_XPATH_STRING(c, "normalize-space('ab\r\n\tcd')", "ab cd");
+	CHECK_XPATH_STRING(c, "normalize-space('ab    cd')", "ab cd");
+	
+	// normalize-space with 2 arguments
+	CHECK_XPATH_FAIL("normalize-space(1, 2)");
+}
+
+TEST(xpath_string_translate)
+{
+	xml_node c;
+
+	// translate with 0 arguments
+	CHECK_XPATH_FAIL("translate()");
+	
+	// translate with 1 argument
+	CHECK_XPATH_FAIL("translate('a')");
+
+	// translate with 2 arguments
+	CHECK_XPATH_FAIL("translate('a', 'b')");
+	
+	// translate with 3 arguments
+	CHECK_XPATH_STRING(c, "translate('abc', '', '')", "abc");
+	CHECK_XPATH_STRING(c, "translate('abc', '', 'foo')", "abc");
+	CHECK_XPATH_STRING(c, "translate('abc', 'ab', 'ba')", "bac");
+	CHECK_XPATH_STRING(c, "translate('abc', 'ab', 'f')", "fc");
+	CHECK_XPATH_STRING(c, "translate('abc', 'aabb', '1234')", "13c");
+	CHECK_XPATH_STRING(c, "translate('', 'abc', 'bac')", "");
+
+	// translate with 3 arguments, from W3C standard
+	CHECK_XPATH_STRING(c, "translate('bar','abc','ABC')", "BAr");
+	CHECK_XPATH_STRING(c, "translate('--aaa--','abc-','ABC')", "AAA");
+
+	// translate with 4 arguments
+	CHECK_XPATH_FAIL("translate('a', 'b', 'c', 'd')");
+}
