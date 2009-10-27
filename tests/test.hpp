@@ -43,7 +43,7 @@ inline bool test_xpath_number(const pugi::xml_node& node, const char* query, dou
 {
 	pugi::xpath_query q(query);
 
-	return fabs(q.evaluate_number(node) - expected) < 1e-8f;
+	return fabs(q.evaluate_number(node) - expected) < 1e-16f;
 }
 
 inline bool test_xpath_number_nan(const pugi::xml_node& node, const char* query)
