@@ -97,25 +97,30 @@ namespace
 			{
 				std::string result;
 
-				xml_node c = n.first_child();
+				xml_node cur = n.first_child();
 				
-				while (c)
+				if (cur)
 				{
-					if (c.type() == node_pcdata || c.type() == node_cdata)
-						result += c.value();
-				
-					if (c.first_child())
-						c = c.first_child();
-					else if (c.next_sibling())
-						c = c.next_sibling();
-					else
+					do 
 					{
-						while (c && c != n) c = c.parent();
+						if (cur.type() == node_pcdata || cur.type() == node_cdata)
+							result += cur.value();
 						
-						if (c == n) break;
+						if (cur.first_child())
+							cur = cur.first_child();
+						else if (cur.next_sibling())
+							cur = cur.next_sibling();
+						else
+						{
+							// Borland C++ workaround
+							while (!cur.next_sibling() && cur != n && (bool)cur.parent())
+								cur = cur.parent();
 						
-						c = c.next_sibling();
+							if (cur != n)
+								cur = cur.next_sibling();
+						}
 					}
+					while (cur && cur != n);
 				}
 				
 				return result;
@@ -3332,6 +3337,7 @@ namespace pugi
 	    			// This is either a function call, or not - if not, we shall proceed with location path
 	    			const char* state = m_lexer.state();
 	    			
+	    			// $$$ signed char
 	    			while (*state && *state <= 32) ++state;
 	    			
 	    			if (*state != '(') return parse_location_path();
