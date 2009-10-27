@@ -47,6 +47,7 @@ TEST_XML(xpath_number_sum, "<node>123<child>789</child></node><node/>")
 	CHECK_XPATH_NUMBER(n, "sum(.)", 123789); // 123 .. 789
 	
 	CHECK_XPATH_NUMBER(n, "sum(./descendant-or-self::node())", 125490); // node + 123 + child + 789 = 123789 + 123 + 789 + 789 = 125490
+	CHECK_XPATH_NUMBER(n, "sum(.//node())", 1701); // 123 + child + 789 = 123 + 789 + 789
 	CHECK_XPATH_NUMBER_NAN(doc.last_child(), "sum(.)");
 
 	// sum with 2 arguments
@@ -215,6 +216,29 @@ TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-UK'><subch
 
 	// lang with 2 arguments
 	CHECK_XPATH_FAIL("lang(1, 2)");
+}
+
+TEST(xpath_string_concat)
+{
+	xml_node c;
+
+	// concat with 0 arguments
+	CHECK_XPATH_FAIL("concat()");
+
+	// concat with 1 argument
+	CHECK_XPATH_FAIL("concat('')");
+
+	// concat with exactly 2 arguments
+	CHECK_XPATH_STRING(c, "concat('prev','next')", "prevnext");
+	CHECK_XPATH_STRING(c, "concat('','next')", "next");
+	CHECK_XPATH_STRING(c, "concat('prev','')", "prev");
+
+	// concat with 3 or more arguments
+	CHECK_XPATH_STRING(c, "concat('a', 'b', 'c')", "abc");
+	CHECK_XPATH_STRING(c, "concat('a', 'b', 'c', 'd')", "abcd");
+	CHECK_XPATH_STRING(c, "concat('a', 'b', 'c', 'd', 'e')", "abcde");
+	CHECK_XPATH_STRING(c, "concat('a', 'b', 'c', 'd', 'e', 'f')", "abcdef");
+	CHECK_XPATH_STRING(c, "concat('a', 'b', 'c', 'd', 'e', 'f', 'g')", "abcdefg");
 }
 
 // $$$: string value of <node>123<child>789</child>100</node> should be 123789100 (?)

@@ -1208,7 +1208,7 @@ namespace pugi
 
 		// tree node structure
 		xpath_ast_node* m_left;
-		xpath_ast_node*	m_right;
+		xpath_ast_node* m_right;
 		xpath_ast_node* m_third;
 		xpath_ast_node* m_next;
 
@@ -1857,7 +1857,8 @@ namespace pugi
 			else m_contents = 0;
 		}
 	public:
-		xpath_ast_node(ast_type_t type, const char* contents, xpath_allocator& a): m_type(type), m_rettype(ast_type_none), m_contents(0)
+		xpath_ast_node(ast_type_t type, const char* contents, xpath_allocator& a): m_type(type),
+			m_rettype(ast_type_none), m_left(0), m_right(0), m_third(0), m_next(0), m_contents(0)
 		{
 			set_contents(contents, a);
 		}
