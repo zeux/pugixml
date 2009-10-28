@@ -128,19 +128,27 @@ struct dummy_fixture {};
 
 #define TEST_XML(name, xml) TEST_XML_FLAGS(name, xml, pugi::parse_default)
 
-#define CHECK_TEXT(condition, text) if (condition) ; else throw text
+#define CHECK_JOIN(text, file, line) text file #line
+#define CHECK_JOIN2(text, file, line) CHECK_JOIN(text, file, line)
+#define CHECK_TEXT(condition, text) if (condition) ; else throw CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__)
 
-#define CHECK(condition) CHECK_TEXT(condition, #condition " is false")
-#define CHECK_STRING(value, expected) CHECK_TEXT(test_string_equal(value, expected), #value " is not equal to " #expected)
-#define CHECK_DOUBLE(value, expected) CHECK_TEXT(fabs(value - expected) < 1e-6, #value " is not equal to " #expected)
-#define CHECK_NAME_VALUE(node, name, value) CHECK_TEXT(test_node_name_value(node, name, value), #node " name/value do not match " #name " and " #value)
-#define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), #node " contents does not match " #expected)
+#if defined(_MSC_VER) && _MSC_VER == 1200
+#	define STR(value) "??" // MSVC 6.0 has troubles stringizing stuff with strings w/escaping inside
+#else
+#	define STR(value) #value
+#endif
+
+#define CHECK(condition) CHECK_TEXT(condition, STR(condition) " is false")
+#define CHECK_STRING(value, expected) CHECK_TEXT(test_string_equal(value, expected), STR(value) " is not equal to " STR(expected))
+#define CHECK_DOUBLE(value, expected) CHECK_TEXT(fabs(value - expected) < 1e-6, STR(value) " is not equal to " STR(expected))
+#define CHECK_NAME_VALUE(node, name, value) CHECK_TEXT(test_node_name_value(node, name, value), STR(node) " name/value do not match " STR(name) " and " STR(value))
+#define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), STR(node) " contents does not match " STR(expected))
 #define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, "", pugi::format_raw)
 
-#define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
-#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
-#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), #query " does not evaluate to " #expected " in context " #node)
-#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), #query " does not evaluate to NaN in context " #node)
-#define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), #query " should not compile")
+#define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
+#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
+#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
+#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STR(query) " does not evaluate to NaN in context " STR(node))
+#define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STR(query) " should not compile")
 
 #endif
