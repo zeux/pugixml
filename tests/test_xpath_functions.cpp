@@ -521,4 +521,11 @@ TEST(xpath_function_arguments)
 	CHECK_XPATH_FAIL("substring(,)");
 	CHECK_XPATH_FAIL("substring('a',)");
 	CHECK_XPATH_FAIL("substring(,'a')");
+
+	// extra commas
+	CHECK_XPATH_FAIL("round(,1)");
+	CHECK_XPATH_FAIL("round(1,)");
+
+	// lack of commas
+	CHECK_XPATH_FAIL("substring(1 2)");
 }
