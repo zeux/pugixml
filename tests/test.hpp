@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include <sstream>
 
 #include "../src/pugixml.hpp"
@@ -52,7 +53,11 @@ inline bool test_xpath_number_nan(const pugi::xml_node& node, const char* query)
 
 	double r = q.evaluate_number(node);
 
+#ifdef _MSC_VER
+	return _isnan(r) != 0;
+#else
 	return r != r;
+#endif
 }
 
 inline bool test_xpath_fail_compile(const char* query)

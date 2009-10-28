@@ -1,5 +1,9 @@
 #include "common.hpp"
 
+#if defined(_MSC_VER) && _MSC_VER == 1200
+#define MSVC6_NAN_BUG // NaN comparison on MSVC6 is incorrect, see http://www.nabble.com/assertDoubleEquals,-NaN---Microsoft-Visual-Studio-6-td9137859.html
+#endif
+
 TEST_XML(xpath_operators_arithmetic, "<node><foo-bar>10</foo-bar><foo>2</foo><bar>3</bar></node>")
 {
 	xml_node c;
@@ -125,9 +129,12 @@ TEST(xpath_operators_equality_primitive_number)
 	// infinity/nan
 	CHECK_XPATH_BOOLEAN(c, "1 div 0 = 2 div 0", true);
 	CHECK_XPATH_BOOLEAN(c, "-1 div 0 != 2 div 0", true);
+
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_BOOLEAN(c, "0 div 0 = 1", false);
 	CHECK_XPATH_BOOLEAN(c, "0 div 0 != 1", true);
 	CHECK_XPATH_BOOLEAN(c, "0 div 0 = 0 div 0", false);
+#endif
 
 	// upcast to number
 	CHECK_XPATH_BOOLEAN(c, "2 = '2'", true);
@@ -190,14 +197,17 @@ TEST_XML(xpath_operators_equality_node_set_primitive, "<node><c1><v>1</v><v>-1</
 	CHECK_XPATH_BOOLEAN(n, "c1/v != 1", true);
 	CHECK_XPATH_BOOLEAN(n, "c1/v = 5", false);
 	CHECK_XPATH_BOOLEAN(n, "c2/v = 1", true);
-	CHECK_XPATH_BOOLEAN(n, "c2/v != 1", true);
 
 	CHECK_XPATH_BOOLEAN(n, "1 = c1/v", true);
 	CHECK_XPATH_BOOLEAN(n, "-1 = c1/v", true);
 	CHECK_XPATH_BOOLEAN(n, "1 != c1/v", true);
 	CHECK_XPATH_BOOLEAN(n, "5 = c1/v", false);
 	CHECK_XPATH_BOOLEAN(n, "1 = c2/v", true);
+
+#ifndef MSVC6_NAN_BUG
+	CHECK_XPATH_BOOLEAN(n, "c2/v != 1", true);
 	CHECK_XPATH_BOOLEAN(n, "1 != c2/v", true);
+#endif
 	
 	// node set vs string
 	CHECK_XPATH_BOOLEAN(c, "x = '1'", false);
@@ -259,10 +269,12 @@ TEST(xpath_operators_inequality_primitive)
 	CHECK_XPATH_BOOLEAN(c, "-1 div 0 < 2 div 0", true);
 	CHECK_XPATH_BOOLEAN(c, "-1 div 0 > 2 div 0", false);
 
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_BOOLEAN(c, "0 div 0 < 1", false);
 	CHECK_XPATH_BOOLEAN(c, "0 div 0 <= 1", false);
 	CHECK_XPATH_BOOLEAN(c, "0 div 0 > 1", false);
 	CHECK_XPATH_BOOLEAN(c, "0 div 0 >= 1", false);
+#endif
 
 	// upcast to number
 	CHECK_XPATH_BOOLEAN(c, "2 < '2'", false);
@@ -277,7 +289,7 @@ TEST(xpath_operators_inequality_primitive)
 	CHECK_XPATH_BOOLEAN(c, "1 > true()", false);
 }
 
-TEST_XML(xpath_operators_inequality_node_set_node_set, "<node><c1><v>1</v><v>-1</v><v>-100</v></c1><c2><v>1</v><v>nan</v></c2></node>")
+TEST_XML(xpath_operators_inequality_node_set_node_set, "<node><c1><v>1</v><v>-1</v><v>-100</v></c1><c2><v>1</v><v>nan</v></c2><c3><v>1</v><v>-4</v></c3></node>")
 {
 	xml_node c;
 	xml_node n = doc.child("node");
@@ -298,10 +310,17 @@ TEST_XML(xpath_operators_inequality_node_set_node_set, "<node><c1><v>1</v><v>-1<
 	CHECK_XPATH_BOOLEAN(n, "x >= c1/v", false);
 	CHECK_XPATH_BOOLEAN(n, "x <= c1/v", false);
 
+	CHECK_XPATH_BOOLEAN(n, "c1/v > c3/v", true);
+	CHECK_XPATH_BOOLEAN(n, "c1/v >= c3/v", true);
+	CHECK_XPATH_BOOLEAN(n, "c1/v < c3/v", true);
+	CHECK_XPATH_BOOLEAN(n, "c1/v <= c3/v", true);
+
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_BOOLEAN(n, "c1/v > c2/v", false);
 	CHECK_XPATH_BOOLEAN(n, "c1/v >= c2/v", true);
 	CHECK_XPATH_BOOLEAN(n, "c1/v < c2/v", true);
 	CHECK_XPATH_BOOLEAN(n, "c1/v <= c2/v", true);
+#endif
 }
 
 TEST_XML(xpath_operators_inequality_node_set_primitive, "<node><c1><v>1</v><v>-1</v><v>-100</v></c1><c2><v>1</v><v>nan</v></c2></node>")
