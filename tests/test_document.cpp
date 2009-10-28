@@ -2,6 +2,10 @@
 
 #include <fstream>
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif
+
 TEST(document_create)
 {
 	pugi::xml_document doc;
@@ -22,7 +26,7 @@ TEST(document_load_stream_error)
 {
 	pugi::xml_document doc;
 
-	std::ifstream fs1("");
+	std::ifstream fs1("filedoesnotexist");
 	CHECK(doc.load(fs1).status == status_io_error);
 	
 	std::ifstream fs2("con");
@@ -70,7 +74,7 @@ TEST(document_load_file_error)
 {
 	pugi::xml_document doc;
 
-	CHECK(doc.load_file("").status == status_file_not_found);
+	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
 	CHECK(doc.load_file("con").status == status_io_error);
 	CHECK(doc.load_file("nul").status == status_io_error);
 

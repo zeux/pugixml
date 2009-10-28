@@ -2,6 +2,11 @@
 
 // letters taken from http://www.utf8-chartable.de/
 
+inline wchar_t wchar_cast(unsigned int value)
+{
+	return static_cast<wchar_t>(value); // to avoid C4310 on MSVC
+}
+
 TEST(as_utf16)
 {
 	// valid 1-byte, 2-byte and 3-byte inputs
@@ -12,7 +17,7 @@ TEST(as_utf16)
 	
 	// valid 4-byte input
 	std::wstring b4 = as_utf16("\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
-	CHECK(b4.size() == 3 && b4[0] == (wchar_t)0x97624 && b4[1] == L' ' && b4[2] == (wchar_t)0x1003ff);
+	CHECK(b4.size() == 3 && b4[0] == wchar_cast(0x97624) && b4[1] == L' ' && b4[2] == wchar_cast(0x1003ff));
 
 	// invalid 5-byte input
 	std::wstring b5 = as_utf16("\xf8\nbcd");

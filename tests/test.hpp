@@ -118,6 +118,10 @@ struct dummy_fixture {};
 		{ \
 			CHECK(doc.load(xml, flags)); \
 		} \
+		\
+	private: \
+		test_fixture_##name(const test_fixture_##name&); \
+		test_fixture_##name& operator=(const test_fixture_##name&); \
 	}; \
 	\
 	TEST_FIXTURE(name, test_fixture_##name)

@@ -4,6 +4,10 @@
 #include <vector>
 #include <iterator>
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4996)
+#endif
+
 template <typename I> I move_iter(I base, int n)
 {
 	std::advance(base, n);
