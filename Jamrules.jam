@@ -13,25 +13,25 @@ if ( $(toolset:I=^mingw) )
 
 	actions ObjectAction
 	{
-		%$(toolset)_PATH%\bin\gcc -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
+		"%$(toolset)_PATH%\bin\gcc" -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
 	}
 	
 	actions LibraryAction
 	{
-		%$(toolset)_PATH%\bin\ar rc $(<) $(>)
+		"%$(toolset)_PATH%\bin\ar" rc $(<) $(>)
 	}
 	
 	actions LinkAction
 	{
-		%$(toolset)_PATH%\bin\g++ $(>) -o $(<) $(LDFLAGS) 
+		"%$(toolset)_PATH%\bin\g++" $(>) -o $(<) $(LDFLAGS) 
 	}
 	
 	actions CoverageAction
 	{
-		%$(toolset)_PATH%\bin\gcov $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
+		"%$(toolset)_PATH%\bin\gcov" $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
 	}
 }
-else if ( $(toolset:I^=msvc) )
+else if ( $(toolset:I=^msvc) )
 {
 	if ( $(configuration) = "debug" )
 	{
@@ -53,17 +53,79 @@ else if ( $(toolset:I^=msvc) )
 
 	actions ObjectAction
 	{
-		%$(toolset)_PATH%\bin\cl.exe /EHsc /WX /I%$(toolset)_PATH%\include /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		"%$(toolset)_PATH%\bin\cl.exe" /EHsc /WX /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction
 	{
-		%$(toolset)_PATH%\bin\lib.exe /NOLOGO /OUT:$(<) $(>)
+		"%$(toolset)_PATH%\bin\lib.exe" /NOLOGO /OUT:$(<) $(>)
 	}
 	
 	actions LinkAction
 	{
-		%$(toolset)_PATH%\bin\link.exe /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:%$(toolset)_PATH%\lib /LIBPATH:%$(toolset)_PATH%\PlatformSDK\lib $(LDFLAGS)
+		"%$(toolset)_PATH%\bin\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib" $(LDFLAGS)
+	}
+	
+	actions CoverageAction
+	{
+	}
+}
+else if ( $(toolset) = "ic8" )
+{
+	msvc = "msvc7" ;
+
+	if ( $(configuration) = "debug" )
+	{
+		CCFLAGS += /D_DEBUG /MTd ;
+	}
+	else
+	{
+		CCFLAGS += /DNDEBUG /Ox /MT ;
+	}
+
+	actions ObjectAction
+	{
+		"%$(toolset)_PATH%\bin\icl.exe" /EHsc /W4 /WX /Wport /Qwd981,444,280,383,909,304,167 /I"%$(msvc)_PATH%\include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+	}
+	
+	actions LibraryAction
+	{
+		"%$(msvc)_PATH%\bin\lib.exe" /NOLOGO /OUT:$(<) $(>)
+	}
+	
+	actions LinkAction
+	{
+		"%$(msvc)_PATH%\bin\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib" /LIBPATH:"%$(msvc)_PATH%\lib" /LIBPATH:"%$(msvc)_PATH%\PlatformSDK\lib" $(LDFLAGS)
+	}
+	
+	actions CoverageAction
+	{
+	}
+}
+else if ( $(toolset:I=^dmc) )
+{
+	if ( $(configuration) = "debug" )
+	{
+		CCFLAGS += -D_DEBUG ;
+	}
+	else
+	{
+		CCFLAGS += -DNDEBUG ;
+	}
+
+	actions ObjectAction
+	{
+		"%$(toolset)_PATH%\bin\dmc.exe" -c -f -wx -Ae $(>) -o$(<)
+	}
+	
+	actions LibraryAction
+	{
+		"%$(toolset)_PATH%\bin\lib.exe" -c $(<) $(>)
+	}
+	
+	actions LinkAction
+	{
+		"%$(toolset)_PATH%\bin\link.exe" $(>:\\) , $(<:\\) , nul , $(LDFLAGS:\\)
 	}
 	
 	actions CoverageAction
@@ -71,7 +133,7 @@ else if ( $(toolset:I^=msvc) )
 	}
 }
 
-actions RunAction
+actions screenoutput RunAction
 {
 	$(>:\\)
 }

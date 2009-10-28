@@ -29,9 +29,11 @@ TEST(document_load_stream_error)
 	std::ifstream fs1("filedoesnotexist");
 	CHECK(doc.load(fs1).status == status_io_error);
 	
+#ifndef __DMC__ // Digital Mars CRT does not like 'con' pseudo-file
 	std::ifstream fs2("con");
 	CHECK(doc.load(fs2).status == status_io_error);
-	
+#endif
+
 	std::ifstream fs3("nul");
 	CHECK(doc.load(fs3).status == status_io_error);
 
@@ -75,7 +77,11 @@ TEST(document_load_file_error)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
+
+#ifndef __DMC__ // Digital Mars CRT does not like 'con' pseudo-file
 	CHECK(doc.load_file("con").status == status_io_error);
+#endif
+
 	CHECK(doc.load_file("nul").status == status_io_error);
 
 	test_runner::_memory_fail_threshold = 1;

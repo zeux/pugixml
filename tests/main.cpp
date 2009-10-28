@@ -8,9 +8,9 @@
 test_runner* test_runner::_tests = 0;
 size_t test_runner::_memory_fail_threshold = 0;
 
-size_t g_memory_total_size = 0;
+static size_t g_memory_total_size = 0;
 
-void* custom_allocate(size_t size)
+static void* custom_allocate(size_t size)
 {
 	if (test_runner::_memory_fail_threshold > 0 && test_runner::_memory_fail_threshold < size)
 		return 0;
@@ -24,7 +24,7 @@ void* custom_allocate(size_t size)
 	}
 }
 
-void custom_deallocate(void* ptr)
+static void custom_deallocate(void* ptr)
 {
 	if (ptr)
 	{
@@ -34,7 +34,7 @@ void custom_deallocate(void* ptr)
 	}
 }
 
-void replace_memory_management()
+static void replace_memory_management()
 {
 	// create some document to touch original functions
 	{
@@ -87,7 +87,7 @@ int main()
 	if (failed != 0)
 		printf("FAILURE: %u out of %u tests failed.\n", failed, total);
 	else
-		printf("Success: %d tests passed.\n", total);
+		printf("Success: %u tests passed.\n", total);
 
 	return failed;
 }

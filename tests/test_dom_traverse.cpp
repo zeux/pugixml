@@ -8,13 +8,13 @@
 #pragma warning(disable: 4996)
 #endif
 
-template <typename I> I move_iter(I base, int n)
+template <typename I> static I move_iter(I base, int n)
 {
 	std::advance(base, n);
 	return base;
 }
 
-template <typename T> void generic_bool_ops_test(const T& obj)
+template <typename T> static void generic_bool_ops_test(const T& obj)
 {
 	T null;
 
@@ -28,7 +28,7 @@ template <typename T> void generic_bool_ops_test(const T& obj)
 	CHECK(b2);
 }
 
-template <typename T> void generic_rel_ops_test(T obj1, T obj2)
+template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
 {
 	T null = T();
 
@@ -88,7 +88,7 @@ template <typename T> void generic_rel_ops_test(T obj1, T obj2)
 	CHECK(!(obj1 >= obj2));
 }
 
-template <typename T> void generic_empty_test(const T& obj)
+template <typename T> static void generic_empty_test(const T& obj)
 {
 	T null;
 
