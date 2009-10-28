@@ -116,10 +116,6 @@ TEST(xpath_number_round)
 
 	// round with 2 arguments
 	CHECK_XPATH_FAIL("round(1, 2)");
-
-	// round with negative zero results
-	// $$ CHECK_XPATH_NUMBER(c, "round(-0.3)", -0)
-	// $$ CHECK_XPATH_NUMBER(c, "round(-0)", -0)
 }
 
 TEST_XML(xpath_boolean_boolean, "<node />")
@@ -497,4 +493,32 @@ TEST(xpath_string_translate)
 
 	// translate with 4 arguments
 	CHECK_XPATH_FAIL("translate('a', 'b', 'c', 'd')");
+}
+
+TEST(xpath_function_arguments)
+{
+	xml_node c;
+
+	// conversion to string
+	CHECK_XPATH_NUMBER(c, "string-length(12)", 2);
+	
+	// conversion to number
+	CHECK_XPATH_NUMBER(c, "round('1.2')", 1);
+	CHECK_XPATH_NUMBER(c, "round('1.7')", 2);
+
+	// conversion to boolean
+	CHECK_XPATH_BOOLEAN(c, "not('1')", false);
+	CHECK_XPATH_BOOLEAN(c, "not('')", true);
+	
+	// conversion to node set
+	CHECK_XPATH_FAIL("sum(1)");
+
+	// expression evaluation
+	CHECK_XPATH_NUMBER(c, "round((2 + 2 * 2) div 4)", 2);
+	
+	// empty expressions
+	CHECK_XPATH_FAIL("round(,)");
+	CHECK_XPATH_FAIL("substring(,)");
+	CHECK_XPATH_FAIL("substring('a',)");
+	CHECK_XPATH_FAIL("substring(,'a')");
 }
