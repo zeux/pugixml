@@ -1,23 +1,74 @@
 # Rules for Jamfile.jam
 
-actions ObjectAction
+if ( $(toolset:I=^mingw) )
 {
-	%MINGW_PATH%\bin\gcc -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
-}
+	if ( $(configuration) = "debug" )
+	{
+		CCFLAGS += -D_DEBUG ;
+	}
+	else
+	{
+		CCFLAGS += -DNDEBUG -O3 ;
+	}
 
-actions LibraryAction
-{
-	%MINGW_PATH%\bin\ar rc $(<) $(>)
+	actions ObjectAction
+	{
+		%$(toolset)_PATH%\bin\gcc -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
+	}
+	
+	actions LibraryAction
+	{
+		%$(toolset)_PATH%\bin\ar rc $(<) $(>)
+	}
+	
+	actions LinkAction
+	{
+		%$(toolset)_PATH%\bin\g++ $(>) -o $(<) $(LDFLAGS) 
+	}
+	
+	actions CoverageAction
+	{
+		%$(toolset)_PATH%\bin\gcov $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
+	}
 }
-
-actions LinkAction
+else if ( $(toolset:I^=msvc) )
 {
-	%MINGW_PATH%\bin\g++ $(>) -o $(<) $(LDFLAGS) 
-}
+	if ( $(configuration) = "debug" )
+	{
+		CCFLAGS += /D_DEBUG /MTd ;
+	}
+	else
+	{
+		CCFLAGS += /DNDEBUG /Ox /MT ;
+	}
 
-actions CoverageAction
-{
-	%MINGW_PATH%\bin\gcov $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
+	if ( $(toolset) != msvc6 )
+	{
+		CCFLAGS += /Wp64 /W4 ;
+	}
+	else
+	{
+		CCFLAGS += /W3 ; # lots of warnings at W4 in standard library
+	}
+
+	actions ObjectAction
+	{
+		%$(toolset)_PATH%\bin\cl.exe /EHsc /WX /I%$(toolset)_PATH%\include /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+	}
+	
+	actions LibraryAction
+	{
+		%$(toolset)_PATH%\bin\lib.exe /NOLOGO /OUT:$(<) $(>)
+	}
+	
+	actions LinkAction
+	{
+		%$(toolset)_PATH%\bin\link.exe /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:%$(toolset)_PATH%\lib /LIBPATH:%$(toolset)_PATH%\PlatformSDK\lib $(LDFLAGS)
+	}
+	
+	actions CoverageAction
+	{
+	}
 }
 
 actions RunAction
