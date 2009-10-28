@@ -461,6 +461,7 @@ TEST_XML_FLAGS(xpath_string_normalize_space, "<node> \t\r\rval1  \rval2\r\nval3\
 	CHECK_XPATH_STRING(c, "normalize-space('abcd \n\r')", "abcd");
 	CHECK_XPATH_STRING(c, "normalize-space('ab\r\n\tcd')", "ab cd");
 	CHECK_XPATH_STRING(c, "normalize-space('ab    cd')", "ab cd");
+	CHECK_XPATH_STRING(c, "normalize-space('\07')", "\07");
 	
 	// normalize-space with 2 arguments
 	CHECK_XPATH_FAIL("normalize-space(1, 2)");
