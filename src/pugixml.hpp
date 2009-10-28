@@ -47,6 +47,16 @@
 
 #include <stddef.h>
 
+// Helpers for inline implementation
+namespace pugi
+{
+	namespace impl
+	{
+		int PUGIXML_FUNCTION strcmp(const char*, const char*);
+		int PUGIXML_FUNCTION strcmpwild(const char*, const char*);
+	}
+}
+
 /// The PugiXML Parser namespace.
 namespace pugi
 {
@@ -1096,7 +1106,24 @@ namespace pugi
 		 * \param name - node name
 		 * \param it - output iterator (for example, std::back_insert_iterator (result of std::back_inserter))
 		 */
-		template <typename OutputIterator> void all_elements_by_name(const char* name, OutputIterator it) const;
+		template <typename OutputIterator> void all_elements_by_name(const char* name, OutputIterator it) const
+		{
+			if (!_root) return;
+			
+			for (xml_node node = first_child(); node; node = node.next_sibling())
+			{
+				if (node.type() == node_element)
+				{
+					if (!impl::strcmp(name, node.name()))
+					{
+						*it = node;
+						++it;
+					}
+				
+					if (node.first_child()) node.all_elements_by_name(name, it);
+				}
+			}
+		}
 
 		/**
 		 * Get all elements from subtree with name that matches given pattern
@@ -1104,7 +1131,24 @@ namespace pugi
 		 * \param name - node name pattern
 		 * \param it - output iterator (for example, std::back_insert_iterator (result of std::back_inserter))
 		 */
-		template <typename OutputIterator> void all_elements_by_name_w(const char* name, OutputIterator it) const;
+		template <typename OutputIterator> void all_elements_by_name_w(const char* name, OutputIterator it) const
+		{
+			if (!_root) return;
+			
+			for (xml_node node = first_child(); node; node = node.next_sibling())
+			{
+				if (node.type() == node_element)
+				{
+					if (!impl::strcmpwild(name, node.name()))
+					{
+						*it = node;
+						++it;
+					}
+					
+					if (node.first_child()) node.all_elements_by_name_w(name, it);
+				}
+			}
+		}
 
 		/**
 		 * Get first child
@@ -1126,7 +1170,16 @@ namespace pugi
 		 * \param pred - predicate, that takes xml_attribute and returns bool
 		 * \return first attribute for which predicate returned true, or empty attribute
 		 */
-		template <typename Predicate> xml_attribute find_attribute(Predicate pred) const;
+		template <typename Predicate> xml_attribute find_attribute(Predicate pred) const
+		{
+			if (!_root) return xml_attribute();
+			
+			for (xml_attribute attrib = first_attribute(); attrib; attrib = attrib.next_attribute())
+				if (pred(attrib))
+					return attrib;
+		
+			return xml_attribute();
+		}
 
 		/**
 		 * Find child node using predicate
@@ -1134,7 +1187,16 @@ namespace pugi
 		 * \param pred - predicate, that takes xml_node and returns bool
 		 * \return first child node for which predicate returned true, or empty node
 		 */
-		template <typename Predicate> xml_node find_child(Predicate pred) const;
+		template <typename Predicate> xml_node find_child(Predicate pred) const
+		{
+			if (!_root) return xml_node();
+	
+			for (xml_node node = first_child(); node; node = node.next_sibling())
+				if (pred(node))
+					return node;
+        
+	        return xml_node();
+		}
 
 		/**
 		 * Find node from subtree using predicate
@@ -1142,7 +1204,24 @@ namespace pugi
 		 * \param pred - predicate, that takes xml_node and returns bool
 		 * \return first node from subtree for which predicate returned true, or empty node
 		 */
-		template <typename Predicate> xml_node find_node(Predicate pred) const;
+		template <typename Predicate> xml_node find_node(Predicate pred) const
+		{
+			if (!_root) return xml_node();
+
+			for (xml_node node = first_child(); node; node = node.next_sibling())
+			{
+				if (pred(node))
+					return node;
+				
+				if (node.first_child())
+				{
+					xml_node found = node.find_node(pred);
+					if (found) return found;
+				}
+			}
+
+			return xml_node();
+		}
 
 		/**
 		 * Find child node with the specified name that has specified attribute
@@ -2017,96 +2096,6 @@ namespace pugi
      * \see set_memory_management_functions
      */
     deallocation_function PUGIXML_FUNCTION get_memory_deallocation_function();
-}
-
-// Inline implementation
-
-namespace pugi
-{
-	namespace impl
-	{
-		int PUGIXML_FUNCTION strcmp(const char*, const char*);
-		int PUGIXML_FUNCTION strcmpwild(const char*, const char*);
-	}
-
-	template <typename OutputIterator> void xml_node::all_elements_by_name(const char* name, OutputIterator it) const
-	{
-		if (!_root) return;
-		
-		for (xml_node node = first_child(); node; node = node.next_sibling())
-		{
-			if (node.type() == node_element)
-			{
-				if (!impl::strcmp(name, node.name()))
-				{
-					*it = node;
-					++it;
-				}
-			
-				if (node.first_child()) node.all_elements_by_name(name, it);
-			}
-		}
-	}
-
-	template <typename OutputIterator> void xml_node::all_elements_by_name_w(const char* name, OutputIterator it) const
-	{
-		if (!_root) return;
-		
-		for (xml_node node = first_child(); node; node = node.next_sibling())
-		{
-			if (node.type() == node_element)
-			{
-				if (!impl::strcmpwild(name, node.name()))
-				{
-					*it = node;
-					++it;
-				}
-					
-				if (node.first_child()) node.all_elements_by_name_w(name, it);
-			}
-		}
-	}
-	
-	template <typename Predicate> inline xml_attribute xml_node::find_attribute(Predicate pred) const
-	{
-		if (!_root) return xml_attribute();
-		
-		for (xml_attribute attrib = first_attribute(); attrib; attrib = attrib.next_attribute())
-			if (pred(attrib))
-				return attrib;
-		
-		return xml_attribute();
-	}
-
-	template <typename Predicate> inline xml_node xml_node::find_child(Predicate pred) const
-	{
-		if (!_root) return xml_node();
-
-		for (xml_node node = first_child(); node; node = node.next_sibling())
-			if (pred(node))
-				return node;
-        
-        return xml_node();
-	}
-
-	template <typename Predicate> inline xml_node xml_node::find_node(Predicate pred) const
-	{
-		if (!_root) return xml_node();
-
-		for (xml_node node = first_child(); node; node = node.next_sibling())
-		{
-			if (pred(node))
-				return node;
-				
-			if (node.first_child())
-			{
-				xml_node found = node.find_node(pred);
-				if (found) return found;
-			}
-		}
-
-		return xml_node();
-	}
 }
 
 #endif
