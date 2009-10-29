@@ -64,6 +64,10 @@ else if ( $(toolset:I=^msvc) )
 	{
 		CCFLAGS += /EHsc ;
 	}
+	else
+	{
+		CCFLAGS += /D_HAS_EXCEPTIONS=0 ;
+	}
 
 	actions ObjectAction
 	{
@@ -136,14 +140,14 @@ else if ( $(toolset:I=^dmc) )
 		CCFLAGS += -DNDEBUG ;
 	}
 
-	if ( !(PUGIXML_NO_EXCEPTIONS in $(defines)) )
+	if ( ! ( PUGIXML_NO_EXCEPTIONS in $(defines) ) )
 	{
 		CCFLAGS += -Ae ;
 	}
 
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\dmc.exe" -c -f -wx $(>) -o$(<)
+		"%$(toolset)_PATH%\bin\dmc.exe" -c -f -wx $(>) -o$(<) $(CCFLAGS)
 	}
 	
 	actions LibraryAction

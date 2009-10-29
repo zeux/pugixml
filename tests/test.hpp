@@ -1,12 +1,18 @@
 #ifndef HEADER_TEST_HPP
 #define HEADER_TEST_HPP
 
+#include "../src/pugixml.hpp"
+
+#if (defined(_MSC_VER) && _MSC_VER==1200) || defined(__DMC__)
+typedef int intptr_t;
+#endif
+
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <string>
+#include <setjmp.h>
 
-#include "../src/pugixml.hpp"
+#include <string>
 
 inline bool test_string_equal(const char* lhs, const char* rhs)
 {
@@ -103,6 +109,7 @@ struct test_runner
 
 	static test_runner* _tests;
 	static size_t _memory_fail_threshold;
+	static jmp_buf _failure;
 };
 
 struct dummy_fixture {};
@@ -147,7 +154,7 @@ struct dummy_fixture {};
 
 #define CHECK_JOIN(text, file, line) text file #line
 #define CHECK_JOIN2(text, file, line) CHECK_JOIN(text, file, line)
-#define CHECK_TEXT(condition, text) if (condition) ; else throw CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__)
+#define CHECK_TEXT(condition, text) if (condition) ; else longjmp(test_runner::_failure, (int)(intptr_t)(CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__)))
 
 #if defined(_MSC_VER) && _MSC_VER == 1200
 #	define STR(value) "??" // MSVC 6.0 has troubles stringizing stuff with strings w/escaping inside
