@@ -1,3 +1,5 @@
+#ifndef PUGIXML_NO_XPATH
+
 #include "common.hpp"
 
 TEST(xpath_literal_parse)
@@ -32,3 +34,5 @@ TEST(xpath_number_error)
 	CHECK_XPATH_FAIL("123.a");
 	CHECK_XPATH_FAIL(".123a");
 }
+
+#endif

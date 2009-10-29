@@ -46,6 +46,35 @@ static void replace_memory_management()
 	pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
 }
 
+static bool run_test(test_runner* test)
+{
+	try
+	{
+		g_memory_total_size = 0;
+		test_runner::_memory_fail_threshold = 0;
+
+		test->run();
+
+		if (g_memory_total_size != 0) throw "Memory leaks found";
+
+		return true;
+	}
+	catch (const std::exception& e)
+	{
+		printf("Test %s failed: exception %s\n", test->_name, e.what());
+	}
+	catch (const char* e)
+	{
+		printf("Test %s failed: %s\n", test->_name, e);
+	}
+	catch (...)
+	{
+		printf("Test %s failed for unknown reason\n", test->_name);
+	}
+
+	return false;
+}
+
 int main()
 {
 	replace_memory_management();
@@ -53,33 +82,12 @@ int main()
 	unsigned int total = 0;
 	unsigned int passed = 0;
 
-	for (test_runner* test = test_runner::_tests; test; test = test->_next)
+	test_runner* test = 0; // gcc3 "variable might be used uninitialized in this function" bug workaround
+
+	for (test = test_runner::_tests; test; test = test->_next)
 	{
-		try
-		{
-			total++;
-
-			g_memory_total_size = 0;
-			test_runner::_memory_fail_threshold = 0;
-
-			test->run();
-
-			if (g_memory_total_size != 0) throw "Memory leaks found";
-
-			passed++;
-		}
-		catch (const std::exception& e)
-		{
-			printf("Test %s failed: exception %s\n", test->_name, e.what());
-		}
-		catch (const char* e)
-		{
-			printf("Test %s failed: %s\n", test->_name, e);
-		}
-		catch (...)
-		{
-			printf("Test %s failed for unknown reason\n", test->_name);
-		}
+		total++;
+		passed += run_test(test);
 	}
 
 	unsigned int failed = total - passed;

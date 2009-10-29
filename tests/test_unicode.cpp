@@ -7,6 +7,7 @@ inline wchar_t wchar_cast(unsigned int value)
 	return static_cast<wchar_t>(value); // to avoid C4310 on MSVC
 }
 
+#ifndef PUGIXML_NO_STL
 TEST(as_utf16)
 {
 	// valid 1-byte, 2-byte and 3-byte inputs
@@ -35,6 +36,7 @@ TEST(as_utf8)
 	CHECK(as_utf8(L"\x97624 \x1003ff") == "\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
 #endif
 }
+#endif
 
 TEST_XML(parse_bom_utf8, "\xef\xbb\xbf<node/>")
 {

@@ -1,6 +1,7 @@
 #include "common.hpp"
 
 #include <string>
+#include <sstream>
 
 TEST_XML(write_simple, "<node attr='1'><child>text</child></node>")
 {
@@ -72,6 +73,7 @@ TEST_XML(write_print_writer, "<node/>")
 	CHECK(writer.contents == "<node />\n");
 }
 
+#ifndef PUGIXML_NO_STL
 TEST_XML(write_print_stream, "<node/>")
 {
 	std::ostringstream oss;
@@ -79,14 +81,15 @@ TEST_XML(write_print_stream, "<node/>")
 
 	CHECK(oss.str() == "<node />\n");
 }
+#endif
 
 TEST_XML(write_huge_chunk, "<node/>")
 {
 	std::string name(10000, 'n');
 	doc.child("node").set_name(name.c_str());
 
-	std::ostringstream oss;
-	doc.print(oss);
+	test_writer writer;
+	doc.print(writer);
 
-	CHECK(oss.str() == "<" + name + " />\n");
+	CHECK(writer.contents == "<" + name + " />\n");
 }

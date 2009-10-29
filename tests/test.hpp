@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
-#include <sstream>
+#include <string>
 
 #include "../src/pugixml.hpp"
 
@@ -18,14 +18,25 @@ template <typename Node> inline bool test_node_name_value(const Node& node, cons
 	return test_string_equal(node.name(), name) && test_string_equal(node.value(), value);
 }
 
+struct xml_writer_string: public pugi::xml_writer
+{
+	std::string result;
+	
+	virtual void write(const void* data, size_t size)
+	{
+		result += std::string(static_cast<const char*>(data), size);
+	}
+};
+
 inline bool test_node(const pugi::xml_node& node, const char* contents, const char* indent, unsigned int flags)
 {
-	std::ostringstream oss;
-	node.print(oss, indent, flags);
+	xml_writer_string writer;
+	node.print(writer, indent, flags);
 
-	return oss.str() == contents;
+	return writer.result == contents;
 }
 
+#ifndef PUGIXML_NO_XPATH
 inline bool test_xpath_string(const pugi::xml_node& node, const char* query, const char* expected)
 {
 	pugi::xpath_query q(query);
@@ -72,6 +83,7 @@ inline bool test_xpath_fail_compile(const char* query)
 		return true;
 	}
 }
+#endif
 
 struct test_runner
 {
@@ -150,10 +162,12 @@ struct dummy_fixture {};
 #define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), STR(node) " contents does not match " STR(expected))
 #define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, "", pugi::format_raw)
 
+#ifndef PUGIXML_NO_XPATH
 #define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
 #define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
 #define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
 #define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STR(query) " does not evaluate to NaN in context " STR(node))
 #define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STR(query) " should not compile")
+#endif
 
 #endif

@@ -1,6 +1,8 @@
 #include "common.hpp"
 
 #include <fstream>
+#include <sstream>
+#include <string>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
@@ -13,6 +15,7 @@ TEST(document_create)
 	CHECK_NODE(doc, "<node />");
 }
 
+#ifndef PUGIXML_NO_STL
 TEST(document_load_stream)
 {
 	pugi::xml_document doc;
@@ -41,6 +44,7 @@ TEST(document_load_stream_error)
 	std::istringstream iss("<node/>");
 	CHECK(doc.load(iss).status == status_out_of_memory);
 }
+#endif
 
 TEST(document_load_string)
 {
@@ -64,12 +68,12 @@ TEST(document_load_file_large)
 
 	CHECK(doc.load_file("tests/data/large.xml"));
 
-	std::ostringstream oss;
-	oss << "<node>";
-	for (int i = 0; i < 10000; ++i) oss << "<node />";
-	oss << "</node>";
+	std::string str;
+	str += "<node>";
+	for (int i = 0; i < 10000; ++i) str += "<node />";
+	str += "</node>";
 
-	CHECK_NODE(doc, oss.str().c_str());
+	CHECK_NODE(doc, str.c_str());
 }
 
 TEST(document_load_file_error)
@@ -90,32 +94,29 @@ TEST(document_load_file_error)
 
 TEST_XML(document_save, "<node/>")
 {
-	std::ostringstream oss;
-	xml_writer_stream writer(oss);
+	xml_writer_string writer;
 
 	doc.save(writer, "", pugi::format_no_declaration | pugi::format_raw);
 
-	CHECK(oss.str() == "<node />");
+	CHECK(writer.result == "<node />");
 }
 
 TEST_XML(document_save_bom, "<node/>")
 {
-	std::ostringstream oss;
-	xml_writer_stream writer(oss);
+	xml_writer_string writer;
 
 	doc.save(writer, "", pugi::format_no_declaration | pugi::format_raw | pugi::format_write_bom_utf8);
 
-	CHECK(oss.str() == "\xef\xbb\xbf<node />");
+	CHECK(writer.result == "\xef\xbb\xbf<node />");
 }
 
 TEST_XML(document_save_declaration, "<node/>")
 {
-	std::ostringstream oss;
-	xml_writer_stream writer(oss);
+	xml_writer_string writer;
 
 	doc.save(writer);
 
-	CHECK(oss.str() == "<?xml version=\"1.0\"?>\n<node />\n");
+	CHECK(writer.result == "<?xml version=\"1.0\"?>\n<node />\n");
 }
 
 TEST_XML(document_save_file, "<node/>")

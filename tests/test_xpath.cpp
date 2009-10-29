@@ -1,3 +1,5 @@
+#ifndef PUGIXML_NO_XPATH
+
 #include "common.hpp"
 
 TEST_XML(xpath_document_order, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>")
@@ -17,3 +19,5 @@ TEST_XML(xpath_document_order, "<node><child1 attr1='value1' attr2='value2'/><ch
 	CHECK(doc.child("node").child("child2").attribute("attr1").document_order() == 7);
 	CHECK(doc.child("node").child("child2").first_child().document_order() == 8);
 }
+
+#endif

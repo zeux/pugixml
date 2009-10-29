@@ -1,3 +1,5 @@
+#ifndef PUGIXML_NO_XPATH
+
 #include "common.hpp"
 
 TEST_XML(xpath_number_number, "<node>123</node>")
@@ -530,3 +532,5 @@ TEST(xpath_function_arguments)
 	// lack of commas
 	CHECK_XPATH_FAIL("substring(1 2)");
 }
+
+#endif

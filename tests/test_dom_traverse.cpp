@@ -8,11 +8,20 @@
 #pragma warning(disable: 4996)
 #endif
 
+#ifdef PUGIXML_NO_STL
+template <typename I> static I move_iter(I base, int n)
+{
+	if (n > 0) while (n--) ++base;
+	else while (n++) --base;
+	return base;
+}
+#else
 template <typename I> static I move_iter(I base, int n)
 {
 	std::advance(base, n);
 	return base;
 }
+#endif
 
 template <typename T> static void generic_bool_ops_test(const T& obj)
 {
@@ -566,6 +575,7 @@ TEST_XML(dom_node_find_node, "<node><child1/><child2/></node>")
 	CHECK(doc.find_node(find_predicate_prefix("child3")) == xml_node());
 }
 
+#ifndef PUGIXML_NO_STL
 TEST_XML(dom_node_path, "<node><child1>text<child2/></child1></node>")
 {
 	CHECK(xml_node().path() == "");
@@ -578,6 +588,7 @@ TEST_XML(dom_node_path, "<node><child1>text<child2/></child1></node>")
 	
 	CHECK(doc.child("node").child("child1").path('\\') == "\\node\\child1");
 }
+#endif
 
 TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></node>")
 {
@@ -591,7 +602,10 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 	CHECK(doc.first_element_by_path("node") == doc.child("node"));
 	CHECK(doc.first_element_by_path("/node") == doc.child("node"));
 
+#ifndef PUGIXML_NO_STL
 	CHECK(doc.first_element_by_path("/node/child1/child2").path() == "/node/child1/child2");
+#endif
+
 	CHECK(doc.first_element_by_path("/node/child2") == xml_node());
 	
 	CHECK(doc.first_element_by_path("\\node\\child1", '\\') == doc.child("node").child("child1"));

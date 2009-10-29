@@ -1,3 +1,5 @@
+#ifndef PUGIXML_NO_XPATH
+
 #include "common.hpp"
 
 #if defined(_MSC_VER) && _MSC_VER == 1200
@@ -395,3 +397,5 @@ TEST(xpath_operators_boolean_precedence)
 	CHECK_XPATH_BOOLEAN(c, "(3 > 2) > 1", false);
 	CHECK_XPATH_BOOLEAN(c, "3 > (2 > 1)", true);
 }
+
+#endif
