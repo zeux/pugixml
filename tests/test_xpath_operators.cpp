@@ -10,6 +10,10 @@
 #	define MSVC6_NAN_BUG // IC8 seems to have the same bug as MSVC6 does
 #endif
 
+#if defined(__BORLANDC__)
+#	define MSVC6_NAN_BUG // BCC seems to have the same bug as MSVC6 does
+#endif
+
 TEST_XML(xpath_operators_arithmetic, "<node><foo-bar>10</foo-bar><foo>2</foo><bar>3</bar></node>")
 {
 	xml_node c;

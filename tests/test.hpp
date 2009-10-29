@@ -12,6 +12,10 @@ typedef int intptr_t;
 #include <float.h>
 #include <setjmp.h>
 
+#if defined(__MWERKS__) || defined(__BORLANDC__)
+#include <stdint.h> // intptr_t
+#endif
+
 #include <string>
 
 inline bool test_string_equal(const char* lhs, const char* rhs)
@@ -70,7 +74,7 @@ inline bool test_xpath_number_nan(const pugi::xml_node& node, const char* query)
 
 	double r = q.evaluate_number(node);
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__BORLANDC__)
 	return _isnan(r) != 0;
 #else
 	return r != r;
@@ -156,8 +160,8 @@ struct dummy_fixture {};
 #define CHECK_JOIN2(text, file, line) CHECK_JOIN(text, file, line)
 #define CHECK_TEXT(condition, text) if (condition) ; else longjmp(test_runner::_failure, (int)(intptr_t)(CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__)))
 
-#if defined(_MSC_VER) && _MSC_VER == 1200
-#	define STR(value) "??" // MSVC 6.0 has troubles stringizing stuff with strings w/escaping inside
+#if (defined(_MSC_VER) && _MSC_VER == 1200) || defined(__MWERKS__)
+#	define STR(value) "??" // MSVC 6.0 and CodeWarrior have troubles stringizing stuff with strings w/escaping inside
 #else
 #	define STR(value) #value
 #endif

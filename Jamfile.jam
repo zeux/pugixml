@@ -27,7 +27,7 @@ defines -= "" ;
 # options
 if ( $(defines) )
 {
-	BUILD = build/$(toolset)/$(defines:J=-)/$(configuration) ;
+	BUILD = build/$(toolset)/$(defines:J=_)/$(configuration) ;
 }
 else
 {

@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+#include <stdio.h>
+
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif

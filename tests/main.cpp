@@ -3,6 +3,7 @@
 #include <exception>
 #include <stdio.h>
 
+#include <stdlib.h>
 #include <malloc.h>
 
 test_runner* test_runner::_tests = 0;
@@ -47,7 +48,7 @@ static void replace_memory_management()
 	pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
 }
 
-#if defined(_MSC_VER) && _MSC_VER > 1200 && _MSC_VER < 1400 && !defined(__INTEL_COMPILER)
+#if defined(_MSC_VER) && _MSC_VER > 1200 && _MSC_VER < 1400 && !defined(__INTEL_COMPILER) && !defined(__DMC__)
 namespace std
 {
 	_CRTIMP2 _Prhand _Raise_handler;
@@ -103,6 +104,10 @@ static bool run_test(test_runner* test)
 
 int main()
 {
+#ifdef __BORLANDC__
+	_control87(MCW_EM | PC_53, MCW_EM | MCW_PC);
+#endif
+
 	replace_memory_management();
 
 	unsigned int total = 0;

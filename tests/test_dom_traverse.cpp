@@ -1,5 +1,7 @@
 #include "common.hpp"
 
+#include <stdio.h>
+
 #include <utility>
 #include <vector>
 #include <iterator>
