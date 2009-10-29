@@ -21,8 +21,18 @@ if ( ! $(configuration) )
 	configuration = "debug" ;
 }
 
+# remove empty define
+defines -= "" ;
+
 # options
-BUILD = build/$(toolset)/$(configuration) ;
+if ( $(defines) )
+{
+	BUILD = build/$(toolset)/$(defines:J=-)/$(configuration) ;
+}
+else
+{
+	BUILD = build/$(toolset)/standard/$(configuration) ;
+}
 
 if ( $(toolset) = "mingw" )
 {

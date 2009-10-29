@@ -2,6 +2,8 @@
 
 if ( $(toolset:I=^mingw) )
 {
+	CCFLAGS += -D$(defines) ;
+
 	if ( $(configuration) = "debug" )
 	{
 		CCFLAGS += -D_DEBUG ;
@@ -9,6 +11,11 @@ if ( $(toolset:I=^mingw) )
 	else
 	{
 		CCFLAGS += -DNDEBUG -O3 ;
+	}
+
+	if ( PUGIXML_NO_EXCEPTIONS in $(defines) )
+	{
+		CCFLAGS += -fno-exceptions ;
 	}
 
 	actions ObjectAction
@@ -33,6 +40,8 @@ if ( $(toolset:I=^mingw) )
 }
 else if ( $(toolset:I=^msvc) )
 {
+	CCFLAGS += /D$(defines) ;
+
 	if ( $(configuration) = "debug" )
 	{
 		CCFLAGS += /D_DEBUG /MTd ;
@@ -51,9 +60,14 @@ else if ( $(toolset:I=^msvc) )
 		CCFLAGS += /W3 ; # lots of warnings at W4 in standard library
 	}
 
+	if ( ! ( PUGIXML_NO_EXCEPTIONS in $(defines) ) )
+	{
+		CCFLAGS += /EHsc ;
+	}
+
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\cl.exe" /EHsc /WX /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		"%$(toolset)_PATH%\bin\cl.exe" /WX /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction
@@ -74,6 +88,8 @@ else if ( $(toolset) = "ic8" )
 {
 	msvc = "msvc7" ;
 
+	CCFLAGS += /D$(defines) ;
+
 	if ( $(configuration) = "debug" )
 	{
 		CCFLAGS += /D_DEBUG /MTd ;
@@ -83,9 +99,14 @@ else if ( $(toolset) = "ic8" )
 		CCFLAGS += /DNDEBUG /Ox /MT ;
 	}
 
+	if ( ! ( PUGIXML_NO_EXCEPTIONS in $(defines) ) )
+	{
+		CCFLAGS += /EHsc ;
+	}
+
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\icl.exe" /EHsc /W4 /WX /Wport /Qwd981,444,280,383,909,304,167 /I"%$(msvc)_PATH%\include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		"%$(toolset)_PATH%\bin\icl.exe" /W4 /WX /Wport /Qwd981,444,280,383,909,304,167 /I"%$(msvc)_PATH%\include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction
@@ -104,6 +125,8 @@ else if ( $(toolset) = "ic8" )
 }
 else if ( $(toolset:I=^dmc) )
 {
+	CCFLAGS += -D$(defines) ;
+
 	if ( $(configuration) = "debug" )
 	{
 		CCFLAGS += -D_DEBUG ;
@@ -113,9 +136,14 @@ else if ( $(toolset:I=^dmc) )
 		CCFLAGS += -DNDEBUG ;
 	}
 
+	if ( !(PUGIXML_NO_EXCEPTIONS in $(defines)) )
+	{
+		CCFLAGS += -Ae ;
+	}
+
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\dmc.exe" -c -f -wx -Ae $(>) -o$(<)
+		"%$(toolset)_PATH%\bin\dmc.exe" -c -f -wx $(>) -o$(<)
 	}
 	
 	actions LibraryAction
