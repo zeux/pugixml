@@ -64,6 +64,11 @@ else if ( $(toolset:I=^msvc) )
 	{
 		CCFLAGS += /EHsc ;
 	}
+	else if ( $(toolset) = "msvc6" || $(toolset) = "msvc71" )
+	{
+		# No no-exception STL in MSVC6, buggy no-exception STL in MSVC71
+		CCFLAGS += /EHsc ;
+	}
 	else
 	{
 		CCFLAGS += /D_HAS_EXCEPTIONS=0 ;
