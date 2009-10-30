@@ -1930,7 +1930,12 @@ namespace pugi
 				return starts_with(m_left->eval_string(c), m_right->eval_string(c).c_str());
 
 			case ast_func_contains:
-				return m_left->eval_string(c).find(m_right->eval_string(c)) != std::string::npos;
+			{
+				std::string lr = m_left->eval_string(c);
+				std::string rr = m_right->eval_string(c);
+
+				return rr.empty() || lr.find(rr) != std::string::npos;
+			}
 
 			case ast_func_boolean:
 				return m_left->eval_boolean(c);
