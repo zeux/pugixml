@@ -561,6 +561,9 @@ namespace pugi
 
 		void* alloc(size_t size)
 		{
+			// align size so that we're able to store pointers in subsequent blocks
+			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+
 			if (m_root->size + size <= xpath_memory_block_size)
 			{
 				void* buf = m_root->data + m_root->size;
