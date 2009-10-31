@@ -152,7 +152,7 @@ else if ( $(toolset:I=^dmc) )
 
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\dmc.exe" -c -f -wx $(>) -o$(<) $(CCFLAGS)
+		"%$(toolset)_PATH%\bin\dmc.exe" -c -f -I%$(toolset)_PATH%\stlport\stlport -wx $(>) -o$(<) $(CCFLAGS)
 	}
 	
 	actions LibraryAction
