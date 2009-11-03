@@ -18,6 +18,27 @@ typedef int intptr_t;
 
 #include <string>
 
+struct test_runner
+{
+	test_runner(const char* name)
+	{
+		_name = name;
+		_next = _tests;
+		_tests = this;
+	}
+
+	virtual ~test_runner() {}
+
+	virtual void run() = 0;
+
+	const char* _name;
+	test_runner* _next;
+
+	static test_runner* _tests;
+	static size_t _memory_fail_threshold;
+	static jmp_buf _failure;
+};
+
 inline bool test_string_equal(const char* lhs, const char* rhs)
 {
 	return (!lhs || !rhs) ? lhs == rhs : strcmp(lhs, rhs) == 0;
@@ -93,28 +114,49 @@ inline bool test_xpath_fail_compile(const char* query)
 		return true;
 	}
 }
-#endif
 
-struct test_runner
+struct xpath_node_set_tester
 {
-	test_runner(const char* name)
+	pugi::xpath_node_set result;
+	unsigned int last;
+	const char* message;
+
+	void check(bool condition)
 	{
-		_name = name;
-		_next = _tests;
-		_tests = this;
+		if (!condition) longjmp(test_runner::_failure, (int)(intptr_t)message);
 	}
 
-	virtual ~test_runner() {}
+	xpath_node_set_tester(const pugi::xml_node& node, const char* query, const char* message): last(0), message(message)
+	{
+		pugi::xpath_query q(query);
+		result = q.evaluate_node_set(node);
+	}
 
-	virtual void run() = 0;
+	~xpath_node_set_tester()
+	{
+		// check that we processed everything
+		check(last == result.size());
+	}
 
-	const char* _name;
-	test_runner* _next;
+	xpath_node_set_tester& operator%(unsigned int expected)
+	{
+		// check element count
+		check(last < result.size());
 
-	static test_runner* _tests;
-	static size_t _memory_fail_threshold;
-	static jmp_buf _failure;
+		// check document order
+		pugi::xpath_node node = result.begin()[last];
+		unsigned int order = node.attribute() ? node.attribute().document_order() : node.node().document_order();
+		
+		check(order == expected);
+
+		// continue to the next element
+		last++;
+
+		return *this;
+	}
 };
+
+#endif
 
 struct dummy_fixture {};
 
@@ -179,6 +221,7 @@ struct dummy_fixture {};
 #define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
 #define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STR(query) " does not evaluate to NaN in context " STR(node))
 #define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STR(query) " should not compile")
+#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node, query, STR(query) " does not evaluate to expected set in context " STR(node))
 #endif
 
 #endif

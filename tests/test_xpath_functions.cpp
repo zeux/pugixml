@@ -498,6 +498,45 @@ TEST(xpath_string_translate)
 	CHECK_XPATH_FAIL("translate('a', 'b', 'c', 'd')");
 }
 
+TEST_XML(xpath_nodeset_count, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// count with 0 arguments
+	CHECK_XPATH_FAIL("count()");
+
+	// count with 1 non-node-set argument
+	CHECK_XPATH_FAIL("count(1)");
+	CHECK_XPATH_FAIL("count(true())");
+	CHECK_XPATH_FAIL("count('')");
+
+	// count with 1 node-set argument
+	CHECK_XPATH_NUMBER(c, "count(.)", 0);
+	CHECK_XPATH_NUMBER(n, "count(.)", 1);
+	CHECK_XPATH_NUMBER(n, "count(c1)", 2);
+	CHECK_XPATH_NUMBER(n, "count(c2)", 1);
+	CHECK_XPATH_NUMBER(n, "count(c3)", 4);
+	CHECK_XPATH_NUMBER(n, "count(c4)", 0);
+
+	// count with 2 arguments
+	CHECK_XPATH_FAIL("count(x, y)");
+}
+
+TEST_XML(xpath_nodeset_id, "<node id='foo'/>")
+{
+	xml_node n = doc.child("node");
+
+	// id with 0 arguments
+	CHECK_XPATH_FAIL("id()");
+	
+	// id with 1 argument - no DTD => no id
+	CHECK_XPATH_NODESET(n, "id('foo')");
+
+	// id with 2 arguments
+	CHECK_XPATH_FAIL("id(1, 2)");
+}
+
 TEST(xpath_function_arguments)
 {
 	xml_node c;
