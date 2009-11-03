@@ -3156,7 +3156,7 @@ namespace pugi
 					break;
 				
 				case 's':
-					if (starts_with(nt_name, "self::")) axis = axis_ancestor_or_self;
+					if (starts_with(nt_name, "self::")) axis = axis_self;
 					else axis_specified = false;
 					
 					break;
