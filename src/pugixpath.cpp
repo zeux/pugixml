@@ -170,6 +170,13 @@ namespace
                 
         return false;
     }
+
+    bool node_is_ancestor(xml_node parent, xml_node node)
+    {
+    	while (node && node != parent) node = node.parent();
+
+    	return parent && node == parent;
+    }
     
 	struct document_order_comparator
 	{
@@ -1605,21 +1612,28 @@ namespace pugi
 				
 				xml_node cur = n;
 				
-				for (;;)
+				// exit from this node so that we don't include descendants
+				while (cur && !cur.next_sibling()) cur = cur.parent();
+				cur = cur.next_sibling();
+
+				if (cur)
 				{
-					if (cur.first_child())
-						cur = cur.first_child();
-					else if (cur.next_sibling())
-						cur = cur.next_sibling();
-					else
+					for (;;)
 					{
-						while (cur && !cur.next_sibling()) cur = cur.parent();
-						cur = cur.next_sibling();
-						
-						if (!cur) break;
+						step_push(ns, cur);
+	
+						if (cur.first_child())
+							cur = cur.first_child();
+						else if (cur.next_sibling())
+							cur = cur.next_sibling();
+						else
+						{
+							while (cur && !cur.next_sibling()) cur = cur.parent();
+							cur = cur.next_sibling();
+							
+							if (!cur) break;
+						}
 					}
-					
-					step_push(ns, cur);
 				}
 
 				break;
@@ -1642,7 +1656,7 @@ namespace pugi
 							cur = cur.last_child();
 						else
 						{
-							// leaf node
+							// leaf node, can't be ancestor
 							step_push(ns, cur);
 							
 							if (cur.previous_sibling())
@@ -1653,8 +1667,8 @@ namespace pugi
 								{
 									cur = cur.parent();
 									if (!cur) break;
-								
-									step_push(ns, cur);
+									
+									if (!node_is_ancestor(cur, n)) step_push(ns, cur);
 								}
 								while (!cur.previous_sibling());
 													
