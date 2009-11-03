@@ -146,7 +146,7 @@ struct xpath_node_set_tester
 		// check document order
 		pugi::xpath_node node = result.begin()[last];
 		unsigned int order = node.attribute() ? node.attribute().document_order() : node.node().document_order();
-		
+
 		check(order == expected);
 
 		// continue to the next element
@@ -221,7 +221,7 @@ struct dummy_fixture {};
 #define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
 #define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STR(query) " does not evaluate to NaN in context " STR(node))
 #define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STR(query) " should not compile")
-#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node, query, STR(query) " does not evaluate to expected set in context " STR(node))
+#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node, query, CHECK_JOIN2(STR(query) " does not evaluate to expected set in context " STR(node), " at "__FILE__ ":", __LINE__))
 #endif
 
 #endif
