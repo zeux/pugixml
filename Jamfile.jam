@@ -39,6 +39,11 @@ if ( $(toolset:I=^mingw) )
 	CCFLAGS = -fprofile-arcs -ftest-coverage ;
 	LDFLAGS = -fprofile-arcs ;
 	GCOVFLAGS = -n ;
+
+	if ( $(toolset) = mingw44 )
+	{
+		GCOVFLAGS += -o $(BUILD)/src ; # because stupid gcov can't find files via relative paths any more
+	}
 }
 
 # rules
