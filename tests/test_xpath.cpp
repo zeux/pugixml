@@ -20,4 +20,22 @@ TEST_XML(xpath_document_order, "<node><child1 attr1='value1' attr2='value2'/><ch
 	CHECK(doc.child("node").child("child2").first_child().document_order() == 8);
 }
 
+TEST(xpath_allocator_many_pages)
+{
+	std::string query = "0";
+
+	for (int i = 0; i < 1024; ++i) query += "+string-length('abcdefgh')";
+
+	CHECK_XPATH_NUMBER(xml_node(), query.c_str(), 8192);
+}
+
+TEST(xpath_allocator_large_page)
+{
+	std::string query;
+
+	for (int i = 0; i < 1024; ++i) query += "abcdefgh";
+
+	CHECK_XPATH_NUMBER(xml_node(), ("string-length('" + query + "')").c_str(), 8192);
+}
+
 #endif
