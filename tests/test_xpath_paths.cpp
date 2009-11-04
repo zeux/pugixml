@@ -136,6 +136,13 @@ TEST_XML(xpath_paths_axes_attribute, "<node attr1='value' attr2='value'><child a
 	CHECK_XPATH_NODESET(n.child("another"), "attribute:: node()"); // namespace nodes are not attributes
 }
 
+TEST_XML(xpath_paths_axes_namespace, "<node xmlns:foo='bar'/>")
+{
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(n, "namespace:: node()"); // namespace nodes are not supported
+}
+
 TEST_XML(xpath_paths_axes_self, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
 	doc.precompute_document_order();

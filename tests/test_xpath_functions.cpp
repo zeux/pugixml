@@ -498,6 +498,41 @@ TEST(xpath_string_translate)
 	CHECK_XPATH_FAIL("translate('a', 'b', 'c', 'd')");
 }
 
+TEST_XML(xpath_nodeset_last, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node");
+
+	// last with 0 arguments
+	CHECK_XPATH_NUMBER(n, "last()", 1);
+	CHECK_XPATH_NODESET(n, "c1[last() = 1]");
+	CHECK_XPATH_NODESET(n, "c1[last() = 2]") % 3 % 4; // c1, c1
+	CHECK_XPATH_NODESET(n, "c2/preceding-sibling::node()[last() = 2]") % 4 % 3; // c1, c1
+
+	// last with 1 argument
+	CHECK_XPATH_FAIL("last(c)");
+}
+
+TEST_XML(xpath_nodeset_position, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node");
+
+	// position with 0 arguments
+	CHECK_XPATH_NUMBER(n, "position()", 1);
+	CHECK_XPATH_NODESET(n, "c1[position() = 0]");
+	CHECK_XPATH_NODESET(n, "c1[position() = 1]") % 3;
+	CHECK_XPATH_NODESET(n, "c1[position() = 2]") % 4;
+	CHECK_XPATH_NODESET(n, "c1[position() = 3]");
+	CHECK_XPATH_NODESET(n, "c2/preceding-sibling::node()[position() = 1]") % 4;
+	CHECK_XPATH_NODESET(n, "c2/preceding-sibling::node()[position() = 2]") % 3;
+	
+	// position with 1 argument
+	CHECK_XPATH_FAIL("position(c)");
+}
+
 TEST_XML(xpath_nodeset_count, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
 {
 	xml_node c;
@@ -537,6 +572,83 @@ TEST_XML(xpath_nodeset_id, "<node id='foo'/>")
 	CHECK_XPATH_FAIL("id(1, 2)");
 }
 
+TEST_XML_FLAGS(xpath_nodeset_local_name, "<node xmlns:foo='http://foo'><c1>text</c1><c2 xmlns:foo='http://foo2' foo:attr='value'><foo:child/></c2><c3 xmlns='http://def' attr='value'><child/></c3><c4><?target stuff?></c4></node>", parse_default | parse_pi)
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// local-name with 0 arguments
+	CHECK_XPATH_STRING(c, "local-name()", "");
+	CHECK_XPATH_STRING(n, "local-name()", "node");
+	
+	// local-name with 1 non-node-set argument
+	CHECK_XPATH_FAIL("local-name(1)");
+
+	// local-name with 1 node-set argument
+	CHECK_XPATH_STRING(n, "local-name(c1)", "c1");
+	CHECK_XPATH_STRING(n, "local-name(c2/node())", "child");
+	CHECK_XPATH_STRING(n, "local-name(c2/attribute::node())", "attr");
+	CHECK_XPATH_STRING(n, "local-name(c1/node())", "");
+	CHECK_XPATH_STRING(n, "local-name(c4/node())", "target");
+	CHECK_XPATH_STRING(n, "local-name(c1/following-sibling::node())", "c2");
+	CHECK_XPATH_STRING(n, "local-name(c4/preceding-sibling::node())", "c1");
+
+	// local-name with 2 arguments
+	CHECK_XPATH_FAIL("local-name(c1, c2)");
+}
+
+TEST_XML_FLAGS(xpath_nodeset_namespace_uri, "<node xmlns:foo='http://foo'><c1>text</c1><c2 xmlns:foo='http://foo2' foo:attr='value'><foo:child/></c2><c3 xmlns='http://def' attr='value'><child/></c3><c4><?target stuff?></c4><c5><foo:child/></c5></node>", parse_default | parse_pi)
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// namespace-uri with 0 arguments
+	CHECK_XPATH_STRING(c, "namespace-uri()", "");
+	CHECK_XPATH_STRING(n.child("c2").child("foo:child"), "namespace-uri()", "http://foo2");
+	
+	// namespace-uri with 1 non-node-set argument
+	CHECK_XPATH_FAIL("namespace-uri(1)");
+
+	// namespace-uri with 1 node-set argument
+	CHECK_XPATH_STRING(n, "namespace-uri(c1)", "");
+	CHECK_XPATH_STRING(n, "namespace-uri(c5/child::node())", "http://foo");
+	CHECK_XPATH_STRING(n, "namespace-uri(c2/attribute::node())", "http://foo2");
+	CHECK_XPATH_STRING(n, "namespace-uri(c2/child::node())", "http://foo2");
+	CHECK_XPATH_STRING(n, "namespace-uri(c1/child::node())", "");
+	CHECK_XPATH_STRING(n, "namespace-uri(c4/child::node())", "");
+	CHECK_XPATH_STRING(n, "namespace-uri(c3)", "http://def");
+	CHECK_XPATH_STRING(n, "namespace-uri(c3/@attr)", ""); // the namespace name for an unprefixed attribute name always has no value (Namespaces in XML 1.0)
+	CHECK_XPATH_STRING(n, "namespace-uri(c3/child::node())", "http://def");
+
+	// namespace-uri with 2 arguments
+	CHECK_XPATH_FAIL("namespace-uri(c1, c2)");
+}
+
+TEST_XML_FLAGS(xpath_nodeset_name, "<node xmlns:foo='http://foo'><c1>text</c1><c2 xmlns:foo='http://foo2' foo:attr='value'><foo:child/></c2><c3 xmlns='http://def' attr='value'><child/></c3><c4><?target stuff?></c4></node>", parse_default | parse_pi)
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// name with 0 arguments
+	CHECK_XPATH_STRING(c, "name()", "");
+	CHECK_XPATH_STRING(n, "name()", "node");
+	
+	// name with 1 non-node-set argument
+	CHECK_XPATH_FAIL("name(1)");
+
+	// name with 1 node-set argument
+	CHECK_XPATH_STRING(n, "name(c1)", "c1");
+	CHECK_XPATH_STRING(n, "name(c2/node())", "foo:child");
+	CHECK_XPATH_STRING(n, "name(c2/attribute::node())", "foo:attr");
+	CHECK_XPATH_STRING(n, "name(c1/node())", "");
+	CHECK_XPATH_STRING(n, "name(c4/node())", "target");
+	CHECK_XPATH_STRING(n, "name(c1/following-sibling::node())", "c2");
+	CHECK_XPATH_STRING(n, "name(c4/preceding-sibling::node())", "c1");
+
+	// name with 2 arguments
+	CHECK_XPATH_FAIL("name(c1, c2)");
+}
+
 TEST(xpath_function_arguments)
 {
 	xml_node c;
@@ -570,6 +682,22 @@ TEST(xpath_function_arguments)
 
 	// lack of commas
 	CHECK_XPATH_FAIL("substring(1 2)");
+}
+
+TEST_XML_FLAGS(xpath_string_value, "<node><c1>pcdata</c1><c2><child/></c2><c3 attr='avalue'/><c4><?target pivalue?></c4><c5><!--comment--></c5><c6><![CDATA[cdata]]></c6></node>", parse_default | parse_pi | parse_comments)
+{
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_STRING(c, "string()", "");
+	CHECK_XPATH_STRING(doc, "string()", "pcdatacdata");
+	CHECK_XPATH_STRING(n, "string()", "pcdatacdata");
+	CHECK_XPATH_STRING(n, "string(c1/node())", "pcdata");
+	CHECK_XPATH_STRING(n, "string(c2/node())", "");
+	CHECK_XPATH_STRING(n, "string(c3/@attr)", "avalue");
+	CHECK_XPATH_STRING(n, "string(c4/node())", "pivalue");
+	CHECK_XPATH_STRING(n, "string(c5/node())", "comment");
+	CHECK_XPATH_STRING(n, "string(c6/node())", "cdata");
 }
 
 #endif

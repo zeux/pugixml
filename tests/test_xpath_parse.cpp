@@ -29,10 +29,14 @@ TEST(xpath_number_parse)
 
 TEST(xpath_number_error)
 {
-	xml_node c;
 	CHECK_XPATH_FAIL("123a");
 	CHECK_XPATH_FAIL("123.a");
 	CHECK_XPATH_FAIL(".123a");
+}
+
+TEST(xpath_variables)
+{
+	CHECK_XPATH_FAIL("$var"); // not implemented
 }
 
 #endif
