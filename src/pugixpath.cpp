@@ -434,7 +434,7 @@ namespace
 			ns.append(node.name(), pos);
 		}
 		
-		xml_node p = node.parent();
+		xml_node p = node;
 		
 		while (p)
 		{
