@@ -24,9 +24,9 @@ TEST(xpath_allocator_many_pages)
 {
 	std::string query = "0";
 
-	for (int i = 0; i < 1024; ++i) query += "+string-length('abcdefgh')";
+	for (int i = 0; i < 128; ++i) query += "+string-length('abcdefgh')";
 
-	CHECK_XPATH_NUMBER(xml_node(), query.c_str(), 8192);
+	CHECK_XPATH_NUMBER(xml_node(), query.c_str(), 1024);
 }
 
 TEST(xpath_allocator_large_page)
