@@ -40,9 +40,9 @@ namespace
 	enum chartype
 	{
 		ct_space = 1,			// \r, \n, space, tab
-		ct_start_symbol = 2,	// Any symbol > 127, a-z, A-Z, _, :
+		ct_start_symbol = 2,	// Any symbol > 127, a-z, A-Z, _
 		ct_digit = 4,			// 0-9
-		ct_symbol = 8			// Any symbol > 127, a-z, A-Z, 0-9, _, :, -, .
+		ct_symbol = 8			// Any symbol > 127, a-z, A-Z, 0-9, _, -, .
 	};
 	
 	const unsigned char chartype_table[256] =
@@ -50,7 +50,7 @@ namespace
 		0,  0,  0,  0,  0,  0,  0,  0,     0,  1,  1,  0,  0,  1,  0,  0,     // 0-15
 		0,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  0,  0,  0,     // 16-31
 		1,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  8,  8,  0,     // 32-47
-		12, 12, 12, 12, 12, 12, 12, 12,    12, 12, 10, 0,  0,  0,  0,  0,     // 48-63
+		12, 12, 12, 12, 12, 12, 12, 12,    12, 12, 0,  0,  0,  0,  0,  0,     // 48-63
 		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 64-79
 		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 0,  0,  0,  0,  10,    // 80-95
 		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 96-111
@@ -819,7 +819,8 @@ namespace pugi
 		lex_comma,
 		lex_axis_attribute,
 		lex_dot,
-		lex_double_dot
+		lex_double_dot,
+		lex_double_colon
 	};
 
 	class xpath_lexer
@@ -1063,6 +1064,18 @@ namespace pugi
 				break;
 			}
 
+			case ':':
+				if (*(m_cur+1) == ':')
+				{
+					m_cur += 2;
+					m_cur_lexeme = lex_double_colon;
+				}
+				else
+				{
+					m_cur_lexeme = lex_none;
+				}
+				break;
+
 			default:
 				if (is_chartype(*m_cur, ct_digit))
 				{
@@ -1083,6 +1096,22 @@ namespace pugi
 				{
 					while (is_chartype(*m_cur, ct_symbol))
 						contents_push(*m_cur++);
+
+					if (m_cur[0] == ':')
+					{
+						if (m_cur[1] == '*') // namespace test ncname:*
+						{
+							contents_push(*m_cur++); // :
+							contents_push(*m_cur++); // *
+						}
+						else if (is_chartype(m_cur[1], ct_symbol)) // namespace test qname
+						{
+							contents_push(*m_cur++); // :
+
+							while (is_chartype(*m_cur, ct_symbol))
+								contents_push(*m_cur++);
+						}
+					}
 				
 					while (is_chartype(*m_cur, ct_space)) ++m_cur;
 
@@ -2803,6 +2832,173 @@ namespace pugi
 
 		xpath_parser(const xpath_parser&);
 		xpath_parser& operator=(const xpath_parser&);
+
+		ast_type_t parse_function_name(const std::string& name, size_t argc)
+		{
+			switch (name[0])
+			{
+			case 'b':
+				if (name == "boolean" && argc == 1)
+					return ast_func_boolean;
+					
+				break;
+			
+			case 'c':
+				if (name == "count" && argc == 1)
+					return ast_func_count;
+				else if (name == "contains" && argc == 2)
+					return ast_func_contains;
+				else if (name == "concat" && argc == 2)
+					return ast_func_concat;
+				else if (name == "ceiling" && argc == 1)
+					return ast_func_ceiling;
+					
+				break;
+			
+			case 'f':
+				if (name == "false" && argc == 0)
+					return ast_func_false;
+				else if (name == "floor" && argc == 1)
+					return ast_func_floor;
+					
+				break;
+			
+			case 'i':
+				if (name == "id" && argc == 1)
+					return ast_func_id;
+					
+				break;
+			
+			case 'l':
+				if (name == "last" && argc == 0)
+					return ast_func_last;
+				else if (name == "lang" && argc == 1)
+					return ast_func_lang;
+				else if (name == "local-name" && argc <= 1)
+					return argc == 0 ? ast_func_local_name_0 : ast_func_local_name_1;
+			
+				break;
+			
+			case 'n':
+				if (name == "name" && argc <= 1)
+					return argc == 0 ? ast_func_name_0 : ast_func_name_1;
+				else if (name == "namespace-uri" && argc <= 1)
+					return argc == 0 ? ast_func_namespace_uri_0 : ast_func_namespace_uri_1;
+				else if (name == "normalize-space" && argc <= 1)
+					return argc == 0 ? ast_func_normalize_space_0 : ast_func_normalize_space_1;
+				else if (name == "not" && argc == 1)
+					return ast_func_not;
+				else if (name == "number" && argc <= 1)
+					return argc == 0 ? ast_func_number_0 : ast_func_number_1;
+			
+				break;
+			
+			case 'p':
+				if (name == "position" && argc == 0)
+					return ast_func_position;
+				
+				break;
+			
+			case 'r':
+				if (name == "round" && argc == 1)
+					return ast_func_round;
+
+				break;
+			
+			case 's':
+				if (name == "string" && argc <= 1)
+					return argc == 0 ? ast_func_string_0 : ast_func_string_1;
+				else if (name == "string-length" && argc <= 1)
+					return argc == 0 ? ast_func_string_length_0 : ast_func_string_length_1;
+				else if (name == "starts-with" && argc == 2)
+					return ast_func_starts_with;
+				else if (name == "substring-before" && argc == 2)
+					return ast_func_substring_before;
+				else if (name == "substring-after" && argc == 2)
+					return ast_func_substring_after;
+				else if (name == "substring" && (argc == 2 || argc == 3))
+					return argc == 2 ? ast_func_substring_2 : ast_func_substring_3;
+				else if (name == "sum" && argc == 1)
+					return ast_func_sum;
+
+				break;
+			
+			case 't':
+				if (name == "translate" && argc == 3)
+					return ast_func_translate;
+				else if (name == "true" && argc == 0)
+					return ast_func_true;
+					
+				break;
+			}
+
+			return ast_none;
+		}
+
+		axis_t parse_axis_name(const std::string& name, bool& specified)
+		{
+			specified = true;
+
+			switch (name[0])
+			{
+			case 'a':
+				if (name == "ancestor")
+					return axis_ancestor;
+				else if (name == "ancestor-or-self")
+					return axis_ancestor_or_self;
+				else if (name == "attribute")
+					return axis_attribute;
+				
+				break;
+			
+			case 'c':
+				if (name == "child")
+					return axis_child;
+				
+				break;
+			
+			case 'd':
+				if (name == "descendant")
+					return axis_descendant;
+				else if (name == "descendant-or-self")
+					return axis_descendant_or_self;
+				
+				break;
+			
+			case 'f':
+				if (name == "following")
+					return axis_following;
+				else if (name == "following-sibling")
+					return axis_following_sibling;
+				
+				break;
+			
+			case 'n':
+				if (name == "namespace")
+					return axis_namespace;
+				
+				break;
+			
+			case 'p':
+				if (name == "parent")
+					return axis_parent;
+				else if (name == "preceding")
+					return axis_preceding;
+				else if (name == "preceding-sibling")
+					return axis_preceding_sibling;
+				
+				break;
+			
+			case 's':
+				if (name == "self")
+					return axis_self;
+				
+				break;
+			}
+
+			specified = false;
+			return axis_child;
+		}
 	    
 	    // PrimaryExpr ::= VariableReference | '(' Expr ')' | Literal | Number | FunctionCall
 	    xpath_ast_node* parse_primary_expression()
@@ -2895,129 +3091,8 @@ namespace pugi
 				
 				m_lexer.next();
 				
-				ast_type_t type = ast_none;
-				
-				switch (function[0])
-				{
-				case 'b':
-				{
-					if (function == "boolean" && argc == 1)
-						type = ast_func_boolean;
-						
-					break;
-				}
-				
-				case 'c':
-				{
-					if (function == "count" && argc == 1)
-						type = ast_func_count;
-					else if (function == "contains" && argc == 2)
-						type = ast_func_contains;
-					else if (function == "concat" && argc == 2)
-					{
-						// set_next was done earlier
-						return new (m_alloc.node()) xpath_ast_node(ast_func_concat, args[0], args[1]);
-					}
-					else if (function == "ceiling" && argc == 1)
-						type = ast_func_ceiling;
-						
-					break;
-				}
-				
-				case 'f':
-				{
-					if (function == "false" && argc == 0)
-						type = ast_func_false;
-					else if (function == "floor" && argc == 1)
-						type = ast_func_floor;
-						
-					break;
-				}
-				
-				case 'i':
-				{
-					if (function == "id" && argc == 1)
-						type = ast_func_id;
-						
-					break;
-				}
-				
-				case 'l':
-				{
-					if (function == "last" && argc == 0)
-						type = ast_func_last;
-					else if (function == "lang" && argc == 1)
-						type = ast_func_lang;
-					else if (function == "local-name" && argc <= 1)
-						type = argc == 0 ? ast_func_local_name_0 : ast_func_local_name_1;
-				
-					break;
-				}
-				
-				case 'n':
-				{
-					if (function == "name" && argc <= 1)
-						type = argc == 0 ? ast_func_name_0 : ast_func_name_1;
-					else if (function == "namespace-uri" && argc <= 1)
-						type = argc == 0 ? ast_func_namespace_uri_0 : ast_func_namespace_uri_1;
-					else if (function == "normalize-space" && argc <= 1)
-						type = argc == 0 ? ast_func_normalize_space_0 : ast_func_normalize_space_1;
-					else if (function == "not" && argc == 1)
-						type = ast_func_not;
-					else if (function == "number" && argc <= 1)
-						type = argc == 0 ? ast_func_number_0 : ast_func_number_1;
-				
-					break;
-				}
-				
-				case 'p':
-				{
-					if (function == "position" && argc == 0)
-						type = ast_func_position;
-					
-					break;
-				}
-				
-				case 'r':
-				{
-					if (function == "round" && argc == 1)
-						type = ast_func_round;
+				ast_type_t type = parse_function_name(function, argc);
 
-					break;
-				}
-				
-				case 's':
-				{
-					if (function == "string" && argc <= 1)
-						type = argc == 0 ? ast_func_string_0 : ast_func_string_1;
-					else if (function == "string-length" && argc <= 1)
-						type = argc == 0 ? ast_func_string_length_0 : ast_func_string_length_1;
-					else if (function == "starts-with" && argc == 2)
-						type = ast_func_starts_with;
-					else if (function == "substring-before" && argc == 2)
-						type = ast_func_substring_before;
-					else if (function == "substring-after" && argc == 2)
-						type = ast_func_substring_after;
-					else if (function == "substring" && (argc == 2 || argc == 3))
-						type = argc == 2 ? ast_func_substring_2 : ast_func_substring_3;
-					else if (function == "sum" && argc == 1)
-						type = ast_func_sum;
-
-					break;
-				}
-				
-				case 't':
-				{
-					if (function == "translate" && argc == 3)
-						type = ast_func_translate;
-					else if (function == "true" && argc == 0)
-						type = ast_func_true;
-						
-					break;
-				}
-				
-				}
-				
 				if (type != ast_none)
 				{
 					switch (argc)
@@ -3069,11 +3144,13 @@ namespace pugi
 	    // AbbreviatedStep ::= '.' | '..'
 	    xpath_ast_node* parse_step(xpath_ast_node* set)
 	    {
-			axis_t axis;
-			
+			bool axis_specified = false;
+			axis_t axis = axis_child; // implied child axis
+
 			if (m_lexer.current() == lex_axis_attribute)
 			{
 				axis = axis_attribute;
+				axis_specified = true;
 				
 				m_lexer.next();
 			}
@@ -3089,165 +3166,101 @@ namespace pugi
 				
 				return new (m_alloc.node()) xpath_ast_node(ast_step, set, axis_parent, nodetest_type_node, 0, m_alloc);
 			}
-			else // implied child axis
-				axis = axis_child;
 	    
 			nodetest_t nt_type;
 			std::string nt_name;
 			
 			if (m_lexer.current() == lex_string)
 			{
+				bool nodetest_specified = false;
+
 				// node name test
 				nt_name = m_lexer.contents();
 				m_lexer.next();
-				
-				// possible axis name here - check.
-				if (nt_name.find("::") == std::string::npos && m_lexer.current() == lex_string && m_lexer.contents()[0] == ':' && m_lexer.contents()[1] == ':')
-				{
-					nt_name += m_lexer.contents();
-					m_lexer.next();
-				}
-				
-				// possible namespace test
-				if (m_lexer.current() == lex_string && m_lexer.contents()[0] == ':')
-				{
-					std::string::size_type colon_pos = nt_name.find(':');
-					
-					// either there is no : in current string or there is, but it's :: and there's nothing more
-					if (colon_pos == std::string::npos ||
-						(colon_pos + 1 < nt_name.size() && nt_name[colon_pos + 1] == ':' &&
-						 nt_name.find(':', colon_pos + 2) == std::string::npos))
-					{
-						nt_name += m_lexer.contents();
-						m_lexer.next();
-					}
-				}
-				
-				bool axis_specified = true;
-				
-				switch (nt_name[0])
-				{
-				case 'a':
-					if (starts_with(nt_name, "ancestor::")) axis = axis_ancestor;
-					else if (starts_with(nt_name, "ancestor-or-self::")) axis = axis_ancestor_or_self;
-					else if (starts_with(nt_name, "attribute::")) axis = axis_attribute;
-					else axis_specified = false;
-					
-					break;
-				
-				case 'c':
-					if (starts_with(nt_name, "child::")) axis = axis_child;
-					else axis_specified = false;
-					
-					break;
-				
-				case 'd':
-					if (starts_with(nt_name, "descendant::")) axis = axis_descendant;
-					else if (starts_with(nt_name, "descendant-or-self::")) axis = axis_descendant_or_self;
-					else axis_specified = false;
-					
-					break;
-				
-				case 'f':
-					if (starts_with(nt_name, "following::")) axis = axis_following;
-					else if (starts_with(nt_name, "following-sibling::")) axis = axis_following_sibling;
-					else axis_specified = false;
-					
-					break;
-				
-				case 'n':
-					if (starts_with(nt_name, "namespace::")) axis = axis_namespace;
-					else axis_specified = false;
-					
-					break;
-				
-				case 'p':
-					if (starts_with(nt_name, "parent::")) axis = axis_parent;
-					else if (starts_with(nt_name, "preceding::")) axis = axis_preceding;
-					else if (starts_with(nt_name, "preceding-sibling::")) axis = axis_preceding_sibling;
-					else axis_specified = false;
-					
-					break;
-				
-				case 's':
-					if (starts_with(nt_name, "self::")) axis = axis_self;
-					else axis_specified = false;
-					
-					break;
 
-				default:
-					axis_specified = false;
-				}
-				
-				if (axis_specified)
+				// was it an axis name?
+				if (m_lexer.current() == lex_double_colon)
 				{
-					nt_name.erase(0, nt_name.find("::") + 2);
-				}
-				
-				if (nt_name.empty() && m_lexer.current() == lex_string)
-				{
-					nt_name += m_lexer.contents();
-					m_lexer.next();
-				}
+					// parse axis name
+					if (axis_specified) throw xpath_exception("Two axis specifiers in one step");
 
-				// node type test or processing-instruction
-				if (m_lexer.current() == lex_open_brace)
-				{
+					axis = parse_axis_name(nt_name, axis_specified);
+
+					if (!axis_specified) throw xpath_exception("Unknown axis");
+
+					// read actual node test
 					m_lexer.next();
-					
-					if (m_lexer.current() == lex_close_brace)
+
+					if (m_lexer.current() == lex_multiply)
 					{
+						nt_type = nodetest_all;
 						m_lexer.next();
-						
-						if (nt_name == "node")
-							nt_type = nodetest_type_node;
-						else if (nt_name == "text")
-							nt_type = nodetest_type_text;
-						else if (nt_name == "comment")
-							nt_type = nodetest_type_comment;
-						else if (nt_name == "processing-instruction")
-							nt_type = nodetest_type_pi;
-						else
-							throw xpath_exception("Unrecognized node type");
-						
-						nt_name.erase(nt_name.begin(), nt_name.end());
+
+						nodetest_specified = true;
 					}
-					else if (nt_name == "processing-instruction")
+					else if (m_lexer.current() == lex_string)
 					{
-						if (m_lexer.current() != lex_quoted_string)
-							throw xpath_exception("Only literals are allowed as arguments to processing-instruction()");
-					
-						nt_type = nodetest_pi;
 						nt_name = m_lexer.contents();
 						m_lexer.next();
-						
-						if (m_lexer.current() != lex_close_brace)
-							throw xpath_exception("Unmatched brace near processing-instruction()");
-						m_lexer.next();
 					}
-					else
-						throw xpath_exception("Unmatched brace near node type test");
-
+					else throw xpath_exception("Unrecognized node test");
 				}
-				// namespace *
-				else if (m_lexer.current() == lex_multiply)
+				
+				if (!nodetest_specified)
 				{
-					// Only strings of form 'namespace:*' are permitted
-					if (nt_name.empty())
-						nt_type = nodetest_all;
+					// node type test or processing-instruction
+					if (m_lexer.current() == lex_open_brace)
+					{
+						m_lexer.next();
+						
+						if (m_lexer.current() == lex_close_brace)
+						{
+							m_lexer.next();
+							
+							if (nt_name == "node")
+								nt_type = nodetest_type_node;
+							else if (nt_name == "text")
+								nt_type = nodetest_type_text;
+							else if (nt_name == "comment")
+								nt_type = nodetest_type_comment;
+							else if (nt_name == "processing-instruction")
+								nt_type = nodetest_type_pi;
+							else
+								throw xpath_exception("Unrecognized node type");
+							
+							nt_name.erase(nt_name.begin(), nt_name.end());
+						}
+						else if (nt_name == "processing-instruction")
+						{
+							if (m_lexer.current() != lex_quoted_string)
+								throw xpath_exception("Only literals are allowed as arguments to processing-instruction()");
+						
+							nt_type = nodetest_pi;
+							nt_name = m_lexer.contents();
+							m_lexer.next();
+							
+							if (m_lexer.current() != lex_close_brace)
+								throw xpath_exception("Unmatched brace near processing-instruction()");
+							m_lexer.next();
+						}
+						else
+							throw xpath_exception("Unmatched brace near node type test");
+
+					}
+					// QName or NCName:*
 					else
 					{
-						if (nt_name.find(':') != nt_name.size() - 1)
-							throw xpath_exception("Wrong namespace-like node test");
-						
-						nt_name.erase(nt_name.size() - 1);
-						
-						nt_type = nodetest_all_in_namespace;
+						std::string::size_type colon_pos = nt_name.find(':');
+
+						if (nt_name.size() > 2 && colon_pos == nt_name.size() - 2 && nt_name[nt_name.size() - 1] == '*') // NCName:*
+						{
+							nt_name.erase(nt_name.size() - 1);
+							
+							nt_type = nodetest_all_in_namespace;
+						}
+						else nt_type = nodetest_name;
 					}
-					
-					m_lexer.next();
 				}
-				else nt_type = nodetest_name;
 			}
 			else if (m_lexer.current() == lex_multiply)
 			{
