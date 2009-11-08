@@ -2489,10 +2489,6 @@ namespace pugi
 				case axis_self:
 					step_do(ns, c, axis_to_type<axis_self>());
 					break;
-
-				default:
-					assert(!"Axis not implemented");
-					return xpath_node_set();
 				}
 				
 				ns.remove_duplicates();
@@ -2548,9 +2544,6 @@ namespace pugi
 			case ast_filter_posinv:
 				return false;
 			
-			case ast_variable:
-				throw xpath_exception("Semantics error: variables are not supported");
-				
 			case ast_string_constant:
 			case ast_number_constant:
 			case ast_func_last:
