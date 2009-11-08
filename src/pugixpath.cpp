@@ -3679,6 +3679,7 @@ namespace pugi
 	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const
 	{
 		if (!m_root) return xpath_node_set();
+		if (m_root->rettype() != ast_type_node_set) throw xpath_exception("Expression does not evaluate to node set");
 		
 		xpath_context c;
 		
