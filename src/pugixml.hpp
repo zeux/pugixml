@@ -258,6 +258,16 @@ namespace pugi
 	class xpath_ast_node;
 	class xpath_allocator;
 	
+	/// XPath query return type classification
+	enum xpath_type_t
+	{
+		xpath_type_none,      ///< Unknown type (query failed to compile)
+		xpath_type_node_set,  ///< Node set (\see xpath_node_set)
+		xpath_type_number,    ///< Number
+		xpath_type_string,    ///< String
+		xpath_type_boolean    ///< Boolean
+	};
+
 	/**
 	 * A class that holds compiled XPath query and allows to evaluate query result
 	 */
@@ -286,6 +296,13 @@ namespace pugi
 		 * Dtor
 		 */
 		~xpath_query();
+
+		/**
+		 * Get query expression return type
+		 *
+		 * \return expression return type
+		 **/
+		xpath_type_t return_type() const;
 		
 		/**
 		 * Evaluate expression as boolean value for the context node \a n.
@@ -322,7 +339,7 @@ namespace pugi
 		
 		/**
 		 * Evaluate expression as node set for the context node \a n.
-		 * If expression does not directly evaluate to node set, function returns empty node set.
+		 * If expression does not directly evaluate to node set, throws xpath_exception.
 		 * Throws std::bad_alloc on out of memory error.
 		 *
 		 * \param n - context node

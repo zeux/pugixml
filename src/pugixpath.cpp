@@ -1214,15 +1214,6 @@ namespace pugi
 		ast_step_root					// select root node
 	};
 
-	enum ast_rettype_t
-	{
-		ast_type_none,
-		ast_type_node_set,
-		ast_type_number,
-		ast_type_string,
-		ast_type_boolean
-	};
-
 	enum axis_t
 	{
 		axis_ancestor,
@@ -1265,7 +1256,7 @@ namespace pugi
 	private:
 		ast_type_t m_type;
 		
-		ast_rettype_t m_rettype;
+		xpath_type_t m_rettype;
 
 		// tree node structure
 		xpath_ast_node* m_left;
@@ -1289,16 +1280,16 @@ namespace pugi
 		{
 			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, xpath_context& c)
 			{
-				if (lhs->rettype() != ast_type_node_set && rhs->rettype() != ast_type_node_set)
+				if (lhs->rettype() != xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
 				{
-					if (lhs->rettype() == ast_type_boolean || rhs->rettype() == ast_type_boolean)
+					if (lhs->rettype() == xpath_type_boolean || rhs->rettype() == xpath_type_boolean)
 						return Cbool()(lhs->eval_boolean(c), rhs->eval_boolean(c));
-					else if (lhs->rettype() == ast_type_number || rhs->rettype() == ast_type_number)
+					else if (lhs->rettype() == xpath_type_number || rhs->rettype() == xpath_type_number)
 						return Cdouble()(lhs->eval_number(c), rhs->eval_number(c));
-					else if (lhs->rettype() == ast_type_string || rhs->rettype() == ast_type_string)
+					else if (lhs->rettype() == xpath_type_string || rhs->rettype() == xpath_type_string)
 						return Cstring()(lhs->eval_string(c), rhs->eval_string(c));
 				}
-				else if (lhs->rettype() == ast_type_node_set && rhs->rettype() == ast_type_node_set)
+				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
 				{
 					xpath_node_set ls = lhs->eval_node_set(c);
 					xpath_node_set rs = rhs->eval_node_set(c);
@@ -1312,11 +1303,11 @@ namespace pugi
 					
 					return false;
 				}
-				else if (lhs->rettype() != ast_type_node_set && rhs->rettype() == ast_type_node_set)
+				else if (lhs->rettype() != xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
 				{
-					if (lhs->rettype() == ast_type_boolean)
+					if (lhs->rettype() == xpath_type_boolean)
 						return Cbool()(lhs->eval_boolean(c), rhs->eval_boolean(c));
-					else if (lhs->rettype() == ast_type_number)
+					else if (lhs->rettype() == xpath_type_number)
 					{
 						double l = lhs->eval_number(c);
 						xpath_node_set rs = rhs->eval_node_set(c);
@@ -1329,7 +1320,7 @@ namespace pugi
 						
 						return false;
 					}
-					else if (lhs->rettype() == ast_type_string)
+					else if (lhs->rettype() == xpath_type_string)
 					{
 						std::string l = lhs->eval_string(c);
 						xpath_node_set rs = rhs->eval_node_set(c);
@@ -1343,11 +1334,11 @@ namespace pugi
 						return false;
 					}
 				}
-				else if (lhs->rettype() == ast_type_node_set && rhs->rettype() != ast_type_node_set)
+				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
 				{
-					if (rhs->rettype() == ast_type_boolean)
+					if (rhs->rettype() == xpath_type_boolean)
 						return Cbool()(lhs->eval_boolean(c), rhs->eval_boolean(c));
-					else if (rhs->rettype() == ast_type_number)
+					else if (rhs->rettype() == xpath_type_number)
 					{
 						xpath_node_set ls = lhs->eval_node_set(c);
 						double r = rhs->eval_number(c);
@@ -1360,7 +1351,7 @@ namespace pugi
 						
 						return false;
 					}
-					else if (rhs->rettype() == ast_type_string)
+					else if (rhs->rettype() == xpath_type_string)
 					{
 						xpath_node_set ls = lhs->eval_node_set(c);
 						std::string r = rhs->eval_string(c);
@@ -1384,9 +1375,9 @@ namespace pugi
 		{
 			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, xpath_context& c)
 			{
-				if (lhs->rettype() != ast_type_node_set && rhs->rettype() != ast_type_node_set)
+				if (lhs->rettype() != xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
 					return Cdouble()(lhs->eval_number(c), rhs->eval_number(c));
-				else if (lhs->rettype() == ast_type_node_set && rhs->rettype() == ast_type_node_set)
+				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
 				{
 					xpath_node_set ls = lhs->eval_node_set(c);
 					xpath_node_set rs = rhs->eval_node_set(c);
@@ -1404,7 +1395,7 @@ namespace pugi
 					
 					return false;
 				}
-				else if (lhs->rettype() != ast_type_node_set && rhs->rettype() == ast_type_node_set)
+				else if (lhs->rettype() != xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
 				{
 					double l = lhs->eval_number(c);
 					xpath_node_set rs = rhs->eval_node_set(c);
@@ -1417,7 +1408,7 @@ namespace pugi
 					
 					return false;
 				}
-				else if (lhs->rettype() == ast_type_node_set && rhs->rettype() != ast_type_node_set)
+				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
 				{
 					xpath_node_set ls = lhs->eval_node_set(c);
 					double r = rhs->eval_number(c);
@@ -1455,7 +1446,7 @@ namespace pugi
 				c.position = i + 1;
 				c.size = size;
 				
-				if (expr->rettype() == ast_type_number)
+				if (expr->rettype() == xpath_type_number)
 				{
 					if (expr->eval_number(c) == i + 1)
 						*last++ = *it;
@@ -1911,24 +1902,24 @@ namespace pugi
 		}
 	public:
 		xpath_ast_node(ast_type_t type, const char* contents, xpath_allocator& a): m_type(type),
-			m_rettype(ast_type_none), m_left(0), m_right(0), m_third(0), m_next(0), m_contents(0)
+			m_rettype(xpath_type_none), m_left(0), m_right(0), m_third(0), m_next(0), m_contents(0)
 		{
 			set_contents(contents, a);
 		}
 		
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, xpath_ast_node* right, axis_t axis): m_type(type),
-			m_rettype(ast_type_none), m_left(left), m_right(right), m_third(0), m_next(0), m_contents(0),
+			m_rettype(xpath_type_none), m_left(left), m_right(right), m_third(0), m_next(0), m_contents(0),
 			m_axis(axis)
 		{
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left = 0, xpath_ast_node* right = 0, xpath_ast_node* third = 0): m_type(type),
-			m_rettype(ast_type_none), m_left(left), m_right(right), m_third(third), m_next(0), m_contents(0)
+			m_rettype(xpath_type_none), m_left(left), m_right(right), m_third(third), m_next(0), m_contents(0)
 		{
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const char* contents, xpath_allocator& a):
-			m_type(type), m_rettype(ast_type_none), m_left(left), m_right(0), m_third(0), m_next(0),
+			m_type(type), m_rettype(xpath_type_none), m_left(left), m_right(0), m_third(0), m_next(0),
 			m_contents(0), m_axis(axis), m_test(test)
 		{
 			set_contents(contents, a);
@@ -2029,13 +2020,13 @@ namespace pugi
 			{
 				switch (m_rettype)
 				{
-				case ast_type_number:
+				case xpath_type_number:
 					return convert_number_to_boolean(eval_number(c));
 					
-				case ast_type_string:
+				case xpath_type_string:
 					return !eval_string(c).empty();
 					
-				case ast_type_node_set:				
+				case xpath_type_node_set:				
 					return !eval_node_set(c).empty();
 					
 				default:
@@ -2126,13 +2117,13 @@ namespace pugi
 			{
 				switch (m_rettype)
 				{
-				case ast_type_boolean:
+				case xpath_type_boolean:
 					return eval_boolean(c) ? 1 : 0;
 					
-				case ast_type_string:
+				case xpath_type_string:
 					return convert_string_to_number(eval_string(c).c_str());
 					
-				case ast_type_node_set:
+				case xpath_type_node_set:
 					return convert_string_to_number(eval_string(c).c_str());
 					
 				default:
@@ -2326,13 +2317,13 @@ namespace pugi
 			{
 				switch (m_rettype)
 				{
-				case ast_type_boolean:
+				case xpath_type_boolean:
 					return eval_boolean(c) ? "true" : "false";
 					
-				case ast_type_number:
+				case xpath_type_number:
 					return convert_number_to_string(eval_number(c));
 					
-				case ast_type_node_set:
+				case xpath_type_node_set:
 				{
 					xpath_node_set ns = eval_node_set(c);
 					return ns.empty() ? std::string("") : string_value(ns.first());
@@ -2383,7 +2374,7 @@ namespace pugi
 					c.position = i + 1;
 					c.size = set.size();
 				
-					if (m_right->rettype() == ast_type_number)
+					if (m_right->rettype() == xpath_type_number)
 					{
 						if (m_right->eval_number(c) == i + 1)
 							*last++ = *it;
@@ -2625,7 +2616,7 @@ namespace pugi
 			case ast_op_greater_or_equal:
 				m_left->check_semantics();
 				m_right->check_semantics();
-				m_rettype = ast_type_boolean;
+				m_rettype = xpath_type_boolean;
 				break;
 				
 			case ast_op_add:
@@ -2635,65 +2626,65 @@ namespace pugi
 			case ast_op_mod:
 				m_left->check_semantics();
 				m_right->check_semantics();
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 				
 			case ast_op_negate:
 				m_left->check_semantics();
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 			
 			case ast_op_union:
 				m_left->check_semantics();
 				m_right->check_semantics();
-				if (m_left->rettype() != ast_type_node_set || m_right->rettype() != ast_type_node_set)
+				if (m_left->rettype() != xpath_type_node_set || m_right->rettype() != xpath_type_node_set)
 					throw xpath_exception("Semantics error: union operator has to be applied to node sets");
-				m_rettype = ast_type_node_set;
+				m_rettype = xpath_type_node_set;
 				break;
 			
 			case ast_filter:
 			case ast_filter_posinv:
 				m_left->check_semantics();
 				m_right->check_semantics();
-				if (m_left->rettype() != ast_type_node_set)
+				if (m_left->rettype() != xpath_type_node_set)
 					throw xpath_exception("Semantics error: predicate has to be applied to node set");
-				m_rettype = ast_type_node_set;
+				m_rettype = xpath_type_node_set;
 				
-				if (!m_right->contains(ast_func_position) && m_right->rettype() != ast_type_number)
+				if (!m_right->contains(ast_func_position) && m_right->rettype() != xpath_type_number)
 					m_type = ast_filter_posinv;
 				break;
 			
 			case ast_predicate:
 				m_left->check_semantics();
-				m_rettype = ast_type_node_set;
+				m_rettype = xpath_type_node_set;
 				break;
 
 			case ast_variable:
 				throw xpath_exception("Semantics error: variable are not supported");
 				
 			case ast_string_constant:
-				m_rettype = ast_type_string;
+				m_rettype = xpath_type_string;
 				break;
 				
 			case ast_number_constant:
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 				
 			case ast_func_last:
 			case ast_func_position:
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 		
 			case ast_func_count:
 				m_left->check_semantics();
-				if (m_left->rettype() != ast_type_node_set)
+				if (m_left->rettype() != xpath_type_node_set)
 					throw xpath_exception("Semantics error: count() has to be applied to node set");
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 				
 			case ast_func_id:
 				m_left->check_semantics();
-				m_rettype = ast_type_node_set;
+				m_rettype = xpath_type_node_set;
 				break;
 				
 			case ast_func_local_name_0:
@@ -2705,16 +2696,16 @@ namespace pugi
 				if (m_left)
 				{
 					m_left->check_semantics();
-					if (m_left->rettype() != ast_type_node_set)
+					if (m_left->rettype() != xpath_type_node_set)
 						throw xpath_exception("Semantics error: function has to be applied to node set");
 				}
-				m_rettype = ast_type_string;
+				m_rettype = xpath_type_string;
 				break;
 				
 			case ast_func_string_0:
 			case ast_func_string_1:
 				if (m_left) m_left->check_semantics();
-				m_rettype = ast_type_string;
+				m_rettype = xpath_type_string;
 				break;
 				
 			case ast_func_concat:
@@ -2724,7 +2715,7 @@ namespace pugi
 				for (xpath_ast_node* n = m_right; n; n = n->m_next)
 					n->check_semantics();
 					
-				m_rettype = ast_type_string;
+				m_rettype = xpath_type_string;
 				break;
 			}
 			
@@ -2732,7 +2723,7 @@ namespace pugi
 			case ast_func_contains:
 				m_left->check_semantics();
 				m_right->check_semantics();
-				m_rettype = ast_type_boolean;
+				m_rettype = xpath_type_boolean;
 				break;
 				
 			case ast_func_substring_before:
@@ -2742,13 +2733,13 @@ namespace pugi
 				m_left->check_semantics();
 				m_right->check_semantics();
 				if (m_third) m_third->check_semantics();
-				m_rettype = ast_type_string;
+				m_rettype = xpath_type_string;
 				break;
 		
 			case ast_func_string_length_0:
 			case ast_func_string_length_1:
 				if (m_left) m_left->check_semantics();
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 				
 			case ast_func_normalize_space_0:
@@ -2757,7 +2748,7 @@ namespace pugi
 				if (m_left) m_left->check_semantics();
 				if (m_right) m_right->check_semantics();
 				if (m_third) m_third->check_semantics();
-				m_rettype = ast_type_string;
+				m_rettype = xpath_type_string;
 				break;
 		
 			case ast_func_boolean:
@@ -2766,27 +2757,27 @@ namespace pugi
 			case ast_func_false:
 			case ast_func_lang:
 				if (m_left) m_left->check_semantics();
-				m_rettype = ast_type_boolean;
+				m_rettype = xpath_type_boolean;
 				break;
 			
 			case ast_func_number_0:
 			case ast_func_number_1:
 				if (m_left) m_left->check_semantics();
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 		
 			case ast_func_sum:
 				m_left->check_semantics();
-				if (m_left->rettype() != ast_type_node_set)
+				if (m_left->rettype() != xpath_type_node_set)
 					throw xpath_exception("Semantics error: sum() has to be applied to node set");
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 				
 			case ast_func_floor:
 			case ast_func_ceiling:
 			case ast_func_round:
 				if (m_left) m_left->check_semantics();
-				m_rettype = ast_type_number;
+				m_rettype = xpath_type_number;
 				break;
 
 			case ast_step:
@@ -2794,19 +2785,19 @@ namespace pugi
 				if (m_left)
 				{
 					m_left->check_semantics();
-					if (m_left->rettype() != ast_type_node_set)
+					if (m_left->rettype() != xpath_type_node_set)
 						throw xpath_exception("Semantics error: step has to be applied to node set");
 				}
 				
 				for (xpath_ast_node* n = m_right; n; n = n->m_next)
 					n->check_semantics();
 				
-				m_rettype = ast_type_node_set;
+				m_rettype = xpath_type_node_set;
 				break;
 			}
 				
 			case ast_step_root:
-				m_rettype = ast_type_node_set;
+				m_rettype = xpath_type_node_set;
 				break;
 			
 			default:
@@ -2814,7 +2805,7 @@ namespace pugi
 			}
 		}
 		
-		ast_rettype_t rettype() const
+		xpath_type_t rettype() const
 		{
 			return m_rettype;
 		}
@@ -3608,6 +3599,13 @@ namespace pugi
 		m_root->check_semantics();
 	}
 
+	xpath_type_t xpath_query::return_type() const
+	{
+		if (!m_root) return xpath_type_none;
+
+		return m_root->rettype();
+	}
+
 	bool xpath_query::evaluate_boolean(const xml_node& n) const
 	{
 		if (!m_root) return false;
@@ -3653,7 +3651,7 @@ namespace pugi
 	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const
 	{
 		if (!m_root) return xpath_node_set();
-		if (m_root->rettype() != ast_type_node_set) throw xpath_exception("Expression does not evaluate to node set");
+		if (m_root->rettype() != xpath_type_node_set) throw xpath_exception("Expression does not evaluate to node set");
 		
 		xpath_context c;
 		
