@@ -1498,7 +1498,7 @@ namespace pugi
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (!strncmp(a.name(), m_contents, strlen(m_contents)) && a.name()[strlen(m_contents)] == ':')
+				if (!strncmp(a.name(), m_contents, strlen(m_contents)))
 					ns.push_back(xpath_node(a, parent));
 				break;
 			
@@ -1547,8 +1547,7 @@ namespace pugi
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (n.type() == node_element && !strncmp(n.name(), m_contents, strlen(m_contents)) &&
-					n.name()[strlen(m_contents)] == ':')
+				if (n.type() == node_element && !strncmp(n.name(), m_contents, strlen(m_contents)))
 					ns.push_back(n);
 				break;
 
@@ -3279,7 +3278,7 @@ namespace pugi
 
 						if (nt_name.size() > 2 && colon_pos == nt_name.size() - 2 && nt_name[nt_name.size() - 1] == '*') // NCName:*
 						{
-							nt_name.erase(nt_name.size() - 1);
+							nt_name.erase(nt_name.size() - 1); // erase *
 							
 							nt_type = nodetest_all_in_namespace;
 						}
