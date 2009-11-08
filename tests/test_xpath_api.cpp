@@ -63,4 +63,84 @@ TEST_XML(xpath_api_node_eq_ops, "<node attr='value'/>")
 	generic_eq_ops_test(doc.select_single_node("node"), doc.select_single_node("node/@attr"));
 }
 
+TEST_XML(xpath_api_node_accessors, "<node attr='value'/>")
+{
+	xpath_node null;
+	xpath_node node = doc.select_single_node("node");
+	xpath_node attr = doc.select_single_node("node/@attr");
+
+	CHECK(!null.node());
+	CHECK(!null.attribute());
+	CHECK(!null.parent());
+
+	CHECK(node.node() == doc.child("node"));
+	CHECK(!node.attribute());
+	CHECK(node.parent() == doc);
+
+	CHECK(!attr.node());
+	CHECK(attr.attribute() == doc.child("node").attribute("attr"));
+	CHECK(attr.parent() == doc.child("node"));
+}
+
+inline void xpath_api_node_accessors_helper(const xpath_node_set& set)
+{
+	CHECK(set.size() == 2);
+	CHECK(set.type() == xpath_node_set::type_sorted);
+	CHECK(!set.empty());
+	CHECK_STRING(set[0].node().name(), "foo");
+	CHECK_STRING(set[1].node().name(), "foo");
+	CHECK(!set[2]);
+	CHECK(set.first() == set[0]);
+	CHECK(set.begin() + 2 == set.end());
+	CHECK(set.begin()[0] == set[0] && set.begin()[1] == set[1]);
+}
+
+TEST_XML(xpath_api_nodeset_accessors, "<node><foo/><foo/></node>")
+{
+	xpath_node_set null;
+	CHECK(null.size() == 0);
+	CHECK(null.type() == xpath_node_set::type_unsorted);
+	CHECK(null.empty());
+	CHECK(!null[0]);
+	CHECK(!null.first());
+	CHECK(null.begin() == null.end());
+
+	xpath_node_set set = doc.select_nodes("node/foo");
+	xpath_api_node_accessors_helper(set);
+
+	xpath_node_set copy = set;
+	xpath_api_node_accessors_helper(copy);
+
+	xpath_node_set assigned;
+	assigned = set;
+	xpath_api_node_accessors_helper(assigned);
+
+	xpath_node_set nullcopy = null;
+}
+
+TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
+{
+	xpath_query q("node/@attr");
+
+	CHECK(q.evaluate_boolean(doc));
+	CHECK(q.evaluate_number(doc) == 3);
+	CHECK(q.evaluate_string(doc) == "3");
+
+	xpath_node_set ns = q.evaluate_node_set(doc);
+	CHECK(ns.size() == 1 && ns[0].attribute() == doc.child("node").attribute("attr"));
+}
+
+TEST(xpath_api_evaluate_node_set)
+{
+	try
+	{
+		xpath_query q("1");
+
+		q.evaluate_node_set(xml_node());
+	}
+	catch (const xpath_exception&)
+	{
+	}
+}
+
 #endif

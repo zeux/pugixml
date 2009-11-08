@@ -132,6 +132,11 @@ struct xpath_node_set_tester
 		result = q.evaluate_node_set(node);
 	}
 
+	xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message): last(0), message(message)
+	{
+		result = set;
+	}
+
 	~xpath_node_set_tester()
 	{
 		// check that we processed everything
