@@ -17,8 +17,8 @@ template <typename T> static void generic_bool_ops_test(const T& obj)
 	CHECK(!b1);
 	CHECK(b2);
 
-	CHECK(obj && true);
-	CHECK(obj || false);
+	CHECK(obj && b2);
+	CHECK(obj || b2);
 	CHECK(obj && obj);
 	CHECK(obj || obj);
 }
