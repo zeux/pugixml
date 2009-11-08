@@ -262,7 +262,7 @@ namespace pugi
 	enum xpath_type_t
 	{
 		xpath_type_none,      ///< Unknown type (query failed to compile)
-		xpath_type_node_set,  ///< Node set (\see xpath_node_set)
+		xpath_type_node_set,  ///< Node set (xpath_node_set)
 		xpath_type_number,    ///< Number
 		xpath_type_string,    ///< String
 		xpath_type_boolean    ///< Boolean
