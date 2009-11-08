@@ -3401,8 +3401,7 @@ namespace pugi
 	    			// This is either a function call, or not - if not, we shall proceed with location path
 	    			const char* state = m_lexer.state();
 	    			
-	    			// $$$ signed char
-	    			while (*state && *state <= 32) ++state;
+					while (is_chartype(*state, ct_space)) ++state;
 	    			
 	    			if (*state != '(') return parse_location_path();
 

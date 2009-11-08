@@ -682,6 +682,9 @@ TEST(xpath_function_arguments)
 
 	// lack of commas
 	CHECK_XPATH_FAIL("substring(1 2)");
+
+	// whitespace after function name
+	CHECK_XPATH_BOOLEAN(c, "true ()", true);
 }
 
 TEST_XML_FLAGS(xpath_string_value, "<node><c1>pcdata</c1><c2><child/></c2><c3 attr='avalue'/><c4><?target pivalue?></c4><c5><!--comment--></c5><c6><![CDATA[cdata]]></c6></node>", parse_default | parse_pi | parse_comments)
