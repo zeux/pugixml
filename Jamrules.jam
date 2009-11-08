@@ -74,19 +74,31 @@ else if ( $(toolset:I=^msvc) )
 		CCFLAGS += /D_HAS_EXCEPTIONS=0 ;
 	}
 
+	if ( $(toolset:I=x64$) )
+	{
+		postfix = "\\amd64" ;
+		sdk_postfix = "\\x64" ;
+		LDFLAGS += /MACHINE:X64 ;
+	}
+	else
+	{
+		postfix = "" ;
+		sdk_postfix = "" ;
+	}
+
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\cl.exe" /WX /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		"%$(toolset)_PATH%\bin$(postfix)\cl.exe" /WX /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction
 	{
-		"%$(toolset)_PATH%\bin\lib.exe" /NOLOGO /OUT:$(<) $(>)
+		"%$(toolset)_PATH%\bin$(postfix)\lib.exe" /NOLOGO /OUT:$(<) $(>)
 	}
 	
 	actions LinkAction
 	{
-		"%$(toolset)_PATH%\bin\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib" $(LDFLAGS)
+		"%$(toolset)_PATH%\bin$(postfix)\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib" /LIBPATH:"%WINSDK_PATH%\Lib$(sdk_postfix)" $(LDFLAGS)
 	}
 	
 	actions CoverageAction
