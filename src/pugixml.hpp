@@ -1947,8 +1947,6 @@ namespace pugi
 		xpath_node* m_end;
 		xpath_node* m_eos;
 		
-		bool m_using_storage;
-		
 		typedef xpath_node* iterator;
 
 		iterator mut_begin();

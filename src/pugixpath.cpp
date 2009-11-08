@@ -657,36 +657,37 @@ namespace pugi
 	}
 #endif
 
-	xpath_node_set::xpath_node_set(): m_type(type_unsorted), m_begin(&m_storage), m_end(&m_storage), m_eos(&m_storage + 1), m_using_storage(true)
+	xpath_node_set::xpath_node_set(): m_type(type_unsorted), m_begin(&m_storage), m_end(&m_storage), m_eos(&m_storage + 1)
 	{
 	}
 
 	xpath_node_set::~xpath_node_set()
 	{
-		if (!m_using_storage) delete[] m_begin;
+		if (m_begin != &m_storage) delete[] m_begin;
 	}
 		
-	xpath_node_set::xpath_node_set(const xpath_node_set& ns): m_type(type_unsorted), m_begin(&m_storage), m_end(&m_storage), m_eos(&m_storage + 1), m_using_storage(true)
+	xpath_node_set::xpath_node_set(const xpath_node_set& ns): m_type(type_unsorted), m_begin(&m_storage), m_end(&m_storage), m_eos(&m_storage + 1)
 	{
 		*this = ns;
 	}
 	
 	xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
 	{
-		if (!m_using_storage) delete[] m_begin;
+		if (&ns == this) return *this;
+
+		if (m_begin != &m_storage) delete[] m_begin;
 		
 		m_begin = m_end = m_eos = 0;
+		m_type = ns.m_type;
 		
 		if (ns.size() == 1)
 		{
 			m_storage = *ns.m_begin;
 			m_begin = &m_storage;
 			m_end = m_eos = &m_storage + 1;
-			m_using_storage = true;
 		}
 		else
 		{
-			m_using_storage = false;
 			append(ns.begin(), ns.end());
 		}
 		
@@ -764,9 +765,7 @@ namespace pugi
 			xpath_node* storage = new xpath_node[capacity];
 			std::copy(m_begin, m_end, storage);
 			
-			if (!m_using_storage) delete[] m_begin;
-			
-			m_using_storage = false;
+			if (m_begin != &m_storage) delete[] m_begin;
 			
 			m_begin = storage;
 			m_end = storage + size;
@@ -2375,6 +2374,9 @@ namespace pugi
 				xpath_node_set ls = m_left->eval_node_set(c);
 				xpath_node_set rs = m_right->eval_node_set(c);
 				
+				// we can optimize merging two sorted sets, but this is a very rare operation, so don't bother
+  		        ls.m_type = xpath_node_set::type_unsorted;
+
 				ls.append(rs.begin(), rs.end());
 				
 				ls.remove_duplicates();
