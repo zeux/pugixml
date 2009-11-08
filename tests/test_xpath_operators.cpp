@@ -402,4 +402,20 @@ TEST(xpath_operators_boolean_precedence)
 	CHECK_XPATH_BOOLEAN(c, "3 > (2 > 1)", true);
 }
 
+TEST_XML(xpath_operators_union, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/><tail/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(n, "employee | .") % 2 % 3 % 4 % 6 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@secretary] | employee[@assistant]") % 4 % 6 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@assistant] | employee[@secretary]") % 4 % 6 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@secretary] | employee[@nobody]") % 4 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@nobody] | employee[@secretary]") % 4 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "tail/preceding-sibling::employee | .") % 2 % 3 % 4 % 6 % 8 % 11;
+	CHECK_XPATH_NODESET(n, ". | tail/preceding-sibling::employee | .") % 2 % 3 % 4 % 6 % 8 % 11;
+}
+
 #endif

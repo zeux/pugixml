@@ -302,6 +302,23 @@ TEST_XML_FLAGS(xpath_paths_nodetest_type, "<node attr='value'>pcdata<child/><?pi
 	CHECK_XPATH_FAIL("processing-instruction('', '')");
 }
 
+TEST_XML(xpath_paths_absolute, "<node><foo><foo/><foo/></foo></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(c, "/foo");
+	CHECK_XPATH_NODESET(n, "/foo");
+	CHECK_XPATH_NODESET(n, "/node/foo") % 3;
+	CHECK_XPATH_NODESET(n.child("foo"), "/node/foo") % 3;
+
+	CHECK_XPATH_NODESET(c, "/");
+	CHECK_XPATH_NODESET(n, "/") % 1;
+	CHECK_XPATH_NODESET(n.child("foo"), "/") % 1;
+}
+
 TEST_XML(xpath_paths_step_abbrev, "<node><foo/></node>")
 {
 	doc.precompute_document_order();
@@ -319,6 +336,108 @@ TEST_XML(xpath_paths_step_abbrev, "<node><foo/></node>")
 
 	CHECK_XPATH_FAIL(".node");
 	CHECK_XPATH_FAIL("..node");
+}
+
+TEST_XML(xpath_paths_relative_abbrev, "<node><foo><foo/><foo/></foo></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(c, "foo//bar");
+
+	CHECK_XPATH_NODESET(n, "foo/foo") % 4 % 5;
+	CHECK_XPATH_NODESET(n, "foo//foo") % 4 % 5;
+	CHECK_XPATH_NODESET(n, ".//foo") % 3 % 4 % 5;
+}
+
+TEST_XML(xpath_paths_absolute_abbrev, "<node><foo><foo/><foo/></foo></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(c, "//bar");
+
+	CHECK_XPATH_NODESET(n, "//foo") % 3 % 4 % 5;
+	CHECK_XPATH_NODESET(n.child("foo"), "//foo") % 3 % 4 % 5;
+	CHECK_XPATH_NODESET(doc, "//foo") % 3 % 4 % 5;
+}
+
+TEST_XML(xpath_paths_predicate_boolean, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node").child("chapter").next_sibling().next_sibling();
+
+	CHECK_XPATH_NODESET(n, "following-sibling::chapter[position()=1]") % 6;
+	CHECK_XPATH_NODESET(n, "following-sibling::chapter[position()=2]") % 7;
+	CHECK_XPATH_NODESET(n, "preceding-sibling::chapter[position()=1]") % 4;
+	CHECK_XPATH_NODESET(n, "preceding-sibling::chapter[position()=2]") % 3;
+}
+
+TEST_XML(xpath_paths_predicate_number, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node").child("chapter").next_sibling().next_sibling();
+
+	CHECK_XPATH_NODESET(n, "following-sibling::chapter[1]") % 6;
+	CHECK_XPATH_NODESET(n, "following-sibling::chapter[2]") % 7;
+	CHECK_XPATH_NODESET(n, "preceding-sibling::chapter[1]") % 4;
+	CHECK_XPATH_NODESET(n, "preceding-sibling::chapter[2]") % 3;
+}
+
+TEST_XML(xpath_paths_predicate_several, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(n, "employee") % 3 % 4 % 6 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@secretary]") % 4 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@assistant]") % 6 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@secretary][@assistant]") % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@assistant][@secretary]") % 8 % 11;
+	CHECK_XPATH_NODESET(n, "employee[@secretary and @assistant]") % 8 % 11;
+}
+
+TEST_XML(xpath_paths_predicate_filter, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node").child("chapter").next_sibling().next_sibling();
+
+	CHECK_XPATH_NODESET(n, "(following-sibling::chapter)[1]") % 6;
+	CHECK_XPATH_NODESET(n, "(following-sibling::chapter)[2]") % 7;
+	CHECK_XPATH_NODESET(n, "(preceding-sibling::chapter)[1]") % 3;
+	CHECK_XPATH_NODESET(n, "(preceding-sibling::chapter)[2]") % 4;
+}
+
+TEST_XML(xpath_paths_step_compose, "<node><foo><foo/><foo/></foo><foo/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(n, "(.)/foo") % 3 % 6;
+	CHECK_XPATH_NODESET(n, "(.)//foo") % 3 % 4 % 5 % 6;
+	CHECK_XPATH_NODESET(n, "(./..)//*") % 2 % 3 % 4 % 5 % 6;
+
+	CHECK_XPATH_FAIL("(1)/foo");
+	CHECK_XPATH_FAIL("(1)//foo");
+}
+
+TEST_XML(xpath_paths_descendant_double_slash_w3c, "<node><para><para/><para/><para><para/></para></para><para/></node>")
+{
+	doc.precompute_document_order();
+
+	CHECK_XPATH_NODESET(doc, "//para") % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, "/descendant::para") % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, "//para[1]") % 3 % 4 % 7;
+	CHECK_XPATH_NODESET(doc, "/descendant::para[1]") % 3;
 }
 
 #endif

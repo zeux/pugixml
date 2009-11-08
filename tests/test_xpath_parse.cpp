@@ -39,4 +39,9 @@ TEST(xpath_variables)
 	CHECK_XPATH_FAIL("$var"); // not implemented
 }
 
+TEST(xpath_empty_expression)
+{
+	CHECK_XPATH_FAIL("");
+}
+
 #endif
