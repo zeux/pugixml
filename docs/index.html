@@ -684,6 +684,42 @@ were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresp
 </ul>
 </dd>
 </dt>
+<dt>15.11.2009 - v0.5
+<dd>Major bugfix release. Changes: <ul>
+<li>XPath bugfixes: <ul>
+<li>Fixed translate(), lang() and concat() functions (infinite loops/crashes)
+<li>Fixed compilation of queries with empty literal strings ("")
+<li>Fixed axis tests: they never add empty nodes/attributes to the resulting node set now
+<li>Fixed string-value evaluation for node-set (the result excluded some text descendants)
+<li>Fixed self:: axis (it behaved like ancestor-or-self::)
+<li>Fixed following:: and preceding:: axes (they included descendent and ancestor nodes, respectively)
+<li>Minor fix for namespace-uri() function (namespace declaration scope includes the parent element of namespace declaration attribute)
+<li>Some incorrect queries are no longer parsed now (i.e. foo: *)
+<li>Fixed text()/etc. node test parsing bug (i.e. foo[text()] failed to compile)
+<li>Fixed root step (/) - it now selects empty node set if query is evaluated on empty node
+<li>Fixed string to number conversion ("123 " converted to NaN, "123 .456" converted to 123.456 - now the results are 123 and NaN, respectively)
+<li>Node set copying now preserves sorted type; leads to better performance on some queries
+</ul>
+<li>Miscellaneous bugfixes: <ul>
+<li>Fixed xml_node::offset_debug for PI nodes
+<li>Added empty attribute checks to xml_node::remove_attribute
+<li>Fixed node_pi and node_declaration copying
+<li>Const-correctness fixes
+</ul>
+<li>Specification changes: <ul>
+<li>xpath_node::select_nodes() and related functions now throw exception if expression return type is not node set (instead of assertion)
+<li>xml_node::traverse() now sets depth to -1 for both begin() and end() callbacks (was 0 at begin() and -1 at end())
+<li>In case of non-raw node printing a newline is output after PCDATA inside nodes if the PCDATA has siblings
+<li>UTF8 -&gt; wchar_t conversion now considers 5-byte UTF8-like sequences as invalid
+</ul>
+<li>New features: <ul>
+<li>Added xpath_node_set::operator[] for index-based iteration
+<li>Added xpath_query::return_type()
+<li>Added getter accessors for memory-management functions
+</ul>
+</ul>
+</dd>
+</dt>
 </dl>
 
 <hr>
@@ -730,7 +766,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 17 September, 2009</p>
+<p>Revised 15 November, 2009</p>
 <p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2009. All Rights Reserved.</i></p>
 </body>
 </html>
