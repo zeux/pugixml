@@ -37,6 +37,7 @@ TEST(xpath_number_error)
 TEST(xpath_variables)
 {
 	CHECK_XPATH_FAIL("$var"); // not implemented
+	CHECK_XPATH_FAIL("$1");
 }
 
 TEST(xpath_empty_expression)
@@ -47,6 +48,38 @@ TEST(xpath_empty_expression)
 TEST(xpath_lexer_error)
 {
 	CHECK_XPATH_FAIL("!");
+}
+
+TEST(xpath_unmatched_braces)
+{
+	CHECK_XPATH_FAIL("node[");
+	CHECK_XPATH_FAIL("node[1");
+	CHECK_XPATH_FAIL("node[]]");
+	CHECK_XPATH_FAIL("node(");
+	CHECK_XPATH_FAIL("node(()");
+	CHECK_XPATH_FAIL("(node)[1");
+	CHECK_XPATH_FAIL("(1");
+}
+
+TEST(xpath_incorrect_step)
+{
+	CHECK_XPATH_FAIL("child::1");
+	CHECK_XPATH_FAIL("something::*");
+}
+
+TEST(xpath_semantics_error)
+{
+	CHECK_XPATH_FAIL("1[1]");
+	CHECK_XPATH_FAIL("1 | 1");
+}
+
+TEST(xpath_semantics_posinv) // coverage for contains()
+{
+	xpath_query("(node)[substring(1, 2, 3)]");
+	xpath_query("(node)[concat(1, 2, 3, 4)]");
+	xpath_query("(node)[count(foo)]");
+	xpath_query("(node)[local-name()]");
+	xpath_query("(node)[(node)[1]]");
 }
 
 #endif
