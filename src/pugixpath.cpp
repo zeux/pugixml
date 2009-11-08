@@ -2500,10 +2500,13 @@ namespace pugi
 			{
 				xpath_node_set ns;
 			
-				ns.push_back(c.root);
+				if (c.root)
+				{
+  	            	ns.push_back(c.root);
 				
-				apply_predicates(ns, 0, c);
-			
+					apply_predicates(ns, 0, c);
+				}
+
 				return ns;
 			}
 
