@@ -6,6 +6,8 @@
 #include <vector>
 #include <iterator>
 
+#include "helpers.hpp"
+
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif
@@ -25,80 +27,6 @@ template <typename I> static I move_iter(I base, int n)
 }
 #endif
 
-template <typename T> static void generic_bool_ops_test(const T& obj)
-{
-	T null;
-
-	CHECK(!null);
-	CHECK(obj);
-	CHECK(!!obj);
-
-	bool b1 = null, b2 = obj;
-
-	CHECK(!b1);
-	CHECK(b2);
-}
-
-template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
-{
-	T null = T();
-
-	// obj1 < obj2 (we use operator<, but there is no other choice
-	if (obj1 > obj2) std::swap(obj1, obj2);
-
-	// operator==
-	CHECK(null == null);
-	CHECK(obj1 == obj1);
-	CHECK(!(null == obj1));
-	CHECK(!(null == obj2));
-	CHECK(T(null) == null);
-	CHECK(T(obj1) == obj1);
-
-	// operator!=
-	CHECK(!(null != null));
-	CHECK(!(obj1 != obj1));
-	CHECK(null != obj1);
-	CHECK(null != obj2);
-	CHECK(!(T(null) != null));
-	CHECK(!(T(obj1) != obj1));
-
-	// operator<
-	CHECK(null < obj1);
-	CHECK(null < obj2);
-	CHECK(obj1 < obj2);
-	CHECK(!(null < null));
-	CHECK(!(obj1 < obj1));
-	CHECK(!(obj1 < null));
-	CHECK(!(obj2 < obj1));
-
-	// operator<=
-	CHECK(null <= obj1);
-	CHECK(null <= obj2);
-	CHECK(obj1 <= obj2);
-	CHECK(null <= null);
-	CHECK(obj1 <= obj1);
-	CHECK(!(obj1 <= null));
-	CHECK(!(obj2 <= obj1));
-
-	// operator>
-	CHECK(obj1 > null);
-	CHECK(obj2 > null);
-	CHECK(obj2 > obj1);
-	CHECK(!(null > null));
-	CHECK(!(obj1 > obj1));
-	CHECK(!(null > obj1));
-	CHECK(!(obj1 > obj2));
-
-	// operator>=
-	CHECK(obj1 >= null);
-	CHECK(obj2 >= null);
-	CHECK(obj2 >= obj1);
-	CHECK(null >= null);
-	CHECK(obj1 >= obj1);
-	CHECK(!(null >= obj1));
-	CHECK(!(obj1 >= obj2));
-}
-
 template <typename T> static void generic_empty_test(const T& obj)
 {
 	T null;
@@ -110,6 +38,11 @@ template <typename T> static void generic_empty_test(const T& obj)
 TEST_XML(dom_attr_bool_ops, "<node attr='1'/>")
 {
 	generic_bool_ops_test(doc.child("node").attribute("attr"));
+}
+
+TEST_XML(dom_attr_eq_ops, "<node attr1='1' attr2='2'/>")
+{
+	generic_eq_ops_test(doc.child("node").attribute("attr1"), doc.child("node").attribute("attr2"));
 }
 
 TEST_XML(dom_attr_rel_ops, "<node attr1='1' attr2='2'/>")
@@ -248,6 +181,11 @@ TEST_XML(dom_attr_iterator, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/
 TEST_XML(dom_node_bool_ops, "<node/>")
 {
 	generic_bool_ops_test(doc.child("node"));
+}
+
+TEST_XML(dom_node_eq_ops, "<node><node1/><node2/></node>")
+{
+	generic_eq_ops_test(doc.child("node").child("node1"), doc.child("node").child("node2"));
 }
 
 TEST_XML(dom_node_rel_ops, "<node><node1/><node2/></node>")

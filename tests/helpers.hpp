@@ -1,0 +1,90 @@
+#pragma once
+
+#include "common.hpp"
+
+#include <utility>
+
+template <typename T> static void generic_bool_ops_test(const T& obj)
+{
+	T null;
+
+	CHECK(!null);
+	CHECK(obj);
+	CHECK(!!obj);
+
+	bool b1 = null, b2 = obj;
+
+	CHECK(!b1);
+	CHECK(b2);
+
+	CHECK(obj && true);
+	CHECK(obj || false);
+	CHECK(obj && obj);
+	CHECK(obj || obj);
+}
+
+template <typename T> static void generic_eq_ops_test(const T& obj1, const T& obj2)
+{
+	T null = T();
+
+	// operator==
+	CHECK(null == null);
+	CHECK(obj1 == obj1);
+	CHECK(!(null == obj1));
+	CHECK(!(null == obj2));
+	CHECK(T(null) == null);
+	CHECK(T(obj1) == obj1);
+
+	// operator!=
+	CHECK(!(null != null));
+	CHECK(!(obj1 != obj1));
+	CHECK(null != obj1);
+	CHECK(null != obj2);
+	CHECK(!(T(null) != null));
+	CHECK(!(T(obj1) != obj1));
+}
+
+template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
+{
+	T null = T();
+
+	// obj1 < obj2 (we use operator<, but there is no other choice
+	if (obj1 > obj2) std::swap(obj1, obj2);
+
+	// operator<
+	CHECK(null < obj1);
+	CHECK(null < obj2);
+	CHECK(obj1 < obj2);
+	CHECK(!(null < null));
+	CHECK(!(obj1 < obj1));
+	CHECK(!(obj1 < null));
+	CHECK(!(obj2 < obj1));
+
+	// operator<=
+	CHECK(null <= obj1);
+	CHECK(null <= obj2);
+	CHECK(obj1 <= obj2);
+	CHECK(null <= null);
+	CHECK(obj1 <= obj1);
+	CHECK(!(obj1 <= null));
+	CHECK(!(obj2 <= obj1));
+
+	// operator>
+	CHECK(obj1 > null);
+	CHECK(obj2 > null);
+	CHECK(obj2 > obj1);
+	CHECK(!(null > null));
+	CHECK(!(obj1 > obj1));
+	CHECK(!(null > obj1));
+	CHECK(!(obj1 > obj2));
+
+	// operator>=
+	CHECK(obj1 >= null);
+	CHECK(obj2 >= null);
+	CHECK(obj2 >= obj1);
+	CHECK(null >= null);
+	CHECK(obj1 >= obj1);
+	CHECK(!(null >= obj1));
+	CHECK(!(obj1 >= obj2));
+}
+

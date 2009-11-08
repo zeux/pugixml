@@ -404,7 +404,19 @@ TEST_XML(xpath_paths_predicate_several, "<node><employee/><employee secretary=''
 	CHECK_XPATH_NODESET(n, "employee[@secretary and @assistant]") % 8 % 11;
 }
 
-TEST_XML(xpath_paths_predicate_filter, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+TEST_XML(xpath_paths_predicate_filter_boolean, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node").child("chapter").next_sibling().next_sibling();
+
+	CHECK_XPATH_NODESET(n, "(following-sibling::chapter)[position()=1]") % 6;
+	CHECK_XPATH_NODESET(n, "(following-sibling::chapter)[position()=2]") % 7;
+	CHECK_XPATH_NODESET(n, "(preceding-sibling::chapter)[position()=1]") % 3;
+	CHECK_XPATH_NODESET(n, "(preceding-sibling::chapter)[position()=2]") % 4;
+}
+
+TEST_XML(xpath_paths_predicate_filter_number, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
 {
 	doc.precompute_document_order();
 
@@ -414,6 +426,17 @@ TEST_XML(xpath_paths_predicate_filter, "<node><chapter/><chapter/><chapter/><cha
 	CHECK_XPATH_NODESET(n, "(following-sibling::chapter)[2]") % 7;
 	CHECK_XPATH_NODESET(n, "(preceding-sibling::chapter)[1]") % 3;
 	CHECK_XPATH_NODESET(n, "(preceding-sibling::chapter)[2]") % 4;
+}
+
+TEST_XML(xpath_paths_predicate_filter_posinv, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(n, "employee") % 3 % 4 % 6 % 8 % 11;
+	CHECK_XPATH_NODESET(n, "(employee[@secretary])[@assistant]") % 8 % 11;
+	CHECK_XPATH_NODESET(n, "((employee)[@assistant])[@secretary]") % 8 % 11;
 }
 
 TEST_XML(xpath_paths_step_compose, "<node><foo><foo/><foo/></foo><foo/></node>")
