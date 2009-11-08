@@ -63,6 +63,9 @@ typedef const <a class="el" href="classpugi_1_1xpath__node.html">xpath_node</a> 
 <tr><td class="memItemLeft" nowrap align="right" valign="top">size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__node__set.html#2d8be3dbf5d38d3fb4ee04daed4d72a7">size</a> () const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get collection size.  <a href="#2d8be3dbf5d38d3fb4ee04daed4d72a7"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="classpugi_1_1xpath__node.html">xpath_node</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__node__set.html#f29e9abded441bd005f1bb11364bfe47">operator[]</a> (size_t index) const </td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get element with the specified index.  <a href="#f29e9abded441bd005f1bb11364bfe47"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="classpugi_1_1xpath__node.html">const_iterator</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__node__set.html#cf8a0a6e24b502941f5f182c44e14587">begin</a> () const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get begin constant iterator for collection.  <a href="#cf8a0a6e24b502941f5f182c44e14587"></a><br></td></tr>
@@ -252,6 +255,42 @@ Get collection size.
     </td>
   </tr>
 </table>
+<a class="anchor" name="f29e9abded441bd005f1bb11364bfe47"></a><!-- doxytag: member="pugi::xpath_node_set::operator[]" ref="f29e9abded441bd005f1bb11364bfe47" args="(size_t index) const " --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="classpugi_1_1xpath__node.html">xpath_node</a> pugi::xpath_node_set::operator[]           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">size_t&nbsp;</td>
+          <td class="mdname1" valign="top" nowrap> <em>index</em>          </td>
+          <td class="md" valign="top">&nbsp;)&nbsp;</td>
+          <td class="md" nowrap> const</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Get element with the specified index. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>index</em>&nbsp;</td><td>- requested index </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>element </dd></dl>
+    </td>
+  </tr>
+</table>
 <a class="anchor" name="cf8a0a6e24b502941f5f182c44e14587"></a><!-- doxytag: member="pugi::xpath_node_set::begin" ref="cf8a0a6e24b502941f5f182c44e14587" args="() const " --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
@@ -374,6 +413,7 @@ Sort the collection in ascending/descending order by document order.
 Get first node in the collection by document order. 
 <p>
 <dl compact><dt><b>Returns:</b></dt><dd>first node by document order </dd></dl>
+<dl compact><dt><b>Note:</b></dt><dd>set.first() is not equal to set[0], since operator[] does not take document order into account </dd></dl>
     </td>
   </tr>
 </table>
@@ -407,7 +447,7 @@ Return true if collection is empty.
     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Thu Sep 17 22:15:57 2009 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Sun Nov 8 22:15:22 2009 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>

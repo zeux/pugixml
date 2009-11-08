@@ -94,6 +94,17 @@ The PugiXML Parser namespace.
  }</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Tree node classification.  <a href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9">More...</a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261d">xpath_type_t</a> { <br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261daa768b8302ccc893f3cc9ba799360a77">xpath_type_none</a>, 
+<a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261df5613748204e2e4861524e7d63a699c9">xpath_type_node_set</a>, 
+<a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261d02959f74f4fe93d71a1e109a45f23825">xpath_type_number</a>, 
+<a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261dde2b17f4d9fad5bfb1617bf5012cf5ad">xpath_type_string</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261d049dd1494237a55f8aba3392d12a0164">xpath_type_boolean</a>
+<br>
+ }</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">XPath query return type classification.  <a href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261d">More...</a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555">xml_parse_status</a> { <br>
 &nbsp;&nbsp;<a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55546ddc2abb6a54fdac07cf9086b45f10f">status_ok</a> =  0, 
 <a class="el" href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b55532e05bc1b1356846e6a5fb0ec097d36b">status_file_not_found</a>, 
@@ -127,6 +138,12 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">void PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#bc67229fed7dbe24a410d83b9233f916">set_memory_management_functions</a> (<a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> allocate, <a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> deallocate)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Override default memory management functions.  <a href="#bc67229fed7dbe24a410d83b9233f916"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#0d3d42320b07fe1865feb5e8e7c01e38">get_memory_allocation_function</a> ()</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get current memory allocation function.  <a href="#0d3d42320b07fe1865feb5e8e7c01e38"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#0823c1cb767482d9d72d1df055be3b67">get_memory_deallocation_function</a> ()</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get current memory deallocation function.  <a href="#0823c1cb767482d9d72d1df055be3b67"></a><br></td></tr>
 <tr><td colspan="2"><br><h2>Variables</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#bdec38e04651950fe8f585c912143a27">memory_block_size</a> = 32768</td></tr>
 
@@ -154,10 +171,10 @@ The PugiXML Parser namespace.
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if EOL handling (that is, replacing sequences 0x0d 0x0a by a single 0x0a character, and replacing all standalone 0x0d characters by 0x0a) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values).  <a href="#d4e017365d2ff3ee04e226c35129b475"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#8617ea5ba78c676aff8b7af960cb2f4b">parse_wnorm_attribute</a> = 0x0040</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes, assuming that their type is not CDATA.  <a href="#8617ea5ba78c676aff8b7af960cb2f4b"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes.  <a href="#8617ea5ba78c676aff8b7af960cb2f4b"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#1e943812f2de36fc3ee14f7756afdbd7">parse_wconv_attribute</a> = 0x0080</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes, assuming that their type is CDATA.  <a href="#1e943812f2de36fc3ee14f7756afdbd7"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes.  <a href="#1e943812f2de36fc3ee14f7756afdbd7"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#db5db03ce720dcd90e900b9bb7e70427">parse_declaration</a> = 0x0100</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if XML document declaration (this node has the form of &lt;?xml .  <a href="#db5db03ce720dcd90e900b9bb7e70427"></a><br></td></tr>
@@ -283,6 +300,45 @@ E.g. ''. </td></tr>
 E.g. '&lt;?...?&gt;'. </td></tr>
 <tr><td valign="top"><em><a class="anchor" name="137e94a038e4ab0ada6477cf7f6153a9ad8024cc4a4afbc68c871f3826a00616"></a><!-- doxytag: member="node_declaration" ref="137e94a038e4ab0ada6477cf7f6153a9ad8024cc4a4afbc68c871f3826a00616" args="" -->node_declaration</em>&nbsp;</td><td>
 E.g. '&lt;?xml ...?&gt;'. </td></tr>
+</table>
+</dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="51b15030472dcfa64b5c0d2252f8261d"></a><!-- doxytag: member="pugi::xpath_type_t" ref="51b15030472dcfa64b5c0d2252f8261d" args="" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">enum <a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261d">pugi::xpath_type_t</a>          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+XPath query return type classification. 
+<p>
+<dl compact><dt><b>Enumerator: </b></dt><dd>
+<table border="0" cellspacing="2" cellpadding="0">
+<tr><td valign="top"><em><a class="anchor" name="51b15030472dcfa64b5c0d2252f8261daa768b8302ccc893f3cc9ba799360a77"></a><!-- doxytag: member="xpath_type_none" ref="51b15030472dcfa64b5c0d2252f8261daa768b8302ccc893f3cc9ba799360a77" args="" -->xpath_type_none</em>&nbsp;</td><td>
+Unknown type (query failed to compile). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51b15030472dcfa64b5c0d2252f8261df5613748204e2e4861524e7d63a699c9"></a><!-- doxytag: member="xpath_type_node_set" ref="51b15030472dcfa64b5c0d2252f8261df5613748204e2e4861524e7d63a699c9" args="" -->xpath_type_node_set</em>&nbsp;</td><td>
+Node set (<a class="el" href="classpugi_1_1xpath__node__set.html">xpath_node_set</a>). </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51b15030472dcfa64b5c0d2252f8261d02959f74f4fe93d71a1e109a45f23825"></a><!-- doxytag: member="xpath_type_number" ref="51b15030472dcfa64b5c0d2252f8261d02959f74f4fe93d71a1e109a45f23825" args="" -->xpath_type_number</em>&nbsp;</td><td>
+Number. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51b15030472dcfa64b5c0d2252f8261dde2b17f4d9fad5bfb1617bf5012cf5ad"></a><!-- doxytag: member="xpath_type_string" ref="51b15030472dcfa64b5c0d2252f8261dde2b17f4d9fad5bfb1617bf5012cf5ad" args="" -->xpath_type_string</em>&nbsp;</td><td>
+String. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="51b15030472dcfa64b5c0d2252f8261d049dd1494237a55f8aba3392d12a0164"></a><!-- doxytag: member="xpath_type_boolean" ref="51b15030472dcfa64b5c0d2252f8261d049dd1494237a55f8aba3392d12a0164" args="" -->xpath_type_boolean</em>&nbsp;</td><td>
+Boolean. </td></tr>
 </table>
 </dl>
     </td>
@@ -465,6 +521,68 @@ All subsequent allocations/deallocations will be performed via supplied function
 </dl>
 <dl compact><dt><b>Note:</b></dt><dd>XPath-related allocations, as well as allocations in functions that return std::string (<a class="el" href="classpugi_1_1xml__node.html#9d5ed8a5d73d252e5786f034d277d504">xml_node::path</a>, as_utf8, as_utf16) are not performed via these functions. <p>
 If you're using parse() with ownership transfer, you have to allocate the buffer you pass to parse() with allocation function you set via this function. </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="0d3d42320b07fe1865feb5e8e7c01e38"></a><!-- doxytag: member="pugi::get_memory_allocation_function" ref="0d3d42320b07fe1865feb5e8e7c01e38" args="()" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> PUGIXML_FUNCTION pugi::get_memory_allocation_function           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="mdname1" valign="top" nowrap>          </td>
+          <td class="md" valign="top">&nbsp;)&nbsp;</td>
+          <td class="md" nowrap></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Get current memory allocation function. 
+<p>
+<dl compact><dt><b>Returns:</b></dt><dd>memory allocation function </dd></dl>
+<dl compact><dt><b>See also:</b></dt><dd><a class="el" href="namespacepugi.html#bc67229fed7dbe24a410d83b9233f916">set_memory_management_functions</a> </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="0823c1cb767482d9d72d1df055be3b67"></a><!-- doxytag: member="pugi::get_memory_deallocation_function" ref="0823c1cb767482d9d72d1df055be3b67" args="()" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> PUGIXML_FUNCTION pugi::get_memory_deallocation_function           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="mdname1" valign="top" nowrap>          </td>
+          <td class="md" valign="top">&nbsp;)&nbsp;</td>
+          <td class="md" nowrap></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Get current memory deallocation function. 
+<p>
+<dl compact><dt><b>Returns:</b></dt><dd>memory deallocation function </dd></dl>
+<dl compact><dt><b>See also:</b></dt><dd><a class="el" href="namespacepugi.html#bc67229fed7dbe24a410d83b9233f916">set_memory_management_functions</a> </dd></dl>
     </td>
   </tr>
 </table>
@@ -698,7 +816,7 @@ This flag is on by default.     </td>
     <td>
 
 <p>
-This flag determines if attribute value normalization should be performed for all attributes, assuming that their type is not CDATA. 
+This flag determines if attribute value normalization should be performed for all attributes. 
 <p>
 This means, that: 1. Whitespace characters (new line, tab and space) are replaced with space (' ') 2. Afterwards sequences of spaces are replaced with a single space 3. Leading/trailing whitespace characters are trimmed<p>
 This flag is off by default.     </td>
@@ -724,7 +842,7 @@ This flag is off by default.     </td>
     <td>
 
 <p>
-This flag determines if attribute value normalization should be performed for all attributes, assuming that their type is CDATA. 
+This flag determines if attribute value normalization should be performed for all attributes. 
 <p>
 This means, that whitespace characters (new line, tab and space) are replaced with space (' '). Note, that the actions performed while this flag is on are also performed if parse_wnorm_attribute is on, so this flag has no effect if parse_wnorm_attribute flag is set.<p>
 This flag is on by default.     </td>
@@ -909,7 +1027,7 @@ This is the default set of formatting flags.
 It includes indenting nodes depending on their depth in DOM tree.     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Thu Sep 17 22:15:55 2009 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Sun Nov 8 22:15:17 2009 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>

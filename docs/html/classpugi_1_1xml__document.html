@@ -59,12 +59,12 @@ This class has noncopyable semantics (private copy ctor/assignment operator).
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#cd3bdf4b2f313653ff848fe2b8639ef0">parse</a> (const <a class="el" href="structpugi_1_1transfer__ownership__tag.html">transfer_ownership_tag</a> &amp;, char *xmlstr, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parse the given XML string in-situ (gains ownership).  <a href="#cd3bdf4b2f313653ff848fe2b8639ef0"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#5039e6a085149c9ebaa6cf788a7a26a5">save</a> (<a class="el" href="classpugi_1_1xml__writer.html">xml_writer</a> &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>)</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#799a8104c5c9e00149d0b846e4e915b1">save</a> (<a class="el" href="classpugi_1_1xml__writer.html">xml_writer</a> &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>) const </td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to writer.  <a href="#5039e6a085149c9ebaa6cf788a7a26a5"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#716c23429fcac408ee1073353056485d">save_file</a> (const char *name, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to writer.  <a href="#799a8104c5c9e00149d0b846e4e915b1"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#dd3435ec713cdb96563e3513c12c02f2">save_file</a> (const char *name, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>) const </td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to file.  <a href="#716c23429fcac408ee1073353056485d"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to file.  <a href="#dd3435ec713cdb96563e3513c12c02f2"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="952fa74a00a02d64ab7600ac2c72fb4b"></a><!-- doxytag: member="pugi::xml_document::precompute_document_order" ref="952fa74a00a02d64ab7600ac2c72fb4b" args="()" -->
 void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#952fa74a00a02d64ab7600ac2c72fb4b">precompute_document_order</a> ()</td></tr>
 
@@ -309,7 +309,7 @@ The string is modified; document gains ownership over the string, so you don't h
     </td>
   </tr>
 </table>
-<a class="anchor" name="5039e6a085149c9ebaa6cf788a7a26a5"></a><!-- doxytag: member="pugi::xml_document::save" ref="5039e6a085149c9ebaa6cf788a7a26a5" args="(xml_writer &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=format_default)" --><p>
+<a class="anchor" name="799a8104c5c9e00149d0b846e4e915b1"></a><!-- doxytag: member="pugi::xml_document::save" ref="799a8104c5c9e00149d0b846e4e915b1" args="(xml_writer &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=format_default) const " --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -335,7 +335,7 @@ The string is modified; document gains ownership over the string, so you don't h
         <tr>
           <td class="md"></td>
           <td class="md">)&nbsp;</td>
-          <td class="md" colspan="2"></td>
+          <td class="md" colspan="2"> const</td>
         </tr>
       </table>
     </td>
@@ -361,7 +361,7 @@ Save XML to writer.
     </td>
   </tr>
 </table>
-<a class="anchor" name="716c23429fcac408ee1073353056485d"></a><!-- doxytag: member="pugi::xml_document::save_file" ref="716c23429fcac408ee1073353056485d" args="(const char *name, const char *indent=&quot;\t&quot;, unsigned int flags=format_default)" --><p>
+<a class="anchor" name="dd3435ec713cdb96563e3513c12c02f2"></a><!-- doxytag: member="pugi::xml_document::save_file" ref="dd3435ec713cdb96563e3513c12c02f2" args="(const char *name, const char *indent=&quot;\t&quot;, unsigned int flags=format_default) const " --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -387,7 +387,7 @@ Save XML to writer.
         <tr>
           <td class="md"></td>
           <td class="md">)&nbsp;</td>
-          <td class="md" colspan="2"></td>
+          <td class="md" colspan="2"> const</td>
         </tr>
       </table>
     </td>
@@ -414,7 +414,7 @@ Save XML to file.
     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Thu Sep 17 22:15:56 2009 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Sun Nov 8 22:15:21 2009 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>
