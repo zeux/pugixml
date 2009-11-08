@@ -16,11 +16,13 @@ TEST_XML(xpath_number_number, "<node>123</node>")
 	CHECK_XPATH_NUMBER(c, "number(' -123.')", -123);
 	CHECK_XPATH_NUMBER(c, "number('123.')", 123);
 	CHECK_XPATH_NUMBER(c, "number('.56')", 0.56);
+	CHECK_XPATH_NUMBER(c, "number('123 ')", 123);
 	CHECK_XPATH_NUMBER_NAN(c, "number('foobar')");
 	CHECK_XPATH_NUMBER_NAN(c, "number('f1')");
 	CHECK_XPATH_NUMBER_NAN(c, "number('1f')");
 	CHECK_XPATH_NUMBER_NAN(c, "number('1.f')");
 	CHECK_XPATH_NUMBER_NAN(c, "number('1.0f')");
+	CHECK_XPATH_NUMBER_NAN(c, "number('123 f')");
 
 	// number with 1 bool argument
 	CHECK_XPATH_NUMBER(c, "number(true())", 1);

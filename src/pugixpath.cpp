@@ -387,7 +387,7 @@ namespace
 			if (is_chartype(*string, ct_space))
 			{
 				while (is_chartype(*string, ct_space)) ++string;
-				if (*string) return gen_nan();
+				return *string ? gen_nan() : r;
 			}
 			
 			if (*string != '.') return gen_nan();
