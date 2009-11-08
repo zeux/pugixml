@@ -48,6 +48,7 @@ TEST(xpath_empty_expression)
 TEST(xpath_lexer_error)
 {
 	CHECK_XPATH_FAIL("!");
+	CHECK_XPATH_FAIL("&");
 }
 
 TEST(xpath_unmatched_braces)
@@ -65,6 +66,12 @@ TEST(xpath_incorrect_step)
 {
 	CHECK_XPATH_FAIL("child::1");
 	CHECK_XPATH_FAIL("something::*");
+	CHECK_XPATH_FAIL("a::*");
+	CHECK_XPATH_FAIL("c::*");
+	CHECK_XPATH_FAIL("d::*");
+	CHECK_XPATH_FAIL("f::*");
+	CHECK_XPATH_FAIL("n::*");
+	CHECK_XPATH_FAIL("p::*");
 }
 
 TEST(xpath_semantics_error)
