@@ -463,4 +463,11 @@ TEST_XML(xpath_paths_descendant_double_slash_w3c, "<node><para><para/><para/><pa
 	CHECK_XPATH_NODESET(doc, "/descendant::para[1]") % 3;
 }
 
+TEST_XML(xpath_paths_needs_sorting, "<node><child/><child/><child><subchild/><subchild/></child></node>")
+{
+    doc.precompute_document_order();
+
+    CHECK_XPATH_NODESET(doc, "(node/child/subchild)[2]") % 7;
+}
+
 #endif

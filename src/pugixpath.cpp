@@ -1299,11 +1299,6 @@ namespace pugi
 						return Cdouble()(lhs->eval_number(c), rhs->eval_number(c));
 					else if (lhs->rettype() == ast_type_string || rhs->rettype() == ast_type_string)
 						return Cstring()(lhs->eval_string(c), rhs->eval_string(c));
-					else
-					{
-						assert(!"Wrong types");
-						return false;
-					}
 				}
 				else if (lhs->rettype() == ast_type_node_set && rhs->rettype() == ast_type_node_set)
 				{
@@ -1349,11 +1344,6 @@ namespace pugi
 						
 						return false;
 					}
-					else
-					{
-						assert(!"Wrong types");
-						return false;
-					}
 				}
 				else if (lhs->rettype() == ast_type_node_set && rhs->rettype() != ast_type_node_set)
 				{
@@ -1385,17 +1375,10 @@ namespace pugi
 						
 						return false;
 					}
-					else
-					{
-						assert(!"Wrong types");
-						return false;
-					}
 				}
-				else
-				{
-					assert(!"Wrong types");
-					return false;
-				}
+
+  		        assert(!"Wrong types");
+				return false;
 			}
 		};
 

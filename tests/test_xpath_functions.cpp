@@ -599,7 +599,7 @@ TEST_XML_FLAGS(xpath_nodeset_local_name, "<node xmlns:foo='http://foo'><c1>text<
 	CHECK_XPATH_FAIL("local-name(c1, c2)");
 }
 
-TEST_XML_FLAGS(xpath_nodeset_namespace_uri, "<node xmlns:foo='http://foo'><c1>text</c1><c2 xmlns:foo='http://foo2' foo:attr='value'><foo:child/></c2><c3 xmlns='http://def' attr='value'><child/></c3><c4><?target stuff?></c4><c5><foo:child/></c5></node>", parse_default | parse_pi)
+TEST_XML_FLAGS(xpath_nodeset_namespace_uri, "<node xmlns:foo='http://foo'><c1>text</c1><c2 xmlns:foo='http://foo2' foo:attr='value'><foo:child/></c2><c3 xmlns='http://def' attr='value'><child/></c3><c4><?target stuff?></c4><c5><foo:child/></c5><c6 bar:attr=''/></node>", parse_default | parse_pi)
 {
 	xml_node c;
 	xml_node n = doc.child("node");
@@ -621,6 +621,7 @@ TEST_XML_FLAGS(xpath_nodeset_namespace_uri, "<node xmlns:foo='http://foo'><c1>te
 	CHECK_XPATH_STRING(n, "namespace-uri(c3)", "http://def");
 	CHECK_XPATH_STRING(n, "namespace-uri(c3/@attr)", ""); // the namespace name for an unprefixed attribute name always has no value (Namespaces in XML 1.0)
 	CHECK_XPATH_STRING(n, "namespace-uri(c3/child::node())", "http://def");
+	CHECK_XPATH_STRING(n, "namespace-uri(c6/@bar:attr)", "");
 
 	// namespace-uri with 2 arguments
 	CHECK_XPATH_FAIL("namespace-uri(c1, c2)");

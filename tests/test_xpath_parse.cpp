@@ -44,4 +44,9 @@ TEST(xpath_empty_expression)
 	CHECK_XPATH_FAIL("");
 }
 
+TEST(xpath_lexer_error)
+{
+	CHECK_XPATH_FAIL("!");
+}
+
 #endif
