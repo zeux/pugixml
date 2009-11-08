@@ -189,4 +189,136 @@ TEST_XML(xpath_paths_axes_ancestor_or_self, "<node attr='value'><child attr='val
 	CHECK_XPATH_NODESET(doc, "ancestor-or-self:: node()") % 1; // root
 }
 
+TEST_XML(xpath_paths_axes_abbrev, "<node attr='value'><foo/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// @ axis
+	CHECK_XPATH_NODESET(c, "@attr");
+	CHECK_XPATH_NODESET(n, "@attr") % 3;
+
+	// no axis - child implied
+	CHECK_XPATH_NODESET(c, "foo");
+	CHECK_XPATH_NODESET(n, "foo") % 4;
+	CHECK_XPATH_NODESET(doc, "node()") % 2;
+
+	// @ axis should disable all other axis specifiers
+	CHECK_XPATH_FAIL("@child::foo");
+	CHECK_XPATH_FAIL("@attribute::foo");
+}
+
+TEST_XML(xpath_paths_nodetest_all, "<node a1='v1' x:a2='v2'><c1/><x:c2/><c3/><x:c4/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(c, "*");
+	CHECK_XPATH_NODESET(c, "child::*");
+
+	CHECK_XPATH_NODESET(n, "*") % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(n, "child::*") % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(n, "attribute::*") % 3 % 4;
+}
+
+TEST_XML_FLAGS(xpath_paths_nodetest_name, "<node a1='v1' x:a2='v2'><c1/><x:c2/><c3/><x:c4/><?c1?></node>", parse_default | parse_pi)
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(c, "c1");
+	CHECK_XPATH_NODESET(c, "child::c1");
+
+	CHECK_XPATH_NODESET(n, "c1") % 5;
+	CHECK_XPATH_NODESET(n, "x:c2") % 6;
+
+	CHECK_XPATH_NODESET(n, "child::c1") % 5;
+	CHECK_XPATH_NODESET(n, "child::x:c2") % 6;
+
+	CHECK_XPATH_NODESET(n, "attribute::a1") % 3;
+	CHECK_XPATH_NODESET(n, "attribute::x:a2") % 4;
+	CHECK_XPATH_NODESET(n, "@x:a2") % 4;
+}
+
+TEST_XML(xpath_paths_nodetest_all_in_namespace, "<node a1='v1' x:a2='v2'><c1/><x:c2/><c3/><x:c4/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(c, "x:*");
+	CHECK_XPATH_NODESET(c, "child::x:*");
+
+	CHECK_XPATH_NODESET(n, "x:*") % 6 % 8;
+	CHECK_XPATH_NODESET(n, "child::x:*") % 6 % 8;
+
+	CHECK_XPATH_NODESET(n, "attribute::x:*") % 4;
+	CHECK_XPATH_NODESET(n, "@x:*") % 4;
+
+	CHECK_XPATH_FAIL(":*");
+	CHECK_XPATH_FAIL("@:*");
+}
+
+TEST_XML_FLAGS(xpath_paths_nodetest_type, "<node attr='value'>pcdata<child/><?pi1 value?><?pi2 value?><!--comment--><![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments)
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	// check on empty nodes
+	CHECK_XPATH_NODESET(c, "node()");
+	CHECK_XPATH_NODESET(c, "text()");
+	CHECK_XPATH_NODESET(c, "comment()");
+	CHECK_XPATH_NODESET(c, "processing-instruction()");
+	CHECK_XPATH_NODESET(c, "processing-instruction('foobar')");
+
+	// child axis
+	CHECK_XPATH_NODESET(n, "node()") % 4 % 5 % 6 % 7 % 8 % 9;
+	CHECK_XPATH_NODESET(n, "text()") % 4 % 9;
+	CHECK_XPATH_NODESET(n, "comment()") % 8;
+	CHECK_XPATH_NODESET(n, "processing-instruction()") % 6 % 7;
+	CHECK_XPATH_NODESET(n, "processing-instruction('pi2')") % 7;
+
+	// attribute axis
+	CHECK_XPATH_NODESET(n, "@node()") % 3;
+	CHECK_XPATH_NODESET(n, "@text()");
+	CHECK_XPATH_NODESET(n, "@comment()");
+	CHECK_XPATH_NODESET(n, "@processing-instruction()");
+	CHECK_XPATH_NODESET(n, "@processing-instruction('pi2')");
+
+	// incorrect 'argument' number
+	CHECK_XPATH_FAIL("node('')");
+	CHECK_XPATH_FAIL("text('')");
+	CHECK_XPATH_FAIL("comment('')");
+	CHECK_XPATH_FAIL("processing-instruction(1)");
+	CHECK_XPATH_FAIL("processing-instruction('', '')");
+}
+
+TEST_XML(xpath_paths_step_abbrev, "<node><foo/></node>")
+{
+	doc.precompute_document_order();
+
+	xml_node c;
+	xml_node n = doc.child("node");
+
+	CHECK_XPATH_NODESET(c, ".");
+	CHECK_XPATH_NODESET(c, "..");
+
+	CHECK_XPATH_NODESET(n, ".") % 2;
+	CHECK_XPATH_NODESET(n, "..") % 1;
+	CHECK_XPATH_NODESET(n, "../node") % 2;
+	CHECK_XPATH_NODESET(n.child("foo"), "..") % 2;
+
+	CHECK_XPATH_FAIL(".node");
+	CHECK_XPATH_FAIL("..node");
+}
+
 #endif
