@@ -1226,6 +1226,7 @@ namespace pugi
 	
 	enum nodetest_t
 	{
+		nodetest_none,
 		nodetest_name,
 		nodetest_type_node,
 		nodetest_type_comment,
@@ -1550,6 +1551,9 @@ namespace pugi
 					n.name()[strlen(m_contents)] == ':')
 					ns.push_back(n);
 				break;
+
+			default:
+				assert(!"Unknown axis");
 			} 
 		}
 
@@ -2999,7 +3003,39 @@ namespace pugi
 			specified = false;
 			return axis_child;
 		}
-	    
+
+		nodetest_t parse_node_test_type(const char* name)
+		{
+			switch (name[0])
+			{
+			case 'c':
+				if (!strcmp(name, "comment"))
+					return nodetest_type_comment;
+
+				break;
+
+			case 'n':
+				if (!strcmp(name, "node"))
+					return nodetest_type_node;
+
+				break;
+
+			case 'p':
+				if (!strcmp(name, "processing-instruction"))
+					return nodetest_type_pi;
+
+				break;
+
+			case 't':
+				if (!strcmp(name, "text"))
+					return nodetest_type_text;
+
+				break;
+			}
+
+			return nodetest_none;
+		}
+
 	    // PrimaryExpr ::= VariableReference | '(' Expr ')' | Literal | Number | FunctionCall
 	    xpath_ast_node* parse_primary_expression()
 	    {
@@ -3167,13 +3203,11 @@ namespace pugi
 				return new (m_alloc.node()) xpath_ast_node(ast_step, set, axis_parent, nodetest_type_node, 0, m_alloc);
 			}
 	    
-			nodetest_t nt_type;
+			nodetest_t nt_type = nodetest_none;
 			std::string nt_name;
 			
 			if (m_lexer.current() == lex_string)
 			{
-				bool nodetest_specified = false;
-
 				// node name test
 				nt_name = m_lexer.contents();
 				m_lexer.next();
@@ -3195,8 +3229,6 @@ namespace pugi
 					{
 						nt_type = nodetest_all;
 						m_lexer.next();
-
-						nodetest_specified = true;
 					}
 					else if (m_lexer.current() == lex_string)
 					{
@@ -3206,7 +3238,7 @@ namespace pugi
 					else throw xpath_exception("Unrecognized node test");
 				}
 				
-				if (!nodetest_specified)
+				if (nt_type == nodetest_none)
 				{
 					// node type test or processing-instruction
 					if (m_lexer.current() == lex_open_brace)
@@ -3216,19 +3248,12 @@ namespace pugi
 						if (m_lexer.current() == lex_close_brace)
 						{
 							m_lexer.next();
+
+							nt_type = parse_node_test_type(nt_name.c_str());
+
+							if (nt_type == nodetest_none) throw xpath_exception("Unrecognized node type");
 							
-							if (nt_name == "node")
-								nt_type = nodetest_type_node;
-							else if (nt_name == "text")
-								nt_type = nodetest_type_text;
-							else if (nt_name == "comment")
-								nt_type = nodetest_type_comment;
-							else if (nt_name == "processing-instruction")
-								nt_type = nodetest_type_pi;
-							else
-								throw xpath_exception("Unrecognized node type");
-							
-							nt_name.erase(nt_name.begin(), nt_name.end());
+							nt_name = "";
 						}
 						else if (nt_name == "processing-instruction")
 						{
@@ -3378,6 +3403,9 @@ namespace pugi
 	    			while (*state && *state <= 32) ++state;
 	    			
 	    			if (*state != '(') return parse_location_path();
+
+					// This looks like a function call; however this still can be a node-test. Check it.
+					if (parse_node_test_type(m_lexer.contents()) != nodetest_none) return parse_location_path();
 	    		}
 	    		
 	    		xpath_ast_node* n = parse_filter_expression();
