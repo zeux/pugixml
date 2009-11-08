@@ -1953,12 +1953,12 @@ namespace pugi
 #ifdef __BORLANDC__
 	bool operator&&(const xml_attribute& lhs, bool rhs)
 	{
-		return lhs ? rhs : false;
+		return (bool)lhs && rhs;
 	}
 
 	bool operator||(const xml_attribute& lhs, bool rhs)
 	{
-		return lhs ? true : rhs;
+		return (bool)lhs || rhs;
 	}
 #endif
 
@@ -2720,12 +2720,12 @@ namespace pugi
 #ifdef __BORLANDC__
 	bool operator&&(const xml_node& lhs, bool rhs)
 	{
-		return lhs ? rhs : false;
+		return (bool)lhs && rhs;
 	}
 
 	bool operator||(const xml_node& lhs, bool rhs)
 	{
-		return lhs ? true : rhs;
+		return (bool)lhs || rhs;
 	}
 #endif
 

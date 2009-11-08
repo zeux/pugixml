@@ -630,6 +630,11 @@ namespace pugi
 		return (m_node || m_attribute) ? &xpath_node::m_node : 0;
 	}
 	
+	bool xpath_node::operator!() const
+	{
+		return !(m_node || m_attribute);
+	}
+
 	bool xpath_node::operator==(const xpath_node& n) const
 	{
 		return m_node == n.m_node && m_attribute == n.m_attribute;
@@ -639,6 +644,18 @@ namespace pugi
 	{
 		return m_node != n.m_node || m_attribute != n.m_attribute;
 	}
+
+#ifdef __BORLANDC__
+	bool operator&&(const xpath_node& lhs, bool rhs)
+	{
+		return (bool)lhs && rhs;
+	}
+
+	bool operator||(const xpath_node& lhs, bool rhs)
+	{
+		return (bool)lhs || rhs;
+	}
+#endif
 
 	xpath_node_set::xpath_node_set(): m_type(type_unsorted), m_begin(&m_storage), m_end(&m_storage), m_eos(&m_storage + 1), m_using_storage(true)
 	{
@@ -691,6 +708,11 @@ namespace pugi
 		return size() == 0;
 	}
 		
+	xpath_node xpath_node_set::operator[](size_t index) const
+	{
+		return (index >= size()) ? xpath_node() : m_begin[index];
+	}
+
 	xpath_node_set::iterator xpath_node_set::mut_begin()
 	{
 		return m_begin;
@@ -701,11 +723,6 @@ namespace pugi
 		return m_begin;
 	}
 		
-	xpath_node_set::iterator xpath_node_set::mut_end()
-	{
-		return m_end;
-	}
-	
 	xpath_node_set::const_iterator xpath_node_set::end() const
 	{
 		return m_end;
@@ -767,6 +784,8 @@ namespace pugi
 
 	xpath_node xpath_node_set::first() const
 	{
+		if (empty()) return xpath_node();
+
 		switch (m_type)
 		{
 		case type_sorted: return *m_begin;
@@ -3613,7 +3632,7 @@ namespace pugi
 		m_root->check_semantics();
 	}
 
-	bool xpath_query::evaluate_boolean(const xml_node& n)
+	bool xpath_query::evaluate_boolean(const xml_node& n) const
 	{
 		if (!m_root) return false;
 		
@@ -3627,7 +3646,7 @@ namespace pugi
 		return m_root->eval_boolean(c);
 	}
 	
-	double xpath_query::evaluate_number(const xml_node& n)
+	double xpath_query::evaluate_number(const xml_node& n) const
 	{
 		if (!m_root) return gen_nan();
 		
@@ -3641,7 +3660,7 @@ namespace pugi
 		return m_root->eval_number(c);
 	}
 	
-	std::string xpath_query::evaluate_string(const xml_node& n)
+	std::string xpath_query::evaluate_string(const xml_node& n) const
 	{
 		if (!m_root) return std::string();
 		
@@ -3655,7 +3674,7 @@ namespace pugi
 		return m_root->eval_string(c);
 	}
 	
-	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n)
+	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const
 	{
 		if (!m_root) return xpath_node_set();
 		
@@ -3675,7 +3694,7 @@ namespace pugi
 		return select_single_node(q);
 	}
 
-	xpath_node xml_node::select_single_node(xpath_query& query) const
+	xpath_node xml_node::select_single_node(const xpath_query& query) const
 	{
 		xpath_node_set s = query.evaluate_node_set(*this);
 		return s.empty() ? xpath_node() : s.first();
@@ -3687,7 +3706,7 @@ namespace pugi
 		return select_nodes(q);
 	}
 
-	xpath_node_set xml_node::select_nodes(xpath_query& query) const
+	xpath_node_set xml_node::select_nodes(const xpath_query& query) const
 	{
 		return query.evaluate_node_set(*this);
 	}

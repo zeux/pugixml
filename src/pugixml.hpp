@@ -298,7 +298,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		bool evaluate_boolean(const xml_node& n);
+		bool evaluate_boolean(const xml_node& n) const;
 		
 		/**
 		 * Evaluate expression as double value for the context node \a n.
@@ -309,7 +309,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		double evaluate_number(const xml_node& n);
+		double evaluate_number(const xml_node& n) const;
 		
 		/**
 		 * Evaluate expression as string value for the context node \a n.
@@ -320,7 +320,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		std::string evaluate_string(const xml_node& n);
+		std::string evaluate_string(const xml_node& n) const;
 		
 		/**
 		 * Evaluate expression as node set for the context node \a n.
@@ -330,7 +330,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		xpath_node_set evaluate_node_set(const xml_node& n);
+		xpath_node_set evaluate_node_set(const xml_node& n) const;
 	};
 	#endif
 	
@@ -1306,7 +1306,7 @@ namespace pugi
 		 * \param query - compiled query
 		 * \return first node from the resulting node set by document order, or empty node if none found
 		 */
-		xpath_node select_single_node(xpath_query& query) const;
+		xpath_node select_single_node(const xpath_query& query) const;
 
 		/**
 		 * Select node set by evaluating XPath query
@@ -1322,7 +1322,7 @@ namespace pugi
 		 * \param query - compiled query
 		 * \return resulting node set
 		 */
-		xpath_node_set select_nodes(xpath_query& query) const;
+		xpath_node_set select_nodes(const xpath_query& query) const;
 	#endif
 		
 		/// \internal Document order or 0 if not set
@@ -1893,6 +1893,9 @@ namespace pugi
     	 */
 		operator unspecified_bool_type() const;
 		
+    	// Borland C++ workaround
+    	bool operator!() const;
+
 		/**
 		 * Compares two XPath nodes
 		 *
@@ -1909,6 +1912,12 @@ namespace pugi
 		 */
 		bool operator!=(const xpath_node& n) const;
 	};
+
+#ifdef __BORLANDC__
+	// Borland C++ workaround
+	bool PUGIXML_FUNCTION operator&&(const xpath_node& lhs, bool rhs);
+	bool PUGIXML_FUNCTION operator||(const xpath_node& lhs, bool rhs);
+#endif
 
 	/**
 	 * Not necessarily ordered constant collection of XPath nodes
@@ -1943,7 +1952,6 @@ namespace pugi
 		typedef xpath_node* iterator;
 
 		iterator mut_begin();
-		iterator mut_end();
 		
 		void push_back(const xpath_node& n);
 		
@@ -1993,6 +2001,14 @@ namespace pugi
 		 * \return collection size
 		 */
 		size_t size() const;
+
+		/**
+		 * Get element with the specified index
+		 *
+		 * \param index - requested index
+		 * \return element
+		 */
+		xpath_node operator[](size_t index) const;
 		
 		/**
 		 * Get begin constant iterator for collection
@@ -2019,6 +2035,7 @@ namespace pugi
 		 * Get first node in the collection by document order
 		 *
 		 * \return first node by document order
+		 * \note set.first() is not equal to set[0], since operator[] does not take document order into account
 		 */
 		xpath_node first() const;
 		
