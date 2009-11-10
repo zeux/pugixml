@@ -692,7 +692,13 @@ namespace
 		{
 			while (!is_chartype(*s, ct_parse_pcdata)) ++s;
 				
-			if (opt_eol && *s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
+			if (*s == '<') // PCDATA ends here
+			{
+				*g.flush(s) = 0;
+				
+				return s + 1;
+			}
+			else if (opt_eol && *s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
 			{
 				*s++ = '\n'; // replace first one with 0x0a
 				
@@ -701,12 +707,6 @@ namespace
 			else if (opt_escape && *s == '&')
 			{
 				s = strconv_escape(s, g);
-			}
-			else if (*s == '<') // PCDATA ends here
-			{
-				*g.flush(s) = 0;
-				
-				return s + 1;
 			}
 			else if (*s == 0)
 			{
@@ -741,22 +741,35 @@ namespace
 			
 		gap g;
 
-		// Trim whitespaces
-		if (opt_wnorm)
+		// trim leading whitespaces
+		if (opt_wnorm && is_chartype(*s, ct_space))
 		{
 			char* str = s;
 			
-			while (is_chartype(*str, ct_space)) ++str;
+			do ++str;
+			while (is_chartype(*str, ct_space));
 			
-			if (str != s)
-				g.push(s, str - s);
+			g.push(s, str - s);
 		}
 
 		while (true)
 		{
 			while (!is_chartype(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
 			
-			if (opt_wnorm && is_chartype(*s, ct_space))
+			if (*s == end_quote)
+			{
+				char* str = g.flush(s);
+				
+				if (opt_wnorm)
+				{
+					do *str-- = 0;
+					while (is_chartype(*str, ct_space));
+				}
+				else *str = 0;
+			
+				return s + 1;
+			}
+			else if (opt_wnorm && is_chartype(*s, ct_space))
 			{
 				*s++ = ' ';
 	
@@ -787,19 +800,6 @@ namespace
 				*s++ = '\n';
 				
 				if (*s == '\n') g.push(s, 1);
-			}
-			else if (*s == end_quote)
-			{
-				char* str = g.flush(s);
-				
-				if (opt_wnorm)
-				{
-					do *str-- = 0;
-					while (is_chartype(*str, ct_space));
-				}
-				else *str = 0;
-			
-				return s + 1;
 			}
 			else if (opt_escape && *s == '&')
 			{
