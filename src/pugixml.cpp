@@ -108,28 +108,28 @@ namespace pugi
 	struct xml_attribute_struct
 	{
 		/// Default ctor
-		xml_attribute_struct(): name_insitu(true), value_insitu(true), document_order(0), name(0), value(0), prev_attribute(0), next_attribute(0)
+		xml_attribute_struct(): document_order(0), name_allocated(false), value_allocated(false), name(0), value(0), prev_attribute(0), next_attribute(0)
 		{
 		}
 
 		void destroy()
 		{
-			if (!name_insitu)
+			if (name_allocated)
 			{
 				global_deallocate(name);
 				name = 0;
 			}
 
-			if (!value_insitu)
+			if (value_allocated)
 			{
 				global_deallocate(value);
 				value = 0;
 			}
 		}
 	
-		bool		name_insitu : 1;
-		bool		value_insitu : 1;
 		unsigned int document_order : 30; ///< Document order value
+		unsigned int name_allocated : 1;
+		unsigned int value_allocated : 1;
 
 		char*		name;			///< Pointer to attribute name.
 		char*		value;			///< Pointer to attribute value.
@@ -143,7 +143,7 @@ namespace pugi
 	{
 		/// Default ctor
 		/// \param type - node type
-		xml_node_struct(xml_node_type type = node_element): type(type), name_insitu(true), value_insitu(true), document_order(0), parent(0), name(0), value(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), first_attribute(0), last_attribute(0)
+		xml_node_struct(xml_node_type type = node_element): name_allocated(false), value_allocated(false), document_order(0), type(type), parent(0), name(0), value(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), first_attribute(0), last_attribute(0)
 		{
 		}
 
@@ -151,13 +151,13 @@ namespace pugi
 		{
 		    parent = 0;
 		    
-			if (!name_insitu)
+			if (name_allocated)
 			{
 			    global_deallocate(name);
 			    name = 0;
 			}
 			
-			if (!value_insitu)
+			if (value_allocated)
 			{
 			    global_deallocate(value);
 			    value = 0;
@@ -201,10 +201,10 @@ namespace pugi
 			return a;
 		}
 
-		unsigned int			type : 3;				///< Node type; see xml_node_type.
-		bool					name_insitu : 1;
-		bool					value_insitu : 1;
+		unsigned int			name_allocated : 1;
+		unsigned int			value_allocated : 1;
 		unsigned int			document_order : 27;	///< Document order value
+		unsigned int			type : 3;				///< Node type; see xml_node_type.
 
 		xml_node_struct*		parent;					///< Pointer to parent
 
@@ -294,7 +294,7 @@ namespace
 		return !!(chartype_table[static_cast<unsigned char>(c)] & ct);
 	}
 
-	bool strcpy_insitu(char*& dest, bool& insitu, const char* source)
+	bool strcpy_insitu(char*& dest, bool& allocated, const char* source)
 	{
 		size_t source_size = strlen(source);
 
@@ -311,10 +311,10 @@ namespace
 
 			strcpy(buf, source);
 
-			if (!insitu) global_deallocate(dest);
+			if (allocated) global_deallocate(dest);
 			
 			dest = buf;
-			insitu = false;
+			allocated = true;
 
 			return true;
 		}
@@ -681,10 +681,10 @@ namespace
 		
 	template <typename opt2> char* strconv_pcdata_t(char* s, opt2)
 	{
+		assert(*s);
+
 		const bool opt_eol = opt2::o1;
 		const bool opt_escape = opt2::o2;
-
-		if (!*s) return 0;
 
 		gap g;
 		
@@ -865,7 +865,267 @@ namespace
 		xml_parser(xml_allocator& alloc): alloc(alloc)
 		{
 		}
-		
+
+		xml_parse_result parse_exclamation(char*& ref_s, xml_node_struct* cursor, unsigned int optmsk, char* buffer_start)
+		{
+			// load into registers
+			char* s = ref_s;
+			char ch = 0;
+
+			// parse node contents, starting with exclamation mark
+			++s;
+
+			if (*s == '-') // '<!-...'
+			{
+				++s;
+
+				if (*s == '-') // '<!--...'
+				{
+					++s;
+
+					if (OPTSET(parse_comments))
+					{
+						PUSHNODE(node_comment); // Append a new node on the tree.
+						cursor->value = s; // Save the offset.
+					}
+
+					if (OPTSET(parse_eol) && OPTSET(parse_comments))
+					{
+						s = strconv_comment(s);
+
+						if (!s) return ERROR(status_bad_comment, cursor->value);
+					}
+					else
+					{
+						// Scan for terminating '-->'.
+						SCANFOR(*s == '-' && *(s+1) == '-' && *(s+2) == '>');
+						CHECK_ERROR(status_bad_comment, s);
+
+						if (OPTSET(parse_comments))
+							*s = 0; // Zero-terminate this segment at the first terminating '-'.
+
+						s += 3; // Step over the '\0->'.
+					}
+
+					if (OPTSET(parse_comments))
+					{
+						POPNODE(); // Pop since this is a standalone.
+					}
+				}
+				else return ERROR(status_bad_comment, s);
+			}
+			else if (*s == '[')
+			{
+				// '<![CDATA[...'
+				if (*++s=='C' && *++s=='D' && *++s=='A' && *++s=='T' && *++s=='A' && *++s == '[')
+				{
+					++s;
+
+					if (OPTSET(parse_cdata))
+					{
+						PUSHNODE(node_cdata); // Append a new node on the tree.
+						cursor->value = s; // Save the offset.
+
+						if (OPTSET(parse_eol))
+						{
+							s = strconv_cdata(s);
+
+							if (!s) return ERROR(status_bad_cdata, cursor->value);
+						}
+						else
+						{
+							// Scan for terminating ']]>'.
+							SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
+							CHECK_ERROR(status_bad_cdata, s);
+
+							ENDSEG(); // Zero-terminate this segment.
+							CHECK_ERROR(status_bad_cdata, s);
+						}
+
+						POPNODE(); // Pop since this is a standalone.
+					}
+					else // Flagged for discard, but we still have to scan for the terminator.
+					{
+						// Scan for terminating ']]>'.
+						SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
+						CHECK_ERROR(status_bad_cdata, s);
+
+						++s;
+					}
+
+					s += 2; // Step over the last ']>'.
+				}
+				else return ERROR(status_bad_cdata, s);
+			}
+			else if (*s=='D' && *++s=='O' && *++s=='C' && *++s=='T' && *++s=='Y' && *++s=='P' && *++s=='E')
+			{
+				++s;
+
+				SKIPWS(); // Eat any whitespace.
+				CHECK_ERROR(status_bad_doctype, s);
+
+			LOC_DOCTYPE:
+				SCANFOR(*s == '\'' || *s == '"' || *s == '[' || *s == '>');
+				CHECK_ERROR(status_bad_doctype, s);
+
+				if (*s == '\'' || *s == '"') // '...SYSTEM "..."
+				{
+					ch = *s++;
+					SCANFOR(*s == ch);
+					CHECK_ERROR(status_bad_doctype, s);
+
+					++s;
+					goto LOC_DOCTYPE;
+				}
+
+				if(*s == '[') // '...[...'
+				{
+					++s;
+					unsigned int bd = 1; // Bracket depth counter.
+					while (*s!=0) // Loop till we're out of all brackets.
+					{
+						if (*s == ']') --bd;
+						else if (*s == '[') ++bd;
+						if (bd == 0) break;
+						++s;
+					}
+				}
+
+				SCANFOR(*s == '>');
+				CHECK_ERROR(status_bad_doctype, s);
+
+				++s;
+			}
+			else return ERROR(status_unrecognized_tag, s);
+
+			// store from registers
+			ref_s = s;
+
+			return ERROR(status_ok, s);
+		}
+
+		xml_parse_result parse_question(char*& ref_s, xml_node_struct*& ref_cursor, unsigned int optmsk, char* buffer_start)
+		{
+			// load into registers
+			char* s = ref_s;
+			xml_node_struct* cursor = ref_cursor;
+			char ch = 0;
+
+			// parse node contents, starting with question mark
+			++s;
+
+			if (!is_chartype(*s, ct_start_symbol)) // bad PI
+				return ERROR(status_bad_pi, s);
+			else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
+			{
+				char* mark = s;
+				SCANWHILE(is_chartype(*s, ct_symbol)); // Read PI target
+				CHECK_ERROR(status_bad_pi, s);
+
+				if (!is_chartype(*s, ct_space) && *s != '?') // Target has to end with space or ?
+					return ERROR(status_bad_pi, s);
+
+				ENDSEG();
+				CHECK_ERROR(status_bad_pi, s);
+
+				if (ch == '?') // nothing except target present
+				{
+					if (*s != '>') return ERROR(status_bad_pi, s);
+					++s;
+
+					// stricmp / strcasecmp is not portable
+					if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
+						&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
+					{
+						if (OPTSET(parse_declaration))
+						{
+							PUSHNODE(node_declaration);
+
+							cursor->name = mark;
+
+							POPNODE();
+						}
+					}
+					else if (OPTSET(parse_pi))
+					{
+						PUSHNODE(node_pi); // Append a new node on the tree.
+
+						cursor->name = mark;
+
+						POPNODE();
+					}
+				}
+				// stricmp / strcasecmp is not portable
+				else if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
+					&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
+				{
+					if (OPTSET(parse_declaration))
+					{
+						PUSHNODE(node_declaration);
+
+						cursor->name = mark;
+
+						// scan for tag end
+						mark = s;
+
+						SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
+						CHECK_ERROR(status_bad_pi, s);
+
+						// replace ending ? with / to terminate properly
+						*s = '/';
+
+						// parse attributes
+						s = mark;
+
+						// we exit from this function with cursor at node_declaration, which is a signal to parse() to go to LOC_ATTRIBUTES
+					}
+				}
+				else
+				{
+					if (OPTSET(parse_pi))
+					{
+						PUSHNODE(node_pi); // Append a new node on the tree.
+
+						cursor->name = mark;
+					}
+
+					// ch is a whitespace character, skip whitespaces
+					SKIPWS();
+					CHECK_ERROR(status_bad_pi, s);
+
+					mark = s;
+
+					SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
+					CHECK_ERROR(status_bad_pi, s);
+
+					ENDSEG();
+					CHECK_ERROR(status_bad_pi, s);
+
+					++s; // Step over >
+
+					if (OPTSET(parse_pi))
+					{
+						cursor->value = mark;
+
+						POPNODE();
+					}
+				}
+			}
+			else // not parsing PI
+			{
+				SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
+				CHECK_ERROR(status_bad_pi, s);
+
+				s += 2;
+			}
+
+			// store from registers
+			ref_s = s;
+			ref_cursor = cursor;
+
+			return ERROR(status_ok, s);
+		}
+
 		xml_parse_result parse(char* s, xml_node_struct* xmldoc, unsigned int optmsk = parse_default)
 		{
 			if (!s || !xmldoc) return MAKE_PARSE_RESULT(status_internal_error);
@@ -887,243 +1147,7 @@ namespace
 					++s;
 
 				LOC_TAG:
-					if (*s == '?') // '<?...'
-					{
-						++s;
-
-						if (!is_chartype(*s, ct_start_symbol)) // bad PI
-							return ERROR(status_bad_pi, s);
-						else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
-						{
-							mark = s;
-							SCANWHILE(is_chartype(*s, ct_symbol)); // Read PI target
-							CHECK_ERROR(status_bad_pi, s);
-
-							if (!is_chartype(*s, ct_space) && *s != '?') // Target has to end with space or ?
-								return ERROR(status_bad_pi, s);
-
-							ENDSEG();
-							CHECK_ERROR(status_bad_pi, s);
-
-							if (ch == '?') // nothing except target present
-							{
-								if (*s != '>') return ERROR(status_bad_pi, s);
-								++s;
-
-								// stricmp / strcasecmp is not portable
-								if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
-									&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
-								{
-									if (OPTSET(parse_declaration))
-									{
-										PUSHNODE(node_declaration);
-
-										cursor->name = mark;
-
-										POPNODE();
-									}
-								}
-								else if (OPTSET(parse_pi))
-								{
-									PUSHNODE(node_pi); // Append a new node on the tree.
-
-									cursor->name = mark;
-
-									POPNODE();
-								}
-							}
-							// stricmp / strcasecmp is not portable
-							else if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
-								&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
-							{
-								if (OPTSET(parse_declaration))
-								{
-									PUSHNODE(node_declaration);
-
-									cursor->name = mark;
-
-									// scan for tag end
-									mark = s;
-
-									SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
-									CHECK_ERROR(status_bad_pi, s);
-
-									// replace ending ? with / to terminate properly
-									*s = '/';
-
-									// parse attributes
-									s = mark;
-
-									goto LOC_ATTRIBUTES;
-								}
-							}
-							else
-							{
-								if (OPTSET(parse_pi))
-								{
-									PUSHNODE(node_pi); // Append a new node on the tree.
-
-									cursor->name = mark;
-								}
-
-								// ch is a whitespace character, skip whitespaces
-								SKIPWS();
-								CHECK_ERROR(status_bad_pi, s);
-	
-								mark = s;
-
-								SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
-								CHECK_ERROR(status_bad_pi, s);
-
-								ENDSEG();
-								CHECK_ERROR(status_bad_pi, s);
-
-								++s; // Step over >
-
-								if (OPTSET(parse_pi))
-								{
-									cursor->value = mark;
-
-									POPNODE();
-								}
-							}
-						}
-						else // not parsing PI
-						{
-							SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
-							CHECK_ERROR(status_bad_pi, s);
-
-							s += 2;
-						}
-					}
-					else if (*s == '!') // '<!...'
-					{
-						++s;
-
-						if (*s == '-') // '<!-...'
-						{
-							++s;
-
-							if (*s == '-') // '<!--...'
-							{
-								++s;
-								
-								if (OPTSET(parse_comments))
-								{
-									PUSHNODE(node_comment); // Append a new node on the tree.
-									cursor->value = s; // Save the offset.
-								}
-
-								if (OPTSET(parse_eol) && OPTSET(parse_comments))
-								{
-									s = strconv_comment(s);
-									
-									if (!s) return ERROR(status_bad_comment, cursor->value);
-								}
-								else
-								{
-									// Scan for terminating '-->'.
-									SCANFOR(*s == '-' && *(s+1) == '-' && *(s+2) == '>');
-									CHECK_ERROR(status_bad_comment, s);
-								
-									if (OPTSET(parse_comments))
-										*s = 0; // Zero-terminate this segment at the first terminating '-'.
-									
-									s += 3; // Step over the '\0->'.
-								}
-								
-								if (OPTSET(parse_comments))
-								{
-									POPNODE(); // Pop since this is a standalone.
-								}
-							}
-							else return ERROR(status_bad_comment, s);
-						}
-						else if (*s == '[')
-						{
-							// '<![CDATA[...'
-							if (*++s=='C' && *++s=='D' && *++s=='A' && *++s=='T' && *++s=='A' && *++s == '[')
-							{
-								++s;
-								
-								if (OPTSET(parse_cdata))
-								{
-									PUSHNODE(node_cdata); // Append a new node on the tree.
-									cursor->value = s; // Save the offset.
-
-									if (OPTSET(parse_eol))
-									{
-										s = strconv_cdata(s);
-										
-										if (!s) return ERROR(status_bad_cdata, cursor->value);
-									}
-									else
-									{
-										// Scan for terminating ']]>'.
-										SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
-										CHECK_ERROR(status_bad_cdata, s);
-
-										ENDSEG(); // Zero-terminate this segment.
-										CHECK_ERROR(status_bad_cdata, s);
-									}
-
-									POPNODE(); // Pop since this is a standalone.
-								}
-								else // Flagged for discard, but we still have to scan for the terminator.
-								{
-									// Scan for terminating ']]>'.
-									SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
-									CHECK_ERROR(status_bad_cdata, s);
-
-									++s;
-								}
-
-								s += 2; // Step over the last ']>'.
-							}
-							else return ERROR(status_bad_cdata, s);
-						}
-						else if (*s=='D' && *++s=='O' && *++s=='C' && *++s=='T' && *++s=='Y' && *++s=='P' && *++s=='E')
-						{
-							++s;
-
-							SKIPWS(); // Eat any whitespace.
-							CHECK_ERROR(status_bad_doctype, s);
-
-						LOC_DOCTYPE:
-							SCANFOR(*s == '\'' || *s == '"' || *s == '[' || *s == '>');
-							CHECK_ERROR(status_bad_doctype, s);
-
-							if (*s == '\'' || *s == '"') // '...SYSTEM "..."
-							{
-								ch = *s++;
-								SCANFOR(*s == ch);
-								CHECK_ERROR(status_bad_doctype, s);
-
-								++s;
-								goto LOC_DOCTYPE;
-							}
-
-							if(*s == '[') // '...[...'
-							{
-								++s;
-								unsigned int bd = 1; // Bracket depth counter.
-								while (*s!=0) // Loop till we're out of all brackets.
-								{
-									if (*s == ']') --bd;
-									else if (*s == '[') ++bd;
-									if (bd == 0) break;
-									++s;
-								}
-							}
-							
-							SCANFOR(*s == '>');
-							CHECK_ERROR(status_bad_doctype, s);
-
-							++s;
-						}
-						else return ERROR(status_unrecognized_tag, s);
-					}
-					else if (is_chartype(*s, ct_start_symbol)) // '<#...'
+					if (is_chartype(*s, ct_start_symbol)) // '<#...'
 					{
 						PUSHNODE(node_element); // Append a new node to the tree.
 
@@ -1133,17 +1157,8 @@ namespace
 						CHECK_ERROR(status_bad_start_element, s);
 
 						ENDSEG(); // Save char in 'ch', terminate & step over.
-						CHECK_ERROR(status_bad_start_element, s);
 
-						if (ch == '/') // '<#.../'
-						{
-							if (*s != '>') return ERROR(status_bad_start_element, s);
-							
-							POPNODE(); // Pop.
-
-							++s;
-						}
-						else if (ch == '>')
+						if (ch == '>')
 						{
 							// end of tag
 						}
@@ -1153,7 +1168,6 @@ namespace
 						    while (true)
 						    {
 								SKIPWS(); // Eat any whitespace.
-								CHECK_ERROR(status_bad_start_element, s);
 						
 								if (is_chartype(*s, ct_start_symbol)) // <... #...
 								{
@@ -1178,9 +1192,8 @@ namespace
 									if (ch == '=') // '<... #=...'
 									{
 										SKIPWS(); // Eat any whitespace.
-										CHECK_ERROR(status_bad_attribute, s);
 
-										if (*s == '\'' || *s == '"') // '<... #="...'
+										if (*s == '"' || *s == '\'') // '<... #="...'
 										{
 											ch = *s; // Save quote char to avoid breaking on "''" -or- '""'.
 											++s; // Step over the quote.
@@ -1194,8 +1207,6 @@ namespace
 											// Whitespaces, / and > are ok, symbols and EOF are wrong,
 											// everything else will be detected
 											if (is_chartype(*s, ct_start_symbol)) return ERROR(status_bad_attribute, s);
-
-											CHECK_ERROR(status_bad_start_element, s);
 										}
 										else return ERROR(status_bad_attribute, s);
 									}
@@ -1224,6 +1235,14 @@ namespace
 
 							// !!!
 						}
+						else if (ch == '/') // '<#.../'
+						{
+							if (*s != '>') return ERROR(status_bad_start_element, s);
+
+							POPNODE(); // Pop.
+
+							++s;
+						}
 						else return ERROR(status_bad_start_element, s);
 					}
 					else if (*s == '/')
@@ -1235,7 +1254,7 @@ namespace
 						char* name = cursor->name;
 						if (!name) return ERROR(status_end_element_mismatch, s);
 						
-						while (*s && is_chartype(*s, ct_symbol))
+						while (is_chartype(*s, ct_symbol))
 						{
 							if (*s++ != *name++) return ERROR(status_end_element_mismatch, s);
 						}
@@ -1249,6 +1268,20 @@ namespace
 
 						if (*s != '>') return ERROR(status_bad_end_element, s);
 						++s;
+					}
+					else if (*s == '?') // '<?...'
+					{
+						xml_parse_result quest_result = parse_question(s, cursor, optmsk, buffer_start);
+
+						if (!quest_result) return quest_result;
+
+						if (cursor && cursor->type == node_declaration) goto LOC_ATTRIBUTES;
+					}
+					else if (*s == '!') // '<!...'
+					{
+						xml_parse_result excl_result = parse_exclamation(s, cursor, optmsk, buffer_start);
+
+						if (!excl_result) return excl_result;
 					}
 					else return ERROR(status_unrecognized_tag, s);
 				}
@@ -1904,9 +1937,9 @@ namespace pugi
 	{
 		if (!_attr) return false;
 		
-		bool insitu = _attr->name_insitu;
-		bool res = strcpy_insitu(_attr->name, insitu, rhs);
-		_attr->name_insitu = insitu;
+		bool allocated = _attr->name_allocated;
+		bool res = strcpy_insitu(_attr->name, allocated, rhs);
+		_attr->name_allocated = allocated;
 		
 		return res;
 	}
@@ -1915,9 +1948,9 @@ namespace pugi
 	{
 		if (!_attr) return false;
 
-		bool insitu = _attr->value_insitu;
-		bool res = strcpy_insitu(_attr->value, insitu, rhs);
-		_attr->value_insitu = insitu;
+		bool allocated = _attr->value_allocated;
+		bool res = strcpy_insitu(_attr->value, allocated, rhs);
+		_attr->value_allocated = allocated;
 		
 		return res;
 	}
@@ -2221,9 +2254,9 @@ namespace pugi
 		case node_declaration:
 		case node_element:
 		{
-			bool insitu = _root->name_insitu;
-			bool res = strcpy_insitu(_root->name, insitu, rhs);
-			_root->name_insitu = insitu;
+			bool allocated = _root->name_allocated;
+			bool res = strcpy_insitu(_root->name, allocated, rhs);
+			_root->name_allocated = allocated;
 		
 			return res;
 		}
@@ -2242,9 +2275,9 @@ namespace pugi
 		case node_pcdata:
 		case node_comment:
 		{
-			bool insitu = _root->value_insitu;
-			bool res = strcpy_insitu(_root->value, insitu, rhs);
-			_root->value_insitu = insitu;
+			bool allocated = _root->value_allocated;
+			bool res = strcpy_insitu(_root->value, allocated, rhs);
+			_root->value_allocated = allocated;
 		
 			return res;
 		}
@@ -2703,12 +2736,12 @@ namespace pugi
 		case node_element:
 		case node_declaration:
 		case node_pi:
-			return _root->name_insitu ? static_cast<int>(_root->name - buffer) : -1;
+			return _root->name_allocated ? -1 : static_cast<int>(_root->name - buffer);
 
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
-			return _root->value_insitu ? static_cast<int>(_root->value - buffer) : -1;
+			return _root->value_allocated ? -1 : static_cast<int>(_root->value - buffer);
 
 		default:
 			return -1;
