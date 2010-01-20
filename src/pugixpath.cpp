@@ -534,6 +534,10 @@ namespace pugi
 
 	class xpath_allocator
 	{
+		// disable copy ctor and assignment
+		xpath_allocator(const xpath_allocator&);
+		xpath_allocator& operator=(const xpath_allocator&);
+
 		struct memory_block
 		{	
 			memory_block(): next(0), size(0)
@@ -841,6 +845,10 @@ namespace pugi
 
 	class xpath_lexer
 	{
+		// disable copy ctor and assignment
+		xpath_lexer(const xpath_lexer&);
+		xpath_lexer& operator=(const xpath_lexer&);
+
 	private:
 		const char* m_cur;
 

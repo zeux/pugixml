@@ -3129,7 +3129,7 @@ namespace pugi
 
 		for (; *str;)
 		{
-			unsigned int ch;
+			unsigned int ch = 0;
 			str = strutf8_utf16(str, ch);
 			result += (wchar_t)ch;
 		}
