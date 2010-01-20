@@ -1777,11 +1777,11 @@ namespace pugi
 						xml_node p = it->parent();
 						if (p)
 						{
-							size_t s = ns.size();
+							size_t size = ns.size();
 							
 							step_push(ns, p);
 							
-							apply_predicates(ns, s, c);
+							apply_predicates(ns, size, c);
 						}
 					}
 				}
@@ -1805,12 +1805,12 @@ namespace pugi
 					
 					for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
 					{
-						size_t s = ns.size();
+						size_t size = ns.size();
 						
 						if (it->attribute()) step_push(ns, it->attribute(), it->parent());
 						else step_push(ns, it->node());
 						
-						apply_predicates(ns, s, c);
+						apply_predicates(ns, size, c);
 					}
 				}
 				else
@@ -1834,14 +1834,14 @@ namespace pugi
 							
 					for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
 					{
-						size_t s = ns.size();
+						size_t size = ns.size();
 						
 						if (it->node())
 							step_fill(ns, it->node(), v);
 						else
 							step_fill(ns, it->attribute(), it->parent(), v);
 							
-						apply_predicates(ns, s, c);
+						apply_predicates(ns, size, c);
 					}
 				}
 				else
@@ -1868,12 +1868,12 @@ namespace pugi
 					
 					for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
 					{
-						size_t s = ns.size();
+						size_t size = ns.size();
 						
 						if (it->node())
 							step_fill(ns, it->node(), v);
 						
-						apply_predicates(ns, s, c);
+						apply_predicates(ns, size, c);
 					}
 				}
 				else if (c.n.node())
