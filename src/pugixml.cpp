@@ -859,8 +859,8 @@ namespace
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define SCANWHILE(X)		{ while ((X)) ++s; }
 		#define ENDSEG()			{ ch = *s; *s = 0; ++s; }
-		#define ERROR(err, m)		make_parse_result(err, static_cast<unsigned int>(m - buffer_start), __LINE__)
-		#define CHECK_ERROR(err, m)	{ if (*s == 0) return ERROR(err, m); }
+		#define THROW_ERROR(err, m)	return make_parse_result(err, static_cast<unsigned int>(m - buffer_start), __LINE__)
+		#define CHECK_ERROR(err, m)	{ if (*s == 0) THROW_ERROR(err, m); }
 		
 		xml_parser(xml_allocator& alloc): alloc(alloc)
 		{
@@ -893,7 +893,7 @@ namespace
 					{
 						s = strconv_comment(s);
 
-						if (!s) return ERROR(status_bad_comment, cursor->value);
+						if (!s) THROW_ERROR(status_bad_comment, cursor->value);
 					}
 					else
 					{
@@ -912,7 +912,7 @@ namespace
 						POPNODE(); // Pop since this is a standalone.
 					}
 				}
-				else return ERROR(status_bad_comment, s);
+				else THROW_ERROR(status_bad_comment, s);
 			}
 			else if (*s == '[')
 			{
@@ -930,7 +930,7 @@ namespace
 						{
 							s = strconv_cdata(s);
 
-							if (!s) return ERROR(status_bad_cdata, cursor->value);
+							if (!s) THROW_ERROR(status_bad_cdata, cursor->value);
 						}
 						else
 						{
@@ -955,7 +955,7 @@ namespace
 
 					s += 2; // Step over the last ']>'.
 				}
-				else return ERROR(status_bad_cdata, s);
+				else THROW_ERROR(status_bad_cdata, s);
 			}
 			else if (*s=='D' && *++s=='O' && *++s=='C' && *++s=='T' && *++s=='Y' && *++s=='P' && *++s=='E')
 			{
@@ -996,12 +996,12 @@ namespace
 
 				++s;
 			}
-			else return ERROR(status_unrecognized_tag, s);
+			else THROW_ERROR(status_unrecognized_tag, s);
 
 			// store from registers
 			ref_s = s;
 
-			return ERROR(status_ok, s);
+			THROW_ERROR(status_ok, s);
 		}
 
 		xml_parse_result parse_question(char*& ref_s, xml_node_struct*& ref_cursor, unsigned int optmsk, char* buffer_start)
@@ -1015,7 +1015,7 @@ namespace
 			++s;
 
 			if (!is_chartype(*s, ct_start_symbol)) // bad PI
-				return ERROR(status_bad_pi, s);
+				THROW_ERROR(status_bad_pi, s);
 			else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
 			{
 				char* mark = s;
@@ -1023,14 +1023,14 @@ namespace
 				CHECK_ERROR(status_bad_pi, s);
 
 				if (!is_chartype(*s, ct_space) && *s != '?') // Target has to end with space or ?
-					return ERROR(status_bad_pi, s);
+					THROW_ERROR(status_bad_pi, s);
 
 				ENDSEG();
 				CHECK_ERROR(status_bad_pi, s);
 
 				if (ch == '?') // nothing except target present
 				{
-					if (*s != '>') return ERROR(status_bad_pi, s);
+					if (*s != '>') THROW_ERROR(status_bad_pi, s);
 					++s;
 
 					// stricmp / strcasecmp is not portable
@@ -1123,7 +1123,7 @@ namespace
 			ref_s = s;
 			ref_cursor = cursor;
 
-			return ERROR(status_ok, s);
+			THROW_ERROR(status_ok, s);
 		}
 
 		xml_parse_result parse(char* s, xml_node_struct* xmldoc, unsigned int optmsk = parse_default)
@@ -1201,22 +1201,22 @@ namespace
 
 											s = strconv_attribute(s, ch, optmsk);
 										
-											if (!s) return ERROR(status_bad_attribute, a->value);
+											if (!s) THROW_ERROR(status_bad_attribute, a->value);
 
 											// After this line the loop continues from the start;
 											// Whitespaces, / and > are ok, symbols and EOF are wrong,
 											// everything else will be detected
-											if (is_chartype(*s, ct_start_symbol)) return ERROR(status_bad_attribute, s);
+											if (is_chartype(*s, ct_start_symbol)) THROW_ERROR(status_bad_attribute, s);
 										}
-										else return ERROR(status_bad_attribute, s);
+										else THROW_ERROR(status_bad_attribute, s);
 									}
-									else return ERROR(status_bad_attribute, s);
+									else THROW_ERROR(status_bad_attribute, s);
 								}
 								else if (*s == '/')
 								{
 									++s;
 
-									if (*s != '>') return ERROR(status_bad_start_element, s);
+									if (*s != '>') THROW_ERROR(status_bad_start_element, s);
 							
 									POPNODE(); // Pop.
 
@@ -1230,43 +1230,43 @@ namespace
 
 									break;
 								}
-								else return ERROR(status_bad_start_element, s);
+								else THROW_ERROR(status_bad_start_element, s);
 							}
 
 							// !!!
 						}
 						else if (ch == '/') // '<#.../'
 						{
-							if (*s != '>') return ERROR(status_bad_start_element, s);
+							if (*s != '>') THROW_ERROR(status_bad_start_element, s);
 
 							POPNODE(); // Pop.
 
 							++s;
 						}
-						else return ERROR(status_bad_start_element, s);
+						else THROW_ERROR(status_bad_start_element, s);
 					}
 					else if (*s == '/')
 					{
 						++s;
 
-						if (!cursor) return ERROR(status_bad_end_element, s);
+						if (!cursor) THROW_ERROR(status_bad_end_element, s);
 
 						char* name = cursor->name;
-						if (!name) return ERROR(status_end_element_mismatch, s);
+						if (!name) THROW_ERROR(status_end_element_mismatch, s);
 						
 						while (is_chartype(*s, ct_symbol))
 						{
-							if (*s++ != *name++) return ERROR(status_end_element_mismatch, s);
+							if (*s++ != *name++) THROW_ERROR(status_end_element_mismatch, s);
 						}
 
-						if (*name) return ERROR(status_end_element_mismatch, s);
+						if (*name) THROW_ERROR(status_end_element_mismatch, s);
 							
 						POPNODE(); // Pop.
 
 						SKIPWS();
 						CHECK_ERROR(status_bad_end_element, s);
 
-						if (*s != '>') return ERROR(status_bad_end_element, s);
+						if (*s != '>') THROW_ERROR(status_bad_end_element, s);
 						++s;
 					}
 					else if (*s == '?') // '<?...'
@@ -1283,7 +1283,7 @@ namespace
 
 						if (!excl_result) return excl_result;
 					}
-					else return ERROR(status_unrecognized_tag, s);
+					else THROW_ERROR(status_unrecognized_tag, s);
 				}
 				else
 				{
@@ -1305,7 +1305,7 @@ namespace
 
 						s = strconv_pcdata(s, optmsk);
 								
-						if (!s) return ERROR(status_bad_pcdata, cursor->value);
+						if (!s) THROW_ERROR(status_bad_pcdata, cursor->value);
 								
 						POPNODE(); // Pop since this is a standalone.
 						
@@ -1324,9 +1324,9 @@ namespace
 				}
 			}
 
-			if (cursor != xmldoc) return ERROR(status_end_element_mismatch, s);
+			if (cursor != xmldoc) THROW_ERROR(status_end_element_mismatch, s);
 			
-			return ERROR(status_ok, s);
+			THROW_ERROR(status_ok, s);
 		}
 		
 	private:
