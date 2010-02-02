@@ -35,15 +35,15 @@ namespace
 {
 	using namespace pugi;
 		
-	enum chartype
+	enum chartypex
 	{
-		ct_space = 1,			// \r, \n, space, tab
-		ct_start_symbol = 2,	// Any symbol > 127, a-z, A-Z, _
-		ct_digit = 4,			// 0-9
-		ct_symbol = 8			// Any symbol > 127, a-z, A-Z, 0-9, _, -, .
+		ctx_space = 1,			// \r, \n, space, tab
+		ctx_start_symbol = 2,	// Any symbol > 127, a-z, A-Z, _
+		ctx_digit = 4,			// 0-9
+		ctx_symbol = 8			// Any symbol > 127, a-z, A-Z, 0-9, _, -, .
 	};
 	
-	const unsigned char chartype_table[256] =
+	const unsigned char chartypex_table[256] =
 	{
 		0,  0,  0,  0,  0,  0,  0,  0,     0,  1,  1,  0,  0,  1,  0,  0,     // 0-15
 		0,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  0,  0,  0,     // 16-31
@@ -64,9 +64,9 @@ namespace
 		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10
 	};
 	
-	bool is_chartype(char c, chartype ct)
+	bool is_chartypex(char c, chartypex ct)
 	{
-		return !!(chartype_table[static_cast<unsigned char>(c)] & ct);
+		return !!(chartypex_table[static_cast<unsigned char>(c)] & ct);
 	}
 
 	bool starts_with(const std::string& s, const char* pattern)
@@ -360,7 +360,7 @@ namespace
 	
 	double convert_string_to_number(const char* string)
 	{
-		while (is_chartype(*string, ct_space)) ++string;
+		while (is_chartypex(*string, ctx_space)) ++string;
 		
 		double sign = 1;
 		
@@ -374,7 +374,7 @@ namespace
 		
 		if (!*string) return gen_nan();
 		
-		while (is_chartype(*string, ct_digit))
+		while (is_chartypex(*string, ctx_digit))
 		{
 			r = r * 10 + (*string - '0');
 			++string;
@@ -382,9 +382,9 @@ namespace
 		
 		if (*string)
 		{
-			if (is_chartype(*string, ct_space))
+			if (is_chartypex(*string, ctx_space))
 			{
-				while (is_chartype(*string, ct_space)) ++string;
+				while (is_chartypex(*string, ctx_space)) ++string;
 				return *string ? gen_nan() : r;
 			}
 			
@@ -394,14 +394,14 @@ namespace
 			
 			double power = 0.1;
 			
-			while (is_chartype(*string, ct_digit))
+			while (is_chartypex(*string, ctx_digit))
 			{
 				r += power * (*string - '0');
 				power /= 10;
 				++string;
 			}
 			
-			while (is_chartype(*string, ct_space)) ++string;
+			while (is_chartypex(*string, ctx_space)) ++string;
 			if (*string) return gen_nan();
 		}
 		
@@ -911,7 +911,7 @@ namespace pugi
 		{
 			contents_clear();
 
-			while (is_chartype(*m_cur, ct_space)) ++m_cur;
+			while (is_chartypex(*m_cur, ctx_space)) ++m_cur;
 
 			switch (*m_cur)
 			{
@@ -1042,14 +1042,14 @@ namespace pugi
 					m_cur += 2;
 					m_cur_lexeme = lex_double_dot;
 				}
-				else if (is_chartype(*(m_cur+1), ct_digit))
+				else if (is_chartypex(*(m_cur+1), ctx_digit))
 				{
 					contents_push('0');
 					contents_push('.');
 
 					++m_cur;
 
-					while (is_chartype(*m_cur, ct_digit))
+					while (is_chartypex(*m_cur, ctx_digit))
 						contents_push(*m_cur++);
 					
 					m_cur_lexeme = lex_number;
@@ -1101,24 +1101,24 @@ namespace pugi
 				break;
 
 			default:
-				if (is_chartype(*m_cur, ct_digit))
+				if (is_chartypex(*m_cur, ctx_digit))
 				{
-					while (is_chartype(*m_cur, ct_digit))
+					while (is_chartypex(*m_cur, ctx_digit))
 						contents_push(*m_cur++);
 				
-					if (*m_cur == '.' && is_chartype(*(m_cur+1), ct_digit))
+					if (*m_cur == '.' && is_chartypex(*(m_cur+1), ctx_digit))
 					{
 						contents_push(*m_cur++);
 
-						while (is_chartype(*m_cur, ct_digit))
+						while (is_chartypex(*m_cur, ctx_digit))
 							contents_push(*m_cur++);
 					}
 
 					m_cur_lexeme = lex_number;
 				}
-				else if (is_chartype(*m_cur, ct_start_symbol))
+				else if (is_chartypex(*m_cur, ctx_start_symbol))
 				{
-					while (is_chartype(*m_cur, ct_symbol))
+					while (is_chartypex(*m_cur, ctx_symbol))
 						contents_push(*m_cur++);
 
 					if (m_cur[0] == ':')
@@ -1128,16 +1128,16 @@ namespace pugi
 							contents_push(*m_cur++); // :
 							contents_push(*m_cur++); // *
 						}
-						else if (is_chartype(m_cur[1], ct_symbol)) // namespace test qname
+						else if (is_chartypex(m_cur[1], ctx_symbol)) // namespace test qname
 						{
 							contents_push(*m_cur++); // :
 
-							while (is_chartype(*m_cur, ct_symbol))
+							while (is_chartypex(*m_cur, ctx_symbol))
 								contents_push(*m_cur++);
 						}
 					}
 				
-					while (is_chartype(*m_cur, ct_space)) ++m_cur;
+					while (is_chartypex(*m_cur, ctx_space)) ++m_cur;
 
 					m_cur_lexeme = lex_string;
 				}
@@ -2287,7 +2287,7 @@ namespace pugi
 				
 				for (std::string::const_iterator it = s.begin(); it != s.end(); ++it)
 				{
-					if (is_chartype(*it, ct_space))
+					if (is_chartypex(*it, ctx_space))
 					{
 						if (!r.empty() && r[r.size() - 1] != ' ')
 							r += ' ';
@@ -3397,7 +3397,7 @@ namespace pugi
 	    			// This is either a function call, or not - if not, we shall proceed with location path
 	    			const char* state = m_lexer.state();
 	    			
-					while (is_chartype(*state, ct_space)) ++state;
+					while (is_chartypex(*state, ctx_space)) ++state;
 	    			
 	    			if (*state != '(') return parse_location_path();
 
