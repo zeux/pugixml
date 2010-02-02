@@ -1910,25 +1910,27 @@ namespace pugi
 		}
 	public:
 		xpath_ast_node(ast_type_t type, const char* contents, xpath_allocator& a): m_type(type),
-			m_rettype(xpath_type_none), m_left(0), m_right(0), m_third(0), m_next(0), m_contents(0)
+			m_rettype(xpath_type_none), m_left(0), m_right(0), m_third(0), m_next(0), m_contents(0),
+			m_axis(axis_self), m_test(nodetest_none)
 		{
 			set_contents(contents, a);
 		}
 		
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, xpath_ast_node* right, axis_t axis): m_type(type),
 			m_rettype(xpath_type_none), m_left(left), m_right(right), m_third(0), m_next(0), m_contents(0),
-			m_axis(axis)
+			m_axis(axis), m_test(nodetest_none)
 		{
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left = 0, xpath_ast_node* right = 0, xpath_ast_node* third = 0): m_type(type),
-			m_rettype(xpath_type_none), m_left(left), m_right(right), m_third(third), m_next(0), m_contents(0)
+			m_rettype(xpath_type_none), m_left(left), m_right(right), m_third(third), m_next(0), m_contents(0),
+			m_axis(axis_self), m_test(nodetest_none)
 		{
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const char* contents, xpath_allocator& a):
-			m_type(type), m_rettype(xpath_type_none), m_left(left), m_right(0), m_third(0), m_next(0),
-			m_contents(0), m_axis(axis), m_test(test)
+			m_type(type), m_rettype(xpath_type_none), m_left(left), m_right(0), m_third(0), m_next(0), m_contents(0),
+			m_axis(axis), m_test(test)
 		{
 			set_contents(contents, a);
 		}
