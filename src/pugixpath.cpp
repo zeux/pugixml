@@ -64,7 +64,7 @@ namespace
 		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10
 	};
 	
-	bool is_chartypex(char c, chartypex ct)
+	inline bool is_chartypex(char c, chartypex ct)
 	{
 		return !!(chartypex_table[static_cast<unsigned char>(c)] & ct);
 	}

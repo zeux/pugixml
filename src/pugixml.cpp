@@ -289,7 +289,7 @@ namespace
 		192, 192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 192, 192, 192, 192, 192
 	};
 	
-	bool is_chartype(char c, chartype ct)
+	inline bool is_chartype(char c, chartype ct)
 	{
 		return !!(chartype_table[static_cast<unsigned char>(c)] & ct);
 	}
