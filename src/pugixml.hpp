@@ -1374,7 +1374,7 @@ namespace pugi
 		 * if element node name has significantly changed; this is guaranteed to return correct offset only for nodes that have not changed
 		 * since parsing.
 		 */
-		int offset_debug() const;
+		ptrdiff_t offset_debug() const;
 	};
 
 #ifdef __BORLANDC__
@@ -1697,7 +1697,7 @@ namespace pugi
 		xml_parse_status status;
 
 		/// Last parsed offset (in bytes from file/string start)
-		unsigned int offset;
+		ptrdiff_t offset;
 
 		/// Line in parser source which reported this
 		unsigned int line;

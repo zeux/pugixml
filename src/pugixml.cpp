@@ -839,7 +839,7 @@ namespace
 		}
 	}
 
-	inline xml_parse_result make_parse_result(xml_parse_status status, unsigned int offset, unsigned int line)
+	inline xml_parse_result make_parse_result(xml_parse_status status, ptrdiff_t offset, unsigned int line)
 	{
 		xml_parse_result result = {status, offset, line};
 		return result;
@@ -859,7 +859,7 @@ namespace
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define SCANWHILE(X)		{ while ((X)) ++s; }
 		#define ENDSEG()			{ ch = *s; *s = 0; ++s; }
-		#define THROW_ERROR(err, m)	return make_parse_result(err, static_cast<unsigned int>(m - buffer_start), __LINE__)
+		#define THROW_ERROR(err, m)	return make_parse_result(err, m - buffer_start, __LINE__)
 		#define CHECK_ERROR(err, m)	{ if (*s == 0) THROW_ERROR(err, m); }
 		
 		xml_parser(xml_allocator& alloc): alloc(alloc)
@@ -2718,7 +2718,7 @@ namespace pugi
 	}
 #endif
 
-	int xml_node::offset_debug() const
+	ptrdiff_t xml_node::offset_debug() const
 	{
 		xml_node_struct* r = root()._root;
 
@@ -2736,12 +2736,12 @@ namespace pugi
 		case node_element:
 		case node_declaration:
 		case node_pi:
-			return _root->name_allocated ? -1 : static_cast<int>(_root->name - buffer);
+			return _root->name_allocated ? -1 : _root->name - buffer;
 
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
-			return _root->value_allocated ? -1 : static_cast<int>(_root->value - buffer);
+			return _root->value_allocated ? -1 : _root->value - buffer;
 
 		default:
 			return -1;
