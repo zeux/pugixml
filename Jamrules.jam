@@ -1,7 +1,16 @@
 # Rules for Jamfile.jam
 
-if ( $(toolset:I=^mingw) )
+if ( $(toolset:I=^mingw) || $(toolset) = "gcc" )
 {
+	if ( $(toolset) = "gcc" )
+	{
+		GCCPATH = "" ;
+	}
+	else
+	{
+		GCCPATH = "%$(toolset)_PATH%\bin\\" ;
+	}
+
 	CCFLAGS += -D$(defines) ;
 
 	if ( $(configuration) = "debug" )
@@ -20,22 +29,22 @@ if ( $(toolset:I=^mingw) )
 
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\gcc" -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
+		"$(GCCPATH)gcc" -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
 	}
 	
 	actions LibraryAction
 	{
-		"%$(toolset)_PATH%\bin\ar" rc $(<) $(>)
+		"$(GCCPATH)ar" rc $(<) $(>)
 	}
 	
 	actions LinkAction
 	{
-		"%$(toolset)_PATH%\bin\g++" $(>) -o $(<) -static-libgcc $(LDFLAGS) 
+		"$(GCCPATH)g++" $(>) -o $(<) -static-libgcc $(LDFLAGS) 
 	}
 	
 	actions CoverageAction
 	{
-		"%$(toolset)_PATH%\bin\gcov" $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
+		"$(GCCPATH)gcov" $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
 	}
 }
 else if ( $(toolset:I=^msvc) )
@@ -256,19 +265,39 @@ else
 	exit "Unknown toolset $(toolset)!" ;
 }
 
-actions screenoutput RunAction
+if ( $(UNIX) )
 {
-	$(>:\\)
-}
+	actions screenoutput RunAction
+	{
+		$(>)
+	}
 
-actions quietly ignore MakeDirAction
-{
-	mkdir $(<:\\) >nul 2>&1
-}
+	actions quietly ignore MakeDirAction
+	{
+		mkdir -p $(<)
+	}
 
-actions quietly ignore DeleteAction
+	actions quietly ignore DeleteAction
+	{
+		rm -f $(>)
+	}
+}
+else
 {
-	del /F $(>:\\) >nul 2>&1
+	actions screenoutput RunAction
+	{
+		$(>:\\)
+	}
+
+	actions quietly ignore MakeDirAction
+	{
+		mkdir $(<:\\) >nul 2>&1
+	}
+
+	actions quietly ignore DeleteAction
+	{
+		del /F $(>:\\) >nul 2>&1
+	}
 }
 
 rule MakeFileDir TARGET
