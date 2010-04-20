@@ -12,6 +12,13 @@ jmp_buf test_runner::_failure;
 
 static size_t g_memory_total_size = 0;
 
+#ifdef __linux
+size_t _msize(void* ptr)
+{
+	return malloc_usable_size(ptr);
+}
+#endif
+
 static void* custom_allocate(size_t size)
 {
 	if (test_runner::_memory_fail_threshold > 0 && test_runner::_memory_fail_threshold < size)
