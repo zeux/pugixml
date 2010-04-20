@@ -13,7 +13,14 @@
 # default toolset/configuration
 if ( ! $(toolset) )
 {
-	exit You should specify a toolset ;
+	if ( $(UNIX) )
+	{
+		toolset = "gcc" ;
+	}
+	else
+	{
+		exit You should specify a toolset ;
+	}
 }
 
 if ( ! $(configuration) )
