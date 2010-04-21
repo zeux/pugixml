@@ -3063,8 +3063,7 @@ namespace pugi
 	{
 		xml_parse_result res = parse(xmlstr, options);
 
-		if (res) _buffer = xmlstr;
-		else global_deallocate(xmlstr);
+		_buffer = xmlstr;
 
 		return res;
 	}
