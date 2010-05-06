@@ -722,6 +722,30 @@ were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresp
 </ul>
 </dd>
 </dt>
+<dt>7.05.2010 - v0.6
+<dd>Changes: <ul>
+<li>Bug fixes:<ul>
+<li>Fixed document corruption on failed parsing bug
+<li>XPath string <-> number conversion improvements (increased precision, fixed crash for huge numbers)
+</ul>
+<li>Major Unicode improvements:<ul>
+<li>Introduced encoding support (automatic/manual encoding detection on load, manual encoding selection on save, conversion from/to UTF8, UTF16 LE/BE, UTF32 LE/BE)
+<li>Introduced wchar_t mode (you can set PUGIXML_WCHAR_MODE define to switch pugixml internal encoding from UTF8 to wchar_t; all functions are switched to their Unicode variants)
+<li>Load/save functions now support wide streams
+</ul>
+<li>Specification changes:<ul>
+<li>parse() API changed to load_buffer/load_buffer_inplace/load_buffer_inplace_own; load_buffer APIs do not require zero-terminated strings.
+<li>Renamed as_utf16 to as_wide
+<li>Changed xml_node::offset_debug return type and xml_parse_result::offset type to ptrdiff_t
+</ul>
+<li>Miscellaneous:<ul>
+<li>Optimized document parsing and saving
+<li>All STL includes in pugixml.hpp are replaced with forward declarations
+<li>Added contrib/ folder with Boost.Foreach compatibility helpers for iterators and header-only configuration support through special header
+</ul>
+</ul>
+</ul>
+</dt>
 </dl>
 
 <hr>
@@ -742,7 +766,7 @@ were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresp
 <p>The <i>pugixml</i> parser is distributed under the MIT license:</p>
 
 <pre>
-Copyright (c) 2006-2009 Arseny Kapoulkine
+Copyright (c) 2006-2010 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -768,7 +792,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 8 November, 2009</p>
-<p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2009. All Rights Reserved.</i></p>
+<p>Revised 7 May, 2010</p>
+<p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2010. All Rights Reserved.</i></p>
 </body>
 </html>
