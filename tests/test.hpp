@@ -3,20 +3,7 @@
 
 #include "../src/pugixml.hpp"
 
-#if (defined(_MSC_VER) && _MSC_VER==1200) || defined(__DMC__)
-typedef int intptr_t;
-#endif
-
-#include <string.h>
-#include <math.h>
-#include <float.h>
 #include <setjmp.h>
-
-#if defined(__MWERKS__) || defined(__BORLANDC__)
-#include <stdint.h> // intptr_t
-#endif
-
-#include <string>
 
 struct test_runner
 {
@@ -36,84 +23,25 @@ struct test_runner
 
 	static test_runner* _tests;
 	static size_t _memory_fail_threshold;
-	static jmp_buf _failure;
+	static jmp_buf _failure_buffer;
+	static const char* _failure_message;
 };
 
-inline bool test_string_equal(const char* lhs, const char* rhs)
-{
-	return (!lhs || !rhs) ? lhs == rhs : strcmp(lhs, rhs) == 0;
-}
+bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs);
 
-template <typename Node> inline bool test_node_name_value(const Node& node, const char* name, const char* value)
+template <typename Node> inline bool test_node_name_value(const Node& node, const pugi::char_t* name, const pugi::char_t* value)
 {
 	return test_string_equal(node.name(), name) && test_string_equal(node.value(), value);
 }
 
-struct xml_writer_string: public pugi::xml_writer
-{
-	std::string result;
-	
-	virtual void write(const void* data, size_t size)
-	{
-		result += std::string(static_cast<const char*>(data), size);
-	}
-};
-
-inline bool test_node(const pugi::xml_node& node, const char* contents, const char* indent, unsigned int flags)
-{
-	xml_writer_string writer;
-	node.print(writer, indent, flags);
-
-	return writer.result == contents;
-}
+bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const pugi::char_t* indent, unsigned int flags);
 
 #ifndef PUGIXML_NO_XPATH
-inline bool test_xpath_string(const pugi::xml_node& node, const char* query, const char* expected)
-{
-	pugi::xpath_query q(query);
-
-	return q.evaluate_string(node) == expected;
-}
-
-inline bool test_xpath_boolean(const pugi::xml_node& node, const char* query, bool expected)
-{
-	pugi::xpath_query q(query);
-
-	return q.evaluate_boolean(node) == expected;
-}
-
-inline bool test_xpath_number(const pugi::xml_node& node, const char* query, double expected)
-{
-	pugi::xpath_query q(query);
-
-	return fabs(q.evaluate_number(node) - expected) < 1e-16f;
-}
-
-inline bool test_xpath_number_nan(const pugi::xml_node& node, const char* query)
-{
-	pugi::xpath_query q(query);
-
-	double r = q.evaluate_number(node);
-
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-	return _isnan(r) != 0;
-#else
-	return r != r;
-#endif
-}
-
-inline bool test_xpath_fail_compile(const char* query)
-{
-	try
-	{
-		pugi::xpath_query q(query);
-		return false;
-	}
-	catch (const pugi::xpath_exception&)
-	{
-		return true;
-	}
-}
+bool test_xpath_string(const pugi::xml_node& node, const pugi::char_t* query, const pugi::char_t* expected);
+bool test_xpath_boolean(const pugi::xml_node& node, const pugi::char_t* query, bool expected);
+bool test_xpath_number(const pugi::xml_node& node, const pugi::char_t* query, double expected);
+bool test_xpath_number_nan(const pugi::xml_node& node, const pugi::char_t* query);
+bool test_xpath_fail_compile(const pugi::char_t* query);
 
 struct xpath_node_set_tester
 {
@@ -121,44 +49,13 @@ struct xpath_node_set_tester
 	unsigned int last;
 	const char* message;
 
-	void check(bool condition)
-	{
-		if (!condition) longjmp(test_runner::_failure, (int)(intptr_t)message);
-	}
+	void check(bool condition);
 
-	xpath_node_set_tester(const pugi::xml_node& node, const char* query, const char* message): last(0), message(message)
-	{
-		pugi::xpath_query q(query);
-		result = q.evaluate_node_set(node);
-	}
+	xpath_node_set_tester(const pugi::xml_node& node, const pugi::char_t* query, const char* message);
+	xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message);
+	~xpath_node_set_tester();
 
-	xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message): last(0), message(message)
-	{
-		result = set;
-	}
-
-	~xpath_node_set_tester()
-	{
-		// check that we processed everything
-		check(last == result.size());
-	}
-
-	xpath_node_set_tester& operator%(unsigned int expected)
-	{
-		// check element count
-		check(last < result.size());
-
-		// check document order
-		pugi::xpath_node node = result.begin()[last];
-		unsigned int order = node.attribute() ? node.attribute().document_order() : node.node().document_order();
-
-		check(order == expected);
-
-		// continue to the next element
-		last++;
-
-		return *this;
-	}
+	xpath_node_set_tester& operator%(unsigned int expected);
 };
 
 #endif
@@ -191,7 +88,7 @@ struct dummy_fixture {};
 		\
 		test_fixture_##name() \
 		{ \
-			CHECK(doc.load(xml, flags)); \
+			CHECK(doc.load(PUGIXML_TEXT(xml), flags)); \
 		} \
 		\
 	private: \
@@ -205,28 +102,42 @@ struct dummy_fixture {};
 
 #define CHECK_JOIN(text, file, line) text file #line
 #define CHECK_JOIN2(text, file, line) CHECK_JOIN(text, file, line)
-#define CHECK_TEXT(condition, text) if (condition) ; else longjmp(test_runner::_failure, (int)(intptr_t)(CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__)))
+#define CHECK_TEXT(condition, text) if (condition) ; else test_runner::_failure_message = CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__), longjmp(test_runner::_failure_buffer, 1)
 
 #if (defined(_MSC_VER) && _MSC_VER == 1200) || defined(__MWERKS__)
-#	define STR(value) "??" // MSVC 6.0 and CodeWarrior have troubles stringizing stuff with strings w/escaping inside
+#	define STRINGIZE(value) "??" // MSVC 6.0 and CodeWarrior have troubles stringizing stuff with strings w/escaping inside
 #else
-#	define STR(value) #value
+#	define STRINGIZE(value) #value
 #endif
 
-#define CHECK(condition) CHECK_TEXT(condition, STR(condition) " is false")
-#define CHECK_STRING(value, expected) CHECK_TEXT(test_string_equal(value, expected), STR(value) " is not equal to " STR(expected))
-#define CHECK_DOUBLE(value, expected) CHECK_TEXT(fabs(value - expected) < 1e-6, STR(value) " is not equal to " STR(expected))
-#define CHECK_NAME_VALUE(node, name, value) CHECK_TEXT(test_node_name_value(node, name, value), STR(node) " name/value do not match " STR(name) " and " STR(value))
-#define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), STR(node) " contents does not match " STR(expected))
-#define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, "", pugi::format_raw)
+#define CHECK(condition) CHECK_TEXT(condition, STRINGIZE(condition) " is false")
+#define CHECK_STRING(value, expected) CHECK_TEXT(test_string_equal(value, expected), STRINGIZE(value) " is not equal to " STRINGIZE(expected))
+#define CHECK_DOUBLE(value, expected) CHECK_TEXT((value > expected ? value - expected : expected - value) < 1e-6, STRINGIZE(value) " is not equal to " STRINGIZE(expected))
+#define CHECK_NAME_VALUE(node, name, value) CHECK_TEXT(test_node_name_value(node, name, value), STRINGIZE(node) " name/value do not match " STRINGIZE(name) " and " STRINGIZE(value))
+#define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), STRINGIZE(node) " contents does not match " STRINGIZE(expected))
+#define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, PUGIXML_TEXT(""), pugi::format_raw)
 
 #ifndef PUGIXML_NO_XPATH
-#define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
-#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
-#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STR(query) " does not evaluate to " STR(expected) " in context " STR(node))
-#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STR(query) " does not evaluate to NaN in context " STR(node))
-#define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STR(query) " should not compile")
-#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node, query, CHECK_JOIN2(STR(query) " does not evaluate to expected set in context " STR(node), " at "__FILE__ ":", __LINE__))
+#define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
+#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
+#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
+#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STRINGIZE(query) " does not evaluate to NaN in context " STRINGIZE(node))
+#define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STRINGIZE(query) " should not compile")
+#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node, query, CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
 #endif
+
+#define STR(text) PUGIXML_TEXT(text)
+
+#ifdef __DMC__
+#define U_LITERALS // DMC does not understand \x01234 (it parses first three digits), but understands \u01234
+#endif
+
+inline wchar_t wchar_cast(unsigned int value)
+{
+	return static_cast<wchar_t>(value); // to avoid C4310 on MSVC
+}
+
+bool is_little_endian();
+pugi::encoding_t get_native_encoding();
 
 #endif

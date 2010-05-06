@@ -17,8 +17,25 @@
 #include "pugiconfig.hpp"
 
 #ifndef PUGIXML_NO_STL
-#	include <string>
-#	include <iosfwd>
+#include <exception>
+
+namespace std
+{
+	struct bidirectional_iterator_tag;
+
+	// Borland C++ compiler has a bug which forces template argument names in forward declarations to be the same as in actual definitions
+	template <class _Ty> class allocator;
+	template <class _Ty> struct char_traits;
+	template <class _Elem, class _Traits> class basic_istream;
+	template <class _Elem, class _Traits> class basic_ostream;
+	template <class _Elem, class _Traits, class _Ax> class basic_string;
+
+	// Digital Mars compiler has a bug which requires a forward declaration for explicit instantiation (otherwise type selection is messed up later, producing link errors)
+	// Also note that we have to declare char_traits as a class here, since it's defined that way
+#ifdef __DMC__
+	template <> class char_traits<char>;
+#endif
+}
 #endif
 
 // No XPath without STL
@@ -45,13 +62,39 @@
 
 #include <stddef.h>
 
+// Character interface macros
+#ifdef PUGIXML_WCHAR_MODE
+#	define PUGIXML_TEXT(t) L ## t
+
+namespace pugi
+{
+	typedef wchar_t char_t;
+
+#ifndef PUGIXML_NO_STL
+	typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> > string_t;
+#endif
+}
+#else
+#	define PUGIXML_TEXT(t) t
+
+namespace pugi
+{
+	typedef char char_t;
+
+#	ifndef PUGIXML_NO_STL
+	// gcc3.4 has a bug which prevents string_t instantiation using char_t, so we have to use char type explicitly
+	typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > string_t;
+#	endif
+}
+#endif
+
 // Helpers for inline implementation
 namespace pugi
 {
 	namespace impl
 	{
-		int PUGIXML_FUNCTION strcmp(const char*, const char*);
-		int PUGIXML_FUNCTION strcmpwild(const char*, const char*);
+		bool PUGIXML_FUNCTION strequal(const char_t*, const char_t*);
+		bool PUGIXML_FUNCTION strequalwild(const char_t*, const char_t*);
 	}
 }
 
@@ -199,6 +242,24 @@ namespace pugi
      */
 	const unsigned int parse_default			= parse_cdata | parse_escapes | parse_wconv_attribute | parse_eol;
 
+	/**
+	 * These flags determine the encoding of input data for XML document. Default mode is encoding_auto,
+	 * which means that document encoding is autodetected from BOM and necessary encoding conversions are
+	 * applied. You can override this mode by using any of the specific encodings.
+	 */
+	enum encoding_t
+	{
+		encoding_auto,      //!< Auto-detect input encoding using BOM or </<? detection; use UTF8 if BOM is not found
+		encoding_utf8,      //!< UTF8 encoding
+		encoding_utf16_le,  //!< Little-endian UTF16
+		encoding_utf16_be,  //!< Big-endian UTF16
+		encoding_utf16,     //!< UTF16 with native endianness
+		encoding_utf32_le,  //!< Little-endian UTF32
+		encoding_utf32_be,  //!< Big-endian UTF32
+		encoding_utf32,     //!< UTF32 with native endianness
+		encoding_wchar      //!< The same encoding wchar_t has (either UTF16 or UTF32)
+	};
+
 	// Formatting flags
 	
 	/**
@@ -210,11 +271,11 @@ namespace pugi
 	const unsigned int format_indent	= 0x01;
 	
 	/**
-	 * This flag determines if UTF-8 BOM is to be written to output stream.
+	 * This flag determines if encoding-specific BOM is to be written to output stream.
 	 *
 	 * This flag is off by default.
 	 */
-	const unsigned int format_write_bom_utf8 = 0x02;
+	const unsigned int format_write_bom = 0x02;
 	
 	/**
 	 * If this flag is on, no indentation is performed and no line breaks are written to output file.
@@ -281,7 +342,7 @@ namespace pugi
 		xpath_allocator* m_alloc;
 		xpath_ast_node* m_root;
 
-		void compile(const char* query);
+		void compile(const char_t* query);
 
 	public:
 		/**
@@ -290,7 +351,7 @@ namespace pugi
 		 *
 		 * \param query - string with XPath expression
 		 */
-		explicit xpath_query(const char* query);
+		explicit xpath_query(const char_t* query);
 
 		/**
 		 * Dtor
@@ -335,7 +396,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		std::string evaluate_string(const xml_node& n) const;
+		string_t evaluate_string(const xml_node& n) const;
 		
 		/**
 		 * Evaluate expression as node set for the context node \a n.
@@ -401,12 +462,20 @@ namespace pugi
 		 *
 		 * \param stream - output stream object
 		 */
-		xml_writer_stream(std::ostream& stream);
+		xml_writer_stream(std::basic_ostream<char, std::char_traits<char> >& stream);
+
+		/**
+		 * Construct writer instance
+		 *
+		 * \param stream - output stream object
+		 */
+		xml_writer_stream(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream);
 
 		virtual void write(const void* data, size_t size);
 
 	private:
-		std::ostream* stream;
+		std::basic_ostream<char, std::char_traits<char> >* narrow_stream;
+		std::basic_ostream<wchar_t, std::char_traits<wchar_t> >* wide_stream;
 	};
 	#endif
 
@@ -559,7 +628,7 @@ namespace pugi
          * \param rhs - new attribute value
          * \return self
          */
-		xml_attribute& operator=(const char* rhs);
+		xml_attribute& operator=(const char_t* rhs);
 	
 		/**
          * Set attribute value to \a rhs.
@@ -599,7 +668,7 @@ namespace pugi
 		 * \param rhs - new attribute name
 		 * \return success flag (call fails if attribute is empty or there is not enough memory)
 		 */
-		bool set_name(const char* rhs);
+		bool set_name(const char_t* rhs);
 		
 		/**
 		 * Set attribute value to \a rhs.
@@ -607,7 +676,7 @@ namespace pugi
 		 * \param rhs - new attribute value
 		 * \return success flag (call fails if attribute is empty or there is not enough memory)
 		 */
-		bool set_value(const char* rhs);
+		bool set_value(const char_t* rhs);
 
 		/**
 		 * Set attribute value to \a rhs.
@@ -655,14 +724,14 @@ namespace pugi
 		 *
 		 * \return attribute name, or "" if attribute is empty
 		 */
-		const char* name() const;
+		const char_t* name() const;
 
 		/**
 		 * Get attribute value.
 		 *
 		 * \return attribute value, or "" if attribute is empty
 		 */
-		const char* value() const;
+		const char_t* value() const;
 	};
 
 #ifdef __BORLANDC__
@@ -825,14 +894,14 @@ namespace pugi
 		 *
 		 * \return node name, if any; "" otherwise
 		 */
-		const char* name() const;
+		const char_t* name() const;
 
 		/**
 		 * Get node value (comment/PI/PCDATA/CDATA contents, depending on node type)
 		 *
 		 * \return node value, if any; "" otherwise
 		 */
-		const char* value() const;
+		const char_t* value() const;
 	
 		/**
 		 * Get child with the specified name
@@ -840,7 +909,7 @@ namespace pugi
 		 * \param name - child name
 		 * \return child with the specified name, if any; empty node otherwise
 		 */
-		xml_node child(const char* name) const;
+		xml_node child(const char_t* name) const;
 
 		/**
 		 * Get child with the name that matches specified pattern
@@ -848,7 +917,7 @@ namespace pugi
 		 * \param name - child name pattern
 		 * \return child with the name that matches pattern, if any; empty node otherwise
 		 */
-		xml_node child_w(const char* name) const;
+		xml_node child_w(const char_t* name) const;
 
 		/**
 		 * Get attribute with the specified name
@@ -856,7 +925,7 @@ namespace pugi
 		 * \param name - attribute name
 		 * \return attribute with the specified name, if any; empty attribute otherwise
 		 */
-		xml_attribute attribute(const char* name) const;
+		xml_attribute attribute(const char_t* name) const;
 
 		/**
 		 * Get attribute with the name that matches specified pattern
@@ -864,7 +933,7 @@ namespace pugi
 		 * \param name - attribute name pattern
 		 * \return attribute with the name that matches pattern, if any; empty attribute otherwise
 		 */
-		xml_attribute attribute_w(const char* name) const;
+		xml_attribute attribute_w(const char_t* name) const;
 
 		/**
 		 * Get first of following sibling nodes with the specified name
@@ -872,7 +941,7 @@ namespace pugi
 		 * \param name - sibling name
 		 * \return node with the specified name, if any; empty node otherwise
 		 */
-		xml_node next_sibling(const char* name) const;
+		xml_node next_sibling(const char_t* name) const;
 
 		/**
 		 * Get first of the following sibling nodes with the name that matches specified pattern
@@ -880,7 +949,7 @@ namespace pugi
 		 * \param name - sibling name pattern
 		 * \return node with the name that matches pattern, if any; empty node otherwise
 		 */
-		xml_node next_sibling_w(const char* name) const;
+		xml_node next_sibling_w(const char_t* name) const;
 
 		/**
 		 * Get following sibling
@@ -895,7 +964,7 @@ namespace pugi
 		 * \param name - sibling name
 		 * \return node with the specified name, if any; empty node otherwise
 		 */
-		xml_node previous_sibling(const char* name) const;
+		xml_node previous_sibling(const char_t* name) const;
 
 		/**
 		 * Get first of the preceding sibling nodes with the name that matches specified pattern
@@ -903,7 +972,7 @@ namespace pugi
 		 * \param name - sibling name pattern
 		 * \return node with the name that matches pattern, if any; empty node otherwise
 		 */
-		xml_node previous_sibling_w(const char* name) const;
+		xml_node previous_sibling_w(const char_t* name) const;
 
 		/**
 		 * Get preceding sibling
@@ -931,7 +1000,7 @@ namespace pugi
 		 *
 		 * \return child value of current node, if any; "" otherwise
 		 */
-		const char* child_value() const;
+		const char_t* child_value() const;
 
 		/**
 		 * Get child value of child with specified name. \see child_value
@@ -940,7 +1009,7 @@ namespace pugi
 		 * \param name - child name
 		 * \return child value of specified child node, if any; "" otherwise
 		 */
-		const char* child_value(const char* name) const;
+		const char_t* child_value(const char_t* name) const;
 
 		/**
 		 * Get child value of child with name that matches the specified pattern. \see child_value
@@ -949,7 +1018,7 @@ namespace pugi
 		 * \param name - child name pattern
 		 * \return child value of specified child node, if any; "" otherwise
 		 */
-		const char* child_value_w(const char* name) const;
+		const char_t* child_value_w(const char_t* name) const;
 
 	public:	
 		/**
@@ -958,7 +1027,7 @@ namespace pugi
 		 * \param rhs - new node name
 		 * \return success flag (call fails if node is of the wrong type or there is not enough memory)
 		 */
-		bool set_name(const char* rhs);
+		bool set_name(const char_t* rhs);
 		
 		/**
 		 * Set node value to \a rhs (for PI/PCDATA/CDATA/comment nodes). \see value
@@ -966,7 +1035,7 @@ namespace pugi
 		 * \param rhs - new node value
 		 * \return success flag (call fails if node is of the wrong type or there is not enough memory)
 		 */
-		bool set_value(const char* rhs);
+		bool set_value(const char_t* rhs);
 
 		/**
 		 * Add attribute with specified name (for element nodes)
@@ -974,7 +1043,7 @@ namespace pugi
 		 * \param name - attribute name
 		 * \return added attribute, or empty attribute if there was an error (wrong node type)
 		 */
-		xml_attribute append_attribute(const char* name);
+		xml_attribute append_attribute(const char_t* name);
 
 		/**
 		 * Insert attribute with specified name after \a attr (for element nodes)
@@ -983,7 +1052,7 @@ namespace pugi
 		 * \param attr - attribute to insert a new one after
 		 * \return inserted attribute, or empty attribute if there was an error (wrong node type, or attr does not belong to node)
 		 */
-		xml_attribute insert_attribute_after(const char* name, const xml_attribute& attr);
+		xml_attribute insert_attribute_after(const char_t* name, const xml_attribute& attr);
 
 		/**
 		 * Insert attribute with specified name before \a attr (for element nodes)
@@ -992,7 +1061,7 @@ namespace pugi
 		 * \param attr - attribute to insert a new one before
 		 * \return inserted attribute, or empty attribute if there was an error (wrong node type, or attr does not belong to node)
 		 */
-		xml_attribute insert_attribute_before(const char* name, const xml_attribute& attr);
+		xml_attribute insert_attribute_before(const char_t* name, const xml_attribute& attr);
 
 		/**
 		 * Add a copy of the specified attribute (for element nodes)
@@ -1084,7 +1153,7 @@ namespace pugi
 		 *
 		 * \param name - attribute name
 		 */
-		void remove_attribute(const char* name);
+		void remove_attribute(const char_t* name);
 
 		/**
 		 * Remove specified child
@@ -1098,7 +1167,7 @@ namespace pugi
 		 *
 		 * \param name - child name
 		 */
-		void remove_child(const char* name);
+		void remove_child(const char_t* name);
 
 	public:
 		/**
@@ -1121,7 +1190,7 @@ namespace pugi
 		 * \param name - node name
 		 * \param it - output iterator (for example, std::back_insert_iterator (result of std::back_inserter))
 		 */
-		template <typename OutputIterator> void all_elements_by_name(const char* name, OutputIterator it) const
+		template <typename OutputIterator> void all_elements_by_name(const char_t* name, OutputIterator it) const
 		{
 			if (!_root) return;
 			
@@ -1129,7 +1198,7 @@ namespace pugi
 			{
 				if (node.type() == node_element)
 				{
-					if (!impl::strcmp(name, node.name()))
+					if (impl::strequal(name, node.name()))
 					{
 						*it = node;
 						++it;
@@ -1146,7 +1215,7 @@ namespace pugi
 		 * \param name - node name pattern
 		 * \param it - output iterator (for example, std::back_insert_iterator (result of std::back_inserter))
 		 */
-		template <typename OutputIterator> void all_elements_by_name_w(const char* name, OutputIterator it) const
+		template <typename OutputIterator> void all_elements_by_name_w(const char_t* name, OutputIterator it) const
 		{
 			if (!_root) return;
 			
@@ -1154,7 +1223,7 @@ namespace pugi
 			{
 				if (node.type() == node_element)
 				{
-					if (!impl::strcmpwild(name, node.name()))
+					if (impl::strequalwild(name, node.name()))
 					{
 						*it = node;
 						++it;
@@ -1246,7 +1315,7 @@ namespace pugi
 		 * \param attr_value - attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value) const;
+		xml_node find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
 
 		/**
 		 * Find child node with the specified name that has specified attribute (use pattern matching for node name and attribute name/value)
@@ -1256,7 +1325,7 @@ namespace pugi
 		 * \param attr_value - pattern for attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value) const;
+		xml_node find_child_by_attribute_w(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
 
 		/**
 		 * Find child node that has specified attribute
@@ -1265,7 +1334,7 @@ namespace pugi
 		 * \param attr_value - attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute(const char* attr_name, const char* attr_value) const;
+		xml_node find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
 
 		/**
 		 * Find child node that has specified attribute (use pattern matching for attribute name/value)
@@ -1274,7 +1343,7 @@ namespace pugi
 		 * \param attr_value - pattern for attribute value of child node
 		 * \return first matching child node, or empty node
 		 */
-		xml_node find_child_by_attribute_w(const char* attr_name, const char* attr_value) const;
+		xml_node find_child_by_attribute_w(const char_t* attr_name, const char_t* attr_value) const;
 
 	#ifndef PUGIXML_NO_STL
 		/**
@@ -1283,7 +1352,7 @@ namespace pugi
 		 * \param delimiter - delimiter character to insert between element names
 		 * \return path string (e.g. '/bookstore/book/author').
 		 */
-		std::string path(char delimiter = '/') const;
+		string_t path(char_t delimiter = '/') const;
 	#endif
 
 		/**
@@ -1293,7 +1362,7 @@ namespace pugi
 		 * \param delimiter - delimiter character to use while tokenizing path
 		 * \return matching node, if any; empty node otherwise
 		 */
-		xml_node first_element_by_path(const char* path, char delimiter = '/') const;
+		xml_node first_element_by_path(const char_t* path, char_t delimiter = '/') const;
 
 		/**
 		 * Recursively traverse subtree with xml_tree_walker
@@ -1313,7 +1382,7 @@ namespace pugi
 		 * \param query - query string
 		 * \return first node from the resulting node set by document order, or empty node if none found
 		 */
-		xpath_node select_single_node(const char* query) const;
+		xpath_node select_single_node(const char_t* query) const;
 
 		/**
 		 * Select single node by evaluating XPath query
@@ -1329,7 +1398,7 @@ namespace pugi
 		 * \param query - query string
 		 * \return resulting node set
 		 */
-		xpath_node_set select_nodes(const char* query) const;
+		xpath_node_set select_nodes(const char_t* query) const;
 
 		/**
 		 * Select node set by evaluating XPath query
@@ -1351,7 +1420,7 @@ namespace pugi
 		 * \param flags - formatting flags
 		 * \param depth - starting depth (used for indentation)
 		 */
-		void print(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
+		void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
 
 	#ifndef PUGIXML_NO_STL
 		/**
@@ -1363,7 +1432,18 @@ namespace pugi
 		 * \param depth - starting depth (used for indentation)
 		 * \deprecated Use print() with xml_writer_stream instead
 		 */
-		void print(std::ostream& os, const char* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
+		void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
+
+		/**
+		 * Print subtree to stream
+		 *
+		 * \param os - output stream
+		 * \param indent - indentation string
+		 * \param flags - formatting flags
+		 * \param depth - starting depth (used for indentation)
+		 * \deprecated Use print() with xml_writer_stream instead
+		 */
+		void print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
 	#endif
 
 		/**
@@ -1388,17 +1468,7 @@ namespace pugi
 	 * It's a bidirectional iterator with value type 'xml_node'.
 	 */
 	class PUGIXML_CLASS xml_node_iterator
-#ifndef PUGIXML_NO_STL
-	: public std::iterator<std::bidirectional_iterator_tag, xml_node>
-#endif
-#ifdef _MSC_VER
-#   pragma warning(push)
-#   pragma warning(disable: 4251 4275) // C4251 and C4275 can be ignored for _Container_base, as per MSDN
-#endif
 	{
-#ifdef _MSC_VER
-#    pragma warning(pop)
-#endif
 		friend class xml_node;
 
 	private:
@@ -1409,6 +1479,18 @@ namespace pugi
 		explicit xml_node_iterator(xml_node_struct* ref);
 
 	public:
+		/**
+		 * Iterator traits
+		 */
+		typedef ptrdiff_t difference_type;
+		typedef xml_node value_type;
+		typedef xml_node* pointer;
+		typedef xml_node& reference;
+
+	#ifndef PUGIXML_NO_STL
+		typedef std::bidirectional_iterator_tag iterator_category;
+	#endif
+
 		/**
 		 * Default ctor
 		 */
@@ -1493,17 +1575,7 @@ namespace pugi
 	 * It's a bidirectional iterator with value type 'xml_attribute'.
 	 */
 	class PUGIXML_CLASS xml_attribute_iterator
-#ifndef PUGIXML_NO_STL
-        : public std::iterator<std::bidirectional_iterator_tag, xml_attribute>
-#endif
-#ifdef _MSC_VER
-#   pragma warning(push)
-#   pragma warning(disable: 4251 4275) // C4251 and C4275 can be ignored for _Container_base, as per MSDN
-#endif
 	{
-#ifdef _MSC_VER
-#    pragma warning(pop)
-#endif
 		friend class xml_node;
 
 	private:
@@ -1514,6 +1586,18 @@ namespace pugi
 		explicit xml_attribute_iterator(xml_attribute_struct* ref);
 
 	public:
+		/**
+		 * Iterator traits
+		 */
+		typedef ptrdiff_t difference_type;
+		typedef xml_attribute value_type;
+		typedef xml_attribute* pointer;
+		typedef xml_attribute& reference;
+
+	#ifndef PUGIXML_NO_STL
+		typedef std::bidirectional_iterator_tag iterator_category;
+	#endif
+
 		/**
 		 * Default ctor
 		 */
@@ -1658,12 +1742,6 @@ namespace pugi
 	};
 
 	/**
-	 * Struct used to distinguish parsing with ownership transfer from parsing without it.
-	 * \see xml_document::parse
-	 */
-	struct transfer_ownership_tag {};
-
-	/**
 	 * Parsing status enumeration, returned as part of xml_parse_result struct
 	 */
 	enum xml_parse_status
@@ -1702,6 +1780,9 @@ namespace pugi
 		/// Line in parser source which reported this
 		unsigned int line;
 
+		/// Source document encoding
+		encoding_t encoding;
+
 		/// Cast to bool operator
 		operator bool() const
 		{
@@ -1719,7 +1800,7 @@ namespace pugi
 	class PUGIXML_CLASS xml_document: public xml_node
 	{
 	private:
-		char*				_buffer;
+		char_t*				_buffer;
 
 		xml_memory_block	_memory;
 		
@@ -1749,17 +1830,26 @@ namespace pugi
 		 * \param options - parsing options
 		 * \return parsing result
 		 */
-		xml_parse_result load(std::istream& stream, unsigned int options = parse_default);
+
+		xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+		/**
+		 * Load document from stream.
+		 *
+		 * \param stream - stream with xml data
+		 * \param options - parsing options
+		 * \return parsing result
+		 */
+		xml_parse_result load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options = parse_default);
 #endif
 
 		/**
-		 * Load document from string.
+		 * Load document from string. String has to be zero-terminated. No encoding conversions are applied.
 		 *
 		 * \param contents - input string
 		 * \param options - parsing options
 		 * \return parsing result
 		 */
-		xml_parse_result load(const char* contents, unsigned int options = parse_default);
+		xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
 
 		/**
 		 * Load document from file
@@ -1768,32 +1858,43 @@ namespace pugi
 		 * \param options - parsing options
 		 * \return parsing result
 		 */
-		xml_parse_result load_file(const char* name, unsigned int options = parse_default);
+		xml_parse_result load_file(const char* name, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
 
 		/**
-		 * Parse the given XML string in-situ.
-		 * The string is modified; you should ensure that string data will persist throughout the
-		 * document's lifetime. Although, document does not gain ownership over the string, so you
-		 * should free the memory occupied by it manually.
+		 * Load document from buffer
 		 *
-		 * \param xmlstr - readwrite string with xml data
+		 * \param contents - buffer contents
+		 * \param size - buffer size in bytes
 		 * \param options - parsing options
 		 * \return parsing result
 		 */
-		xml_parse_result parse(char* xmlstr, unsigned int options = parse_default);
-		
+		xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+
 		/**
-		 * Parse the given XML string in-situ (gains ownership).
-		 * The string is modified; document gains ownership over the string, so you don't have to worry
-		 * about it's lifetime.
-		 * Call example: doc.parse(transfer_ownership_tag(), string, options);
+		 * Load document from buffer in-situ.
+		 * The buffer is modified; you should ensure that buffer data will persist throughout the document's
+		 * lifetime. Document does not gain ownership over the buffer, so you should free the buffer memory manually.
 		 *
-		 * \param xmlstr - readwrite string with xml data
+		 * \param contents - buffer contents
+		 * \param size - buffer size in bytes
 		 * \param options - parsing options
 		 * \return parsing result
 		 */
-		xml_parse_result parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options = parse_default);
-		
+		xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+
+		/**
+		 * Load document from buffer in-situ (gains buffer ownership).
+		 * The buffer is modified; you should ensure that buffer data will persist throughout the document's
+		 * lifetime. Document gains ownership over the buffer, so you should allocate the buffer with pugixml
+		 * allocation function.
+		 *
+		 * \param contents - buffer contents
+		 * \param size - buffer size in bytes
+		 * \param options - parsing options
+		 * \return parsing result
+		 */
+		xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+
 		/**
 		 * Save XML to writer
 		 *
@@ -1801,7 +1902,27 @@ namespace pugi
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
 		 */
-		void save(xml_writer& writer, const char* indent = "\t", unsigned int flags = format_default) const;
+		void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+
+	#ifndef PUGIXML_NO_STL
+		/**
+		 * Save XML to stream
+		 *
+		 * \param stream - output stream
+		 * \param indent - indentation string
+		 * \param flags - formatting flags
+		 */
+		void save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+
+		/**
+		 * Save XML to stream
+		 *
+		 * \param stream - output stream
+		 * \param indent - indentation string
+		 * \param flags - formatting flags
+		 */
+		void save(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default) const;
+	#endif
 
 		/**
 		 * Save XML to file
@@ -1811,7 +1932,7 @@ namespace pugi
 		 * \param flags - formatting flags
 		 * \return success flag
 		 */
-		bool save_file(const char* name, const char* indent = "\t", unsigned int flags = format_default) const;
+		bool save_file(const char* name, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
 
 		/**
 		 * Compute document order for the whole tree
@@ -2063,20 +2184,20 @@ namespace pugi
 
 #ifndef PUGIXML_NO_STL
 	/**
-	 * Convert utf16 to utf8
+	 * Convert wide string to utf8
 	 *
-	 * \param str - input UTF16 string
+	 * \param str - input wide string string
 	 * \return output UTF8 string
 	 */
-	std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str);
+	std::basic_string<char, std::char_traits<char>, std::allocator<char> > PUGIXML_FUNCTION as_utf8(const wchar_t* str);
 	
 	/**
-	 * Convert utf8 to utf16
+	 * Convert utf8 to wide string
 	 *
 	 * \param str - input UTF8 string
-	 * \return output UTF16 string
+	 * \return output wide string string
 	 */
-	std::wstring PUGIXML_FUNCTION as_utf16(const char* str);
+	std::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> > PUGIXML_FUNCTION as_wide(const char* str);
 #endif
 
 	/**
@@ -2104,7 +2225,7 @@ namespace pugi
      * \param allocate - allocation function
      * \param deallocate - deallocation function
      * 
-     * \note XPath-related allocations, as well as allocations in functions that return std::string (xml_node::path, as_utf8, as_utf16)
+     * \note XPath-related allocations, as well as allocations in functions that return std::string (xml_node::path, as_utf8, as_wide)
      * are not performed via these functions.
      * \note If you're using parse() with ownership transfer, you have to allocate the buffer you pass to parse() with allocation
      * function you set via this function.
@@ -2127,6 +2248,15 @@ namespace pugi
      */
     deallocation_function PUGIXML_FUNCTION get_memory_deallocation_function();
 }
+
+#if !defined(PUGIXML_NO_STL) && (defined(_MSC_VER) || defined(__ICC))
+namespace std
+{
+	// Workarounds for (non-standard) iterator category detection for older versions (MSVC7/IC8 and earlier)
+	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_node_iterator&);
+	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_attribute_iterator&);
+}
+#endif
 
 #endif
 

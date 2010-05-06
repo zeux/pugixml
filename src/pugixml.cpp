@@ -13,22 +13,26 @@
 
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-
-// For placement new
-#include <new>
-
 #if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_EXCEPTIONS)
 #error No exception mode can not be used with XPath support
 #endif
 
+#include "pugiutf.hpp"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <wchar.h>
+
 #ifndef PUGIXML_NO_STL
 #	include <istream>
 #	include <ostream>
+#	include <string>
 #endif
+
+// For placement new
+#include <new>
 
 #ifdef _MSC_VER
 #	pragma warning(disable: 4127) // conditional expression is constant
@@ -48,6 +52,7 @@ using std::memcpy;
 
 #define STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
 
+// Memory allocation
 namespace
 {
 	void* default_allocate(size_t size)
@@ -62,6 +67,155 @@ namespace
 
 	pugi::allocation_function global_allocate = default_allocate;
 	pugi::deallocation_function global_deallocate = default_deallocate;
+}
+
+// String utilities prototypes
+namespace pugi
+{
+	namespace impl
+	{
+		size_t strlen(const char_t* s);
+		void strcpy(char_t* dst, const char_t* src);
+		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count);
+		void widen_ascii(wchar_t* dest, const char* source);
+	}
+}
+
+// String utilities
+namespace pugi
+{
+	namespace impl
+	{
+		// Get string length
+		size_t strlen(const char_t* s)
+		{
+		#ifdef PUGIXML_WCHAR_MODE
+			return wcslen(s);
+		#else
+			return ::strlen(s);
+		#endif
+		}
+
+		// Copy one string into another
+		void strcpy(char_t* dst, const char_t* src)
+		{
+		#ifdef PUGIXML_WCHAR_MODE
+			wcscpy(dst, src);
+		#else
+			::strcpy(dst, src);
+		#endif
+		}
+
+		// Compare two strings
+		bool PUGIXML_FUNCTION strequal(const char_t* src, const char_t* dst)
+		{
+		#ifdef PUGIXML_WCHAR_MODE
+			return wcscmp(src, dst) == 0;
+		#else
+			return strcmp(src, dst) == 0;
+		#endif
+		}
+
+		// Compare lhs with [rhs_begin, rhs_end)
+		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count)
+		{
+			for (size_t i = 0; i < count; ++i)
+				if (lhs[i] != rhs[i])
+					return false;
+		
+			return true;
+		}
+		
+		// Character set pattern match.
+		static bool strequalwild_cset(const char_t** src, const char_t** dst)
+		{
+			int find = 0, excl = 0, star = 0;
+			
+			if (**src == '!')
+			{
+				excl = 1;
+				++(*src);
+			}
+			
+			while (**src != ']' || star == 1)
+			{
+				if (find == 0)
+				{
+					if (**src == '-' && *(*src-1) < *(*src+1) && *(*src+1) != ']' && star == 0)
+					{
+						if (**dst >= *(*src-1) && **dst <= *(*src+1))
+						{
+							find = 1;
+							++(*src);
+						}
+					}
+					else if (**src == **dst) find = 1;
+				}
+				++(*src);
+				star = 0;
+			}
+
+			if (excl == 1) find = (1 - find);
+			if (find == 1) ++(*dst);
+		
+			return find == 0;
+		}
+
+		// Wildcard pattern match.
+		static bool strequalwild_astr(const char_t** src, const char_t** dst)
+		{
+			int find = 1;
+			++(*src);
+			while ((**dst != 0 && **src == '?') || **src == '*')
+			{
+				if(**src == '?') ++(*dst);
+				++(*src);
+			}
+			while (**src == '*') ++(*src);
+			if (**dst == 0 && **src != 0) return 0;
+			if (**dst == 0 && **src == 0) return 1;
+			else
+			{
+				if (!impl::strequalwild(*src,*dst))
+				{
+					do
+					{
+						++(*dst);
+						while(**src != **dst && **src != '[' && **dst != 0) 
+							++(*dst);
+					}
+					while ((**dst != 0) ? !impl::strequalwild(*src,*dst) : 0 != (find=0));
+				}
+				if (**dst == 0 && **src == 0) find = 1;
+				return find == 0;
+			}
+		}
+
+		// Compare two strings, with globbing, and character sets.
+		bool PUGIXML_FUNCTION strequalwild(const char_t* src, const char_t* dst)
+		{
+			int find = 1;
+			for(; *src != 0 && find == 1 && *dst != 0; ++src)
+			{
+				switch (*src)
+				{
+					case '?': ++dst; break;
+					case '[': ++src; find = !strequalwild_cset(&src,&dst); break;
+					case '*': find = !strequalwild_astr(&src,&dst); --src; break;
+					default : find = (int) (*src == *dst); ++dst;
+				}
+			}
+			while (*src == '*' && find == 1) ++src;
+			return (find == 1 && *dst == 0 && *src == 0);
+		}
+
+		// Convert string to wide string, assuming all symbols are ASCII
+		void widen_ascii(wchar_t* dest, const char* source)
+		{
+			for (const char* i = source; *i; ++i) *dest++ = *i;
+			*dest = 0;
+		}
+	}
 }
 
 namespace pugi
@@ -131,8 +285,8 @@ namespace pugi
 		unsigned int name_allocated : 1;
 		unsigned int value_allocated : 1;
 
-		char*		name;			///< Pointer to attribute name.
-		char*		value;			///< Pointer to attribute value.
+		char_t*		name;			///< Pointer to attribute name.
+		char_t*		value;			///< Pointer to attribute value.
 
 		xml_attribute_struct* prev_attribute;	///< Previous attribute
 		xml_attribute_struct* next_attribute;	///< Next attribute
@@ -208,8 +362,8 @@ namespace pugi
 
 		xml_node_struct*		parent;					///< Pointer to parent
 
-		char*					name;					///< Pointer to element name.
-		char*					value;					///< Pointer to any associated string data.
+		char_t*					name;					///< Pointer to element name.
+		char_t*					value;					///< Pointer to any associated string data.
 
 		xml_node_struct*		first_child;			///< First child
 		xml_node_struct*		last_child;				///< Last child
@@ -228,7 +382,7 @@ namespace pugi
 		}
 
 		xml_allocator allocator;
-		const char* buffer;
+		const char_t* buffer;
 	};
 
 	xml_document_struct* xml_allocator::allocate_document()
@@ -251,12 +405,7 @@ namespace
 {	
 	using namespace pugi;
 
-	const unsigned char UTF8_BYTE_MASK = 0xBF;
-	const unsigned char UTF8_BYTE_MARK = 0x80;
-	const unsigned char UTF8_BYTE_MASK_READ = 0x3F;
-	const unsigned char UTF8_FIRST_BYTE_MARK[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
-
-	enum chartype
+	enum chartype_t
 	{
 		ct_parse_pcdata = 1,	// \0, &, \r, <
 		ct_parse_attr = 2,		// \0, &, \r, ', "
@@ -288,148 +437,55 @@ namespace
 		192, 192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 192, 192, 192, 192, 192,
 		192, 192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 192, 192, 192, 192, 192
 	};
-	
-	inline bool is_chartype(char c, chartype ct)
+
+	inline bool is_chartype(char_t c, chartype_t ct)
 	{
+	#ifdef PUGIXML_WCHAR_MODE
+		unsigned int ch = static_cast<unsigned int>(c);
+
+		return !!((ch < 128 ? chartype_table[ch] : chartype_table[128]) & ct);
+	#else
 		return !!(chartype_table[static_cast<unsigned char>(c)] & ct);
+	#endif
 	}
 
-	bool strcpy_insitu(char*& dest, bool& allocated, const char* source)
+	enum output_chartype_t
 	{
-		size_t source_size = strlen(source);
+		oct_special_pcdata = 1,   // Any symbol >= 0 and < 32 (except \t, \r, \n), &, <, >
+		oct_special_attr = 2      // Any symbol >= 0 and < 32 (except \t), &, <, >, "
+	};
 
-		if (dest && strlen(dest) >= source_size)
-		{
-			strcpy(dest, source);
-			
-			return true;
-		}
-		else
-		{
-			char* buf = static_cast<char*>(global_allocate(source_size + 1));
-			if (!buf) return false;
-
-			strcpy(buf, source);
-
-			if (allocated) global_deallocate(dest);
-			
-			dest = buf;
-			allocated = true;
-
-			return true;
-		}
-	}
-
-	// Get the size that is needed for strutf16_utf8 applied to all s characters
-	size_t strutf16_utf8_size(const wchar_t* s)
+	const unsigned char output_chartype_table[256] =
 	{
-		size_t length = 0;
+		3, 3, 3, 3, 3, 3, 3, 3,    3, 0, 2, 3, 3, 2, 3, 3,  // 0-15
+		3, 3, 3, 3, 3, 3, 3, 3,    3, 3, 3, 3, 3, 3, 3, 3,  // 16-31
+		0, 0, 2, 0, 0, 0, 3, 0,    0, 0, 0, 0, 0, 0, 0, 0,  // 32-47
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 3, 0, 3, 0,  // 48-63
 
-		for (; *s; ++s)
-		{
-			unsigned int ch = *s;
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,  // 64-128
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
 
-			if (ch < 0x80) length += 1;
-			else if (ch < 0x800) length += 2;
-			else if (ch < 0x10000) length += 3;
-			else if (ch < 0x200000) length += 4;
-		}
-
-		return length;
-	}
-
-	// Write utf16 char to stream, return position after the last written char
-	// \return position after last char
-	char* strutf16_utf8(char* s, unsigned int ch)
-	{
-		unsigned int length;
-
-		if (ch < 0x80) length = 1;
-		else if (ch < 0x800) length = 2;
-		else if (ch < 0x10000) length = 3;
-		else if (ch < 0x200000) length = 4;
-		else return s;
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,  // 128+
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+	};
 	
-		s += length;
-
-		// Scary scary fall throughs.
-		switch (length)
-		{
-			case 4:
-				*--s = (char)((ch | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); 
-				ch >>= 6;
-			case 3:
-				*--s = (char)((ch | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); 
-				ch >>= 6;
-			case 2:
-				*--s = (char)((ch | UTF8_BYTE_MARK) & UTF8_BYTE_MASK); 
-				ch >>= 6;
-			case 1:
-				*--s = (char)(ch | UTF8_FIRST_BYTE_MARK[length]);
-		}
-		
-		return s + length;
-	}
-
-	// Get the size that is needed for strutf8_utf16 applied to all s characters
-	size_t strutf8_utf16_size(const char* s)
+	inline bool is_output_chartype(char_t c, output_chartype_t ct)
 	{
-		size_t length = 0;
+	#ifdef PUGIXML_WCHAR_MODE
+		unsigned int ch = static_cast<unsigned int>(c);
 
-		for (; *s; ++s)
-		{
-			unsigned char ch = static_cast<unsigned char>(*s);
-
-			if (ch < 0x80 || (ch >= 0xC0 && ch < 0xFC)) ++length;
-		}
-
-		return length;
-	}
-
-	// Read utf16 char from utf8 stream, return position after the last read char
-	// \return position after the last char
-	const char* strutf8_utf16(const char* s, unsigned int& ch)
-	{
-		unsigned int length;
-
-		const unsigned char* str = reinterpret_cast<const unsigned char*>(s);
-
-		if (*str < UTF8_BYTE_MARK)
-		{
-			ch = *str;
-			return s + 1;
-		}
-		else if (*str < 0xC0)
-		{
-			ch = ' ';
-			return s + 1;
-		}
-		else if (*str < 0xE0) length = 2;
-		else if (*str < 0xF0) length = 3;
-		else if (*str < 0xF8) length = 4;
-		else
-		{
-			ch = ' ';
-			return s + 1;
-		}
-
-		ch = (*str++ & ~UTF8_FIRST_BYTE_MARK[length]);
-	
-		// Scary scary fall throughs.
-		switch (length) 
-		{
-			case 4:
-				ch <<= 6;
-				ch += (*str++ & UTF8_BYTE_MASK_READ);
-			case 3:
-				ch <<= 6;
-				ch += (*str++ & UTF8_BYTE_MASK_READ);
-			case 2:
-				ch <<= 6;
-				ch += (*str++ & UTF8_BYTE_MASK_READ);
-		}
-		
-		return reinterpret_cast<const char*>(str);
+		return !!((ch < 128 ? output_chartype_table[ch] : output_chartype_table[128]) & ct);
+	#else
+		return !!(output_chartype_table[static_cast<unsigned char>(c)] & ct);
+	#endif
 	}
 
 	template <bool _1> struct opt1_to_type
@@ -461,9 +517,314 @@ namespace
 	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o3 = _3;
 	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o4 = _4;
 
+	bool is_little_endian()
+	{
+		unsigned int ui = 1;
+
+		return *reinterpret_cast<unsigned char*>(&ui) == 1;
+	}
+
+	encoding_t get_wchar_encoding()
+	{
+		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+
+		if (sizeof(wchar_t) == 2)
+			return is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
+		else 
+			return is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
+	}
+
+	encoding_t get_buffer_encoding(encoding_t encoding, const void* contents, size_t size)
+	{
+		// replace wchar encoding with utf implementation
+		if (encoding == encoding_wchar) return get_wchar_encoding();
+
+		// replace utf16 encoding with utf16 with specific endianness
+		if (encoding == encoding_utf16) return is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
+
+		// replace utf32 encoding with utf32 with specific endianness
+		if (encoding == encoding_utf32) return is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
+
+		// only do autodetection if no explicit encoding is requested
+		if (encoding != encoding_auto) return encoding;
+
+		// try to guess encoding (based on XML specification, Appendix F.1)
+		const impl::char8_t* data = static_cast<const impl::char8_t*>(contents);
+
+		// look for BOM in first few bytes
+		if (size > 4 && data[0] == 0 && data[1] == 0 && data[2] == 0xfe && data[3] == 0xff) return encoding_utf32_be;
+		if (size > 4 && data[0] == 0xff && data[1] == 0xfe && data[2] == 0 && data[3] == 0) return encoding_utf32_le;
+		if (size > 2 && data[0] == 0xfe && data[1] == 0xff) return encoding_utf16_be;
+		if (size > 2 && data[0] == 0xff && data[1] == 0xfe) return encoding_utf16_le;
+		if (size > 3 && data[0] == 0xef && data[1] == 0xbb && data[2] == 0xbf) return encoding_utf8;
+
+		// look for <, <? or <?xm in various encodings
+		if (size > 4 && data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 0x3c) return encoding_utf32_be;
+		if (size > 4 && data[0] == 0x3c && data[1] == 0 && data[2] == 0 && data[3] == 0) return encoding_utf32_le;
+		if (size > 4 && data[0] == 0 && data[1] == 0x3c && data[2] == 0 && data[3] == 0x3f) return encoding_utf16_be;
+		if (size > 4 && data[0] == 0x3c && data[1] == 0 && data[2] == 0x3f && data[3] == 0) return encoding_utf16_le;
+		if (size > 4 && data[0] == 0x3c && data[1] == 0x3f && data[2] == 0x78 && data[3] == 0x6d) return encoding_utf8;
+
+		// look for utf16 < followed by node name (this may fail, but is better than utf8 since it's zero terminated so early)
+		if (size > 2 && data[0] == 0 && data[1] == 0x3c) return encoding_utf16_be;
+		if (size > 2 && data[0] == 0x3c && data[1] == 0) return encoding_utf16_le;
+
+		// no known BOM detected, assume utf8
+		return encoding_utf8;
+	}
+
+	bool get_mutable_buffer(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, bool is_mutable)
+	{
+		if (is_mutable)
+		{
+			out_buffer = static_cast<char_t*>(const_cast<void*>(contents));
+		}
+		else
+		{
+			void* buffer = global_allocate(size > 0 ? size : 1);
+			if (!buffer) return false;
+
+			memcpy(buffer, contents, size);
+
+			out_buffer = static_cast<char_t*>(buffer);
+		}
+
+		out_length = size / sizeof(char_t);
+
+		return true;
+	}
+
+#ifdef PUGIXML_WCHAR_MODE
+	inline bool need_endian_swap_utf(encoding_t le, encoding_t re)
+	{
+		return (le == encoding_utf16_be && re == encoding_utf16_le) || (le == encoding_utf16_le && re == encoding_utf16_be) ||
+		       (le == encoding_utf32_be && re == encoding_utf32_le) || (le == encoding_utf32_le && re == encoding_utf32_be);
+	}
+
+	bool convert_buffer_endian_swap(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, bool is_mutable)
+	{
+		const char_t* data = static_cast<const char_t*>(contents);
+	
+		out_buffer = is_mutable ? const_cast<char_t*>(data) : static_cast<char_t*>(global_allocate(size > 0 ? size : 1));
+		out_length = size / sizeof(char_t);
+
+		if (!out_buffer) return false;
+
+		impl::convert_wchar_endian_swap(out_buffer, data, out_length);
+
+		return true;
+	}
+
+	bool convert_buffer_utf8(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size)
+	{
+		const impl::char8_t* data = static_cast<const impl::char8_t*>(contents);
+
+		// first pass: get length in wchar_t units
+		out_length = impl::decode_utf8_block<impl::wchar_counter>(data, size, 0);
+
+		// allocate buffer of suitable length
+		out_buffer = static_cast<char_t*>(global_allocate((out_length > 0 ? out_length : 1) * sizeof(char_t)));
+		if (!out_buffer) return false;
+
+		// second pass: convert utf8 input to wchar_t
+		impl::wchar_writer::value_type out_begin = reinterpret_cast<impl::wchar_writer::value_type>(out_buffer);
+		impl::wchar_writer::value_type out_end = impl::decode_utf8_block<impl::wchar_writer>(data, size, out_begin);
+
+		assert(out_end == out_begin + out_length);
+		(void)!out_end;
+
+		return true;
+	}
+
+	template <typename opt1> bool convert_buffer_utf16(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
+	{
+		const impl::char16_t* data = static_cast<const impl::char16_t*>(contents);
+		size_t length = size / sizeof(impl::char16_t);
+
+		// first pass: get length in wchar_t units
+		out_length = impl::decode_utf16_block<impl::wchar_counter>(data, length, 0, opt1());
+
+		// allocate buffer of suitable length
+		out_buffer = static_cast<char_t*>(global_allocate((out_length > 0 ? out_length : 1) * sizeof(char_t)));
+		if (!out_buffer) return false;
+
+		// second pass: convert utf16 input to wchar_t
+		impl::wchar_writer::value_type out_begin = reinterpret_cast<impl::wchar_writer::value_type>(out_buffer);
+		impl::wchar_writer::value_type out_end = impl::decode_utf16_block<impl::wchar_writer>(data, length, out_begin, opt1());
+
+		assert(out_end == out_begin + out_length);
+		(void)!out_end;
+
+		return true;
+	}
+
+	template <typename opt1> bool convert_buffer_utf32(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
+	{
+		const impl::char32_t* data = static_cast<const impl::char32_t*>(contents);
+		size_t length = size / sizeof(impl::char32_t);
+
+		// first pass: get length in wchar_t units
+		out_length = impl::decode_utf32_block<impl::wchar_counter>(data, length, 0, opt1());
+
+		// allocate buffer of suitable length
+		out_buffer = static_cast<char_t*>(global_allocate((out_length > 0 ? out_length : 1) * sizeof(char_t)));
+		if (!out_buffer) return false;
+
+		// second pass: convert utf32 input to wchar_t
+		impl::wchar_writer::value_type out_begin = reinterpret_cast<impl::wchar_writer::value_type>(out_buffer);
+		impl::wchar_writer::value_type out_end = impl::decode_utf32_block<impl::wchar_writer>(data, length, out_begin, opt1());
+
+		assert(out_end == out_begin + out_length);
+		(void)!out_end;
+
+		return true;
+	}
+
+	bool convert_buffer(char_t*& out_buffer, size_t& out_length, encoding_t encoding, const void* contents, size_t size, bool is_mutable)
+	{
+		// get native encoding
+		encoding_t wchar_encoding = get_wchar_encoding();
+
+		// fast path: no conversion required
+		if (encoding == wchar_encoding) return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
+
+		// only endian-swapping is required
+		if (need_endian_swap_utf(encoding, wchar_encoding)) return convert_buffer_endian_swap(out_buffer, out_length, contents, size, is_mutable);
+
+		// source encoding is utf8
+		if (encoding == encoding_utf8) return convert_buffer_utf8(out_buffer, out_length, contents, size);
+
+		// source encoding is utf16
+		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
+		{
+			encoding_t native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
+
+			return (native_encoding == encoding) ?
+				convert_buffer_utf16(out_buffer, out_length, contents, size, opt1_to_type<false>()) :
+				convert_buffer_utf16(out_buffer, out_length, contents, size, opt1_to_type<true>());
+		}
+
+		// source encoding is utf32
+		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
+		{
+			encoding_t native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
+
+			return (native_encoding == encoding) ?
+				convert_buffer_utf32(out_buffer, out_length, contents, size, opt1_to_type<false>()) :
+				convert_buffer_utf32(out_buffer, out_length, contents, size, opt1_to_type<true>());
+		}
+
+		// invalid encoding combination (this can't happen)
+		assert(false);
+
+		return false;
+	}
+#else
+	template <typename opt1> bool convert_buffer_utf16(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
+	{
+		const impl::char16_t* data = static_cast<const impl::char16_t*>(contents);
+		size_t length = size / sizeof(impl::char16_t);
+
+		// first pass: get length in utf8 units
+		out_length = impl::decode_utf16_block<impl::utf8_counter>(data, length, 0, opt1());
+
+		// allocate buffer of suitable length
+		out_buffer = static_cast<char_t*>(global_allocate((out_length > 0 ? out_length : 1) * sizeof(char_t)));
+		if (!out_buffer) return false;
+
+		// second pass: convert utf16 input to utf8
+		impl::char8_t* out_begin = reinterpret_cast<impl::char8_t*>(out_buffer);
+		impl::char8_t* out_end = impl::decode_utf16_block<impl::utf8_writer>(data, length, out_begin, opt1());
+
+		assert(out_end == out_begin + out_length);
+		(void)!out_end;
+
+		return true;
+	}
+
+	template <typename opt1> bool convert_buffer_utf32(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
+	{
+		const impl::char32_t* data = static_cast<const impl::char32_t*>(contents);
+		size_t length = size / sizeof(impl::char32_t);
+
+		// first pass: get length in utf8 units
+		out_length = impl::decode_utf32_block<impl::utf8_counter>(data, length, 0, opt1());
+
+		// allocate buffer of suitable length
+		out_buffer = static_cast<char_t*>(global_allocate((out_length > 0 ? out_length : 1) * sizeof(char_t)));
+		if (!out_buffer) return false;
+
+		// second pass: convert utf32 input to utf8
+		impl::char8_t* out_begin = reinterpret_cast<impl::char8_t*>(out_buffer);
+		impl::char8_t* out_end = impl::decode_utf32_block<impl::utf8_writer>(data, length, out_begin, opt1());
+
+		assert(out_end == out_begin + out_length);
+		(void)!out_end;
+
+		return true;
+	}
+
+	bool convert_buffer(char_t*& out_buffer, size_t& out_length, encoding_t encoding, const void* contents, size_t size, bool is_mutable)
+	{
+		// fast path: no conversion required
+		if (encoding == encoding_utf8) return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
+
+		// source encoding is utf16
+		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
+		{
+			encoding_t native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
+
+			return (native_encoding == encoding) ?
+				convert_buffer_utf16(out_buffer, out_length, contents, size, opt1_to_type<false>()) :
+				convert_buffer_utf16(out_buffer, out_length, contents, size, opt1_to_type<true>());
+		}
+
+		// source encoding is utf32
+		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
+		{
+			encoding_t native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
+
+			return (native_encoding == encoding) ?
+				convert_buffer_utf32(out_buffer, out_length, contents, size, opt1_to_type<false>()) :
+				convert_buffer_utf32(out_buffer, out_length, contents, size, opt1_to_type<true>());
+		}
+
+		// invalid encoding combination (this can't happen)
+		assert(false);
+
+		return false;
+	}
+#endif
+
+	bool strcpy_insitu(char_t*& dest, bool& allocated, const char_t* source)
+	{
+		size_t source_length = impl::strlen(source);
+
+		if (dest && impl::strlen(dest) >= source_length)
+		{
+			impl::strcpy(dest, source);
+			
+			return true;
+		}
+		else
+		{
+			char_t* buf = static_cast<char_t*>(global_allocate((source_length + 1) * sizeof(char_t)));
+			if (!buf) return false;
+
+			impl::strcpy(buf, source);
+
+			if (allocated) global_deallocate(dest);
+			
+			dest = buf;
+			allocated = true;
+
+			return true;
+		}
+	}
+
 	struct gap
 	{
-		char* end;
+		char_t* end;
 		size_t size;
 			
 		gap(): end(0), size(0)
@@ -472,12 +833,12 @@ namespace
 			
 		// Push new gap, move s count bytes further (skipping the gap).
 		// Collapse previous gap.
-		void push(char*& s, size_t count)
+		void push(char_t*& s, size_t count)
 		{
 			if (end) // there was a gap already; collapse it
 			{
 				// Move [old_gap_end, new_gap_start) to [old_gap_start, ...)
-				memmove(end - size, end, s - end);
+				memmove(end - size, end, reinterpret_cast<char*>(s) - reinterpret_cast<char*>(end));
 			}
 				
 			s += count; // end of current gap
@@ -488,12 +849,12 @@ namespace
 		}
 			
 		// Collapse all gaps, return past-the-end pointer
-		char* flush(char* s)
+		char_t* flush(char_t* s)
 		{
 			if (end)
 			{
 				// Move [old_gap_end, current_pos) to [old_gap_start, ...)
-				memmove(end - size, end, s - end);
+				memmove(end - size, end, reinterpret_cast<char*>(s) - reinterpret_cast<char*>(end));
 
 				return s - size;
 			}
@@ -501,9 +862,9 @@ namespace
 		}
 	};
 	
-	char* strconv_escape(char* s, gap& g)
+	char_t* strconv_escape(char_t* s, gap& g)
 	{
-		char* stre = s + 1;
+		char_t* stre = s + 1;
 
 		switch (*stre)
 		{
@@ -545,7 +906,11 @@ namespace
 					++stre;
 				}
 
-				s = strutf16_utf8(s, ucsc);
+			#ifdef PUGIXML_WCHAR_MODE
+				s = reinterpret_cast<char_t*>(impl::wchar_writer::any(reinterpret_cast<impl::wchar_writer::value_type>(s), ucsc));
+			#else
+				s = reinterpret_cast<char_t*>(impl::utf8_writer::any(reinterpret_cast<impl::char8_t*>(s), ucsc));
+			#endif
 					
 				g.push(s, stre - s);
 				return stre;
@@ -619,7 +984,10 @@ namespace
 		return stre;
 	}
 
-	char* strconv_comment(char* s)
+	// Utility macro for last character handling
+	#define ENDSWITH(c, e) ((c) == (e) || ((c) == 0 && endch == (e)))
+
+	char_t* strconv_comment(char_t* s, char_t endch)
 	{
 		if (!*s) return 0;
 		
@@ -635,11 +1003,11 @@ namespace
 				
 				if (*s == '\n') g.push(s, 1);
 			}
-			else if (*s == '-' && *(s+1) == '-' && *(s+2) == '>') // comment ends here
+			else if (s[0] == '-' && s[1] == '-' && ENDSWITH(s[2], '>')) // comment ends here
 			{
 				*g.flush(s) = 0;
 				
-				return s + 3;
+				return s + (s[2] == '>' ? 3 : 2);
 			}
 			else if (*s == 0)
 			{
@@ -649,7 +1017,7 @@ namespace
 		}
 	}
 
-	char* strconv_cdata(char* s)
+	char_t* strconv_cdata(char_t* s, char_t endch)
 	{
 		if (!*s) return 0;
 			
@@ -665,7 +1033,7 @@ namespace
 				
 				if (*s == '\n') g.push(s, 1);
 			}
-			else if (*s == ']' && *(s+1) == ']' && *(s+2) == '>') // CDATA ends here
+			else if (s[0] == ']' && s[1] == ']' && ENDSWITH(s[2], '>')) // CDATA ends here
 			{
 				*g.flush(s) = 0;
 				
@@ -678,170 +1046,176 @@ namespace
 			else ++s;
 		}
 	}
+	
+	typedef char_t* (*strconv_pcdata_t)(char_t*);
 		
-	template <typename opt2> char* strconv_pcdata_t(char* s, opt2)
+	template <typename opt2> struct strconv_pcdata_impl
 	{
-		assert(*s);
-
-		const bool opt_eol = opt2::o1;
-		const bool opt_escape = opt2::o2;
-
-		gap g;
-		
-		while (true)
+		static char_t* parse(char_t* s)
 		{
-			while (!is_chartype(*s, ct_parse_pcdata)) ++s;
-				
-			if (*s == '<') // PCDATA ends here
-			{
-				*g.flush(s) = 0;
-				
-				return s + 1;
-			}
-			else if (opt_eol && *s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
-			{
-				*s++ = '\n'; // replace first one with 0x0a
-				
-				if (*s == '\n') g.push(s, 1);
-			}
-			else if (opt_escape && *s == '&')
-			{
-				s = strconv_escape(s, g);
-			}
-			else if (*s == 0)
-			{
-				return s;
-			}
-			else ++s;
-		}
-	}
+			const bool opt_eol = opt2::o1;
+			const bool opt_escape = opt2::o2;
 
-	char* strconv_pcdata(char* s, unsigned int optmask)
+			gap g;
+			
+			while (true)
+			{
+				while (!is_chartype(*s, ct_parse_pcdata)) ++s;
+					
+				if (*s == '<') // PCDATA ends here
+				{
+					*g.flush(s) = 0;
+					
+					return s + 1;
+				}
+				else if (opt_eol && *s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
+				{
+					*s++ = '\n'; // replace first one with 0x0a
+					
+					if (*s == '\n') g.push(s, 1);
+				}
+				else if (opt_escape && *s == '&')
+				{
+					s = strconv_escape(s, g);
+				}
+				else if (*s == 0)
+				{
+					return s;
+				}
+				else ++s;
+			}
+		}
+	};
+	
+	strconv_pcdata_t get_strconv_pcdata(unsigned int optmask)
 	{
 		STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20);
 
 		switch ((optmask >> 4) & 3) // get bitmask for flags (eol escapes)
 		{
-		case 0: return strconv_pcdata_t(s, opt2_to_type<0, 0>());
-		case 1: return strconv_pcdata_t(s, opt2_to_type<0, 1>());
-		case 2: return strconv_pcdata_t(s, opt2_to_type<1, 0>());
-		case 3: return strconv_pcdata_t(s, opt2_to_type<1, 1>());
+		case 0: return strconv_pcdata_impl<opt2_to_type<0, 0> >::parse;
+		case 1: return strconv_pcdata_impl<opt2_to_type<0, 1> >::parse;
+		case 2: return strconv_pcdata_impl<opt2_to_type<1, 0> >::parse;
+		case 3: return strconv_pcdata_impl<opt2_to_type<1, 1> >::parse;
 		default: return 0; // should not get here
 		}
 	}
 
-	template <typename opt4> char* strconv_attribute_t(char* s, char end_quote, opt4)
-	{
-		const bool opt_wconv = opt4::o1;
-		const bool opt_wnorm = opt4::o2;
-		const bool opt_eol = opt4::o3;
-		const bool opt_escape = opt4::o4;
-
-		if (!*s) return 0;
-			
-		gap g;
-
-		// trim leading whitespaces
-		if (opt_wnorm && is_chartype(*s, ct_space))
-		{
-			char* str = s;
-			
-			do ++str;
-			while (is_chartype(*str, ct_space));
-			
-			g.push(s, str - s);
-		}
-
-		while (true)
-		{
-			while (!is_chartype(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
-			
-			if (*s == end_quote)
-			{
-				char* str = g.flush(s);
-				
-				if (opt_wnorm)
-				{
-					do *str-- = 0;
-					while (is_chartype(*str, ct_space));
-				}
-				else *str = 0;
-			
-				return s + 1;
-			}
-			else if (opt_wnorm && is_chartype(*s, ct_space))
-			{
-				*s++ = ' ';
+	typedef char_t* (*strconv_attribute_t)(char_t*, char_t);
 	
-				if (is_chartype(*s, ct_space))
-				{
-					char* str = s + 1;
-					while (is_chartype(*str, ct_space)) ++str;
-					
-					g.push(s, str - s);
-				}
-			}
-			else if (opt_wconv && is_chartype(*s, ct_space))
+	template <typename opt4> struct strconv_attribute_impl
+	{
+		static char_t* parse(char_t* s, char_t end_quote)
+		{
+			const bool opt_wconv = opt4::o1;
+			const bool opt_wnorm = opt4::o2;
+			const bool opt_eol = opt4::o3;
+			const bool opt_escape = opt4::o4;
+
+			gap g;
+
+			// trim leading whitespaces
+			if (opt_wnorm && is_chartype(*s, ct_space))
 			{
-				if (opt_eol)
-				{
-					if (*s == '\r')
-					{
-						*s++ = ' ';
+				char_t* str = s;
 				
-						if (*s == '\n') g.push(s, 1);
+				do ++str;
+				while (is_chartype(*str, ct_space));
+				
+				g.push(s, str - s);
+			}
+
+			while (true)
+			{
+				while (!is_chartype(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
+				
+				if (*s == end_quote)
+				{
+					char_t* str = g.flush(s);
+					
+					if (opt_wnorm)
+					{
+						do *str-- = 0;
+						while (is_chartype(*str, ct_space));
+					}
+					else *str = 0;
+				
+					return s + 1;
+				}
+				else if (opt_wnorm && is_chartype(*s, ct_space))
+				{
+					*s++ = ' ';
+		
+					if (is_chartype(*s, ct_space))
+					{
+						char_t* str = s + 1;
+						while (is_chartype(*str, ct_space)) ++str;
+						
+						g.push(s, str - s);
+					}
+				}
+				else if (opt_wconv && is_chartype(*s, ct_space))
+				{
+					if (opt_eol)
+					{
+						if (*s == '\r')
+						{
+							*s++ = ' ';
+					
+							if (*s == '\n') g.push(s, 1);
+						}
+						else *s++ = ' ';
 					}
 					else *s++ = ' ';
 				}
-				else *s++ = ' ';
+				else if (opt_eol && *s == '\r')
+				{
+					*s++ = '\n';
+					
+					if (*s == '\n') g.push(s, 1);
+				}
+				else if (opt_escape && *s == '&')
+				{
+					s = strconv_escape(s, g);
+				}
+				else if (!*s)
+				{
+					return 0;
+				}
+				else ++s;
 			}
-			else if (opt_eol && *s == '\r')
-			{
-				*s++ = '\n';
-				
-				if (*s == '\n') g.push(s, 1);
-			}
-			else if (opt_escape && *s == '&')
-			{
-				s = strconv_escape(s, g);
-			}
-			else if (!*s)
-			{
-				return 0;
-			}
-			else ++s;
 		}
-	}
+	};
 
-	char* strconv_attribute(char* s, char end_quote, unsigned int optmask)
+	strconv_attribute_t get_strconv_attribute(unsigned int optmask)
 	{
 		STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20 && parse_wnorm_attribute == 0x40 && parse_wconv_attribute == 0x80);
 		
 		switch ((optmask >> 4) & 15) // get bitmask for flags (wconv wnorm eol escapes)
 		{
-		case 0:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 0, 0>());
-		case 1:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 0, 1>());
-		case 2:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 1, 0>());
-		case 3:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 0, 1, 1>());
-		case 4:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 0, 0>());
-		case 5:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 0, 1>());
-		case 6:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 1, 0>());
-		case 7:  return strconv_attribute_t(s, end_quote, opt4_to_type<0, 1, 1, 1>());
-		case 8:  return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 0, 0>());
-		case 9:  return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 0, 1>());
-		case 10: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 1, 0>());
-		case 11: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 0, 1, 1>());
-		case 12: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 0, 0>());
-		case 13: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 0, 1>());
-		case 14: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 1, 0>());
-		case 15: return strconv_attribute_t(s, end_quote, opt4_to_type<1, 1, 1, 1>());
+		case 0:  return strconv_attribute_impl<opt4_to_type<0, 0, 0, 0> >::parse;
+		case 1:  return strconv_attribute_impl<opt4_to_type<0, 0, 0, 1> >::parse;
+		case 2:  return strconv_attribute_impl<opt4_to_type<0, 0, 1, 0> >::parse;
+		case 3:  return strconv_attribute_impl<opt4_to_type<0, 0, 1, 1> >::parse;
+		case 4:  return strconv_attribute_impl<opt4_to_type<0, 1, 0, 0> >::parse;
+		case 5:  return strconv_attribute_impl<opt4_to_type<0, 1, 0, 1> >::parse;
+		case 6:  return strconv_attribute_impl<opt4_to_type<0, 1, 1, 0> >::parse;
+		case 7:  return strconv_attribute_impl<opt4_to_type<0, 1, 1, 1> >::parse;
+		case 8:  return strconv_attribute_impl<opt4_to_type<1, 0, 0, 0> >::parse;
+		case 9:  return strconv_attribute_impl<opt4_to_type<1, 0, 0, 1> >::parse;
+		case 10: return strconv_attribute_impl<opt4_to_type<1, 0, 1, 0> >::parse;
+		case 11: return strconv_attribute_impl<opt4_to_type<1, 0, 1, 1> >::parse;
+		case 12: return strconv_attribute_impl<opt4_to_type<1, 1, 0, 0> >::parse;
+		case 13: return strconv_attribute_impl<opt4_to_type<1, 1, 0, 1> >::parse;
+		case 14: return strconv_attribute_impl<opt4_to_type<1, 1, 1, 0> >::parse;
+		case 15: return strconv_attribute_impl<opt4_to_type<1, 1, 1, 1> >::parse;
 		default: return 0; // should not get here
 		}
 	}
 
 	inline xml_parse_result make_parse_result(xml_parse_status status, ptrdiff_t offset, unsigned int line)
 	{
-		xml_parse_result result = {status, offset, line};
+		xml_parse_result result = {status, offset, line, encoding_auto};
 		return result;
 	}
 
@@ -866,11 +1240,11 @@ namespace
 		{
 		}
 
-		xml_parse_result parse_exclamation(char*& ref_s, xml_node_struct* cursor, unsigned int optmsk, char* buffer_start)
+		xml_parse_result parse_exclamation(char_t*& ref_s, xml_node_struct* cursor, unsigned int optmsk, char_t* buffer_start, char_t endch)
 		{
 			// load into registers
-			char* s = ref_s;
-			char ch = 0;
+			char_t* s = ref_s;
+			char_t ch = 0;
 
 			// parse node contents, starting with exclamation mark
 			++s;
@@ -891,20 +1265,20 @@ namespace
 
 					if (OPTSET(parse_eol) && OPTSET(parse_comments))
 					{
-						s = strconv_comment(s);
+						s = strconv_comment(s, endch);
 
 						if (!s) THROW_ERROR(status_bad_comment, cursor->value);
 					}
 					else
 					{
 						// Scan for terminating '-->'.
-						SCANFOR(*s == '-' && *(s+1) == '-' && *(s+2) == '>');
+						SCANFOR(s[0] == '-' && s[1] == '-' && ENDSWITH(s[2], '>'));
 						CHECK_ERROR(status_bad_comment, s);
 
 						if (OPTSET(parse_comments))
 							*s = 0; // Zero-terminate this segment at the first terminating '-'.
 
-						s += 3; // Step over the '\0->'.
+						s += (s[2] == '>' ? 3 : 2); // Step over the '\0->'.
 					}
 
 					if (OPTSET(parse_comments))
@@ -928,18 +1302,17 @@ namespace
 
 						if (OPTSET(parse_eol))
 						{
-							s = strconv_cdata(s);
+							s = strconv_cdata(s, endch);
 
 							if (!s) THROW_ERROR(status_bad_cdata, cursor->value);
 						}
 						else
 						{
 							// Scan for terminating ']]>'.
-							SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
+							SCANFOR(s[0] == ']' && s[1] == ']' && ENDSWITH(s[2], '>'));
 							CHECK_ERROR(status_bad_cdata, s);
 
 							ENDSEG(); // Zero-terminate this segment.
-							CHECK_ERROR(status_bad_cdata, s);
 						}
 
 						POPNODE(); // Pop since this is a standalone.
@@ -947,34 +1320,31 @@ namespace
 					else // Flagged for discard, but we still have to scan for the terminator.
 					{
 						// Scan for terminating ']]>'.
-						SCANFOR(*s == ']' && *(s+1) == ']' && *(s+2) == '>');
+						SCANFOR(s[0] == ']' && s[1] == ']' && ENDSWITH(s[2], '>'));
 						CHECK_ERROR(status_bad_cdata, s);
 
 						++s;
 					}
 
-					s += 2; // Step over the last ']>'.
+					s += (s[1] == '>' ? 2 : 1); // Step over the last ']>'.
 				}
 				else THROW_ERROR(status_bad_cdata, s);
 			}
-			else if (*s=='D' && *++s=='O' && *++s=='C' && *++s=='T' && *++s=='Y' && *++s=='P' && *++s=='E')
+			else if (s[0] == 'D' && s[1] == 'O' && s[2] == 'C' && s[3] == 'T' && s[4] == 'Y' && s[5] == 'P' && ENDSWITH(s[6], 'E'))
 			{
-				++s;
-
-				SKIPWS(); // Eat any whitespace.
-				CHECK_ERROR(status_bad_doctype, s);
+				if (s[6] != 'E') THROW_ERROR(status_bad_doctype, s); 
 
 			LOC_DOCTYPE:
 				SCANFOR(*s == '\'' || *s == '"' || *s == '[' || *s == '>');
-				CHECK_ERROR(status_bad_doctype, s);
+				if (*s == 0 && endch != '>') THROW_ERROR(status_bad_doctype, s);
 
 				if (*s == '\'' || *s == '"') // '...SYSTEM "..."
 				{
 					ch = *s++;
 					SCANFOR(*s == ch);
-					CHECK_ERROR(status_bad_doctype, s);
+					if (*s == 0 && endch != '>') THROW_ERROR(status_bad_doctype, s);
 
-					++s;
+					s += (*s != 0);
 					goto LOC_DOCTYPE;
 				}
 
@@ -989,13 +1359,23 @@ namespace
 						if (bd == 0) break;
 						++s;
 					}
+
+					if (bd != 0) THROW_ERROR(status_bad_doctype, s);
 				}
 
 				SCANFOR(*s == '>');
-				CHECK_ERROR(status_bad_doctype, s);
 
-				++s;
+				if (*s == 0)
+				{
+					if (endch != '>') THROW_ERROR(status_bad_doctype, s);
+				}
+				else
+				{
+					++s;
+				}
 			}
+			else if (*s == 0 && endch == '-') THROW_ERROR(status_bad_comment, s);
+			else if (*s == 0 && endch == '[') THROW_ERROR(status_bad_cdata, s);
 			else THROW_ERROR(status_unrecognized_tag, s);
 
 			// store from registers
@@ -1004,12 +1384,12 @@ namespace
 			THROW_ERROR(status_ok, s);
 		}
 
-		xml_parse_result parse_question(char*& ref_s, xml_node_struct*& ref_cursor, unsigned int optmsk, char* buffer_start)
+		xml_parse_result parse_question(char_t*& ref_s, xml_node_struct*& ref_cursor, unsigned int optmsk, char_t* buffer_start, char_t endch)
 		{
 			// load into registers
-			char* s = ref_s;
+			char_t* s = ref_s;
 			xml_node_struct* cursor = ref_cursor;
-			char ch = 0;
+			char_t ch = 0;
 
 			// parse node contents, starting with question mark
 			++s;
@@ -1018,7 +1398,7 @@ namespace
 				THROW_ERROR(status_bad_pi, s);
 			else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
 			{
-				char* mark = s;
+				char_t* mark = s;
 				SCANWHILE(is_chartype(*s, ct_symbol)); // Read PI target
 				CHECK_ERROR(status_bad_pi, s);
 
@@ -1026,12 +1406,12 @@ namespace
 					THROW_ERROR(status_bad_pi, s);
 
 				ENDSEG();
-				CHECK_ERROR(status_bad_pi, s);
+				if (*s == 0 && endch != '>') THROW_ERROR(status_bad_pi, s);
 
 				if (ch == '?') // nothing except target present
 				{
-					if (*s != '>') THROW_ERROR(status_bad_pi, s);
-					++s;
+					if (!ENDSWITH(*s, '>')) THROW_ERROR(status_bad_pi, s);
+					s += (*s == '>');
 
 					// stricmp / strcasecmp is not portable
 					if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
@@ -1068,7 +1448,7 @@ namespace
 						// scan for tag end
 						mark = s;
 
-						SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
+						SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>')); // Look for '?>'.
 						CHECK_ERROR(status_bad_pi, s);
 
 						// replace ending ? with / to terminate properly
@@ -1095,13 +1475,12 @@ namespace
 
 					mark = s;
 
-					SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
+					SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>')); // Look for '?>'.
 					CHECK_ERROR(status_bad_pi, s);
 
 					ENDSEG();
-					CHECK_ERROR(status_bad_pi, s);
 
-					++s; // Step over >
+					s += (*s == '>'); // Step over >
 
 					if (OPTSET(parse_pi))
 					{
@@ -1113,10 +1492,10 @@ namespace
 			}
 			else // not parsing PI
 			{
-				SCANFOR(*s == '?' && *(s+1) == '>'); // Look for '?>'.
+				SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>')); // Look for '?>'.
 				CHECK_ERROR(status_bad_pi, s);
 
-				s += 2;
+				s += (s[1] == '>' ? 2 : 1);
 			}
 
 			// store from registers
@@ -1126,19 +1505,16 @@ namespace
 			THROW_ERROR(status_ok, s);
 		}
 
-		xml_parse_result parse(char* s, xml_node_struct* xmldoc, unsigned int optmsk = parse_default)
+		xml_parse_result parse(char_t* s, xml_node_struct* xmldoc, unsigned int optmsk, char_t endch)
 		{
-			if (!s || !xmldoc) return MAKE_PARSE_RESULT(status_internal_error);
+			strconv_attribute_t strconv_attribute = get_strconv_attribute(optmsk);
+			strconv_pcdata_t strconv_pcdata = get_strconv_pcdata(optmsk);
+			
+			char_t* buffer_start = s;
 
-			char* buffer_start = s;
-
-			// UTF-8 BOM
-			if ((unsigned char)*s == 0xEF && (unsigned char)*(s+1) == 0xBB && (unsigned char)*(s+2) == 0xBF)
-				s += 3;
-				
-			char ch = 0;
+			char_t ch = 0;
 			xml_node_struct* cursor = xmldoc;
-			char* mark = s;
+			char_t* mark = s;
 
 			while (*s != 0)
 			{
@@ -1154,8 +1530,6 @@ namespace
 						cursor->name = s;
 
 						SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
-						CHECK_ERROR(status_bad_start_element, s);
-
 						ENDSEG(); // Save char in 'ch', terminate & step over.
 
 						if (ch == '>')
@@ -1199,7 +1573,7 @@ namespace
 											++s; // Step over the quote.
 											a->value = s; // Save the offset.
 
-											s = strconv_attribute(s, ch, optmsk);
+											s = strconv_attribute(s, ch);
 										
 											if (!s) THROW_ERROR(status_bad_attribute, a->value);
 
@@ -1215,19 +1589,28 @@ namespace
 								else if (*s == '/')
 								{
 									++s;
-
-									if (*s != '>') THROW_ERROR(status_bad_start_element, s);
-							
-									POPNODE(); // Pop.
-
-									++s;
-
-									break;
+									
+									if (*s == '>')
+									{
+										POPNODE();
+										s++;
+										break;
+									}
+									else if (*s == 0 && endch == '>')
+									{
+										POPNODE();
+										break;
+									}
+									else THROW_ERROR(status_bad_start_element, s);
 								}
 								else if (*s == '>')
 								{
 									++s;
 
+									break;
+								}
+								else if (*s == 0 && endch == '>')
+								{
 									break;
 								}
 								else THROW_ERROR(status_bad_start_element, s);
@@ -1237,11 +1620,18 @@ namespace
 						}
 						else if (ch == '/') // '<#.../'
 						{
-							if (*s != '>') THROW_ERROR(status_bad_start_element, s);
+							if (!ENDSWITH(*s, '>')) THROW_ERROR(status_bad_start_element, s);
 
 							POPNODE(); // Pop.
 
-							++s;
+							s += (*s == '>');
+						}
+						else if (ch == 0)
+						{
+							// we stepped over null terminator, backtrack & handle closing tag
+							--s;
+							
+							if (endch != '>') THROW_ERROR(status_bad_start_element, s);
 						}
 						else THROW_ERROR(status_bad_start_element, s);
 					}
@@ -1249,9 +1639,7 @@ namespace
 					{
 						++s;
 
-						if (!cursor) THROW_ERROR(status_bad_end_element, s);
-
-						char* name = cursor->name;
+						char_t* name = cursor->name;
 						if (!name) THROW_ERROR(status_end_element_mismatch, s);
 						
 						while (is_chartype(*s, ct_symbol))
@@ -1259,19 +1647,29 @@ namespace
 							if (*s++ != *name++) THROW_ERROR(status_end_element_mismatch, s);
 						}
 
-						if (*name) THROW_ERROR(status_end_element_mismatch, s);
+						if (*name)
+						{
+							if (*s == 0 && name[0] == endch && name[1] == 0) THROW_ERROR(status_bad_end_element, s);
+							else THROW_ERROR(status_end_element_mismatch, s);
+						}
 							
 						POPNODE(); // Pop.
 
 						SKIPWS();
-						CHECK_ERROR(status_bad_end_element, s);
 
-						if (*s != '>') THROW_ERROR(status_bad_end_element, s);
-						++s;
+						if (*s == 0)
+						{
+							if (endch != '>') THROW_ERROR(status_bad_end_element, s);
+						}
+						else
+						{
+							if (*s != '>') THROW_ERROR(status_bad_end_element, s);
+							++s;
+						}
 					}
 					else if (*s == '?') // '<?...'
 					{
-						xml_parse_result quest_result = parse_question(s, cursor, optmsk, buffer_start);
+						xml_parse_result quest_result = parse_question(s, cursor, optmsk, buffer_start, endch);
 
 						if (!quest_result) return quest_result;
 
@@ -1279,10 +1677,11 @@ namespace
 					}
 					else if (*s == '!') // '<!...'
 					{
-						xml_parse_result excl_result = parse_exclamation(s, cursor, optmsk, buffer_start);
+						xml_parse_result excl_result = parse_exclamation(s, cursor, optmsk, buffer_start, endch);
 
 						if (!excl_result) return excl_result;
 					}
+					else if (*s == 0 && endch == '?') THROW_ERROR(status_bad_pi, s);
 					else THROW_ERROR(status_unrecognized_tag, s);
 				}
 				else
@@ -1291,7 +1690,7 @@ namespace
 
 					SKIPWS(); // Eat whitespace if no genuine PCDATA here.
 
-					if ((mark == s || !OPTSET(parse_ws_pcdata)) && (!*s || *s == '<'))
+					if ((!OPTSET(parse_ws_pcdata) || mark == s) && (*s == '<' || !*s))
 					{
 						continue;
 					}
@@ -1303,9 +1702,7 @@ namespace
 						PUSHNODE(node_pcdata); // Append a new node on the tree.
 						cursor->value = s; // Save the offset.
 
-						s = strconv_pcdata(s, optmsk);
-								
-						if (!s) THROW_ERROR(status_bad_pcdata, cursor->value);
+						s = strconv_pcdata(s);
 								
 						POPNODE(); // Pop since this is a standalone.
 						
@@ -1324,9 +1721,42 @@ namespace
 				}
 			}
 
+			// check that last tag is closed
 			if (cursor != xmldoc) THROW_ERROR(status_end_element_mismatch, s);
 			
 			THROW_ERROR(status_ok, s);
+		}
+
+		static xml_parse_result parse(char_t* buffer, size_t length, xml_node_struct* xmldoc, unsigned int optmsk)
+		{
+			// store buffer for offset_debug
+			static_cast<xml_document_struct*>(xmldoc)->buffer = buffer;
+
+			// early-out for empty documents
+			if (length == 0) return MAKE_PARSE_RESULT(status_ok);
+
+			// create parser on stack
+			xml_allocator& alloc = static_cast<xml_document_struct*>(xmldoc)->allocator;
+			
+			xml_parser parser(alloc);
+
+			// save last character and make buffer zero-terminated (speeds up parsing)
+			char_t endch = buffer[length - 1];
+			buffer[length - 1] = 0;
+			
+			// perform actual parsing
+			xml_parse_result result = parser.parse(buffer, xmldoc, optmsk, endch);
+
+			// since we removed last character, we have to handle the only possible false positive
+			if (result && endch == '<')
+			{
+				char_t* buffer_start = buffer;
+
+				// there's no possible well-formed document with < at the end
+				THROW_ERROR(status_unrecognized_tag, buffer_start + length);
+			}
+
+			return result;
 		}
 		
 	private:
@@ -1334,91 +1764,165 @@ namespace
 		const xml_parser& operator=(const xml_parser&);
 	};
 
-	// Compare lhs with [rhs_begin, rhs_end)
-	int strcmprange(const char* lhs, const char* rhs_begin, const char* rhs_end)
-	{
-		while (*lhs && rhs_begin != rhs_end && *lhs == *rhs_begin)
-		{
-			++lhs;
-			++rhs_begin;
-		}
-		
-		if (rhs_begin == rhs_end && *lhs == 0) return 0;
-		else return 1;
-	}
-	
-	// Character set pattern match.
-	int strcmpwild_cset(const char** src, const char** dst)
-	{
-		int find = 0, excl = 0, star = 0;
-		
-		if (**src == '!')
-		{
-			excl = 1;
-			++(*src);
-		}
-		
-		while (**src != ']' || star == 1)
-		{
-			if (find == 0)
-			{
-				if (**src == '-' && *(*src-1) < *(*src+1) && *(*src+1) != ']' && star == 0)
-				{
-					if (**dst >= *(*src-1) && **dst <= *(*src+1))
-					{
-						find = 1;
-						++(*src);
-					}
-				}
-				else if (**src == **dst) find = 1;
-			}
-			++(*src);
-			star = 0;
-		}
-
-		if (excl == 1) find = (1 - find);
-		if (find == 1) ++(*dst);
-	
-		return find;
-	}
-
-	// Wildcard pattern match.
-	int strcmpwild_astr(const char** src, const char** dst)
-	{
-		int find = 1;
-		++(*src);
-		while ((**dst != 0 && **src == '?') || **src == '*')
-		{
-			if(**src == '?') ++(*dst);
-			++(*src);
-		}
-		while (**src == '*') ++(*src);
-		if (**dst == 0 && **src != 0) return 0;
-		if (**dst == 0 && **src == 0) return 1;
-		else
-		{
-			if (impl::strcmpwild(*src,*dst))
-			{
-				do
-				{
-					++(*dst);
-					while(**src != **dst && **src != '[' && **dst != 0) 
-						++(*dst);
-				}
-				while ((**dst != 0) ? impl::strcmpwild(*src,*dst) : 0 != (find=0));
-			}
-			if (**dst == 0 && **src == 0) find = 1;
-			return find;
-		}
-	}
-
 	// Output facilities
-	struct xml_buffered_writer
+	encoding_t get_write_native_encoding()
+	{
+	#ifdef PUGIXML_WCHAR_MODE
+		return get_wchar_encoding();
+	#else
+		return encoding_utf8;
+	#endif
+	}
+
+	encoding_t get_write_encoding(encoding_t encoding)
+	{
+		// replace wchar encoding with utf implementation
+		if (encoding == encoding_wchar) return get_wchar_encoding();
+
+		// replace utf16 encoding with utf16 with specific endianness
+		if (encoding == encoding_utf16) return is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
+
+		// replace utf32 encoding with utf32 with specific endianness
+		if (encoding == encoding_utf32) return is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
+
+		// only do autodetection if no explicit encoding is requested
+		if (encoding != encoding_auto) return encoding;
+
+		// assume utf8 encoding
+		return encoding_utf8;
+	}
+
+#ifdef PUGIXML_WCHAR_MODE
+	size_t get_valid_length(const char_t* data, size_t length)
+	{
+		assert(length > 0);
+
+		// discard last character if it's the lead of a surrogate pair 
+		return (sizeof(wchar_t) == 2 && (unsigned)(static_cast<impl::char16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
+	}
+
+	size_t convert_buffer(char* result, const char_t* data, size_t length, encoding_t encoding)
+	{
+		// only endian-swapping is required
+		if (need_endian_swap_utf(encoding, get_wchar_encoding()))
+		{
+			impl::convert_wchar_endian_swap(reinterpret_cast<char_t*>(result), data, length);
+
+			return length * sizeof(char_t);
+		}
+	
+		// convert to utf8
+		if (encoding == encoding_utf8)
+		{
+			impl::char8_t* dest = reinterpret_cast<impl::char8_t*>(result);
+
+			impl::char8_t* end = sizeof(wchar_t) == 2 ?
+				impl::decode_utf16_block<impl::utf8_writer>(reinterpret_cast<const impl::char16_t*>(data), length, dest, opt1_to_type<false>()) :
+				impl::decode_utf32_block<impl::utf8_writer>(reinterpret_cast<const impl::char32_t*>(data), length, dest, opt1_to_type<false>());
+
+			return static_cast<size_t>(end - dest);
+		}
+
+		// convert to utf16
+		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
+		{
+			impl::char16_t* dest = reinterpret_cast<impl::char16_t*>(result);
+
+			// convert to native utf16
+			impl::char16_t* end = impl::decode_utf32_block<impl::utf16_writer>(reinterpret_cast<const impl::char32_t*>(data), length, dest, opt1_to_type<false>());
+
+			// swap if necessary
+			encoding_t native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
+
+			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
+
+			return static_cast<size_t>(end - dest) * sizeof(impl::char16_t);
+		}
+
+		// convert to utf32
+		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
+		{
+			impl::char32_t* dest = reinterpret_cast<impl::char32_t*>(result);
+
+			// convert to native utf32
+			impl::char32_t* end = impl::decode_utf16_block<impl::utf32_writer>(reinterpret_cast<const impl::char16_t*>(data), length, dest, opt1_to_type<false>());
+
+			// swap if necessary
+			encoding_t native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
+
+			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
+
+			return static_cast<size_t>(end - dest) * sizeof(impl::char32_t);
+		}
+
+		// invalid encoding combination (this can't happen)
+		assert(false);
+
+		return 0;
+	}
+#else
+	size_t get_valid_length(const char_t* data, size_t length)
+	{
+		assert(length > 4);
+
+		for (size_t i = 1; i <= 4; ++i)
+		{
+			impl::char8_t ch = static_cast<impl::char8_t>(data[length - i]);
+
+			// either a standalone character or a leading one
+			if ((ch & 0xc0) != 0x80) return length - i;
+		}
+
+		// there are four non-leading characters at the end, sequence tail is broken so might as well process the whole chunk
+		return length;
+	}
+
+	size_t convert_buffer(char* result, const char_t* data, size_t length, encoding_t encoding)
+	{
+		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
+		{
+			impl::char16_t* dest = reinterpret_cast<impl::char16_t*>(result);
+
+			// convert to native utf16
+			impl::char16_t* end = impl::decode_utf8_block<impl::utf16_writer>(reinterpret_cast<const impl::char8_t*>(data), length, dest);
+
+			// swap if necessary
+			encoding_t native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
+
+			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
+
+			return static_cast<size_t>(end - dest) * sizeof(impl::char16_t);
+		}
+
+		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
+		{
+			impl::char32_t* dest = reinterpret_cast<impl::char32_t*>(result);
+
+			// convert to native utf32
+			impl::char32_t* end = impl::decode_utf8_block<impl::utf32_writer>(reinterpret_cast<const impl::char8_t*>(data), length, dest);
+
+			// swap if necessary
+			encoding_t native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
+
+			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
+
+			return static_cast<size_t>(end - dest) * sizeof(impl::char32_t);
+		}
+
+		// invalid encoding combination (this can't happen)
+		assert(false);
+
+		return 0;
+	}
+#endif
+
+	class xml_buffered_writer
 	{
 		xml_buffered_writer(const xml_buffered_writer&);
 		xml_buffered_writer& operator=(const xml_buffered_writer&);
 
-		xml_buffered_writer(xml_writer& writer): writer(writer), bufsize(0)
+	public:
+		xml_buffered_writer(xml_writer& writer, encoding_t user_encoding): writer(writer), bufsize(0), encoding(get_write_encoding(user_encoding))
 		{
 		}
 
@@ -1429,56 +1933,188 @@ namespace
 
 		void flush()
 		{
-			if (bufsize > 0) writer.write(buffer, bufsize);
+			flush(buffer, bufsize);
 			bufsize = 0;
 		}
 
-		void write(const void* data, size_t size)
+		void flush(const char_t* data, size_t size)
 		{
-			if (bufsize + size > sizeof(buffer))
+			if (size == 0) return;
+
+			// fast path, just write data
+			if (encoding == get_write_native_encoding())
+				writer.write(data, size * sizeof(char_t));
+			else
 			{
+				// convert chunk
+				size_t result = convert_buffer(scratch, data, size, encoding);
+				assert(result <= sizeof(scratch));
+
+				// write data
+				writer.write(scratch, result);
+			}
+		}
+
+		void write(const char_t* data, size_t length)
+		{
+			if (bufsize + length > bufcapacity)
+			{
+				// flush the remaining buffer contents
 				flush();
 
-				if (size > sizeof(buffer))
+				// handle large chunks
+				if (length > bufcapacity)
 				{
-					writer.write(data, size);
-					return;
+					if (encoding == get_write_native_encoding())
+					{
+						// fast path, can just write data chunk
+						writer.write(data, length * sizeof(char_t));
+						return;
+					}
+
+					// need to convert in suitable chunks
+					while (length > bufcapacity)
+					{
+						// get chunk size by selecting such number of characters that are guaranteed to fit into scratch buffer
+						// and form a complete codepoint sequence (i.e. discard start of last codepoint if necessary)
+						size_t chunk_size = get_valid_length(data, bufcapacity);
+
+						// convert chunk and write
+						flush(data, chunk_size);
+
+						// iterate
+						data += chunk_size;
+						length -= chunk_size;
+					}
+
+					// small tail is copied below
+					bufsize = 0;
 				}
 			}
 
-			memcpy(buffer + bufsize, data, size);
-			bufsize += size;
+			memcpy(buffer + bufsize, data, length * sizeof(char_t));
+			bufsize += length;
 		}
 
-		void write(const char* data)
+		void write(const char_t* data)
 		{
-			write(data, strlen(data));
+			write(data, impl::strlen(data));
 		}
 
-		void write(char data)
+		void write(char_t d0)
 		{
-			if (bufsize + 1 > sizeof(buffer)) flush();
+			if (bufsize + 1 > bufcapacity) flush();
 
-			buffer[bufsize++] = data;
+			buffer[bufsize + 0] = d0;
+			bufsize += 1;
 		}
+
+		void write(char_t d0, char_t d1)
+		{
+			if (bufsize + 2 > bufcapacity) flush();
+
+			buffer[bufsize + 0] = d0;
+			buffer[bufsize + 1] = d1;
+			bufsize += 2;
+		}
+
+		void write(char_t d0, char_t d1, char_t d2)
+		{
+			if (bufsize + 3 > bufcapacity) flush();
+
+			buffer[bufsize + 0] = d0;
+			buffer[bufsize + 1] = d1;
+			buffer[bufsize + 2] = d2;
+			bufsize += 3;
+		}
+
+		void write(char_t d0, char_t d1, char_t d2, char_t d3)
+		{
+			if (bufsize + 4 > bufcapacity) flush();
+
+			buffer[bufsize + 0] = d0;
+			buffer[bufsize + 1] = d1;
+			buffer[bufsize + 2] = d2;
+			buffer[bufsize + 3] = d3;
+			bufsize += 4;
+		}
+
+		void write(char_t d0, char_t d1, char_t d2, char_t d3, char_t d4)
+		{
+			if (bufsize + 5 > bufcapacity) flush();
+
+			buffer[bufsize + 0] = d0;
+			buffer[bufsize + 1] = d1;
+			buffer[bufsize + 2] = d2;
+			buffer[bufsize + 3] = d3;
+			buffer[bufsize + 4] = d4;
+			bufsize += 5;
+		}
+
+		void write(char_t d0, char_t d1, char_t d2, char_t d3, char_t d4, char_t d5)
+		{
+			if (bufsize + 6 > bufcapacity) flush();
+
+			buffer[bufsize + 0] = d0;
+			buffer[bufsize + 1] = d1;
+			buffer[bufsize + 2] = d2;
+			buffer[bufsize + 3] = d3;
+			buffer[bufsize + 4] = d4;
+			buffer[bufsize + 5] = d5;
+			bufsize += 6;
+		}
+
+		// utf8 maximum expansion: x4 (-> utf32)
+		// utf16 maximum expansion: x2 (-> utf32)
+		// utf32 maximum expansion: x1
+		enum { bufcapacity = 2048 };
+
+		char_t buffer[bufcapacity];
+		char scratch[4 * bufcapacity];
 
 		xml_writer& writer;
-		char buffer[8192];
 		size_t bufsize;
+		encoding_t encoding;
 	};
 
-	template <typename opt1> void text_output_escaped(xml_buffered_writer& writer, const char* s, opt1)
+	void write_bom(xml_writer& writer, encoding_t encoding)
 	{
-		const bool attribute = opt1::o1;
+		switch (encoding)
+		{
+		case encoding_utf8:
+			writer.write("\xef\xbb\xbf", 3);
+			break;
 
+		case encoding_utf16_be:
+			writer.write("\xfe\xff", 2);
+			break;
+
+		case encoding_utf16_le:
+			writer.write("\xff\xfe", 2);
+			break;
+
+		case encoding_utf32_be:
+			writer.write("\x00\x00\xfe\xff", 4);
+			break;
+
+		case encoding_utf32_le:
+			writer.write("\xff\xfe\x00\x00", 4);
+			break;
+
+		default:
+			// invalid encoding (this should not happen)
+			assert(false);
+		}
+	}
+
+	void text_output_escaped(xml_buffered_writer& writer, const char_t* s, output_chartype_t type)
+	{
 		while (*s)
 		{
-			const char* prev = s;
+			const char_t* prev = s;
 			
 			// While *s is a usual symbol
-			while (*s && *s != '&' && *s != '<' && *s != '>' && (*s != '"' || !attribute)
-					&& ((unsigned char)*s >= 32 || (*s == '\r' && !attribute) || (*s == '\n' && !attribute) || *s == '\t'))
-				++s;
+			while (!is_output_chartype(*s, type)) ++s;
 		
 			writer.write(prev, static_cast<size_t>(s - prev));
 
@@ -1486,43 +2122,33 @@ namespace
 			{
 				case 0: break;
 				case '&':
-					writer.write("&amp;");
+					writer.write('&', 'a', 'm', 'p', ';');
 					++s;
 					break;
 				case '<':
-					writer.write("&lt;");
+					writer.write('&', 'l', 't', ';');
 					++s;
 					break;
 				case '>':
-					writer.write("&gt;");
+					writer.write('&', 'g', 't', ';');
 					++s;
 					break;
 				case '"':
-					writer.write("&quot;");
-					++s;
-					break;
-				case '\r':
-					writer.write("&#13;");
-					++s;
-					break;
-				case '\n':
-					writer.write("&#10;");
+					writer.write('&', 'q', 'u', 'o', 't', ';');
 					++s;
 					break;
 				default: // s is not a usual symbol
 				{
-					unsigned int ch = (unsigned char)*s++;
+					unsigned int ch = static_cast<unsigned int>(*s++);
+					assert(ch < 32);
 
-					char buf[8];
-					sprintf(buf, "&#%u;", ch);
-
-					writer.write(buf);
+					writer.write('&', '#', static_cast<char_t>((ch / 10) + '0'), static_cast<char_t>((ch % 10) + '0'), ';');
 				}
 			}
 		}
 	}
 
-	void node_output(xml_buffered_writer& writer, const xml_node& node, const char* indent, unsigned int flags, unsigned int depth)
+	void node_output(xml_buffered_writer& writer, const xml_node& node, const char_t* indent, unsigned int flags, unsigned int depth)
 	{
 		if ((flags & format_indent) != 0 && (flags & format_raw) == 0)
 			for (unsigned int i = 0; i < depth; ++i) writer.write(indent);
@@ -1545,10 +2171,9 @@ namespace
 			{
 				writer.write(' ');
 				writer.write(a.name());
-				writer.write('=');
-				writer.write('"');
+				writer.write('=', '"');
 
-				text_output_escaped(writer, a.value(), opt1_to_type<1>());
+				text_output_escaped(writer, a.value(), oct_special_attr);
 
 				writer.write('"');
 			}
@@ -1556,7 +2181,7 @@ namespace
 			if (flags & format_raw)
 			{
 				if (!node.first_child())
-					writer.write(" />");
+					writer.write(' ', '/', '>');
 				else
 				{
 					writer.write('>');
@@ -1564,30 +2189,26 @@ namespace
 					for (xml_node n = node.first_child(); n; n = n.next_sibling())
 						node_output(writer, n, indent, flags, depth + 1);
 
-					writer.write('<');
-					writer.write('/');
+					writer.write('<', '/');
 					writer.write(node.name());
 					writer.write('>');
 				}
 			}
 			else if (!node.first_child())
-				writer.write(" />\n");
+				writer.write(' ', '/', '>', '\n');
 			else if (node.first_child() == node.last_child() && node.first_child().type() == node_pcdata)
 			{
 				writer.write('>');
 
-				text_output_escaped(writer, node.first_child().value(), opt1_to_type<0>());
+				text_output_escaped(writer, node.first_child().value(), oct_special_pcdata);
 
-				writer.write('<');
-				writer.write('/');
+				writer.write('<', '/');
 				writer.write(node.name());
-				writer.write('>');
-				writer.write('\n');
+				writer.write('>', '\n');
 			}
 			else
 			{
-				writer.write('>');
-				writer.write('\n');
+				writer.write('>', '\n');
 				
 				for (xml_node n = node.first_child(); n; n = n.next_sibling())
 					node_output(writer, n, indent, flags, depth + 1);
@@ -1595,65 +2216,63 @@ namespace
 				if ((flags & format_indent) != 0 && (flags & format_raw) == 0)
 					for (unsigned int i = 0; i < depth; ++i) writer.write(indent);
 				
-				writer.write('<');
-				writer.write('/');
+				writer.write('<', '/');
 				writer.write(node.name());
-				writer.write('>');
-				writer.write('\n');
+				writer.write('>', '\n');
 			}
 
 			break;
 		}
 		
 		case node_pcdata:
-			text_output_escaped(writer, node.value(), opt1_to_type<0>());
+			text_output_escaped(writer, node.value(), oct_special_pcdata);
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
 		case node_cdata:
-			writer.write("<![CDATA[");
+			writer.write('<', '!', '[', 'C', 'D');
+			writer.write('A', 'T', 'A', '[');
 			writer.write(node.value());
-			writer.write("]]>");
+			writer.write(']', ']', '>');
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
 		case node_comment:
-			writer.write("<!--");
+			writer.write('<', '!', '-', '-');
 			writer.write(node.value());
-			writer.write("-->");
+			writer.write('-', '-', '>');
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
 		case node_pi:
-			writer.write("<?");
+			writer.write('<', '?');
 			writer.write(node.name());
 			if (node.value()[0])
 			{
 				writer.write(' ');
 				writer.write(node.value());
 			}
-			writer.write("?>");
+			writer.write('?', '>');
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 		
 		case node_declaration:
 		{
-			writer.write("<?");
+			writer.write('<', '?');
 			writer.write(node.name());
 
 			for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
 			{
 				writer.write(' ');
 				writer.write(a.name());
-				writer.write('=');
-				writer.write('"');
+				writer.write('=', '"');
 
-				text_output_escaped(writer, a.value(), opt1_to_type<1>());
+				text_output_escaped(writer, a.value(), oct_special_attr);
 
 				writer.write('"');
 			}
 
-			writer.write("?>");
+			writer.write('?', '>');
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 		}
@@ -1718,33 +2337,6 @@ namespace
 
 namespace pugi
 {
-	namespace impl
-	{
-		// Compare two strings
-		int PUGIXML_FUNCTION strcmp(const char* src, const char* dst)
-		{
-			return ::strcmp(src, dst);
-		}
-
-		// Compare two strings, with globbing, and character sets.
-		int PUGIXML_FUNCTION strcmpwild(const char* src, const char* dst)
-		{
-			int find = 1;
-			for(; *src != 0 && find == 1 && *dst != 0; ++src)
-			{
-				switch (*src)
-				{
-					case '?': ++dst; break;
-					case '[': ++src; find = strcmpwild_cset(&src,&dst); break;
-					case '*': find = strcmpwild_astr(&src,&dst); --src; break;
-					default : find = (int) (*src == *dst); ++dst;
-				}
-			}
-			while (*src == '*' && find == 1) ++src;
-			return (find == 1 && *dst == 0 && *src == 0) ? 0 : 1;
-		}
-	}
-
 	xml_writer_file::xml_writer_file(void* file): file(file)
 	{
 	}
@@ -1755,13 +2347,28 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
-	xml_writer_stream::xml_writer_stream(std::ostream& stream): stream(&stream)
+	xml_writer_stream::xml_writer_stream(std::basic_ostream<char, std::char_traits<char> >& stream): narrow_stream(&stream), wide_stream(0)
+	{
+	}
+
+	xml_writer_stream::xml_writer_stream(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream): narrow_stream(0), wide_stream(&stream)
 	{
 	}
 
 	void xml_writer_stream::write(const void* data, size_t size)
 	{
-		stream->write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
+		if (narrow_stream)
+		{
+			assert(!wide_stream);
+			narrow_stream->write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
+		}
+		else
+		{
+			assert(wide_stream);
+			assert(size % sizeof(wchar_t) == 0);
+
+			wide_stream->write(reinterpret_cast<const wchar_t*>(data), static_cast<std::streamsize>(size / sizeof(wchar_t)));
+		}
 	}
 #endif
 
@@ -1796,17 +2403,14 @@ namespace pugi
 	{
 	}
 
+	xml_attribute::operator xml_attribute::unspecified_bool_type() const
+	{
 #ifdef __MWERKS__
-	xml_attribute::operator xml_attribute::unspecified_bool_type() const
-	{
       	return _attr ? &xml_attribute::empty : 0;
-   	}
 #else
-	xml_attribute::operator xml_attribute::unspecified_bool_type() const
-	{
       	return _attr ? &xml_attribute::_attr : 0;
-   	}
 #endif
+   	}
 
    	bool xml_attribute::operator!() const
    	{
@@ -1855,29 +2459,56 @@ namespace pugi
 
 	int xml_attribute::as_int() const
 	{
-		return (_attr && _attr->value) ? atoi(_attr->value) : 0;
+		if (!_attr || !_attr->value) return 0;
+
+	#ifdef PUGIXML_WCHAR_MODE
+		return (int)wcstol(_attr->value, 0, 10);
+	#else
+		return atoi(_attr->value);
+	#endif
 	}
 
 	unsigned int xml_attribute::as_uint() const
 	{
-		int result = (_attr && _attr->value) ? atoi(_attr->value) : 0;
+		if (!_attr || !_attr->value) return 0;
+
+	#ifdef PUGIXML_WCHAR_MODE
+		int result = (int)wcstol(_attr->value, 0, 10);
+	#else
+		int result = atoi(_attr->value);
+	#endif
+
 		return result < 0 ? 0 : static_cast<unsigned int>(result);
 	}
 
 	double xml_attribute::as_double() const
 	{
-		return (_attr && _attr->value) ? atof(_attr->value) : 0;
+		if (!_attr || !_attr->value) return 0;
+
+	#ifdef PUGIXML_WCHAR_MODE
+		return wcstod(_attr->value, 0);
+	#else
+		return atof(_attr->value);
+	#endif
 	}
 
 	float xml_attribute::as_float() const
 	{
-		return (_attr && _attr->value) ? (float)atof(_attr->value) : 0;
+		if (!_attr || !_attr->value) return 0;
+
+	#ifdef PUGIXML_WCHAR_MODE
+		return (float)wcstod(_attr->value, 0);
+	#else
+		return (float)atof(_attr->value);
+	#endif
 	}
 
 	bool xml_attribute::as_bool() const
 	{
+		if (!_attr || !_attr->value) return false;
+
 		// only look at first char
-		char first = (_attr && _attr->value) ? *_attr->value : '\0';
+		char_t first = *_attr->value;
 
 		// 1*, t* (true), T* (True), y* (yes), Y* (YES)
 		return (first == '1' || first == 't' || first == 'T' || first == 'y' || first == 'Y');
@@ -1888,14 +2519,14 @@ namespace pugi
 		return !_attr;
 	}
 
-	const char* xml_attribute::name() const
+	const char_t* xml_attribute::name() const
 	{
-		return (_attr && _attr->name) ? _attr->name : "";
+		return (_attr && _attr->name) ? _attr->name : PUGIXML_TEXT("");
 	}
 
-	const char* xml_attribute::value() const
+	const char_t* xml_attribute::value() const
 	{
-		return (_attr && _attr->value) ? _attr->value : "";
+		return (_attr && _attr->value) ? _attr->value : PUGIXML_TEXT("");
 	}
 
 	unsigned int xml_attribute::document_order() const
@@ -1903,7 +2534,7 @@ namespace pugi
 		return _attr ? _attr->document_order : 0;
 	}
 
-	xml_attribute& xml_attribute::operator=(const char* rhs)
+	xml_attribute& xml_attribute::operator=(const char_t* rhs)
 	{
 		set_value(rhs);
 		return *this;
@@ -1933,7 +2564,7 @@ namespace pugi
 		return *this;
 	}
 
-	bool xml_attribute::set_name(const char* rhs)
+	bool xml_attribute::set_name(const char_t* rhs)
 	{
 		if (!_attr) return false;
 		
@@ -1944,7 +2575,7 @@ namespace pugi
 		return res;
 	}
 		
-	bool xml_attribute::set_value(const char* rhs)
+	bool xml_attribute::set_value(const char_t* rhs)
 	{
 		if (!_attr) return false;
 
@@ -1959,26 +2590,50 @@ namespace pugi
 	{
 		char buf[128];
 		sprintf(buf, "%d", rhs);
+	
+	#ifdef PUGIXML_WCHAR_MODE
+		char_t wbuf[128];
+		impl::widen_ascii(wbuf, buf);
+
+		return set_value(wbuf);
+	#else
 		return set_value(buf);
+	#endif
 	}
 
 	bool xml_attribute::set_value(unsigned int rhs)
 	{
 		char buf[128];
 		sprintf(buf, "%u", rhs);
+
+	#ifdef PUGIXML_WCHAR_MODE
+		char_t wbuf[128];
+		impl::widen_ascii(wbuf, buf);
+
+		return set_value(wbuf);
+	#else
 		return set_value(buf);
+	#endif
 	}
 
 	bool xml_attribute::set_value(double rhs)
 	{
 		char buf[128];
 		sprintf(buf, "%g", rhs);
+
+	#ifdef PUGIXML_WCHAR_MODE
+		char_t wbuf[128];
+		impl::widen_ascii(wbuf, buf);
+
+		return set_value(wbuf);
+	#else
 		return set_value(buf);
+	#endif
 	}
 	
 	bool xml_attribute::set_value(bool rhs)
 	{
-		return set_value(rhs ? "true" : "false");
+		return set_value(rhs ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
 	}
 
 #ifdef __BORLANDC__
@@ -2001,17 +2656,14 @@ namespace pugi
 	{
 	}
 	
+	xml_node::operator xml_node::unspecified_bool_type() const
+	{
 #ifdef __MWERKS__
-	xml_node::operator xml_node::unspecified_bool_type() const
-	{
       	return _root ? &xml_node::empty : 0;
-   	}
 #else
-	xml_node::operator xml_node::unspecified_bool_type() const
-	{
       	return _root ? &xml_node::_root : 0;
-   	}
 #endif
+   	}
 
    	bool xml_node::operator!() const
    	{
@@ -2080,9 +2732,9 @@ namespace pugi
 		return static_cast<xml_document_struct*>(r)->allocator;
 	}
 
-	const char* xml_node::name() const
+	const char_t* xml_node::name() const
 	{
-		return (_root && _root->name) ? _root->name : "";
+		return (_root && _root->name) ? _root->name : PUGIXML_TEXT("");
 	}
 
 	xml_node_type xml_node::type() const
@@ -2090,69 +2742,69 @@ namespace pugi
 		return _root ? static_cast<xml_node_type>(_root->type) : node_null;
 	}
 	
-	const char* xml_node::value() const
+	const char_t* xml_node::value() const
 	{
-		return (_root && _root->value) ? _root->value : "";
+		return (_root && _root->value) ? _root->value : PUGIXML_TEXT("");
 	}
 	
-	xml_node xml_node::child(const char* name) const
+	xml_node xml_node::child(const char_t* name) const
 	{
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && !strcmp(name, i->name)) return xml_node(i);
+			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
 
-	xml_node xml_node::child_w(const char* name) const
+	xml_node xml_node::child_w(const char_t* name) const
 	{
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && !impl::strcmpwild(name, i->name)) return xml_node(i);
+			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
 
-	xml_attribute xml_node::attribute(const char* name) const
+	xml_attribute xml_node::attribute(const char_t* name) const
 	{
 		if (!_root) return xml_attribute();
 
 		for (xml_attribute_struct* i = _root->first_attribute; i; i = i->next_attribute)
-			if (i->name && !strcmp(name, i->name))
+			if (i->name && impl::strequal(name, i->name))
 				return xml_attribute(i);
 		
 		return xml_attribute();
 	}
 	
-	xml_attribute xml_node::attribute_w(const char* name) const
+	xml_attribute xml_node::attribute_w(const char_t* name) const
 	{
 		if (!_root) return xml_attribute();
 
 		for (xml_attribute_struct* i = _root->first_attribute; i; i = i->next_attribute)
-			if (i->name && !impl::strcmpwild(name, i->name))
+			if (i->name && impl::strequalwild(name, i->name))
 				return xml_attribute(i);
 		
 		return xml_attribute();
 	}
 
-	xml_node xml_node::next_sibling(const char* name) const
+	xml_node xml_node::next_sibling(const char_t* name) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
-			if (i->name && !strcmp(name, i->name)) return xml_node(i);
+			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
 
-	xml_node xml_node::next_sibling_w(const char* name) const
+	xml_node xml_node::next_sibling_w(const char_t* name) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
-			if (i->name && !impl::strcmpwild(name, i->name)) return xml_node(i);
+			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -2165,22 +2817,22 @@ namespace pugi
 		else return xml_node();
 	}
 
-	xml_node xml_node::previous_sibling(const char* name) const
+	xml_node xml_node::previous_sibling(const char_t* name) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->prev_sibling; i; i = i->prev_sibling)
-			if (i->name && !strcmp(name, i->name)) return xml_node(i);
+			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
 
-	xml_node xml_node::previous_sibling_w(const char* name) const
+	xml_node xml_node::previous_sibling_w(const char_t* name) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->prev_sibling; i; i = i->prev_sibling)
-			if (i->name && !impl::strcmpwild(name, i->name)) return xml_node(i);
+			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -2205,23 +2857,23 @@ namespace pugi
 		return r;
 	}
 
-	const char* xml_node::child_value() const
+	const char_t* xml_node::child_value() const
 	{
-		if (!_root) return "";
+		if (!_root) return PUGIXML_TEXT("");
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if ((static_cast<xml_node_type>(i->type) == node_pcdata || static_cast<xml_node_type>(i->type) == node_cdata) && i->value)
 				return i->value;
 
-		return "";
+		return PUGIXML_TEXT("");
 	}
 
-	const char* xml_node::child_value(const char* name) const
+	const char_t* xml_node::child_value(const char_t* name) const
 	{
 		return child(name).child_value();
 	}
 
-	const char* xml_node::child_value_w(const char* name) const
+	const char_t* xml_node::child_value_w(const char_t* name) const
 	{
 		return child_w(name).child_value();
 	}
@@ -2246,7 +2898,7 @@ namespace pugi
 		return _root ? xml_node(_root->last_child) : xml_node();
 	}
 
-	bool xml_node::set_name(const char* rhs)
+	bool xml_node::set_name(const char_t* rhs)
 	{
 		switch (type())
 		{
@@ -2266,7 +2918,7 @@ namespace pugi
 		}
 	}
 		
-	bool xml_node::set_value(const char* rhs)
+	bool xml_node::set_value(const char_t* rhs)
 	{
 		switch (type())
 		{
@@ -2287,7 +2939,7 @@ namespace pugi
 		}
 	}
 
-	xml_attribute xml_node::append_attribute(const char* name)
+	xml_attribute xml_node::append_attribute(const char_t* name)
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
@@ -2297,7 +2949,7 @@ namespace pugi
 		return a;
 	}
 
-	xml_attribute xml_node::insert_attribute_before(const char* name, const xml_attribute& attr)
+	xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr)
 	{
 		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
 		
@@ -2323,7 +2975,7 @@ namespace pugi
 		return a;
 	}
 
-	xml_attribute xml_node::insert_attribute_after(const char* name, const xml_attribute& attr)
+	xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr)
 	{
 		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
 		
@@ -2453,7 +3105,7 @@ namespace pugi
 		return result;
 	}
 
-	void xml_node::remove_attribute(const char* name)
+	void xml_node::remove_attribute(const char_t* name)
 	{
 		remove_attribute(attribute(name));
 	}
@@ -2478,7 +3130,7 @@ namespace pugi
 		a._attr->destroy();
 	}
 
-	void xml_node::remove_child(const char* name)
+	void xml_node::remove_child(const char_t* name)
 	{
 		remove_child(child(name));
 	}
@@ -2496,64 +3148,64 @@ namespace pugi
         n._root->destroy();
 	}
 
-	xml_node xml_node::find_child_by_attribute(const char* name, const char* attr_name, const char* attr_value) const
+	xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && !strcmp(name, i->name))
+			if (i->name && impl::strequal(name, i->name))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (!strcmp(attr_name, a->name) && !strcmp(attr_value, a->value))
+					if (impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value))
 						return xml_node(i);
 			}
 
 		return xml_node();
 	}
 
-	xml_node xml_node::find_child_by_attribute_w(const char* name, const char* attr_name, const char* attr_value) const
+	xml_node xml_node::find_child_by_attribute_w(const char_t* name, const char_t* attr_name, const char_t* attr_value) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && !impl::strcmpwild(name, i->name))
+			if (i->name && impl::strequalwild(name, i->name))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (!impl::strcmpwild(attr_name, a->name) && !impl::strcmpwild(attr_value, a->value))
+					if (impl::strequalwild(attr_name, a->name) && impl::strequalwild(attr_value, a->value))
 						return xml_node(i);
 			}
 
 		return xml_node();
 	}
 
-	xml_node xml_node::find_child_by_attribute(const char* attr_name, const char* attr_value) const
+	xml_node xml_node::find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (!strcmp(attr_name, a->name) && !strcmp(attr_value, a->value))
+				if (impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value))
 					return xml_node(i);
 
 		return xml_node();
 	}
 
-	xml_node xml_node::find_child_by_attribute_w(const char* attr_name, const char* attr_value) const
+	xml_node xml_node::find_child_by_attribute_w(const char_t* attr_name, const char_t* attr_value) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (!impl::strcmpwild(attr_name, a->name) && !impl::strcmpwild(attr_value, a->value))
+				if (impl::strequalwild(attr_name, a->name) && impl::strequalwild(attr_value, a->value))
 					return xml_node(i);
 
 		return xml_node();
 	}
 
 #ifndef PUGIXML_NO_STL
-	std::string xml_node::path(char delimiter) const
+	string_t xml_node::path(char_t delimiter) const
 	{
-		std::string path;
+		string_t path;
 
 		xml_node cursor = *this; // Make a copy.
 		
@@ -2563,7 +3215,7 @@ namespace pugi
 		{
 			cursor = cursor.parent();
 			
-			std::string temp = cursor.name();
+			string_t temp = cursor.name();
 			temp += delimiter;
 			temp += path;
 			path.swap(temp);
@@ -2573,7 +3225,7 @@ namespace pugi
 	}
 #endif
 
-	xml_node xml_node::first_element_by_path(const char* path, char delimiter) const
+	xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter) const
 	{
 		xml_node found = *this; // Current search context.
 
@@ -2586,17 +3238,17 @@ namespace pugi
 			++path;
 		}
 
-		const char* path_segment = path;
+		const char_t* path_segment = path;
 
 		while (*path_segment == delimiter) ++path_segment;
 
-		const char* path_segment_end = path_segment;
+		const char_t* path_segment_end = path_segment;
 
 		while (*path_segment_end && *path_segment_end != delimiter) ++path_segment_end;
 
 		if (path_segment == path_segment_end) return found;
 
-		const char* next_segment = path_segment_end;
+		const char_t* next_segment = path_segment_end;
 
 		while (*next_segment == delimiter) ++next_segment;
 
@@ -2608,7 +3260,7 @@ namespace pugi
 		{
 			for (xml_node_struct* j = found._root->first_child; j; j = j->next_sibling)
 			{
-				if (j->name && !strcmprange(j->name, path_segment, path_segment_end))
+				if (j->name && impl::strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
 				{
 					xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
 
@@ -2698,23 +3350,32 @@ namespace pugi
 		}
 	}
 
-	void xml_node::print(xml_writer& writer, const char* indent, unsigned int flags, unsigned int depth) const
+	void xml_node::print(xml_writer& writer, const char_t* indent, unsigned int flags, encoding_t encoding, unsigned int depth) const
 	{
 		if (!_root) return;
 
-		xml_buffered_writer buffered_writer(writer);
+		xml_buffered_writer buffered_writer(writer, encoding);
 
 		node_output(buffered_writer, *this, indent, flags, depth);
 	}
 
 #ifndef PUGIXML_NO_STL
-	void xml_node::print(std::ostream& stream, const char* indent, unsigned int flags, unsigned int depth) const
+	void xml_node::print(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent, unsigned int flags, encoding_t encoding, unsigned int depth) const
 	{
 		if (!_root) return;
 
 		xml_writer_stream writer(stream);
 
-		print(writer, indent, flags, depth);
+		print(writer, indent, flags, encoding, depth);
+	}
+
+	void xml_node::print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent, unsigned int flags, unsigned int depth) const
+	{
+		if (!_root) return;
+
+		xml_writer_stream writer(stream);
+
+		print(writer, indent, flags, encoding_wchar, depth);
 	}
 #endif
 
@@ -2724,7 +3385,7 @@ namespace pugi
 
 		if (!r) return -1;
 
-		const char* buffer = static_cast<xml_document_struct*>(r)->buffer;
+		const char_t* buffer = static_cast<xml_document_struct*>(r)->buffer;
 
 		if (!buffer) return -1;
 
@@ -2964,7 +3625,7 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
-	xml_parse_result xml_document::load(std::istream& stream, unsigned int options)
+	xml_parse_result xml_document::load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options, encoding_t encoding)
 	{
 		destroy();
 
@@ -2977,36 +3638,63 @@ namespace pugi
 
 		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
 
-		char* s = static_cast<char*>(global_allocate(length + 1));
+		char* s = static_cast<char*>(global_allocate(length > 0 ? length : 1));
 		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
 
 		stream.read(s, length);
 
-		if (stream.gcount() > length || stream.gcount() == 0)
+		if (stream.gcount() > length || (length > 0 && stream.gcount() == 0))
 		{
 			global_deallocate(s);
 			return MAKE_PARSE_RESULT(status_io_error);
 		}
 
-		s[stream.gcount()] = 0;
-
-		return parse(transfer_ownership_tag(), s, options); // Parse the input string.
+		return load_buffer_inplace_own(s, stream.gcount(), options, encoding); // Parse the input string.
 	}
-#endif
 
-	xml_parse_result xml_document::load(const char* contents, unsigned int options)
+	xml_parse_result xml_document::load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options)
 	{
 		destroy();
 
-		char* s = static_cast<char*>(global_allocate(strlen(contents) + 1));
+		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
+
+		std::streamoff length, pos = stream.tellg();
+		stream.seekg(0, std::ios::end);
+		length = stream.tellg();
+		stream.seekg(pos, std::ios::beg);
+
+		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
+
+		wchar_t* s = static_cast<wchar_t*>(global_allocate((length > 0 ? length : 1) * sizeof(wchar_t)));
 		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
 
-		strcpy(s, contents);
+		stream.read(s, length);
 
-		return parse(transfer_ownership_tag(), s, options); // Parse the input string.
+		if (stream.gcount() > length || (length > 0 && stream.gcount() == 0))
+		{
+			global_deallocate(s);
+			return MAKE_PARSE_RESULT(status_io_error);
+		}
+
+		return load_buffer_inplace_own(s, stream.gcount() * sizeof(wchar_t), options, encoding_wchar); // Parse the input string.
+	}
+#endif
+
+	xml_parse_result xml_document::load(const char_t* contents, unsigned int options)
+	{
+		destroy();
+		
+		// Force native encoding (skip autodetection)
+	#ifdef PUGIXML_WCHAR_MODE
+		encoding_t encoding = encoding_wchar;
+	#else
+		encoding_t encoding = encoding_utf8;
+	#endif
+
+		return load_buffer(contents, impl::strlen(contents) * sizeof(char_t), options, encoding);
 	}
 
-	xml_parse_result xml_document::load_file(const char* name, unsigned int options)
+	xml_parse_result xml_document::load_file(const char* name, unsigned int options, encoding_t encoding)
 	{
 		destroy();
 
@@ -3023,7 +3711,7 @@ namespace pugi
 			return MAKE_PARSE_RESULT(status_io_error);
 		}
 		
-		char* s = static_cast<char*>(global_allocate(length + 1));
+		char* s = static_cast<char*>(global_allocate(length > 0 ? length : 1));
 
 		if (!s)
 		{
@@ -3031,69 +3719,134 @@ namespace pugi
 			return MAKE_PARSE_RESULT(status_out_of_memory);
 		}
 
-		size_t read = fread(s, (size_t)length, 1, file);
+		size_t read = fread(s, 1, (size_t)length, file);
 		fclose(file);
 
-		if (read != 1)
+		if (read != (size_t)length)
 		{
 			global_deallocate(s);
 			return MAKE_PARSE_RESULT(status_io_error);
 		}
-
-		s[length] = 0;
 		
-		return parse(transfer_ownership_tag(), s, options); // Parse the input string.
+		return load_buffer_inplace_own(s, length, options, encoding);
 	}
 
-	xml_parse_result xml_document::parse(char* xmlstr, unsigned int options)
+	xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, encoding_t encoding)
 	{
 		destroy();
 
-		// for offset_debug
-		static_cast<xml_document_struct*>(_root)->buffer = xmlstr;
+		// get actual encoding
+		encoding_t buffer_encoding = get_buffer_encoding(encoding, contents, size);
 
-		xml_allocator& alloc = static_cast<xml_document_struct*>(_root)->allocator;
-		
-		xml_parser parser(alloc);
-		
-		return parser.parse(xmlstr, _root, options); // Parse the input string.
-	}
-		
-	xml_parse_result xml_document::parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options)
-	{
-		xml_parse_result res = parse(xmlstr, options);
+		// get private buffer
+		char_t* buffer;
+		size_t length;
 
-		_buffer = xmlstr;
+		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, false)) return MAKE_PARSE_RESULT(status_out_of_memory);
+		
+		// parse
+		xml_parse_result res = xml_parser::parse(buffer, length, _root, options);
+
+		// remember encoding
+		res.encoding = buffer_encoding;
+
+		// grab onto buffer
+		_buffer = buffer;
 
 		return res;
 	}
 
-	void xml_document::save(xml_writer& writer, const char* indent, unsigned int flags) const
+	xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options, encoding_t encoding)
 	{
-		xml_buffered_writer buffered_writer(writer);
+		destroy();
 
-		if (flags & format_write_bom_utf8)
-		{
-			static const unsigned char utf8_bom[] = {0xEF, 0xBB, 0xBF};
-			buffered_writer.write(utf8_bom, 3);
-		}
+		// get actual encoding
+		encoding_t buffer_encoding = get_buffer_encoding(encoding, contents, size);
+
+		// get private buffer
+		char_t* buffer;
+		size_t length;
+
+		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, true)) return MAKE_PARSE_RESULT(status_out_of_memory);
+		
+		// parse
+		xml_parse_result res = xml_parser::parse(buffer, length, _root, options);
+
+		// remember encoding
+		res.encoding = buffer_encoding;
+
+		// grab onto buffer if it's our buffer, user is responsible for deallocating contens himself
+		if (buffer != contents) _buffer = buffer;
+
+		return res;
+	}
+		
+	xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options, encoding_t encoding)
+	{
+		destroy();
+
+		// get actual encoding
+		encoding_t buffer_encoding = get_buffer_encoding(encoding, contents, size);
+
+		// get private buffer
+		char_t* buffer;
+		size_t length;
+
+		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, true)) return MAKE_PARSE_RESULT(status_out_of_memory);
+
+		// delete original buffer if we performed a conversion
+		if (buffer != contents) global_deallocate(contents);
+		
+		// parse
+		xml_parse_result res = xml_parser::parse(buffer, length, _root, options);
+
+		// remember encoding
+		res.encoding = buffer_encoding;
+
+		// grab onto buffer
+		_buffer = buffer;
+
+		return res;
+	}
+
+	void xml_document::save(xml_writer& writer, const char_t* indent, unsigned int flags, encoding_t encoding) const
+	{
+		if (flags & format_write_bom) write_bom(writer, get_write_encoding(encoding));
+
+		xml_buffered_writer buffered_writer(writer, encoding);
 
 		if (!(flags & format_no_declaration))
 		{
-			buffered_writer.write("<?xml version=\"1.0\"?>");
-			if (!(flags & format_raw)) buffered_writer.write("\n");
+			buffered_writer.write(PUGIXML_TEXT("<?xml version=\"1.0\"?>"));
+			if (!(flags & format_raw)) buffered_writer.write('\n');
 		}
 
 		node_output(buffered_writer, *this, indent, flags, 0);
 	}
 
-	bool xml_document::save_file(const char* name, const char* indent, unsigned int flags) const
+#ifndef PUGIXML_NO_STL
+	void xml_document::save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent, unsigned int flags, encoding_t encoding) const
+	{
+		xml_writer_stream writer(stream);
+
+		save(writer, indent, flags, encoding);
+	}
+
+	void xml_document::save(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent, unsigned int flags) const
+	{
+		xml_writer_stream writer(stream);
+
+		save(writer, indent, flags, encoding_wchar);
+	}
+#endif
+
+	bool xml_document::save_file(const char* name, const char_t* indent, unsigned int flags, encoding_t encoding) const
 	{
 		FILE* file = fopen(name, "wb");
 		if (!file) return false;
 
 		xml_writer_file writer(file);
-		save(writer, indent, flags);
+		save(writer, indent, flags, encoding);
 
 		fclose(file);
 
@@ -3108,29 +3861,56 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str)
 	{
+		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+
+		size_t length = wcslen(str);
+
+		// first pass: get length in utf8 characters
+		size_t size = sizeof(wchar_t) == 2 ?
+			impl::decode_utf16_block<impl::utf8_counter>(reinterpret_cast<const impl::char16_t*>(str), length, 0, opt1_to_type<false>()) :
+			impl::decode_utf32_block<impl::utf8_counter>(reinterpret_cast<const impl::char32_t*>(str), length, 0, opt1_to_type<false>());
+
+		// allocate resulting string
 		std::string result;
-		result.reserve(strutf16_utf8_size(str));
-	  
-		for (; *str; ++str)
+		result.resize(size);
+
+		// second pass: convert to utf8
+		if (size > 0)
 		{
-			char buffer[6];
+			impl::char8_t* begin = reinterpret_cast<impl::char8_t*>(&result[0]);
+			impl::char8_t* end = sizeof(wchar_t) == 2 ?
+				impl::decode_utf16_block<impl::utf8_writer>(reinterpret_cast<const impl::char16_t*>(str), length, begin, opt1_to_type<false>()) :
+				impl::decode_utf32_block<impl::utf8_writer>(reinterpret_cast<const impl::char32_t*>(str), length, begin, opt1_to_type<false>());
 	  	
-			result.append(buffer, strutf16_utf8(buffer, *str));
+			// truncate invalid output
+			assert(begin <= end && static_cast<size_t>(end - begin) <= result.size());
+			result.resize(static_cast<size_t>(end - begin));
 		}
-	  	
+
 	  	return result;
 	}
 	
-	std::wstring PUGIXML_FUNCTION as_utf16(const char* str)
+	std::wstring PUGIXML_FUNCTION as_wide(const char* str)
 	{
-		std::wstring result;
-		result.reserve(strutf8_utf16_size(str));
+		const impl::char8_t* data = reinterpret_cast<const impl::char8_t*>(str);
+		size_t size = strlen(str);
 
-		for (; *str;)
+		// first pass: get length in wchar_t
+		size_t length = impl::decode_utf8_block<impl::wchar_counter>(data, size, 0);
+
+		// allocate resulting string
+		std::wstring result;
+		result.resize(length);
+
+		// second pass: convert to wchar_t
+		if (length > 0)
 		{
-			unsigned int ch = 0;
-			str = strutf8_utf16(str, ch);
-			result += (wchar_t)ch;
+			impl::wchar_writer::value_type begin = reinterpret_cast<impl::wchar_writer::value_type>(&result[0]);
+			impl::wchar_writer::value_type end = impl::decode_utf8_block<impl::wchar_writer>(data, size, begin);
+
+			// truncate invalid output
+			assert(begin <= end && static_cast<size_t>(end - begin) <= result.size());
+			result.resize(static_cast<size_t>(end - begin));
 		}
 
 		return result;
@@ -3153,6 +3933,22 @@ namespace pugi
     	return global_deallocate;
     }
 }
+
+#if !defined(PUGIXML_NO_STL) && (defined(_MSC_VER) || defined(__ICC))
+namespace std
+{
+	// Workarounds for (non-standard) iterator category detection for older versions (MSVC7/IC8 and earlier)
+	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_node_iterator&)
+	{
+		return std::bidirectional_iterator_tag();
+	}
+
+	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_attribute_iterator&)
+	{
+		return std::bidirectional_iterator_tag();
+	}
+}
+#endif
 
 /**
  * Copyright (c) 2006-2009 Arseny Kapoulkine

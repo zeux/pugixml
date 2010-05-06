@@ -8,7 +8,7 @@ if ( $(toolset:I=^mingw) || $(toolset) = "gcc" )
 	}
 	else
 	{
-		GCCPATH = "%$(toolset)_PATH%\bin\\" ;
+		GCCPATH = "%$(toolset)_PATH%\\bin\\" ;
 	}
 
 	CCFLAGS += -D$(defines) ;
@@ -39,12 +39,12 @@ if ( $(toolset:I=^mingw) || $(toolset) = "gcc" )
 	
 	actions LinkAction
 	{
-		"$(GCCPATH)g++" $(>) -o $(<) -static-libgcc $(LDFLAGS) 
+		"$(GCCPATH)g++" $(>) -o $(<) -static-libgcc -static $(LDFLAGS) 
 	}
 	
-	actions CoverageAction
+	actions maxtargets 1 CoverageAction
 	{
-		"$(GCCPATH)gcov" $(>:\\) $(GCOVFLAGS) | perl tests/gcov-filter.pl
+		"$(GCCPATH)gcov" $(>) $(GCOVFLAGS) | perl tests/gcov-filter.pl
 	}
 }
 else if ( $(toolset:I=^msvc) )
@@ -67,6 +67,15 @@ else if ( $(toolset:I=^msvc) )
 	else
 	{
 		CCFLAGS += /W3 ; # lots of warnings at W4 in standard library
+	}
+
+	if ( $(toolset) = msvc7 || $(toolset) = msvc71 || $(toolset) = msvc8 )
+	{
+		CCFLAGS += "/I\"%$(toolset)_PATH%\\PlatformSDK\\include\"" ;
+	}
+	else if ( $(toolset) != msvc6 )
+	{
+		CCFLAGS += "/I\"%WINSDK_PATH%\\Include\"" ;
 	}
 
 	if ( ! ( PUGIXML_NO_EXCEPTIONS in $(defines) ) )
@@ -107,7 +116,7 @@ else if ( $(toolset:I=^msvc) )
 	
 	actions LinkAction
 	{
-		"%$(toolset)_PATH%\bin$(postfix)\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib" /LIBPATH:"%WINSDK_PATH%\Lib$(sdk_postfix)" $(LDFLAGS)
+		"%$(toolset)_PATH%\bin$(postfix)\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) /PDB:$(<:S=.pdb) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib" /LIBPATH:"%WINSDK_PATH%\Lib$(sdk_postfix)" $(LDFLAGS)
 	}
 	
 	actions CoverageAction
@@ -136,7 +145,7 @@ else if ( $(toolset) = "ic8" )
 
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\icl.exe" /W4 /WX /Wport /Qwd981,444,280,383,909,304,167,177 /I"%$(msvc)_PATH%\include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		"%$(toolset)_PATH%\bin\icl.exe" /W4 /WX /Wport /Qwd981,444,280,383,909,304,167,177,1419 /I"%$(msvc)_PATH%\include" /I"%$(msvc)_PATH%\PlatformSDK\Include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction
@@ -183,7 +192,7 @@ else if ( $(toolset:I=^dmc) )
 	
 	actions LinkAction
 	{
-		"%$(toolset)_PATH%\bin\link.exe" $(>:\\) , $(<:\\) , nul , $(LDFLAGS:\\)
+		"%$(toolset)_PATH%\bin\link.exe" $(>:\\) , $(<:\\) , nul , $(LDFLAGS:\\) -L/co/ma
 	}
 	
 	actions CoverageAction
@@ -399,6 +408,9 @@ rule CleanCoverage TARGET
 	
 	# clean object files
 	local FILES = $($(SOURCE)_objects:S=.gcda) ;
+
+	# disable "independent target" warnings
+	NotFile $(FILES) ;
 
 	DeleteAction $(CLEAN_TARGET) : $(FILES) ;
 }

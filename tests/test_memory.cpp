@@ -2,13 +2,13 @@
 
 namespace
 {
-	char buffer[8];
+	pugi::char_t buffer[8];
 	int allocate_count = 0;
 	int deallocate_count = 0;
 
 	void* allocate(size_t size)
 	{
-		CHECK(size == 8);
+		CHECK(size == sizeof(pugi::char_t) * 8);
 		++allocate_count;
 		return buffer;
 	}
@@ -32,23 +32,23 @@ TEST(custom_memory_management)
 	{
 		// parse document
 		xml_document doc;
-		CHECK(doc.load("<node/>"));
+		CHECK(doc.load(STR("<node />")));
 	
 		CHECK(allocate_count == 1);
 		CHECK(deallocate_count == 0);
-		CHECK_STRING(buffer, "<node\0>");
+		CHECK_STRING(buffer, STR("<node"));
 
 		// modify document
-		doc.child("node").set_name("foobars");
+		doc.child(STR("node")).set_name(STR("foobars"));
 
 		CHECK(allocate_count == 2);
 		CHECK(deallocate_count == 0);
-		CHECK_STRING(buffer, "foobars");
+		CHECK_STRING(buffer, STR("foobars"));
 	}
 
 	CHECK(allocate_count == 2);
 	CHECK(deallocate_count == 2);
-	CHECK_STRING(buffer, "foobars");
+	CHECK_STRING(buffer, STR("foobars"));
 
 	// restore old functions
 	set_memory_management_functions(old_allocate, old_deallocate);

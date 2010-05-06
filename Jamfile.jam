@@ -28,8 +28,8 @@ if ( ! $(configuration) )
 	configuration = "debug" ;
 }
 
-# remove empty define
-defines -= "" ;
+# split defines into list
+defines = [ Split $(defines) : ',' ] ;
 
 # options
 if ( $(defines) )
@@ -41,23 +41,24 @@ else
 	BUILD = build/$(toolset)/standard/$(configuration) ;
 }
 
-if ( $(toolset:I=^mingw) )
+if ( $(toolset:I=^mingw) || $(toolset) = gcc )
 {
 	CCFLAGS = -fprofile-arcs -ftest-coverage ;
 	LDFLAGS = -fprofile-arcs ;
 	GCOVFLAGS = -n ;
 
-	if ( $(toolset) = mingw44 )
-	{
-		GCOVFLAGS += -o $(BUILD)/src ; # because stupid gcov can't find files via relative paths any more
-	}
+	GCOVFLAGS += -o $(BUILD)/src ; # because stupid gcov can't find files via relative paths
 }
 
 # rules
 include "Jamrules.jam" ;
 
+# enable dependency cache
+DEPCACHE.standard = build/.depcache ;
+
 # targets
 Library pugixml : src/pugixml.cpp src/pugixpath.cpp ;
-Application tests : tests/main.cpp [ Glob tests : test_*.cpp ] : pugixml ;
+Application tests : [ Glob tests : *.cpp ] : pugixml ;
 Test run_tests : tests ;
-Coverage coverage : run_tests ;
+Coverage coverage : pugixml ;
+Depends coverage : run_tests ;

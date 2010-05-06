@@ -49,7 +49,12 @@ template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
 	T null = T();
 
 	// obj1 < obj2 (we use operator<, but there is no other choice
-	if (obj1 > obj2) std::swap(obj1, obj2);
+	if (obj1 > obj2)
+	{
+		T temp = obj1;
+		obj1 = obj2;
+		obj2 = temp;
+	}
 
 	// operator<
 	CHECK(null < obj1);
