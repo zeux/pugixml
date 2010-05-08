@@ -292,7 +292,10 @@ namespace pugi
 	const unsigned int format_write_bom = 0x02;
 
 	// \deprecated This constant is deprecated and will be removed in future versions; use format_write_bom instead
-	PUGIXML_DEPRECATED const unsigned int format_write_bom_utf8 = format_write_bom;
+#ifndef __INTEL_COMPILER
+	PUGIXML_DEPRECATED
+#endif
+	const unsigned int format_write_bom_utf8 = format_write_bom;
 	
 	/**
 	 * If this flag is on, no indentation is performed and no line breaks are written to output file.
