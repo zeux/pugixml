@@ -12,6 +12,7 @@ if ( $(toolset:I=^mingw) || $(toolset) = "gcc" )
 	}
 
 	CCFLAGS += -D$(defines) ;
+	CCFLAGS += -Wno-deprecated-declarations ;
 
 	if ( $(configuration) = "debug" )
 	{

@@ -6,6 +6,10 @@
 
 #include "writer_string.hpp"
 
+#ifdef _MSC_VER
+#	pragma warning(disable: 4996)
+#endif
+
 // format_write_bom_utf8 - it's now format_write_bom!
 TEST_XML(document_save_bom_utf8, "<node/>")
 {

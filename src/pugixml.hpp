@@ -38,7 +38,13 @@ namespace std
 
 // Macro for deprecated features
 #ifndef PUGIXML_DEPRECATED
-#	define PUGIXML_DEPRECATED(message)
+#	if defined(__GNUC__)
+#		define PUGIXML_DEPRECATED __attribute__((deprecated))
+#	elif defined(_MSC_VER) && _MSC_VER >= 1300
+#		define PUGIXML_DEPRECATED __declspec(deprecated)
+#	else
+#		define PUGIXML_DEPRECATED
+#	endif
 #endif
 
 // No XPath without STL
@@ -285,7 +291,8 @@ namespace pugi
 	 */
 	const unsigned int format_write_bom = 0x02;
 
-	PUGIXML_DEPRECATED("Use format_write_bom instead") const unsigned int format_write_bom_utf8 = format_write_bom;
+	// \deprecated This constant is deprecated and will be removed in future versions; use format_write_bom instead
+	PUGIXML_DEPRECATED const unsigned int format_write_bom_utf8 = format_write_bom;
 	
 	/**
 	 * If this flag is on, no indentation is performed and no line breaks are written to output file.
@@ -1753,7 +1760,7 @@ namespace pugi
 	 * Struct used to distinguish parsing with ownership transfer from parsing without it.
 	 * \see xml_document::parse
 	 */
-	PUGIXML_DEPRECATED("Use xml_document::load_buffer_inplace_own instead") struct transfer_ownership_tag {};
+	struct transfer_ownership_tag {};
 
 	/**
 	 * Parsing status enumeration, returned as part of xml_parse_result struct
@@ -1874,8 +1881,10 @@ namespace pugi
 		 * \param xmlstr - readwrite string with xml data
 		 * \param options - parsing options
 		 * \return parsing result
+		 *
+		 * \deprecated This function is deprecated and will be removed in future versions; use xml_document::load_buffer_inplace instead
 		 */
-		PUGIXML_DEPRECATED("Use xml_document::load_buffer_inplace instead") xml_parse_result parse(char* xmlstr, unsigned int options = parse_default);
+		PUGIXML_DEPRECATED xml_parse_result parse(char* xmlstr, unsigned int options = parse_default);
 		
 		/**
 		 * Parse the given XML string in-situ (gains ownership).
@@ -1886,8 +1895,10 @@ namespace pugi
 		 * \param xmlstr - readwrite string with xml data
 		 * \param options - parsing options
 		 * \return parsing result
+		 *
+		 * \deprecated This function is deprecated and will be removed in future versions; use xml_document::load_buffer_inplace_own instead
 		 */
-		PUGIXML_DEPRECATED("Use xml_document::load_buffer_inplace_own instead") xml_parse_result parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options = parse_default);
+		PUGIXML_DEPRECATED xml_parse_result parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options = parse_default);
 
 		/**
 		 * Load document from file
@@ -2234,8 +2245,10 @@ namespace pugi
 	 *
 	 * \param str - input UTF8 string
 	 * \return output wide string string
+	 *
+	 * \deprecated This function is deprecated and will be removed in future versions; use as_wide instead
 	 */
-	PUGIXML_DEPRECATED("Use as_wide instead") std::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> > PUGIXML_FUNCTION as_utf16(const char* str);
+	PUGIXML_DEPRECATED std::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> > PUGIXML_FUNCTION as_utf16(const char* str);
 
 	/**
 	 * Convert utf8 to wide string
