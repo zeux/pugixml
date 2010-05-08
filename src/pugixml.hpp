@@ -17,8 +17,6 @@
 #include "pugiconfig.hpp"
 
 #ifndef PUGIXML_NO_STL
-#include <exception>
-
 namespace std
 {
 	struct bidirectional_iterator_tag;
@@ -38,11 +36,21 @@ namespace std
 }
 #endif
 
+// Macro for deprecated features
+#ifndef PUGIXML_DEPRECATED
+#	define PUGIXML_DEPRECATED(message)
+#endif
+
 // No XPath without STL
 #ifdef PUGIXML_NO_STL
 #	ifndef PUGIXML_NO_XPATH
 #		define PUGIXML_NO_XPATH
 #	endif
+#endif
+
+// Include exception header for XPath
+#ifndef PUGIXML_NO_XPATH
+#	include <exception>
 #endif
 
 // If no API is defined, assume default
@@ -276,6 +284,8 @@ namespace pugi
 	 * This flag is off by default.
 	 */
 	const unsigned int format_write_bom = 0x02;
+
+	PUGIXML_DEPRECATED("Use format_write_bom instead") const unsigned int format_write_bom_utf8 = format_write_bom;
 	
 	/**
 	 * If this flag is on, no indentation is performed and no line breaks are written to output file.
@@ -1430,7 +1440,6 @@ namespace pugi
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
 		 * \param depth - starting depth (used for indentation)
-		 * \deprecated Use print() with xml_writer_stream instead
 		 */
 		void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
 
@@ -1441,7 +1450,6 @@ namespace pugi
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
 		 * \param depth - starting depth (used for indentation)
-		 * \deprecated Use print() with xml_writer_stream instead
 		 */
 		void print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
 	#endif
@@ -1742,6 +1750,12 @@ namespace pugi
 	};
 
 	/**
+	 * Struct used to distinguish parsing with ownership transfer from parsing without it.
+	 * \see xml_document::parse
+	 */
+	PUGIXML_DEPRECATED("Use xml_document::load_buffer_inplace_own instead") struct transfer_ownership_tag {};
+
+	/**
 	 * Parsing status enumeration, returned as part of xml_parse_result struct
 	 */
 	enum xml_parse_status
@@ -1850,6 +1864,30 @@ namespace pugi
 		 * \return parsing result
 		 */
 		xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
+
+		/**
+		 * Parse the given XML string in-situ.
+		 * The string is modified; you should ensure that string data will persist throughout the
+		 * document's lifetime. Although, document does not gain ownership over the string, so you
+		 * should free the memory occupied by it manually.
+		 *
+		 * \param xmlstr - readwrite string with xml data
+		 * \param options - parsing options
+		 * \return parsing result
+		 */
+		PUGIXML_DEPRECATED("Use xml_document::load_buffer_inplace instead") xml_parse_result parse(char* xmlstr, unsigned int options = parse_default);
+		
+		/**
+		 * Parse the given XML string in-situ (gains ownership).
+		 * The string is modified; document gains ownership over the string, so you don't have to worry
+		 * about it's lifetime.
+		 * Call example: doc.parse(transfer_ownership_tag(), string, options);
+		 *
+		 * \param xmlstr - readwrite string with xml data
+		 * \param options - parsing options
+		 * \return parsing result
+		 */
+		PUGIXML_DEPRECATED("Use xml_document::load_buffer_inplace_own instead") xml_parse_result parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options = parse_default);
 
 		/**
 		 * Load document from file
@@ -2191,6 +2229,14 @@ namespace pugi
 	 */
 	std::basic_string<char, std::char_traits<char>, std::allocator<char> > PUGIXML_FUNCTION as_utf8(const wchar_t* str);
 	
+	/**
+	 * Convert utf8 to wide string
+	 *
+	 * \param str - input UTF8 string
+	 * \return output wide string string
+	 */
+	PUGIXML_DEPRECATED("Use as_wide instead") std::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> > PUGIXML_FUNCTION as_utf16(const char* str);
+
 	/**
 	 * Convert utf8 to wide string
 	 *

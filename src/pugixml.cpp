@@ -4009,6 +4009,16 @@ namespace pugi
 		return load_buffer(contents, impl::strlen(contents) * sizeof(char_t), options, encoding);
 	}
 
+	xml_parse_result xml_document::parse(char* xmlstr, unsigned int options)
+	{
+		return load_buffer_inplace(xmlstr, strlen(xmlstr), options, encoding_utf8);
+	}
+		
+	xml_parse_result xml_document::parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options)
+	{
+		return load_buffer_inplace_own(xmlstr, strlen(xmlstr), options, encoding_utf8);
+	}
+
 	xml_parse_result xml_document::load_file(const char* name, unsigned int options, encoding_t encoding)
 	{
 		destroy();
@@ -4205,6 +4215,11 @@ namespace pugi
 	  	return result;
 	}
 	
+	std::wstring PUGIXML_FUNCTION as_utf16(const char* str)
+	{
+		return as_wide(str);
+	}
+
 	std::wstring PUGIXML_FUNCTION as_wide(const char* str)
 	{
 		const impl::char8_t* data = reinterpret_cast<const impl::char8_t*>(str);
