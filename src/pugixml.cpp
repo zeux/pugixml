@@ -207,12 +207,14 @@ namespace pugi
 			return (find == 1 && *dst == 0 && *src == 0);
 		}
 
+#ifdef PUGIXML_WCHAR_MODE
 		// Convert string to wide string, assuming all symbols are ASCII
 		void widen_ascii(wchar_t* dest, const char* source)
 		{
 			for (const char* i = source; *i; ++i) *dest++ = *i;
 			*dest = 0;
 		}
+#endif
 	}
 }
 

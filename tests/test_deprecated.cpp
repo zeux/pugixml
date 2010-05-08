@@ -110,6 +110,7 @@ TEST_XML(dom_node_child_value_w, "<node><novalue/><child1>value1</child1><child2
 
 	CHECK_STRING(node.child_value_w(STR("c*[23456789]")), STR("value2"));
 	CHECK_STRING(node.child_value_w(STR("*")), STR("")); // child_value(name) and child_value_w(pattern) do not continue the search if a node w/out value is found first
+	CHECK_STRING(node.child_value_w(STR("nothing*here")), STR(""));
 }
 
 TEST_XML(dom_node_find_child_by_attribute_w, "<node><child1 attr='value1'/><child2 attr='value2'/><child2 attr='value3'/></node>")
