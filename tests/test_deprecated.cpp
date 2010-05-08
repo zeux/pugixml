@@ -13,6 +13,12 @@
 #	pragma warning(disable: 4996)
 #endif
 
+#ifdef __GNUC__
+#	if __GNUC__ >= 4
+#		pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#	endif
+#endif
+
 // format_write_bom_utf8 - it's now format_write_bom!
 TEST_XML(document_save_bom_utf8, "<node/>")
 {
