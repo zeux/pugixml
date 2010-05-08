@@ -122,7 +122,7 @@ else if ( $(toolset:I=^msvc) )
 	
 	actions LinkAction
 	{
-		"%$(toolset)_PATH%\bin$(postfix)\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) /PDB:$(<:S=.pdb) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib" /LIBPATH:"%WINSDK_PATH%\Lib$(sdk_postfix)" $(LDFLAGS)
+		"%$(toolset)_PATH%\bin$(postfix)\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) /PDB:$(<:S=.pdb) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib$(postfix)" /LIBPATH:"%WINSDK_PATH%\Lib$(sdk_postfix)" $(LDFLAGS)
 	}
 	
 	actions CoverageAction
