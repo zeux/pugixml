@@ -1,3 +1,6 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_NONSTDC_NO_DEPRECATE 0
+
 #include <string.h> // because Borland's STL is braindead, we have to include <string.h> _before_ <string> in order to get memcpy
 
 #include "common.hpp"
@@ -11,10 +14,6 @@
 #include <sstream>
 
 #include <string>
-
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
 
 TEST(document_create)
 {

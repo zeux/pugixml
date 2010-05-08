@@ -3190,7 +3190,12 @@ namespace pugi
 
 	const char_t* xml_node::child_value_w(const char_t* name) const
 	{
-		return child_w(name).child_value();
+		if (!_root) return PUGIXML_TEXT("");
+
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i).child_value();
+
+		return PUGIXML_TEXT("");
 	}
 
 	xml_attribute xml_node::first_attribute() const

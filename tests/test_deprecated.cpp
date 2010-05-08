@@ -6,6 +6,9 @@
 
 #include "writer_string.hpp"
 
+#include <vector>
+#include <iterator>
+
 #ifdef _MSC_VER
 #	pragma warning(disable: 4996)
 #endif
@@ -59,3 +62,135 @@ TEST(as_utf16)
 #endif
 }
 #endif
+
+// wildcard functions
+TEST_XML(dom_node_child_w, "<node><child1/><child2/></node>")
+{
+	CHECK(doc.child_w(STR("n?de")) == doc.child(STR("node")));
+	CHECK(doc.child_w(STR("n[az]de")) == xml_node());
+	CHECK(doc.child_w(STR("n[aoz]de")) == doc.child(STR("node")));
+	CHECK(doc.child_w(STR("*e")) == doc.child(STR("node")));
+	CHECK(doc.child(STR("node")).child_w(STR("*l?[23456789]*")) == doc.child(STR("node")).child(STR("child2")));
+}
+
+TEST_XML(dom_node_attribute_w, "<node attr1='0' attr2='1'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute_w(STR("*tt?[23456789]*")) == node.attribute(STR("attr2")));
+	CHECK(node.attribute_w(STR("?")) == xml_attribute());
+}
+
+TEST_XML(dom_node_next_previous_sibling_w, "<node><child1/><child2/><child3/></node>")
+{
+	CHECK(xml_node().next_sibling_w(STR("n")) == xml_node());
+	CHECK(xml_node().previous_sibling_w(STR("n")) == xml_node());
+
+	xml_node child1 = doc.child(STR("node")).child(STR("child1"));
+	xml_node child3 = doc.child(STR("node")).child(STR("child3"));
+
+	CHECK(child1.next_sibling_w(STR("*[3456789]")) == child3);
+	CHECK(child1.next_sibling_w(STR("?")) == xml_node());
+	CHECK(child3.previous_sibling_w(STR("*[3456789]")) == xml_node());
+	CHECK(child3.previous_sibling_w(STR("?")) == xml_node());
+	CHECK(child3.previous_sibling_w(STR("*1")) == child1);
+}
+
+TEST_XML(dom_node_child_value_w, "<node><novalue/><child1>value1</child1><child2>value2<n/></child2><child3><![CDATA[value3]]></child3>value4</node>")
+{
+	CHECK_STRING(xml_node().child_value_w(STR("n")), STR(""));
+
+	xml_node node = doc.child(STR("node"));
+
+	CHECK_STRING(node.child_value_w(STR("c*[23456789]")), STR("value2"));
+	CHECK_STRING(node.child_value_w(STR("*")), STR("")); // child_value(name) and child_value_w(pattern) do not continue the search if a node w/out value is found first
+}
+
+TEST_XML(dom_node_find_child_by_attribute_w, "<node><child1 attr='value1'/><child2 attr='value2'/><child2 attr='value3'/></node>")
+{
+	CHECK(xml_node().find_child_by_attribute_w(STR("name"), STR("attr"), STR("value")) == xml_node());
+	CHECK(xml_node().find_child_by_attribute_w(STR("attr"), STR("value")) == xml_node());
+
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.find_child_by_attribute_w(STR("*"), STR("att?"), STR("val*[0123456789]")) == node.child(STR("child1")));
+	CHECK(node.find_child_by_attribute_w(STR("*"), STR("attr3"), STR("val*[0123456789]")) == xml_node());
+	CHECK(node.find_child_by_attribute_w(STR("att?"), STR("val*[0123456789]")) == node.child(STR("child1")));
+	CHECK(node.find_child_by_attribute_w(STR("attr3"), STR("val*[0123456789]")) == xml_node());
+}
+
+TEST_XML(dom_node_all_elements_by_name_w, "<node><child><child/><child/></child></node>")
+{
+	std::vector<xml_node> v;
+
+	v.clear();
+	xml_node().all_elements_by_name_w(STR("*"), std::back_inserter(v));
+	CHECK(v.empty());
+
+	v.clear();
+	doc.all_elements_by_name_w(STR("*"), std::back_inserter(v));
+	CHECK(v.size() == 4);
+	CHECK(v[0] == doc.child(STR("node")));
+	CHECK(v[1] == doc.child(STR("node")).child(STR("child")));
+	CHECK(v[2] == doc.child(STR("node")).child(STR("child")).first_child());
+	CHECK(v[3] == doc.child(STR("node")).child(STR("child")).last_child());
+}
+
+TEST_XML(dom_node_wildcard_cset, "<node c='1'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute_w(STR("[A-Z]")).as_int() == 0);
+	CHECK(node.attribute_w(STR("[a-z]")).as_int() == 1);
+	CHECK(node.attribute_w(STR("[A-z]")).as_int() == 1);
+	CHECK(node.attribute_w(STR("[z-a]")).as_int() == 0);
+	CHECK(node.attribute_w(STR("[a-zA-Z]")).as_int() == 1);
+	CHECK(node.attribute_w(STR("[!A-Z]")).as_int() == 1);
+	CHECK(node.attribute_w(STR("[!A-Za-z]")).as_int() == 0);
+}
+
+TEST_XML(dom_node_wildcard_star, "<node cd='1'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute_w(STR("*")).as_int() == 1);
+	CHECK(node.attribute_w(STR("?d*")).as_int() == 1);
+	CHECK(node.attribute_w(STR("?c*")).as_int() == 0);
+	CHECK(node.attribute_w(STR("*?*c*")).as_int() == 0);
+	CHECK(node.attribute_w(STR("*?*d*")).as_int() == 1);
+}
+
+TEST(parse_attribute_wnorm)
+{
+	xml_document doc;
+
+	for (int eol = 0; eol < 2; ++eol)
+		for (int wconv = 0; wconv < 2; ++wconv)
+		{
+			unsigned int flags = parse_minimal | parse_wnorm_attribute | (eol ? parse_eol : 0) | (wconv ? parse_wconv_attribute : 0);
+			CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), flags));
+			CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("val1 val2 val3 val4"));
+		}
+}
+
+TEST(parse_attribute_variations_wnorm)
+{
+	xml_document doc;
+
+	for (int wnorm = 0; wnorm < 2; ++wnorm)
+		for (int eol = 0; eol < 2; ++eol)
+			for (int wconv = 0; wconv < 2; ++wconv)
+				for (int escapes = 0; escapes < 2; ++escapes)
+				{
+					unsigned int flags = parse_minimal;
+					
+					 flags |= (wnorm ? parse_wnorm_attribute : 0);
+					 flags |= (eol ? parse_eol : 0);
+					 flags |= (wconv ? parse_wconv_attribute : 0);
+					 flags |= (escapes ? parse_escapes : 0);
+
+					CHECK(doc.load(STR("<node id='1'/>"), flags));
+					CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
+				}
+}
+

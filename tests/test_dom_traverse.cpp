@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "common.hpp"
 
 #include <stdio.h>
@@ -11,10 +13,6 @@
 #include <string>
 
 #include "helpers.hpp"
-
-#ifdef _MSC_VER
-#pragma warning(disable: 4996)
-#endif
 
 #ifdef PUGIXML_NO_STL
 template <typename I> static I move_iter(I base, int n)
@@ -298,12 +296,6 @@ TEST_XML(dom_node_child, "<node><child1/><child2/></node>")
 	CHECK(doc.child(STR("n")) == xml_node());
 	CHECK_NAME_VALUE(doc.child(STR("node")), STR("node"), STR(""));
 	CHECK(doc.child(STR("node")).child(STR("child2")) == doc.child(STR("node")).last_child());
-
-	CHECK(doc.child_w(STR("n?de")) == doc.child(STR("node")));
-	CHECK(doc.child_w(STR("n[az]de")) == xml_node());
-	CHECK(doc.child_w(STR("n[aoz]de")) == doc.child(STR("node")));
-	CHECK(doc.child_w(STR("*e")) == doc.child(STR("node")));
-	CHECK(doc.child(STR("node")).child_w(STR("*l?[23456789]*")) == doc.child(STR("node")).child(STR("child2")));
 }
 
 TEST_XML(dom_node_attribute, "<node attr1='0' attr2='1'/>")
@@ -315,20 +307,15 @@ TEST_XML(dom_node_attribute, "<node attr1='0' attr2='1'/>")
 	CHECK(node.attribute(STR("n")) == xml_attribute());
 	CHECK_NAME_VALUE(node.attribute(STR("attr1")), STR("attr1"), STR("0"));
 	CHECK(node.attribute(STR("attr2")) == node.last_attribute());
-
-	CHECK(node.attribute_w(STR("*tt?[23456789]*")) == node.attribute(STR("attr2")));
-	CHECK(node.attribute_w(STR("?")) == xml_attribute());
 }
 
 TEST_XML(dom_node_next_previous_sibling, "<node><child1/><child2/><child3/></node>")
 {
 	CHECK(xml_node().next_sibling() == xml_node());
 	CHECK(xml_node().next_sibling(STR("n")) == xml_node());
-	CHECK(xml_node().next_sibling_w(STR("n")) == xml_node());
 
 	CHECK(xml_node().previous_sibling() == xml_node());
 	CHECK(xml_node().previous_sibling(STR("n")) == xml_node());
-	CHECK(xml_node().previous_sibling_w(STR("n")) == xml_node());
 
 	xml_node child1 = doc.child(STR("node")).child(STR("child1"));
 	xml_node child2 = doc.child(STR("node")).child(STR("child2"));
@@ -345,19 +332,12 @@ TEST_XML(dom_node_next_previous_sibling, "<node><child1/><child2/><child3/></nod
 
 	CHECK(child3.previous_sibling(STR("child1")) == child1);
 	CHECK(child3.previous_sibling(STR("child")) == xml_node());
-
-	CHECK(child1.next_sibling_w(STR("*[3456789]")) == child3);
-	CHECK(child1.next_sibling_w(STR("?")) == xml_node());
-	CHECK(child3.previous_sibling_w(STR("*[3456789]")) == xml_node());
-	CHECK(child3.previous_sibling_w(STR("?")) == xml_node());
-	CHECK(child3.previous_sibling_w(STR("*1")) == child1);
 }
 
 TEST_XML(dom_node_child_value, "<node><novalue/><child1>value1</child1><child2>value2<n/></child2><child3><![CDATA[value3]]></child3>value4</node>")
 {
 	CHECK_STRING(xml_node().child_value(), STR(""));
 	CHECK_STRING(xml_node().child_value(STR("n")), STR(""));
-	CHECK_STRING(xml_node().child_value_w(STR("n")), STR(""));
 
 	xml_node node = doc.child(STR("node"));
 
@@ -366,8 +346,6 @@ TEST_XML(dom_node_child_value, "<node><novalue/><child1>value1</child1><child2>v
 	CHECK_STRING(node.child(STR("child2")).child_value(), STR("value2"));
 	CHECK_STRING(node.child(STR("child3")).child_value(), STR("value3"));
 	CHECK_STRING(node.child_value(STR("child3")), STR("value3"));
-	CHECK_STRING(node.child_value_w(STR("c*[23456789]")), STR("value2"));
-	CHECK_STRING(node.child_value_w(STR("*")), STR("")); // child_value(name) and child_value_w(pattern) do not continue the search if a node w/out value is found first
 }
 
 TEST_XML(dom_node_first_last_attribute, "<node attr1='0' attr2='1'/>")
@@ -401,9 +379,7 @@ TEST_XML(dom_node_first_last_child, "<node><child1/><child2/></node>")
 TEST_XML(dom_node_find_child_by_attribute, "<node><child1 attr='value1'/><child2 attr='value2'/><child2 attr='value3'/></node>")
 {
 	CHECK(xml_node().find_child_by_attribute(STR("name"), STR("attr"), STR("value")) == xml_node());
-	CHECK(xml_node().find_child_by_attribute_w(STR("name"), STR("attr"), STR("value")) == xml_node());
 	CHECK(xml_node().find_child_by_attribute(STR("attr"), STR("value")) == xml_node());
-	CHECK(xml_node().find_child_by_attribute_w(STR("attr"), STR("value")) == xml_node());
 
 	xml_node node = doc.child(STR("node"));
 
@@ -411,11 +387,6 @@ TEST_XML(dom_node_find_child_by_attribute, "<node><child1 attr='value1'/><child2
 	CHECK(node.find_child_by_attribute(STR("child2"), STR("attr3"), STR("value3")) == xml_node());
 	CHECK(node.find_child_by_attribute(STR("attr"), STR("value2")) == node.child(STR("child2")));
 	CHECK(node.find_child_by_attribute(STR("attr3"), STR("value")) == xml_node());
-
-	CHECK(node.find_child_by_attribute_w(STR("*"), STR("att?"), STR("val*[0123456789]")) == node.child(STR("child1")));
-	CHECK(node.find_child_by_attribute_w(STR("*"), STR("attr3"), STR("val*[0123456789]")) == xml_node());
-	CHECK(node.find_child_by_attribute_w(STR("att?"), STR("val*[0123456789]")) == node.child(STR("child1")));
-	CHECK(node.find_child_by_attribute_w(STR("attr3"), STR("val*[0123456789]")) == xml_node());
 }
 
 TEST_XML(dom_node_all_elements_by_name, "<node><child><child/><child/></child></node>")
@@ -424,10 +395,6 @@ TEST_XML(dom_node_all_elements_by_name, "<node><child><child/><child/></child></
 
 	v.clear();
 	xml_node().all_elements_by_name(STR("node"), std::back_inserter(v));
-	CHECK(v.empty());
-
-	v.clear();
-	xml_node().all_elements_by_name_w(STR("*"), std::back_inserter(v));
 	CHECK(v.empty());
 
 	v.clear();
@@ -440,14 +407,6 @@ TEST_XML(dom_node_all_elements_by_name, "<node><child><child/><child/></child></
 	CHECK(v[0] == doc.child(STR("node")).child(STR("child")));
 	CHECK(v[1] == doc.child(STR("node")).child(STR("child")).first_child());
 	CHECK(v[2] == doc.child(STR("node")).child(STR("child")).last_child());
-
-	v.clear();
-	doc.all_elements_by_name_w(STR("*"), std::back_inserter(v));
-	CHECK(v.size() == 4);
-	CHECK(v[0] == doc.child(STR("node")));
-	CHECK(v[1] == doc.child(STR("node")).child(STR("child")));
-	CHECK(v[2] == doc.child(STR("node")).child(STR("child")).first_child());
-	CHECK(v[3] == doc.child(STR("node")).child(STR("child")).last_child());
 }
 
 struct find_predicate_const
@@ -712,28 +671,4 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><?pi?><!--comment--><node>pcdata<![CDAT
 	
 	CHECK((cit++)->offset_debug() == 33);
 	CHECK((cit++)->offset_debug() == 48);
-}
-
-TEST_XML(dom_node_wildcard_cset, "<node c='1'/>")
-{
-	xml_node node = doc.child(STR("node"));
-
-	CHECK(node.attribute_w(STR("[A-Z]")).as_int() == 0);
-	CHECK(node.attribute_w(STR("[a-z]")).as_int() == 1);
-	CHECK(node.attribute_w(STR("[A-z]")).as_int() == 1);
-	CHECK(node.attribute_w(STR("[z-a]")).as_int() == 0);
-	CHECK(node.attribute_w(STR("[a-zA-Z]")).as_int() == 1);
-	CHECK(node.attribute_w(STR("[!A-Z]")).as_int() == 1);
-	CHECK(node.attribute_w(STR("[!A-Za-z]")).as_int() == 0);
-}
-
-TEST_XML(dom_node_wildcard_star, "<node cd='1'/>")
-{
-	xml_node node = doc.child(STR("node"));
-
-	CHECK(node.attribute_w(STR("*")).as_int() == 1);
-	CHECK(node.attribute_w(STR("?d*")).as_int() == 1);
-	CHECK(node.attribute_w(STR("?c*")).as_int() == 0);
-	CHECK(node.attribute_w(STR("*?*c*")).as_int() == 0);
-	CHECK(node.attribute_w(STR("*?*d*")).as_int() == 1);
 }
