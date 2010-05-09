@@ -59,7 +59,7 @@ else if ( $(toolset:I=^msvc) )
 
 	if ( $(fulldebug) )
 	{
-		CCFLAGS += /Zi ;
+		CCFLAGS += /Z7 ;
 		LDFLAGS += /DEBUG ;
 	}
 
@@ -72,9 +72,14 @@ else if ( $(toolset:I=^msvc) )
 		CCFLAGS += /DNDEBUG /Ox /MT ;
 	}
 
+	if ( $(toolset) = msvc7 || $(toolset) = msvc71 || $(toolset) = msvc8 )
+	{
+		CCFLAGS += /Wp64 ; # Wp64 is deprecated from msvc9
+	}
+
 	if ( $(toolset) != msvc6 )
 	{
-		CCFLAGS += /Wp64 /W4 ;
+		CCFLAGS += /W4 ;
 	}
 	else
 	{
