@@ -11,6 +11,7 @@ jmp_buf test_runner::_failure_buffer;
 const char* test_runner::_failure_message;
 
 static size_t g_memory_total_size = 0;
+static size_t g_memory_total_count = 0;
 
 static void* custom_allocate(size_t size)
 {
@@ -21,6 +22,7 @@ static void* custom_allocate(size_t size)
 		void* ptr = memory_allocate(size);
 
 		g_memory_total_size += memory_size(ptr);
+		g_memory_total_count++;
 		
 		return ptr;
 	}
@@ -31,6 +33,7 @@ static void custom_deallocate(void* ptr)
 	if (ptr)
 	{
 		g_memory_total_size -= memory_size(ptr);
+		g_memory_total_count--;
 		
 		memory_deallocate(ptr);
 	}
@@ -63,6 +66,7 @@ static bool run_test(test_runner* test)
 	{
 #endif
 		g_memory_total_size = 0;
+		g_memory_total_count = 0;
 		test_runner::_memory_fail_threshold = 0;
 	
 #ifdef _MSC_VER
@@ -84,9 +88,9 @@ static bool run_test(test_runner* test)
 
 		test->run();
 
-		if (g_memory_total_size != 0)
+		if (g_memory_total_size != 0 || g_memory_total_count != 0)
 		{
-			printf("Test %s failed: memory leaks found (%u bytes)\n", test->_name, (unsigned int)g_memory_total_size);
+			printf("Test %s failed: memory leaks found (%u bytes in %u allocations)\n", test->_name, (unsigned int)g_memory_total_size, (unsigned int)g_memory_total_count);
 			return false;
 		}
 
