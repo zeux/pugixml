@@ -28,14 +28,14 @@
 #	include <wchar.h>
 #endif
 
-#include <algorithm>
-#include <string>
-
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4127) // conditional expression is constant
 #	pragma warning(disable: 4702) // unreachable code
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
+
+#include <algorithm>
+#include <string>
 
 // String utilities prototypes
 namespace pugi
@@ -787,6 +787,8 @@ namespace pugi
 
 	template <typename Iterator> void xpath_node_set::append(Iterator begin, Iterator end)
 	{
+		if (begin == end) return;
+
 		size_t count = std::distance(begin, end);
 		size_t size = m_end - m_begin;
 		size_t capacity = m_eos - m_begin;

@@ -2650,6 +2650,41 @@ namespace
 			assert(false);
 		}
 	}
+
+	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T, std::char_traits<T> >& stream, unsigned int options, encoding_t encoding)
+	{
+		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
+
+		// get length of remaining data in stream
+		std::streamoff pos = stream.tellg();
+		stream.seekg(0, std::ios::end);
+		std::streamoff length = stream.tellg() - pos;
+		stream.seekg(pos, std::ios::beg);
+
+		if (!stream.good() || pos < 0 || length < 0) return MAKE_PARSE_RESULT(status_io_error);
+
+		// read stream data into memory
+		size_t read_length = static_cast<size_t>(length);
+
+		T* s = static_cast<T*>(global_allocate((read_length > 0 ? read_length : 1) * sizeof(T)));
+		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
+
+		stream.read(s, static_cast<std::streamsize>(read_length));
+
+		// check for errors
+		size_t actual_length = static_cast<size_t>(stream.gcount());
+		assert(actual_length <= read_length);
+
+		if (read_length > 0 && actual_length == 0)
+		{
+			global_deallocate(s);
+			return MAKE_PARSE_RESULT(status_io_error);
+		}
+
+		// load data from buffer
+		return doc.load_buffer_inplace_own(s, actual_length * sizeof(T), options, encoding);
+	}
+
 }
 
 namespace pugi
@@ -3951,54 +3986,14 @@ namespace pugi
 	{
 		destroy();
 
-		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
-
-		std::streamoff length, pos = stream.tellg();
-		stream.seekg(0, std::ios::end);
-		length = stream.tellg();
-		stream.seekg(pos, std::ios::beg);
-
-		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
-
-		char* s = static_cast<char*>(global_allocate(length > 0 ? length : 1));
-		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
-
-		stream.read(s, length);
-
-		if (stream.gcount() > length || (length > 0 && stream.gcount() == 0))
-		{
-			global_deallocate(s);
-			return MAKE_PARSE_RESULT(status_io_error);
-		}
-
-		return load_buffer_inplace_own(s, stream.gcount(), options, encoding); // Parse the input string.
+		return load_stream_impl(*this, stream, options, encoding);
 	}
 
 	xml_parse_result xml_document::load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options)
 	{
 		destroy();
 
-		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
-
-		std::streamoff length, pos = stream.tellg();
-		stream.seekg(0, std::ios::end);
-		length = stream.tellg();
-		stream.seekg(pos, std::ios::beg);
-
-		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
-
-		wchar_t* s = static_cast<wchar_t*>(global_allocate((length > 0 ? length : 1) * sizeof(wchar_t)));
-		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
-
-		stream.read(s, length);
-
-		if (stream.gcount() > length || (length > 0 && stream.gcount() == 0))
-		{
-			global_deallocate(s);
-			return MAKE_PARSE_RESULT(status_io_error);
-		}
-
-		return load_buffer_inplace_own(s, stream.gcount() * sizeof(wchar_t), options, encoding_wchar); // Parse the input string.
+		return load_stream_impl(*this, stream, options, encoding_wchar);
 	}
 #endif
 
@@ -4063,7 +4058,7 @@ namespace pugi
 		return load_buffer_inplace_own(s, length, options, encoding);
 	}
 
-	xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, encoding_t encoding)
+	xml_parse_result xml_document::load_buffer_impl(void* contents, size_t size, unsigned int options, encoding_t encoding, bool is_mutable, bool own)
 	{
 		destroy();
 
@@ -4074,33 +4069,11 @@ namespace pugi
 		char_t* buffer;
 		size_t length;
 
-		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, false)) return MAKE_PARSE_RESULT(status_out_of_memory);
+		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return MAKE_PARSE_RESULT(status_out_of_memory);
 		
-		// parse
-		xml_parse_result res = xml_parser::parse(buffer, length, _root, options);
+		// delete original buffer if we performed a conversion
+		if (own && buffer != contents) global_deallocate(contents);
 
-		// remember encoding
-		res.encoding = buffer_encoding;
-
-		// grab onto buffer
-		_buffer = buffer;
-
-		return res;
-	}
-
-	xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options, encoding_t encoding)
-	{
-		destroy();
-
-		// get actual encoding
-		encoding_t buffer_encoding = get_buffer_encoding(encoding, contents, size);
-
-		// get private buffer
-		char_t* buffer;
-		size_t length;
-
-		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, true)) return MAKE_PARSE_RESULT(status_out_of_memory);
-		
 		// parse
 		xml_parse_result res = xml_parser::parse(buffer, length, _root, options);
 
@@ -4108,37 +4081,24 @@ namespace pugi
 		res.encoding = buffer_encoding;
 
 		// grab onto buffer if it's our buffer, user is responsible for deallocating contens himself
-		if (buffer != contents) _buffer = buffer;
+		if (own || buffer != contents) _buffer = buffer;
 
 		return res;
+	}
+
+	xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, encoding_t encoding)
+	{
+		return load_buffer_impl(const_cast<void*>(contents), size, options, encoding, false, false);
+	}
+
+	xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options, encoding_t encoding)
+	{
+		return load_buffer_impl(contents, size, options, encoding, true, false);
 	}
 		
 	xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options, encoding_t encoding)
 	{
-		destroy();
-
-		// get actual encoding
-		encoding_t buffer_encoding = get_buffer_encoding(encoding, contents, size);
-
-		// get private buffer
-		char_t* buffer;
-		size_t length;
-
-		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, true)) return MAKE_PARSE_RESULT(status_out_of_memory);
-
-		// delete original buffer if we performed a conversion
-		if (buffer != contents) global_deallocate(contents);
-		
-		// parse
-		xml_parse_result res = xml_parser::parse(buffer, length, _root, options);
-
-		// remember encoding
-		res.encoding = buffer_encoding;
-
-		// grab onto buffer
-		_buffer = buffer;
-
-		return res;
+		return load_buffer_impl(contents, size, options, encoding, true, true);
 	}
 
 	void xml_document::save(xml_writer& writer, const char_t* indent, unsigned int flags, encoding_t encoding) const

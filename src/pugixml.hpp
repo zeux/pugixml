@@ -1861,6 +1861,8 @@ namespace pugi
 		void create();
 		void destroy();
 
+		xml_parse_result load_buffer_impl(void* contents, size_t size, unsigned int options, encoding_t encoding, bool is_mutable, bool own);
+
 	public:
 		/**
 		 * Default ctor, makes empty document
@@ -1873,7 +1875,7 @@ namespace pugi
 		~xml_document();
 
 	public:
-#ifndef PUGIXML_NO_STL
+	#ifndef PUGIXML_NO_STL
 		/**
 		 * Load document from stream.
 		 *
@@ -1881,8 +1883,8 @@ namespace pugi
 		 * \param options - parsing options
 		 * \return parsing result
 		 */
-
 		xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+
 		/**
 		 * Load document from stream.
 		 *
@@ -1891,7 +1893,7 @@ namespace pugi
 		 * \return parsing result
 		 */
 		xml_parse_result load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options = parse_default);
-#endif
+	#endif
 
 		/**
 		 * Load document from string. String has to be zero-terminated. No encoding conversions are applied.
