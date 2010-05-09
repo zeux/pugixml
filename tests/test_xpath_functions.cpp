@@ -504,8 +504,6 @@ TEST(xpath_string_translate)
 
 TEST_XML(xpath_nodeset_last, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node"));
 
 	// last with 0 arguments
@@ -520,8 +518,6 @@ TEST_XML(xpath_nodeset_last, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
 
 TEST_XML(xpath_nodeset_position, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node"));
 
 	// position with 0 arguments

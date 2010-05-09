@@ -4,8 +4,6 @@
 
 TEST_XML(xpath_paths_axes_child, "<node attr='value'><child attr='value'><subchild/></child><another/><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -17,8 +15,6 @@ TEST_XML(xpath_paths_axes_child, "<node attr='value'><child attr='value'><subchi
 
 TEST_XML(xpath_paths_axes_descendant, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -32,8 +28,6 @@ TEST_XML(xpath_paths_axes_descendant, "<node attr='value'><child attr='value'><s
 
 TEST_XML(xpath_paths_axes_parent, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -48,8 +42,6 @@ TEST_XML(xpath_paths_axes_parent, "<node attr='value'><child attr='value'><subch
 
 TEST_XML(xpath_paths_axes_ancestor, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -64,8 +56,6 @@ TEST_XML(xpath_paths_axes_ancestor, "<node attr='value'><child attr='value'><sub
 
 TEST_XML(xpath_paths_axes_following_sibling, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -78,8 +68,6 @@ TEST_XML(xpath_paths_axes_following_sibling, "<node attr1='value' attr2='value'>
 
 TEST_XML(xpath_paths_axes_preceding_sibling, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -92,8 +80,6 @@ TEST_XML(xpath_paths_axes_preceding_sibling, "<node attr1='value' attr2='value'>
 
 TEST_XML(xpath_paths_axes_following, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another><subchild/></another><almost/><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -107,8 +93,6 @@ TEST_XML(xpath_paths_axes_following, "<node attr1='value' attr2='value'><child a
 
 TEST_XML(xpath_paths_axes_preceding, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another><subchild/></another><almost/><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -122,8 +106,6 @@ TEST_XML(xpath_paths_axes_preceding, "<node attr1='value' attr2='value'><child a
 
 TEST_XML(xpath_paths_axes_attribute, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another xmlns:foo='bar'><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -145,8 +127,6 @@ TEST_XML(xpath_paths_axes_namespace, "<node xmlns:foo='bar'/>")
 
 TEST_XML(xpath_paths_axes_self, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -161,8 +141,6 @@ TEST_XML(xpath_paths_axes_self, "<node attr='value'><child attr='value'><subchil
 
 TEST_XML(xpath_paths_axes_descendant_or_self, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -176,8 +154,6 @@ TEST_XML(xpath_paths_axes_descendant_or_self, "<node attr='value'><child attr='v
 
 TEST_XML(xpath_paths_axes_ancestor_or_self, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -192,8 +168,6 @@ TEST_XML(xpath_paths_axes_ancestor_or_self, "<node attr='value'><child attr='val
 
 TEST_XML(xpath_paths_axes_abbrev, "<node attr='value'><foo/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -213,8 +187,6 @@ TEST_XML(xpath_paths_axes_abbrev, "<node attr='value'><foo/></node>")
 
 TEST_XML(xpath_paths_nodetest_all, "<node a1='v1' x:a2='v2'><c1/><x:c2/><c3/><x:c4/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -228,8 +200,6 @@ TEST_XML(xpath_paths_nodetest_all, "<node a1='v1' x:a2='v2'><c1/><x:c2/><c3/><x:
 
 TEST_XML_FLAGS(xpath_paths_nodetest_name, "<node a1='v1' x:a2='v2'><c1/><x:c2/><c3/><x:c4/><?c1?></node>", parse_default | parse_pi)
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -249,8 +219,6 @@ TEST_XML_FLAGS(xpath_paths_nodetest_name, "<node a1='v1' x:a2='v2'><c1/><x:c2/><
 
 TEST_XML(xpath_paths_nodetest_all_in_namespace, "<node a1='v1' x:a2='v2'><c1/><x:c2/><c3/><x:c4/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -269,8 +237,6 @@ TEST_XML(xpath_paths_nodetest_all_in_namespace, "<node a1='v1' x:a2='v2'><c1/><x
 
 TEST_XML_FLAGS(xpath_paths_nodetest_type, "<node attr='value'>pcdata<child/><?pi1 value?><?pi2 value?><!--comment--><![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments)
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -305,8 +271,6 @@ TEST_XML_FLAGS(xpath_paths_nodetest_type, "<node attr='value'>pcdata<child/><?pi
 
 TEST_XML(xpath_paths_absolute, "<node><foo><foo/><foo/></foo></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -322,8 +286,6 @@ TEST_XML(xpath_paths_absolute, "<node><foo><foo/><foo/></foo></node>")
 
 TEST_XML(xpath_paths_step_abbrev, "<node><foo/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -341,8 +303,6 @@ TEST_XML(xpath_paths_step_abbrev, "<node><foo/></node>")
 
 TEST_XML(xpath_paths_relative_abbrev, "<node><foo><foo/><foo/></foo></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -355,8 +315,6 @@ TEST_XML(xpath_paths_relative_abbrev, "<node><foo><foo/><foo/></foo></node>")
 
 TEST_XML(xpath_paths_absolute_abbrev, "<node><foo><foo/><foo/></foo></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -369,8 +327,6 @@ TEST_XML(xpath_paths_absolute_abbrev, "<node><foo><foo/><foo/></foo></node>")
 
 TEST_XML(xpath_paths_predicate_boolean, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
 
 	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[position()=1]")) % 6;
@@ -381,8 +337,6 @@ TEST_XML(xpath_paths_predicate_boolean, "<node><chapter/><chapter/><chapter/><ch
 
 TEST_XML(xpath_paths_predicate_number, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
 
 	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[1]")) % 6;
@@ -393,8 +347,6 @@ TEST_XML(xpath_paths_predicate_number, "<node><chapter/><chapter/><chapter/><cha
 
 TEST_XML(xpath_paths_predicate_several, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node"));
 
 	CHECK_XPATH_NODESET(n, STR("employee")) % 3 % 4 % 6 % 8 % 11;
@@ -407,8 +359,6 @@ TEST_XML(xpath_paths_predicate_several, "<node><employee/><employee secretary=''
 
 TEST_XML(xpath_paths_predicate_filter_boolean, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
 
 	CHECK_XPATH_NODESET(n, STR("(following-sibling::chapter)[position()=1]")) % 6;
@@ -419,8 +369,6 @@ TEST_XML(xpath_paths_predicate_filter_boolean, "<node><chapter/><chapter/><chapt
 
 TEST_XML(xpath_paths_predicate_filter_number, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
 
 	CHECK_XPATH_NODESET(n, STR("(following-sibling::chapter)[1]")) % 6;
@@ -431,8 +379,6 @@ TEST_XML(xpath_paths_predicate_filter_number, "<node><chapter/><chapter/><chapte
 
 TEST_XML(xpath_paths_predicate_filter_posinv, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node"));
 
 	CHECK_XPATH_NODESET(n, STR("employee")) % 3 % 4 % 6 % 8 % 11;
@@ -442,8 +388,6 @@ TEST_XML(xpath_paths_predicate_filter_posinv, "<node><employee/><employee secret
 
 TEST_XML(xpath_paths_step_compose, "<node><foo><foo/><foo/></foo><foo/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node n = doc.child(STR("node"));
 
 	CHECK_XPATH_NODESET(n, STR("(.)/foo")) % 3 % 6;
@@ -456,8 +400,6 @@ TEST_XML(xpath_paths_step_compose, "<node><foo><foo/><foo/></foo><foo/></node>")
 
 TEST_XML(xpath_paths_descendant_double_slash_w3c, "<node><para><para/><para/><para><para/></para></para><para/></node>")
 {
-	doc.precompute_document_order();
-
 	CHECK_XPATH_NODESET(doc, STR("//para")) % 3 % 4 % 5 % 6 % 7 % 8;
 	CHECK_XPATH_NODESET(doc, STR("/descendant::para")) % 3 % 4 % 5 % 6 % 7 % 8;
 	CHECK_XPATH_NODESET(doc, STR("//para[1]")) % 3 % 4 % 7;
@@ -466,8 +408,6 @@ TEST_XML(xpath_paths_descendant_double_slash_w3c, "<node><para><para/><para/><pa
 
 TEST_XML(xpath_paths_needs_sorting, "<node><child/><child/><child><subchild/><subchild/></child></node>")
 {
-    doc.precompute_document_order();
-
     CHECK_XPATH_NODESET(doc, STR("(node/child/subchild)[2]")) % 7;
 }
 

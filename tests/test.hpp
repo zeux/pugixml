@@ -45,13 +45,15 @@ bool test_xpath_fail_compile(const pugi::char_t* query);
 
 struct xpath_node_set_tester
 {
+	pugi::xpath_node* document_order;
+	size_t document_size;
+
 	pugi::xpath_node_set result;
 	unsigned int last;
 	const char* message;
 
 	void check(bool condition);
 
-	xpath_node_set_tester(const pugi::xml_node& node, const pugi::char_t* query, const char* message);
 	xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message);
 	~xpath_node_set_tester();
 
@@ -123,7 +125,7 @@ struct dummy_fixture {};
 #define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
 #define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STRINGIZE(query) " does not evaluate to NaN in context " STRINGIZE(node))
 #define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STRINGIZE(query) " should not compile")
-#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node, query, CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
+#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node.select_nodes(query), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
 #endif
 
 #define STR(text) PUGIXML_TEXT(text)

@@ -8,28 +8,24 @@
 
 TEST_XML(xpath_api_select_nodes, "<node><head/><foo/><foo/><tail/></node>")
 {
-	doc.precompute_document_order();
-
 	xpath_node_set ns1 = doc.select_nodes(STR("node/foo"));
 
 	xpath_query q(STR("node/foo"));
 	xpath_node_set ns2 = doc.select_nodes(q);
 
-	CHECK(ns1.size() == 2 && ns1[0].node().document_order() == 4 && ns1[1].node().document_order() == 5);
-	CHECK(ns2.size() == 2 && ns2[0].node().document_order() == 4 && ns2[1].node().document_order() == 5);
+	xpath_node_set_tester(ns1, "ns1") % 4 % 5;
+	xpath_node_set_tester(ns2, "ns2") % 4 % 5;
 }
 
-TEST_XML(xpath_api_select_single_node, "<node><head/><foo/><foo/><tail/></node>")
+TEST_XML(xpath_api_select_single_node, "<node><head/><foo id='1'/><foo/><tail/></node>")
 {
-	doc.precompute_document_order();
-
 	xpath_node n1 = doc.select_single_node(STR("node/foo"));
 
 	xpath_query q(STR("node/foo"));
 	xpath_node n2 = doc.select_single_node(q);
 
-	CHECK(n1.node().document_order() == 4);
-	CHECK(n2.node().document_order() == 4);
+	CHECK(n1.node().attribute(STR("id")).as_int() == 1);
+	CHECK(n2.node().attribute(STR("id")).as_int() == 1);
 
 	xpath_node n3 = doc.select_single_node(STR("node/bar"));
 	
@@ -38,8 +34,8 @@ TEST_XML(xpath_api_select_single_node, "<node><head/><foo/><foo/><tail/></node>"
 	xpath_node n4 = doc.select_single_node(STR("node/head/following-sibling::foo"));
 	xpath_node n5 = doc.select_single_node(STR("node/tail/preceding-sibling::foo"));
 	
-	CHECK(n4.node().document_order() == 4);
-	CHECK(n5.node().document_order() == 4);
+	CHECK(n4.node().attribute(STR("id")).as_int() == 1);
+	CHECK(n5.node().attribute(STR("id")).as_int() == 1);
 }
 
 TEST(xpath_api_exception_what)

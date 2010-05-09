@@ -404,8 +404,6 @@ TEST(xpath_operators_boolean_precedence)
 
 TEST_XML(xpath_operators_union, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/><tail/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 

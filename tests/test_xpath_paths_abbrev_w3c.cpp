@@ -4,8 +4,6 @@
 
 TEST_XML(xpath_paths_abbrev_w3c_1, "<node><para/><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -15,8 +13,6 @@ TEST_XML(xpath_paths_abbrev_w3c_1, "<node><para/><foo/><para/></node>")
 
 TEST_XML(xpath_paths_abbrev_w3c_2, "<node><para/><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -26,8 +22,6 @@ TEST_XML(xpath_paths_abbrev_w3c_2, "<node><para/><foo/><para/></node>")
 
 TEST_XML(xpath_paths_abbrev_w3c_3, "<node>pcdata<child/><![CDATA[cdata]]></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -37,8 +31,6 @@ TEST_XML(xpath_paths_abbrev_w3c_3, "<node>pcdata<child/><![CDATA[cdata]]></node>
 
 TEST_XML(xpath_paths_abbrev_w3c_4, "<node name='value' foo='bar' />")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -48,8 +40,6 @@ TEST_XML(xpath_paths_abbrev_w3c_4, "<node name='value' foo='bar' />")
 
 TEST_XML(xpath_paths_abbrev_w3c_5, "<node name='value' foo='bar' />")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -59,8 +49,6 @@ TEST_XML(xpath_paths_abbrev_w3c_5, "<node name='value' foo='bar' />")
 
 TEST_XML(xpath_paths_abbrev_w3c_6, "<node><para/><para/><para/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -70,8 +58,6 @@ TEST_XML(xpath_paths_abbrev_w3c_6, "<node><para/><para/><para/><para/></node>")
 
 TEST_XML(xpath_paths_abbrev_w3c_7, "<node><para/><para/><para/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -81,8 +67,6 @@ TEST_XML(xpath_paths_abbrev_w3c_7, "<node><para/><para/><para/><para/></node>")
 
 TEST_XML(xpath_paths_abbrev_w3c_8, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 
 	CHECK_XPATH_NODESET(c, STR("*/para"));
@@ -91,8 +75,6 @@ TEST_XML(xpath_paths_abbrev_w3c_8, "<node><para><para/><para/><foo><para/></foo>
 
 TEST_XML(xpath_paths_abbrev_w3c_9, "<doc><chapter/><chapter/><chapter/><chapter/><chapter><section/><section/><section/></chapter><chapter/></doc>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("doc")).child(STR("chapter"));
 
@@ -103,8 +85,6 @@ TEST_XML(xpath_paths_abbrev_w3c_9, "<doc><chapter/><chapter/><chapter/><chapter/
 
 TEST_XML(xpath_paths_abbrev_w3c_10, "<chapter><para><para/><para/><foo><para/></foo></para><foo/><para/></chapter>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 
 	CHECK_XPATH_NODESET(c, STR("chapter//para"));
@@ -113,8 +93,6 @@ TEST_XML(xpath_paths_abbrev_w3c_10, "<chapter><para><para/><para/><foo><para/></
 
 TEST_XML(xpath_paths_abbrev_w3c_11, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -125,8 +103,6 @@ TEST_XML(xpath_paths_abbrev_w3c_11, "<node><para><para/><para/><foo><para/></foo
 
 TEST_XML(xpath_paths_abbrev_w3c_12, "<node><olist><item/></olist><item/><olist><olist><item/><item/></olist></olist></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -137,8 +113,6 @@ TEST_XML(xpath_paths_abbrev_w3c_12, "<node><olist><item/></olist><item/><olist><
 
 TEST_XML(xpath_paths_abbrev_w3c_13, "<node><child/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -149,8 +123,6 @@ TEST_XML(xpath_paths_abbrev_w3c_13, "<node><child/></node>")
 
 TEST_XML(xpath_paths_abbrev_w3c_14, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -161,8 +133,6 @@ TEST_XML(xpath_paths_abbrev_w3c_14, "<node><para><para/><para/><foo><para/></foo
 
 TEST_XML(xpath_paths_abbrev_w3c_15, "<node lang='en'><child/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -173,8 +143,6 @@ TEST_XML(xpath_paths_abbrev_w3c_15, "<node lang='en'><child/></node>")
 
 TEST_XML(xpath_paths_abbrev_w3c_16, "<node lang='en'><child/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -185,8 +153,6 @@ TEST_XML(xpath_paths_abbrev_w3c_16, "<node lang='en'><child/></node>")
 
 TEST_XML(xpath_paths_abbrev_w3c_17, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='error'/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -196,8 +162,6 @@ TEST_XML(xpath_paths_abbrev_w3c_17, "<node><para/><para type='warning'/><para ty
 
 TEST_XML(xpath_paths_abbrev_w3c_18, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='error'/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -207,8 +171,6 @@ TEST_XML(xpath_paths_abbrev_w3c_18, "<node><para/><para type='warning'/><para ty
 
 TEST_XML(xpath_paths_abbrev_w3c_19a, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='error'/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -218,8 +180,6 @@ TEST_XML(xpath_paths_abbrev_w3c_19a, "<node><para/><para type='warning'/><para t
 
 TEST_XML(xpath_paths_abbrev_w3c_19b, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -229,8 +189,6 @@ TEST_XML(xpath_paths_abbrev_w3c_19b, "<node><para/><para type='warning'/><para t
 
 TEST_XML(xpath_paths_abbrev_w3c_20, "<node><chapter><title>foo</title></chapter><chapter><title>Introduction</title></chapter><chapter><title>introduction</title></chapter><chapter/><chapter><title>Introduction</title><title>foo</title></chapter></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -240,8 +198,6 @@ TEST_XML(xpath_paths_abbrev_w3c_20, "<node><chapter><title>foo</title></chapter>
 
 TEST_XML(xpath_paths_abbrev_w3c_21, "<node><chapter><title>foo</title></chapter><chapter><title>Introduction</title></chapter><chapter><title>introduction</title></chapter><chapter/><chapter><title>Introduction</title><title>foo</title></chapter></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -251,8 +207,6 @@ TEST_XML(xpath_paths_abbrev_w3c_21, "<node><chapter><title>foo</title></chapter>
 
 TEST_XML(xpath_paths_abbrev_w3c_22, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 

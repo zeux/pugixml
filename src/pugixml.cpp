@@ -262,7 +262,7 @@ namespace pugi
 	struct xml_attribute_struct
 	{
 		/// Default ctor
-		xml_attribute_struct(): document_order(0), name_allocated(false), value_allocated(false), name(0), value(0), prev_attribute(0), next_attribute(0)
+		xml_attribute_struct(): padding(0), name_allocated(false), value_allocated(false), name(0), value(0), prev_attribute(0), next_attribute(0)
 		{
 		}
 
@@ -281,7 +281,7 @@ namespace pugi
 			}
 		}
 	
-		unsigned int document_order : 30; ///< Document order value
+		unsigned int padding : 30;
 		unsigned int name_allocated : 1;
 		unsigned int value_allocated : 1;
 
@@ -297,7 +297,7 @@ namespace pugi
 	{
 		/// Default ctor
 		/// \param type - node type
-		xml_node_struct(xml_node_type type = node_element): name_allocated(false), value_allocated(false), document_order(0), type(type), parent(0), name(0), value(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), first_attribute(0), last_attribute(0)
+		xml_node_struct(xml_node_type type = node_element): name_allocated(false), value_allocated(false), padding(0), type(type), parent(0), name(0), value(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), first_attribute(0), last_attribute(0)
 		{
 		}
 
@@ -357,7 +357,7 @@ namespace pugi
 
 		unsigned int			name_allocated : 1;
 		unsigned int			value_allocated : 1;
-		unsigned int			document_order : 27;	///< Document order value
+		unsigned int			padding : 27;
 		unsigned int			type : 3;				///< Node type; see xml_node_type.
 
 		xml_node_struct*		parent;					///< Pointer to parent
@@ -2890,7 +2890,7 @@ namespace pugi
 
 	unsigned int xml_attribute::document_order() const
 	{
-		return _attr ? _attr->document_order : 0;
+		return 0;
 	}
 
 	xml_attribute& xml_attribute::operator=(const char_t* rhs)
@@ -3683,35 +3683,7 @@ namespace pugi
 
 	unsigned int xml_node::document_order() const
 	{
-		return _root ? _root->document_order : 0;
-	}
-
-	void xml_node::precompute_document_order_impl()
-	{
-		if (type() != node_document) return;
-
-		unsigned int current = 1;
-		xml_node cur = *this;
-
-		for (;;)
-		{
-			cur._root->document_order = current++;
-			
-			for (xml_attribute a = cur.first_attribute(); a; a = a.next_attribute())
-				a._attr->document_order = current++;
-					
-			if (cur.first_child())
-				cur = cur.first_child();
-			else if (cur.next_sibling())
-				cur = cur.next_sibling();
-			else
-			{
-				while (cur && !cur.next_sibling()) cur = cur.parent();
-				cur = cur.next_sibling();
-				
-				if (!cur) break;
-			}
-		}
+		return 0;
 	}
 
 	void xml_node::print(xml_writer& writer, const char_t* indent, unsigned int flags, encoding_t encoding, unsigned int depth) const
@@ -4154,7 +4126,6 @@ namespace pugi
 
 	void xml_document::precompute_document_order()
 	{
-		precompute_document_order_impl();
 	}
 
 #ifndef PUGIXML_NO_STL

@@ -4,8 +4,6 @@
 
 TEST_XML(xpath_paths_w3c_1, "<node><para/><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -15,8 +13,6 @@ TEST_XML(xpath_paths_w3c_1, "<node><para/><foo/><para/></node>")
 
 TEST_XML(xpath_paths_w3c_2, "<node><para/><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -26,8 +22,6 @@ TEST_XML(xpath_paths_w3c_2, "<node><para/><foo/><para/></node>")
 
 TEST_XML(xpath_paths_w3c_3, "<node>pcdata<child/><![CDATA[cdata]]></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -37,8 +31,6 @@ TEST_XML(xpath_paths_w3c_3, "<node>pcdata<child/><![CDATA[cdata]]></node>")
 
 TEST_XML(xpath_paths_w3c_4, "<node>pcdata<child/><![CDATA[cdata]]></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -48,8 +40,6 @@ TEST_XML(xpath_paths_w3c_4, "<node>pcdata<child/><![CDATA[cdata]]></node>")
 
 TEST_XML(xpath_paths_w3c_5, "<node name='value' foo='bar' />")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -59,8 +49,6 @@ TEST_XML(xpath_paths_w3c_5, "<node name='value' foo='bar' />")
 
 TEST_XML(xpath_paths_w3c_6, "<node name='value' foo='bar' />")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -70,8 +58,6 @@ TEST_XML(xpath_paths_w3c_6, "<node name='value' foo='bar' />")
 
 TEST_XML(xpath_paths_w3c_7, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -82,8 +68,6 @@ TEST_XML(xpath_paths_w3c_7, "<node><para><para/><para/><foo><para/></foo></para>
 
 TEST_XML(xpath_paths_w3c_8, "<node><div><font><div><div/></div></font></div></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -93,8 +77,6 @@ TEST_XML(xpath_paths_w3c_8, "<node><div><font><div><div/></div></font></div></no
 
 TEST_XML(xpath_paths_w3c_9, "<node><div><font><div><div/></div></font></div></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -104,8 +86,6 @@ TEST_XML(xpath_paths_w3c_9, "<node><div><font><div><div/></div></font></div></no
 
 TEST_XML(xpath_paths_w3c_10, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -116,8 +96,6 @@ TEST_XML(xpath_paths_w3c_10, "<node><para><para/><para/><foo><para/></foo></para
 
 TEST_XML(xpath_paths_w3c_11, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -128,8 +106,6 @@ TEST_XML(xpath_paths_w3c_11, "<node><para><para/><para/><foo><para/></foo></para
 
 TEST_XML(xpath_paths_w3c_12, "<chapter><para><para/><para/><foo><para/></foo></para><foo/><para/></chapter>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 
 	CHECK_XPATH_NODESET(c, STR("child::chapter/descendant::para"));
@@ -138,8 +114,6 @@ TEST_XML(xpath_paths_w3c_12, "<chapter><para><para/><para/><foo><para/></foo></p
 
 TEST_XML(xpath_paths_w3c_13, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 
 	CHECK_XPATH_NODESET(c, STR("child::*/child::para"));
@@ -148,8 +122,6 @@ TEST_XML(xpath_paths_w3c_13, "<node><para><para/><para/><foo><para/></foo></para
 
 TEST_XML(xpath_paths_w3c_14, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -162,8 +134,6 @@ TEST_XML(xpath_paths_w3c_14, "<node><para><para/><para/><foo><para/></foo></para
 
 TEST_XML(xpath_paths_w3c_15, "<node><para><para/><para/><foo><para/></foo></para><foo/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -174,8 +144,6 @@ TEST_XML(xpath_paths_w3c_15, "<node><para><para/><para/><foo><para/></foo></para
 
 TEST_XML(xpath_paths_w3c_16, "<node><olist><item/></olist><item/><olist><olist><item/><item/></olist></olist></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -186,8 +154,6 @@ TEST_XML(xpath_paths_w3c_16, "<node><olist><item/></olist><item/><olist><olist><
 
 TEST_XML(xpath_paths_w3c_17, "<node><para/><para/><para/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -197,8 +163,6 @@ TEST_XML(xpath_paths_w3c_17, "<node><para/><para/><para/><para/></node>")
 
 TEST_XML(xpath_paths_w3c_18, "<node><para/><para/><para/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -208,8 +172,6 @@ TEST_XML(xpath_paths_w3c_18, "<node><para/><para/><para/><para/></node>")
 
 TEST_XML(xpath_paths_w3c_19, "<node><para/><para/><para/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -219,8 +181,6 @@ TEST_XML(xpath_paths_w3c_19, "<node><para/><para/><para/><para/></node>")
 
 TEST_XML(xpath_paths_w3c_20, "<node><para/><para/><para/><para/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -230,8 +190,6 @@ TEST_XML(xpath_paths_w3c_20, "<node><para/><para/><para/><para/></node>")
 
 TEST_XML(xpath_paths_w3c_21, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
 
@@ -241,8 +199,6 @@ TEST_XML(xpath_paths_w3c_21, "<node><chapter/><chapter/><chapter/><chapter/><cha
 
 TEST_XML(xpath_paths_w3c_22, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
 
@@ -252,8 +208,6 @@ TEST_XML(xpath_paths_w3c_22, "<node><chapter/><chapter/><chapter/><chapter/><cha
 
 TEST_XML(xpath_paths_w3c_23, "<node><figure><figure/><figure/><foo><figure/></foo></figure><foo/><figure/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -264,8 +218,6 @@ TEST_XML(xpath_paths_w3c_23, "<node><figure><figure/><figure/><foo><figure/></fo
 
 TEST_XML(xpath_paths_w3c_24, "<doc><chapter/><chapter/><chapter/><chapter/><chapter><section/><section/><section/></chapter><chapter/></doc>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("doc")).child(STR("chapter"));
 
@@ -276,8 +228,6 @@ TEST_XML(xpath_paths_w3c_24, "<doc><chapter/><chapter/><chapter/><chapter/><chap
 
 TEST_XML(xpath_paths_w3c_25, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='error'/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -287,8 +237,6 @@ TEST_XML(xpath_paths_w3c_25, "<node><para/><para type='warning'/><para type='war
 
 TEST_XML(xpath_paths_w3c_26, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='error'/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -298,8 +246,6 @@ TEST_XML(xpath_paths_w3c_26, "<node><para/><para type='warning'/><para type='war
 
 TEST_XML(xpath_paths_w3c_27a, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='error'/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -309,8 +255,6 @@ TEST_XML(xpath_paths_w3c_27a, "<node><para/><para type='warning'/><para type='wa
 
 TEST_XML(xpath_paths_w3c_27b, "<node><para/><para type='warning'/><para type='warning'/><para/><para type='warning'/><para type='warning'/><para type='warning'/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -320,8 +264,6 @@ TEST_XML(xpath_paths_w3c_27b, "<node><para/><para type='warning'/><para type='wa
 
 TEST_XML(xpath_paths_w3c_28, "<node><chapter><title>foo</title></chapter><chapter><title>Introduction</title></chapter><chapter><title>introduction</title></chapter><chapter/><chapter><title>Introduction</title><title>foo</title></chapter></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -331,8 +273,6 @@ TEST_XML(xpath_paths_w3c_28, "<node><chapter><title>foo</title></chapter><chapte
 
 TEST_XML(xpath_paths_w3c_29, "<node><chapter><title>foo</title></chapter><chapter><title>Introduction</title></chapter><chapter><title>introduction</title></chapter><chapter/><chapter><title>Introduction</title><title>foo</title></chapter></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -342,8 +282,6 @@ TEST_XML(xpath_paths_w3c_29, "<node><chapter><title>foo</title></chapter><chapte
 
 TEST_XML(xpath_paths_w3c_30, "<node><abstract/><chapter/><chapter/><references/><appendix/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -353,8 +291,6 @@ TEST_XML(xpath_paths_w3c_30, "<node><abstract/><chapter/><chapter/><references/>
 
 TEST_XML(xpath_paths_w3c_31a, "<node><abstract/><chapter/><chapter/><references/><appendix/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 
@@ -364,8 +300,6 @@ TEST_XML(xpath_paths_w3c_31a, "<node><abstract/><chapter/><chapter/><references/
 
 TEST_XML(xpath_paths_w3c_31b, "<node><abstract/><chapter/><chapter/><references/><appendix/><chapter/></node>")
 {
-	doc.precompute_document_order();
-
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
 

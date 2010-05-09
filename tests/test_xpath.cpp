@@ -8,24 +8,6 @@
 
 #include <string>
 
-TEST_XML(xpath_document_order, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>")
-{
-	CHECK(xml_node().document_order() == 0);
-	CHECK(doc.child(STR("node")).document_order() == 0);
-	CHECK(doc.document_order() == 0);
-
-	doc.precompute_document_order();
-
-	CHECK(doc.document_order() == 1);
-	CHECK(doc.child(STR("node")).document_order() == 2);
-	CHECK(doc.child(STR("node")).child(STR("child1")).document_order() == 3);
-	CHECK(doc.child(STR("node")).child(STR("child1")).attribute(STR("attr1")).document_order() == 4);
-	CHECK(doc.child(STR("node")).child(STR("child1")).attribute(STR("attr2")).document_order() == 5);
-	CHECK(doc.child(STR("node")).child(STR("child2")).document_order() == 6);
-	CHECK(doc.child(STR("node")).child(STR("child2")).attribute(STR("attr1")).document_order() == 7);
-	CHECK(doc.child(STR("node")).child(STR("child2")).first_child().document_order() == 8);
-}
-
 TEST(xpath_allocator_many_pages)
 {
 	pugi::string_t query = STR("0");
@@ -55,8 +37,6 @@ TEST_XML(xpath_sort_complex, "<node><child1 attr1='value1' attr2='value2'/><chil
 	ns.sort(true);
 	xpath_node_set reverse_sorted = ns;
 
-	doc.precompute_document_order();
-
 	xpath_node_set_tester(sorted, "sorted order failed") % 2 % 3 % 4 % 5 % 6 % 7 % 8;
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 8 % 7 % 6 % 5 % 4 % 3 % 2;
 }
@@ -70,8 +50,6 @@ TEST_XML(xpath_sort_children, "<node><child><subchild id='1'/></child><child><su
 
 	ns.sort(true);
 	xpath_node_set reverse_sorted = ns;
-
-	doc.precompute_document_order();
 
 	xpath_node_set_tester(sorted, "sorted order failed") % 4 % 7;
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 7 % 4;
@@ -94,8 +72,6 @@ TEST_XML(xpath_sort_attributes, "<node/>")
 
 	ns.sort(false);
 	xpath_node_set sorted = ns;
-
-	doc.precompute_document_order();
 
 	xpath_node_set_tester(sorted, "sorted order failed") % 3 % 4 % 5;
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 5 % 4 % 3;

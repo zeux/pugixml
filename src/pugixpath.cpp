@@ -213,12 +213,6 @@ namespace
 	{
 		bool operator()(const xpath_node& lhs, const xpath_node& rhs) const
 		{
-			unsigned int lo = lhs.attribute() ? lhs.attribute().document_order() : lhs.node().document_order();
-			unsigned int ro = rhs.attribute() ? rhs.attribute().document_order() : rhs.node().document_order();
-			
-			if (lo != 0 && ro != 0)
-				return lo < ro;
-
 			xml_node ln = lhs.node(), rn = rhs.node();
 
 			if (lhs.attribute() && rhs.attribute())

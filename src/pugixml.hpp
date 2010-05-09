@@ -644,7 +644,7 @@ namespace pugi
 		bool as_bool() const;
 
 		/// \internal Document order or 0 if not set
-		unsigned int document_order() const;
+		PUGIXML_DEPRECATED unsigned int document_order() const;
 
 	public:
 		/**
@@ -786,9 +786,6 @@ namespace pugi
 
 		/// \internal Initializing ctor
 		explicit xml_node(xml_node_struct* p);
-
-		/// \internal Precompute document order (valid only for document node)
-		void precompute_document_order_impl();
 
 		/// \internal Get allocator
 		xml_allocator& get_allocator() const;
@@ -1457,7 +1454,7 @@ namespace pugi
 	#endif
 		
 		/// \internal Document order or 0 if not set
-		unsigned int document_order() const;
+		PUGIXML_DEPRECATED unsigned int document_order() const;
 
 		/**
 		 * Print subtree to writer
@@ -2019,7 +2016,7 @@ namespace pugi
 		 * Compute document order for the whole tree
 		 * Sometimes this makes evaluation of XPath queries faster.
 		 */
-		void precompute_document_order();
+		PUGIXML_DEPRECATED void precompute_document_order();
 	};
 
 #ifndef PUGIXML_NO_XPATH
