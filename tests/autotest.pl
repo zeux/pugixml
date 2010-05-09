@@ -14,7 +14,7 @@ sub permute
 }
 
 $fast = (shift eq 'fast');
-@toolsets = ($^O =~ /win/i) ? (bcc, cw, dmc, ic8, mingw34, mingw44, mingw45, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10) : (gcc);
+@toolsets = ($^O =~ /win/i) ? (bcc, cw, dmc, ic8, mingw34, mingw44, mingw45, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64) : (gcc);
 @configurations = (debug, release);
 @defines = (PUGIXML_NO_XPATH, PUGIXML_NO_EXCEPTIONS, PUGIXML_NO_STL, PUGIXML_WCHAR_MODE);
 @definesabbr = (noxpath, noexcept, nostl, wchar);
