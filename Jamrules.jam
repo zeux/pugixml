@@ -57,6 +57,12 @@ else if ( $(toolset:I=^msvc) )
 {
 	CCFLAGS += /D$(defines) ;
 
+	if ( $(fulldebug) )
+	{
+		CCFLAGS += /Zi ;
+		LDFLAGS += /DEBUG ;
+	}
+
 	if ( $(configuration) = "debug" )
 	{
 		CCFLAGS += /D_DEBUG /MTd ;
