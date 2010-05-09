@@ -922,10 +922,17 @@ namespace
 	{
 		const char_t* data = static_cast<const char_t*>(contents);
 	
-		out_buffer = is_mutable ? const_cast<char_t*>(data) : static_cast<char_t*>(global_allocate(size > 0 ? size : 1));
-		out_length = size / sizeof(char_t);
+		if (is_mutable)
+		{
+			out_buffer = const_cast<char_t*>(data);
+		}
+		else
+		{
+			out_buffer = static_cast<char_t*>(global_allocate(size > 0 ? size : 1));
+			if (!out_buffer) return false;
+		}
 
-		if (!out_buffer) return false;
+		out_length = size / sizeof(char_t);
 
 		impl::convert_wchar_endian_swap(out_buffer, data, out_length);
 

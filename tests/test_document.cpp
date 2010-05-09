@@ -71,6 +71,15 @@ TEST(document_load_stream_error)
 	CHECK(doc.load(iss).status == status_out_of_memory);
 }
 
+TEST(document_load_stream_empty)
+{
+	std::istringstream iss;
+
+	pugi::xml_document doc;
+	doc.load(iss); // parse result depends on STL implementation
+	CHECK(!doc.first_child());
+}
+
 TEST(document_load_stream_wide)
 {
 	pugi::xml_document doc;
@@ -570,4 +579,39 @@ TEST(document_convert_invalid_utf16)
 	// check incorrect leading code
 	CHECK(test_parse_fail("\x00<\xde\x24", 4, encoding_utf16_be));
 	CHECK(test_parse_fail("<\x00\x24\xde", 4, encoding_utf16_le));
+}
+
+TEST(document_load_buffer_empty)
+{
+	encoding_t encodings[] =
+	{
+		encoding_auto,
+		encoding_utf8,
+		encoding_utf16_le,
+		encoding_utf16_be,
+		encoding_utf16,
+		encoding_utf32_le,
+		encoding_utf32_be,
+		encoding_utf32,
+		encoding_wchar
+	};
+
+	char buffer[1];
+
+	for (unsigned int i = 0; i < sizeof(encodings) / sizeof(encodings[0]); ++i)
+	{
+		encoding_t encoding = encodings[i];
+
+		xml_document doc;
+		CHECK(doc.load_buffer(buffer, 0, parse_default, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer(0, 0, parse_default, encoding) && !doc.first_child());
+
+		CHECK(doc.load_buffer_inplace(buffer, 0, parse_default, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace(0, 0, parse_default, encoding) && !doc.first_child());
+
+		void* own_buffer = pugi::get_memory_allocation_function()(1);
+
+		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_default, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace_own(0, 0, parse_default, encoding) && !doc.first_child());
+	}
 }
