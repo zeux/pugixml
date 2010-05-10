@@ -411,7 +411,7 @@ namespace pugi
 	struct xml_attribute_struct
 	{
 		/// Default ctor
-		xml_attribute_struct(xml_memory_page* page): header(reinterpret_cast<uintptr_t>(page)), name(0), value(0), prev_attribute(0), next_attribute(0)
+		xml_attribute_struct(xml_memory_page* page): header(reinterpret_cast<uintptr_t>(page)), name(0), value(0), prev_attribute_c(0), next_attribute(0)
 		{
 		}
 
@@ -420,7 +420,7 @@ namespace pugi
 		char_t* name;	///< Pointer to attribute name.
 		char_t*	value;	///< Pointer to attribute value.
 
-		xml_attribute_struct* prev_attribute;	///< Previous attribute
+		xml_attribute_struct* prev_attribute_c;	///< Previous attribute (cyclic list)
 		xml_attribute_struct* next_attribute;	///< Next attribute
 	};
 
@@ -429,7 +429,7 @@ namespace pugi
 	{
 		/// Default ctor
 		/// \param type - node type
-		xml_node_struct(xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | type), parent(0), name(0), value(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), first_attribute(0), last_attribute(0)
+		xml_node_struct(xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | type), parent(0), name(0), value(0), first_child(0), prev_sibling_c(0), next_sibling(0), first_attribute(0)
 		{
 		}
 
@@ -441,13 +441,11 @@ namespace pugi
 		char_t*					value;					///< Pointer to any associated string data.
 
 		xml_node_struct*		first_child;			///< First child
-		xml_node_struct*		last_child;				///< Last child
 		
-		xml_node_struct*		prev_sibling;			///< Left brother
+		xml_node_struct*		prev_sibling_c;			///< Left brother (cyclic list)
 		xml_node_struct*		next_sibling;			///< Right brother
 		
 		xml_attribute_struct*	first_attribute;		///< First attribute
-		xml_attribute_struct*	last_attribute;			///< Last attribute
 	};
 
 	struct xml_document_struct: public xml_node_struct
@@ -532,14 +530,22 @@ namespace
 	{
 		xml_node_struct* child = allocate_node(alloc, type);
 		child->parent = node;
+
+		xml_node_struct* first_child = node->first_child;
 			
-		if (node->last_child)
+		if (first_child)
 		{
-			node->last_child->next_sibling = child;
-			child->prev_sibling = node->last_child;
-			node->last_child = child;
+			xml_node_struct* last_child = first_child->prev_sibling_c;
+
+			last_child->next_sibling = child;
+			child->prev_sibling_c = last_child;
+			first_child->prev_sibling_c = child;
 		}
-		else node->first_child = node->last_child = child;
+		else
+		{
+			node->first_child = child;
+			child->prev_sibling_c = child;
+		}
 			
 		return child;
 	}
@@ -548,13 +554,21 @@ namespace
 	{
 		xml_attribute_struct* a = allocate_attribute(alloc);
 
-		if (node->last_attribute)
+		xml_attribute_struct* first_attribute = node->first_attribute;
+
+		if (first_attribute)
 		{
-			node->last_attribute->next_attribute = a;
-			a->prev_attribute = node->last_attribute;
-			node->last_attribute = a;
+			xml_attribute_struct* last_attribute = first_attribute->prev_attribute_c;
+
+			last_attribute->next_attribute = a;
+			a->prev_attribute_c = last_attribute;
+			first_attribute->prev_attribute_c = a;
 		}
-		else node->first_attribute = node->last_attribute = a;
+		else
+		{
+			node->first_attribute = a;
+			a->prev_attribute_c = a;
+		}
 			
 		return a;
 	}
@@ -2974,7 +2988,7 @@ namespace pugi
 
     xml_attribute xml_attribute::previous_attribute() const
     {
-    	return _attr ? xml_attribute(_attr->prev_attribute) : xml_attribute();
+    	return _attr && _attr->prev_attribute_c->next_attribute ? xml_attribute(_attr->prev_attribute_c) : xml_attribute();
     }
 
 	int xml_attribute::as_int() const
@@ -3189,7 +3203,7 @@ namespace pugi
 
 	xml_node::iterator xml_node::end() const
 	{
-		return _root ? iterator(0, _root->last_child) : iterator();
+		return _root && _root->first_child ? iterator(0, _root->first_child->prev_sibling_c) : iterator();
 	}
 	
 	xml_node::attribute_iterator xml_node::attributes_begin() const
@@ -3199,7 +3213,7 @@ namespace pugi
 
 	xml_node::attribute_iterator xml_node::attributes_end() const
 	{
-		return _root ? attribute_iterator(0, _root->last_attribute) : attribute_iterator();
+		return _root && _root->first_attribute ? attribute_iterator(0, _root->first_attribute->prev_attribute_c) : attribute_iterator();
 	}
 
 	bool xml_node::operator==(const xml_node& r) const
@@ -3333,7 +3347,7 @@ namespace pugi
 	{
 		if (!_root) return xml_node();
 		
-		for (xml_node_struct* i = _root->prev_sibling; i; i = i->prev_sibling)
+		for (xml_node_struct* i = _root->prev_sibling_c; i->next_sibling; i = i->prev_sibling_c)
 			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
 
 		return xml_node();
@@ -3343,7 +3357,7 @@ namespace pugi
 	{
 		if (!_root) return xml_node();
 		
-		for (xml_node_struct* i = _root->prev_sibling; i; i = i->prev_sibling)
+		for (xml_node_struct* i = _root->prev_sibling_c; i->next_sibling; i = i->prev_sibling_c)
 			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i);
 
 		return xml_node();
@@ -3353,7 +3367,7 @@ namespace pugi
 	{
 		if (!_root) return xml_node();
 		
-		if (_root->prev_sibling) return xml_node(_root->prev_sibling);
+		if (_root->prev_sibling_c->next_sibling) return xml_node(_root->prev_sibling_c);
 		else return xml_node();
 	}
 
@@ -3406,7 +3420,7 @@ namespace pugi
 
 	xml_attribute xml_node::last_attribute() const
 	{
-		return _root ? xml_attribute(_root->last_attribute) : xml_attribute();
+		return _root && _root->first_attribute ? xml_attribute(_root->first_attribute->prev_attribute_c) : xml_attribute();
 	}
 
 	xml_node xml_node::first_child() const
@@ -3416,7 +3430,7 @@ namespace pugi
 
 	xml_node xml_node::last_child() const
 	{
-		return _root ? xml_node(_root->last_child) : xml_node();
+		return _root && _root->first_child ? xml_node(_root->first_child->prev_sibling_c) : xml_node();
 	}
 
 	bool xml_node::set_name(const char_t* rhs)
@@ -3469,21 +3483,21 @@ namespace pugi
 		// check that attribute belongs to *this
 		xml_attribute_struct* cur = attr._attr;
 
-		while (cur->prev_attribute) cur = cur->prev_attribute;
+		while (cur->prev_attribute_c->next_attribute) cur = cur->prev_attribute_c;
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
 		xml_attribute a(allocate_attribute(get_allocator()));
 		a.set_name(name);
 
-		if (attr._attr->prev_attribute)
-			attr._attr->prev_attribute->next_attribute = a._attr;
+		if (attr._attr->prev_attribute_c->next_attribute)
+			attr._attr->prev_attribute_c->next_attribute = a._attr;
 		else
 			_root->first_attribute = a._attr;
 		
-		a._attr->prev_attribute = attr._attr->prev_attribute;
+		a._attr->prev_attribute_c = attr._attr->prev_attribute_c;
 		a._attr->next_attribute = attr._attr;
-		attr._attr->prev_attribute = a._attr;
+		attr._attr->prev_attribute_c = a._attr;
 				
 		return a;
 	}
@@ -3495,7 +3509,7 @@ namespace pugi
 		// check that attribute belongs to *this
 		xml_attribute_struct* cur = attr._attr;
 
-		while (cur->prev_attribute) cur = cur->prev_attribute;
+		while (cur->prev_attribute_c->next_attribute) cur = cur->prev_attribute_c;
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
@@ -3503,12 +3517,12 @@ namespace pugi
 		a.set_name(name);
 
 		if (attr._attr->next_attribute)
-			attr._attr->next_attribute->prev_attribute = a._attr;
+			attr._attr->next_attribute->prev_attribute_c = a._attr;
 		else
-			_root->last_attribute = a._attr;
+			_root->first_attribute->prev_attribute_c = a._attr;
 		
 		a._attr->next_attribute = attr._attr->next_attribute;
-		a._attr->prev_attribute = attr._attr;
+		a._attr->prev_attribute_c = attr._attr;
 		attr._attr->next_attribute = a._attr;
 
 		return a;
@@ -3559,14 +3573,14 @@ namespace pugi
 		xml_node n(allocate_node(get_allocator(), type));
 		n._root->parent = _root;
 		
-		if (node._root->prev_sibling)
-			node._root->prev_sibling->next_sibling = n._root;
+		if (node._root->prev_sibling_c->next_sibling)
+			node._root->prev_sibling_c->next_sibling = n._root;
 		else
 			_root->first_child = n._root;
 		
-		n._root->prev_sibling = node._root->prev_sibling;
+		n._root->prev_sibling_c = node._root->prev_sibling_c;
 		n._root->next_sibling = node._root;
-		node._root->prev_sibling = n._root;
+		node._root->prev_sibling_c = n._root;
 
 		return n;
 	}
@@ -3580,12 +3594,12 @@ namespace pugi
 		n._root->parent = _root;
 	
 		if (node._root->next_sibling)
-			node._root->next_sibling->prev_sibling = n._root;
+			node._root->next_sibling->prev_sibling_c = n._root;
 		else
-			_root->last_child = n._root;
+			_root->first_child->prev_sibling_c = n._root;
 		
 		n._root->next_sibling = node._root->next_sibling;
-		n._root->prev_sibling = node._root;
+		n._root->prev_sibling_c = node._root;
 		node._root->next_sibling = n._root;
 
 		return n;
@@ -3630,14 +3644,14 @@ namespace pugi
 		// check that attribute belongs to *this
 		xml_attribute_struct* attr = a._attr;
 
-		while (attr->prev_attribute) attr = attr->prev_attribute;
+		while (attr->prev_attribute_c->next_attribute) attr = attr->prev_attribute_c;
 
 		if (attr != _root->first_attribute) return;
 
-		if (a._attr->next_attribute) a._attr->next_attribute->prev_attribute = a._attr->prev_attribute;
-		else _root->last_attribute = a._attr->prev_attribute;
+		if (a._attr->next_attribute) a._attr->next_attribute->prev_attribute_c = a._attr->prev_attribute_c;
+		else if (_root->first_attribute) _root->first_attribute->prev_attribute_c = a._attr->prev_attribute_c;
 		
-		if (a._attr->prev_attribute) a._attr->prev_attribute->next_attribute = a._attr->next_attribute;
+		if (a._attr->prev_attribute_c->next_attribute) a._attr->prev_attribute_c->next_attribute = a._attr->next_attribute;
 		else _root->first_attribute = a._attr->next_attribute;
 
 		destroy_attribute(a._attr, get_allocator());
@@ -3652,10 +3666,10 @@ namespace pugi
 	{
 		if (!_root || n.parent() != *this) return;
 
-		if (n._root->next_sibling) n._root->next_sibling->prev_sibling = n._root->prev_sibling;
-		else _root->last_child = n._root->prev_sibling;
+		if (n._root->next_sibling) n._root->next_sibling->prev_sibling_c = n._root->prev_sibling_c;
+		else if (_root->first_child) _root->first_child->prev_sibling_c = n._root->prev_sibling_c;
 		
-		if (n._root->prev_sibling) n._root->prev_sibling->next_sibling = n._root->next_sibling;
+		if (n._root->prev_sibling_c->next_sibling) n._root->prev_sibling_c->next_sibling = n._root->next_sibling;
 		else _root->first_child = n._root->next_sibling;
         
         destroy_node(n._root, get_allocator());
@@ -3958,7 +3972,7 @@ namespace pugi
 
 	const xml_node_iterator& xml_node_iterator::operator--()
 	{
-		if (_wrap._root) _wrap = xml_node(_wrap._root->prev_sibling);
+		if (_wrap._root) _wrap = _wrap.previous_sibling();
 		else _wrap = _prev;
 		return *this;
 	}
@@ -4022,7 +4036,7 @@ namespace pugi
 
 	const xml_attribute_iterator& xml_attribute_iterator::operator--()
 	{
-		if (_wrap._attr) _wrap = xml_attribute(_wrap._attr->prev_attribute);
+		if (_wrap._attr) _wrap = _wrap.previous_attribute();
 		else _wrap = _prev;
 		return *this;
 	}
@@ -4093,6 +4107,8 @@ namespace pugi
 		xml_allocator alloc(_memory.next ? _memory.next : &_memory);
 		
 		_root = allocate_document(alloc);
+
+		_root->prev_sibling_c = _root;
 
 		// setup allocator
 		xml_allocator& a = static_cast<xml_document_struct*>(_root)->allocator;
