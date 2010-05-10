@@ -162,7 +162,7 @@ else if ( $(toolset) = "ic8" )
 
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\icl.exe" /W4 /WX /Wport /Qwd981,444,280,383,909,304,167,177,1419 /I"%$(msvc)_PATH%\include" /I"%$(msvc)_PATH%\PlatformSDK\Include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		"%$(toolset)_PATH%\bin\icl.exe" /W4 /WX /Wport /Qwd981,444,280,383,909,304,167,171,177,1419 /I"%$(msvc)_PATH%\include" /I"%$(msvc)_PATH%\PlatformSDK\Include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction

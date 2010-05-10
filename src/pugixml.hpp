@@ -131,11 +131,11 @@ namespace pugi
 	// Parsing options
 
 	/**
-	 * Memory block size, used for fast allocator. Memory for DOM tree is allocated in blocks of
-	 * memory_block_size + 4.
-	 * This value affects size of xml_memory class.
+	 * Memory page size, used for fast allocator. Memory for DOM tree is allocated in pages of
+	 * xml_memory_page_size + size of header (approximately 64 bytes)
+	 * This value affects size of xml_memory_page class.
 	 */
-	const size_t memory_block_size = 32768;
+	const size_t xml_memory_page_size = 32768;
 
 	/**
 	 * Minimal parsing mode. Equivalent to turning all other flags off. This set of flags means
@@ -329,7 +329,7 @@ namespace pugi
 	struct xml_attribute_struct;
 	struct xml_node_struct;
 
-	class xml_allocator;
+	struct xml_allocator;
 
 	class xml_node_iterator;
 	class xml_attribute_iterator;
@@ -1772,15 +1772,22 @@ namespace pugi
 		virtual bool end(xml_node&);
 	};
 
-	/// \internal Memory block
-	struct PUGIXML_CLASS xml_memory_block
+	/// \internal Memory page
+	struct PUGIXML_CLASS xml_memory_page
 	{
-		xml_memory_block();
+		xml_memory_page();
 
-		xml_memory_block* next;
-		size_t size;
+		xml_allocator* allocator;
 
-		char data[memory_block_size];
+		void* memory;
+
+		xml_memory_page* prev;
+		xml_memory_page* next;
+
+		size_t busy_size;
+		size_t freed_size;
+
+		char data[1];
 	};
 
 	/**
@@ -1848,9 +1855,9 @@ namespace pugi
 	class PUGIXML_CLASS xml_document: public xml_node
 	{
 	private:
-		char_t*				_buffer;
+		char_t* _buffer;
 
-		xml_memory_block	_memory;
+		xml_memory_page _memory;
 		
 		xml_document(const xml_document&);
 		const xml_document& operator=(const xml_document&);

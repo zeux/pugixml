@@ -494,7 +494,7 @@ TEST_XML_FLAGS(dom_node_copy_types, "<root><?xml version='1.0'?><?pi value?><!--
 	CHECK_NODE(doc, STR("<root><?xml version=\"1.0\"?><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?xml version=\"1.0\"?><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
 }
 
-TEST_XML(dom_attr_assign_large, "<node attr1='' attr2='' />")
+TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
 {
 	xml_node node = doc.child(STR("node"));
 
