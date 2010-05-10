@@ -241,3 +241,35 @@ TEST(parse_doctype_xmlconf_ibm_3)
 	TEST_DOCTYPE_WF("<!DOCTYPE root [ <![IGNORE[ begin Everything is ignored within an ignored section, except the sub-section delimiters '<![' and ']]>'.  These must be balanced <![ <!ELEMENT animal EMPTY> ]]> nesting <![ <!ELEMENT tiger (#PCDATA)> ]]> nesting again <![ <!ELEMENT abc ANY> ]]> end ]]> ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!DOCTYPE root SYSTEM \"ibm69v01.dtd\" [ <!ELEMENT root (#PCDATA|a)* > <!ENTITY % pe1 \"<!-- comment in PE -->\"> %pe1; ]> ]>");
 }
+
+TEST(parse_doctype_xmlconf_oasis_1)
+{
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT doc EMPTY> <!ENTITY % ent1 \"\"> <!ENTITY ent2 \"text2\"> <!ENTITY % ent3 \"<!-- <!DOCTYPE <!ELEMENT <? '''&#34;&ent2; %ent1;\"> <!ENTITY % ent4 '\"\"&#x27;&#39;\"'> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <![INCLUDE[ <!ENTITY % rootel \"<!ELEMENT doc EMPTY>\"> ]]> %rootel; <!ATTLIST doc att CDATA #IMPLIED> <![IGNORE[ <!ELEMENT doc (a)> ]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <![INCLUDE[<![INCLUDE[ <![IGNORE[ ignored ]]> <!ELEMENT doc EMPTY> ]]>]]> <![IGNORE[ ignored ]]> <![IGNORE[ <!ELEMENT doc ignored ]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <![INCLUDE[ <![ INCLUDE [ <!ELEMENT doc EMPTY> <![IGNORE[asdfasdf]]> ]]>]]> <![INCLUDE[]]> <![INCLUDE[ ]]> <![INCLUDE[ ]]>  ]>");
+	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <!ELEMENT doc EMPTY> <![IGNORE[<![]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT doc EMPTY> <![IGNORE[ <![INCLUDE[ <!ELEMENT doc ]]>]]> <![ IGNORE [ ]]> <![IGNORE[]]> <![IGNORE[ ]]> <![IGNORE[ ]]> ]>");
+	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <!ELEMENT doc EMPTY> <![IGNORE[ <![ starts must balance ]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT doc EMPTY> <![IGNORE[ Everything is ignored within an ignored section, except the sub-section delimiters '<![' and ']]>'.  These must be balanced, but it is no section keyword is required: <![]]> <![DUNNO[ ]]> <![INCLUDE[ asdfasdfasdf <!OK ]]> ] ]> ]] > ]]> <![IGNORE[ < ![ <! [ <![]]>]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc EMPTY> <!NOTATION not1 SYSTEM \"a%a&b&#0<!ELEMENT<!--<?</>?>/\''\"> <!NOTATION not2 SYSTEM 'a b\"\"\"'> <!NOTATION not3 SYSTEM \"\"> <!NOTATION not4 SYSTEM ''> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc EMPTY> <!NOTATION not1 PUBLIC \"<\"> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc EMPTY> <!NOTATION not1 PUBLIC \"a b cdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\"> <!NOTATION not2 PUBLIC '0123456789-()+,./:=?;!*#@$_%'> <!NOTATION not3 PUBLIC \"0123456789-()+,.'/:=?;!*#@$_%\"> ]>");
+	TEST_DOCTYPE_WF("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"); // not actually a doctype :)
+	TEST_DOCTYPE_WF("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"); // not actually a doctype :)
+	TEST_DOCTYPE_WF("<!DOCTYPE doc SYSTEM \"p31pass1.dtd\" [<!ELEMENT doc EMPTY>]>");
+}
+
+TEST(parse_doctype_xmlconf_xmltest_1)
+{
+	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <![ INCLUDE [ <!ELEMENT doc (#PCDATA)> ]> ]>");
+	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <!ELEMENT doc (#PCDATA)> <![ IGNORE [");
+	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <!ELEMENT doc (#PCDATA)> <![ IGNORE [ ]>");
+	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <!ELEMENT doc (#PCDATA)> <![ INCLUDE [");
+	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <!ELEMENT doc (#PCDATA)> <![ INCLUDE [ ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT doc EMPTY> <!ENTITY % e \"<!--\"> %e; -->");
+	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!NOTATION foo PUBLIC \"[\" \"null.ent\"> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ATTLIST doc a CDATA #IMPLIED> <!ENTITY e '\"'> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ENTITY e \"<foo a='&#38;'></foo>\"> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]>");
+}
