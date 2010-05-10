@@ -217,6 +217,11 @@ TEST_XML(document_save_file, "<node/>")
 	unlink("tests/data/output.xml");
 }
 
+TEST_XML(document_save_file_error, "<node/>")
+{
+	CHECK(!doc.save_file("tests/data/unknown/output.xml"));
+}
+
 TEST(document_load_buffer)
 {
 	const pugi::char_t text[] = STR("<?xml?><node/>");

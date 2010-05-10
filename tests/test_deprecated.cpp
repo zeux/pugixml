@@ -208,6 +208,6 @@ TEST_XML(document_order_coverage, "<node id='1'/>")
 	xml_document doc;
 	doc.precompute_document_order();
 
-	CHECK(doc.child("node").document_order() == 0);
-	CHECK(doc.child("node").attribute("id").document_order() == 0);
+	CHECK(doc.child(STR("node")).document_order() == 0);
+	CHECK(doc.child(STR("node")).attribute(STR("id")).document_order() == 0);
 }
