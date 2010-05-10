@@ -1853,7 +1853,6 @@ namespace
 		{
 			// load into registers
 			char_t* s = ref_s;
-			char_t ch = 0;
 
 			// parse node contents, starting with exclamation mark
 			++s;
@@ -1921,7 +1920,7 @@ namespace
 							SCANFOR(s[0] == ']' && s[1] == ']' && ENDSWITH(s[2], '>'));
 							CHECK_ERROR(status_bad_cdata, s);
 
-							ENDSEG(); // Zero-terminate this segment.
+							*s++ = 0; // Zero-terminate this segment.
 						}
 
 						POPNODE(); // Pop since this is a standalone.

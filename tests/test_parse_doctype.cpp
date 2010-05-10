@@ -2,30 +2,30 @@
 
 #include <string>
 
-bool test_doctype_wf(const std::basic_string<char_t>& decl)
+static bool test_doctype_wf(const std::basic_string<char_t>& decl)
 {
 	xml_document doc;
 
 	// standalone
-	if (!doc.load(decl.c_str()) || doc.first_child()) return false;
+	if (!doc.load(decl.c_str()) || (bool)doc.first_child()) return false;
 
 	// pcdata pre/postfix
-	if (!doc.load(("a" + decl).c_str()) || doc.first_child()) return false;
-	if (!doc.load((decl + "b").c_str()) || doc.first_child()) return false;
-	if (!doc.load(("a" + decl + "b").c_str()) || doc.first_child()) return false;
+	if (!doc.load((STR("a") + decl).c_str()) || (bool)doc.first_child()) return false;
+	if (!doc.load((decl + STR("b")).c_str()) || (bool)doc.first_child()) return false;
+	if (!doc.load((STR("a") + decl + STR("b")).c_str()) || (bool)doc.first_child()) return false;
 
 	// node pre/postfix
-	if (!doc.load(("<nodea/>" + decl).c_str()) || !test_node(doc, STR("<nodea />"), STR(""), format_raw)) return false;
-	if (!doc.load((decl + "<nodeb/>").c_str()) || !test_node(doc, STR("<nodeb />"), STR(""), format_raw)) return false;
-	if (!doc.load(("<nodea/>" + decl + "<nodeb/>").c_str()) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
+	if (!doc.load((STR("<nodea/>") + decl).c_str()) || !test_node(doc, STR("<nodea />"), STR(""), format_raw)) return false;
+	if (!doc.load((decl + STR("<nodeb/>")).c_str()) || !test_node(doc, STR("<nodeb />"), STR(""), format_raw)) return false;
+	if (!doc.load((STR("<nodea/>") + decl + STR("<nodeb/>")).c_str()) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
 
 	// wrap in node to check that doctype is parsed fully (does not leave any "pcdata")
-	if (!doc.load(("<node>" + decl + "</node>").c_str()) || !test_node(doc, STR("<node />"), STR(""), format_raw)) return false;
+	if (!doc.load((STR("<node>") + decl + STR("</node>")).c_str()) || !test_node(doc, STR("<node />"), STR(""), format_raw)) return false;
 
 	return true;
 }
 
-bool test_doctype_nwf(const std::basic_string<char_t>& decl)
+static bool test_doctype_nwf(const std::basic_string<char_t>& decl)
 {
 	xml_document doc;
 
@@ -33,10 +33,10 @@ bool test_doctype_nwf(const std::basic_string<char_t>& decl)
 	if (doc.load(decl.c_str()).status != status_bad_doctype) return false;
 
 	// pcdata postfix
-	if (doc.load((decl + "b").c_str()).status != status_bad_doctype) return false;
+	if (doc.load((decl + STR("b")).c_str()).status != status_bad_doctype) return false;
 
 	// node postfix
-	if (doc.load((decl + "<nodeb/>").c_str()).status != status_bad_doctype) return false;
+	if (doc.load((decl + STR("<nodeb/>")).c_str()).status != status_bad_doctype) return false;
 
 	return true;
 }
