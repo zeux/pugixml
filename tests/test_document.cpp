@@ -15,6 +15,12 @@
 
 #include <string>
 
+TEST(document_create_empty)
+{
+	pugi::xml_document doc;
+	CHECK_NODE(doc, STR(""));
+}
+
 TEST(document_create)
 {
 	pugi::xml_document doc;

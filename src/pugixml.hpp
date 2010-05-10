@@ -1520,6 +1520,9 @@ namespace pugi
 		/// \internal Initializing ctor
 		explicit xml_node_iterator(xml_node_struct* ref);
 
+		/// \internal Initializing ctor (for past-the-end)
+		xml_node_iterator(xml_node_struct* ref, xml_node_struct* prev);
+
 	public:
 		/**
 		 * Iterator traits
@@ -1544,14 +1547,6 @@ namespace pugi
 		 * \param node - node that iterator will point at
 		 */
 		xml_node_iterator(const xml_node& node);
-
-		/**
-		 * Initializing ctor (for past-the-end)
-		 *
-		 * \param ref - should be 0
-		 * \param prev - previous node
-		 */
-		xml_node_iterator(xml_node_struct* ref, xml_node_struct* prev);
 
 		/**
 		 * Check if this iterator is equal to \a rhs
@@ -1627,6 +1622,9 @@ namespace pugi
 		/// \internal Initializing ctor
 		explicit xml_attribute_iterator(xml_attribute_struct* ref);
 
+		/// \internal Initializing ctor (for past-the-end)
+		xml_attribute_iterator(xml_attribute_struct* ref, xml_attribute_struct* prev);
+
 	public:
 		/**
 		 * Iterator traits
@@ -1651,14 +1649,6 @@ namespace pugi
 		 * \param node - node that iterator will point at
 		 */
 		xml_attribute_iterator(const xml_attribute& node);
-
-		/**
-		 * Initializing ctor (for past-the-end)
-		 *
-		 * \param ref - should be 0
-		 * \param prev - previous node
-		 */
-		xml_attribute_iterator(xml_attribute_struct* ref, xml_attribute_struct* prev);
 
 		/**
 		 * Check if this iterator is equal to \a rhs
