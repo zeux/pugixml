@@ -22,6 +22,8 @@ namespace
 
 TEST(custom_memory_management)
 {
+	allocate_count = deallocate_count = 0;
+
 	// remember old functions
 	allocation_function old_allocate = get_memory_allocation_function();
 	deallocation_function old_deallocate = get_memory_deallocation_function();
@@ -53,37 +55,64 @@ TEST(custom_memory_management)
 
 TEST(large_allocations)
 {
-	xml_document doc;
+	allocate_count = deallocate_count = 0;
 
-	// initial fill
-	for (size_t i = 0; i < 128; ++i)
+	// remember old functions
+	allocation_function old_allocate = get_memory_allocation_function();
+	deallocation_function old_deallocate = get_memory_deallocation_function();
+
+	// replace functions
+	set_memory_management_functions(allocate, deallocate);
+
 	{
-		std::basic_string<pugi::char_t> s(i * 128, 'x');
+		xml_document doc;
 
-		CHECK(doc.append_child(node_pcdata).set_value(s.c_str()));
-	}
+		CHECK(allocate_count == 1 && deallocate_count == 0);
 
-	// grow-prune loop
-	while (doc.first_child())
-	{
-		pugi::xml_node node;
-
-		// grow
-		for (node = doc.first_child(); node; node = node.next_sibling())
+		// initial fill
+		for (size_t i = 0; i < 128; ++i)
 		{
-			std::basic_string<pugi::char_t> s = node.value();
+			std::basic_string<pugi::char_t> s(i * 128, 'x');
 
-			CHECK(node.set_value((s + s).c_str()));
+			CHECK(doc.append_child(node_pcdata).set_value(s.c_str()));
 		}
 
-		// prune
-		for (node = doc.first_child(); node; )
+		CHECK(allocate_count > 1 && deallocate_count == 0);
+
+		// grow-prune loop
+		while (doc.first_child())
 		{
-			pugi::xml_node next = node.next_sibling().next_sibling();
+			pugi::xml_node node;
 
-			node.parent().remove_child(node);
+			// grow
+			for (node = doc.first_child(); node; node = node.next_sibling())
+			{
+				std::basic_string<pugi::char_t> s = node.value();
 
-			node = next;
+				CHECK(node.set_value((s + s).c_str()));
+			}
+
+			// prune
+			for (node = doc.first_child(); node; )
+			{
+				pugi::xml_node next = node.next_sibling().next_sibling();
+
+				node.parent().remove_child(node);
+
+				node = next;
+			}
 		}
+
+		CHECK(allocate_count == deallocate_count + 2); // only two live pages left: one contains document node, another one waits for new allocations
+
+		char buffer;
+		CHECK(doc.load_buffer_inplace(&buffer, 0, parse_default, get_native_encoding()));
+
+		CHECK(allocate_count == deallocate_count + 1); // only one live page left (it contains document node)
 	}
+
+	CHECK(allocate_count == deallocate_count); // everything is freed
+
+	// restore old functions
+	set_memory_management_functions(old_allocate, old_deallocate);
 }
