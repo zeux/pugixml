@@ -1739,6 +1739,116 @@ namespace
 		{
 		}
 
+		// DOCTYPE consists of nested sections of the following possible types:
+		// <!-- ... -->, <? ... ?>, "...", '...'
+		// <![...]]>
+		// <!...>
+		// First group can not contain nested groups
+		// Second group can contain nested groups of the same type
+		// Third group can contain all other groups
+		xml_parse_result parse_doctype_primitive(char_t*& s, char_t* buffer_start)
+		{
+			if (*s == '"' || *s == '\'')
+			{
+				// quoted string
+				char_t ch = *s++;
+				SCANFOR(*s == ch);
+				if (!*s) THROW_ERROR(status_bad_doctype, s);
+
+				s++;
+			}
+			else if (s[0] == '<' && s[1] == '?')
+			{
+				// <? ... ?>
+				s += 2;
+				SCANFOR(s[0] == '?' && s[1] == '>'); // no need for ENDSWITH because ?> can't terminate proper doctype
+				if (!*s) THROW_ERROR(status_bad_doctype, s);
+
+				s += 2;
+			}
+			else if (s[0] == '<' && s[1] == '!' && s[2] == '-' && s[3] == '-')
+			{
+				s += 4;
+				SCANFOR(s[0] == '-' && s[1] == '-' && s[2] == '>'); // no need for ENDSWITH because --> can't terminate proper doctype
+				if (!*s) THROW_ERROR(status_bad_doctype, s);
+
+				s += 4;
+			}
+			else THROW_ERROR(status_bad_doctype, s);
+
+			THROW_ERROR(status_ok, s);
+		}
+
+		xml_parse_result parse_doctype_ignore(char_t*& s, char_t* buffer_start)
+		{
+			assert(s[0] == '<' && s[1] == '!' && s[2] == '[');
+			s++;
+
+			while (*s)
+			{
+				if (s[0] == '<' && s[1] == '!' && s[2] == '[')
+				{
+					// nested ignore section
+					xml_parse_result res = parse_doctype_ignore(s, buffer_start);
+
+					if (!res) return res;
+				}
+				else if (s[0] == ']' && s[1] == ']' && s[2] == '>')
+				{
+					// ignore section end
+					s += 3;
+
+					THROW_ERROR(status_ok, s);
+				}
+				else s++;
+			}
+
+			THROW_ERROR(status_bad_doctype, s);
+		}
+
+		xml_parse_result parse_doctype(char_t*& s, char_t* buffer_start, char_t endch, bool toplevel)
+		{
+			assert(s[0] == '<' && s[1] == '!');
+			s++;
+
+			while (*s)
+			{
+				if (s[0] == '<' && s[1] == '!' && s[2] != '-')
+				{
+					if (s[2] == '[')
+					{
+						// ignore
+						xml_parse_result res = parse_doctype_ignore(s, buffer_start);
+
+						if (!res) return res;
+					}
+					else
+					{
+						// some control group
+						xml_parse_result res = parse_doctype(s, buffer_start, endch, false);
+
+						if (!res) return res;
+					}
+				}
+				else if (s[0] == '<' || s[0] == '"' || s[0] == '\'')
+				{
+					// unknown tag (forbidden), or some primitive group
+					xml_parse_result res = parse_doctype_primitive(s, buffer_start);
+
+					if (!res) return res;
+				}
+				else if (*s == '>')
+				{
+					s++;
+
+					THROW_ERROR(status_ok, s);
+				}
+				else s++;
+			}
+
+			THROW_ERROR((toplevel && endch == '>') ? status_ok : status_bad_doctype, s);
+		}
+
 		xml_parse_result parse_exclamation(char_t*& ref_s, xml_node_struct* cursor, unsigned int optmsk, char_t* buffer_start, char_t endch)
 		{
 			// load into registers
@@ -1831,47 +1941,13 @@ namespace
 			}
 			else if (s[0] == 'D' && s[1] == 'O' && s[2] == 'C' && s[3] == 'T' && s[4] == 'Y' && s[5] == 'P' && ENDSWITH(s[6], 'E'))
 			{
-				if (s[6] != 'E') THROW_ERROR(status_bad_doctype, s); 
+				if (s[6] != 'E') THROW_ERROR(status_bad_doctype, s);
 
-			LOC_DOCTYPE:
-				SCANFOR(*s == '\'' || *s == '"' || *s == '[' || *s == '>');
-				if (*s == 0 && endch != '>') THROW_ERROR(status_bad_doctype, s);
+				s -= 2;
 
-				if (*s == '\'' || *s == '"') // '...SYSTEM "..."
-				{
-					ch = *s++;
-					SCANFOR(*s == ch);
-					if (*s == 0 && endch != '>') THROW_ERROR(status_bad_doctype, s);
+				xml_parse_result res = parse_doctype(s, buffer_start, endch, true);
 
-					s += (*s != 0);
-					goto LOC_DOCTYPE;
-				}
-
-				if(*s == '[') // '...[...'
-				{
-					++s;
-					unsigned int bd = 1; // Bracket depth counter.
-					while (*s!=0) // Loop till we're out of all brackets.
-					{
-						if (*s == ']') --bd;
-						else if (*s == '[') ++bd;
-						if (bd == 0) break;
-						++s;
-					}
-
-					if (bd != 0) THROW_ERROR(status_bad_doctype, s);
-				}
-
-				SCANFOR(*s == '>');
-
-				if (*s == 0)
-				{
-					if (endch != '>') THROW_ERROR(status_bad_doctype, s);
-				}
-				else
-				{
-					++s;
-				}
+				if (!res) return res;
 			}
 			else if (*s == 0 && endch == '-') THROW_ERROR(status_bad_comment, s);
 			else if (*s == 0 && endch == '[') THROW_ERROR(status_bad_cdata, s);

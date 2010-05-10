@@ -497,35 +497,6 @@ TEST(parse_declaration_error)
 	CHECK(doc.load(STR("<?xml version='1?>"), parse_minimal | parse_declaration).status == status_bad_attribute);
 }
 
-TEST(parse_doctype_skip)
-{
-	xml_document doc;
-	CHECK(doc.load(STR("<!DOCTYPE doc>")) && !doc.first_child());
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo'>")) && !doc.first_child());
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM \"foo\">")) && !doc.first_child());
-	CHECK(doc.load(STR("<!DOCTYPE doc PUBLIC \"foo\" 'bar'>")) && !doc.first_child());
-	CHECK(doc.load(STR("<!DOCTYPE doc PUBLIC \"foo'\">")) && !doc.first_child());
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>]>")) && !doc.first_child());
-
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>]><node/>")));
-	CHECK_NODE(doc, STR("<node />"));
-}
-
-TEST(parse_doctype_error)
-{
-	xml_document doc;
-	CHECK(doc.load(STR("<!DOCTYPE")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM \"foo")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc PUBLIC \"foo\" 'bar")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc PUBLIC \"foo'\"")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>]")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE doc SYSTEM 'foo' [<!ELEMENT foo 'ANY'>] ")).status == status_bad_doctype);
-}
-
 TEST(parse_empty)
 {
 	xml_document doc;
