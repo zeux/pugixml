@@ -403,6 +403,17 @@ TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node
 	CHECK_NODE(doc, STR("<node><n2 /><child /></node>"));
 }
 
+TEST_XML(dom_node_remove_child_complex, "<node id='1'><n1 id1='1' id2='2'/><n2/><n3/><child><n4/></child></node>")
+{
+	doc.child(STR("node")).remove_child(STR("n1"));
+
+	CHECK_NODE(doc, STR("<node id=\"1\"><n2 /><n3 /><child><n4 /></child></node>"));
+
+	doc.remove_child(STR("node"));
+
+	CHECK_NODE(doc, STR(""));
+}
+
 TEST_XML(dom_node_append_copy, "<node>foo<child/></node>")
 {
 	CHECK(xml_node().append_copy(xml_node()) == xml_node());

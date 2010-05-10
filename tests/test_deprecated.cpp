@@ -167,6 +167,7 @@ TEST_XML(dom_node_wildcard_star, "<node cd='1'/>")
 	CHECK(node.attribute_w(STR("*?*d*")).as_int() == 1);
 }
 
+// parse_wnorm_attribute flag
 TEST(parse_attribute_wnorm)
 {
 	xml_document doc;
@@ -201,3 +202,12 @@ TEST(parse_attribute_variations_wnorm)
 				}
 }
 
+// document order
+TEST_XML(document_order_coverage, "<node id='1'/>")
+{
+	xml_document doc;
+	doc.precompute_document_order();
+
+	CHECK(doc.child("node").document_order() == 0);
+	CHECK(doc.child("node").attribute("id").document_order() == 0);
+}
