@@ -4084,20 +4084,34 @@ namespace pugi
 
 	void xml_document::destroy()
 	{
+		// destroy static storage
 		if (_buffer)
 		{
 			global_deallocate(_buffer);
 			_buffer = 0;
 		}
 
-		// unoptimized deallocation, for verification purposes
+		// destroy dynamic storage, leave sentinel page and next page (if any)
 		if (_root)
 		{
-			_root->destroy(get_allocator(), sizeof(xml_document_struct));
-
 			assert(_memory.next);
-			assert(!_memory.next->next);
-			assert(_memory.next->busy_size == 0 && _memory.next->freed_size == 0);
+
+			// destroy all pages
+			for (xml_memory_page* page = _memory.next->next; page; )
+			{
+				xml_memory_page* next = page->next;
+
+				xml_allocator::deallocate_page(page);
+
+				page = next;
+			}
+
+			// cleanup next page
+			_memory.next->allocator = 0;
+			_memory.next->next = 0;
+			_memory.next->busy_size = _memory.next->freed_size = 0;
+
+			_root = 0;
 		}
 		else
 		{
