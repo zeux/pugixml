@@ -214,3 +214,30 @@ TEST(parse_doctype_xmlconf_ibm_2)
 	TEST_DOCTYPE_NWF("<!DOCTYPE root [ <!ELEMENT root (#PCDATA)> <!ATTLIST root att CDATA #IMPLIED> <!--* missing closing bracket  *--> <!ENTITY % paaa \"<!-- comments -->\" %paaa; ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE root PUBLIC \"-//W3C//DTD//EN\"\"empty.dtd\" [ <!ELEMENT root (#PCDATA)> <!ATTLIST root att CDATA #IMPLIED> ]>");
 }
+
+TEST(parse_doctype_xmlconf_ibm_3)
+{
+	TEST_DOCTYPE_WF("<!DOCTYPE animal [ <!ELEMENT animal (cat|tiger|leopard)+> <!ELEMENT cat EMPTY> <!ELEMENT tiger (#PCDATA)> <!ELEMENT leopard ANY> <!ELEMENT small EMPTY> <!ELEMENT big EMPTY> <!ATTLIST tiger color CDATA #REQUIRED> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE book [ <!ELEMENT book ANY> <!-- This test case covers     legal character ranges plus discrete legal characters for production 02. --> <?NAME target ?> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student [ <!ELEMENT student (#PCDATA)> <!ATTLIST student first CDATA #REQUIRED middle CDATA #IMPLIED last CDATA #REQUIRED > <!ENTITY myfirst \"Snow\"> <!ENTITY mymiddle \"I\"> <!ENTITY mylast 'Man &myfirst; and &myfirst; mymiddle;.'> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student SYSTEM 'student.dtd'[ ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student [ <!ELEMENT student (#PCDATA)> <!ENTITY unref SYSTEM \"\"> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student PUBLIC \"\" \"student.dtd\"[ ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student PUBLIC '' 'student.dtd'[ ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student PUBLIC \"The big ' in it\" \"student.dtd\"[ ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student PUBLIC 'The latest version' 'student.dtd'[ ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student PUBLIC \"#x20 #xD #xA abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -'()+,./:=?;!*#@$_% \" \"student.dtd\"[ ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student [ <!ELEMENT student (#PCDATA)> <!----> ]>");
+	TEST_DOCTYPE_NWF("<!DOCTYPE student [ <!ELEMENT student (#PCDATA)> <!---> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student [ <!ELEMENT student (#PCDATA)> <?pi?> ]>");
+	TEST_DOCTYPE_NWF("<!DOCTYPE student [ <!ELEMENT student (#PCDATA)> <?> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE student [ <!ELEMENT student (#PCDATA)> <?MyInstruct AVOID ? BEFORE > IN PI ?> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE animal SYSTEM \"ibm28v02.dtd\" [ <!NOTATION animal_class SYSTEM \"ibm28v02.txt\"> <!ENTITY forcat \"This is a small cat\"> <!ELEMENT tiger (#PCDATA)> <!ENTITY % make_small \"<!ELEMENT small EMPTY>\"> <!ENTITY % make_leopard_element \"<!ELEMENT leopard ANY>\"> <!ENTITY % make_attlist \"<!ATTLIST tiger color CDATA #REQUIRED>\"> %make_leopard_element; <!ELEMENT cat ANY> %make_small; <!ENTITY % make_big \"<!ELEMENT big EMPTY>\"> %make_big; %make_attlist; <?sound \"This is a PI\" ?> <!-- This is a valid test file for p28 --> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE animal [ <![INCLUDE[ <!ENTITY % rootElement \"<!ELEMENT animal ANY>\"> ]]> %rootElement; <!-- Following is a makupdecl --> <!ENTITY % make_tiger_element \"<!ELEMENT tiger EMPTY>\"> %make_tiger_element; <![IGNORE[ <!ELEMENT animal EMPTY> ]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT root (a,b)> <!ELEMENT a EMPTY> <!ELEMENT b (#PCDATA|c)* > <!ELEMENT c ANY> <!ENTITY inContent \"<b>General entity reference in element content</b>\"> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT a EMPTY> <!ELEMENT b (#PCDATA|c)* > <!ELEMENT c ANY> <!--* PE replace Text have both parentheses *--> <!ENTITY % seq1 \"(a,b,c)\"> <!ELEMENT child1 %seq1; > <!--* Another legal PE replace Text *--> <!ENTITY % seq2 \"a,b\"> <!ELEMENT child2 (%seq2;,c) > ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <![IGNORE[ Everything is ignored within an ignored section, except the sub-section delimiters '<![' and ']]>'.  These must be balanced <!ok ]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <![IGNORE[ Everything is ignored within an ignored section, except the sub-section delimiters '<![' and ']]>'.  These must be balanced <![ <!ELEMENT animal EMPTY> ]]> ]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <![IGNORE[ begin Everything is ignored within an ignored section, except the sub-section delimiters '<![' and ']]>'.  These must be balanced <![ <!ELEMENT animal EMPTY> ]]> nesting <![ <!ELEMENT tiger (#PCDATA)> ]]> nesting again <![ <!ELEMENT abc ANY> ]]> end ]]> ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!DOCTYPE root SYSTEM \"ibm69v01.dtd\" [ <!ELEMENT root (#PCDATA|a)* > <!ENTITY % pe1 \"<!-- comment in PE -->\"> %pe1; ]> ]>");
+}
