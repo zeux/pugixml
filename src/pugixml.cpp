@@ -55,6 +55,16 @@ using std::memcpy;
 typedef size_t uintptr_t;
 #endif
 
+// Inlining controls
+#if defined(_MSC_VER) && _MSC_VER >= 1300
+#	define PUGIXML_NO_INLINE __declspec(noinline)
+#elif defined(__GNUC__)
+#	define PUGIXML_NO_INLINE __attribute__((noinline))
+#else
+#	define PUGIXML_NO_INLINE 
+#endif
+
+// Simple static assertion
 #define STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
 
 // Memory allocation
@@ -243,13 +253,24 @@ namespace pugi
 
 	struct xml_allocator
 	{
-		xml_allocator(xml_memory_page* root): _root(root)
+		xml_allocator(xml_memory_page* root): _root(root), _busy_size(root ? root->busy_size : 0)
 		{
+		}
+
+		~xml_allocator()
+		{
+			if (_root) _root->busy_size = _busy_size;
 		}
 
 		xml_memory_page* allocate_page(size_t data_size)
 		{
-			size_t size = sizeof(xml_memory_page) + data_size; // $$$ slightly incorrect
+		#ifdef __GNUC__
+			// To avoid offsetof warning (xml_memory_page is not POD)
+			xml_memory_page* dummy_page = 0;
+			size_t size = ((size_t)(uintptr_t)&dummy_page->data) + data_size;
+		#else
+			size_t size = offsetof(xml_memory_page, data) + data_size;
+		#endif
 
 			// allocate block with some alignment, leaving memory for worst-case padding
 			void* memory = global_allocate(size + xml_memory_page_alignment);
@@ -271,26 +292,25 @@ namespace pugi
 			global_deallocate(page->memory);
 		}
 
-		void* allocate_memory_oob(size_t size, xml_memory_page*& out_page)
+		PUGIXML_NO_INLINE void* allocate_memory_oob(size_t size, xml_memory_page*& out_page)
 		{
 			const size_t large_allocation_threshold = xml_memory_page_size / 4;
 
-			xml_memory_page* page;
+			xml_memory_page* page = allocate_page(size <= large_allocation_threshold ? xml_memory_page_size : size);
 
 			if (size <= large_allocation_threshold)
 			{
-				page = allocate_page(xml_memory_page_size);
+				_root->busy_size = _busy_size;
 
 				// insert page at the end of linked list
 				page->prev = _root;
 				_root->next = page;
 				_root = page;
+
+				_busy_size = size;
 			}
 			else
 			{
-				// standalone page
-				page = allocate_page(size);
-
 				// insert page before the end of linked list
 				assert(_root->prev);
 
@@ -310,11 +330,11 @@ namespace pugi
 
 		void* allocate_memory(size_t size, xml_memory_page*& out_page)
 		{
-			if (_root->busy_size + size > xml_memory_page_size) return allocate_memory_oob(size, out_page);
+			if (_busy_size + size > xml_memory_page_size) return allocate_memory_oob(size, out_page);
 
-			void* buf = _root->data + _root->busy_size;
+			void* buf = _root->data + _busy_size;
 
-			_root->busy_size += size;
+			_busy_size += size;
 
 			out_page = _root;
 
@@ -325,6 +345,8 @@ namespace pugi
 		{
 			assert(ptr >= page->data && ptr < page->data + xml_memory_page_size);
 			(void)!ptr;
+
+			if (page == _root) page->busy_size = _busy_size;
 
 			page->freed_size += size;
 			assert(page->freed_size <= page->busy_size);
@@ -337,6 +359,7 @@ namespace pugi
 
 					// top page freed, just reset sizes
 					page->busy_size = page->freed_size = 0;
+					_busy_size = 0;
 				}
 				else
 				{
@@ -352,10 +375,6 @@ namespace pugi
 				}
 			}
 		}
-
-		xml_document_struct* allocate_document();
-		xml_node_struct* allocate_node(xml_node_type type);
-		xml_attribute_struct* allocate_attribute();
 
 		char_t* allocate_string(size_t length)
 		{
@@ -385,6 +404,7 @@ namespace pugi
 		}
 
 		xml_memory_page* _root;
+		size_t _busy_size;
 	};
 
 	/// A 'name=value' XML attribute structure.
@@ -395,14 +415,6 @@ namespace pugi
 		{
 		}
 
-		void destroy(xml_allocator& alloc)
-		{
-			if (header & xml_memory_page_name_allocated_mask) alloc.deallocate_string(name);
-			if (header & xml_memory_page_value_allocated_mask) alloc.deallocate_string(value);
-
-			alloc.deallocate_memory(this, sizeof(xml_attribute_struct), reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask));
-		}
-	
 		uintptr_t header;
 
 		char_t* name;	///< Pointer to attribute name.
@@ -419,68 +431,6 @@ namespace pugi
 		/// \param type - node type
 		xml_node_struct(xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | type), parent(0), name(0), value(0), first_child(0), last_child(0), prev_sibling(0), next_sibling(0), first_attribute(0), last_attribute(0)
 		{
-		}
-
-		void destroy(xml_allocator& alloc)
-		{
-			destroy(alloc, sizeof(xml_node_struct));
-		}
-
-		void destroy(xml_allocator& alloc, size_t size)
-		{
-			if (header & xml_memory_page_name_allocated_mask) alloc.deallocate_string(name);
-			if (header & xml_memory_page_value_allocated_mask) alloc.deallocate_string(value);
-
-			for (xml_attribute_struct* attr = first_attribute; attr; )
-			{
-				xml_attribute_struct* next = attr->next_attribute;
-
-				attr->destroy(alloc);
-
-				attr = next;
-			}
-
-			for (xml_node_struct* node = first_child; node; )
-			{
-				xml_node_struct* next = node->next_sibling;
-
-				node->destroy(alloc);
-
-				node = next;
-			}
-
-			alloc.deallocate_memory(this, size, reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask));
-		}
-
-		xml_node_struct* append_node(xml_allocator& alloc, xml_node_type type = node_element)
-		{
-			xml_node_struct* child = alloc.allocate_node(type);
-			child->parent = this;
-			
-			if (last_child)
-			{
-				last_child->next_sibling = child;
-				child->prev_sibling = last_child;
-				last_child = child;
-			}
-			else first_child = last_child = child;
-			
-			return child;
-		}
-
-		xml_attribute_struct* append_attribute(xml_allocator& alloc)
-		{
-			xml_attribute_struct* a = alloc.allocate_attribute();
-
-			if (last_attribute)
-			{
-				last_attribute->next_attribute = a;
-				a->prev_attribute = last_attribute;
-				last_attribute = a;
-			}
-			else first_attribute = last_attribute = a;
-			
-			return a;
 		}
 
 		uintptr_t header;
@@ -509,29 +459,104 @@ namespace pugi
 		xml_allocator allocator;
 		const char_t* buffer;
 	};
+}
 
-	xml_document_struct* xml_allocator::allocate_document()
+// Low-level DOM operations
+namespace
+{
+	using namespace pugi;
+
+	inline xml_attribute_struct* allocate_attribute(xml_allocator& alloc)
 	{
 		xml_memory_page* page;
-		void* memory = allocate_memory(sizeof(xml_document_struct), page);
+		void* memory = alloc.allocate_memory(sizeof(xml_attribute_struct), page);
 
-		return new (memory) xml_document_struct(page);
+		return new (memory) xml_attribute_struct(page);
 	}
 
-	xml_node_struct* xml_allocator::allocate_node(xml_node_type type)
+	inline xml_node_struct* allocate_node(xml_allocator& alloc, xml_node_type type)
 	{
 		xml_memory_page* page;
-		void* memory = allocate_memory(sizeof(xml_node_struct), page);
+		void* memory = alloc.allocate_memory(sizeof(xml_node_struct), page);
 
 		return new (memory) xml_node_struct(page, type);
 	}
 
-	xml_attribute_struct* xml_allocator::allocate_attribute()
+	inline xml_document_struct* allocate_document(xml_allocator& alloc)
 	{
 		xml_memory_page* page;
-		void* memory = allocate_memory(sizeof(xml_attribute_struct), page);
+		void* memory = alloc.allocate_memory(sizeof(xml_document_struct), page);
 
-		return new (memory) xml_attribute_struct(page);
+		return new (memory) xml_document_struct(page);
+	}
+
+	inline void destroy_attribute(xml_attribute_struct* a, xml_allocator& alloc)
+	{
+		uintptr_t header = a->header;
+
+		if (header & xml_memory_page_name_allocated_mask) alloc.deallocate_string(a->name);
+		if (header & xml_memory_page_value_allocated_mask) alloc.deallocate_string(a->value);
+
+		alloc.deallocate_memory(a, sizeof(xml_attribute_struct), reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask));
+	}
+
+	inline void destroy_node(xml_node_struct* n, xml_allocator& alloc)
+	{
+		uintptr_t header = n->header;
+
+		if (header & xml_memory_page_name_allocated_mask) alloc.deallocate_string(n->name);
+		if (header & xml_memory_page_value_allocated_mask) alloc.deallocate_string(n->value);
+
+		for (xml_attribute_struct* attr = n->first_attribute; attr; )
+		{
+			xml_attribute_struct* next = attr->next_attribute;
+
+			destroy_attribute(attr, alloc);
+
+			attr = next;
+		}
+
+		for (xml_node_struct* child = n->first_child; child; )
+		{
+			xml_node_struct* next = child->next_sibling;
+
+			destroy_node(child, alloc);
+
+			child = next;
+		}
+
+		alloc.deallocate_memory(n, sizeof(xml_node_struct), reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask));
+	}
+
+	PUGIXML_NO_INLINE xml_node_struct* append_node(xml_node_struct* node, xml_allocator& alloc, xml_node_type type = node_element)
+	{
+		xml_node_struct* child = allocate_node(alloc, type);
+		child->parent = node;
+			
+		if (node->last_child)
+		{
+			node->last_child->next_sibling = child;
+			child->prev_sibling = node->last_child;
+			node->last_child = child;
+		}
+		else node->first_child = node->last_child = child;
+			
+		return child;
+	}
+
+	PUGIXML_NO_INLINE xml_attribute_struct* append_attribute_ll(xml_node_struct* node, xml_allocator& alloc)
+	{
+		xml_attribute_struct* a = allocate_attribute(alloc);
+
+		if (node->last_attribute)
+		{
+			node->last_attribute->next_attribute = a;
+			a->prev_attribute = node->last_attribute;
+			node->last_attribute = a;
+		}
+		else node->first_attribute = node->last_attribute = a;
+			
+		return a;
 	}
 }
 
@@ -1683,12 +1708,12 @@ namespace
 
 	struct xml_parser
 	{
-		xml_allocator& alloc;
+		xml_allocator alloc;
 		
 		// Parser utilities.
 		#define SKIPWS()			{ while (is_chartype(*s, ct_space)) ++s; }
 		#define OPTSET(OPT)			( optmsk & OPT )
-		#define PUSHNODE(TYPE)		{ cursor = cursor->append_node(alloc,TYPE); }
+		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); }
 		#define POPNODE()			{ cursor = cursor->parent; }
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define SCANWHILE(X)		{ while ((X)) ++s; }
@@ -1696,7 +1721,7 @@ namespace
 		#define THROW_ERROR(err, m)	return make_parse_result(err, m - buffer_start, __LINE__)
 		#define CHECK_ERROR(err, m)	{ if (*s == 0) THROW_ERROR(err, m); }
 		
-		xml_parser(xml_allocator& alloc): alloc(alloc)
+		xml_parser(const xml_allocator& alloc): alloc(alloc)
 		{
 		}
 
@@ -2005,7 +2030,7 @@ namespace
 						
 								if (is_chartype(*s, ct_start_symbol)) // <... #...
 								{
-									xml_attribute_struct* a = cursor->append_attribute(alloc); // Make space for this attribute.
+									xml_attribute_struct* a = append_attribute_ll(cursor, alloc); // Make space for this attribute.
 									a->name = s; // Save the offset.
 
 									SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
@@ -2207,8 +2232,8 @@ namespace
 			// perform actual parsing
 			xml_parse_result result = parser.parse(buffer, xmldoc, optmsk, endch);
 
-			// fixup page live_sizes $$$
-			// for (xml_memory_page* page = alloc._root; page; page = page->prev) page->live_size = page->busy_size;
+			// update allocator state
+			alloc = parser.alloc;
 
 			// since we removed last character, we have to handle the only possible false positive
 			if (result && endch == '<')
@@ -2221,10 +2246,6 @@ namespace
 
 			return result;
 		}
-		
-	private:
-		xml_parser(const xml_parser&);
-		const xml_parser& operator=(const xml_parser&);
 	};
 
 	// Output facilities
@@ -3435,7 +3456,7 @@ namespace pugi
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
-		xml_attribute a(_root->append_attribute(get_allocator()));
+		xml_attribute a(append_attribute_ll(_root, get_allocator()));
 		a.set_name(name);
 		
 		return a;
@@ -3452,7 +3473,7 @@ namespace pugi
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
-		xml_attribute a(get_allocator().allocate_attribute());
+		xml_attribute a(allocate_attribute(get_allocator()));
 		a.set_name(name);
 
 		if (attr._attr->prev_attribute)
@@ -3478,7 +3499,7 @@ namespace pugi
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
-		xml_attribute a(get_allocator().allocate_attribute());
+		xml_attribute a(allocate_attribute(get_allocator()));
 		a.set_name(name);
 
 		if (attr._attr->next_attribute)
@@ -3527,7 +3548,7 @@ namespace pugi
 	{
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		
-		return xml_node(_root->append_node(get_allocator(), type));
+		return xml_node(append_node(_root, get_allocator(), type));
 	}
 
 	xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node)
@@ -3535,7 +3556,7 @@ namespace pugi
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		if (node.parent() != *this) return xml_node();
 	
-		xml_node n(get_allocator().allocate_node(type));
+		xml_node n(allocate_node(get_allocator(), type));
 		n._root->parent = _root;
 		
 		if (node._root->prev_sibling)
@@ -3555,7 +3576,7 @@ namespace pugi
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		if (node.parent() != *this) return xml_node();
 	
-		xml_node n(get_allocator().allocate_node(type));
+		xml_node n(allocate_node(get_allocator(), type));
 		n._root->parent = _root;
 	
 		if (node._root->next_sibling)
@@ -3619,7 +3640,7 @@ namespace pugi
 		if (a._attr->prev_attribute) a._attr->prev_attribute->next_attribute = a._attr->next_attribute;
 		else _root->first_attribute = a._attr->next_attribute;
 
-		a._attr->destroy(get_allocator());
+		destroy_attribute(a._attr, get_allocator());
 	}
 
 	void xml_node::remove_child(const char_t* name)
@@ -3637,7 +3658,7 @@ namespace pugi
 		if (n._root->prev_sibling) n._root->prev_sibling->next_sibling = n._root->next_sibling;
 		else _root->first_child = n._root->next_sibling;
         
-        n._root->destroy(get_allocator());
+        destroy_node(n._root, get_allocator());
 	}
 
 	xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const
@@ -4071,7 +4092,7 @@ namespace pugi
 		// allocate new root
 		xml_allocator alloc(_memory.next ? _memory.next : &_memory);
 		
-		_root = alloc.allocate_document();
+		_root = allocate_document(alloc);
 
 		// setup allocator
 		xml_allocator& a = static_cast<xml_document_struct*>(_root)->allocator;
