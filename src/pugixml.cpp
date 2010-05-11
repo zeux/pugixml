@@ -237,8 +237,6 @@ namespace pugi
 
 namespace pugi
 {
-	struct xml_document_struct;
-
 	static const uintptr_t xml_memory_page_alignment = 32;
 	static const uintptr_t xml_memory_page_pointer_mask = ~(xml_memory_page_alignment - 1);
 	static const uintptr_t xml_memory_page_name_allocated_mask = 16;
@@ -255,11 +253,6 @@ namespace pugi
 	{
 		xml_allocator(xml_memory_page* root): _root(root), _busy_size(root ? root->busy_size : 0)
 		{
-		}
-
-		~xml_allocator()
-		{
-			if (_root) _root->busy_size = _busy_size;
 		}
 
 		xml_memory_page* allocate_page(size_t data_size)
@@ -282,7 +275,7 @@ namespace pugi
 			xml_memory_page* page = new (page_memory) xml_memory_page();
 
 			page->memory = memory;
-			page->allocator = this;
+			page->allocator = _root->allocator;
 
 			return page;
 		}
