@@ -19,12 +19,10 @@ $fast = (shift eq 'fast');
 @toolsets = ($^O =~ /win/i) ? (bcc, cw, dmc, ic8, mingw34, mingw44, mingw45, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64) : (gcc);
 @configurations = (debug, release);
 @defines = (PUGIXML_NO_XPATH, PUGIXML_NO_EXCEPTIONS, PUGIXML_NO_STL, PUGIXML_WCHAR_MODE);
-@definesabbr = (noxpath, noexcept, nostl, wchar);
 
 if ($fast)
 {
 	@defines = (PUGIXML_WCHAR_MODE);
-	@definesabbr = (wchar);
 }
 
 @definesets = permute(@defines);
@@ -39,19 +37,10 @@ foreach $toolset (@toolsets)
 	{
 		foreach $defineset (@definesets)
 		{
-			# construct define abbreviation
-			$defineabbr = $defineset;
-			$defineabbr =~ s/,/ /g;
+			if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_EXCEPTIONS/) { next; }
+			if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_STL/) { next; }
 
-			for ($i = 0; $i < $#definesabbr + 1; ++$i)
-			{
-				$defineabbr =~ s/$defines[$i]/$definesabbr[$i]/;
-			}
-
-			if ($defineabbr !~ /noxpath/ && $defineabbr =~ /noexcept/) { next; }
-			if ($defineabbr !~ /noxpath/ && $defineabbr =~ /nostl/) { next; }
-
-			print STDERR "*** testing $toolset/$configuration ($defineabbr) ... ***\n";
+			print STDERR "*** testing $toolset/$configuration ($defineset) ... ***\n";
 
 			# launch command
 			my $cmdline = "jam toolset=$toolset configuration=$configuration defines=$defineset";
@@ -69,7 +58,7 @@ foreach $toolset (@toolsets)
 			my $coverage_pugixpath = $1 if ($coverage =~ /pugixpath\.cpp' executed:([^%]+)%/);
 	
 			# print build report
-			print "### autotest $Config{archname} $toolset $configuration [$defineabbr] result $result $coverage_pugixml $coverage_pugixpath\n";
+			print "### autotest $Config{archname} $toolset $configuration [$defineset] result $result $coverage_pugixml $coverage_pugixpath\n";
 		}
 
 		last if ($fast);
