@@ -76,7 +76,6 @@ foreach $tool (@toolsetarray)
 
 	foreach (@configurationarray)
 	{
-		my $cmdline = "jam toolset=" . (split /\s+/, $tool)[0] . " defines=" . (split /\s+/, $_)[1] . " configuration=" . (split /\s+/, $_)[0];
 		my $info = $results{$tool}{$_};
 
 		if (!defined $$info{result})
@@ -87,7 +86,7 @@ foreach $tool (@toolsetarray)
 		{
 			my ($coverage_pugixml, $coverage_pugixpath) = ($$info{coverage_pugixml}, $$info{coverage_pugixpath});
 
-			print "<td bgcolor='#00ff00' align='center' title='$cmdline'>pass";
+			print "<td bgcolor='#00ff00' align='center'>pass";
 				
 			if ($coverage_pugixml > 0 || $coverage_pugixpath > 0)
 			{
@@ -98,7 +97,7 @@ foreach $tool (@toolsetarray)
 		}
 		else
 		{
-			print "<td bgcolor='#ff0000' align='center' title='$cmdline'>fail</td>"
+			print "<td bgcolor='#ff0000' align='center'>fail</td>"
 		}
 	}
 
