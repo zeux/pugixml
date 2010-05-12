@@ -1,5 +1,39 @@
 #!/usr/bin/perl
 
+# pretty-printing
+sub prettytoolset
+{
+	my $toolset = shift;
+
+	return "Borland C++ 5.82" if ($toolset eq 'bcc');
+	return "Metrowerks CodeWarrior 8" if ($toolset eq 'cw');
+	return "Digital Mars C++ 8.51" if ($toolset eq 'dmc');
+
+	return "Intel C++ Compiler $1.0" if ($toolset =~ /^ic(\d+)$/);
+	return "MinGW32 (GCC $1.$2)" if ($toolset =~ /^mingw(\d)(\d)$/);
+	return "Microsoft Visual C++ 7.1" if ($toolset eq 'msvc71');
+	return "Microsoft Visual C++ $1.0" if ($toolset =~ /^msvc(\d+)$/);
+	return "Microsoft Visual C++ $1.0 x64" if ($toolset =~ /^msvc(\d+)_x64$/);
+
+	$toolset;
+}
+
+sub prettyplatform
+{
+	my $platform = shift;
+
+	return "linux64" if ($platform =~ /64-linux/);
+	return "linux32" if ($platform =~ /86-linux/);
+
+	return "freebsd64" if ($platform =~ /64-freebsd/);
+	return "freebsd32" if ($platform =~ /86-freebsd/);
+
+	return "win64" if ($platform =~ /MSWin32-x64/);
+	return "win32" if ($platform =~ /MSWin32/);
+
+	$platform;
+}
+
 # parse build log
 %results = ();
 %toolsets = ();
@@ -22,7 +56,7 @@ while (<>)
 
 		die "Detected duplicate build information $_\n" if defined $results{"$toolset $platform"}{$configuration}{$defineset};
 
-		my $fulltool = "$toolset $platform";
+		my $fulltool = &prettyplatform($platform) . ' ' . &prettytoolset($toolset);
 		my $fullconf = "$configuration $defineset";
 
 		$results{$fulltool}{$fullconf}{result} = $result;
@@ -51,14 +85,14 @@ print <<END;
 END
 
 # print configuration header (release/debug)
-print "<tr><td align='right'>configuration</td>";
+print "<tr><td align='right' colspan=2>configuration</td>";
 print "<td>".(split /\s+/)[0]."</td>" foreach (@configurationarray);
 print "</tr>\n";
 
 # print defines header (one row for each define)
 foreach $define (sort {$a cmp $b} keys %defines)
 {
-	print "<tr><td align='right'><small>$define</small></td>";
+	print "<tr><td align='right' colspan=2><small>$define</small></td>";
 
 	foreach (@configurationarray)
 	{
@@ -72,7 +106,8 @@ foreach $define (sort {$a cmp $b} keys %defines)
 # print data (one row for each toolset)
 foreach $tool (@toolsetarray)
 {
-	print "<tr><td>$tool</td>";
+	my ($platform, $toolset) = split(/\s+/, $tool, 2);
+	print "<tr><td style='border-right: none' align='right'><small>$platform</small></td><td style='border-left: none'>$toolset</td>";
 
 	foreach (@configurationarray)
 	{
