@@ -12,10 +12,22 @@ sub execprint
 }
 
 use IO::Socket;
+use Net::Ping;
 
 $exitcmd = shift;
+$host = "10.0.2.2";
 
-my $client = new IO::Socket::INET(PeerAddr => "10.0.2.2:7183", Timeout => 5);
+# wait while network is up
+$ping = Net::Ping->new("icmp");
+
+while (!$ping->ping($host))
+{
+	print "### autotest $host is down, retrying...\n";
+}
+
+print "### autotest $host is up, connecting...\n";
+
+my $client = new IO::Socket::INET(PeerAddr => "$host:7183");
 exit unless $client;
 
 select $client;
