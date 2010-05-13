@@ -25,8 +25,8 @@ sub prettyplatform
 	return "linux64" if ($platform =~ /64-linux/);
 	return "linux32" if ($platform =~ /86-linux/);
 
-	return "freebsd64" if ($platform =~ /64-freebsd/);
-	return "freebsd32" if ($platform =~ /86-freebsd/);
+	return "fbsd64" if ($platform =~ /64-freebsd/);
+	return "fbsd32" if ($platform =~ /86-freebsd/);
 
 	return "win64" if ($platform =~ /MSWin32-x64/);
 	return "win32" if ($platform =~ /MSWin32/);
@@ -78,10 +78,15 @@ $toolsetarray[$toolsets{$_}] = $_ foreach (keys %toolsets);
 $configurationarray[$configurations{$_}] = $_ foreach (keys %configurations);
 
 # print header
+$stylesheet = <<END;
+table.autotest { border: 1px solid; border-left: none; border-top: none; }
+table.autotest td { border: 1px solid; border-right: none; border-bottom: none; }
+END
+
 print <<END;
-<html><head><title>pugixml autotest report</title></head><body>
+<html><head><title>pugixml autotest report</title><style type="text/css"><!-- $stylesheet --></style></head><body>
 <h3>pugixml autotest report</h3>
-<table border=1 cellspacing=0 cellpadding=4>
+<table border=1 cellspacing=0 cellpadding=4 class="autotest">
 END
 
 # print configuration header (release/debug)
@@ -107,7 +112,7 @@ foreach $define (sort {$a cmp $b} keys %defines)
 foreach $tool (@toolsetarray)
 {
 	my ($platform, $toolset) = split(/\s+/, $tool, 2);
-	print "<tr><td style='border-right: none' align='right'><small>$platform</small></td><td style='border-left: none'>$toolset</td>";
+	print "<tr><td style='border-right: none' align='center'><small>$platform</small></td><td style='border-left: none'>$toolset</td>";
 
 	foreach (@configurationarray)
 	{
