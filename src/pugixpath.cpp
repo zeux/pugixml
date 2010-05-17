@@ -93,9 +93,15 @@ namespace
 	#endif
 	}
 
-	bool starts_with(const string_t& s, const char_t* pattern)
+	bool starts_with(const char_t* string, const char_t* pattern)
 	{
-		return s.compare(0, impl::strlen(pattern), pattern) == 0;
+		while (*pattern && *string == *pattern)
+		{
+			string++;
+			pattern++;
+		}
+
+		return *pattern == 0;
 	}
 
 	const char_t* find_char(const char_t* s, char_t c)
@@ -513,27 +519,11 @@ namespace
 		}
 	};
 
-	template <class T> struct greater
-	{
-		bool operator()(const T& lhs, const T& rhs) const
-		{
-			return lhs > rhs;
-		}
-	};
-	
 	template <class T> struct less
 	{
 		bool operator()(const T& lhs, const T& rhs) const
 		{
 			return lhs < rhs;
-		}
-	};
-
-	template <class T> struct greater_equal
-	{
-		bool operator()(const T& lhs, const T& rhs) const
-		{
-			return lhs >= rhs;
 		}
 	};
 
@@ -1308,7 +1298,7 @@ namespace pugi
 
 		template <class Cbool, class Cdouble, class Cstring> struct compare_eq
 		{
-			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, xpath_context& c)
+			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c)
 			{
 				if (lhs->rettype() != xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
 				{
@@ -1403,7 +1393,7 @@ namespace pugi
 
 		template <class Cdouble> struct compare_rel
 		{
-			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, xpath_context& c)
+			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c)
 			{
 				if (lhs->rettype() != xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
 					return Cdouble()(lhs->eval_number(c), rhs->eval_number(c));
@@ -1504,7 +1494,7 @@ namespace pugi
 
 			// There are no attribute nodes corresponding to attributes that declare namespaces
 			// That is, "xmlns:..." or "xmlns"
-			if (impl::strequalrange(a.name(), PUGIXML_TEXT("xmlns"), 5) && (a.name()[5] == 0 || a.name()[5] == ':')) return;
+			if (starts_with(a.name(), PUGIXML_TEXT("xmlns")) && (a.name()[5] == 0 || a.name()[5] == ':')) return;
 			
 			switch (m_test)
 			{
@@ -1518,7 +1508,7 @@ namespace pugi
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (impl::strequalrange(a.name(), m_contents, impl::strlen(m_contents)))
+				if (starts_with(a.name(), m_contents))
 					ns.push_back(xpath_node(a, parent));
 				break;
 			
@@ -1567,7 +1557,7 @@ namespace pugi
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (n.type() == node_element && impl::strequalrange(n.name(), m_contents, impl::strlen(m_contents)))
+				if (n.type() == node_element && starts_with(n.name(), m_contents))
 					ns.push_back(n);
 				break;
 
@@ -1791,7 +1781,7 @@ namespace pugi
 			}
 		}
 		
-		template <class T> void step_do(xpath_node_set& ns, xpath_context& c, T v)
+		template <class T> void step_do(xpath_node_set& ns, const xpath_context& c, T v)
 		{
 			const axis_t axis = T::axis;
 
@@ -1971,7 +1961,7 @@ namespace pugi
 			m_right = value;
 		}
 
-		bool eval_boolean(xpath_context& c)
+		bool eval_boolean(const xpath_context& c)
 		{
 			switch (m_type)
 			{
@@ -1993,16 +1983,16 @@ namespace pugi
 				return compare_rel<less<double> >::run(m_left, m_right, c);
 			
 			case ast_op_greater:
-				return compare_rel<greater<double> >::run(m_left, m_right, c);
+				return compare_rel<less<double> >::run(m_right, m_left, c);
 
 			case ast_op_less_or_equal:
 				return compare_rel<less_equal<double> >::run(m_left, m_right, c);
 			
 			case ast_op_greater_or_equal:
-				return compare_rel<greater_equal<double> >::run(m_left, m_right, c);
+				return compare_rel<less_equal<double> >::run(m_right, m_left, c);
 
 			case ast_func_starts_with:
-				return starts_with(m_left->eval_string(c), m_right->eval_string(c).c_str());
+				return starts_with(m_left->eval_string(c).c_str(), m_right->eval_string(c).c_str());
 
 			case ast_func_contains:
 			{
@@ -2073,7 +2063,7 @@ namespace pugi
 			}
 		}
 
-		double eval_number(xpath_context& c)
+		double eval_number(const xpath_context& c)
 		{
 			switch (m_type)
 			{
@@ -2171,7 +2161,7 @@ namespace pugi
 			}
 		}
 		
-		string_t eval_string(xpath_context& c)
+		string_t eval_string(const xpath_context& c)
 		{
 			switch (m_type)
 			{
@@ -2373,7 +2363,7 @@ namespace pugi
 			}
 		}
 
-		xpath_node_set eval_node_set(xpath_context& c)
+		xpath_node_set eval_node_set(const xpath_context& c)
 		{
 			switch (m_type)
 			{
@@ -2393,67 +2383,18 @@ namespace pugi
 			}
 
 			case ast_filter:
-			{
-				xpath_node_set set = m_left->eval_node_set(c);
-				set.sort();
-				
-				xpath_context oc = c;
-			
-				size_t i = 0;
-				
-				xpath_node_set::iterator last = set.mut_begin();
-				
-				// remove_if... or well, sort of
-				for (xpath_node_set::const_iterator it = set.begin(); it != set.end(); ++it, ++i)
-				{
-					c.n = *it;
-					c.position = i + 1;
-					c.size = set.size();
-				
-					if (m_right->rettype() == xpath_type_number)
-					{
-						if (m_right->eval_number(c) == i + 1)
-							*last++ = *it;
-					}
-					else if (m_right->eval_boolean(c))
-						*last++ = *it;
-				}
-			
-				c = oc;
-				
-				set.truncate(last);
-			
-				return set;
-			}
-			
 			case ast_filter_posinv:
 			{
 				xpath_node_set set = m_left->eval_node_set(c);
-				
-				xpath_context oc = c;
-			
-				size_t i = 0;
-				
-				xpath_node_set::iterator last = set.mut_begin();
-				
-				// remove_if... or well, sort of
-				for (xpath_node_set::const_iterator it = set.begin(); it != set.end(); ++it, ++i)
-				{
-					c.n = *it;
-					c.position = i + 1;
-					c.size = set.size();
-				
-					if (m_right->eval_boolean(c))
-						*last++ = *it;
-				}
-			
-				c = oc;
-				
-				set.truncate(last);
+
+				// either expression is a number or it contains position() call; sort by document order
+				if (m_type == ast_filter) set.sort();
+
+				apply_predicate(set, 0, m_right, c);
 			
 				return set;
 			}
-
+			
 			case ast_func_id:
 				return xpath_node_set();
 			

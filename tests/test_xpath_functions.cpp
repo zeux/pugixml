@@ -707,4 +707,9 @@ TEST_XML_FLAGS(xpath_string_value, "<node><c1>pcdata</c1><c2><child/></c2><c3 at
 	CHECK_XPATH_STRING(n, STR("string(c6/node())"), STR("cdata"));
 }
 
+TEST_XML(xpath_string_concat_translate, "<node>foobar</node>")
+{
+	CHECK_XPATH_STRING(doc, STR("concat('a', 'b', 'c', translate(node, 'o', 'a'), 'd')"), STR("abcfaabard"));
+}
+
 #endif
