@@ -15,7 +15,7 @@ if ( ! $(toolset) )
 {
 	if ( $(UNIX) )
 	{
-		toolset = "gcc" ;
+		toolset = "gcc" [ Shell "gcc -dumpversion" ] ;
 	}
 	else
 	{

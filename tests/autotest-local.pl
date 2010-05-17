@@ -17,7 +17,7 @@ sub permute
 
 sub gcctoolset
 {
-	return 'gcc' . `gcc -dumpversion`;
+	return 'gcc' . chomp(`gcc -dumpversion`);
 }
 
 $fast = (shift eq 'fast');
