@@ -14,6 +14,7 @@ sub prettytoolset
 	return "Microsoft Visual C++ 7.1" if ($toolset eq 'msvc71');
 	return "Microsoft Visual C++ $1.0" if ($toolset =~ /^msvc(\d+)$/);
 	return "Microsoft Visual C++ $1.0 x64" if ($toolset =~ /^msvc(\d+)_x64$/);
+	return "GNU C++ Compiler $1" if ($toolset =~ /^gcc(.*)$/);
 
 	$toolset;
 }
