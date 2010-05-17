@@ -41,7 +41,7 @@ else
 	BUILD = build/$(toolset)/standard/$(configuration) ;
 }
 
-if ( $(toolset:I=^mingw) || $(toolset) = gcc )
+if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 {
 	CCFLAGS = -fprofile-arcs -ftest-coverage ;
 	LDFLAGS = -fprofile-arcs ;

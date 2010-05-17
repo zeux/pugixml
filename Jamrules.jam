@@ -1,8 +1,8 @@
 # Rules for Jamfile.jam
 
-if ( $(toolset:I=^mingw) || $(toolset) = "gcc" )
+if ( $(toolset:I=^mingw) || $(toolset:I^=gcc) )
 {
-	if ( $(toolset) = "gcc" )
+	if ( $(toolset:I^=gcc) )
 	{
 		GCCPATH = "" ;
 	}
