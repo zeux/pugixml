@@ -15,7 +15,7 @@ if ( ! $(toolset) )
 {
 	if ( $(UNIX) )
 	{
-		local GCCVERSION = [ Shell "gcc -dumpversion" ] ;
+		local GCCVERSION = [ Subst [ Shell "gcc -dumpversion" ] : $(NEWLINE) ] ;
 		toolset = "gcc"$(GCCVERSION) ;
 	}
 	else
