@@ -503,33 +503,33 @@ namespace
 		return PUGIXML_TEXT("");
 	}
 
-	template <class T> struct equal_to
+	struct equal_to
 	{
-		bool operator()(const T& lhs, const T& rhs) const
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
 		{
 			return lhs == rhs;
 		}
 	};
 
-	template <class T> struct not_equal_to
+	struct not_equal_to
 	{
-		bool operator()(const T& lhs, const T& rhs) const
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
 		{
 			return lhs != rhs;
 		}
 	};
 
-	template <class T> struct less
+	struct less
 	{
-		bool operator()(const T& lhs, const T& rhs) const
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
 		{
 			return lhs < rhs;
 		}
 	};
 
-	template <class T> struct less_equal
+	struct less_equal
 	{
-		bool operator()(const T& lhs, const T& rhs) const
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
 		{
 			return lhs <= rhs;
 		}
@@ -1296,158 +1296,131 @@ namespace pugi
 		xpath_ast_node(const xpath_ast_node&);
 		xpath_ast_node& operator=(const xpath_ast_node&);
 
-		template <class Cbool, class Cdouble, class Cstring> struct compare_eq
+		template <class Comp> static bool compare_eq(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const Comp& comp = Comp())
 		{
-			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c)
+			xpath_type_t lt = lhs->rettype(), rt = rhs->rettype();
+
+			if (lt != xpath_type_node_set && rt != xpath_type_node_set)
 			{
-				if (lhs->rettype() != xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
-				{
-					if (lhs->rettype() == xpath_type_boolean || rhs->rettype() == xpath_type_boolean)
-						return Cbool()(lhs->eval_boolean(c), rhs->eval_boolean(c));
-					else if (lhs->rettype() == xpath_type_number || rhs->rettype() == xpath_type_number)
-						return Cdouble()(lhs->eval_number(c), rhs->eval_number(c));
-					else if (lhs->rettype() == xpath_type_string || rhs->rettype() == xpath_type_string)
-						return Cstring()(lhs->eval_string(c), rhs->eval_string(c));
-				}
-				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
-				{
-					xpath_node_set ls = lhs->eval_node_set(c);
-					xpath_node_set rs = rhs->eval_node_set(c);
-					
-					for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
+				if (lt == xpath_type_boolean || rt == xpath_type_boolean)
+					return comp(lhs->eval_boolean(c), rhs->eval_boolean(c));
+				else if (lt == xpath_type_number || rt == xpath_type_number)
+					return comp(lhs->eval_number(c), rhs->eval_number(c));
+				else if (lt == xpath_type_string || rt == xpath_type_string)
+					return comp(lhs->eval_string(c), rhs->eval_string(c));
+			}
+			else if (lt == xpath_type_node_set && rt == xpath_type_node_set)
+			{
+				xpath_node_set ls = lhs->eval_node_set(c);
+				xpath_node_set rs = rhs->eval_node_set(c);
+
+				for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
 					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
 					{
-						if (Cstring()(string_value(*li), string_value(*ri)))
+						if (comp(string_value(*li), string_value(*ri)))
 							return true;
 					}
-					
-					return false;
-				}
-				else if (lhs->rettype() != xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
-				{
-					if (lhs->rettype() == xpath_type_boolean)
-						return Cbool()(lhs->eval_boolean(c), rhs->eval_boolean(c));
-					else if (lhs->rettype() == xpath_type_number)
-					{
-						double l = lhs->eval_number(c);
-						xpath_node_set rs = rhs->eval_node_set(c);
-						
-						for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
-						{
-							if (Cdouble()(l, convert_string_to_number(string_value(*ri).c_str())) == true)
-								return true;
-						}
-						
-						return false;
-					}
-					else if (lhs->rettype() == xpath_type_string)
-					{
-						string_t l = lhs->eval_string(c);
-						xpath_node_set rs = rhs->eval_node_set(c);
 
-						for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
-						{
-							if (Cstring()(l, string_value(*ri)) == true)
-								return true;
-						}
-						
-						return false;
-					}
-				}
-				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
-				{
-					if (rhs->rettype() == xpath_type_boolean)
-						return Cbool()(lhs->eval_boolean(c), rhs->eval_boolean(c));
-					else if (rhs->rettype() == xpath_type_number)
-					{
-						xpath_node_set ls = lhs->eval_node_set(c);
-						double r = rhs->eval_number(c);
-
-						for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
-						{
-							if (Cdouble()(convert_string_to_number(string_value(*li).c_str()), r) == true)
-								return true;
-						}
-						
-						return false;
-					}
-					else if (rhs->rettype() == xpath_type_string)
-					{
-						xpath_node_set ls = lhs->eval_node_set(c);
-						string_t r = rhs->eval_string(c);
-
-						for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
-						{
-							if (Cstring()(string_value(*li), r) == true)
-								return true;
-						}
-						
-						return false;
-					}
-				}
-
-  		        assert(!"Wrong types");
 				return false;
 			}
-		};
-
-		template <class Cdouble> struct compare_rel
-		{
-			static bool run(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c)
+			else
 			{
-				if (lhs->rettype() != xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
-					return Cdouble()(lhs->eval_number(c), rhs->eval_number(c));
-				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
+				if (lt == xpath_type_node_set)
 				{
-					xpath_node_set ls = lhs->eval_node_set(c);
-					xpath_node_set rs = rhs->eval_node_set(c);
-					
-					for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
-					{
-						double l = convert_string_to_number(string_value(*li).c_str());
-						
-						for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
-						{
-							if (Cdouble()(l, convert_string_to_number(string_value(*ri).c_str())) == true)
-								return true;
-						}
-					}
-					
-					return false;
+					std::swap(lhs, rhs);
+					std::swap(lt, rt);
 				}
-				else if (lhs->rettype() != xpath_type_node_set && rhs->rettype() == xpath_type_node_set)
+
+				if (lt == xpath_type_boolean)
+					return comp(lhs->eval_boolean(c), rhs->eval_boolean(c));
+				else if (lt == xpath_type_number)
 				{
 					double l = lhs->eval_number(c);
 					xpath_node_set rs = rhs->eval_node_set(c);
-						
+
 					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
 					{
-						if (Cdouble()(l, convert_string_to_number(string_value(*ri).c_str())) == true)
+						if (comp(l, convert_string_to_number(string_value(*ri).c_str())))
 							return true;
 					}
-					
-					return false;
-				}
-				else if (lhs->rettype() == xpath_type_node_set && rhs->rettype() != xpath_type_node_set)
-				{
-					xpath_node_set ls = lhs->eval_node_set(c);
-					double r = rhs->eval_number(c);
 
-					for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
-					{
-						if (Cdouble()(convert_string_to_number(string_value(*li).c_str()), r) == true)
-							return true;
-					}
-					
 					return false;
 				}
-				else
+				else if (lt == xpath_type_string)
 				{
-					assert(!"Wrong types");
+					string_t l = lhs->eval_string(c);
+					xpath_node_set rs = rhs->eval_node_set(c);
+
+					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+					{
+						if (comp(l, string_value(*ri)))
+							return true;
+					}
+
 					return false;
 				}
 			}
-		};
+
+			assert(!"Wrong types");
+			return false;
+		}
+
+		template <class Comp> static bool compare_rel(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const Comp& comp = Comp())
+		{
+			xpath_type_t lt = lhs->rettype(), rt = rhs->rettype();
+
+			if (lt != xpath_type_node_set && rt != xpath_type_node_set)
+				return comp(lhs->eval_number(c), rhs->eval_number(c));
+			else if (lt == xpath_type_node_set && rt == xpath_type_node_set)
+			{
+				xpath_node_set ls = lhs->eval_node_set(c);
+				xpath_node_set rs = rhs->eval_node_set(c);
+
+				for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
+				{
+					double l = convert_string_to_number(string_value(*li).c_str());
+
+					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+					{
+						if (comp(l, convert_string_to_number(string_value(*ri).c_str())))
+							return true;
+					}
+				}
+
+				return false;
+			}
+			else if (lt != xpath_type_node_set && rt == xpath_type_node_set)
+			{
+				double l = lhs->eval_number(c);
+				xpath_node_set rs = rhs->eval_node_set(c);
+
+				for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+				{
+					if (comp(l, convert_string_to_number(string_value(*ri).c_str())))
+						return true;
+				}
+
+				return false;
+			}
+			else if (lt == xpath_type_node_set && rt != xpath_type_node_set)
+			{
+				xpath_node_set ls = lhs->eval_node_set(c);
+				double r = rhs->eval_number(c);
+
+				for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
+				{
+					if (comp(convert_string_to_number(string_value(*li).c_str()), r))
+						return true;
+				}
+
+				return false;
+			}
+			else
+			{
+				assert(!"Wrong types");
+				return false;
+			}
+		}
 
 		void apply_predicate(xpath_node_set& ns, size_t first, xpath_ast_node* expr, const xpath_context& context)
 		{
@@ -1974,22 +1947,22 @@ namespace pugi
 				else return m_right->eval_boolean(c);
 				
 			case ast_op_equal:
-				return compare_eq<equal_to<bool>, equal_to<double>, equal_to<string_t> >::run(m_left, m_right, c);
+				return compare_eq(m_left, m_right, c, equal_to());
 
 			case ast_op_not_equal:
-				return compare_eq<not_equal_to<bool>, not_equal_to<double>, not_equal_to<string_t> >::run(m_left, m_right, c);
+				return compare_eq(m_left, m_right, c, not_equal_to());
 	
 			case ast_op_less:
-				return compare_rel<less<double> >::run(m_left, m_right, c);
+				return compare_rel(m_left, m_right, c, less());
 			
 			case ast_op_greater:
-				return compare_rel<less<double> >::run(m_right, m_left, c);
+				return compare_rel(m_right, m_left, c, less());
 
 			case ast_op_less_or_equal:
-				return compare_rel<less_equal<double> >::run(m_left, m_right, c);
+				return compare_rel(m_left, m_right, c, less_equal());
 			
 			case ast_op_greater_or_equal:
-				return compare_rel<less_equal<double> >::run(m_right, m_left, c);
+				return compare_rel(m_right, m_left, c, less_equal());
 
 			case ast_func_starts_with:
 				return starts_with(m_left->eval_string(c).c_str(), m_right->eval_string(c).c_str());
