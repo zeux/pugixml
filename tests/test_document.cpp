@@ -626,3 +626,27 @@ TEST(document_load_buffer_empty)
 		CHECK(doc.load_buffer_inplace_own(0, 0, parse_default, encoding) && !doc.first_child());
 	}
 }
+
+TEST(document_progressive_truncation)
+{
+	char* original_data;
+	size_t original_size;
+
+	CHECK(load_file_in_memory("tests/data/utftest_utf8.xml", original_data, original_size));
+
+	for (size_t i = 1; i < original_size; ++i)
+	{
+		char* truncated_data = new char[i];
+		memcpy(truncated_data, original_data, i);
+
+		xml_document doc;
+		bool result = doc.load_buffer(truncated_data, i);
+
+		// some truncate locations are parseable - those that come after declaration, declaration + doctype, declaration + doctype + comment and eof
+		CHECK(((i - 21) < 3 || (i - 66) < 3 || (i - 95) < 3 || i >= 3325) ? result : !result);
+
+		delete[] truncated_data;
+	}
+
+	delete[] original_data;
+}
