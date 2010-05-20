@@ -49,9 +49,10 @@ using std::memcpy;
 #endif
 
 // uintptr_t
-#if defined(__BORLANDC__) || defined(__MWERKS__) || defined(__DMC__) || defined(__GNUC__)
+#if !defined(_MSC_VER)
 #	include <stdint.h>
-#elif defined(_MSC_VER) && _MSC_VER < 1300
+#elif _MSC_VER < 1300
+// No native uintptr_t in MSVC6
 typedef size_t uintptr_t;
 #endif
 
