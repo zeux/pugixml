@@ -23,6 +23,8 @@ sub prettyplatform
 {
 	my $platform = shift;
 
+	return "macos32" if ($platform =~ /darwin/);
+
 	return "linux64" if ($platform =~ /64-linux/);
 	return "linux32" if ($platform =~ /86-linux/);
 

@@ -27,7 +27,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 		CCFLAGS += -fno-exceptions ;
 	}
 
-	if ( $(toolset:I=^mingw) )
+	if ( $(OS) != MACOSX )
 	{
 		LDFLAGS += -static-libgcc -static ;
 	}
