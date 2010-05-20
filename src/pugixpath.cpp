@@ -82,16 +82,11 @@ namespace
 		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10
 	};
 	
-	inline bool is_chartypex(char_t c, chartypex ct)
-	{
-	#ifdef PUGIXML_WCHAR_MODE
-		unsigned int ch = static_cast<unsigned int>(c);
-
-		return !!((ch < 128 ? chartypex_table[ch] : chartypex_table[128]) & ct);
-	#else
-		return !!(chartypex_table[static_cast<unsigned char>(c)] & ct);
-	#endif
-	}
+#ifdef PUGIXML_WCHAR_MODE
+	#define IS_CHARTYPEX(c, ct) ((static_cast<unsigned int>(c) < 128 ? chartypex_table[static_cast<unsigned int>(c)] : chartypex_table[128]) & (ct))
+#else
+	#define IS_CHARTYPEX(c, ct) (chartypex_table[static_cast<unsigned char>(c)] & (ct))
+#endif
 
 	bool starts_with(const char_t* string, const char_t* pattern)
 	{
@@ -401,7 +396,7 @@ namespace
 	bool check_string_to_number_format(const char_t* string)
 	{
 		// parse leading whitespace
-		while (is_chartypex(*string, ctx_space)) ++string;
+		while (IS_CHARTYPEX(*string, ctx_space)) ++string;
 
 		// parse sign
 		if (*string == '-') ++string;
@@ -409,21 +404,21 @@ namespace
 		if (!*string) return false;
 
 		// if there is no integer part, there should be a decimal part with at least one digit
-		if (!is_chartypex(string[0], ctx_digit) && (string[0] != '.' || !is_chartypex(string[1], ctx_digit))) return false;
+		if (!IS_CHARTYPEX(string[0], ctx_digit) && (string[0] != '.' || !IS_CHARTYPEX(string[1], ctx_digit))) return false;
 
 		// parse integer part
-		while (is_chartypex(*string, ctx_digit)) ++string;
+		while (IS_CHARTYPEX(*string, ctx_digit)) ++string;
 
 		// parse decimal part
 		if (*string == '.')
 		{
 			++string;
 
-			while (is_chartypex(*string, ctx_digit)) ++string;
+			while (IS_CHARTYPEX(*string, ctx_digit)) ++string;
 		}
 
 		// parse trailing whitespace
-		while (is_chartypex(*string, ctx_space)) ++string;
+		while (IS_CHARTYPEX(*string, ctx_space)) ++string;
 
 		return *string == 0;
 	}
@@ -919,7 +914,7 @@ namespace pugi
 		{
 			contents_clear();
 
-			while (is_chartypex(*m_cur, ctx_space)) ++m_cur;
+			while (IS_CHARTYPEX(*m_cur, ctx_space)) ++m_cur;
 
 			switch (*m_cur)
 			{
@@ -1050,13 +1045,13 @@ namespace pugi
 					m_cur += 2;
 					m_cur_lexeme = lex_double_dot;
 				}
-				else if (is_chartypex(*(m_cur+1), ctx_digit))
+				else if (IS_CHARTYPEX(*(m_cur+1), ctx_digit))
 				{
 					m_cur_lexeme_contents.begin = m_cur; // .
 
 					++m_cur;
 
-					while (is_chartypex(*m_cur, ctx_digit)) m_cur++;
+					while (IS_CHARTYPEX(*m_cur, ctx_digit)) m_cur++;
 
 					m_cur_lexeme_contents.end = m_cur;
 					
@@ -1110,28 +1105,28 @@ namespace pugi
 				break;
 
 			default:
-				if (is_chartypex(*m_cur, ctx_digit))
+				if (IS_CHARTYPEX(*m_cur, ctx_digit))
 				{
 					m_cur_lexeme_contents.begin = m_cur;
 
-					while (is_chartypex(*m_cur, ctx_digit)) m_cur++;
+					while (IS_CHARTYPEX(*m_cur, ctx_digit)) m_cur++;
 				
-					if (*m_cur == '.' && is_chartypex(*(m_cur+1), ctx_digit))
+					if (*m_cur == '.' && IS_CHARTYPEX(*(m_cur+1), ctx_digit))
 					{
 						m_cur++;
 
-						while (is_chartypex(*m_cur, ctx_digit)) m_cur++;
+						while (IS_CHARTYPEX(*m_cur, ctx_digit)) m_cur++;
 					}
 
 					m_cur_lexeme_contents.end = m_cur;
 
 					m_cur_lexeme = lex_number;
 				}
-				else if (is_chartypex(*m_cur, ctx_start_symbol))
+				else if (IS_CHARTYPEX(*m_cur, ctx_start_symbol))
 				{
 					m_cur_lexeme_contents.begin = m_cur;
 
-					while (is_chartypex(*m_cur, ctx_symbol)) m_cur++;
+					while (IS_CHARTYPEX(*m_cur, ctx_symbol)) m_cur++;
 
 					if (m_cur[0] == ':')
 					{
@@ -1139,17 +1134,17 @@ namespace pugi
 						{
 							m_cur += 2; // :*
 						}
-						else if (is_chartypex(m_cur[1], ctx_symbol)) // namespace test qname
+						else if (IS_CHARTYPEX(m_cur[1], ctx_symbol)) // namespace test qname
 						{
 							m_cur++; // :
 
-							while (is_chartypex(*m_cur, ctx_symbol)) m_cur++;
+							while (IS_CHARTYPEX(*m_cur, ctx_symbol)) m_cur++;
 						}
 					}
 
 					m_cur_lexeme_contents.end = m_cur;
 				
-					while (is_chartypex(*m_cur, ctx_space)) ++m_cur;
+					while (IS_CHARTYPEX(*m_cur, ctx_space)) ++m_cur;
 
 					m_cur_lexeme = lex_string;
 				}
@@ -2276,7 +2271,7 @@ namespace pugi
 				
 				for (string_t::const_iterator it = s.begin(); it != s.end(); ++it)
 				{
-					if (is_chartypex(*it, ctx_space))
+					if (IS_CHARTYPEX(*it, ctx_space))
 					{
 						if (!r.empty() && r[r.size() - 1] != ' ')
 							r += ' ';
@@ -3342,7 +3337,7 @@ namespace pugi
 	    			// This is either a function call, or not - if not, we shall proceed with location path
 	    			const char_t* state = m_lexer.state();
 	    			
-					while (is_chartypex(*state, ctx_space)) ++state;
+					while (IS_CHARTYPEX(*state, ctx_space)) ++state;
 	    			
 	    			if (*state != '(') return parse_location_path();
 

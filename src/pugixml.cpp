@@ -922,16 +922,11 @@ namespace
 		192, 192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 192, 192, 192, 192, 192
 	};
 
-	inline bool is_chartype(char_t c, chartype_t ct)
-	{
-	#ifdef PUGIXML_WCHAR_MODE
-		unsigned int ch = static_cast<unsigned int>(c);
-
-		return !!((ch < 128 ? chartype_table[ch] : chartype_table[128]) & ct);
-	#else
-		return !!(chartype_table[static_cast<unsigned char>(c)] & ct);
-	#endif
-	}
+#ifdef PUGIXML_WCHAR_MODE
+	#define IS_CHARTYPE(c, ct) ((static_cast<unsigned int>(c) < 128 ? chartype_table[static_cast<unsigned int>(c)] : chartype_table[128]) & (ct))
+#else
+	#define IS_CHARTYPE(c, ct) (chartype_table[static_cast<unsigned char>(c)] & (ct))
+#endif
 
 	enum output_chartype_t
 	{
@@ -961,16 +956,11 @@ namespace
 		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
 	};
 	
-	inline bool is_output_chartype(char_t c, output_chartype_t ct)
-	{
-	#ifdef PUGIXML_WCHAR_MODE
-		unsigned int ch = static_cast<unsigned int>(c);
-
-		return !!((ch < 128 ? output_chartype_table[ch] : output_chartype_table[128]) & ct);
-	#else
-		return !!(output_chartype_table[static_cast<unsigned char>(c)] & ct);
-	#endif
-	}
+#ifdef PUGIXML_WCHAR_MODE
+	#define IS_OUTPUT_CHARTYPE(c, ct) ((static_cast<unsigned int>(c) < 128 ? output_chartype_table[static_cast<unsigned int>(c)] : output_chartype_table[128]) & (ct))
+#else
+	#define IS_OUTPUT_CHARTYPE(c, ct) (output_chartype_table[static_cast<unsigned char>(c)] & (ct))
+#endif
 
 	template <bool _1> struct opt1_to_type
 	{
@@ -1488,7 +1478,7 @@ namespace
 		
 		while (true)
 		{
-			while (!is_chartype(*s, ct_parse_comment)) ++s;
+			while (!IS_CHARTYPE(*s, ct_parse_comment)) ++s;
 		
 			if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
 			{
@@ -1518,7 +1508,7 @@ namespace
 			
 		while (true)
 		{
-			while (!is_chartype(*s, ct_parse_cdata)) ++s;
+			while (!IS_CHARTYPE(*s, ct_parse_cdata)) ++s;
 			
 			if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
 			{
@@ -1553,7 +1543,7 @@ namespace
 			
 			while (true)
 			{
-				while (!is_chartype(*s, ct_parse_pcdata)) ++s;
+				while (!IS_CHARTYPE(*s, ct_parse_pcdata)) ++s;
 					
 				if (*s == '<') // PCDATA ends here
 				{
@@ -1608,19 +1598,19 @@ namespace
 			gap g;
 
 			// trim leading whitespaces
-			if (opt_wnorm && is_chartype(*s, ct_space))
+			if (opt_wnorm && IS_CHARTYPE(*s, ct_space))
 			{
 				char_t* str = s;
 				
 				do ++str;
-				while (is_chartype(*str, ct_space));
+				while (IS_CHARTYPE(*str, ct_space));
 				
 				g.push(s, str - s);
 			}
 
 			while (true)
 			{
-				while (!is_chartype(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
+				while (!IS_CHARTYPE(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
 				
 				if (*s == end_quote)
 				{
@@ -1629,25 +1619,25 @@ namespace
 					if (opt_wnorm)
 					{
 						do *str-- = 0;
-						while (is_chartype(*str, ct_space));
+						while (IS_CHARTYPE(*str, ct_space));
 					}
 					else *str = 0;
 				
 					return s + 1;
 				}
-				else if (opt_wnorm && is_chartype(*s, ct_space))
+				else if (opt_wnorm && IS_CHARTYPE(*s, ct_space))
 				{
 					*s++ = ' ';
 		
-					if (is_chartype(*s, ct_space))
+					if (IS_CHARTYPE(*s, ct_space))
 					{
 						char_t* str = s + 1;
-						while (is_chartype(*str, ct_space)) ++str;
+						while (IS_CHARTYPE(*str, ct_space)) ++str;
 						
 						g.push(s, str - s);
 					}
 				}
-				else if (opt_wconv && is_chartype(*s, ct_space))
+				else if (opt_wconv && IS_CHARTYPE(*s, ct_space))
 				{
 					if (opt_eol)
 					{
@@ -1719,7 +1709,7 @@ namespace
 		xml_allocator alloc;
 		
 		// Parser utilities.
-		#define SKIPWS()			{ while (is_chartype(*s, ct_space)) ++s; }
+		#define SKIPWS()			{ while (IS_CHARTYPE(*s, ct_space)) ++s; }
 		#define OPTSET(OPT)			( optmsk & OPT )
 		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); }
 		#define POPNODE()			{ cursor = cursor->parent; }
@@ -1962,15 +1952,15 @@ namespace
 			// parse node contents, starting with question mark
 			++s;
 
-			if (!is_chartype(*s, ct_start_symbol)) // bad PI
+			if (!IS_CHARTYPE(*s, ct_start_symbol)) // bad PI
 				THROW_ERROR(status_bad_pi, s);
 			else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
 			{
 				char_t* mark = s;
-				SCANWHILE(is_chartype(*s, ct_symbol)); // Read PI target
+				SCANWHILE(IS_CHARTYPE(*s, ct_symbol)); // Read PI target
 				CHECK_ERROR(status_bad_pi, s);
 
-				if (!is_chartype(*s, ct_space) && *s != '?') // Target has to end with space or ?
+				if (!IS_CHARTYPE(*s, ct_space) && *s != '?') // Target has to end with space or ?
 					THROW_ERROR(status_bad_pi, s);
 
 				ENDSEG();
@@ -2091,38 +2081,38 @@ namespace
 					++s;
 
 				LOC_TAG:
-					if (is_chartype(*s, ct_start_symbol)) // '<#...'
+					if (IS_CHARTYPE(*s, ct_start_symbol)) // '<#...'
 					{
 						PUSHNODE(node_element); // Append a new node to the tree.
 
 						cursor->name = s;
 
-						SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
+						SCANWHILE(IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
 						ENDSEG(); // Save char in 'ch', terminate & step over.
 
 						if (ch == '>')
 						{
 							// end of tag
 						}
-						else if (is_chartype(ch, ct_space))
+						else if (IS_CHARTYPE(ch, ct_space))
 						{
 						LOC_ATTRIBUTES:
 						    while (true)
 						    {
 								SKIPWS(); // Eat any whitespace.
 						
-								if (is_chartype(*s, ct_start_symbol)) // <... #...
+								if (IS_CHARTYPE(*s, ct_start_symbol)) // <... #...
 								{
 									xml_attribute_struct* a = append_attribute_ll(cursor, alloc); // Make space for this attribute.
 									a->name = s; // Save the offset.
 
-									SCANWHILE(is_chartype(*s, ct_symbol)); // Scan for a terminator.
+									SCANWHILE(IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
 									CHECK_ERROR(status_bad_attribute, s);
 
 									ENDSEG(); // Save char in 'ch', terminate & step over.
 									CHECK_ERROR(status_bad_attribute, s);
 
-									if (is_chartype(ch, ct_space))
+									if (IS_CHARTYPE(ch, ct_space))
 									{
 										SKIPWS(); // Eat any whitespace.
 										CHECK_ERROR(status_bad_attribute, s);
@@ -2148,7 +2138,7 @@ namespace
 											// After this line the loop continues from the start;
 											// Whitespaces, / and > are ok, symbols and EOF are wrong,
 											// everything else will be detected
-											if (is_chartype(*s, ct_start_symbol)) THROW_ERROR(status_bad_attribute, s);
+											if (IS_CHARTYPE(*s, ct_start_symbol)) THROW_ERROR(status_bad_attribute, s);
 										}
 										else THROW_ERROR(status_bad_attribute, s);
 									}
@@ -2210,7 +2200,7 @@ namespace
 						char_t* name = cursor->name;
 						if (!name) THROW_ERROR(status_end_element_mismatch, s);
 						
-						while (is_chartype(*s, ct_symbol))
+						while (IS_CHARTYPE(*s, ct_symbol))
 						{
 							if (*s++ != *name++) THROW_ERROR(status_end_element_mismatch, s);
 						}
@@ -2681,7 +2671,7 @@ namespace
 			const char_t* prev = s;
 			
 			// While *s is a usual symbol
-			while (!is_output_chartype(*s, type)) ++s;
+			while (!IS_OUTPUT_CHARTYPE(*s, type)) ++s;
 		
 			writer.write(prev, static_cast<size_t>(s - prev));
 
