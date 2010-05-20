@@ -3067,7 +3067,7 @@ namespace pugi
 	#ifdef PUGIXML_WCHAR_MODE
 		return (int)wcstol(_attr->value, 0, 10);
 	#else
-		return atoi(_attr->value);
+		return (int)strtol(_attr->value, 0, 10);
 	#endif
 	}
 
@@ -3076,12 +3076,10 @@ namespace pugi
 		if (!_attr || !_attr->value) return 0;
 
 	#ifdef PUGIXML_WCHAR_MODE
-		int result = (int)wcstol(_attr->value, 0, 10);
+		return (unsigned int)wcstoul(_attr->value, 0, 10);
 	#else
-		int result = atoi(_attr->value);
+		return (unsigned int)strtoul(_attr->value, 0, 10);
 	#endif
-
-		return result < 0 ? 0 : static_cast<unsigned int>(result);
 	}
 
 	double xml_attribute::as_double() const
@@ -3091,7 +3089,7 @@ namespace pugi
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(_attr->value, 0);
 	#else
-		return atof(_attr->value);
+		return strtod(_attr->value, 0);
 	#endif
 	}
 
@@ -3102,7 +3100,7 @@ namespace pugi
 	#ifdef PUGIXML_WCHAR_MODE
 		return (float)wcstod(_attr->value, 0);
 	#else
-		return (float)atof(_attr->value);
+		return (float)strtod(_attr->value, 0);
 	#endif
 	}
 

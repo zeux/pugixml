@@ -91,7 +91,7 @@ TEST_XML(dom_attr_as_int, "<node attr1='1' attr2='-1' attr3='-2147483648' attr4=
 	CHECK(node.attribute(STR("attr4")).as_int() == 2147483647);
 }
 
-TEST_XML(dom_attr_as_uint, "<node attr1='0' attr2='1' attr3='2147483647'/>")
+TEST_XML(dom_attr_as_uint, "<node attr1='0' attr2='1' attr3='2147483647' attr4='4294967295'/>")
 {
 	xml_node node = doc.child(STR("node"));
 
@@ -99,6 +99,7 @@ TEST_XML(dom_attr_as_uint, "<node attr1='0' attr2='1' attr3='2147483647'/>")
 	CHECK(node.attribute(STR("attr1")).as_uint() == 0);
 	CHECK(node.attribute(STR("attr2")).as_uint() == 1);
 	CHECK(node.attribute(STR("attr3")).as_uint() == 2147483647);
+	CHECK(node.attribute(STR("attr4")).as_uint() == 4294967295u);
 }
 
 TEST_XML(dom_attr_as_float, "<node attr1='0' attr2='1' attr3='0.12' attr4='-5.1' attr5='3e-4' attr6='3.14159265358979323846'/>")
