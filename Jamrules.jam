@@ -1,8 +1,8 @@
 # Rules for Jamfile.jam
 
-if ( $(toolset:I=^mingw) || $(toolset:I^=gcc) )
+if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 {
-	if ( $(toolset:I^=gcc) )
+	if ( $(toolset:I=^gcc) )
 	{
 		GCCPATH = "" ;
 	}
@@ -12,12 +12,6 @@ if ( $(toolset:I=^mingw) || $(toolset:I^=gcc) )
 	}
 
 	CCFLAGS += -D$(defines) ;
-
-	if ( $(toolset:I=^mingw3) )
-	{
-		# GCC3 does not have pragma diagnostic
-		CCFLAGS += -Wno-deprecated-declarations ;
-	}
 
 	if ( $(configuration) = "debug" )
 	{
@@ -33,6 +27,11 @@ if ( $(toolset:I=^mingw) || $(toolset:I^=gcc) )
 		CCFLAGS += -fno-exceptions ;
 	}
 
+	if ( $(toolset:I=^mingw) )
+	{
+		LDFLAGS += -static-libgcc -static ;
+	}
+
 	actions ObjectAction
 	{
 		"$(GCCPATH)gcc" -W -Wall -Wextra -Werror -pedantic -c $(>) -o $(<) $(CCFLAGS)
@@ -40,12 +39,12 @@ if ( $(toolset:I=^mingw) || $(toolset:I^=gcc) )
 	
 	actions LibraryAction
 	{
-		"$(GCCPATH)ar" rc $(<) $(>)
+		"$(GCCPATH)ar" rcs $(<) $(>)
 	}
 	
 	actions LinkAction
 	{
-		"$(GCCPATH)g++" $(>) -o $(<) -static-libgcc -static $(LDFLAGS) 
+		"$(GCCPATH)g++" $(>) -o $(<) $(LDFLAGS) 
 	}
 	
 	actions maxtargets 1 CoverageAction

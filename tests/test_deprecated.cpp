@@ -1,5 +1,18 @@
 // This file includes all tests for deprecated functionality; this is going away in the next release!
 
+#ifdef _MSC_VER
+#	pragma warning(disable: 4996)
+#endif
+
+#ifdef __GNUC__
+#	if __GNUC__ >= 4 && __GNUC_MINOR__ >= 2
+#		pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#	else
+#		define PUGIXML_DEPRECATED
+#	endif
+#endif
+
+
 #include <string.h>
 
 #include "common.hpp"
@@ -8,16 +21,6 @@
 
 #include <vector>
 #include <iterator>
-
-#ifdef _MSC_VER
-#	pragma warning(disable: 4996)
-#endif
-
-#ifdef __GNUC__
-#	if __GNUC__ >= 4
-#		pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#	endif
-#endif
 
 // format_write_bom_utf8 - it's now format_write_bom!
 TEST_XML(document_save_bom_utf8, "<node/>")

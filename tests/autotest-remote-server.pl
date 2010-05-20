@@ -7,7 +7,7 @@ $vm = shift;
 my $server = new IO::Socket::INET(LocalPort => 7183, Listen => 1);
 die "Could not create socket: $!\n" unless $server;
 
-system("vboxmanage startvm $vm --type gui");
+system("vboxmanage startvm $vm --type headless");
 
 print "Listening for connection...\n";
 
