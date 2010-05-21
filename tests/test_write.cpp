@@ -306,4 +306,32 @@ TEST(write_unicode_invalid_utf8)
 	CHECK(test_write_unicode_invalid("a\xf8_", L"a_"));
 }
 
+TEST(write_no_name_element)
+{
+	xml_document doc;
+	xml_node root = doc.append_child();
+	root.append_child();
+	root.append_child().append_child(node_pcdata).set_value("text");
+
+	CHECK_NODE(doc, "<:anonymous><:anonymous /><:anonymous>text</:anonymous></:anonymous>");
+	CHECK_NODE_EX(doc, "<:anonymous>\n\t<:anonymous />\n\t<:anonymous>text</:anonymous>\n</:anonymous>\n", "\t", format_default);
+}
+
+TEST(write_no_name_pi)
+{
+	xml_document doc;
+	doc.append_child(node_pi);
+
+	CHECK_NODE(doc, "<?:anonymous?>");
+}
+
+TEST(write_no_name_attribute)
+{
+	xml_document doc;
+	doc.append_child().set_name("root");
+	doc.child("root").append_attribute("");
+
+	CHECK_NODE(doc, "<root :anonymous=\"\" />");
+}
+
 #endif

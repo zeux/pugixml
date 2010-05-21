@@ -2705,8 +2705,26 @@ namespace
 		}
 	}
 
+	void node_output_attributes(xml_buffered_writer& writer, const xml_node& node)
+	{
+		const char_t* default_name = PUGIXML_TEXT(":anonymous");
+
+		for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
+		{
+			writer.write(' ');
+			writer.write(a.name()[0] ? a.name() : default_name);
+			writer.write('=', '"');
+
+			text_output_escaped(writer, a.value(), oct_special_attr);
+
+			writer.write('"');
+		}
+	}
+
 	void node_output(xml_buffered_writer& writer, const xml_node& node, const char_t* indent, unsigned int flags, unsigned int depth)
 	{
+		const char_t* default_name = PUGIXML_TEXT(":anonymous");
+
 		if ((flags & format_indent) != 0 && (flags & format_raw) == 0)
 			for (unsigned int i = 0; i < depth; ++i) writer.write(indent);
 
@@ -2721,19 +2739,12 @@ namespace
 			
 		case node_element:
 		{
+			const char_t* name = node.name()[0] ? node.name() : default_name;
+
 			writer.write('<');
-			writer.write(node.name());
+			writer.write(name);
 
-			for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
-			{
-				writer.write(' ');
-				writer.write(a.name());
-				writer.write('=', '"');
-
-				text_output_escaped(writer, a.value(), oct_special_attr);
-
-				writer.write('"');
-			}
+			node_output_attributes(writer, node);
 
 			if (flags & format_raw)
 			{
@@ -2747,7 +2758,7 @@ namespace
 						node_output(writer, n, indent, flags, depth + 1);
 
 					writer.write('<', '/');
-					writer.write(node.name());
+					writer.write(name);
 					writer.write('>');
 				}
 			}
@@ -2760,7 +2771,7 @@ namespace
 				text_output_escaped(writer, node.first_child().value(), oct_special_pcdata);
 
 				writer.write('<', '/');
-				writer.write(node.name());
+				writer.write(name);
 				writer.write('>', '\n');
 			}
 			else
@@ -2774,7 +2785,7 @@ namespace
 					for (unsigned int i = 0; i < depth; ++i) writer.write(indent);
 				
 				writer.write('<', '/');
-				writer.write(node.name());
+				writer.write(name);
 				writer.write('>', '\n');
 			}
 
@@ -2802,37 +2813,23 @@ namespace
 			break;
 
 		case node_pi:
+		case node_declaration:
 			writer.write('<', '?');
-			writer.write(node.name());
-			if (node.value()[0])
+			writer.write(node.name()[0] ? node.name() : default_name);
+
+			if (node.type() == node_declaration)
+			{
+				node_output_attributes(writer, node);
+			}
+			else if (node.value()[0])
 			{
 				writer.write(' ');
 				writer.write(node.value());
 			}
-			writer.write('?', '>');
-			if ((flags & format_raw) == 0) writer.write('\n');
-			break;
-		
-		case node_declaration:
-		{
-			writer.write('<', '?');
-			writer.write(node.name());
-
-			for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
-			{
-				writer.write(' ');
-				writer.write(a.name());
-				writer.write('=', '"');
-
-				text_output_escaped(writer, a.value(), oct_special_attr);
-
-				writer.write('"');
-			}
 
 			writer.write('?', '>');
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
-		}
 
 		default:
 			assert(false);
