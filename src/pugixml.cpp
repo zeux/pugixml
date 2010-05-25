@@ -809,19 +809,19 @@ namespace pugi
 					data += 1;
 				}
 				// 110xxxxx -> U+0080..U+07FF
-				else if ((unsigned)(lead - 0xC0) < 0x20 && data + 1 < end && (data[1] & 0xc0) == 0x80)
+				else if ((unsigned)(lead - 0xC0) < 0x20 && (end - data) > 1 && (data[1] & 0xc0) == 0x80)
 				{
 					result = Traits::low(result, ((lead & ~0xC0) << 6) | (data[1] & utf8_byte_mask));
 					data += 2;
 				}
 				// 1110xxxx -> U+0800-U+FFFF
-				else if ((unsigned)(lead - 0xE0) < 0x10 && data + 2 < end && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80)
+				else if ((unsigned)(lead - 0xE0) < 0x10 && (end - data) > 2 && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80)
 				{
 					result = Traits::low(result, ((lead & ~0xE0) << 12) | ((data[1] & utf8_byte_mask) << 6) | (data[2] & utf8_byte_mask));
 					data += 3;
 				}
 				// 11110xxx -> U+10000..U+10FFFF
-				else if ((unsigned)(lead - 0xF0) < 0x08 && data + 3 < end && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80 && (data[3] & 0xc0) == 0x80)
+				else if ((unsigned)(lead - 0xF0) < 0x08 && (end - data) > 3 && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80 && (data[3] & 0xc0) == 0x80)
 				{
 					result = Traits::high(result, ((lead & ~0xF0) << 18) | ((data[1] & utf8_byte_mask) << 12) | ((data[2] & utf8_byte_mask) << 6) | (data[3] & utf8_byte_mask));
 					data += 4;
@@ -4173,7 +4173,7 @@ namespace pugi
 		destroy();
 
 		// initialize sentinel page
-		assert(offsetof(xml_memory_page, data) + sizeof(xml_document_struct) + xml_memory_page_alignment <= sizeof(_memory));
+		STATIC_ASSERT(offsetof(xml_memory_page, data) + sizeof(xml_document_struct) + xml_memory_page_alignment <= sizeof(_memory));
 
 		// align upwards to page boundary
 		void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(_memory) + (xml_memory_page_alignment - 1)) & ~(xml_memory_page_alignment - 1));
