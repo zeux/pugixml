@@ -44,34 +44,52 @@ This class has noncopyable semantics (private copy ctor/assignment operator).
 &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#16c086e679286271b0ccd4541d1c1290">~xml_document</a> ()</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Dtor. <br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#c079241b405fe2a60caf5c50b5ee0122">load</a> (std::istream &amp;stream, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#6be61931780afe63469711d7ef627832">load</a> (std::basic_istream&lt; char, std::char_traits&lt; char &gt; &gt; &amp;stream, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from stream.  <a href="#c079241b405fe2a60caf5c50b5ee0122"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#199d2bd1bda6928816c90d68be3c6b4f">load</a> (const char *contents, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from stream.  <a href="#6be61931780afe63469711d7ef627832"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#7bea1b385fd40ad2b193655427d68145">load</a> (std::basic_istream&lt; wchar_t, std::char_traits&lt; wchar_t &gt; &gt; &amp;stream, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from string.  <a href="#199d2bd1bda6928816c90d68be3c6b4f"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#627d8357c8d91f9a6dc3b3796eb78a58">load_file</a> (const char *name, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from stream.  <a href="#7bea1b385fd40ad2b193655427d68145"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#f155720fa4a736acd8a30310f895f67d">load</a> (const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *contents, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from file.  <a href="#627d8357c8d91f9a6dc3b3796eb78a58"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#148970f10ce16c21d75c3f10000b3158">parse</a> (char *xmlstr, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from string.  <a href="#f155720fa4a736acd8a30310f895f67d"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">PUGIXML_DEPRECATED <a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#a412a8bd194e7e4bdcaf61baf5b7a98b">parse</a> (char *xmlstr, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parse the given XML string in-situ.  <a href="#148970f10ce16c21d75c3f10000b3158"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#cd3bdf4b2f313653ff848fe2b8639ef0">parse</a> (const <a class="el" href="structpugi_1_1transfer__ownership__tag.html">transfer_ownership_tag</a> &amp;, char *xmlstr, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parse the given XML string in-situ.  <a href="#a412a8bd194e7e4bdcaf61baf5b7a98b"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">PUGIXML_DEPRECATED <a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#2d226bc068b1becdf992e0c0caa1c94b">parse</a> (const <a class="el" href="structpugi_1_1transfer__ownership__tag.html">transfer_ownership_tag</a> &amp;, char *xmlstr, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parse the given XML string in-situ (gains ownership).  <a href="#cd3bdf4b2f313653ff848fe2b8639ef0"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#799a8104c5c9e00149d0b846e4e915b1">save</a> (<a class="el" href="classpugi_1_1xml__writer.html">xml_writer</a> &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>) const </td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parse the given XML string in-situ (gains ownership).  <a href="#2d226bc068b1becdf992e0c0caa1c94b"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#9b9054284ae2f14dd27e20106ff7e630">load_file</a> (const char *name, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to writer.  <a href="#799a8104c5c9e00149d0b846e4e915b1"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#dd3435ec713cdb96563e3513c12c02f2">save_file</a> (const char *name, const char *indent=&quot;\t&quot;, unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>) const </td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from file.  <a href="#9b9054284ae2f14dd27e20106ff7e630"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#fccd56ee382298c3b1281b1004e7e4c9">load_buffer</a> (const void *contents, size_t size, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to file.  <a href="#dd3435ec713cdb96563e3513c12c02f2"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="952fa74a00a02d64ab7600ac2c72fb4b"></a><!-- doxytag: member="pugi::xml_document::precompute_document_order" ref="952fa74a00a02d64ab7600ac2c72fb4b" args="()" -->
-void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#952fa74a00a02d64ab7600ac2c72fb4b">precompute_document_order</a> ()</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from buffer.  <a href="#fccd56ee382298c3b1281b1004e7e4c9"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#c5d4b87682abc59e452008f677c4b5cd">load_buffer_inplace</a> (void *contents, size_t size, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from buffer in-situ.  <a href="#c5d4b87682abc59e452008f677c4b5cd"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#9d2ba340fa4455c20c15c3000a032b41">load_buffer_inplace_own</a> (void *contents, size_t size, unsigned int options=<a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Load document from buffer in-situ (gains buffer ownership).  <a href="#9d2ba340fa4455c20c15c3000a032b41"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#4603745d305c65fafd811d995cf7fba5">save</a> (<a class="el" href="classpugi_1_1xml__writer.html">xml_writer</a> &amp;writer, const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto) const </td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to writer.  <a href="#4603745d305c65fafd811d995cf7fba5"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#bb5200ba10cf66c8ef6c3ca97f4a18f6">save</a> (std::basic_ostream&lt; char, std::char_traits&lt; char &gt; &gt; &amp;stream, const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto) const </td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to stream.  <a href="#bb5200ba10cf66c8ef6c3ca97f4a18f6"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#37649bea142707c2e9a76df3518117bc">save</a> (std::basic_ostream&lt; wchar_t, std::char_traits&lt; wchar_t &gt; &gt; &amp;stream, const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>) const </td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to stream.  <a href="#37649bea142707c2e9a76df3518117bc"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#4fe6b295b0584876b4fba63b95321dfd">save_file</a> (const char *name, const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=<a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a>, <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> encoding=encoding_auto) const </td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Save XML to file.  <a href="#4fe6b295b0584876b4fba63b95321dfd"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="0c7be6cf0334ffd15f3c1b41bcc788d4"></a><!-- doxytag: member="pugi::xml_document::precompute_document_order" ref="0c7be6cf0334ffd15f3c1b41bcc788d4" args="()" -->
+PUGIXML_DEPRECATED void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__document.html#0c7be6cf0334ffd15f3c1b41bcc788d4">precompute_document_order</a> ()</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Compute document order for the whole tree Sometimes this makes evaluation of XPath queries faster. <br></td></tr>
 </table>
 <hr><h2>Member Function Documentation</h2>
-<a class="anchor" name="c079241b405fe2a60caf5c50b5ee0122"></a><!-- doxytag: member="pugi::xml_document::load" ref="c079241b405fe2a60caf5c50b5ee0122" args="(std::istream &amp;stream, unsigned int options=parse_default)" --><p>
+<a class="anchor" name="6be61931780afe63469711d7ef627832"></a><!-- doxytag: member="pugi::xml_document::load" ref="6be61931780afe63469711d7ef627832" args="(std::basic_istream&lt; char, std::char_traits&lt; char &gt; &gt; &amp;stream, unsigned int options=parse_default, encoding_t encoding=encoding_auto)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -79,7 +97,60 @@ void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
         <tr>
           <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load           </td>
           <td class="md" valign="top">(&nbsp;</td>
-          <td class="md" nowrap valign="top">std::istream &amp;&nbsp;</td>
+          <td class="md" nowrap valign="top">std::basic_istream&lt; char, std::char_traits&lt; char &gt; &gt; &amp;&nbsp;</td>
+          <td class="mdname" nowrap> <em>stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>unsigned int&nbsp;</td>
+          <td class="mdname" nowrap> <em>options</em> = <code><a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Load document from stream. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>stream</em>&nbsp;</td><td>- stream with xml data </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- source data encoding </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>parsing result </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="7bea1b385fd40ad2b193655427d68145"></a><!-- doxytag: member="pugi::xml_document::load" ref="7bea1b385fd40ad2b193655427d68145" args="(std::basic_istream&lt; wchar_t, std::char_traits&lt; wchar_t &gt; &gt; &amp;stream, unsigned int options=parse_default)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">std::basic_istream&lt; wchar_t, std::char_traits&lt; wchar_t &gt; &gt; &amp;&nbsp;</td>
           <td class="mdname" nowrap> <em>stream</em>, </td>
         </tr>
         <tr>
@@ -117,7 +188,7 @@ Load document from stream.
     </td>
   </tr>
 </table>
-<a class="anchor" name="199d2bd1bda6928816c90d68be3c6b4f"></a><!-- doxytag: member="pugi::xml_document::load" ref="199d2bd1bda6928816c90d68be3c6b4f" args="(const char *contents, unsigned int options=parse_default)" --><p>
+<a class="anchor" name="f155720fa4a736acd8a30310f895f67d"></a><!-- doxytag: member="pugi::xml_document::load" ref="f155720fa4a736acd8a30310f895f67d" args="(const char_t *contents, unsigned int options=parse_default)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -125,7 +196,7 @@ Load document from stream.
         <tr>
           <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load           </td>
           <td class="md" valign="top">(&nbsp;</td>
-          <td class="md" nowrap valign="top">const char *&nbsp;</td>
+          <td class="md" nowrap valign="top">const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *&nbsp;</td>
           <td class="mdname" nowrap> <em>contents</em>, </td>
         </tr>
         <tr>
@@ -153,6 +224,7 @@ Load document from stream.
 <p>
 Load document from string. 
 <p>
+String has to be zero-terminated. No encoding conversions are applied.<p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>contents</em>&nbsp;</td><td>- input string </td></tr>
@@ -163,59 +235,13 @@ Load document from string.
     </td>
   </tr>
 </table>
-<a class="anchor" name="627d8357c8d91f9a6dc3b3796eb78a58"></a><!-- doxytag: member="pugi::xml_document::load_file" ref="627d8357c8d91f9a6dc3b3796eb78a58" args="(const char *name, unsigned int options=parse_default)" --><p>
+<a class="anchor" name="a412a8bd194e7e4bdcaf61baf5b7a98b"></a><!-- doxytag: member="pugi::xml_document::parse" ref="a412a8bd194e7e4bdcaf61baf5b7a98b" args="(char *xmlstr, unsigned int options=parse_default)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load_file           </td>
-          <td class="md" valign="top">(&nbsp;</td>
-          <td class="md" nowrap valign="top">const char *&nbsp;</td>
-          <td class="mdname" nowrap> <em>name</em>, </td>
-        </tr>
-        <tr>
-          <td class="md" nowrap align="right"></td>
-          <td class="md"></td>
-          <td class="md" nowrap>unsigned int&nbsp;</td>
-          <td class="mdname" nowrap> <em>options</em> = <code><a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a></code></td>
-        </tr>
-        <tr>
-          <td class="md"></td>
-          <td class="md">)&nbsp;</td>
-          <td class="md" colspan="2"></td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-<table cellspacing="5" cellpadding="0" border="0">
-  <tr>
-    <td>
-      &nbsp;
-    </td>
-    <td>
-
-<p>
-Load document from file. 
-<p>
-<dl compact><dt><b>Parameters:</b></dt><dd>
-  <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>name</em>&nbsp;</td><td>- file name </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
-  </table>
-</dl>
-<dl compact><dt><b>Returns:</b></dt><dd>parsing result </dd></dl>
-    </td>
-  </tr>
-</table>
-<a class="anchor" name="148970f10ce16c21d75c3f10000b3158"></a><!-- doxytag: member="pugi::xml_document::parse" ref="148970f10ce16c21d75c3f10000b3158" args="(char *xmlstr, unsigned int options=parse_default)" --><p>
-<table class="mdTable" cellpadding="2" cellspacing="0">
-  <tr>
-    <td class="mdRow">
-      <table cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::parse           </td>
+          <td class="md" nowrap valign="top">PUGIXML_DEPRECATED <a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::parse           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">char *&nbsp;</td>
           <td class="mdname" nowrap> <em>xmlstr</em>, </td>
@@ -252,17 +278,18 @@ The string is modified; you should ensure that string data will persist througho
     <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
   </table>
 </dl>
-<dl compact><dt><b>Returns:</b></dt><dd>parsing result </dd></dl>
+<dl compact><dt><b>Returns:</b></dt><dd>parsing result</dd></dl>
+<dl compact><dt><b><a class="el" href="deprecated.html#_deprecated000012">Deprecated:</a></b></dt><dd>This function is deprecated and will be removed in future versions; use <a class="el" href="classpugi_1_1xml__document.html#c5d4b87682abc59e452008f677c4b5cd">xml_document::load_buffer_inplace</a> instead </dd></dl>
     </td>
   </tr>
 </table>
-<a class="anchor" name="cd3bdf4b2f313653ff848fe2b8639ef0"></a><!-- doxytag: member="pugi::xml_document::parse" ref="cd3bdf4b2f313653ff848fe2b8639ef0" args="(const transfer_ownership_tag &amp;, char *xmlstr, unsigned int options=parse_default)" --><p>
+<a class="anchor" name="2d226bc068b1becdf992e0c0caa1c94b"></a><!-- doxytag: member="pugi::xml_document::parse" ref="2d226bc068b1becdf992e0c0caa1c94b" args="(const transfer_ownership_tag &amp;, char *xmlstr, unsigned int options=parse_default)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::parse           </td>
+          <td class="md" nowrap valign="top">PUGIXML_DEPRECATED <a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::parse           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">const <a class="el" href="structpugi_1_1transfer__ownership__tag.html">transfer_ownership_tag</a> &amp;&nbsp;</td>
           <td class="mdname" nowrap>, </td>
@@ -305,11 +332,247 @@ The string is modified; document gains ownership over the string, so you don't h
     <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
   </table>
 </dl>
+<dl compact><dt><b>Returns:</b></dt><dd>parsing result</dd></dl>
+<dl compact><dt><b><a class="el" href="deprecated.html#_deprecated000013">Deprecated:</a></b></dt><dd>This function is deprecated and will be removed in future versions; use <a class="el" href="classpugi_1_1xml__document.html#9d2ba340fa4455c20c15c3000a032b41">xml_document::load_buffer_inplace_own</a> instead </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="9b9054284ae2f14dd27e20106ff7e630"></a><!-- doxytag: member="pugi::xml_document::load_file" ref="9b9054284ae2f14dd27e20106ff7e630" args="(const char *name, unsigned int options=parse_default, encoding_t encoding=encoding_auto)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load_file           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">const char *&nbsp;</td>
+          <td class="mdname" nowrap> <em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>unsigned int&nbsp;</td>
+          <td class="mdname" nowrap> <em>options</em> = <code><a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Load document from file. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>name</em>&nbsp;</td><td>- file name </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- source data encoding </td></tr>
+  </table>
+</dl>
 <dl compact><dt><b>Returns:</b></dt><dd>parsing result </dd></dl>
     </td>
   </tr>
 </table>
-<a class="anchor" name="799a8104c5c9e00149d0b846e4e915b1"></a><!-- doxytag: member="pugi::xml_document::save" ref="799a8104c5c9e00149d0b846e4e915b1" args="(xml_writer &amp;writer, const char *indent=&quot;\t&quot;, unsigned int flags=format_default) const " --><p>
+<a class="anchor" name="fccd56ee382298c3b1281b1004e7e4c9"></a><!-- doxytag: member="pugi::xml_document::load_buffer" ref="fccd56ee382298c3b1281b1004e7e4c9" args="(const void *contents, size_t size, unsigned int options=parse_default, encoding_t encoding=encoding_auto)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load_buffer           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">const void *&nbsp;</td>
+          <td class="mdname" nowrap> <em>contents</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>size_t&nbsp;</td>
+          <td class="mdname" nowrap> <em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>unsigned int&nbsp;</td>
+          <td class="mdname" nowrap> <em>options</em> = <code><a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Load document from buffer. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>contents</em>&nbsp;</td><td>- buffer contents </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>size</em>&nbsp;</td><td>- buffer size in bytes </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- source data encoding </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>parsing result </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="c5d4b87682abc59e452008f677c4b5cd"></a><!-- doxytag: member="pugi::xml_document::load_buffer_inplace" ref="c5d4b87682abc59e452008f677c4b5cd" args="(void *contents, size_t size, unsigned int options=parse_default, encoding_t encoding=encoding_auto)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load_buffer_inplace           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">void *&nbsp;</td>
+          <td class="mdname" nowrap> <em>contents</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>size_t&nbsp;</td>
+          <td class="mdname" nowrap> <em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>unsigned int&nbsp;</td>
+          <td class="mdname" nowrap> <em>options</em> = <code><a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Load document from buffer in-situ. 
+<p>
+The buffer is modified; you should ensure that buffer data will persist throughout the document's lifetime. Document does not gain ownership over the buffer, so you should free the buffer memory manually.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>contents</em>&nbsp;</td><td>- buffer contents </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>size</em>&nbsp;</td><td>- buffer size in bytes </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- source data encoding </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>parsing result </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="9d2ba340fa4455c20c15c3000a032b41"></a><!-- doxytag: member="pugi::xml_document::load_buffer_inplace_own" ref="9d2ba340fa4455c20c15c3000a032b41" args="(void *contents, size_t size, unsigned int options=parse_default, encoding_t encoding=encoding_auto)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top"><a class="el" href="structpugi_1_1xml__parse__result.html">xml_parse_result</a> pugi::xml_document::load_buffer_inplace_own           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">void *&nbsp;</td>
+          <td class="mdname" nowrap> <em>contents</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>size_t&nbsp;</td>
+          <td class="mdname" nowrap> <em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>unsigned int&nbsp;</td>
+          <td class="mdname" nowrap> <em>options</em> = <code><a class="el" href="namespacepugi.html#d7c927d1c1752330637c3318b0d7b366">parse_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Load document from buffer in-situ (gains buffer ownership). 
+<p>
+The buffer is modified; you should ensure that buffer data will persist throughout the document's lifetime. Document gains ownership over the buffer, so you should allocate the buffer with pugixml allocation function.<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>contents</em>&nbsp;</td><td>- buffer contents </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>size</em>&nbsp;</td><td>- buffer size in bytes </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>options</em>&nbsp;</td><td>- parsing options </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- source data encoding </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>parsing result </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="4603745d305c65fafd811d995cf7fba5"></a><!-- doxytag: member="pugi::xml_document::save" ref="4603745d305c65fafd811d995cf7fba5" args="(xml_writer &amp;writer, const char_t *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=format_default, encoding_t encoding=encoding_auto) const " --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -323,14 +586,20 @@ The string is modified; document gains ownership over the string, so you don't h
         <tr>
           <td class="md" nowrap align="right"></td>
           <td class="md"></td>
-          <td class="md" nowrap>const char *&nbsp;</td>
-          <td class="mdname" nowrap> <em>indent</em> = <code>&quot;\t&quot;</code>, </td>
+          <td class="md" nowrap>const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *&nbsp;</td>
+          <td class="mdname" nowrap> <em>indent</em> = <code>PUGIXML_TEXT(&quot;\t&quot;)</code>, </td>
         </tr>
         <tr>
           <td class="md" nowrap align="right"></td>
           <td class="md"></td>
           <td class="md" nowrap>unsigned int&nbsp;</td>
-          <td class="mdname" nowrap> <em>flags</em> = <code><a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a></code></td>
+          <td class="mdname" nowrap> <em>flags</em> = <code><a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
         </tr>
         <tr>
           <td class="md"></td>
@@ -356,12 +625,124 @@ Save XML to writer.
     <tr><td valign="top"></td><td valign="top"><em>writer</em>&nbsp;</td><td>- writer object </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>indent</em>&nbsp;</td><td>- indentation string </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>flags</em>&nbsp;</td><td>- formatting flags </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- encoding used for writing </td></tr>
   </table>
 </dl>
     </td>
   </tr>
 </table>
-<a class="anchor" name="dd3435ec713cdb96563e3513c12c02f2"></a><!-- doxytag: member="pugi::xml_document::save_file" ref="dd3435ec713cdb96563e3513c12c02f2" args="(const char *name, const char *indent=&quot;\t&quot;, unsigned int flags=format_default) const " --><p>
+<a class="anchor" name="bb5200ba10cf66c8ef6c3ca97f4a18f6"></a><!-- doxytag: member="pugi::xml_document::save" ref="bb5200ba10cf66c8ef6c3ca97f4a18f6" args="(std::basic_ostream&lt; char, std::char_traits&lt; char &gt; &gt; &amp;stream, const char_t *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=format_default, encoding_t encoding=encoding_auto) const " --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">void pugi::xml_document::save           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">std::basic_ostream&lt; char, std::char_traits&lt; char &gt; &gt; &amp;&nbsp;</td>
+          <td class="mdname" nowrap> <em>stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *&nbsp;</td>
+          <td class="mdname" nowrap> <em>indent</em> = <code>PUGIXML_TEXT(&quot;\t&quot;)</code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>unsigned int&nbsp;</td>
+          <td class="mdname" nowrap> <em>flags</em> = <code><a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"> const</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Save XML to stream. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>stream</em>&nbsp;</td><td>- output stream </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>indent</em>&nbsp;</td><td>- indentation string </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>flags</em>&nbsp;</td><td>- formatting flags </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- encoding used for writing </td></tr>
+  </table>
+</dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="37649bea142707c2e9a76df3518117bc"></a><!-- doxytag: member="pugi::xml_document::save" ref="37649bea142707c2e9a76df3518117bc" args="(std::basic_ostream&lt; wchar_t, std::char_traits&lt; wchar_t &gt; &gt; &amp;stream, const char_t *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=format_default) const " --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">void pugi::xml_document::save           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">std::basic_ostream&lt; wchar_t, std::char_traits&lt; wchar_t &gt; &gt; &amp;&nbsp;</td>
+          <td class="mdname" nowrap> <em>stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *&nbsp;</td>
+          <td class="mdname" nowrap> <em>indent</em> = <code>PUGIXML_TEXT(&quot;\t&quot;)</code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap>unsigned int&nbsp;</td>
+          <td class="mdname" nowrap> <em>flags</em> = <code><a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a></code></td>
+        </tr>
+        <tr>
+          <td class="md"></td>
+          <td class="md">)&nbsp;</td>
+          <td class="md" colspan="2"> const</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Save XML to stream. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>stream</em>&nbsp;</td><td>- output stream </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>indent</em>&nbsp;</td><td>- indentation string </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>flags</em>&nbsp;</td><td>- formatting flags </td></tr>
+  </table>
+</dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="4fe6b295b0584876b4fba63b95321dfd"></a><!-- doxytag: member="pugi::xml_document::save_file" ref="4fe6b295b0584876b4fba63b95321dfd" args="(const char *name, const char_t *indent=PUGIXML_TEXT(&quot;\t&quot;), unsigned int flags=format_default, encoding_t encoding=encoding_auto) const " --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -375,14 +756,20 @@ Save XML to writer.
         <tr>
           <td class="md" nowrap align="right"></td>
           <td class="md"></td>
-          <td class="md" nowrap>const char *&nbsp;</td>
-          <td class="mdname" nowrap> <em>indent</em> = <code>&quot;\t&quot;</code>, </td>
+          <td class="md" nowrap>const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *&nbsp;</td>
+          <td class="mdname" nowrap> <em>indent</em> = <code>PUGIXML_TEXT(&quot;\t&quot;)</code>, </td>
         </tr>
         <tr>
           <td class="md" nowrap align="right"></td>
           <td class="md"></td>
           <td class="md" nowrap>unsigned int&nbsp;</td>
-          <td class="mdname" nowrap> <em>flags</em> = <code><a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a></code></td>
+          <td class="mdname" nowrap> <em>flags</em> = <code><a class="el" href="namespacepugi.html#325f48a35abbaeacdfd8b7fc9ed1713c">format_default</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="md" nowrap align="right"></td>
+          <td class="md"></td>
+          <td class="md" nowrap><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a>&nbsp;</td>
+          <td class="mdname" nowrap> <em>encoding</em> = <code>encoding_auto</code></td>
         </tr>
         <tr>
           <td class="md"></td>
@@ -408,13 +795,14 @@ Save XML to file.
     <tr><td valign="top"></td><td valign="top"><em>name</em>&nbsp;</td><td>- file name </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>indent</em>&nbsp;</td><td>- indentation string </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>flags</em>&nbsp;</td><td>- formatting flags </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>encoding</em>&nbsp;</td><td>- encoding used for writing </td></tr>
   </table>
 </dl>
 <dl compact><dt><b>Returns:</b></dt><dd>success flag </dd></dl>
     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Tue Jan 5 20:02:14 2010 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Tue May 25 23:22:41 2010 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>

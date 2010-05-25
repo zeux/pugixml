@@ -1,5 +1,5 @@
 /**
- * pugixml parser - version 0.6
+ * pugixml parser - version 0.7
  * --------------------------------------------------------
  * Copyright (C) 2006-2010, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at http://code.google.com/p/pugixml/
@@ -82,9 +82,11 @@ namespace std
 
 namespace pugi
 {
+	/// Character type used for all internal storage and operations; depends on PUGIXML_WCHAR_MODE
 	typedef wchar_t char_t;
 
 #ifndef PUGIXML_NO_STL
+	/// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> > string_t;
 #endif
 }
@@ -93,10 +95,12 @@ namespace pugi
 
 namespace pugi
 {
+	/// Character type used for all internal storage and operations; depends on PUGIXML_WCHAR_MODE
 	typedef char char_t;
 
 #	ifndef PUGIXML_NO_STL
 	// gcc3.4 has a bug which prevents string_t instantiation using char_t, so we have to use char type explicitly
+	/// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > string_t;
 #	endif
 }
@@ -289,7 +293,7 @@ namespace pugi
 	 */
 	const unsigned int format_write_bom = 0x02;
 
-	// \deprecated This constant is deprecated and will be removed in future versions; use format_write_bom instead
+	/// \deprecated This constant is deprecated and will be removed in future versions; use format_write_bom instead
 #ifndef __INTEL_COMPILER
 	PUGIXML_DEPRECATED
 #endif
@@ -635,6 +639,7 @@ namespace pugi
 		bool as_bool() const;
 
 		/// \internal Document order or 0 if not set
+		/// \deprecated This function is deprecated
 		PUGIXML_DEPRECATED unsigned int document_order() const;
 
 	public:
@@ -1442,6 +1447,7 @@ namespace pugi
 	#endif
 		
 		/// \internal Document order or 0 if not set
+		/// \deprecated This function is deprecated
 		PUGIXML_DEPRECATED unsigned int document_order() const;
 
 		/**
@@ -1450,6 +1456,7 @@ namespace pugi
 		 * \param writer - writer object
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
+		 * \param encoding - encoding used for writing
 		 * \param depth - starting depth (used for indentation)
 		 */
 		void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
@@ -1461,6 +1468,7 @@ namespace pugi
 		 * \param os - output stream
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
+		 * \param encoding - encoding used for writing
 		 * \param depth - starting depth (used for indentation)
 		 */
 		void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
@@ -1471,6 +1479,7 @@ namespace pugi
 		 * \param os - output stream
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
+		 * \param encoding - encoding used for writing
 		 * \param depth - starting depth (used for indentation)
 		 */
 		void print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
@@ -1845,6 +1854,7 @@ namespace pugi
 		 *
 		 * \param stream - stream with xml data
 		 * \param options - parsing options
+		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
 		xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
@@ -1901,6 +1911,7 @@ namespace pugi
 		 *
 		 * \param name - file name
 		 * \param options - parsing options
+		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
 		xml_parse_result load_file(const char* name, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
@@ -1911,6 +1922,7 @@ namespace pugi
 		 * \param contents - buffer contents
 		 * \param size - buffer size in bytes
 		 * \param options - parsing options
+		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
 		xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
@@ -1923,6 +1935,7 @@ namespace pugi
 		 * \param contents - buffer contents
 		 * \param size - buffer size in bytes
 		 * \param options - parsing options
+		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
 		xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
@@ -1936,6 +1949,7 @@ namespace pugi
 		 * \param contents - buffer contents
 		 * \param size - buffer size in bytes
 		 * \param options - parsing options
+		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
 		xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
@@ -1946,6 +1960,7 @@ namespace pugi
 		 * \param writer - writer object
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
+		 * \param encoding - encoding used for writing
 		 */
 		void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
 
@@ -1956,6 +1971,7 @@ namespace pugi
 		 * \param stream - output stream
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
+		 * \param encoding - encoding used for writing
 		 */
 		void save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
 
@@ -1975,6 +1991,7 @@ namespace pugi
 		 * \param name - file name
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
+		 * \param encoding - encoding used for writing
 		 * \return success flag
 		 */
 		bool save_file(const char* name, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;

@@ -27,9 +27,9 @@ A class that holds compiled XPath query and allows to evaluate query result.
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td></td></tr>
 <tr><td colspan="2"><br><h2>Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__query.html#df3ce6efc17c1b58a1ff60bedb632140">xpath_query</a> (const char *query)</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__query.html#ee39fc174aa9048b5c1ea24d26451566">xpath_query</a> (const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *query)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Ctor from string with XPath expression.  <a href="#df3ce6efc17c1b58a1ff60bedb632140"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Ctor from string with XPath expression.  <a href="#ee39fc174aa9048b5c1ea24d26451566"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="0ca09e7de62e46feb64d03995f389da3"></a><!-- doxytag: member="pugi::xpath_query::~xpath_query" ref="0ca09e7de62e46feb64d03995f389da3" args="()" -->
 &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__query.html#0ca09e7de62e46feb64d03995f389da3">~xpath_query</a> ()</td></tr>
 
@@ -43,15 +43,15 @@ A class that holds compiled XPath query and allows to evaluate query result.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">double&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__query.html#d6538470814cbf572971e83a912f5bd5">evaluate_number</a> (const <a class="el" href="classpugi_1_1xml__node.html">xml_node</a> &amp;n) const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Evaluate expression as double value for the context node <em>n</em>.  <a href="#d6538470814cbf572971e83a912f5bd5"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">std::string&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__query.html#132cb4e92eb1d90569281c2795f00198">evaluate_string</a> (const <a class="el" href="classpugi_1_1xml__node.html">xml_node</a> &amp;n) const </td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="namespacepugi.html#009e541d184dda0373445df1601a1e96">string_t</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__query.html#ef5de04abed0897f1aacdaffea59250a">evaluate_string</a> (const <a class="el" href="classpugi_1_1xml__node.html">xml_node</a> &amp;n) const </td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Evaluate expression as string value for the context node <em>n</em>.  <a href="#132cb4e92eb1d90569281c2795f00198"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Evaluate expression as string value for the context node <em>n</em>.  <a href="#ef5de04abed0897f1aacdaffea59250a"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="el" href="classpugi_1_1xpath__node__set.html">xpath_node_set</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xpath__query.html#de21ad3afc39efd1db110a0dfca7b865">evaluate_node_set</a> (const <a class="el" href="classpugi_1_1xml__node.html">xml_node</a> &amp;n) const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Evaluate expression as node set for the context node <em>n</em>.  <a href="#de21ad3afc39efd1db110a0dfca7b865"></a><br></td></tr>
 </table>
 <hr><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" name="df3ce6efc17c1b58a1ff60bedb632140"></a><!-- doxytag: member="pugi::xpath_query::xpath_query" ref="df3ce6efc17c1b58a1ff60bedb632140" args="(const char *query)" --><p>
+<a class="anchor" name="ee39fc174aa9048b5c1ea24d26451566"></a><!-- doxytag: member="pugi::xpath_query::xpath_query" ref="ee39fc174aa9048b5c1ea24d26451566" args="(const char_t *query)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
@@ -59,7 +59,7 @@ A class that holds compiled XPath query and allows to evaluate query result.
         <tr>
           <td class="md" nowrap valign="top">pugi::xpath_query::xpath_query           </td>
           <td class="md" valign="top">(&nbsp;</td>
-          <td class="md" nowrap valign="top">const char *&nbsp;</td>
+          <td class="md" nowrap valign="top">const <a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a> *&nbsp;</td>
           <td class="mdname1" valign="top" nowrap> <em>query</em>          </td>
           <td class="md" valign="top">&nbsp;)&nbsp;</td>
           <td class="md" nowrap><code> [explicit]</code></td>
@@ -192,13 +192,13 @@ If expression does not directly evaluate to double, the expression result is con
     </td>
   </tr>
 </table>
-<a class="anchor" name="132cb4e92eb1d90569281c2795f00198"></a><!-- doxytag: member="pugi::xpath_query::evaluate_string" ref="132cb4e92eb1d90569281c2795f00198" args="(const xml_node &amp;n) const " --><p>
+<a class="anchor" name="ef5de04abed0897f1aacdaffea59250a"></a><!-- doxytag: member="pugi::xpath_query::evaluate_string" ref="ef5de04abed0897f1aacdaffea59250a" args="(const xml_node &amp;n) const " --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">std::string pugi::xpath_query::evaluate_string           </td>
+          <td class="md" nowrap valign="top"><a class="el" href="namespacepugi.html#009e541d184dda0373445df1601a1e96">string_t</a> pugi::xpath_query::evaluate_string           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">const <a class="el" href="classpugi_1_1xml__node.html">xml_node</a> &amp;&nbsp;</td>
           <td class="mdname1" valign="top" nowrap> <em>n</em>          </td>
@@ -266,7 +266,7 @@ If expression does not directly evaluate to node set, throws <a class="el" href=
     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Tue Jan 5 20:02:10 2010 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Tue May 25 23:22:40 2010 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>

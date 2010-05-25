@@ -746,6 +746,31 @@ were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresp
 </ul>
 </ul>
 </dt>
+<dt>25.05.2010 - v0.7
+<dd>Changes: <ul>
+<li>Compatibility:<ul>
+<li>Added parse() and as_utf16 for compatibility (these functions are deprecated and will be removed in pugixml-1.0)
+<li>Wildcard functions, document_order/precompute_document_order functions, format_write_bom_utf8 and parse_wnorm_attribute flags are deprecated and will be removed in version 1.0
+</ul>
+<li>Optimizations:<ul>
+<li>Changed internal memory management: internal allocator is used for both metadata and name/value data; allocated pages are deleted if all allocations from them are deleted
+<li>Optimized memory consumption: sizeof(xml_node_struct) reduced from 40 bytes to 32 bytes on x86
+<li>Unicode conversion optimizations
+<li>Optimized debug mode parsing/saving by order of magnitude
+</ul>
+<li>Major Unicode improvements:<ul>
+<li>Introduced encoding support (automatic/manual encoding detection on load, manual encoding selection on save, conversion from/to UTF8, UTF16 LE/BE, UTF32 LE/BE)
+<li>Introduced wchar_t mode (you can set PUGIXML_WCHAR_MODE define to switch pugixml internal encoding from UTF8 to wchar_t; all functions are switched to their Unicode variants)
+<li>Load/save functions now support wide streams
+</ul>
+<li>Bug fixes / specification changes:<ul>
+<li>Improved DOCTYPE parsing: now parser recognizes all well-formed DOCTYPE declarations
+<li>Fixed as_uint() for large numbers (i.e. 2^32-1)
+<li>Nodes/attributes with empty names are now printed as :anonymous
+</ul>
+</ul>
+</ul>
+</dt>
 </dl>
 
 <hr>
@@ -792,7 +817,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 <hr>
 
-<p>Revised 7 May, 2010</p>
+<p>Revised 25 May, 2010</p>
 <p><i>&copy; Copyright <a href="mailto:arseny.kapoulkine@gmail.com">Arseny Kapoulkine</a> 2006-2010. All Rights Reserved.</i></p>
 </body>
 </html>

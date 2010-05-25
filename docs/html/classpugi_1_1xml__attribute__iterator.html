@@ -20,10 +20,9 @@
   </ul></div>
 <div class="nav">
 <a class="el" href="namespacepugi.html">pugi</a>::<a class="el" href="classpugi_1_1xml__attribute__iterator.html">xml_attribute_iterator</a></div>
-<h1>pugi::xml_attribute_iterator Class Reference</h1><!-- doxytag: class="pugi::xml_attribute_iterator" --><!-- doxytag: inherits="std::iterator" -->Inheritance diagram for pugi::xml_attribute_iterator:<p><center><img src="classpugi_1_1xml__attribute__iterator__inherit__graph.png" border="0" usemap="#pugi_1_1xml__attribute__iterator__inherit__map" alt="Inheritance graph"></center>
-<center><font size="2">[<a href="graph_legend.html">legend</a>]</font></center>Collaboration diagram for pugi::xml_attribute_iterator:<p><center><img src="classpugi_1_1xml__attribute__iterator__coll__graph.png" border="0" usemap="#pugi_1_1xml__attribute__iterator__coll__map" alt="Collaboration graph"></center>
+<h1>pugi::xml_attribute_iterator Class Reference</h1><!-- doxytag: class="pugi::xml_attribute_iterator" -->Collaboration diagram for pugi::xml_attribute_iterator:<p><center><img src="classpugi_1_1xml__attribute__iterator__coll__graph.png" border="0" usemap="#pugi_1_1xml__attribute__iterator__coll__map" alt="Collaboration graph"></center>
 <map name="pugi_1_1xml__attribute__iterator__coll__map">
-<area href="classpugi_1_1xml__attribute.html" shape="rect" coords="392,96,525,123" alt="">
+<area href="classpugi_1_1xml__attribute.html" shape="rect" coords="29,96,163,123" alt="">
 </map>
 <center><font size="2">[<a href="graph_legend.html">legend</a>]</font></center><a href="classpugi_1_1xml__attribute__iterator-members.html">List of all members.</a><hr><a name="_details"></a><h2>Detailed Description</h2>
 Attribute iterator. 
@@ -32,6 +31,23 @@ It's a bidirectional iterator with value type 'xml_attribute'.
 <p>
 <table border="0" cellpadding="0" cellspacing="0">
 <tr><td></td></tr>
+<tr><td colspan="2"><br><h2>Public Types</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="00b3eecf2aba886a673ad2319be88618"></a><!-- doxytag: member="pugi::xml_attribute_iterator::difference_type" ref="00b3eecf2aba886a673ad2319be88618" args="" -->
+typedef ptrdiff_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute__iterator.html#00b3eecf2aba886a673ad2319be88618">difference_type</a></td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Iterator traits. <br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="2b0e779f12de813d7a806056ebed8907"></a><!-- doxytag: member="pugi::xml_attribute_iterator::value_type" ref="2b0e779f12de813d7a806056ebed8907" args="" -->
+typedef <a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a>&nbsp;</td><td class="memItemRight" valign="bottom"><b>value_type</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="6ed6fb3197abb02ffa848ad6b9b7a1be"></a><!-- doxytag: member="pugi::xml_attribute_iterator::pointer" ref="6ed6fb3197abb02ffa848ad6b9b7a1be" args="" -->
+typedef <a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><b>pointer</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="de97045a1217d0a7897e5f5873297117"></a><!-- doxytag: member="pugi::xml_attribute_iterator::reference" ref="de97045a1217d0a7897e5f5873297117" args="" -->
+typedef <a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><b>reference</b></td></tr>
+
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="ad988273a3e4cdc5fa3eb879dbdc8d35"></a><!-- doxytag: member="pugi::xml_attribute_iterator::iterator_category" ref="ad988273a3e4cdc5fa3eb879dbdc8d35" args="" -->
+typedef std::bidirectional_iterator_tag&nbsp;</td><td class="memItemRight" valign="bottom"><b>iterator_category</b></td></tr>
+
 <tr><td colspan="2"><br><h2>Public Member Functions</h2></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="bdc6df1b586551706b124eed1badaafd"></a><!-- doxytag: member="pugi::xml_attribute_iterator::xml_attribute_iterator" ref="bdc6df1b586551706b124eed1badaafd" args="()" -->
 &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute__iterator.html#bdc6df1b586551706b124eed1badaafd">xml_attribute_iterator</a> ()</td></tr>
@@ -40,9 +56,6 @@ It's a bidirectional iterator with value type 'xml_attribute'.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute__iterator.html#4595648e3aa06a3209f200c69805ed47">xml_attribute_iterator</a> (const <a class="el" href="classpugi_1_1xml__attribute.html">xml_attribute</a> &amp;node)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Initializing ctor.  <a href="#4595648e3aa06a3209f200c69805ed47"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute__iterator.html#c99270b894dd2faeab9fc6eb3832dc94">xml_attribute_iterator</a> (xml_attribute_struct *ref, xml_attribute_struct *prev)</td></tr>
-
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Initializing ctor (for past-the-end).  <a href="#c99270b894dd2faeab9fc6eb3832dc94"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__attribute__iterator.html#6478076e6a12f5900992008311e42963">operator==</a> (const <a class="el" href="classpugi_1_1xml__attribute__iterator.html">xml_attribute_iterator</a> &amp;rhs) const </td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Check if this iterator is equal to <em>rhs</em>.  <a href="#6478076e6a12f5900992008311e42963"></a><br></td></tr>
@@ -103,51 +116,6 @@ Initializing ctor.
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>node</em>&nbsp;</td><td>- node that iterator will point at </td></tr>
-  </table>
-</dl>
-    </td>
-  </tr>
-</table>
-<a class="anchor" name="c99270b894dd2faeab9fc6eb3832dc94"></a><!-- doxytag: member="pugi::xml_attribute_iterator::xml_attribute_iterator" ref="c99270b894dd2faeab9fc6eb3832dc94" args="(xml_attribute_struct *ref, xml_attribute_struct *prev)" --><p>
-<table class="mdTable" cellpadding="2" cellspacing="0">
-  <tr>
-    <td class="mdRow">
-      <table cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td class="md" nowrap valign="top">pugi::xml_attribute_iterator::xml_attribute_iterator           </td>
-          <td class="md" valign="top">(&nbsp;</td>
-          <td class="md" nowrap valign="top">xml_attribute_struct *&nbsp;</td>
-          <td class="mdname" nowrap> <em>ref</em>, </td>
-        </tr>
-        <tr>
-          <td class="md" nowrap align="right"></td>
-          <td class="md"></td>
-          <td class="md" nowrap>xml_attribute_struct *&nbsp;</td>
-          <td class="mdname" nowrap> <em>prev</em></td>
-        </tr>
-        <tr>
-          <td class="md"></td>
-          <td class="md">)&nbsp;</td>
-          <td class="md" colspan="2"></td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-<table cellspacing="5" cellpadding="0" border="0">
-  <tr>
-    <td>
-      &nbsp;
-    </td>
-    <td>
-
-<p>
-Initializing ctor (for past-the-end). 
-<p>
-<dl compact><dt><b>Parameters:</b></dt><dd>
-  <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>ref</em>&nbsp;</td><td>- should be 0 </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>prev</em>&nbsp;</td><td>- previous node </td></tr>
   </table>
 </dl>
     </td>
@@ -408,7 +376,7 @@ Post-decrement operator.
     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Tue Jan 5 20:02:13 2010 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Tue May 25 23:22:41 2010 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>

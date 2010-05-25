@@ -52,8 +52,6 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">class &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classpugi_1_1xml__tree__walker.html">xml_tree_walker</a></td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Abstract tree walker class.  <a href="classpugi_1_1xml__tree__walker.html#_details">More...</a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><b>xml_memory_block</b></td></tr>
-
 <tr><td class="memItemLeft" nowrap align="right" valign="top">struct &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structpugi_1_1transfer__ownership__tag.html">transfer_ownership_tag</a></td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Struct used to distinguish parsing with ownership transfer from parsing without it.  <a href="structpugi_1_1transfer__ownership__tag.html#_details">More...</a><br></td></tr>
@@ -73,6 +71,16 @@ The PugiXML Parser namespace.
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Not necessarily ordered constant collection of XPath nodes.  <a href="classpugi_1_1xpath__node__set.html#_details">More...</a><br></td></tr>
 <tr><td colspan="2"><br><h2>Typedefs</h2></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="b1b14d3e95e40b2a55befefb0b9a04aa"></a><!-- doxytag: member="pugi::char_t" ref="b1b14d3e95e40b2a55befefb0b9a04aa" args="" -->
+typedef char&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#b1b14d3e95e40b2a55befefb0b9a04aa">char_t</a></td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Character type used for all internal storage and operations; depends on PUGIXML_WCHAR_MODE. <br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top"><a class="anchor" name="009e541d184dda0373445df1601a1e96"></a><!-- doxytag: member="pugi::string_t" ref="009e541d184dda0373445df1601a1e96" args="" -->
+typedef std::basic_string&lt;<br>
+ char, std::char_traits&lt; char &gt;,<br>
+ std::allocator&lt; char &gt; &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#009e541d184dda0373445df1601a1e96">string_t</a></td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE. <br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">typedef void *(*&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> )(size_t size)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Memory allocation function.  <a href="#15c8048c4bbfca2ad0ab9fc0b56ea522"></a><br></td></tr>
@@ -94,6 +102,22 @@ The PugiXML Parser namespace.
  }</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Tree node classification.  <a href="namespacepugi.html#137e94a038e4ab0ada6477cf7f6153a9">More...</a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">encoding_t</a> { <br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52e11b2ef666f03e77b7e764e38d22dc17">encoding_auto</a>, 
+<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b5296c73bf345f635f0fbee5f6646fb095e">encoding_utf8</a>, 
+<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b5247be6a1d4828e9b284d40894afc27e54">encoding_utf16_le</a>, 
+<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b528689b47b8387fc3524334e8d106fda16">encoding_utf16_be</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52c1fbf60f9cb5db0e9e38fbfdba7afb6a">encoding_utf16</a>, 
+<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52c54c474159301358c31d931855987dc6">encoding_utf32_le</a>, 
+<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b5255b0b036621ebcfcd5e0e43b8f69f4dc">encoding_utf32_be</a>, 
+<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b5246a8f0d9f4c03350f7a831a370d2b032">encoding_utf32</a>, 
+<br>
+&nbsp;&nbsp;<a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52e670d39438f31fe41f1a596739e5c00e">encoding_wchar</a>
+<br>
+ }</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">These flags determine the encoding of input data for XML document.  <a href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">More...</a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261d">xpath_type_t</a> { <br>
 &nbsp;&nbsp;<a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261daa768b8302ccc893f3cc9ba799360a77">xpath_type_none</a>, 
 <a class="el" href="namespacepugi.html#51b15030472dcfa64b5c0d2252f8261df5613748204e2e4861524e7d63a699c9">xpath_type_node_set</a>, 
@@ -129,12 +153,23 @@ The PugiXML Parser namespace.
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Parsing status enumeration, returned as part of xml_parse_result struct.  <a href="namespacepugi.html#9054ca609e12afb8f3e5892fc6c0b555">More...</a><br></td></tr>
 <tr><td colspan="2"><br><h2>Functions</h2></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">std::string PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#c66598a65cc30aa7a3f439fa5ad0f876">as_utf8</a> (const wchar_t *str)</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">std::basic_string&lt; char, std::char_traits&lt;<br>
+ char &gt;, std::allocator&lt; char <br>
+&gt; &gt; PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#437f8018424e4adb645dbd4ace6a83bc">as_utf8</a> (const wchar_t *str)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf16 to utf8.  <a href="#c66598a65cc30aa7a3f439fa5ad0f876"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">std::wstring PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#dc6b6fcaa56cea6b0a2e5fbd8e212c25">as_utf16</a> (const char *str)</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert wide string to utf8.  <a href="#437f8018424e4adb645dbd4ace6a83bc"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">PUGIXML_DEPRECATED std::basic_string&lt;<br>
+ wchar_t, std::char_traits&lt;<br>
+ wchar_t &gt;, std::allocator&lt;<br>
+ wchar_t &gt; &gt; PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#3eedd4b9cfe8e7ada2560003c8c24a62">as_utf16</a> (const char *str)</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf8 to utf16.  <a href="#dc6b6fcaa56cea6b0a2e5fbd8e212c25"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf8 to wide string.  <a href="#3eedd4b9cfe8e7ada2560003c8c24a62"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">std::basic_string&lt; wchar_t,<br>
+ std::char_traits&lt; wchar_t &gt;,<br>
+ std::allocator&lt; wchar_t <br>
+&gt; &gt; PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#6a3152f1a3f7e7750580f7549758ef64">as_wide</a> (const char *str)</td></tr>
+
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Convert utf8 to wide string.  <a href="#6a3152f1a3f7e7750580f7549758ef64"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">void PUGIXML_FUNCTION&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#bc67229fed7dbe24a410d83b9233f916">set_memory_management_functions</a> (<a class="el" href="namespacepugi.html#15c8048c4bbfca2ad0ab9fc0b56ea522">allocation_function</a> allocate, <a class="el" href="namespacepugi.html#a6161e8d6344110788d7ff8a11ca680b">deallocation_function</a> deallocate)</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Override default memory management functions.  <a href="#bc67229fed7dbe24a410d83b9233f916"></a><br></td></tr>
@@ -145,9 +180,6 @@ The PugiXML Parser namespace.
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get current memory deallocation function.  <a href="#0823c1cb767482d9d72d1df055be3b67"></a><br></td></tr>
 <tr><td colspan="2"><br><h2>Variables</h2></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">const size_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#bdec38e04651950fe8f585c912143a27">memory_block_size</a> = 32768</td></tr>
-
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Memory block size, used for fast allocator.  <a href="#bdec38e04651950fe8f585c912143a27"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#e5058761cfd25d6cdb7e092659dae1fd">parse_minimal</a> = 0x0000</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Minimal parsing mode.  <a href="#e5058761cfd25d6cdb7e092659dae1fd"></a><br></td></tr>
@@ -169,9 +201,10 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#d4e017365d2ff3ee04e226c35129b475">parse_eol</a> = 0x0020</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if EOL handling (that is, replacing sequences 0x0d 0x0a by a single 0x0a character, and replacing all standalone 0x0d characters by 0x0a) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values).  <a href="#d4e017365d2ff3ee04e226c35129b475"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#8617ea5ba78c676aff8b7af960cb2f4b">parse_wnorm_attribute</a> = 0x0040</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">PUGIXML_DEPRECATED const unsigned <br>
+int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#3da188344c4c53e6012eac2daa9ffd17">parse_wnorm_attribute</a> = 0x0040</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes.  <a href="#8617ea5ba78c676aff8b7af960cb2f4b"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes.  <a href="#3da188344c4c53e6012eac2daa9ffd17"></a><br></td></tr>
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#1e943812f2de36fc3ee14f7756afdbd7">parse_wconv_attribute</a> = 0x0080</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if attribute value normalization should be performed for all attributes.  <a href="#1e943812f2de36fc3ee14f7756afdbd7"></a><br></td></tr>
@@ -184,9 +217,12 @@ The PugiXML Parser namespace.
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#ce12e8dee65c5bae8ee42a64be7421d3">format_indent</a> = 0x01</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Indent the nodes that are written to output stream with as many indentation strings as deep the node is in DOM tree.  <a href="#ce12e8dee65c5bae8ee42a64be7421d3"></a><br></td></tr>
-<tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#4c3641085a6c69a480d1def1692be1a8">format_write_bom_utf8</a> = 0x02</td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#b863bcafd203aeaa98953df3a998243f">format_write_bom</a> = 0x02</td></tr>
 
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if UTF-8 BOM is to be written to output stream.  <a href="#4c3641085a6c69a480d1def1692be1a8"></a><br></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">This flag determines if encoding-specific BOM is to be written to output stream.  <a href="#b863bcafd203aeaa98953df3a998243f"></a><br></td></tr>
+<tr><td class="memItemLeft" nowrap align="right" valign="top">PUGIXML_DEPRECATED const unsigned <br>
+int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#ce7d9ff7c724cd74e6fffc5c11c2c926">format_write_bom_utf8</a> = <a class="el" href="namespacepugi.html#b863bcafd203aeaa98953df3a998243f">format_write_bom</a></td></tr>
+
 <tr><td class="memItemLeft" nowrap align="right" valign="top">const unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacepugi.html#2dd811716b1c0a6a2431ceca43bc649e">format_raw</a> = 0x04</td></tr>
 
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">If this flag is on, no indentation is performed and no line breaks are written to output file.  <a href="#2dd811716b1c0a6a2431ceca43bc649e"></a><br></td></tr>
@@ -305,6 +341,53 @@ E.g. '&lt;?xml ...?&gt;'. </td></tr>
     </td>
   </tr>
 </table>
+<a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b52"></a><!-- doxytag: member="pugi::encoding_t" ref="ad7ded58c805fa8936fc17390a9a1b52" args="" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">enum <a class="el" href="namespacepugi.html#ad7ded58c805fa8936fc17390a9a1b52">pugi::encoding_t</a>          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+These flags determine the encoding of input data for XML document. 
+<p>
+Default mode is encoding_auto, which means that document encoding is autodetected from BOM and necessary encoding conversions are applied. You can override this mode by using any of the specific encodings. <dl compact><dt><b>Enumerator: </b></dt><dd>
+<table border="0" cellspacing="2" cellpadding="0">
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b52e11b2ef666f03e77b7e764e38d22dc17"></a><!-- doxytag: member="encoding_auto" ref="ad7ded58c805fa8936fc17390a9a1b52e11b2ef666f03e77b7e764e38d22dc17" args="" -->encoding_auto</em>&nbsp;</td><td>
+Auto-detect input encoding using BOM or &lt;/&lt;? detection; use UTF8 if BOM is not found. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b5296c73bf345f635f0fbee5f6646fb095e"></a><!-- doxytag: member="encoding_utf8" ref="ad7ded58c805fa8936fc17390a9a1b5296c73bf345f635f0fbee5f6646fb095e" args="" -->encoding_utf8</em>&nbsp;</td><td>
+UTF8 encoding. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b5247be6a1d4828e9b284d40894afc27e54"></a><!-- doxytag: member="encoding_utf16_le" ref="ad7ded58c805fa8936fc17390a9a1b5247be6a1d4828e9b284d40894afc27e54" args="" -->encoding_utf16_le</em>&nbsp;</td><td>
+Little-endian UTF16. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b528689b47b8387fc3524334e8d106fda16"></a><!-- doxytag: member="encoding_utf16_be" ref="ad7ded58c805fa8936fc17390a9a1b528689b47b8387fc3524334e8d106fda16" args="" -->encoding_utf16_be</em>&nbsp;</td><td>
+Big-endian UTF16. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b52c1fbf60f9cb5db0e9e38fbfdba7afb6a"></a><!-- doxytag: member="encoding_utf16" ref="ad7ded58c805fa8936fc17390a9a1b52c1fbf60f9cb5db0e9e38fbfdba7afb6a" args="" -->encoding_utf16</em>&nbsp;</td><td>
+UTF16 with native endianness. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b52c54c474159301358c31d931855987dc6"></a><!-- doxytag: member="encoding_utf32_le" ref="ad7ded58c805fa8936fc17390a9a1b52c54c474159301358c31d931855987dc6" args="" -->encoding_utf32_le</em>&nbsp;</td><td>
+Little-endian UTF32. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b5255b0b036621ebcfcd5e0e43b8f69f4dc"></a><!-- doxytag: member="encoding_utf32_be" ref="ad7ded58c805fa8936fc17390a9a1b5255b0b036621ebcfcd5e0e43b8f69f4dc" args="" -->encoding_utf32_be</em>&nbsp;</td><td>
+Big-endian UTF32. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b5246a8f0d9f4c03350f7a831a370d2b032"></a><!-- doxytag: member="encoding_utf32" ref="ad7ded58c805fa8936fc17390a9a1b5246a8f0d9f4c03350f7a831a370d2b032" args="" -->encoding_utf32</em>&nbsp;</td><td>
+UTF32 with native endianness. </td></tr>
+<tr><td valign="top"><em><a class="anchor" name="ad7ded58c805fa8936fc17390a9a1b52e670d39438f31fe41f1a596739e5c00e"></a><!-- doxytag: member="encoding_wchar" ref="ad7ded58c805fa8936fc17390a9a1b52e670d39438f31fe41f1a596739e5c00e" args="" -->encoding_wchar</em>&nbsp;</td><td>
+The same encoding wchar_t has (either UTF16 or UTF32). </td></tr>
+</table>
+</dl>
+    </td>
+  </tr>
+</table>
 <a class="anchor" name="51b15030472dcfa64b5c0d2252f8261d"></a><!-- doxytag: member="pugi::xpath_type_t" ref="51b15030472dcfa64b5c0d2252f8261d" args="" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
@@ -404,13 +487,13 @@ There was a mismatch of start-end tags (closing tag had incorrect name, some tag
   </tr>
 </table>
 <hr><h2>Function Documentation</h2>
-<a class="anchor" name="c66598a65cc30aa7a3f439fa5ad0f876"></a><!-- doxytag: member="pugi::as_utf8" ref="c66598a65cc30aa7a3f439fa5ad0f876" args="(const wchar_t *str)" --><p>
+<a class="anchor" name="437f8018424e4adb645dbd4ace6a83bc"></a><!-- doxytag: member="pugi::as_utf8" ref="437f8018424e4adb645dbd4ace6a83bc" args="(const wchar_t *str)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">std::string PUGIXML_FUNCTION pugi::as_utf8           </td>
+          <td class="md" nowrap valign="top">std::basic_string&lt;char, std::char_traits&lt;char&gt;, std::allocator&lt;char&gt; &gt; PUGIXML_FUNCTION pugi::as_utf8           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">const wchar_t *&nbsp;</td>
           <td class="mdname1" valign="top" nowrap> <em>str</em>          </td>
@@ -429,24 +512,24 @@ There was a mismatch of start-end tags (closing tag had incorrect name, some tag
     <td>
 
 <p>
-Convert utf16 to utf8. 
+Convert wide string to utf8. 
 <p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
-    <tr><td valign="top"></td><td valign="top"><em>str</em>&nbsp;</td><td>- input UTF16 string </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>str</em>&nbsp;</td><td>- input wide string string </td></tr>
   </table>
 </dl>
 <dl compact><dt><b>Returns:</b></dt><dd>output UTF8 string </dd></dl>
     </td>
   </tr>
 </table>
-<a class="anchor" name="dc6b6fcaa56cea6b0a2e5fbd8e212c25"></a><!-- doxytag: member="pugi::as_utf16" ref="dc6b6fcaa56cea6b0a2e5fbd8e212c25" args="(const char *str)" --><p>
+<a class="anchor" name="3eedd4b9cfe8e7ada2560003c8c24a62"></a><!-- doxytag: member="pugi::as_utf16" ref="3eedd4b9cfe8e7ada2560003c8c24a62" args="(const char *str)" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">std::wstring PUGIXML_FUNCTION pugi::as_utf16           </td>
+          <td class="md" nowrap valign="top">PUGIXML_DEPRECATED std::basic_string&lt;wchar_t, std::char_traits&lt;wchar_t&gt;, std::allocator&lt;wchar_t&gt; &gt; PUGIXML_FUNCTION pugi::as_utf16           </td>
           <td class="md" valign="top">(&nbsp;</td>
           <td class="md" nowrap valign="top">const char *&nbsp;</td>
           <td class="mdname1" valign="top" nowrap> <em>str</em>          </td>
@@ -465,14 +548,51 @@ Convert utf16 to utf8.
     <td>
 
 <p>
-Convert utf8 to utf16. 
+Convert utf8 to wide string. 
 <p>
 <dl compact><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>str</em>&nbsp;</td><td>- input UTF8 string </td></tr>
   </table>
 </dl>
-<dl compact><dt><b>Returns:</b></dt><dd>output UTF16 string </dd></dl>
+<dl compact><dt><b>Returns:</b></dt><dd>output wide string string</dd></dl>
+<dl compact><dt><b><a class="el" href="deprecated.html#_deprecated000003">Deprecated:</a></b></dt><dd>This function is deprecated and will be removed in future versions; use as_wide instead </dd></dl>
+    </td>
+  </tr>
+</table>
+<a class="anchor" name="6a3152f1a3f7e7750580f7549758ef64"></a><!-- doxytag: member="pugi::as_wide" ref="6a3152f1a3f7e7750580f7549758ef64" args="(const char *str)" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">std::basic_string&lt;wchar_t, std::char_traits&lt;wchar_t&gt;, std::allocator&lt;wchar_t&gt; &gt; PUGIXML_FUNCTION pugi::as_wide           </td>
+          <td class="md" valign="top">(&nbsp;</td>
+          <td class="md" nowrap valign="top">const char *&nbsp;</td>
+          <td class="mdname1" valign="top" nowrap> <em>str</em>          </td>
+          <td class="md" valign="top">&nbsp;)&nbsp;</td>
+          <td class="md" nowrap></td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+Convert utf8 to wide string. 
+<p>
+<dl compact><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>str</em>&nbsp;</td><td>- input UTF8 string </td></tr>
+  </table>
+</dl>
+<dl compact><dt><b>Returns:</b></dt><dd>output wide string string </dd></dl>
     </td>
   </tr>
 </table>
@@ -519,7 +639,7 @@ All subsequent allocations/deallocations will be performed via supplied function
     <tr><td valign="top"></td><td valign="top"><em>deallocate</em>&nbsp;</td><td>- deallocation function</td></tr>
   </table>
 </dl>
-<dl compact><dt><b>Note:</b></dt><dd>XPath-related allocations, as well as allocations in functions that return std::string (<a class="el" href="classpugi_1_1xml__node.html#9d5ed8a5d73d252e5786f034d277d504">xml_node::path</a>, as_utf8, as_utf16) are not performed via these functions. <p>
+<dl compact><dt><b>Note:</b></dt><dd>XPath-related allocations, as well as allocations in functions that return std::string (<a class="el" href="classpugi_1_1xml__node.html#129ae059dfb2f01127982bde445d6ff0">xml_node::path</a>, as_utf8, as_wide) are not performed via these functions. <p>
 If you're using parse() with ownership transfer, you have to allocate the buffer you pass to parse() with allocation function you set via this function. </dd></dl>
     </td>
   </tr>
@@ -587,31 +707,6 @@ Get current memory deallocation function.
   </tr>
 </table>
 <hr><h2>Variable Documentation</h2>
-<a class="anchor" name="bdec38e04651950fe8f585c912143a27"></a><!-- doxytag: member="pugi::memory_block_size" ref="bdec38e04651950fe8f585c912143a27" args="" --><p>
-<table class="mdTable" cellpadding="2" cellspacing="0">
-  <tr>
-    <td class="mdRow">
-      <table cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td class="md" nowrap valign="top">const size_t <a class="el" href="namespacepugi.html#bdec38e04651950fe8f585c912143a27">pugi::memory_block_size</a> = 32768          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-</table>
-<table cellspacing="5" cellpadding="0" border="0">
-  <tr>
-    <td>
-      &nbsp;
-    </td>
-    <td>
-
-<p>
-Memory block size, used for fast allocator. 
-<p>
-Memory for DOM tree is allocated in blocks of memory_block_size + 4. This value affects size of xml_memory class.     </td>
-  </tr>
-</table>
 <a class="anchor" name="e5058761cfd25d6cdb7e092659dae1fd"></a><!-- doxytag: member="pugi::parse_minimal" ref="e5058761cfd25d6cdb7e092659dae1fd" args="" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
@@ -796,13 +891,13 @@ This flag determines if EOL handling (that is, replacing sequences 0x0d 0x0a by 
 This flag is on by default.     </td>
   </tr>
 </table>
-<a class="anchor" name="8617ea5ba78c676aff8b7af960cb2f4b"></a><!-- doxytag: member="pugi::parse_wnorm_attribute" ref="8617ea5ba78c676aff8b7af960cb2f4b" args="" --><p>
+<a class="anchor" name="3da188344c4c53e6012eac2daa9ffd17"></a><!-- doxytag: member="pugi::parse_wnorm_attribute" ref="3da188344c4c53e6012eac2daa9ffd17" args="" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">const unsigned int <a class="el" href="namespacepugi.html#8617ea5ba78c676aff8b7af960cb2f4b">pugi::parse_wnorm_attribute</a> = 0x0040          </td>
+          <td class="md" nowrap valign="top">PUGIXML_DEPRECATED const unsigned int <a class="el" href="namespacepugi.html#3da188344c4c53e6012eac2daa9ffd17">pugi::parse_wnorm_attribute</a> = 0x0040          </td>
         </tr>
       </table>
     </td>
@@ -819,7 +914,9 @@ This flag is on by default.     </td>
 This flag determines if attribute value normalization should be performed for all attributes. 
 <p>
 This means, that: 1. Whitespace characters (new line, tab and space) are replaced with space (' ') 2. Afterwards sequences of spaces are replaced with a single space 3. Leading/trailing whitespace characters are trimmed<p>
-This flag is off by default.     </td>
+This flag is off by default.<p>
+<dl compact><dt><b><a class="el" href="deprecated.html#_deprecated000001">Deprecated:</a></b></dt><dd>This flag is deprecated </dd></dl>
+    </td>
   </tr>
 </table>
 <a class="anchor" name="1e943812f2de36fc3ee14f7756afdbd7"></a><!-- doxytag: member="pugi::parse_wconv_attribute" ref="1e943812f2de36fc3ee14f7756afdbd7" args="" --><p>
@@ -925,13 +1022,13 @@ Indent the nodes that are written to output stream with as many indentation stri
 This flag is on by default.     </td>
   </tr>
 </table>
-<a class="anchor" name="4c3641085a6c69a480d1def1692be1a8"></a><!-- doxytag: member="pugi::format_write_bom_utf8" ref="4c3641085a6c69a480d1def1692be1a8" args="" --><p>
+<a class="anchor" name="b863bcafd203aeaa98953df3a998243f"></a><!-- doxytag: member="pugi::format_write_bom" ref="b863bcafd203aeaa98953df3a998243f" args="" --><p>
 <table class="mdTable" cellpadding="2" cellspacing="0">
   <tr>
     <td class="mdRow">
       <table cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td class="md" nowrap valign="top">const unsigned int <a class="el" href="namespacepugi.html#4c3641085a6c69a480d1def1692be1a8">pugi::format_write_bom_utf8</a> = 0x02          </td>
+          <td class="md" nowrap valign="top">const unsigned int <a class="el" href="namespacepugi.html#b863bcafd203aeaa98953df3a998243f">pugi::format_write_bom</a> = 0x02          </td>
         </tr>
       </table>
     </td>
@@ -945,9 +1042,33 @@ This flag is on by default.     </td>
     <td>
 
 <p>
-This flag determines if UTF-8 BOM is to be written to output stream. 
+This flag determines if encoding-specific BOM is to be written to output stream. 
 <p>
 This flag is off by default.     </td>
+  </tr>
+</table>
+<a class="anchor" name="ce7d9ff7c724cd74e6fffc5c11c2c926"></a><!-- doxytag: member="pugi::format_write_bom_utf8" ref="ce7d9ff7c724cd74e6fffc5c11c2c926" args="" --><p>
+<table class="mdTable" cellpadding="2" cellspacing="0">
+  <tr>
+    <td class="mdRow">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="md" nowrap valign="top">PUGIXML_DEPRECATED const unsigned int <a class="el" href="namespacepugi.html#ce7d9ff7c724cd74e6fffc5c11c2c926">pugi::format_write_bom_utf8</a> = <a class="el" href="namespacepugi.html#b863bcafd203aeaa98953df3a998243f">format_write_bom</a>          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<table cellspacing="5" cellpadding="0" border="0">
+  <tr>
+    <td>
+      &nbsp;
+    </td>
+    <td>
+
+<p>
+<dl compact><dt><b><a class="el" href="deprecated.html#_deprecated000002">Deprecated:</a></b></dt><dd>This constant is deprecated and will be removed in future versions; use format_write_bom instead </dd></dl>
+    </td>
   </tr>
 </table>
 <a class="anchor" name="2dd811716b1c0a6a2431ceca43bc649e"></a><!-- doxytag: member="pugi::format_raw" ref="2dd811716b1c0a6a2431ceca43bc649e" args="" --><p>
@@ -1027,7 +1148,7 @@ This is the default set of formatting flags.
 It includes indenting nodes depending on their depth in DOM tree.     </td>
   </tr>
 </table>
-<hr size="1"><address style="align: right;"><small>Generated on Tue Jan 5 20:02:10 2010 for pugixml by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Tue May 25 23:22:40 2010 for pugixml by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.4.6-NO </small></address>
 </body>
