@@ -1,5 +1,5 @@
-#ifndef HEADER_TEST_HPP
-#define HEADER_TEST_HPP
+#ifndef HEADER_TEST_TEST_HPP
+#define HEADER_TEST_TEST_HPP
 
 #include "../src/pugixml.hpp"
 

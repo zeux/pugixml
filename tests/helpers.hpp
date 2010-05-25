@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HEADER_TEST_HELPERS_HPP
+#define HEADER_TEST_HELPERS_HPP
 
 #include "common.hpp"
 
@@ -93,3 +94,4 @@ template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
 	CHECK(!(obj1 >= obj2));
 }
 
+#endif

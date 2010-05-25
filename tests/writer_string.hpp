@@ -1,5 +1,5 @@
-#ifndef HEADER_WRITER_STRING_HPP
-#define HEADER_WRITER_STRING_HPP
+#ifndef HEADER_TEST_WRITER_STRING_HPP
+#define HEADER_TEST_WRITER_STRING_HPP
 
 #include "../src/pugixml.hpp"
 
