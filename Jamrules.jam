@@ -285,6 +285,43 @@ else if ( $(toolset:I=^bcc) )
 	{
 	}
 }
+else if ( $(toolset:I=^suncc) )
+{
+	CCFLAGS += -D$(defines) ;
+
+	if ( $(configuration) = "debug" )
+	{
+		CCFLAGS += -D_DEBUG ;
+	}
+	else
+	{
+		CCFLAGS += -DNDEBUG -O ;
+	}
+
+	if ( PUGIXML_NO_EXCEPTIONS in $(defines) )
+	{
+		CCFLAGS += -noex ;
+	}
+
+	actions ObjectAction
+	{
+		sunCC $(CCFLAGS) +w -xwe -c -o $(<) $(>)
+	}
+
+	actions LibraryAction
+	{
+		ar rcs $(<) $(>)
+	}
+
+	actions LinkAction
+	{
+		sunCC $(>) -o $(<) $(LDFLAGS) 
+	}
+
+	actions CoverageAction
+	{
+	}
+}
 else
 {
 	exit "Unknown toolset $(toolset)!" ;

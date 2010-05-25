@@ -13,7 +13,11 @@
 # default toolset/configuration
 if ( ! $(toolset) )
 {
-	if ( $(UNIX) )
+	if ( $(OS) = SOLARIS )
+	{
+		toolset = suncc ;
+	}
+	else if ( $(UNIX) )
 	{
 		local GCCVERSION = [ Subst [ Shell "gcc -dumpversion" ] : $(NEWLINE) ] ;
 		toolset = "gcc"$(GCCVERSION) ;
