@@ -208,7 +208,6 @@ TEST(parse_attribute_variations_wnorm)
 // document order
 TEST_XML(document_order_coverage, "<node id='1'/>")
 {
-	xml_document doc;
 	doc.precompute_document_order();
 
 	CHECK(doc.child(STR("node")).document_order() == 0);
