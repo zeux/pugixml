@@ -4516,6 +4516,22 @@ namespace std
 }
 #endif
 
+#if !defined(PUGIXML_NO_STL) && defined(__SUNPRO_CC)
+namespace std
+{
+	// Workarounds for (non-standard) iterator category detection
+	std::bidirectional_iterator_tag __iterator_category(const pugi::xml_node_iterator&)
+	{
+		return std::bidirectional_iterator_tag();
+	}
+
+	std::bidirectional_iterator_tag __iterator_category(const pugi::xml_attribute_iterator&)
+	{
+		return std::bidirectional_iterator_tag();
+	}
+}
+#endif
+
 /**
  * Copyright (c) 2006-2010 Arseny Kapoulkine
  *

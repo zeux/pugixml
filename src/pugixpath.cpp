@@ -768,7 +768,7 @@ namespace pugi
 	{
 		if (begin == end) return;
 
-		size_t count = std::distance(begin, end);
+		size_t count = end - begin;
 		size_t size = m_end - m_begin;
 		size_t capacity = m_eos - m_begin;
 		
