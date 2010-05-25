@@ -49,11 +49,16 @@ using std::memcpy;
 #endif
 
 // uintptr_t
-#if !defined(_MSC_VER)
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
 #	include <stdint.h>
-#elif _MSC_VER < 1300
+#else
+#	if _MSC_VER < 1300
 // No native uintptr_t in MSVC6
 typedef size_t uintptr_t;
+#	endif
+typedef unsigned __int8 uint8_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int32 uint32_t;
 #endif
 
 // Inlining controls
@@ -609,9 +614,9 @@ namespace pugi
 {
 	namespace impl
 	{
-		typedef unsigned char char8_t;
-		typedef unsigned short char16_t;
-		typedef unsigned int char32_t;
+		typedef uint8_t char8_t;
+		typedef uint16_t char16_t;
+		typedef uint32_t char32_t;
 
 		inline char16_t endian_swap(char16_t value)
 		{
