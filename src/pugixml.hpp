@@ -131,13 +131,6 @@ namespace pugi
 	// Parsing options
 
 	/**
-	 * Memory page size, used for fast allocator. Memory for DOM tree is allocated in pages of
-	 * xml_memory_page_size + size of header (approximately 64 bytes)
-	 * This value affects size of xml_memory_page class.
-	 */
-	const size_t xml_memory_page_size = 32768;
-
-	/**
 	 * Minimal parsing mode. Equivalent to turning all other flags off. This set of flags means
 	 * that pugixml does not add pi/cdata sections or comments to DOM tree and does not perform
 	 * any conversions for input data, meaning fastest parsing.
@@ -328,8 +321,6 @@ namespace pugi
 	// Forward declarations
 	struct xml_attribute_struct;
 	struct xml_node_struct;
-
-	struct xml_allocator;
 
 	class xml_node_iterator;
 	class xml_attribute_iterator;
@@ -786,9 +777,6 @@ namespace pugi
 
 		/// \internal Initializing ctor
 		explicit xml_node(xml_node_struct* p);
-
-		/// \internal Get allocator
-		xml_allocator& get_allocator() const;
 
 	private:
 		template <typename OutputIterator> void all_elements_by_name_w_helper(const char_t* name, OutputIterator it) const
@@ -1762,24 +1750,6 @@ namespace pugi
 		virtual bool end(xml_node&);
 	};
 
-	/// \internal Memory page
-	struct PUGIXML_CLASS xml_memory_page
-	{
-		xml_memory_page();
-
-		xml_allocator* allocator;
-
-		void* memory;
-
-		xml_memory_page* prev;
-		xml_memory_page* next;
-
-		size_t busy_size;
-		size_t freed_size;
-
-		char data[1];
-	};
-
 	/**
 	 * Struct used to distinguish parsing with ownership transfer from parsing without it.
 	 * \see xml_document::parse
@@ -1847,7 +1817,7 @@ namespace pugi
 	private:
 		char_t* _buffer;
 
-		xml_memory_page _memory;
+		char _memory[192];
 		
 		xml_document(const xml_document&);
 		const xml_document& operator=(const xml_document&);

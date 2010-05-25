@@ -238,11 +238,46 @@ namespace pugi
 
 namespace pugi
 {
+	static const size_t xml_memory_page_size = 32768;
+
 	static const uintptr_t xml_memory_page_alignment = 32;
 	static const uintptr_t xml_memory_page_pointer_mask = ~(xml_memory_page_alignment - 1);
 	static const uintptr_t xml_memory_page_name_allocated_mask = 16;
 	static const uintptr_t xml_memory_page_value_allocated_mask = 8;
 	static const uintptr_t xml_memory_page_type_mask = 7;
+
+	struct xml_allocator;
+
+	struct xml_memory_page
+	{
+		static xml_memory_page* construct(void* memory)
+		{
+			if (!memory) return 0;
+
+			xml_memory_page* result = static_cast<xml_memory_page*>(memory);
+
+			result->allocator = 0;
+			result->memory = 0;
+			result->prev = 0;
+			result->next = 0;
+			result->busy_size = 0;
+			result->freed_size = 0;
+
+			return result;
+		}
+
+		xml_allocator* allocator;
+
+		void* memory;
+
+		xml_memory_page* prev;
+		xml_memory_page* next;
+
+		size_t busy_size;
+		size_t freed_size;
+
+		char data[1];
+	};
 
 	struct xml_memory_string_header
 	{
@@ -258,13 +293,7 @@ namespace pugi
 
 		xml_memory_page* allocate_page(size_t data_size)
 		{
-		#ifdef __GNUC__
-			// To avoid offsetof warning (xml_memory_page is not POD)
-			xml_memory_page* dummy_page = 0;
-			size_t size = ((size_t)(uintptr_t)&dummy_page->data) + data_size;
-		#else
 			size_t size = offsetof(xml_memory_page, data) + data_size;
-		#endif
 
 			// allocate block with some alignment, leaving memory for worst-case padding
 			void* memory = global_allocate(size + xml_memory_page_alignment);
@@ -273,7 +302,7 @@ namespace pugi
 			void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(memory) + (xml_memory_page_alignment - 1)) & ~(xml_memory_page_alignment - 1));
 
 			// prepare page structure
-			xml_memory_page* page = new (page_memory) xml_memory_page();
+			xml_memory_page* page = xml_memory_page::construct(page_memory);
 
 			page->memory = memory;
 			page->allocator = _root->allocator;
@@ -451,6 +480,13 @@ namespace pugi
 		xml_allocator allocator;
 		const char_t* buffer;
 	};
+
+	inline xml_allocator& get_allocator(const xml_node_struct* node)
+	{
+		assert(node);
+
+		return *reinterpret_cast<xml_memory_page*>(node->header & xml_memory_page_pointer_mask)->allocator;
+	}
 }
 
 // Low-level DOM operations
@@ -3305,13 +3341,6 @@ namespace pugi
 		return !_root;
 	}
 	
-	xml_allocator& xml_node::get_allocator() const
-	{
-		assert(_root);
-
-		return *reinterpret_cast<xml_memory_page*>(_root->header & xml_memory_page_pointer_mask)->allocator;
-	}
-
 	const char_t* xml_node::name() const
 	{
 		return (_root && _root->name) ? _root->name : PUGIXML_TEXT("");
@@ -3524,7 +3553,7 @@ namespace pugi
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
-		xml_attribute a(append_attribute_ll(_root, get_allocator()));
+		xml_attribute a(append_attribute_ll(_root, get_allocator(_root)));
 		a.set_name(name);
 		
 		return a;
@@ -3541,7 +3570,7 @@ namespace pugi
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(get_allocator()));
+		xml_attribute a(allocate_attribute(get_allocator(_root)));
 		a.set_name(name);
 
 		if (attr._attr->prev_attribute_c->next_attribute)
@@ -3567,7 +3596,7 @@ namespace pugi
 
 		if (cur != _root->first_attribute) return xml_attribute();
 
-		xml_attribute a(allocate_attribute(get_allocator()));
+		xml_attribute a(allocate_attribute(get_allocator(_root)));
 		a.set_name(name);
 
 		if (attr._attr->next_attribute)
@@ -3616,7 +3645,7 @@ namespace pugi
 	{
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		
-		return xml_node(append_node(_root, get_allocator(), type));
+		return xml_node(append_node(_root, get_allocator(_root), type));
 	}
 
 	xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node)
@@ -3624,7 +3653,7 @@ namespace pugi
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		if (node.parent() != *this) return xml_node();
 	
-		xml_node n(allocate_node(get_allocator(), type));
+		xml_node n(allocate_node(get_allocator(_root), type));
 		n._root->parent = _root;
 		
 		if (node._root->prev_sibling_c->next_sibling)
@@ -3644,7 +3673,7 @@ namespace pugi
 		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
 		if (node.parent() != *this) return xml_node();
 	
-		xml_node n(allocate_node(get_allocator(), type));
+		xml_node n(allocate_node(get_allocator(_root), type));
 		n._root->parent = _root;
 	
 		if (node._root->next_sibling)
@@ -3708,7 +3737,7 @@ namespace pugi
 		if (a._attr->prev_attribute_c->next_attribute) a._attr->prev_attribute_c->next_attribute = a._attr->next_attribute;
 		else _root->first_attribute = a._attr->next_attribute;
 
-		destroy_attribute(a._attr, get_allocator());
+		destroy_attribute(a._attr, get_allocator(_root));
 	}
 
 	void xml_node::remove_child(const char_t* name)
@@ -3726,7 +3755,7 @@ namespace pugi
 		if (n._root->prev_sibling_c->next_sibling) n._root->prev_sibling_c->next_sibling = n._root->next_sibling;
 		else _root->first_child = n._root->next_sibling;
         
-        destroy_node(n._root, get_allocator());
+        destroy_node(n._root, get_allocator(_root));
 	}
 
 	xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const
@@ -4102,10 +4131,6 @@ namespace pugi
 		return temp;
 	}
 
-	xml_memory_page::xml_memory_page(): allocator(0), memory(0), prev(0), next(0), busy_size(0), freed_size(0)
-	{
-	}
-
 	const char* xml_parse_result::description() const
 	{
 		switch (status)
@@ -4141,13 +4166,6 @@ namespace pugi
 	xml_document::~xml_document()
 	{
 		destroy();
-
-		if (_memory.next)
-		{
-			assert(!_memory.next->next);
-
-			xml_allocator::deallocate_page(_memory.next);
-		}
 	}
 
 	void xml_document::create()
@@ -4155,22 +4173,26 @@ namespace pugi
 		destroy();
 
 		// initialize sentinel page
-		_memory.busy_size = xml_memory_page_size;
+		assert(offsetof(xml_memory_page, data) + sizeof(xml_document_struct) + xml_memory_page_alignment <= sizeof(_memory));
+
+		// align upwards to page boundary
+		void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(_memory) + (xml_memory_page_alignment - 1)) & ~(xml_memory_page_alignment - 1));
+
+		// prepare page structure
+		xml_memory_page* page = xml_memory_page::construct(page_memory);
+
+		page->busy_size = xml_memory_page_size;
 
 		// allocate new root
-		xml_allocator alloc(_memory.next ? _memory.next : &_memory);
-		
-		_root = allocate_document(alloc);
-
+		_root = new (page->data) xml_document_struct(page);
 		_root->prev_sibling_c = _root;
 
 		// setup allocator
 		xml_allocator& a = static_cast<xml_document_struct*>(_root)->allocator;
-		a = alloc;
+		a = xml_allocator(page);
 
-		// setup page
-		assert(_memory.next);
-		_memory.next->allocator = &a;
+		// setup sentinel page
+		page->allocator = &a;
 	}
 
 	void xml_document::destroy()
@@ -4182,13 +4204,14 @@ namespace pugi
 			_buffer = 0;
 		}
 
-		// destroy dynamic storage, leave sentinel page and next page (if any)
+		// destroy dynamic storage, leave sentinel page (it's in static memory)
 		if (_root)
 		{
-			assert(_memory.next);
+			xml_memory_page* root_page = reinterpret_cast<xml_memory_page*>(_root->header & xml_memory_page_pointer_mask);
+			assert(root_page && !root_page->prev && !root_page->memory);
 
 			// destroy all pages
-			for (xml_memory_page* page = _memory.next->next; page; )
+			for (xml_memory_page* page = root_page->next; page; )
 			{
 				xml_memory_page* next = page->next;
 
@@ -4197,16 +4220,12 @@ namespace pugi
 				page = next;
 			}
 
-			// cleanup next page
-			_memory.next->allocator = 0;
-			_memory.next->next = 0;
-			_memory.next->busy_size = _memory.next->freed_size = 0;
+			// cleanup root page
+			root_page->allocator = 0;
+			root_page->next = 0;
+			root_page->busy_size = root_page->freed_size = 0;
 
 			_root = 0;
-		}
-		else
-		{
-			assert(!_memory.next);
 		}
 	}
 
