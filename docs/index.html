@@ -758,11 +758,6 @@ were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresp
 <li>Unicode conversion optimizations
 <li>Optimized debug mode parsing/saving by order of magnitude
 </ul>
-<li>Major Unicode improvements:<ul>
-<li>Introduced encoding support (automatic/manual encoding detection on load, manual encoding selection on save, conversion from/to UTF8, UTF16 LE/BE, UTF32 LE/BE)
-<li>Introduced wchar_t mode (you can set PUGIXML_WCHAR_MODE define to switch pugixml internal encoding from UTF8 to wchar_t; all functions are switched to their Unicode variants)
-<li>Load/save functions now support wide streams
-</ul>
 <li>Bug fixes / specification changes:<ul>
 <li>Improved DOCTYPE parsing: now parser recognizes all well-formed DOCTYPE declarations
 <li>Fixed as_uint() for large numbers (i.e. 2^32-1)
