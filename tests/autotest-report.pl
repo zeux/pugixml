@@ -8,6 +8,7 @@ sub prettytoolset
 	return "Borland C++ 5.82" if ($toolset eq 'bcc');
 	return "Metrowerks CodeWarrior 8" if ($toolset eq 'cw');
 	return "Digital Mars C++ 8.51" if ($toolset eq 'dmc');
+	return "Sun C++ 5.10" if ($toolset eq 'suncc');
 
 	return "Intel C++ Compiler $1.0" if ($toolset =~ /^ic(\d+)$/);
 	return "MinGW32 (GCC $1.$2)" if ($toolset =~ /^mingw(\d)(\d)$/);
@@ -23,7 +24,9 @@ sub prettyplatform
 {
 	my $platform = shift;
 
-	return "macos32" if ($platform =~ /darwin/);
+	return "solaris" if ($platform =~ /solaris/);
+
+	return "macos" if ($platform =~ /darwin/);
 
 	return "linux64" if ($platform =~ /64-linux/);
 	return "linux32" if ($platform =~ /86-linux/);
