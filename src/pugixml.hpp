@@ -2160,7 +2160,7 @@ namespace pugi
 		
 		void push_back(const xpath_node& n);
 		
-		template <typename Iterator> void append(Iterator begin, Iterator end);
+		void append(const_iterator begin, const_iterator end);
 		
 		void truncate(iterator it);
 

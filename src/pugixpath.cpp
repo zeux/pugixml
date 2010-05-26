@@ -764,7 +764,7 @@ namespace pugi
 		}
 	}
 
-	template <typename Iterator> void xpath_node_set::append(Iterator begin, Iterator end)
+	void xpath_node_set::append(const_iterator begin, const_iterator end)
 	{
 		if (begin == end) return;
 
