@@ -436,9 +436,15 @@ namespace
 	#endif
 	}
 	
-	double ieee754_round(double value)
+	double round_nearest(double value)
 	{
-		return is_nan(value) ? value : floor(value + 0.5);
+		return floor(value + 0.5);
+	}
+
+	double round_nearest_nzero(double value)
+	{
+		// same as round_nearest, but returns -0 for [-0.5, -0]
+		return (value >= -0.5 && value <= 0) ? ceil(value) : floor(value + 0.5);
 	}
 	
 	const char_t* local_name(const char_t* name)
@@ -2104,8 +2110,7 @@ namespace pugi
 			}
 
 			case ast_func_round:
-				// correct except for negative zero (it returns positive zero instead of negative)
-				return ieee754_round(m_left->eval_number(c));
+				return round_nearest_nzero(m_left->eval_number(c));
 			
 			default:
 			{
@@ -2232,7 +2237,7 @@ namespace pugi
 			case ast_func_substring_2:
 			{
 				string_t s = m_left->eval_string(c);
-				double first = ieee754_round(m_right->eval_number(c));
+				double first = round_nearest(m_right->eval_number(c));
 				
 				if (is_nan(first)) return string_t(); // NaN
 				else if (first >= s.length() + 1) return string_t();
@@ -2245,8 +2250,8 @@ namespace pugi
 			case ast_func_substring_3:
 			{
 				string_t s = m_left->eval_string(c);
-				double first = ieee754_round(m_right->eval_number(c));
-				double last = first + ieee754_round(m_third->eval_number(c));
+				double first = round_nearest(m_right->eval_number(c));
+				double last = first + round_nearest(m_third->eval_number(c));
 				
 				if (is_nan(first) || is_nan(last)) return string_t();
 				else if (first >= s.length() + 1) return string_t();
