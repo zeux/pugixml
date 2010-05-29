@@ -206,7 +206,7 @@ TEST_XML(xpath_xalan_axes_9, "<doc><foo att1='c'><foo att1='b'><foo att1='a'><ba
 	CHECK_XPATH_NODESET(baz, STR("ancestor-or-self::*[@att1][1]/@att1")) % 8;
     CHECK_XPATH_NODESET(baz, STR("(ancestor-or-self::*)[@att1][1]/@att1")) % 4;
 
-	xml_node bar = doc.child("doc").child("bar");
+	xml_node bar = doc.child(STR("doc")).child(STR("bar"));
 
     CHECK_XPATH_NODESET(bar, STR("preceding::foo[1]/@att1")) % 8;
 	CHECK_XPATH_NODESET(bar, STR("(preceding::foo)[1]/@att1")) % 4;
@@ -214,7 +214,7 @@ TEST_XML(xpath_xalan_axes_9, "<doc><foo att1='c'><foo att1='b'><foo att1='a'><ba
 
 TEST_XML(xpath_xalan_axes_10, "<doc><foo att1='c'/><foo att1='b'/><foo att1='a'/><baz/></doc>")
 {
-	xml_node baz = doc.child("doc").child("baz");
+	xml_node baz = doc.child(STR("doc")).child(STR("baz"));
 
     CHECK_XPATH_NODESET(baz, STR("preceding-sibling::foo[1]/@att1")) % 8;
 	CHECK_XPATH_NODESET(baz, STR("(preceding-sibling::foo)[1]/@att1")) % 4;
@@ -222,7 +222,7 @@ TEST_XML(xpath_xalan_axes_10, "<doc><foo att1='c'/><foo att1='b'/><foo att1='a'/
 
 TEST_XML(xpath_xalan_axes_11, "<chapter title='A' x='0'><section title='A1' x='1'><subsection title='A1a' x='2'>hello</subsection><subsection title='A1b'>ahoy</subsection></section><section title='A2'><subsection title='A2a'>goodbye</subsection><subsection title='A2b'>sayonara</subsection><subsection title='A2c'>adios</subsection></section><section title='A3'><subsection title='A3a'>aloha</subsection><subsection title='A3b'><footnote x='3'>A3b-1</footnote><footnote>A3b-2</footnote></subsection><subsection title='A3c'>shalom</subsection></section></chapter>")
 {
-	xml_node chapter = doc.child("chapter");
+	xml_node chapter = doc.child(STR("chapter"));
 
     CHECK_XPATH_NUMBER(doc, STR("count(//@*)"), 16);
     CHECK_XPATH_NUMBER(doc, STR("count(//@title)"), 12);

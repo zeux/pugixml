@@ -4,8 +4,6 @@
 
 #include "common.hpp"
 
-#include <stdio.h>
-
 #include <string>
 
 TEST_XML(xpath_xalan_string_1, "<doc a='test'>ENCYCLOPEDIA</doc>")
@@ -133,17 +131,22 @@ TEST_XML(xpath_xalan_string_4, "<doc><a>a</a><b>b</b><c>c</c><d>d</d><e>ef</e><f
 
 static std::basic_string<char_t> number_to_string(int number)
 {
-	char buf[128];
-	sprintf(buf, "%d", number);
+	std::basic_string<char_t> result;
 
-	return std::basic_string<char_t>(buf, buf + strlen(buf));
+	while (number)
+	{
+		result = static_cast<char_t>('0' + number % 10) + result;
+		number /= 10;
+	}
+
+	return result;
 }
 
 TEST(xpath_xalan_string_5)
 {
 	std::basic_string<char_t> query = STR("concat(");
 
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 1; i < 1000; ++i)
 	{
 		query += STR("concat('t',");
 		query += number_to_string(i);
@@ -154,7 +157,7 @@ TEST(xpath_xalan_string_5)
 
 	std::basic_string<char_t> expected;
 
-	for (int j = 0; j < 1000; ++j)
+	for (int j = 1; j < 1000; ++j)
 	{
 		expected += STR("t");
 		expected += number_to_string(j);
