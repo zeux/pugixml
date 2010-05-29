@@ -1751,6 +1751,15 @@ namespace pugi
 				break;
 			}
 
+			case axis_descendant_or_self:
+			{
+				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
+
+				step_push(ns, a, p);
+
+				break;
+			}
+
 			case axis_following:
 			{
 				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
@@ -1858,6 +1867,7 @@ namespace pugi
 				
 			case axis_ancestor:
 			case axis_ancestor_or_self:
+			case axis_descendant_or_self:
 			case axis_following:
 			case axis_preceding:
 				if (m_left)
@@ -1891,7 +1901,6 @@ namespace pugi
 			case axis_attribute:
 			case axis_child:
 			case axis_descendant:
-			case axis_descendant_or_self:
 				if (m_left)
 				{
 					xpath_node_set s = m_left->eval_node_set(c);
