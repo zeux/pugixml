@@ -14,7 +14,9 @@ TEST(xpath_literal_parse)
 TEST(xpath_literal_error)
 {
 	CHECK_XPATH_FAIL(STR("\""));
+	CHECK_XPATH_FAIL(STR("\"foo"));
 	CHECK_XPATH_FAIL(STR("\'"));
+	CHECK_XPATH_FAIL(STR("\'bar"));
 }
 
 TEST(xpath_number_parse)

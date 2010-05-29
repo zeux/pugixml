@@ -58,12 +58,16 @@ bool test_xpath_string(const pugi::xml_node& node, const pugi::char_t* query, co
 {
 	pugi::xpath_query q(query);
 
+	// $$$ q.rettype() == string
+
 	return q.evaluate_string(node) == expected;
 }
 
 bool test_xpath_boolean(const pugi::xml_node& node, const pugi::char_t* query, bool expected)
 {
 	pugi::xpath_query q(query);
+
+	// $$$ q.rettype() == boolean
 
 	return q.evaluate_boolean(node) == expected;
 }
@@ -73,6 +77,8 @@ bool test_xpath_boolean(const pugi::xml_node& node, const pugi::char_t* query, b
 bool test_xpath_number(const pugi::xml_node& node, const pugi::char_t* query, double expected)
 {
 	pugi::xpath_query q(query);
+
+	// $$$ q.rettype() == number
 
 	double value = q.evaluate_number(node);
 	double absolute_error = fabs(value - expected);
@@ -84,6 +90,8 @@ bool test_xpath_number(const pugi::xml_node& node, const pugi::char_t* query, do
 bool test_xpath_number_nan(const pugi::xml_node& node, const pugi::char_t* query)
 {
 	pugi::xpath_query q(query);
+
+	// $$$ q.rettype() == number
 
 	double r = q.evaluate_number(node);
 
