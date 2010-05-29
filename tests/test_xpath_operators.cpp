@@ -50,7 +50,9 @@ TEST_XML(xpath_operators_arithmetic, "<node><foo-bar>10</foo-bar><foo>2</foo><ba
 	CHECK_XPATH_NUMBER(c, STR("(2 + 2) * 2 div (1 mod 3)"), 8);
 	CHECK_XPATH_NUMBER(c, STR("(2 + 2) * (2 div 1) mod 3"), 2);
 	CHECK_XPATH_NUMBER(c, STR("2 - -2"), 4);
+	CHECK_XPATH_NUMBER(c, STR("2 + -2"), 0);
 	CHECK_XPATH_NUMBER(c, STR("2--2"), 4);
+	CHECK_XPATH_NUMBER(c, STR("2+-2"), 0);
 	CHECK_XPATH_NUMBER(c, STR("1-2-3"), -4);
 
 	// infinity/nan
