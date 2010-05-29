@@ -1422,7 +1422,7 @@ namespace pugi
 			xpath_context c;
 			c.root = context.root;
 			
-			size_t i = 0;
+			size_t i = 1;
 			size_t size = ns.size() - first;
 				
 			xpath_node_set::iterator last = ns.mut_begin() + first;
@@ -1431,12 +1431,12 @@ namespace pugi
 			for (xpath_node_set::iterator it = last; it != ns.end(); ++it, ++i)
 			{
 				c.n = *it;
-				c.position = i + 1;
+				c.position = i;
 				c.size = size;
 				
 				if (expr->rettype() == xpath_type_number)
 				{
-					if (expr->eval_number(c) == i + 1)
+					if (expr->eval_number(c) == i)
 						*last++ = *it;
 				}
 				else if (expr->eval_boolean(c))
