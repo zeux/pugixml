@@ -134,6 +134,12 @@ struct dummy_fixture {};
 #define U_LITERALS // DMC does not understand \x01234 (it parses first three digits), but understands \u01234
 #endif
 
+#if (defined(_MSC_VER) && _MSC_VER == 1200) || (defined(__INTEL_COMPILER) && __INTEL_COMPILER == 800) || defined(__BORLANDC__)
+// NaN comparison on MSVC6 is incorrect, see http://www.nabble.com/assertDoubleEquals,-NaN---Microsoft-Visual-Studio-6-td9137859.html
+// IC8 and BCC are also affected by the same bug
+#	define MSVC6_NAN_BUG 
+#endif
+
 inline wchar_t wchar_cast(unsigned int value)
 {
 	return static_cast<wchar_t>(value); // to avoid C4310 on MSVC

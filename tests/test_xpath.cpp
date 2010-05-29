@@ -186,15 +186,15 @@ TEST_XML(xpath_xsl_list_2, "<TR><TD id='1'>text1</TD><TD id='2'>text2</TD><TD id
 {
 	CHECK_XPATH_FAIL(STR(".[not(.=ancestor::TR/TD[15]/node())]"));
 
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "1").first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]")) % 5;
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "2").first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]")) % 8;
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "3").first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]"));
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "4").first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]")) % 14;
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("1")).first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]")) % 5;
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("2")).first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]")) % 8;
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("3")).first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]"));
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("4")).first_child(), STR("self::node()[not(.=ancestor::TR/TD[3]/node())]")) % 14;
 
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "1"), STR("node()[not(.=ancestor::TR/TD[3]/node())]")) % 5;
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "2"), STR("node()[not(.=ancestor::TR/TD[3]/node())]")) % 8;
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "3"), STR("node()[not(.=ancestor::TR/TD[3]/node())]"));
-	CHECK_XPATH_NODESET(doc.child("TR").find_child_by_attribute("TD", "id", "4"), STR("node()[not(.=ancestor::TR/TD[3]/node())]")) % 14;
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("1")), STR("node()[not(.=ancestor::TR/TD[3]/node())]")) % 5;
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("2")), STR("node()[not(.=ancestor::TR/TD[3]/node())]")) % 8;
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("3")), STR("node()[not(.=ancestor::TR/TD[3]/node())]"));
+	CHECK_XPATH_NODESET(doc.child(STR("TR")).find_child_by_attribute(STR("TD"), STR("id"), STR("4")), STR("node()[not(.=ancestor::TR/TD[3]/node())]")) % 14;
 }
 
 TEST_XML(xpath_star_token, "<node>0.5<section><child/><child/><child/><child/></section><section/></node>")
@@ -206,8 +206,8 @@ TEST_XML(xpath_star_token, "<node>0.5<section><child/><child/><child/><child/></
 
 TEST(xpath_miscellaneous)
 {
-	CHECK_XPATH_FAIL("/root/child[a=3]/substring(child::text())");
-	CHECK_XPATH_NODESET(xml_node(), "foo/@FOO/@bar");
+	CHECK_XPATH_FAIL(STR("/root/child[a=3]/substring(child::text())"));
+	CHECK_XPATH_NODESET(xml_node(), STR("foo/@FOO/@bar"));
 }
 
 #endif

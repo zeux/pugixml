@@ -103,7 +103,7 @@ TEST_XML(xpath_xalan_boolean_4, "<avj><a>foo</a><b>bar</b><c>foobar</c><d>foo</d
 
 TEST_XML(xpath_xalan_boolean_5, "<doc><j l='12' w='33'>first</j><j l='17' w='45'>second</j><j l='16' w='78'>third</j><j l='12' w='33'>fourth</j></doc>")
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_BOOLEAN(c, STR("j[@l='12'] = j[@w='33']"), true);
 	CHECK_XPATH_BOOLEAN(c, STR("j[@l='12'] = j[@l='17']"), false);
@@ -117,7 +117,7 @@ TEST_XML(xpath_xalan_boolean_5, "<doc><j l='12' w='33'>first</j><j l='17' w='45'
 
 TEST_XML(xpath_xalan_boolean_6, "<doc><avj><good><b>12</b><c>34</c><d>56</d><e>78</e></good></avj></doc>")
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_BOOLEAN(c, STR("avj/good/*=34"), true);
 	CHECK_XPATH_BOOLEAN(c, STR("not(avj/good/*=34)"), false);
@@ -132,7 +132,7 @@ TEST_XML(xpath_xalan_boolean_6, "<doc><avj><good><b>12</b><c>34</c><d>56</d><e>7
 
 TEST_XML(xpath_xalan_boolean_7, "<doc><avj><bool><b>true</b><c></c><d>false?</d><e>1</e><f>0</f></bool></avj></doc>")
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_BOOLEAN(c, STR("avj/bool/*=true()"), true);
 	CHECK_XPATH_BOOLEAN(c, STR("not(avj/bool/*=true())"), false);
@@ -165,7 +165,7 @@ TEST_XML(xpath_xalan_conditional, "<letters>b</letters>")
 	CHECK_XPATH_BOOLEAN(c, STR("'a'='a'"), true);
 	CHECK_XPATH_BOOLEAN(c, STR("2+2=4"), true);
 
-	xml_node b = doc.child("letters").first_child();
+	xml_node b = doc.child(STR("letters")).first_child();
 
 	CHECK_XPATH_BOOLEAN(b, STR(".='b'"), true);
 	CHECK_XPATH_BOOLEAN(b, STR("name(..)='letters'"), true);
@@ -194,8 +194,12 @@ TEST_XML(xpath_xalan_math_1, "<a>3</a>")
 	CHECK_XPATH_BOOLEAN(c, STR("number(string(1.0))=1"), true);
 	CHECK_XPATH_BOOLEAN(c, STR("number(true())=1"), true);
 	CHECK_XPATH_BOOLEAN(c, STR("number(false())=0"), true);
+
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_BOOLEAN(c, STR("number('xxx')=number('xxx')"), false);
 	CHECK_XPATH_BOOLEAN(c, STR("number('xxx')=0"), false);
+#endif
+
 	CHECK_XPATH_NUMBER(doc, STR("floor(a)"), 3);
 	CHECK_XPATH_NUMBER(c, STR("floor(1.9)"), 1);
 	CHECK_XPATH_NUMBER(c, STR("floor(2.999999)"), 2);
@@ -243,7 +247,7 @@ TEST_XML(xpath_xalan_math_3, "<doc><n v='1'/><n>2</n><n v='3'/><n>4</n><n v='5'>
 
 TEST_XML(xpath_xalan_math_4, "<doc><n1 a='1'>2</n1><n2 a='2'>3</n2><n1-n2>123</n1-n2><n-1>72</n-1><n-2>12</n-2><div a='2'>5</div><mod a='5'>2</mod></doc>")
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_NUMBER(c, STR("n1*n2"), 6);
 	CHECK_XPATH_NUMBER(c, STR("n1/@a*n2/@a"), 2);
@@ -275,8 +279,11 @@ TEST_XML(xpath_xalan_math_4, "<doc><n1 a='1'>2</n1><n2 a='2'>3</n2><n1-n2>123</n
 	CHECK_XPATH_BOOLEAN(c, STR("1 div -0 = 2 div -0"), true);
 	CHECK_XPATH_BOOLEAN(c, STR("1 div -0 = 1 div 0"), false);
 	CHECK_XPATH_BOOLEAN(c, STR("1 div -0 = -1 div 0"), true);
+
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_BOOLEAN(c, STR("0 div 0 >= 0"), false);
 	CHECK_XPATH_BOOLEAN(c, STR("0 div 0 < 0"), false);
+#endif
 
 	CHECK_XPATH_NUMBER(c, STR("n1 mod n2"), 2);
 	CHECK_XPATH_NUMBER(c, STR("div mod mod"), 1);
@@ -301,8 +308,12 @@ TEST(xpath_xalan_math_5)
 	CHECK_XPATH_NUMBER_NAN(c, STR("number('xxx') - 3"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("2 div number('xxx')"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("number('xxx') div 3"));
+
+#ifndef __BORLANDC__ // BCC fmod does not propagate NaN correctly
 	CHECK_XPATH_NUMBER_NAN(c, STR("2 mod number('xxx')"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("number('xxx') mod 3"));
+#endif
+
 	CHECK_XPATH_NUMBER_NAN(c, STR("floor(number('xxx'))"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("ceiling(number('xxx'))"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("round(number('xxx'))"));
@@ -323,7 +334,7 @@ TEST(xpath_xalan_math_5)
 
 TEST_XML(xpath_xalan_math_6, "<doc><n1>3</n1><n2>7</n2><n3>x</n3></doc>")
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_NUMBER(c, STR("-(n1|n2)"), -3);
 	CHECK_XPATH_NUMBER(c, STR("-(n2|n1)"), -3);
@@ -333,7 +344,7 @@ TEST_XML(xpath_xalan_math_6, "<doc><n1>3</n1><n2>7</n2><n3>x</n3></doc>")
 
 TEST_XML(xpath_xalan_math_7, "<doc><n1>3</n1><n2>7</n2><n3>x</n3></doc>")
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_NUMBER(c, STR("-(n1|n2)"), -3);
 	CHECK_XPATH_NUMBER(c, STR("-(n2|n1)"), -3);
