@@ -11,6 +11,8 @@ TEST_XML(xpath_paths_axes_child, "<node attr='value'><child attr='value'><subchi
 
 	CHECK_XPATH_NODESET(n, STR("child:: node()")) % 4 % 7 % 8; // child, another, last
 	CHECK_XPATH_NODESET(n, STR("another/child:: node()"));
+
+	CHECK_XPATH_NODESET(n, STR("@attr/child::node()"));
 }
 
 TEST_XML(xpath_paths_axes_descendant, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
@@ -24,6 +26,8 @@ TEST_XML(xpath_paths_axes_descendant, "<node attr='value'><child attr='value'><s
 	CHECK_XPATH_NODESET(doc, STR("descendant:: node()")) % 2 % 4 % 6 % 7 % 8 % 9; // node, child, subchild, another, subchild, last
 	CHECK_XPATH_NODESET(n, STR("another/descendant:: node()")) % 8; // subchild
 	CHECK_XPATH_NODESET(n, STR("last/descendant:: node()"));
+
+	CHECK_XPATH_NODESET(n, STR("@attr/descendant::node()"));
 }
 
 TEST_XML(xpath_paths_axes_parent, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
@@ -89,9 +93,12 @@ TEST_XML(xpath_paths_axes_following, "<node attr1='value' attr2='value'><child a
 	CHECK_XPATH_NODESET(n.child(STR("child")), STR("following:: node()")) % 8 % 9 % 10 % 11; // another, subchild, almost, last
 	CHECK_XPATH_NODESET(n.child(STR("child")).child(STR("subchild")), STR("following:: node()")) % 8 % 9 % 10 % 11; // another, subchild, almost, last
 	CHECK_XPATH_NODESET(n.child(STR("last")), STR("following:: node()"));
+
+	CHECK_XPATH_NODESET(n, STR("@attr1/following::node()")) % 5 % 7 % 8 % 9 % 10 % 11; // child, subchild, another, subchild, almost, last - because @/following
+	CHECK_XPATH_NODESET(n, STR("child/@attr/following::node()")) % 7 % 8 % 9 % 10 % 11; // subchild, another, subchild, almost, last
 }
 
-TEST_XML(xpath_paths_axes_preceding, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another><subchild/></another><almost/><last/></node>")
+TEST_XML(xpath_paths_axes_preceding, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another><subchild id='1'/></another><almost/><last/></node>")
 {
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
@@ -99,9 +106,12 @@ TEST_XML(xpath_paths_axes_preceding, "<node attr1='value' attr2='value'><child a
 	CHECK_XPATH_NODESET(c, STR("preceding:: node()"));
 
 	CHECK_XPATH_NODESET(n.child(STR("child")), STR("preceding:: node()")); // no ancestors
-	CHECK_XPATH_NODESET(n.child(STR("last")), STR("preceding:: node()")) % 10 % 9 % 8 % 7 % 5; // almost, subchild, another, subchild, child
+	CHECK_XPATH_NODESET(n.child(STR("last")), STR("preceding:: node()")) % 11 % 9 % 8 % 7 % 5; // almost, subchild, another, subchild, child
 	CHECK_XPATH_NODESET(n.child(STR("another")).child(STR("subchild")), STR("preceding:: node()")) % 7 % 5; // subchild, child
 	CHECK_XPATH_NODESET(n, STR("preceding:: node()"));
+
+	CHECK_XPATH_NODESET(n, STR("child/@attr/preceding::node()")); // no ancestors
+	CHECK_XPATH_NODESET(n, STR("//subchild[@id]/@id/preceding::node()")) % 7 % 5; // subchild, child
 }
 
 TEST_XML(xpath_paths_axes_attribute, "<node attr1='value' attr2='value'><child attr='value'><subchild/></child><another xmlns:foo='bar'><subchild/></another><last/></node>")
@@ -116,13 +126,16 @@ TEST_XML(xpath_paths_axes_attribute, "<node attr1='value' attr2='value'><child a
 	CHECK_XPATH_NODESET(n, STR("attribute:: node()")) % 3 % 4; // node/@attr1 node/@attr2
 	CHECK_XPATH_NODESET(doc, STR("descendant-or-self:: node()/attribute:: node()")) % 3 % 4 % 6; // all attributes
 	CHECK_XPATH_NODESET(n.child(STR("another")), STR("attribute:: node()")); // namespace nodes are not attributes
+
+	CHECK_XPATH_NODESET(n, STR("@attr1/attribute::node()"));
 }
 
-TEST_XML(xpath_paths_axes_namespace, "<node xmlns:foo='bar'/>")
+TEST_XML(xpath_paths_axes_namespace, "<node xmlns:foo='bar' attr='value'/>")
 {
 	xml_node n = doc.child(STR("node"));
 
 	CHECK_XPATH_NODESET(n, STR("namespace:: node()")); // namespace nodes are not supported
+	CHECK_XPATH_NODESET(n, STR("@attr/attribute::node()"));
 }
 
 TEST_XML(xpath_paths_axes_self, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
@@ -150,6 +163,8 @@ TEST_XML(xpath_paths_axes_descendant_or_self, "<node attr='value'><child attr='v
 	CHECK_XPATH_NODESET(doc, STR("descendant-or-self:: node()")) % 1 % 2 % 4 % 6 % 7 % 8 % 9; // root, node, child, subchild, another, subchild, last
 	CHECK_XPATH_NODESET(n, STR("another/descendant-or-self:: node()")) % 7 % 8; // another, subchild
 	CHECK_XPATH_NODESET(n, STR("last/descendant-or-self:: node()")) % 9; // last
+
+	CHECK_XPATH_NODESET(n, STR("child/@attr/descendant-or-self::node()"));
 }
 
 TEST_XML(xpath_paths_axes_ancestor_or_self, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
