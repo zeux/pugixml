@@ -164,7 +164,7 @@ TEST_XML(xpath_paths_axes_descendant_or_self, "<node attr='value'><child attr='v
 	CHECK_XPATH_NODESET(n, STR("another/descendant-or-self:: node()")) % 7 % 8; // another, subchild
 	CHECK_XPATH_NODESET(n, STR("last/descendant-or-self:: node()")) % 9; // last
 
-	CHECK_XPATH_NODESET(n, STR("child/@attr/descendant-or-self::node()"));
+	CHECK_XPATH_NODESET(n, STR("child/@attr/descendant-or-self::node()")) % 5; // @attr
 }
 
 TEST_XML(xpath_paths_axes_ancestor_or_self, "<node attr='value'><child attr='value'><subchild/></child><another><subchild/></another><last/></node>")
@@ -179,6 +179,8 @@ TEST_XML(xpath_paths_axes_ancestor_or_self, "<node attr='value'><child attr='val
 	CHECK_XPATH_NODESET(n, STR("child/@attr/ancestor-or-self:: node()")) % 5 % 4 % 2 % 1; // @attr, child, node, root
 	CHECK_XPATH_NODESET(n, STR("ancestor-or-self:: node()")) % 2 % 1; // root, node
 	CHECK_XPATH_NODESET(doc, STR("ancestor-or-self:: node()")) % 1; // root
+	CHECK_XPATH_NODESET(n, STR("ancestor-or-self:: node()")) % 2 % 1; // root, node
+	CHECK_XPATH_NODESET(n, STR("last/ancestor-or-self::node()")) % 9 % 2 % 1; // root, node, last
 }
 
 TEST_XML(xpath_paths_axes_abbrev, "<node attr='value'><foo/></node>")
@@ -282,6 +284,12 @@ TEST_XML_FLAGS(xpath_paths_nodetest_type, "<node attr='value'>pcdata<child/><?pi
 	CHECK_XPATH_FAIL(STR("comment('')"));
 	CHECK_XPATH_FAIL(STR("processing-instruction(1)"));
 	CHECK_XPATH_FAIL(STR("processing-instruction('', '')"));
+}
+
+TEST_XML_FLAGS(xpath_paths_nodetest_principal, "<node attr='value'>pcdata<child/><?pi1 value?><?pi2 value?><!--comment--><![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments)
+{
+	// $$$ self::* should not select attribute nodes (?)
+	// $$$ name, * and name:* should check type = elem (?)
 }
 
 TEST_XML(xpath_paths_absolute, "<node><foo><foo/><foo/></foo></node>")
