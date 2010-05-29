@@ -1725,7 +1725,7 @@ namespace pugi
 			}
 		}
 		
-		template <class T> void step_fill(xpath_node_set& ns, const xml_attribute& a, const xml_node& p, T)
+		template <class T> void step_fill(xpath_node_set& ns, const xml_attribute& a, const xml_node& p, T v)
 		{
 			const axis_t axis = T::axis;
 
@@ -1750,6 +1750,39 @@ namespace pugi
 				
 				break;
 			}
+
+			case axis_following:
+			{
+				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
+				
+				xml_node cur = p;
+				
+				for (;;)
+				{
+					if (cur.first_child())
+						cur = cur.first_child();
+					else if (cur.next_sibling())
+						cur = cur.next_sibling();
+					else
+					{
+						while (cur && !cur.next_sibling()) cur = cur.parent();
+						cur = cur.next_sibling();
+						
+						if (!cur) break;
+					}
+
+					step_push(ns, cur);
+				}
+
+				break;
+			}
+
+			case axis_preceding:
+			{
+				// preceding:: axis does not include attribute nodes and attribute ancestors (they are the same as parent's ancestors), so we can reuse node preceding
+				step_fill(ns, p, v);
+				break;
+			}
 			
 			default:
 				assert(!"Unimplemented axis");
@@ -1759,6 +1792,8 @@ namespace pugi
 		template <class T> void step_do(xpath_node_set& ns, const xpath_context& c, T v)
 		{
 			const axis_t axis = T::axis;
+
+			assert(ns.empty());
 
 			switch (axis)
 			{
@@ -1823,6 +1858,8 @@ namespace pugi
 				
 			case axis_ancestor:
 			case axis_ancestor_or_self:
+			case axis_following:
+			case axis_preceding:
 				if (m_left)
 				{
 					xpath_node_set s = m_left->eval_node_set(c);
@@ -1849,9 +1886,7 @@ namespace pugi
 				
 				break;
 		
-			case axis_following:
 			case axis_following_sibling:
-			case axis_preceding:
 			case axis_preceding_sibling:
 			case axis_attribute:
 			case axis_child:
