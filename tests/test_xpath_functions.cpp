@@ -71,6 +71,7 @@ TEST(xpath_number_floor)
 	CHECK_XPATH_FAIL(STR("floor()"));
 
 	// floor with 1 argument
+	CHECK_XPATH_NUMBER(c, STR("floor(0)"), 0);
 	CHECK_XPATH_NUMBER(c, STR("floor(1.2)"), 1);
 	CHECK_XPATH_NUMBER(c, STR("floor(1)"), 1);
 	CHECK_XPATH_NUMBER(c, STR("floor(-1.2)"), -2);
@@ -90,6 +91,7 @@ TEST(xpath_number_ceiling)
 	CHECK_XPATH_FAIL(STR("ceiling()"));
 
 	// ceiling with 1 argument
+	CHECK_XPATH_NUMBER(c, STR("ceiling(0)"), 0);
 	CHECK_XPATH_NUMBER(c, STR("ceiling(1.2)"), 2);
 	CHECK_XPATH_NUMBER(c, STR("ceiling(1)"), 1);
 	CHECK_XPATH_NUMBER(c, STR("ceiling(-1.2)"), -1);
@@ -99,6 +101,11 @@ TEST(xpath_number_ceiling)
 
 	// ceiling with 2 arguments
 	CHECK_XPATH_FAIL(STR("ceiling(1, 2)"));
+
+	// ceiling with argument in range (-1, -0] should result in minus zero
+	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(0))"), STR("Infinity"));
+	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(-0))"), STR("-Infinity"));
+	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(-0.1))"), STR("-Infinity"));
 }
 
 TEST(xpath_number_round)
@@ -122,6 +129,15 @@ TEST(xpath_number_round)
 
 	// round with 2 arguments
 	CHECK_XPATH_FAIL(STR("round(1, 2)"));
+
+	// round with argument in range [-0.5, -0] should result in minus zero
+	CHECK_XPATH_STRING(c, STR("string(1 div round(0))"), STR("Infinity"));
+
+#if 0 // $$$ commented out temporarily because round is not compliant yet
+	CHECK_XPATH_STRING(c, STR("string(1 div round(-0.5))"), STR("-Infinity"));
+	CHECK_XPATH_STRING(c, STR("string(1 div round(-0))"), STR("-Infinity"));
+	CHECK_XPATH_STRING(c, STR("string(1 div round(-0.1))"), STR("-Infinity"));
+#endif
 }
 
 TEST_XML(xpath_boolean_boolean, "<node />")
@@ -239,7 +255,9 @@ TEST_XML(xpath_string_string, "<node>123<child id='1'>789</child><child><![CDATA
 	CHECK_XPATH_STRING(c, STR("string(0)"), STR("0"));
 	CHECK_XPATH_STRING(c, STR("string(-0)"), STR("0"));
 	CHECK_XPATH_STRING(c, STR("string(1 div 0)"), STR("Infinity"));
+	CHECK_XPATH_STRING(c, STR("string(-1 div -0)"), STR("Infinity"));
 	CHECK_XPATH_STRING(c, STR("string(-1 div 0)"), STR("-Infinity"));
+	CHECK_XPATH_STRING(c, STR("string(1 div -0)"), STR("-Infinity"));
 	CHECK_XPATH_STRING(c, STR("string(1234567)"), STR("1234567"));
 	CHECK_XPATH_STRING(c, STR("string(-1234567)"), STR("-1234567"));
 	CHECK_XPATH_STRING(c, STR("string(1234.5678)"), STR("1234.5678"));
@@ -281,6 +299,7 @@ TEST(xpath_string_concat)
 	CHECK_XPATH_STRING(c, STR("concat('a', 'b', 'c', 'd', 'e')"), STR("abcde"));
 	CHECK_XPATH_STRING(c, STR("concat('a', 'b', 'c', 'd', 'e', 'f')"), STR("abcdef"));
 	CHECK_XPATH_STRING(c, STR("concat('a', 'b', 'c', 'd', 'e', 'f', 'g')"), STR("abcdefg"));
+	CHECK_XPATH_STRING(c, STR("concat(1, 2, 3, 4, 5, 6, 7, 8)"), STR("12345678"));
 }
 
 TEST(xpath_string_starts_with)
@@ -405,6 +424,7 @@ TEST(xpath_string_substring)
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 0 div 0)"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring('', 1)"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring('', 0)"), STR(""));
+    CHECK_XPATH_STRING(c, STR("substring(substring('internalexternalcorrect substring',9),9)"), STR("correct substring"));
 
 	// substring with 3 arguments
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 2, 1)"), STR("b"));
