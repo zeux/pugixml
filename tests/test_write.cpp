@@ -179,6 +179,26 @@ TEST(write_encoding_huge)
 
 	CHECK(test_write_narrow(doc, format_default, encoding_utf8, s_utf8.c_str(), s_utf8.length()));
 }
+
+TEST(write_encoding_huge_invalid)
+{
+	size_t wcharsize = sizeof(wchar_t);
+
+	if (wcharsize == 2)
+	{
+		const unsigned int N = 16000;
+
+		// make a large utf16 name consisting of leading surrogate chars
+		std::basic_string<wchar_t> s_utf16;
+
+		for (unsigned int i = 0; i < N; ++i) s_utf16 += static_cast<wchar_t>(0xd852);
+
+		xml_document doc;
+		doc.append_child().set_name(s_utf16.c_str());
+
+		CHECK(test_write_narrow(doc, format_default, encoding_utf8, "< />\n", 5));
+	}
+}
 #else
 TEST(write_encoding_huge)
 {
@@ -208,14 +228,12 @@ TEST(write_encoding_huge_invalid)
 	const unsigned int N = 16000;
 
 	// make a large utf8 name consisting of non-leading chars
-	std::string s_utf8 = "<";
+	std::string s_utf8;
 
 	for (unsigned int i = 0; i < N; ++i) s_utf8 += "\x82";
 
-	s_utf8 += "/>";
-
 	xml_document doc;
-	CHECK(doc.load_buffer(&s_utf8[0], s_utf8.length(), parse_default, encoding_utf8));
+	doc.append_child().set_name(s_utf8.c_str());
 
 	std::string s_utf16 = std::string("\x00<\x00 \x00/\x00>\x00\n", 10);
 
@@ -305,16 +323,17 @@ TEST(write_unicode_invalid_utf8)
 	// invalid 5-byte input
 	CHECK(test_write_unicode_invalid("a\xf8_", L"a_"));
 }
+#endif
 
 TEST(write_no_name_element)
 {
 	xml_document doc;
 	xml_node root = doc.append_child();
 	root.append_child();
-	root.append_child().append_child(node_pcdata).set_value("text");
+	root.append_child().append_child(node_pcdata).set_value(STR("text"));
 
-	CHECK_NODE(doc, "<:anonymous><:anonymous /><:anonymous>text</:anonymous></:anonymous>");
-	CHECK_NODE_EX(doc, "<:anonymous>\n\t<:anonymous />\n\t<:anonymous>text</:anonymous>\n</:anonymous>\n", "\t", format_default);
+	CHECK_NODE(doc, STR("<:anonymous><:anonymous /><:anonymous>text</:anonymous></:anonymous>"));
+	CHECK_NODE_EX(doc, STR("<:anonymous>\n\t<:anonymous />\n\t<:anonymous>text</:anonymous>\n</:anonymous>\n"), STR("\t"), format_default);
 }
 
 TEST(write_no_name_pi)
@@ -322,16 +341,14 @@ TEST(write_no_name_pi)
 	xml_document doc;
 	doc.append_child(node_pi);
 
-	CHECK_NODE(doc, "<?:anonymous?>");
+	CHECK_NODE(doc, STR("<?:anonymous?>"));
 }
 
 TEST(write_no_name_attribute)
 {
 	xml_document doc;
-	doc.append_child().set_name("root");
-	doc.child("root").append_attribute("");
+	doc.append_child().set_name(STR("root"));
+	doc.child(STR("root")).append_attribute(STR(""));
 
-	CHECK_NODE(doc, "<root :anonymous=\"\" />");
+	CHECK_NODE(doc, STR("<root :anonymous=\"\" />"));
 }
-
-#endif

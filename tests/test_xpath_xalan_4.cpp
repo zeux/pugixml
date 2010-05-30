@@ -4,7 +4,7 @@
 
 TEST_XML(xpath_xalan_position_1, "<doc><a>1</a><a>2</a><a>3</a><a>4</a></doc>")
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_BOOLEAN(c, STR("position()=1"), true);
 	CHECK_XPATH_NODESET(c, STR("*[position()=4]")) % 9;
@@ -12,7 +12,7 @@ TEST_XML(xpath_xalan_position_1, "<doc><a>1</a><a>2</a><a>3</a><a>4</a></doc>")
 
 TEST_XML_FLAGS(xpath_xalan_position_2, "<doc><a test='true'><num>1</num></a><a><num>1191</num></a><a><num>263</num></a><a test='true'><num>2</num></a><a><num>827</num></a><a><num>256</num></a><a test='true'><num>3</num></a><a test='true'><num>4<x/>5</num></a><?pi?><?pi?><!--comment--><!--comment--></doc>", parse_default | parse_comments | parse_pi)
 {
-	xml_node c = doc.child("doc");
+	xml_node c = doc.child(STR("doc"));
 
 	CHECK_XPATH_NODESET(c, STR("*[@test and position()=8]")) % 27;
 	CHECK_XPATH_NODESET(c, STR("*[@test][position()=4]/num")) % 29;
