@@ -59,7 +59,7 @@ TEST_XML_FLAGS(xpath_xalan_axes_2, "<far-north> Level-1<north-north-west1/><nort
 	CHECK_XPATH_NODESET(center, STR("@*/self::node()")) % 21 % 22 % 23;
 	CHECK_XPATH_NODESET(center, STR("@*/.")) % 21 % 22 % 23;
 	CHECK_XPATH_NODESET(center, STR("@*/descendant-or-self::node()")) % 21 % 22 % 23;
-	CHECK_XPATH_NODESET(center, STR("@*/ancestor-or-self::*")) % 21 % 22 % 23 % 2 % 9 % 13 % 20;
+	CHECK_XPATH_NODESET(center, STR("@*/ancestor-or-self::*")) % 2 % 9 % 13 % 20 % 21 % 22 % 23;
 	CHECK_XPATH_NODESET(center, STR("@*/preceding-sibling::node()"));
 	CHECK_XPATH_NODESET(center, STR("@*/following-sibling::*"));
 	CHECK_XPATH_NODESET(center, STR("@*/ancestor::*/near-north/*[4]/@*/preceding::*")) % 4 % 5 % 14 % 15 % 16;

@@ -128,6 +128,9 @@ xpath_node_set_tester::xpath_node_set_tester(const pugi::xpath_node_set& set, co
 {
 	result = set;
 
+	// only sort unsorted sets so that we're able to verify reverse order for some axes
+	if (result.type() == pugi::xpath_node_set::type_unsorted) result.sort();
+
 	if (result.empty())
 	{
 		document_order = 0;
