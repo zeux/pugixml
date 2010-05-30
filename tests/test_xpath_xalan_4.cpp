@@ -140,6 +140,12 @@ TEST_XML(xpath_xalan_match_2, "<doc><l1><v2>doc-l1-v2</v2><x2>doc-l1-x2</x2><l2>
 	CHECK_XPATH_STRING(doc, STR("doc//child::l2//child::x4"), STR("doc-l1-l2-l3-x4"));
 }
 
+TEST_XML(xpath_xalan_match_3, "<doc><child><child-foo><name id='1'>John Doe</name><child><name id='2'>Jane Doe</name></child></child-foo></child></doc>")
+{
+	CHECK_XPATH_NODESET(doc, STR("doc/child/*[starts-with(name(),'child-')]//name")) % 5 % 9;
+	CHECK_XPATH_NODESET(doc, STR("//@*")) % 6 % 10;
+}
+
 TEST_XML(xpath_xalan_expression_1, "<doc><para id='1' xml:lang='en'>en</para><div xml:lang='en'><para>en</para></div><para id='3' xml:lang='EN'>EN</para><para id='4' xml:lang='en-us'>en-us</para></doc>")
 {
 	CHECK_XPATH_NODESET(doc, STR("doc/para[@id='1' and lang('en')]")) % 3;

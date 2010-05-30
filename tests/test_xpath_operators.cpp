@@ -406,4 +406,51 @@ TEST_XML(xpath_operators_union, "<node><employee/><employee secretary=''/><emplo
 	CHECK_XPATH_NODESET(n, STR(". | tail/preceding-sibling::employee | .")) % 2 % 3 % 4 % 6 % 8 % 11;
 }
 
+TEST(xpath_operators_union_error)
+{
+	CHECK_XPATH_FAIL(STR(". | true()"));
+	CHECK_XPATH_FAIL(STR(". | 1"));
+	CHECK_XPATH_FAIL(STR(". | '1'"));
+	CHECK_XPATH_FAIL(STR(". | count(.)"));
+	CHECK_XPATH_FAIL(STR("true() | ."));
+	CHECK_XPATH_FAIL(STR("1 | ."));
+	CHECK_XPATH_FAIL(STR("'1' | ."));
+	CHECK_XPATH_FAIL(STR("count(.) | ."));
+}
+
+TEST(xpath_operators_associativity_boolean)
+{
+	xml_node c;
+
+	CHECK_XPATH_BOOLEAN(c, STR("false() or true() and true() and false()"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("3 > 2 > 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("4 > 3 > 2 > 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("5 > 4 > 3 > 2 > 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("1 < 2 < 3 < 4 < 5"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("1 <= 2 <= 3 <= 4 <= 5"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("5 >= 4 >= 3 >= 2 >= 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("3 >= 2 >= 1"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("2 >= 1"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("4 >= 3 >= 2 >= 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("((((5 > 4) > 3) > 2) > 1)"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("2 != 3 != 1 != 4 != 0"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("(((2 != 3) != 1) != 4) != 0"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("2 != 3 != 1 != 4 != 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("(((2 != 3) != 1) != 4) != 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("2 = 3 = 1 = 4 = 0"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("(((2 = 3) = 1) = 4) = 0"), true);
+	CHECK_XPATH_BOOLEAN(c, STR("2 = 3 = 1 = 4 = 1"), false);
+	CHECK_XPATH_BOOLEAN(c, STR("(((2 = 3) = 1) = 4) = 1"), false);
+}
+
+TEST(xpath_operators_associativity_arithmetic)
+{
+	xml_node c;
+
+	CHECK_XPATH_NUMBER(c, STR("2+1-1+1"), 3);
+	CHECK_XPATH_NUMBER(c, STR("1+2+1-1+1"), 4);
+	CHECK_XPATH_NUMBER(c, STR("1+1+2+1-1+1"), 5);
+	CHECK_XPATH_NUMBER(c, STR("1-1+1"), 1);
+}
+
 #endif
