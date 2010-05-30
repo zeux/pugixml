@@ -29,6 +29,7 @@ TEST(xpath_number_parse)
 	CHECK_XPATH_NUMBER(c, STR("123.456"), 123.456);
 	CHECK_XPATH_NUMBER(c, STR(".123"), 0.123);
 	CHECK_XPATH_NUMBER(c, STR("123.4567890123456789012345"), 123.4567890123456789012345);
+	CHECK_XPATH_NUMBER(c, STR("123."), 123);
 }
 
 TEST(xpath_number_error)
@@ -225,12 +226,11 @@ TEST(xpath_parse_jaxen_invalid)
 		STR("///triple slash"), STR("/numbers numbers"), STR("/a/b[c > d]efg"), STR("/inv/child::"), STR("/invoice/@test[abcd"),
 		STR("/invoice/@test[abcd > x"), STR("string-length('a"), STR("/descendant::()"), STR("(1 + 1"), STR("!false()"),
 		STR("$author"), STR("10 + $foo"), STR("$foo:bar"), STR("$varname[@a='1']"), STR("foo/$variable/foo"),
-		STR(".[1]"), STR("chyld::foo"), STR("foo/tacos()"), STR("foo/tacos()"), STR("/foo/bar[baz"), STR("//"), // STR("*:foo"), $$ should not compile
+		STR(".[1]"), STR("chyld::foo"), STR("foo/tacos()"), STR("foo/tacos()"), STR("/foo/bar[baz"), STR("//"), STR("*:foo"),
         STR("/cracker/cheese[(mold > 1) and (sense/taste"),
 
 		// From xpath-as3 tests
-		STR("a b"), STR("//self::node())"), STR("/x/y[contains(self::node())"), STR("/x/y[contains(self::node()]"), STR("///"),
-		STR("text::a"), // STR("***"), $$ should not compile
+		STR("a b"), STR("//self::node())"), STR("/x/y[contains(self::node())"), STR("/x/y[contains(self::node()]"), STR("///"), STR("text::a"),
 
 		// From haXe-xpath tests
 		STR("|/gjs"), STR("+3"), STR("/html/body/p != ---'div'/a"), STR(""), STR("@"), STR("#akf"), STR(",")

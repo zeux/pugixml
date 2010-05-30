@@ -861,7 +861,8 @@ namespace pugi
 		lex_axis_attribute,
 		lex_dot,
 		lex_double_dot,
-		lex_double_colon
+		lex_double_colon,
+		lex_eof
 	};
 
 	struct xpath_lexer_string
@@ -926,7 +927,7 @@ namespace pugi
 			switch (*m_cur)
 			{
 			case 0:
-				m_cur_lexeme = lex_none;
+				m_cur_lexeme = lex_eof;
 				break;
 			
 			case '>':
@@ -1118,7 +1119,7 @@ namespace pugi
 
 					while (IS_CHARTYPEX(*m_cur, ctx_digit)) m_cur++;
 				
-					if (*m_cur == '.' && IS_CHARTYPEX(*(m_cur+1), ctx_digit))
+					if (*m_cur == '.')
 					{
 						m_cur++;
 
@@ -3558,7 +3559,7 @@ namespace pugi
 		{
 			xpath_ast_node* result = parse_expression();
 			
-			if (m_lexer.current() != lex_none)
+			if (m_lexer.current() != lex_eof)
 			{
 				// there are still unparsed tokens left, error
 				throw xpath_exception("Incorrect query");

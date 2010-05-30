@@ -68,8 +68,8 @@ TEST_XML(xpath_xalan_select_6, "<div div='20' div-5='12'>9</div>")
 	CHECK_XPATH_NUMBER(doc, STR("(* - 4) div 2"), 2.5);
 	CHECK_XPATH_NUMBER(doc, STR("' 6 ' div 2"), 3);
 	CHECK_XPATH_NUMBER(doc, STR("' 6 '*div"), 54);
-	// CHECK_XPATH_NUMBER(doc, STR("5.*."), 45); $$ should work
-	// CHECK_XPATH_NUMBER(doc, STR("5.+."), 14); $$ should work
+	CHECK_XPATH_NUMBER(doc, STR("5.*."), 45);
+	CHECK_XPATH_NUMBER(doc, STR("5.+."), 14);
 }
 
 TEST_XML(xpath_xalan_select_7, "<doc div='20'><div>9</div><attribute>8</attribute></doc>")
@@ -235,7 +235,7 @@ TEST(xpath_xalan_error_namespace)
 	CHECK_XPATH_FAIL(STR("namespace-uri(baz2:b,..)"));
 	CHECK_XPATH_FAIL(STR("name(a,b)"));
 	CHECK_XPATH_FAIL(STR(":foo"));
-	// CHECK_XPATH_FAIL(STR("*:foo")); $$ should not compile
+	CHECK_XPATH_FAIL(STR("*:foo"));
 }
 
 TEST(xpath_xalan_error_position)
