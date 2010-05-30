@@ -59,7 +59,8 @@ TEST_XML_FLAGS(xpath_xalan_axes_2, "<far-north> Level-1<north-north-west1/><nort
 	CHECK_XPATH_NODESET(center, STR("@*/self::node()")) % 21 % 22 % 23;
 	CHECK_XPATH_NODESET(center, STR("@*/.")) % 21 % 22 % 23;
 	CHECK_XPATH_NODESET(center, STR("@*/descendant-or-self::node()")) % 21 % 22 % 23;
-	CHECK_XPATH_NODESET(center, STR("@*/ancestor-or-self::*")) % 2 % 9 % 13 % 20 % 21 % 22 % 23;
+	CHECK_XPATH_NODESET(center, STR("@*/ancestor-or-self::node()")) % 1 % 2 % 9 % 13 % 20 % 21 % 22 % 23;
+	CHECK_XPATH_NODESET(center, STR("@*/ancestor-or-self::*")) % 2 % 9 % 13 % 20;
 	CHECK_XPATH_NODESET(center, STR("@*/preceding-sibling::node()"));
 	CHECK_XPATH_NODESET(center, STR("@*/following-sibling::*"));
 	CHECK_XPATH_NODESET(center, STR("@*/ancestor::*/near-north/*[4]/@*/preceding::*")) % 4 % 5 % 14 % 15 % 16;
@@ -318,9 +319,9 @@ TEST_XML(xpath_xalan_axes_18, "<north><center center-attr='here'><south/></cente
 	xml_node center = doc.child(STR("north")).child(STR("center"));
 
 	CHECK_XPATH_NODESET(center, STR("@*/self::node()")) % 4;
-	CHECK_XPATH_NODESET(center, STR("@*/self::*")) % 4; // $$$ wrong - should be empty, since * test tests for principal node type
+	CHECK_XPATH_NODESET(center, STR("@*/self::*")); // * tests for principal node type
 	CHECK_XPATH_NODESET(center, STR("@*/self::text()"));
-	CHECK_XPATH_NODESET(center, STR("@*/self::center-attr")) % 4; // $$$ wrong - should be empty, since name test tests for principal node type
+	CHECK_XPATH_NODESET(center, STR("@*/self::center-attr")); // * tests for principal node type
 }
 
 #endif

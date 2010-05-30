@@ -286,10 +286,44 @@ TEST_XML_FLAGS(xpath_paths_nodetest_type, "<node attr='value'>pcdata<child/><?pi
 	CHECK_XPATH_FAIL(STR("processing-instruction('', '')"));
 }
 
-TEST_XML_FLAGS(xpath_paths_nodetest_principal, "<node attr='value'>pcdata<child/><?pi1 value?><?pi2 value?><!--comment--><![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments)
+TEST_XML_FLAGS(xpath_paths_nodetest_principal, "<node attr='value'>pcdata<child/><?pi1 value?><?pi2 value?><!--comment--><![CDATA[cdata]]></node><abra:cadabra abra:arba=''/>", parse_default | parse_pi | parse_comments)
 {
-	// $$$ self::* should not select attribute nodes (?)
-	// $$$ name, * and name:* should check type = elem (?)
+	// node() test is true for any node type
+	CHECK_XPATH_NODESET(doc, STR("//node()")) % 2 % 4 % 5 % 6 % 7 % 8 % 9 % 10;
+	CHECK_XPATH_NODESET(doc, STR("//attribute::node()")) % 3 % 11;
+	CHECK_XPATH_NODESET(doc, STR("//attribute::node()/ancestor-or-self::node()")) % 1 % 2 % 3 % 10 % 11;
+
+	// name test is true only for node with principal node type (depends on axis)
+	CHECK_XPATH_NODESET(doc, STR("node/child::child")) % 5;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::attr")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("node/child::pi1"));
+	CHECK_XPATH_NODESET(doc, STR("node/child::attr"));
+	CHECK_XPATH_NODESET(doc, STR("node/child::child/self::child")) % 5;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::attr/self::attr")); // attribute is not of element type
+	CHECK_XPATH_NODESET(doc, STR("node/child::child/ancestor-or-self::child")) % 5;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::attr/ancestor-or-self::attr")); // attribute is not of element type
+	CHECK_XPATH_NODESET(doc, STR("node/child::child/descendant-or-self::child")) % 5;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::attr/descendant-or-self::attr")); // attribute is not of element type
+
+	// any name test is true only for node with principal node type (depends on axis)
+	CHECK_XPATH_NODESET(doc, STR("node/child::*")) % 5;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::*")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("node/child::*/self::*")) % 5;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::*/self::*")); // attribute is not of element type
+	CHECK_XPATH_NODESET(doc, STR("node/child::*/ancestor-or-self::*")) % 5 % 2;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::*/ancestor-or-self::*")) % 2; // attribute is not of element type
+	CHECK_XPATH_NODESET(doc, STR("node/child::*/descendant-or-self::*")) % 5;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::*/descendant-or-self::*")); // attribute is not of element type
+
+	// namespace test is true only for node with principal node type (depends on axis)
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*")) % 10;
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*/attribute::abra:*")) % 11;
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*/self::abra:*")) % 10;
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*/attribute::abra:*/self::abra:*")); // attribute is not of element type
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*/ancestor-or-self::abra:*")) % 10;
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*/attribute::abra:*/ancestor-or-self::abra:*")) % 10; // attribute is not of element type
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*/descendant-or-self::abra:*")) % 10;
+	CHECK_XPATH_NODESET(doc, STR("child::abra:*/attribute::abra:*/descendant-or-self::abra:*")); // attribute is not of element type
 }
 
 TEST_XML(xpath_paths_absolute, "<node><foo><foo/><foo/></foo></node>")

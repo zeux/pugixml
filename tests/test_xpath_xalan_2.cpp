@@ -166,7 +166,7 @@ TEST(xpath_xalan_string_5)
 	CHECK_XPATH_STRING(xml_node(), query.c_str(), expected.c_str());
 }
 
-#if 0 // number formatting is not precise yet; also some compilers don't have a good CRT implementation that can handle large numbers
+#if 0 // $$ number formatting is not precise yet; also some compilers don't have a good CRT implementation that can handle large numbers
 TEST(xpath_xalan_string_6)
 {
 	xml_node c;
