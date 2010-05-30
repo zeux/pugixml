@@ -1719,6 +1719,24 @@ namespace pugi
 				
 				break;
 			}
+
+			case axis_self:
+			{
+				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
+
+				step_push(ns, n);
+
+				break;
+			}
+
+			case axis_parent:
+			{
+				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
+
+				if (n.parent()) step_push(ns, n.parent());
+
+				break;
+			}
 				
 			default:
 				assert(!"Unimplemented axis");
@@ -1736,7 +1754,7 @@ namespace pugi
 			{
 				ns.m_type = ns.empty() ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_unsorted;
 
-				if (axis == axis_ancestor_or_self)
+				if (axis == axis_ancestor_or_self && m_test == nodetest_type_node) // reject attributes based on principal node type test
 					step_push(ns, a, p);
 
 				xml_node cur = p;
@@ -1752,10 +1770,12 @@ namespace pugi
 			}
 
 			case axis_descendant_or_self:
+			case axis_self:
 			{
 				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
 
-				step_push(ns, a, p);
+				if (m_test == nodetest_type_node) // reject attributes based on principal node type test
+					step_push(ns, a, p);
 
 				break;
 			}
@@ -1786,6 +1806,15 @@ namespace pugi
 				break;
 			}
 
+			case axis_parent:
+			{
+				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
+
+				step_push(ns, p);
+
+				break;
+			}
+
 			case axis_preceding:
 			{
 				// preceding:: axis does not include attribute nodes and attribute ancestors (they are the same as parent's ancestors), so we can reuse node preceding
@@ -1806,70 +1835,13 @@ namespace pugi
 
 			switch (axis)
 			{
-			case axis_parent:
-				if (m_left)
-				{
-					xpath_node_set s = m_left->eval_node_set(c);
-					
-					for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
-					{
-						xml_node p = it->parent();
-						if (p)
-						{
-							size_t size = ns.size();
-							
-							step_push(ns, p);
-							
-							apply_predicates(ns, size, c);
-						}
-					}
-				}
-				else
-				{
-					xml_node p = c.n.parent();
-					if (p)
-					{
-						step_push(ns, p);
-						
-						apply_predicates(ns, 0, c);
-					}
-				}
-
-				break;
-				
-			case axis_self:
-				if (m_left)
-				{
-					xpath_node_set s = m_left->eval_node_set(c);
-					
-					for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
-					{
-						size_t size = ns.size();
-						
-						if (it->attribute()) step_push(ns, it->attribute(), it->parent());
-						else step_push(ns, it->node());
-						
-						apply_predicates(ns, size, c);
-					}
-				}
-				else
-				{
-					if (c.n.node()) step_push(ns, c.n.node());
-					else step_push(ns, c.n.attribute(), c.n.parent());
-					
-					apply_predicates(ns, 0, c);
-				}
-
-				break;
-				
-			case axis_namespace:
-				break;
-				
 			case axis_ancestor:
 			case axis_ancestor_or_self:
 			case axis_descendant_or_self:
 			case axis_following:
+			case axis_parent:
 			case axis_preceding:
+			case axis_self:
 				if (m_left)
 				{
 					xpath_node_set s = m_left->eval_node_set(c);
@@ -1924,6 +1896,9 @@ namespace pugi
 				
 				break;
 			
+			case axis_namespace:
+				break;
+				
 			default:
 				assert(!"Unimplemented axis");
 			}
