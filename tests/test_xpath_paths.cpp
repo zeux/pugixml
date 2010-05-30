@@ -284,6 +284,7 @@ TEST_XML_FLAGS(xpath_paths_nodetest_type, "<node attr='value'>pcdata<child/><?pi
 	CHECK_XPATH_FAIL(STR("comment('')"));
 	CHECK_XPATH_FAIL(STR("processing-instruction(1)"));
 	CHECK_XPATH_FAIL(STR("processing-instruction('', '')"));
+	CHECK_XPATH_FAIL(STR("processing-instruction(concat('a', 'b'))"));
 }
 
 TEST_XML_FLAGS(xpath_paths_nodetest_principal, "<node attr='value'>pcdata<child/><?pi1 value?><?pi2 value?><!--comment--><![CDATA[cdata]]></node><abra:cadabra abra:arba=''/>", parse_default | parse_pi | parse_comments)
