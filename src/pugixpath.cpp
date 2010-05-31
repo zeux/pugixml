@@ -885,44 +885,46 @@ namespace pugi
 		{
 			contents_clear();
 
-			while (IS_CHARTYPEX(*m_cur, ctx_space)) ++m_cur;
+			const char_t* cur = m_cur;
 
-			switch (*m_cur)
+			while (IS_CHARTYPEX(*cur, ctx_space)) ++cur;
+
+			switch (*cur)
 			{
 			case 0:
 				m_cur_lexeme = lex_eof;
 				break;
 			
 			case '>':
-				if (*(m_cur+1) == '=')
+				if (*(cur+1) == '=')
 				{
-					m_cur += 2;
+					cur += 2;
 					m_cur_lexeme = lex_greater_or_equal;
 				}
 				else
 				{
-					m_cur += 1;
+					cur += 1;
 					m_cur_lexeme = lex_greater;
 				}
 				break;
 
 			case '<':
-				if (*(m_cur+1) == '=')
+				if (*(cur+1) == '=')
 				{
-					m_cur += 2;
+					cur += 2;
 					m_cur_lexeme = lex_less_or_equal;
 				}
 				else
 				{
-					m_cur += 1;
+					cur += 1;
 					m_cur_lexeme = lex_less;
 				}
 				break;
 
 			case '!':
-				if (*(m_cur+1) == '=')
+				if (*(cur+1) == '=')
 				{
-					m_cur += 2;
+					cur += 2;
 					m_cur_lexeme = lex_not_equal;
 				}
 				else
@@ -932,111 +934,111 @@ namespace pugi
 				break;
 
 			case '=':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_equal;
 
 				break;
 			
 			case '+':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_plus;
 
 				break;
 
 			case '-':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_minus;
 
 				break;
 
 			case '*':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_multiply;
 
 				break;
 
 			case '|':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_union;
 
 				break;
 
 			case '$':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_var_ref;
 
 				break;
 			
 			case '(':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_open_brace;
 
 				break;
 
 			case ')':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_close_brace;
 
 				break;
 			
 			case '[':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_open_square_brace;
 
 				break;
 
 			case ']':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_close_square_brace;
 
 				break;
 
 			case ',':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_comma;
 
 				break;
 
 			case '/':
-				if (*(m_cur+1) == '/')
+				if (*(cur+1) == '/')
 				{
-					m_cur += 2;
+					cur += 2;
 					m_cur_lexeme = lex_double_slash;
 				}
 				else
 				{
-					m_cur += 1;
+					cur += 1;
 					m_cur_lexeme = lex_slash;
 				}
 				break;
 		
 			case '.':
-				if (*(m_cur+1) == '.')
+				if (*(cur+1) == '.')
 				{
-					m_cur += 2;
+					cur += 2;
 					m_cur_lexeme = lex_double_dot;
 				}
-				else if (IS_CHARTYPEX(*(m_cur+1), ctx_digit))
+				else if (IS_CHARTYPEX(*(cur+1), ctx_digit))
 				{
-					m_cur_lexeme_contents.begin = m_cur; // .
+					m_cur_lexeme_contents.begin = cur; // .
 
-					++m_cur;
+					++cur;
 
-					while (IS_CHARTYPEX(*m_cur, ctx_digit)) m_cur++;
+					while (IS_CHARTYPEX(*cur, ctx_digit)) cur++;
 
-					m_cur_lexeme_contents.end = m_cur;
+					m_cur_lexeme_contents.end = cur;
 					
 					m_cur_lexeme = lex_number;
 				}
 				else
 				{
-					m_cur += 1;
+					cur += 1;
 					m_cur_lexeme = lex_dot;
 				}
 				break;
 
 			case '@':
-				m_cur += 1;
+				cur += 1;
 				m_cur_lexeme = lex_axis_attribute;
 
 				break;
@@ -1044,19 +1046,19 @@ namespace pugi
 			case '"':
 			case '\'':
 			{
-				char_t terminator = *m_cur;
+				char_t terminator = *cur;
 
-				++m_cur;
+				++cur;
 
-				m_cur_lexeme_contents.begin = m_cur;
-				while (*m_cur && *m_cur != terminator) m_cur++;
-				m_cur_lexeme_contents.end = m_cur;
+				m_cur_lexeme_contents.begin = cur;
+				while (*cur && *cur != terminator) cur++;
+				m_cur_lexeme_contents.end = cur;
 				
-				if (!*m_cur)
+				if (!*cur)
 					m_cur_lexeme = lex_none;
 				else
 				{
-					m_cur += 1;
+					cur += 1;
 					m_cur_lexeme = lex_quoted_string;
 				}
 
@@ -1064,9 +1066,9 @@ namespace pugi
 			}
 
 			case ':':
-				if (*(m_cur+1) == ':')
+				if (*(cur+1) == ':')
 				{
-					m_cur += 2;
+					cur += 2;
 					m_cur_lexeme = lex_double_colon;
 				}
 				else
@@ -1076,46 +1078,46 @@ namespace pugi
 				break;
 
 			default:
-				if (IS_CHARTYPEX(*m_cur, ctx_digit))
+				if (IS_CHARTYPEX(*cur, ctx_digit))
 				{
-					m_cur_lexeme_contents.begin = m_cur;
+					m_cur_lexeme_contents.begin = cur;
 
-					while (IS_CHARTYPEX(*m_cur, ctx_digit)) m_cur++;
+					while (IS_CHARTYPEX(*cur, ctx_digit)) cur++;
 				
-					if (*m_cur == '.')
+					if (*cur == '.')
 					{
-						m_cur++;
+						cur++;
 
-						while (IS_CHARTYPEX(*m_cur, ctx_digit)) m_cur++;
+						while (IS_CHARTYPEX(*cur, ctx_digit)) cur++;
 					}
 
-					m_cur_lexeme_contents.end = m_cur;
+					m_cur_lexeme_contents.end = cur;
 
 					m_cur_lexeme = lex_number;
 				}
-				else if (IS_CHARTYPEX(*m_cur, ctx_start_symbol))
+				else if (IS_CHARTYPEX(*cur, ctx_start_symbol))
 				{
-					m_cur_lexeme_contents.begin = m_cur;
+					m_cur_lexeme_contents.begin = cur;
 
-					while (IS_CHARTYPEX(*m_cur, ctx_symbol)) m_cur++;
+					while (IS_CHARTYPEX(*cur, ctx_symbol)) cur++;
 
-					if (m_cur[0] == ':')
+					if (cur[0] == ':')
 					{
-						if (m_cur[1] == '*') // namespace test ncname:*
+						if (cur[1] == '*') // namespace test ncname:*
 						{
-							m_cur += 2; // :*
+							cur += 2; // :*
 						}
-						else if (IS_CHARTYPEX(m_cur[1], ctx_symbol)) // namespace test qname
+						else if (IS_CHARTYPEX(cur[1], ctx_symbol)) // namespace test qname
 						{
-							m_cur++; // :
+							cur++; // :
 
-							while (IS_CHARTYPEX(*m_cur, ctx_symbol)) m_cur++;
+							while (IS_CHARTYPEX(*cur, ctx_symbol)) cur++;
 						}
 					}
 
-					m_cur_lexeme_contents.end = m_cur;
+					m_cur_lexeme_contents.end = cur;
 				
-					while (IS_CHARTYPEX(*m_cur, ctx_space)) ++m_cur;
+					while (IS_CHARTYPEX(*cur, ctx_space)) ++cur;
 
 					m_cur_lexeme = lex_string;
 				}
@@ -1124,6 +1126,8 @@ namespace pugi
 					throw xpath_exception("Unrecognized token");
 				}
 			}
+
+			m_cur = cur;
 		}
 
 		lexeme_t current() const
