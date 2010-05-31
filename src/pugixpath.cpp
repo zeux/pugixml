@@ -881,12 +881,6 @@ namespace pugi
 			return m_cur;
 		}
 		
-		void reset(const char_t* state)
-		{
-			m_cur = state;
-			next();
-		}
-
 		void next()
 		{
 			contents_clear();
@@ -3079,25 +3073,17 @@ namespace pugi
 	    {
 			if (m_lexer.current() == lex_slash)
 			{
-				// Save state for next lexeme - that is, whatever follows '/'
-				const char_t* state = 0; // gcc3 "variable might be used uninitialized in this function" bug workaround
-				state = m_lexer.state();
-				
 				m_lexer.next();
 				
-				xpath_ast_node* n = 0; // gcc3 "variable might be used uninitialized in this function" bug workaround
-				n = new (m_alloc.node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
-				
-				try
-				{
-					n = parse_relative_location_path(n);
-				}
-				catch (const xpath_exception&)
-				{
-					m_lexer.reset(state);
-				}
-				
-				return n;
+				xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
+
+				// relative location path can start from axis_attribute, dot, double_dot, multiply and string lexemes; any other lexeme means standalone root path
+				lexeme_t l = m_lexer.current();
+
+				if (l == lex_string || l == lex_axis_attribute || l == lex_dot || l == lex_double_dot || l == lex_multiply)
+					return parse_relative_location_path(n);
+				else
+					return n;
 			}
 			else if (m_lexer.current() == lex_double_slash)
 			{

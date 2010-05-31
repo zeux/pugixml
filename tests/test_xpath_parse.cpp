@@ -254,4 +254,19 @@ TEST(xpath_parse_jaxen_invalid)
 	}
 }
 
+TEST_XML(xpath_parse_absolute, "<div><s/></div>")
+{
+	CHECK_XPATH_NODESET(doc, STR("/")) % 1;
+
+	CHECK_XPATH_NODESET(doc, STR("/div/s")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("/ div /s")) % 3;
+	CHECK_XPATH_FAIL(STR("/ div 5"));
+
+	CHECK_XPATH_NODESET(doc, STR("/*/s")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("/ * /s")) % 3;
+	CHECK_XPATH_FAIL(STR("/ * 5"));
+
+	CHECK_XPATH_NODESET(doc, STR("/*[/]")) % 2;
+}
+
 #endif
