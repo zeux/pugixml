@@ -2675,6 +2675,10 @@ namespace pugi
 			}
 
 			throw xpath_exception("Unrecognized function or wrong parameter count");
+
+		#ifdef __DMC__	    	
+			return 0; // Digital Mars C++
+		#endif
 		}
 
 		axis_t parse_axis_name(const xpath_lexer_string& name, bool& specified)
@@ -2820,7 +2824,7 @@ namespace pugi
 
 			case lex_string:
 			{
-				xpath_ast_node* args[4] = {};
+				xpath_ast_node* args[4] = {0};
 				size_t argc = 0;
 				
 				xpath_lexer_string function = m_lexer.contents();
