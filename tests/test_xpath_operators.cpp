@@ -2,10 +2,9 @@
 
 #include "common.hpp"
 
-TEST_XML(xpath_operators_arithmetic, "<node><foo-bar>10</foo-bar><foo>2</foo><bar>3</bar></node>")
+TEST(xpath_operators_arithmetic)
 {
 	xml_node c;
-	xml_node n = doc.child(STR("node"));
 
 	// incorrect unary operator
 	CHECK_XPATH_FAIL(STR("-"));
@@ -43,6 +42,17 @@ TEST_XML(xpath_operators_arithmetic, "<node><foo-bar>10</foo-bar><foo>2</foo><ba
 	CHECK_XPATH_NUMBER(c, STR("2+-2"), 0);
 	CHECK_XPATH_NUMBER(c, STR("1-2-3"), -4);
 
+	// mod, from W3C standard
+	CHECK_XPATH_NUMBER(c, STR("5 mod 2"), 1);
+	CHECK_XPATH_NUMBER(c, STR("5 mod -2"), 1);
+	CHECK_XPATH_NUMBER(c, STR("-5 mod 2"), -1);
+	CHECK_XPATH_NUMBER(c, STR("-5 mod -2"), -1);
+}
+
+TEST(xpath_operators_arithmetic_specials)
+{
+	xml_node c;
+
 	// infinity/nan
 	CHECK_XPATH_STRING(c, STR("1 div 0"), STR("Infinity"));
 	CHECK_XPATH_STRING(c, STR("-1 div 0"), STR("-Infinity"));
@@ -53,12 +63,19 @@ TEST_XML(xpath_operators_arithmetic, "<node><foo-bar>10</foo-bar><foo>2</foo><ba
 	CHECK_XPATH_STRING(c, STR("1 div 0 + 100"), STR("Infinity"));
 	CHECK_XPATH_STRING(c, STR("-1 div 0 + 100"), STR("-Infinity"));
 	CHECK_XPATH_STRING(c, STR("0 div 0 + 100"), STR("NaN"));
+	
+	// unary - and multiplication clarifications from recommendations errata
+	CHECK_XPATH_STRING(c, STR("1 div -0"), STR("-Infinity"));
+	CHECK_XPATH_STRING(c, STR("-1 div -0"), STR("Infinity"));
+	CHECK_XPATH_STRING(c, STR("1 div (-0 * 1)"), STR("-Infinity"));
+	CHECK_XPATH_STRING(c, STR("-1 div (0 * -1)"), STR("Infinity"));
+	CHECK_XPATH_STRING(c, STR("1 div (-0 div 1)"), STR("-Infinity"));
+	CHECK_XPATH_STRING(c, STR("-1 div (0 div -1)"), STR("Infinity"));
+}
 
-	// mod, from W3C standard
-	CHECK_XPATH_NUMBER(c, STR("5 mod 2"), 1);
-	CHECK_XPATH_NUMBER(c, STR("5 mod -2"), 1);
-	CHECK_XPATH_NUMBER(c, STR("-5 mod 2"), -1);
-	CHECK_XPATH_NUMBER(c, STR("-5 mod -2"), -1);
+TEST_XML(xpath_operators_arithmetic_subtraction_parse, "<node><foo-bar>10</foo-bar><foo>2</foo><bar>3</bar></node>")
+{
+	xml_node n = doc.child(STR("node"));
 
 	// correct subtraction parsing, from W3C standard
 	CHECK_XPATH_NUMBER(n, STR("foo-bar"), 10);

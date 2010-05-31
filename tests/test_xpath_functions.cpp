@@ -81,6 +81,14 @@ TEST(xpath_number_floor)
 
 	// floor with 2 arguments
 	CHECK_XPATH_FAIL(STR("floor(1, 2)"));
+
+	// floor with argument 0 should return 0
+	CHECK_XPATH_STRING(c, STR("string(1 div floor(0))"), STR("Infinity"));
+
+	// floor with argument -0 should return -0
+#if !(defined(__APPLE__) && defined(__MACH__)) // MacOS X gcc 4.0.1 implements floor incorrectly (floor never returns -0)
+	CHECK_XPATH_STRING(c, STR("string(1 div floor(-0))"), STR("-Infinity"));
+#endif
 }
 
 TEST(xpath_number_ceiling)
@@ -102,9 +110,10 @@ TEST(xpath_number_ceiling)
 	// ceiling with 2 arguments
 	CHECK_XPATH_FAIL(STR("ceiling(1, 2)"));
 
-	// ceiling with argument in range (-1, -0] should result in minus zero
+	// ceiling with argument 0 should return 0
 	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(0))"), STR("Infinity"));
 
+	// ceiling with argument in range (-1, -0] should result in minus zero
 #if !(defined(__APPLE__) && defined(__MACH__)) // MacOS X gcc 4.0.1 implements ceil incorrectly (ceil never returns -0)
 	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(-0))"), STR("-Infinity"));
 	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(-0.1))"), STR("-Infinity"));
