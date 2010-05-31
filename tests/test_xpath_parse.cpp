@@ -162,6 +162,15 @@ TEST(xpath_parse_paths_valid)
         STR("id(\"pet\")/SELECT[@name=\"species\"]/OPTION[@selected]/@value"), STR("descendant::INPUT[@name=\"name\"]/@value"), STR("id(\"pet\")/INPUT[@name=\"gender\" and @checked]/@value"),
         STR("//TEXTAREA[@name=\"description\"]/text()"), STR("id(\"div1\")|id(\"div2\")|id(\"div3 div4 div5\")"), STR("//LI[1]"), STR("//LI[last()]/text()"), STR("//LI[position() mod 2]/@class"),
         STR("//text()[.=\"foo\"]"), STR("descendant-or-self::SPAN[position() > 2]"), STR("descendant::*[contains(@class,\" fruit \")]"),
+
+		// ajaxslt considers this path invalid, however I believe it's valid as per spec
+		STR("***"),
+
+		// Oasis MSFT considers this path invalid, however I believe it's valid as per spec
+		STR("**..**"),
+
+		// Miscellaneous
+		STR("..***..***.***.***..***..***..")
     };
 
 	for (size_t i = 0; i < sizeof(paths) / sizeof(paths[0]); ++i)
@@ -234,6 +243,9 @@ TEST(xpath_parse_jaxen_invalid)
 
 		// From haXe-xpath tests
 		STR("|/gjs"), STR("+3"), STR("/html/body/p != ---'div'/a"), STR(""), STR("@"), STR("#akf"), STR(",")
+
+		// Miscellaneous
+		STR("..."), STR("...."), STR("**"), STR("****"), STR("******"), STR("..***..***.***.***..***..***..*")
 	};
 
 	for (size_t i = 0; i < sizeof(paths) / sizeof(paths[0]); ++i)
