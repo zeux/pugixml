@@ -226,7 +226,7 @@ TEST(xpath_parse_paths_valid_unicode)
 	}
 }
 
-TEST(xpath_parse_jaxen_invalid)
+TEST(xpath_parse_invalid)
 {
     const char_t* paths[] =
 	{
@@ -245,7 +245,7 @@ TEST(xpath_parse_jaxen_invalid)
 		STR("|/gjs"), STR("+3"), STR("/html/body/p != ---'div'/a"), STR(""), STR("@"), STR("#akf"), STR(",")
 
 		// Miscellaneous
-		STR("..."), STR("...."), STR("**"), STR("****"), STR("******"), STR("..***..***.***.***..***..***..*")
+		STR("..."), STR("...."), STR("**"), STR("****"), STR("******"), STR("..***..***.***.***..***..***..*"), STR("/[1]")
 	};
 
 	for (size_t i = 0; i < sizeof(paths) / sizeof(paths[0]); ++i)
