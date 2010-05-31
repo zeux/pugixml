@@ -105,7 +105,7 @@ TEST(xpath_number_ceiling)
 	// ceiling with argument in range (-1, -0] should result in minus zero
 	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(0))"), STR("Infinity"));
 
-#if defined(__APPLE__) && defined(__MACH__) // MacOS X gcc 4.0.1 implements ceil incorrectly (ceil never returns -0)
+#if !(defined(__APPLE__) && defined(__MACH__)) // MacOS X gcc 4.0.1 implements ceil incorrectly (ceil never returns -0)
 	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(-0))"), STR("-Infinity"));
 	CHECK_XPATH_STRING(c, STR("string(1 div ceiling(-0.1))"), STR("-Infinity"));
 #endif
@@ -136,7 +136,7 @@ TEST(xpath_number_round)
 	// round with argument in range [-0.5, -0] should result in minus zero
 	CHECK_XPATH_STRING(c, STR("string(1 div round(0))"), STR("Infinity"));
 
-#if defined(__APPLE__) && defined(__MACH__) // MacOS X gcc 4.0.1 implements ceil incorrectly (ceil never returns -0)
+#if !(defined(__APPLE__) && defined(__MACH__)) // MacOS X gcc 4.0.1 implements ceil incorrectly (ceil never returns -0)
 	CHECK_XPATH_STRING(c, STR("string(1 div round(-0.5))"), STR("-Infinity"));
 	CHECK_XPATH_STRING(c, STR("string(1 div round(-0))"), STR("-Infinity"));
 	CHECK_XPATH_STRING(c, STR("string(1 div round(-0.1))"), STR("-Infinity"));
