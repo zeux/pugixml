@@ -297,31 +297,10 @@ namespace
 	
 	const char_t* convert_number_to_string_special(double value)
 	{
-	#if defined(_MSC_VER)
-		switch (_fpclass(value))
-		{
-		case _FPCLASS_SNAN:
-		case _FPCLASS_QNAN:
-			return PUGIXML_TEXT("NaN");
-
-		case _FPCLASS_NINF:
-			return PUGIXML_TEXT("-Infinity");
-
-		case _FPCLASS_NZ:
-		case _FPCLASS_PZ:
-			return PUGIXML_TEXT("0");
-
-		case _FPCLASS_PINF:
-			return PUGIXML_TEXT("Infinity");
-
-		default:
-			return 0;
-		}
-	#elif defined(__BORLANDC__) // _fpclass in BorlandC breaks fp flags
+	#if defined(_MSC_VER) || defined(__BORLANDC__)
+		if (_finite(value)) return (value == 0) ? PUGIXML_TEXT("0") : 0;
 		if (_isnan(value)) return PUGIXML_TEXT("NaN");
-		if (!_finite(value)) return PUGIXML_TEXT("-Infinity") + (value > 0);
-		if (value == 0) return PUGIXML_TEXT("0");
-		return 0;
+		return PUGIXML_TEXT("-Infinity") + (value > 0);
 	#elif defined(FP_NAN) && defined(FP_INFINITE) && defined(FP_ZERO)
 		switch (fpclassify(value))
 		{
