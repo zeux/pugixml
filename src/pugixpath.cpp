@@ -286,7 +286,7 @@ namespace
 	{
 	#if defined(_MSC_VER) || defined(__BORLANDC__)
 		return !!_isnan(value);
-	#elif defined(FP_NAN)
+	#elif defined(fpclassify) && defined(FP_NAN)
 		return fpclassify(value) == FP_NAN;
 	#else
 		// fallback
@@ -301,7 +301,7 @@ namespace
 		if (_finite(value)) return (value == 0) ? PUGIXML_TEXT("0") : 0;
 		if (_isnan(value)) return PUGIXML_TEXT("NaN");
 		return PUGIXML_TEXT("-Infinity") + (value > 0);
-	#elif defined(FP_NAN) && defined(FP_INFINITE) && defined(FP_ZERO)
+	#elif defined(fpclassify) && defined(FP_NAN) && defined(FP_INFINITE) && defined(FP_ZERO)
 		switch (fpclassify(value))
 		{
 		case FP_NAN:
