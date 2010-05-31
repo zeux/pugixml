@@ -28,6 +28,14 @@
 #	include <wchar.h>
 #endif
 
+// int32_t
+#if !defined(_MSC_VER) || _MSC_VER >= 1600
+#	include <stdint.h>
+#else
+typedef __int32 int32_t;
+#endif
+
+
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4127) // conditional expression is constant
 #	pragma warning(disable: 4702) // unreachable code
@@ -261,100 +269,83 @@ namespace
 		}
 	};
 	
-	/* From trio
-	 *
-	 * Endian-agnostic indexing macro.
-	 *
-	 * The value of internalEndianMagic, when converted into a 64-bit
-	 * integer, becomes 0x0706050403020100 (we could have used a 64-bit
-	 * integer value instead of a double, but not all platforms supports
-	 * that type). The value is automatically encoded with the correct
-	 * endianess by the compiler, which means that we can support any
-	 * kind of endianess. The individual bytes are then used as an index
-	 * for the IEEE 754 bit-patterns and masks.
-	 */
-	#define DOUBLE_INDEX(x) (((unsigned char *)&internal_endian_magic)[7-(x)])
-
-	static const double internal_endian_magic = 7.949928895127363e-275;
-
-	static const unsigned char ieee_754_exponent_mask[] = { 0x7F, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-	static const unsigned char ieee_754_mantissa_mask[] = { 0x00, 0x0F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-
-	static const unsigned char ieee_754_qnan_array[] = { 0x7F, 0xF8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-	
-	bool is_special(double value, bool& has_mantissa)
-	{
-		bool is_special_quantity = true;
-
-		has_mantissa = false;
-
-		for (unsigned int i = 0; i < sizeof(double); ++i)
-		{
-			unsigned char current = ((unsigned char *)&value)[DOUBLE_INDEX(i)];
-			
-			is_special_quantity = is_special_quantity && (current & ieee_754_exponent_mask[i]) == ieee_754_exponent_mask[i];
-			has_mantissa = has_mantissa || (current & ieee_754_mantissa_mask[i]) != 0;
-		}
-		
-		return is_special_quantity;
-	}
-
 	double gen_nan()
 	{
-#if FLT_RADIX == 2 && DBL_MAX_EXP == 1024 && DBL_MANT_DIG == 53
-		// IEEE 754
-		
-		double result = 0;
-
-		for (unsigned int i = 0; i < sizeof(double); ++i)
-		{
-			((unsigned char *)&result)[DOUBLE_INDEX(i)] = ieee_754_qnan_array[i];
-		}
-		
-		return result;
-#else
+	#if defined(__STDC_IEC_559__) || ((FLT_RADIX - 0 == 2) && (FLT_MAX_EXP - 0 == 128) && (FLT_MANT_DIG - 0 == 24))
+		union { float f; int32_t i; } u[sizeof(float) == sizeof(int32_t) ? 1 : -1];
+		u[0].i = 0x7fc00000;
+		return u[0].f;
+	#else
+		// fallback
 		const volatile double zero = 0.0;
 		return zero / zero;
-#endif
+	#endif
 	}
 	
 	bool is_nan(double value)
 	{
-#if defined(__USE_ISOC99)
-		return isnan(value);
-#elif (defined(_MSC_VER) || defined(__BORLANDC__)) && !defined(__COMO__)
+	#if defined(_MSC_VER) || defined(__BORLANDC__)
 		return !!_isnan(value);
-#elif FLT_RADIX == 2 && DBL_MAX_EXP == 1024 && DBL_MANT_DIG == 53
-		// IEEE 754
-
-		bool has_mantissa;
-		
-		bool is_special_quantity = is_special(value, has_mantissa);
-  
-		return (is_special_quantity && has_mantissa);
-#else
-		return value != value;
-#endif
+	#elif defined(FP_NAN)
+		return fpclassify(value) == FP_NAN;
+	#else
+		// fallback
+		const volatile double v = value;
+		return v != v;
+	#endif
 	}
 	
-	bool is_inf(double value)
+	const char_t* convert_number_to_string_special(double value)
 	{
-#if defined(__USE_ISOC99)
-		return !isfinite(value);
-#elif (defined(_MSC_VER) || defined(__BORLANDC__)) && !defined(__COMO__)
-		return !_finite(value);
-#elif FLT_RADIX == 2 && DBL_MAX_EXP == 1024 && DBL_MANT_DIG == 53
-		// IEEE 754
-  
-		bool has_mantissa;
-		
-		bool is_special_quantity = is_special(value, has_mantissa);
-  
-		return (is_special_quantity && !has_mantissa);
-#else
-		return value + 1 == value && value - 1 == value;
-#endif
+	#if defined(_MSC_VER)
+		switch (_fpclass(value))
+		{
+		case _FPCLASS_SNAN:
+		case _FPCLASS_QNAN:
+			return PUGIXML_TEXT("NaN");
+
+		case _FPCLASS_NINF:
+			return PUGIXML_TEXT("-Infinity");
+
+		case _FPCLASS_NZ:
+		case _FPCLASS_PZ:
+			return PUGIXML_TEXT("0");
+
+		case _FPCLASS_PINF:
+			return PUGIXML_TEXT("Infinity");
+
+		default:
+			return 0;
+		}
+	#elif defined(__BORLANDC__) // _fpclass in BorlandC breaks fp flags
+		if (_isnan(value)) return PUGIXML_TEXT("NaN");
+		if (!_finite(value)) return PUGIXML_TEXT("-Infinity") + (value > 0);
+		if (value == 0) return PUGIXML_TEXT("0");
+		return 0;
+	#elif defined(FP_NAN) && defined(FP_INFINITE) && defined(FP_ZERO)
+		switch (fpclassify(value))
+		{
+		case FP_NAN:
+			return PUGIXML_TEXT("NaN");
+
+		case FP_INFINITE:
+			return PUGIXML_TEXT("-Infinity") + (value > 0);
+
+		case FP_ZERO:
+			return PUGIXML_TEXT("0");
+
+		default:
+			return 0;
+		}
+	#else
+		// fallback
+		const volatile double v = value;
+
+		if (v == 0) return PUGIXML_TEXT("0");
+		if (v != v) return PUGIXML_TEXT("NaN");
+		if (v * 2 == v) return PUGIXML_TEXT("-Infinity") + (value > 0);
+		return 0;
+	#endif
 	}
 	
 	bool convert_number_to_boolean(double value)
@@ -364,9 +355,8 @@ namespace
 	
 	string_t convert_number_to_string(double value)
 	{
-		if (is_nan(value)) return PUGIXML_TEXT("NaN");
-		else if (is_inf(value)) return value < 0 ? PUGIXML_TEXT("-Infinity") : PUGIXML_TEXT("Infinity");
-		else if (value == 0) return PUGIXML_TEXT("0");
+		const char_t* special = convert_number_to_string_special(value);
+		if (special) return special;
 		
 		char buf[512];
 		sprintf(buf, "%f", value);
