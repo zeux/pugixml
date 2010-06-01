@@ -518,14 +518,6 @@ namespace
 		return new (memory) xml_node_struct(page, type);
 	}
 
-	inline xml_document_struct* allocate_document(xml_allocator& alloc)
-	{
-		xml_memory_page* page;
-		void* memory = alloc.allocate_memory(sizeof(xml_document_struct), page);
-
-		return new (memory) xml_document_struct(page);
-	}
-
 	inline void destroy_attribute(xml_attribute_struct* a, xml_allocator& alloc)
 	{
 		uintptr_t header = a->header;
