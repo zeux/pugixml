@@ -232,7 +232,7 @@ namespace pugi
 	 *
 	 * \deprecated This flag is deprecated
  	 */
-#ifndef __INTEL_COMPILER
+#if !defined(__INTEL_COMPILER) || __INTEL_COMPILER > 800
 	PUGIXML_DEPRECATED
 #endif
  	const unsigned int parse_wnorm_attribute	= 0x0040;
@@ -303,7 +303,7 @@ namespace pugi
 	const unsigned int format_write_bom = 0x02;
 
 	/// \deprecated This constant is deprecated and will be removed in future versions; use format_write_bom instead
-#ifndef __INTEL_COMPILER
+#if !defined(__INTEL_COMPILER) || __INTEL_COMPILER > 800
 	PUGIXML_DEPRECATED
 #endif
 	const unsigned int format_write_bom_utf8 = format_write_bom;

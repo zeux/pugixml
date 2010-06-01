@@ -11,6 +11,10 @@
  * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
  */
 
+#ifdef _MSC_VER
+#	define _CRT_SECURE_NO_WARNINGS // disable deprecation warnings for CRT functions
+#endif
+
 #include "pugixml.hpp"
 
 #if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_EXCEPTIONS)
@@ -34,7 +38,6 @@
 
 #ifdef _MSC_VER
 #	pragma warning(disable: 4127) // conditional expression is constant
-#	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
 #ifdef __BORLANDC__
