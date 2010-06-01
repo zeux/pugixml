@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define _SCL_SECURE_NO_WARNINGS
 
 #include "common.hpp"
 
@@ -541,7 +542,7 @@ struct test_walker: xml_tree_walker
 
 	#ifdef PUGIXML_WCHAR_MODE
 		wchar_t wbuf[32];
-		std::copy(buf, buf + strlen(buf) + 1, wbuf);
+		std::copy(buf, buf + strlen(buf) + 1, &wbuf[0]);
 
 		return std::basic_string<pugi::char_t>(wbuf);
 	#else

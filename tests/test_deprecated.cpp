@@ -12,6 +12,9 @@
 #	endif
 #endif
 
+#ifdef __INTEL_COMPILER
+#	pragma warning(disable: 1478)
+#endif
 
 #include <string.h>
 

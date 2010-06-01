@@ -11,7 +11,9 @@ sub prettytoolset
 	return "Sun C++ 5.10" if ($toolset eq 'suncc');
 
 	return "Intel C++ Compiler $1.0" if ($toolset =~ /^ic(\d+)$/);
-	return "MinGW32 (GCC $1.$2)" if ($toolset =~ /^mingw(\d)(\d)$/);
+	return "Intel C++ Compiler $1.0 x64" if ($toolset =~ /^ic(\d+)_x64$/);
+	return "MinGW (GCC $1.$2)" if ($toolset =~ /^mingw(\d)(\d)$/);
+	return "MinGW (GCC $1.$2) x64" if ($toolset =~ /^mingw(\d)(\d)_x64$/);
 	return "Microsoft Visual C++ 7.1" if ($toolset eq 'msvc71');
 	return "Microsoft Visual C++ $1.0" if ($toolset =~ /^msvc(\d+)$/);
 	return "Microsoft Visual C++ $1.0 x64" if ($toolset =~ /^msvc(\d+)_x64$/);

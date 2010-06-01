@@ -139,15 +139,47 @@ else if ( $(toolset:I=^msvc) )
 	{
 	}
 }
-else if ( $(toolset) = "ic8" )
+else if ( $(toolset:I=^ic) )
 {
-	msvc = "msvc7" ;
+	if ( $(toolset) = ic8 || $(toolset) = ic9 )
+	{
+		msvc = "msvc71" ;
+	}
+	else
+	{
+		msvc = "msvc8" ;
+	}
+
+	if ( $(toolset) = ic11 )
+	{
+		postfix = "\\ia32" ;
+		CCFLAGS += /fp:precise ;
+	}
+	else if ( $(toolset) = ic11_x64 )
+	{
+		postfix = "\\intel64" ;
+		CCFLAGS += /fp:precise ;
+	}
+	else
+	{
+		postfix = "" ;
+	}
+
+	if ( $(toolset:I=_x64$) )
+	{
+		msvc_postfix = "\\amd64" ;
+		LDFLAGS += /MACHINE:X64 ;
+	}
+	else
+	{
+		msvc_postfix = "" ;
+	}
 
 	CCFLAGS += /D$(defines) ;
 
 	if ( $(configuration) = "debug" )
 	{
-		CCFLAGS += /D_DEBUG /MTd ;
+		CCFLAGS += /D_DEBUG /Od /MTd ;
 	}
 	else
 	{
@@ -161,7 +193,8 @@ else if ( $(toolset) = "ic8" )
 
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin\icl.exe" /W4 /WX /Wport /Qwd981,444,280,383,909,304,167,171,177,1419 /I"%$(msvc)_PATH%\include" /I"%$(msvc)_PATH%\PlatformSDK\Include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		set PATH=%$(msvc)_PATH%\bin
+		"%$(toolset)_PATH%\bin$(postfix)\icl.exe" /W3 /WX /Qvec_report0 /I"%$(msvc)_PATH%\include" /I"%$(msvc)_PATH%\PlatformSDK\Include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction
@@ -171,7 +204,7 @@ else if ( $(toolset) = "ic8" )
 	
 	actions LinkAction
 	{
-		"%$(msvc)_PATH%\bin\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib" /LIBPATH:"%$(msvc)_PATH%\lib" /LIBPATH:"%$(msvc)_PATH%\PlatformSDK\lib" $(LDFLAGS)
+		"%$(msvc)_PATH%\bin\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(msvc)_PATH%\lib$(msvc_postfix)" /LIBPATH:"%$(msvc)_PATH%\PlatformSDK\lib$(msvc_postfix)" $(LDFLAGS)
 	}
 	
 	actions CoverageAction
