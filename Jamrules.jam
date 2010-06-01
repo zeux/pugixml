@@ -153,12 +153,10 @@ else if ( $(toolset:I=^ic) )
 	if ( $(toolset) = ic11 )
 	{
 		postfix = "\\ia32" ;
-		CCFLAGS += /fp:precise ;
 	}
 	else if ( $(toolset) = ic11_x64 )
 	{
 		postfix = "\\intel64" ;
-		CCFLAGS += /fp:precise ;
 	}
 	else
 	{
@@ -176,6 +174,11 @@ else if ( $(toolset:I=^ic) )
 	}
 
 	CCFLAGS += /D$(defines) ;
+
+	if ( $(toolset) != ic8 )
+	{
+		CCFLAGS += /fp:precise ;
+	}
 
 	if ( $(configuration) = "debug" )
 	{
