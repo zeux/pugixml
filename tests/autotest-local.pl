@@ -43,7 +43,13 @@ print "### autotest begin " . scalar localtime() . "\n";
 
 foreach $toolset (@toolsets)
 {
-	my $cmdline = "jam toolset=$toolset";
+	my $cmdline = "jam";
+
+	# parallel build on non-windows platforms (since jam can't detect processor count)
+	$cmdline .= " -j6" if ($^O !~ /MSWin/);
+	
+	# add toolset
+	$cmdline .= " toolset=$toolset";
 
 	# add configurations
 	$cmdline .= " configuration=" . join(',', @configurations);
