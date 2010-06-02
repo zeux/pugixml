@@ -27,10 +27,12 @@ $fast = (shift eq 'fast');
 @toolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64) : ($^O =~ /solaris/) ? (suncc) : (&gcctoolset());
 @configurations = (debug, release);
 @defines = (PUGIXML_NO_XPATH, PUGIXML_NO_EXCEPTIONS, PUGIXML_NO_STL, PUGIXML_WCHAR_MODE);
+$stddefine = 'PUGIXML_STANDARD';
 
 if ($fast)
 {
 	@defines = (PUGIXML_WCHAR_MODE);
+	@configurations = (debug);
 }
 
 @definesets = permute(@defines);
@@ -41,35 +43,69 @@ print "### autotest begin " . scalar localtime() . "\n";
 
 foreach $toolset (@toolsets)
 {
-	foreach $configuration (@configurations)
+	my $cmdline = "jam toolset=$toolset";
+
+	# add configurations
+	$cmdline .= " configuration=" . join(',', @configurations);
+
+	# add definesets
+	$cmdline .= " defines=$stddefine";
+
+	foreach $defineset (@definesets)
 	{
-		foreach $defineset (@definesets)
+		if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_EXCEPTIONS/) { next; }
+		if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_STL/) { next; }
+
+		$cmdline .= ";$defineset" if ($defineset ne '');
+
+		# any configuration with prepare but without result is treated as failed
+		foreach $configuration (@configurations)
 		{
-			if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_EXCEPTIONS/) { next; }
-			if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_STL/) { next; }
-
-			print STDERR "*** testing $toolset/$configuration ($defineset) ... ***\n";
-
-			# launch command
-			my $cmdline = "jam toolset=$toolset configuration=$configuration defines=$defineset";
-	
-			print "### autotest launch $cmdline\n";
-
-			my $coverage = `$cmdline coverage`;
-			my $result = $? >> 8;
-
-			# print build output
-			print $coverage;
-
-			# parse coverage
-			my $coverage_pugixml = $1 if ($coverage =~ /pugixml\.cpp' executed:([^%]+)%/);
-			my $coverage_pugixpath = $1 if ($coverage =~ /pugixpath\.cpp' executed:([^%]+)%/);
-	
-			# print build report
-			print "### autotest $Config{archname} $toolset $configuration [$defineset] result $result $coverage_pugixml $coverage_pugixpath\n";
+			print "### autotest $Config{archname} $toolset $configuration [$defineset] prepare\n";
 		}
+	}
 
-		last if ($fast);
+	print STDERR "*** testing $toolset... ***\n";
+
+	# launch command
+	print "### autotest launch $cmdline\n";
+
+	my $coverage = `$cmdline autotest=on coverage`;
+
+	# parse build output
+	foreach (split /\n/, $coverage)
+	{
+		### autotest release [wchar] success
+		if (/^### autotest (\S+) \[(.*?)\] success/)
+		{
+			my $configuration = $1;
+			my $defineset = ($2 eq $stddefine) ? '' : $2;
+
+			print "### autotest $Config{archname} $toolset $configuration [$defineset] success\n";
+		}
+		### autotest release [wchar] gcov
+		elsif (/^### autotest (\S+) \[(.*?)\] gcov/)
+		{
+			my $configuration = $1;
+			my $defineset = ($2 eq $stddefine) ? '' : $2;
+			my $file;
+
+			$file = "pugixml $1" if (/pugixml\.cpp' executed:([^%]+)%/);
+			$file = "pugixpath $1" if (/pugixpath\.cpp' executed:([^%]+)%/);
+
+			if (defined($file))
+			{
+				print "### autotest $Config{archname} $toolset $configuration [$defineset] coverage $file\n";
+			}
+			else
+			{
+				print "$_\n";
+			}
+		}
+		else
+		{
+			print "$_\n";
+		}
 	}
 }
 

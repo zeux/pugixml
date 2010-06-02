@@ -33,37 +33,73 @@ if ( ! $(configuration) )
 	configuration = "debug" ;
 }
 
-# split defines into list
-defines = [ Split $(defines) : ',' ] ;
-
-# options
-if ( $(defines) )
+if ( ! $(defines) )
 {
-	BUILD = build/$(toolset)/$(defines:J=_)/$(configuration) ;
-}
-else
-{
-	BUILD = build/$(toolset)/standard/$(configuration) ;
+	defines = "PUGIXML_STANDARD" ;
 }
 
+# coverage options
 if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 {
 	CCFLAGS = -fprofile-arcs -ftest-coverage ;
 	LDFLAGS = -fprofile-arcs ;
 	GCOVFLAGS = -n ;
-
-	GCOVFLAGS += -o $(BUILD)/src ; # because stupid gcov can't find files via relative paths
 }
+
+# build folder
+BUILD = build ;
+
+# enable dependency cache
+DEPCACHE.standard = $(BUILD)/.depcache ;
 
 # rules
 include "Jamrules.jam" ;
 
-# enable dependency cache
-DEPCACHE.standard = build/.depcache ;
+# split define sets into list
+local DEFINESETS = [ Split $(defines) : ';' ] ;
 
-# targets
-Library pugixml : src/pugixml.cpp src/pugixpath.cpp ;
-Application tests : [ Glob tests : *.cpp ] : pugixml ;
-Test run_tests : tests ;
-Coverage coverage : pugixml ;
-Depends coverage : run_tests ;
+# split configurations into list
+local CONFIGURATIONS = [ Split $(configuration) : ',' ] ;
+
+for CONFIG in $(CONFIGURATIONS)
+{
+	for DEFINESET in $(DEFINESETS)
+	{
+		local DEFINES = [ Split $(DEFINESET) : ',' ] ;
+
+		# build folder
+		local CFGBUILD = $(BUILD)/$(toolset)/$(DEFINES:J=_)/$(CONFIG) ;
+
+		# compilation options
+		local CFGFLAGS = $(CCFLAGS) [ GetCFlags $(CONFIG) : $(DEFINES) ] ;
+
+		# build library
+		local PUGIXML = $(CFGBUILD)/pugixml.lib ;
+		Library $(PUGIXML) : src/pugixml.cpp src/pugixpath.cpp : $(CFGFLAGS) ;
+		Alias pugixml : $(PUGIXML) ;
+
+		# build tests
+		local TESTS = $(CFGBUILD)/tests.exe ;
+		Application $(TESTS) : [ Glob tests : *.cpp ] : $(CFGFLAGS) : $(PUGIXML) ;
+		Alias tests : $(TESTS) ;
+
+		# run tests
+		Test $(TESTS)_run : $(TESTS) ;
+		Alias run_tests : $(TESTS)_run ;
+
+		# gather coverage
+		Coverage $(TESTS)_coverage : $(PUGIXML) ;
+		Alias coverage : $(TESTS)_coverage ;
+
+		GCOVFLAGS on $(TESTS)_coverage = $(GCOVFLAGS) -o $(CFGBUILD)/src ; # because stupid gcov can't find files via relative paths
+
+		# add special autotest markers to build log
+		if $(autotest)
+		{
+			COVPREFIX on $(TESTS)_coverage = "### autotest $(CONFIG) [$(DEFINESET)]" ;
+		}
+
+		# gather coverage after tests run
+		Depends $(TESTS)_coverage : $(TESTS)_run ;
+	}
+}

@@ -58,18 +58,29 @@ sub insertindex
 while (<>)
 {
 	### autotest i386-freebsd-64int gcc release [wchar] result 0 97.78 98.85
-	if (/^### autotest (\S+) (\S+) (\S+) \[(.*?)\] result (\S+) (\S*) (\S*)/)
+	if (/^### autotest (\S+) (\S+) (\S+) \[(.*?)\] (.*)/)
 	{
-		my ($platform, $toolset, $configuration, $defineset, $result, $coverage_pugixml, $coverage_pugixpath) = ($1, $2, $3, $4, $5, $6, $7);
-
-		die "Detected duplicate build information $_\n" if defined $results{"$toolset $platform"}{$configuration}{$defineset};
+		my ($platform, $toolset, $configuration, $defineset, $info) = ($1, $2, $3, $4, $5);
 
 		my $fulltool = &prettyplatform($platform) . ' ' . &prettytoolset($toolset);
 		my $fullconf = "$configuration $defineset";
 
-		$results{$fulltool}{$fullconf}{result} = $result;
-		$results{$fulltool}{$fullconf}{coverage_pugixml} = $coverage_pugixml;
-		$results{$fulltool}{$fullconf}{coverage_pugixpath} = $coverage_pugixpath;
+		if ($info =~ /^prepare/)
+		{
+			$results{$fulltool}{$fullconf}{result} = 1;
+		}
+		elsif ($info =~ /^success/)
+		{
+			$results{$fulltool}{$fullconf}{result} = 0;
+		}
+		elsif ($info =~ /^coverage (\S+) (\S+)/)
+		{
+			$results{$fulltool}{$fullconf}{"coverage_$1"} = $2;
+		}
+		else
+		{
+			print STDERR "Unrecognized autotest infoline $_";
+		}
 
 		&insertindex(\%toolsets, $fulltool);
 
