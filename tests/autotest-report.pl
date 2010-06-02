@@ -87,6 +87,17 @@ while (<>)
 		$defines{$_} = 1 foreach (split /,/, $defineset);
 		&insertindex(\%configurations, $fullconf);
 	}
+	elsif (/^### autotest revision (\d+)/)
+	{
+		if (defined $revision && $revision != $1)
+		{
+			print STDERR "Autotest build report contains several revisions: $revision, $1\n";
+		}
+		else
+		{
+			$revision = $1;
+		}
+	}
 }
 
 # make arrays of toolsets and configurations
@@ -168,6 +179,6 @@ $date = localtime;
 
 print <<END;
 </table><br>
-Generated on $date
+Generated on $date from Subversion r$revision
 </body></html>
 END

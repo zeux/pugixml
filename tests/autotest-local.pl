@@ -39,6 +39,10 @@ if ($fast)
 
 print "### autotest begin " . scalar localtime() . "\n";
 
+# print SVN revision info
+print "### autotest revision $1\n" if (`svn info` =~ /Revision:\s+(\d+)/);
+
+# build all configurations
 %results = ();
 
 foreach $toolset (@toolsets)
