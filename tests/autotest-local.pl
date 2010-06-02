@@ -76,10 +76,10 @@ foreach $toolset (@toolsets)
 	# launch command
 	print "### autotest launch $cmdline\n";
 
-	my $coverage = `$cmdline autotest=on coverage`;
+	open PIPE, "$cmdline autotest=on coverage |" || die "$cmdline failed: $!\n";
 
 	# parse build output
-	foreach (split /\n/, $coverage)
+	while (<PIPE>)
 	{
 		### autotest release [wchar] success
 		if (/^### autotest (\S+) \[(.*?)\] success/)
@@ -105,14 +105,16 @@ foreach $toolset (@toolsets)
 			}
 			else
 			{
-				print "$_\n";
+				print;
 			}
 		}
 		else
 		{
-			print "$_\n";
+			print;
 		}
 	}
+
+	close PIPE;
 }
 
 print "### autotest end " . scalar localtime() . "\n";
