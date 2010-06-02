@@ -209,12 +209,14 @@ TEST_XML(document_save_declaration, "<node/>")
 
 TEST_XML(document_save_file, "<node/>")
 {
-	CHECK(doc.save_file("tests/data/output.xml"));
+	const char* path = tmpnam(0);
 
-	CHECK(doc.load_file("tests/data/output.xml", pugi::parse_default | pugi::parse_declaration));
+	CHECK(doc.save_file(path));
+
+	CHECK(doc.load_file(path, pugi::parse_default | pugi::parse_declaration));
 	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node />"));
 
-	unlink("tests/data/output.xml");
+	unlink(path);
 }
 
 TEST_XML(document_save_file_error, "<node/>")
