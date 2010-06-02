@@ -56,7 +56,7 @@ DEPCACHE.standard = $(BUILD)/.depcache ;
 include "Jamrules.jam" ;
 
 # split define sets into list
-local DEFINESETS = [ Split $(defines) : ';' ] ;
+local DEFINESETS = [ Split $(defines) : ':' ] ;
 
 # split configurations into list
 local CONFIGURATIONS = [ Split $(configuration) : ',' ] ;

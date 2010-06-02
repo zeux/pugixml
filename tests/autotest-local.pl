@@ -62,7 +62,7 @@ foreach $toolset (@toolsets)
 		if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_EXCEPTIONS/) { next; }
 		if ($defineset !~ /NO_XPATH/ && $defineset =~ /NO_STL/) { next; }
 
-		$cmdline .= ";$defineset" if ($defineset ne '');
+		$cmdline .= ":$defineset" if ($defineset ne '');
 
 		# any configuration with prepare but without result is treated as failed
 		foreach $configuration (@configurations)
