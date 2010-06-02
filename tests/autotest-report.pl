@@ -109,8 +109,8 @@ $configurationarray[$configurations{$_}] = $_ foreach (keys %configurations);
 
 # print header
 $stylesheet = <<END;
-table.autotest { border: 1px solid; border-left: none; border-top: none; }
-table.autotest td { border: 1px solid; border-right: none; border-bottom: none; }
+table.autotest { border: 1px solid black; border-left: none; border-top: none; }
+table.autotest td { border: 1px solid black; border-right: none; border-bottom: none; }
 END
 
 print <<END;
