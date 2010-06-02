@@ -209,14 +209,25 @@ TEST_XML(document_save_declaration, "<node/>")
 
 TEST_XML(document_save_file, "<node/>")
 {
+#ifdef __unix
+	char path[] = "/tmp/pugiXXXXXX";
+
+	int fd = mkstemp(path);
+	CHECK(fd != -1);
+#else
 	const char* path = tmpnam(0);
+#endif
 
 	CHECK(doc.save_file(path));
 
 	CHECK(doc.load_file(path, pugi::parse_default | pugi::parse_declaration));
 	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node />"));
 
-	unlink(path);
+	CHECK(unlink(path) == 0);
+
+#ifdef __unix
+	CHECK(close(fd) == 0);
+#endif
 }
 
 TEST_XML(document_save_file_error, "<node/>")
