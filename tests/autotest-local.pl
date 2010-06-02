@@ -81,16 +81,16 @@ foreach $toolset (@toolsets)
 	# parse build output
 	while (<PIPE>)
 	{
-		### autotest release [wchar] success
-		if (/^### autotest (\S+) \[(.*?)\] success/)
+		# ... autotest release [wchar] success
+		if (/^\.\.\. autotest (\S+) \[(.*?)\] success/)
 		{
 			my $configuration = $1;
 			my $defineset = ($2 eq $stddefine) ? '' : $2;
 
 			print "### autotest $Config{archname} $toolset $configuration [$defineset] success\n";
 		}
-		### autotest release [wchar] gcov
-		elsif (/^### autotest (\S+) \[(.*?)\] gcov/)
+		# ... autotest release [wchar] gcov
+		elsif (/^\.\.\. autotest (\S+) \[(.*?)\] gcov/)
 		{
 			my $configuration = $1;
 			my $defineset = ($2 eq $stddefine) ? '' : $2;

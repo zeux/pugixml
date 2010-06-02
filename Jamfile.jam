@@ -96,7 +96,7 @@ for CONFIG in $(CONFIGURATIONS)
 		# add special autotest markers to build log
 		if $(autotest)
 		{
-			COVPREFIX on $(TESTS)_coverage = "### autotest $(CONFIG) [$(DEFINESET)]" ;
+			COVPREFIX on $(TESTS)_coverage = "... autotest $(CONFIG) [$(DEFINESET)]" ;
 		}
 
 		# gather coverage after tests run
