@@ -52,8 +52,6 @@ namespace pugi
 {
 	namespace impl
 	{
-		size_t strlen(const char_t* s);
-		void strcpy(char_t* dst, const char_t* src);
 		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count);
 		void widen_ascii(wchar_t* dest, const char* source);
 	}

@@ -99,7 +99,6 @@ namespace pugi
 	namespace impl
 	{
 		size_t strlen(const char_t* s);
-		void strcpy(char_t* dst, const char_t* src);
 		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count);
 		void widen_ascii(wchar_t* dest, const char* source);
 	}
@@ -117,16 +116,6 @@ namespace pugi
 			return wcslen(s);
 		#else
 			return ::strlen(s);
-		#endif
-		}
-
-		// Copy one string into another
-		void strcpy(char_t* dst, const char_t* src)
-		{
-		#ifdef PUGIXML_WCHAR_MODE
-			wcscpy(dst, src);
-		#else
-			::strcpy(dst, src);
 		#endif
 		}
 
@@ -1336,7 +1325,7 @@ namespace
 
 		if (dest && impl::strlen(dest) >= source_length)
 		{
-			impl::strcpy(dest, source);
+			memcpy(dest, source, (source_length + 1) * sizeof(char_t));
 			
 			return true;
 		}
@@ -1347,7 +1336,7 @@ namespace
 			char_t* buf = alloc->allocate_string(source_length + 1);
 			if (!buf) return false;
 
-			impl::strcpy(buf, source);
+			memcpy(buf, source, (source_length + 1) * sizeof(char_t));
 
 			if (header & header_mask) alloc->deallocate_string(dest);
 			
