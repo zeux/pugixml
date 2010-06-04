@@ -935,7 +935,7 @@ namespace
 	{
 		ct_parse_pcdata = 1,	// \0, &, \r, <
 		ct_parse_attr = 2,		// \0, &, \r, ', "
-		ct_parse_attr_ws = 4,	// \0, &, \r, ', ", \n, space, tab
+		ct_parse_attr_ws = 4,	// \0, &, \r, ', ", \n, tab
 		ct_space = 8,			// \r, \n, space, tab
 		ct_parse_cdata = 16,	// \0, ], >, \r
 		ct_parse_comment = 32,	// \0, -, >, \r
@@ -947,7 +947,7 @@ namespace
 	{
 		55,  0,   0,   0,   0,   0,   0,   0,      0,   12,  12,  0,   0,   63,  0,   0,   // 0-15
 		0,   0,   0,   0,   0,   0,   0,   0,      0,   0,   0,   0,   0,   0,   0,   0,   // 16-31
-		12,  0,   6,   0,   0,   0,   7,   6,      0,   0,   0,   0,   0,   96,  64,  0,   // 32-47
+		8,   0,   6,   0,   0,   0,   7,   6,      0,   0,   0,   0,   0,   96,  64,  0,   // 32-47
 		64,  64,  64,  64,  64,  64,  64,  64,     64,  64,  192, 0,   1,   0,   48,  0,   // 48-63
 		0,   192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 192, 192, 192, 192, 192, // 64-79
 		192, 192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 0,   0,   16,  0,   192, // 80-95
@@ -1019,19 +1019,6 @@ namespace
 
 	template <bool _1, bool _2> const bool opt2_to_type<_1, _2>::o1 = _1;
 	template <bool _1, bool _2> const bool opt2_to_type<_1, _2>::o2 = _2;
-
-	template <bool _1, bool _2, bool _3, bool _4> struct opt4_to_type
-	{
-		static const bool o1;
-		static const bool o2;
-		static const bool o3;
-		static const bool o4;
-	};
-
-	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o1 = _1;
-	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o2 = _2;
-	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o3 = _3;
-	template <bool _1, bool _2, bool _3, bool _4> const bool opt4_to_type<_1, _2, _3, _4>::o4 = _4;
 
 	bool is_little_endian()
 	{
@@ -1628,19 +1615,16 @@ namespace
 
 	typedef char_t* (*strconv_attribute_t)(char_t*, char_t);
 	
-	template <typename opt4> struct strconv_attribute_impl
+	template <typename opt1> struct strconv_attribute_impl
 	{
-		static char_t* parse(char_t* s, char_t end_quote)
+		static char_t* parse_wnorm(char_t* s, char_t end_quote)
 		{
-			const bool opt_wconv = opt4::o1;
-			const bool opt_wnorm = opt4::o2;
-			const bool opt_eol = opt4::o3;
-			const bool opt_escape = opt4::o4;
+			const bool opt_escape = opt1::o1;
 
 			gap g;
 
 			// trim leading whitespaces
-			if (opt_wnorm && IS_CHARTYPE(*s, ct_space))
+			if (IS_CHARTYPE(*s, ct_space))
 			{
 				char_t* str = s;
 				
@@ -1652,22 +1636,18 @@ namespace
 
 			while (true)
 			{
-				while (!IS_CHARTYPE(*s, (opt_wnorm || opt_wconv) ? ct_parse_attr_ws : ct_parse_attr)) ++s;
+				while (!IS_CHARTYPE(*s, ct_parse_attr_ws | ct_space)) ++s;
 				
 				if (*s == end_quote)
 				{
 					char_t* str = g.flush(s);
 					
-					if (opt_wnorm)
-					{
-						do *str-- = 0;
-						while (IS_CHARTYPE(*str, ct_space));
-					}
-					else *str = 0;
+					do *str-- = 0;
+					while (IS_CHARTYPE(*str, ct_space));
 				
 					return s + 1;
 				}
-				else if (opt_wnorm && IS_CHARTYPE(*s, ct_space))
+				else if (IS_CHARTYPE(*s, ct_space))
 				{
 					*s++ = ' ';
 		
@@ -1679,21 +1659,73 @@ namespace
 						g.push(s, str - s);
 					}
 				}
-				else if (opt_wconv && IS_CHARTYPE(*s, ct_space))
+				else if (opt_escape && *s == '&')
 				{
-					if (opt_eol)
+					s = strconv_escape(s, g);
+				}
+				else if (!*s)
+				{
+					return 0;
+				}
+				else ++s;
+			}
+		}
+
+		static char_t* parse_wconv(char_t* s, char_t end_quote)
+		{
+			const bool opt_escape = opt1::o1;
+
+			gap g;
+
+			while (true)
+			{
+				while (!IS_CHARTYPE(*s, ct_parse_attr_ws)) ++s;
+				
+				if (*s == end_quote)
+				{
+					*g.flush(s) = 0;
+				
+					return s + 1;
+				}
+				else if (IS_CHARTYPE(*s, ct_space))
+				{
+					if (*s == '\r')
 					{
-						if (*s == '\r')
-						{
-							*s++ = ' ';
-					
-							if (*s == '\n') g.push(s, 1);
-						}
-						else *s++ = ' ';
+						*s++ = ' ';
+				
+						if (*s == '\n') g.push(s, 1);
 					}
 					else *s++ = ' ';
 				}
-				else if (opt_eol && *s == '\r')
+				else if (opt_escape && *s == '&')
+				{
+					s = strconv_escape(s, g);
+				}
+				else if (!*s)
+				{
+					return 0;
+				}
+				else ++s;
+			}
+		}
+
+		static char_t* parse_eol(char_t* s, char_t end_quote)
+		{
+			const bool opt_escape = opt1::o1;
+
+			gap g;
+
+			while (true)
+			{
+				while (!IS_CHARTYPE(*s, ct_parse_attr)) ++s;
+				
+				if (*s == end_quote)
+				{
+					*g.flush(s) = 0;
+				
+					return s + 1;
+				}
+				else if (*s == '\r')
 				{
 					*s++ = '\n';
 					
@@ -1710,30 +1742,58 @@ namespace
 				else ++s;
 			}
 		}
+
+		static char_t* parse_simple(char_t* s, char_t end_quote)
+		{
+			const bool opt_escape = opt1::o1;
+
+			gap g;
+
+			while (true)
+			{
+				while (!IS_CHARTYPE(*s, ct_parse_attr)) ++s;
+				
+				if (*s == end_quote)
+				{
+					*g.flush(s) = 0;
+				
+					return s + 1;
+				}
+				else if (opt_escape && *s == '&')
+				{
+					s = strconv_escape(s, g);
+				}
+				else if (!*s)
+				{
+					return 0;
+				}
+				else ++s;
+			}
+		}
 	};
 
 	strconv_attribute_t get_strconv_attribute(unsigned int optmask)
 	{
-		STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20 && parse_wconv_attribute == 0x80);
+		STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20 && parse_wconv_attribute == 0x40);
 		
 		switch ((optmask >> 4) & 15) // get bitmask for flags (wconv wnorm eol escapes)
 		{
-		case 0:  return strconv_attribute_impl<opt4_to_type<0, 0, 0, 0> >::parse;
-		case 1:  return strconv_attribute_impl<opt4_to_type<0, 0, 0, 1> >::parse;
-		case 2:  return strconv_attribute_impl<opt4_to_type<0, 0, 1, 0> >::parse;
-		case 3:  return strconv_attribute_impl<opt4_to_type<0, 0, 1, 1> >::parse;
-		case 4:  return strconv_attribute_impl<opt4_to_type<0, 1, 0, 0> >::parse;
-		case 5:  return strconv_attribute_impl<opt4_to_type<0, 1, 0, 1> >::parse;
-		case 6:  return strconv_attribute_impl<opt4_to_type<0, 1, 1, 0> >::parse;
-		case 7:  return strconv_attribute_impl<opt4_to_type<0, 1, 1, 1> >::parse;
-		case 8:  return strconv_attribute_impl<opt4_to_type<1, 0, 0, 0> >::parse;
-		case 9:  return strconv_attribute_impl<opt4_to_type<1, 0, 0, 1> >::parse;
-		case 10: return strconv_attribute_impl<opt4_to_type<1, 0, 1, 0> >::parse;
-		case 11: return strconv_attribute_impl<opt4_to_type<1, 0, 1, 1> >::parse;
-		case 12: return strconv_attribute_impl<opt4_to_type<1, 1, 0, 0> >::parse;
-		case 13: return strconv_attribute_impl<opt4_to_type<1, 1, 0, 1> >::parse;
-		case 14: return strconv_attribute_impl<opt4_to_type<1, 1, 1, 0> >::parse;
-		case 15: return strconv_attribute_impl<opt4_to_type<1, 1, 1, 1> >::parse;
+		case 0:  return strconv_attribute_impl<opt1_to_type<0> >::parse_simple;
+		case 1:  return strconv_attribute_impl<opt1_to_type<1> >::parse_simple;
+		case 2:  return strconv_attribute_impl<opt1_to_type<0> >::parse_eol;
+		case 3:  return strconv_attribute_impl<opt1_to_type<1> >::parse_eol;
+		case 4:  return strconv_attribute_impl<opt1_to_type<0> >::parse_wconv;
+		case 5:  return strconv_attribute_impl<opt1_to_type<1> >::parse_wconv;
+		case 6:  return strconv_attribute_impl<opt1_to_type<0> >::parse_wconv;
+		case 7:  return strconv_attribute_impl<opt1_to_type<1> >::parse_wconv;
+		case 8:  return strconv_attribute_impl<opt1_to_type<0> >::parse_wnorm;
+		case 9:  return strconv_attribute_impl<opt1_to_type<1> >::parse_wnorm;
+		case 10: return strconv_attribute_impl<opt1_to_type<0> >::parse_wnorm;
+		case 11: return strconv_attribute_impl<opt1_to_type<1> >::parse_wnorm;
+		case 12: return strconv_attribute_impl<opt1_to_type<0> >::parse_wnorm;
+		case 13: return strconv_attribute_impl<opt1_to_type<1> >::parse_wnorm;
+		case 14: return strconv_attribute_impl<opt1_to_type<0> >::parse_wnorm;
+		case 15: return strconv_attribute_impl<opt1_to_type<1> >::parse_wnorm;
 		default: return 0; // should not get here
 		}
 	}

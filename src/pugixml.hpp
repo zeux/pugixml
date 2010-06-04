@@ -235,17 +235,18 @@ namespace pugi
 #if !defined(__INTEL_COMPILER) || __INTEL_COMPILER > 800
 	PUGIXML_DEPRECATED
 #endif
- 	const unsigned int parse_wnorm_attribute	= 0x0040;
+ 	const unsigned int parse_wnorm_attribute	= 0x0080;
 
  	/**
  	 * This flag determines if attribute value normalization should be performed for all attributes.
  	 * This means, that whitespace characters (new line, tab and space) are replaced with space (' ').
  	 * Note, that the actions performed while this flag is on are also performed if parse_wnorm_attribute
  	 * is on, so this flag has no effect if parse_wnorm_attribute flag is set.
+	 * New line characters are always treated as if parse_eol is set, i.e. \r\n is converted to single space.
  	 * 
  	 * This flag is on by default.
  	 */
- 	const unsigned int parse_wconv_attribute	= 0x0080;
+ 	const unsigned int parse_wconv_attribute	= 0x0040;
 	
 	/**
 	 * This flag determines if XML document declaration (this node has the form of <?xml ... ?> in XML)

@@ -351,7 +351,7 @@ TEST(parse_attribute_no_eol_wconv)
 {
 	xml_document doc;
 	CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_wconv_attribute));
-	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("    val1   val2  val3 val4  "));
+	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("    val1   val2 val3 val4  "));
 }
 
 TEST(parse_attribute_eol_wconv)
