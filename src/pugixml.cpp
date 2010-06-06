@@ -598,16 +598,12 @@ namespace pugi
 {
 	namespace impl
 	{
-		typedef uint8_t char8_t;
-		typedef uint16_t char16_t;
-		typedef uint32_t char32_t;
-
-		inline char16_t endian_swap(char16_t value)
+		inline uint16_t endian_swap(uint16_t value)
 		{
-			return static_cast<char16_t>(((value & 0xff) << 8) | (value >> 8));
+			return static_cast<uint16_t>(((value & 0xff) << 8) | (value >> 8));
 		}
 
-		inline char32_t endian_swap(char32_t value)
+		inline uint32_t endian_swap(uint32_t value)
 		{
 			return ((value & 0xff) << 24) | ((value & 0xff00) << 8) | ((value & 0xff0000) >> 8) | (value >> 24);
 		}
@@ -616,7 +612,7 @@ namespace pugi
 		{
 			typedef size_t value_type;
 
-			static value_type low(value_type result, char32_t ch)
+			static value_type low(value_type result, uint32_t ch)
 			{
 				// U+0000..U+007F
 				if (ch < 0x80) return result + 1;
@@ -626,7 +622,7 @@ namespace pugi
 				else return result + 3;
 			}
 
-			static value_type high(value_type result, char32_t)
+			static value_type high(value_type result, uint32_t)
 			{
 				// U+10000..U+10FFFF
 				return result + 4;
@@ -635,44 +631,44 @@ namespace pugi
 
 		struct utf8_writer
 		{
-			typedef char8_t* value_type;
+			typedef uint8_t* value_type;
 
-			static value_type low(value_type result, char32_t ch)
+			static value_type low(value_type result, uint32_t ch)
 			{
 				// U+0000..U+007F
 				if (ch < 0x80)
 				{
-					*result = static_cast<char8_t>(ch);
+					*result = static_cast<uint8_t>(ch);
 					return result + 1;
 				}
 				// U+0080..U+07FF
 				else if (ch < 0x800)
 				{
-					result[0] = static_cast<char8_t>(0xC0 | (ch >> 6));
-					result[1] = static_cast<char8_t>(0x80 | (ch & 0x3F));
+					result[0] = static_cast<uint8_t>(0xC0 | (ch >> 6));
+					result[1] = static_cast<uint8_t>(0x80 | (ch & 0x3F));
 					return result + 2;
 				}
 				// U+0800..U+FFFF
 				else
 				{
-					result[0] = static_cast<char8_t>(0xE0 | (ch >> 12));
-					result[1] = static_cast<char8_t>(0x80 | ((ch >> 6) & 0x3F));
-					result[2] = static_cast<char8_t>(0x80 | (ch & 0x3F));
+					result[0] = static_cast<uint8_t>(0xE0 | (ch >> 12));
+					result[1] = static_cast<uint8_t>(0x80 | ((ch >> 6) & 0x3F));
+					result[2] = static_cast<uint8_t>(0x80 | (ch & 0x3F));
 					return result + 3;
 				}
 			}
 
-			static value_type high(value_type result, char32_t ch)
+			static value_type high(value_type result, uint32_t ch)
 			{
 				// U+10000..U+10FFFF
-				result[0] = static_cast<char8_t>(0xF0 | (ch >> 18));
-				result[1] = static_cast<char8_t>(0x80 | ((ch >> 12) & 0x3F));
-				result[2] = static_cast<char8_t>(0x80 | ((ch >> 6) & 0x3F));
-				result[3] = static_cast<char8_t>(0x80 | (ch & 0x3F));
+				result[0] = static_cast<uint8_t>(0xF0 | (ch >> 18));
+				result[1] = static_cast<uint8_t>(0x80 | ((ch >> 12) & 0x3F));
+				result[2] = static_cast<uint8_t>(0x80 | ((ch >> 6) & 0x3F));
+				result[3] = static_cast<uint8_t>(0x80 | (ch & 0x3F));
 				return result + 4;
 			}
 
-			static value_type any(value_type result, char32_t ch)
+			static value_type any(value_type result, uint32_t ch)
 			{
 				return (ch < 0x10000) ? low(result, ch) : high(result, ch);
 			}
@@ -682,12 +678,12 @@ namespace pugi
 		{
 			typedef size_t value_type;
 
-			static value_type low(value_type result, char32_t)
+			static value_type low(value_type result, uint32_t)
 			{
 				return result + 1;
 			}
 
-			static value_type high(value_type result, char32_t)
+			static value_type high(value_type result, uint32_t)
 			{
 				return result + 2;
 			}
@@ -695,27 +691,27 @@ namespace pugi
 
 		struct utf16_writer
 		{
-			typedef char16_t* value_type;
+			typedef uint16_t* value_type;
 
-			static value_type low(value_type result, char32_t ch)
+			static value_type low(value_type result, uint32_t ch)
 			{
-				*result = static_cast<char16_t>(ch);
+				*result = static_cast<uint16_t>(ch);
 
 				return result + 1;
 			}
 
-			static value_type high(value_type result, char32_t ch)
+			static value_type high(value_type result, uint32_t ch)
 			{
-				char32_t msh = (char32_t)(ch - 0x10000) >> 10;
-				char32_t lsh = (char32_t)(ch - 0x10000) & 0x3ff;
+				uint32_t msh = (uint32_t)(ch - 0x10000) >> 10;
+				uint32_t lsh = (uint32_t)(ch - 0x10000) & 0x3ff;
 
-				result[0] = static_cast<char16_t>(0xD800 + msh);
-				result[1] = static_cast<char16_t>(0xDC00 + lsh);
+				result[0] = static_cast<uint16_t>(0xD800 + msh);
+				result[1] = static_cast<uint16_t>(0xDC00 + lsh);
 
 				return result + 2;
 			}
 
-			static value_type any(value_type result, char32_t ch)
+			static value_type any(value_type result, uint32_t ch)
 			{
 				return (ch < 0x10000) ? low(result, ch) : high(result, ch);
 			}
@@ -725,12 +721,12 @@ namespace pugi
 		{
 			typedef size_t value_type;
 
-			static value_type low(value_type result, char32_t)
+			static value_type low(value_type result, uint32_t)
 			{
 				return result + 1;
 			}
 
-			static value_type high(value_type result, char32_t)
+			static value_type high(value_type result, uint32_t)
 			{
 				return result + 1;
 			}
@@ -738,23 +734,23 @@ namespace pugi
 
 		struct utf32_writer
 		{
-			typedef char32_t* value_type;
+			typedef uint32_t* value_type;
 
-			static value_type low(value_type result, char32_t ch)
+			static value_type low(value_type result, uint32_t ch)
 			{
 				*result = ch;
 
 				return result + 1;
 			}
 
-			static value_type high(value_type result, char32_t ch)
+			static value_type high(value_type result, uint32_t ch)
 			{
 				*result = ch;
 
 				return result + 1;
 			}
 
-			static value_type any(value_type result, char32_t ch)
+			static value_type any(value_type result, uint32_t ch)
 			{
 				*result = ch;
 
@@ -766,14 +762,14 @@ namespace pugi
 
 		template <> struct wchar_selector<2>
 		{
-			typedef char16_t type;
+			typedef uint16_t type;
 			typedef utf16_counter counter;
 			typedef utf16_writer writer;
 		};
 
 		template <> struct wchar_selector<4>
 		{
-			typedef char32_t type;
+			typedef uint32_t type;
 			typedef utf32_counter counter;
 			typedef utf32_writer writer;
 		};
@@ -781,13 +777,13 @@ namespace pugi
 		typedef wchar_selector<sizeof(wchar_t)>::counter wchar_counter;
 		typedef wchar_selector<sizeof(wchar_t)>::writer wchar_writer;
 
-		template <typename Traits> static inline typename Traits::value_type decode_utf8_block(const char8_t* data, size_t size, typename Traits::value_type result, Traits = Traits())
+		template <typename Traits> static inline typename Traits::value_type decode_utf8_block(const uint8_t* data, size_t size, typename Traits::value_type result, Traits = Traits())
 		{
-			const char8_t utf8_byte_mask = 0x3f;
+			const uint8_t utf8_byte_mask = 0x3f;
 
 			while (size)
 			{
-				char8_t lead = *data;
+				uint8_t lead = *data;
 
 				// 0xxxxxxx -> U+0000..U+007F
 				if (lead < 0x80)
@@ -799,7 +795,7 @@ namespace pugi
 					// process aligned single-byte (ascii) blocks
 					if ((reinterpret_cast<uintptr_t>(data) & 3) == 0)
 					{
-						while (size >= 4 && (*reinterpret_cast<const char32_t*>(data) & 0x80808080) == 0)
+						while (size >= 4 && (*reinterpret_cast<const uint32_t*>(data) & 0x80808080) == 0)
 						{
 							result = Traits::low(result, data[0]);
 							result = Traits::low(result, data[1]);
@@ -842,15 +838,15 @@ namespace pugi
 			return result;
 		}
 
-		template <typename Traits, typename opt1> static inline typename Traits::value_type decode_utf16_block(const char16_t* data, size_t size, typename Traits::value_type result, opt1, Traits = Traits())
+		template <typename Traits, typename opt1> static inline typename Traits::value_type decode_utf16_block(const uint16_t* data, size_t size, typename Traits::value_type result, opt1, Traits = Traits())
 		{
 			const bool swap = opt1::o1;
 
-			const char16_t* end = data + size;
+			const uint16_t* end = data + size;
 
 			while (data < end)
 			{
-				char16_t lead = swap ? endian_swap(*data) : *data;
+				uint16_t lead = swap ? endian_swap(*data) : *data;
 
 				// U+0000..U+D7FF
 				if (lead < 0xD800)
@@ -867,7 +863,7 @@ namespace pugi
 				// surrogate pair lead
 				else if ((unsigned)(lead - 0xD800) < 0x400 && data + 1 < end)
 				{
-					char16_t next = swap ? endian_swap(data[1]) : data[1];
+					uint16_t next = swap ? endian_swap(data[1]) : data[1];
 
 					if ((unsigned)(next - 0xDC00) < 0x400)
 					{
@@ -888,15 +884,15 @@ namespace pugi
 			return result;
 		}
 
-		template <typename Traits, typename opt1> static inline typename Traits::value_type decode_utf32_block(const char32_t* data, size_t size, typename Traits::value_type result, opt1, Traits = Traits())
+		template <typename Traits, typename opt1> static inline typename Traits::value_type decode_utf32_block(const uint32_t* data, size_t size, typename Traits::value_type result, opt1, Traits = Traits())
 		{
 			const bool swap = opt1::o1;
 
-			const char32_t* end = data + size;
+			const uint32_t* end = data + size;
 
 			while (data < end)
 			{
-				char32_t lead = swap ? endian_swap(*data) : *data;
+				uint32_t lead = swap ? endian_swap(*data) : *data;
 
 				// U+0000..U+FFFF
 				if (lead < 0x10000)
@@ -1052,7 +1048,7 @@ namespace
 		if (encoding != encoding_auto) return encoding;
 
 		// try to guess encoding (based on XML specification, Appendix F.1)
-		const impl::char8_t* data = static_cast<const impl::char8_t*>(contents);
+		const uint8_t* data = static_cast<const uint8_t*>(contents);
 
 		// look for BOM in first few bytes
 		if (size > 4 && data[0] == 0 && data[1] == 0 && data[2] == 0xfe && data[3] == 0xff) return encoding_utf32_be;
@@ -1127,7 +1123,7 @@ namespace
 
 	bool convert_buffer_utf8(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size)
 	{
-		const impl::char8_t* data = static_cast<const impl::char8_t*>(contents);
+		const uint8_t* data = static_cast<const uint8_t*>(contents);
 
 		// first pass: get length in wchar_t units
 		out_length = impl::decode_utf8_block<impl::wchar_counter>(data, size, 0);
@@ -1148,8 +1144,8 @@ namespace
 
 	template <typename opt1> bool convert_buffer_utf16(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
 	{
-		const impl::char16_t* data = static_cast<const impl::char16_t*>(contents);
-		size_t length = size / sizeof(impl::char16_t);
+		const uint16_t* data = static_cast<const uint16_t*>(contents);
+		size_t length = size / sizeof(uint16_t);
 
 		// first pass: get length in wchar_t units
 		out_length = impl::decode_utf16_block<impl::wchar_counter>(data, length, 0, opt1());
@@ -1170,8 +1166,8 @@ namespace
 
 	template <typename opt1> bool convert_buffer_utf32(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
 	{
-		const impl::char32_t* data = static_cast<const impl::char32_t*>(contents);
-		size_t length = size / sizeof(impl::char32_t);
+		const uint32_t* data = static_cast<const uint32_t*>(contents);
+		size_t length = size / sizeof(uint32_t);
 
 		// first pass: get length in wchar_t units
 		out_length = impl::decode_utf32_block<impl::wchar_counter>(data, length, 0, opt1());
@@ -1232,8 +1228,8 @@ namespace
 #else
 	template <typename opt1> bool convert_buffer_utf16(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
 	{
-		const impl::char16_t* data = static_cast<const impl::char16_t*>(contents);
-		size_t length = size / sizeof(impl::char16_t);
+		const uint16_t* data = static_cast<const uint16_t*>(contents);
+		size_t length = size / sizeof(uint16_t);
 
 		// first pass: get length in utf8 units
 		out_length = impl::decode_utf16_block<impl::utf8_counter>(data, length, 0, opt1());
@@ -1243,8 +1239,8 @@ namespace
 		if (!out_buffer) return false;
 
 		// second pass: convert utf16 input to utf8
-		impl::char8_t* out_begin = reinterpret_cast<impl::char8_t*>(out_buffer);
-		impl::char8_t* out_end = impl::decode_utf16_block<impl::utf8_writer>(data, length, out_begin, opt1());
+		uint8_t* out_begin = reinterpret_cast<uint8_t*>(out_buffer);
+		uint8_t* out_end = impl::decode_utf16_block<impl::utf8_writer>(data, length, out_begin, opt1());
 
 		assert(out_end == out_begin + out_length);
 		(void)!out_end;
@@ -1254,8 +1250,8 @@ namespace
 
 	template <typename opt1> bool convert_buffer_utf32(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt1)
 	{
-		const impl::char32_t* data = static_cast<const impl::char32_t*>(contents);
-		size_t length = size / sizeof(impl::char32_t);
+		const uint32_t* data = static_cast<const uint32_t*>(contents);
+		size_t length = size / sizeof(uint32_t);
 
 		// first pass: get length in utf8 units
 		out_length = impl::decode_utf32_block<impl::utf8_counter>(data, length, 0, opt1());
@@ -1265,8 +1261,8 @@ namespace
 		if (!out_buffer) return false;
 
 		// second pass: convert utf32 input to utf8
-		impl::char8_t* out_begin = reinterpret_cast<impl::char8_t*>(out_buffer);
-		impl::char8_t* out_end = impl::decode_utf32_block<impl::utf8_writer>(data, length, out_begin, opt1());
+		uint8_t* out_begin = reinterpret_cast<uint8_t*>(out_buffer);
+		uint8_t* out_end = impl::decode_utf32_block<impl::utf8_writer>(data, length, out_begin, opt1());
 
 		assert(out_end == out_begin + out_length);
 		(void)!out_end;
@@ -1421,7 +1417,7 @@ namespace
 			#ifdef PUGIXML_WCHAR_MODE
 				s = reinterpret_cast<char_t*>(impl::wchar_writer::any(reinterpret_cast<impl::wchar_writer::value_type>(s), ucsc));
 			#else
-				s = reinterpret_cast<char_t*>(impl::utf8_writer::any(reinterpret_cast<impl::char8_t*>(s), ucsc));
+				s = reinterpret_cast<char_t*>(impl::utf8_writer::any(reinterpret_cast<uint8_t*>(s), ucsc));
 			#endif
 					
 				g.push(s, stre - s);
@@ -2457,7 +2453,7 @@ namespace
 		assert(length > 0);
 
 		// discard last character if it's the lead of a surrogate pair 
-		return (sizeof(wchar_t) == 2 && (unsigned)(static_cast<impl::char16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
+		return (sizeof(wchar_t) == 2 && (unsigned)(static_cast<uint16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
 	}
 
 	size_t convert_buffer(char* result, const char_t* data, size_t length, encoding_t encoding)
@@ -2473,11 +2469,11 @@ namespace
 		// convert to utf8
 		if (encoding == encoding_utf8)
 		{
-			impl::char8_t* dest = reinterpret_cast<impl::char8_t*>(result);
+			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
 
-			impl::char8_t* end = sizeof(wchar_t) == 2 ?
-				impl::decode_utf16_block<impl::utf8_writer>(reinterpret_cast<const impl::char16_t*>(data), length, dest, opt1_to_type<false>()) :
-				impl::decode_utf32_block<impl::utf8_writer>(reinterpret_cast<const impl::char32_t*>(data), length, dest, opt1_to_type<false>());
+			uint8_t* end = sizeof(wchar_t) == 2 ?
+				impl::decode_utf16_block<impl::utf8_writer>(reinterpret_cast<const uint16_t*>(data), length, dest, opt1_to_type<false>()) :
+				impl::decode_utf32_block<impl::utf8_writer>(reinterpret_cast<const uint32_t*>(data), length, dest, opt1_to_type<false>());
 
 			return static_cast<size_t>(end - dest);
 		}
@@ -2485,33 +2481,33 @@ namespace
 		// convert to utf16
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
-			impl::char16_t* dest = reinterpret_cast<impl::char16_t*>(result);
+			uint16_t* dest = reinterpret_cast<uint16_t*>(result);
 
 			// convert to native utf16
-			impl::char16_t* end = impl::decode_utf32_block<impl::utf16_writer>(reinterpret_cast<const impl::char32_t*>(data), length, dest, opt1_to_type<false>());
+			uint16_t* end = impl::decode_utf32_block<impl::utf16_writer>(reinterpret_cast<const uint32_t*>(data), length, dest, opt1_to_type<false>());
 
 			// swap if necessary
 			encoding_t native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
 
 			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
 
-			return static_cast<size_t>(end - dest) * sizeof(impl::char16_t);
+			return static_cast<size_t>(end - dest) * sizeof(uint16_t);
 		}
 
 		// convert to utf32
 		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
 		{
-			impl::char32_t* dest = reinterpret_cast<impl::char32_t*>(result);
+			uint32_t* dest = reinterpret_cast<uint32_t*>(result);
 
 			// convert to native utf32
-			impl::char32_t* end = impl::decode_utf16_block<impl::utf32_writer>(reinterpret_cast<const impl::char16_t*>(data), length, dest, opt1_to_type<false>());
+			uint32_t* end = impl::decode_utf16_block<impl::utf32_writer>(reinterpret_cast<const uint16_t*>(data), length, dest, opt1_to_type<false>());
 
 			// swap if necessary
 			encoding_t native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 
 			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
 
-			return static_cast<size_t>(end - dest) * sizeof(impl::char32_t);
+			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
 		}
 
 		// invalid encoding combination (this can't happen)
@@ -2526,7 +2522,7 @@ namespace
 
 		for (size_t i = 1; i <= 4; ++i)
 		{
-			impl::char8_t ch = static_cast<impl::char8_t>(data[length - i]);
+			uint8_t ch = static_cast<uint8_t>(data[length - i]);
 
 			// either a standalone character or a leading one
 			if ((ch & 0xc0) != 0x80) return length - i;
@@ -2540,32 +2536,32 @@ namespace
 	{
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
-			impl::char16_t* dest = reinterpret_cast<impl::char16_t*>(result);
+			uint16_t* dest = reinterpret_cast<uint16_t*>(result);
 
 			// convert to native utf16
-			impl::char16_t* end = impl::decode_utf8_block<impl::utf16_writer>(reinterpret_cast<const impl::char8_t*>(data), length, dest);
+			uint16_t* end = impl::decode_utf8_block<impl::utf16_writer>(reinterpret_cast<const uint8_t*>(data), length, dest);
 
 			// swap if necessary
 			encoding_t native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
 
 			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
 
-			return static_cast<size_t>(end - dest) * sizeof(impl::char16_t);
+			return static_cast<size_t>(end - dest) * sizeof(uint16_t);
 		}
 
 		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
 		{
-			impl::char32_t* dest = reinterpret_cast<impl::char32_t*>(result);
+			uint32_t* dest = reinterpret_cast<uint32_t*>(result);
 
 			// convert to native utf32
-			impl::char32_t* end = impl::decode_utf8_block<impl::utf32_writer>(reinterpret_cast<const impl::char8_t*>(data), length, dest);
+			uint32_t* end = impl::decode_utf8_block<impl::utf32_writer>(reinterpret_cast<const uint8_t*>(data), length, dest);
 
 			// swap if necessary
 			encoding_t native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 
 			if (native_encoding != encoding) impl::convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
 
-			return static_cast<size_t>(end - dest) * sizeof(impl::char32_t);
+			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
 		}
 
 		// invalid encoding combination (this can't happen)
@@ -4472,8 +4468,8 @@ namespace pugi
 
 		// first pass: get length in utf8 characters
 		size_t size = sizeof(wchar_t) == 2 ?
-			impl::decode_utf16_block<impl::utf8_counter>(reinterpret_cast<const impl::char16_t*>(str), length, 0, opt1_to_type<false>()) :
-			impl::decode_utf32_block<impl::utf8_counter>(reinterpret_cast<const impl::char32_t*>(str), length, 0, opt1_to_type<false>());
+			impl::decode_utf16_block<impl::utf8_counter>(reinterpret_cast<const uint16_t*>(str), length, 0, opt1_to_type<false>()) :
+			impl::decode_utf32_block<impl::utf8_counter>(reinterpret_cast<const uint32_t*>(str), length, 0, opt1_to_type<false>());
 
 		// allocate resulting string
 		std::string result;
@@ -4482,10 +4478,10 @@ namespace pugi
 		// second pass: convert to utf8
 		if (size > 0)
 		{
-			impl::char8_t* begin = reinterpret_cast<impl::char8_t*>(&result[0]);
-			impl::char8_t* end = sizeof(wchar_t) == 2 ?
-				impl::decode_utf16_block<impl::utf8_writer>(reinterpret_cast<const impl::char16_t*>(str), length, begin, opt1_to_type<false>()) :
-				impl::decode_utf32_block<impl::utf8_writer>(reinterpret_cast<const impl::char32_t*>(str), length, begin, opt1_to_type<false>());
+			uint8_t* begin = reinterpret_cast<uint8_t*>(&result[0]);
+			uint8_t* end = sizeof(wchar_t) == 2 ?
+				impl::decode_utf16_block<impl::utf8_writer>(reinterpret_cast<const uint16_t*>(str), length, begin, opt1_to_type<false>()) :
+				impl::decode_utf32_block<impl::utf8_writer>(reinterpret_cast<const uint32_t*>(str), length, begin, opt1_to_type<false>());
 	  	
 			// truncate invalid output
 			assert(begin <= end && static_cast<size_t>(end - begin) <= result.size());
@@ -4502,7 +4498,7 @@ namespace pugi
 
 	std::wstring PUGIXML_FUNCTION as_wide(const char* str)
 	{
-		const impl::char8_t* data = reinterpret_cast<const impl::char8_t*>(str);
+		const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
 		size_t size = strlen(str);
 
 		// first pass: get length in wchar_t
