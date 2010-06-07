@@ -15,6 +15,10 @@
 
 #include <string>
 
+#ifdef __MINGW32__
+#	include <io.h> // for unlink in C++0x mode
+#endif
+
 TEST(document_create_empty)
 {
 	pugi::xml_document doc;

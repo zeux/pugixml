@@ -22,6 +22,11 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 
 		RESULT += -W -Wall -Wextra -Werror -pedantic ;
 
+		if ( $(toolset:I=_0x) )
+		{
+			RESULT += -std=c++0x ;
+		}
+
 		if ( $(fulldebug) )
 		{
 			RESULT += -g ;
