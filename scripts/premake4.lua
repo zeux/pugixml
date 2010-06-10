@@ -1,10 +1,10 @@
+local action = premake.action.current()
+
 if string.startswith(_ACTION, "vs") then
 	-- We need debugging symbols for all configurations, but runtime library depends on official Symbols flag, so hack it
 	function premake.vs200x_vcproj_symbols(cfg)
 		return 3
 	end
-
-	local action = premake.action.current()
 
 	if action then
 		-- Disable solution generation
@@ -16,6 +16,18 @@ if string.startswith(_ACTION, "vs") then
 		function action.onproject(prj)
 			premake.generate(prj, "%%_" .. _ACTION .. ".vcproj", premake.vs200x_vcproj)
 		end
+	end
+elseif _ACTION == "codeblocks" then
+	action.onsolution = nil
+
+	function action.onproject(prj)
+		premake.generate(prj, "%%_" .. _ACTION .. ".cbp", premake.codeblocks_cbp)
+	end
+elseif _ACTION == "codelite" then
+	action.onsolution = nil
+
+	function action.onproject(prj)
+		premake.generate(prj, "%%_" .. _ACTION .. ".project", premake.codelite_project)
 	end
 end
 
