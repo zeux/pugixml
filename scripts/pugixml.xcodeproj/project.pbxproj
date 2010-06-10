@@ -7,20 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7B7157781F0E001276187980 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5798321A608F001276187980 /* pugixml.cpp */; };
-		512576A93004001276187980 /* pugixpath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 759C4F2F1EA5001276187980 /* pugixpath.cpp */; };
+		5314084032B5001276189718 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E0405306C15001276189718 /* pugixml.cpp */; };
+		6ED63AE23641001276189718 /* pugixpath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19E0517F3CF2001276189718 /* pugixpath.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		48FD751D6AE1001276187980 /* pugiconfig.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pugiconfig.hpp"; path = "pugiconfig.hpp"; sourceTree = "<group>"; };
-		5798321A608F001276187980 /* pugixml.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "pugixml.cpp"; path = "pugixml.cpp"; sourceTree = "<group>"; };
-		503D140A3505001276187980 /* pugixml.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pugixml.hpp"; path = "pugixml.hpp"; sourceTree = "<group>"; };
-		759C4F2F1EA5001276187980 /* pugixpath.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "pugixpath.cpp"; path = "pugixpath.cpp"; sourceTree = "<group>"; };
-		657F5E385C32001276187980 /* libpugixml_d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libpugixml_d.a"; path = "libpugixml_d.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A4C28F55399001276189718 /* pugiconfig.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pugiconfig.hpp"; path = "pugiconfig.hpp"; sourceTree = "<group>"; };
+		0E0405306C15001276189718 /* pugixml.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "pugixml.cpp"; path = "pugixml.cpp"; sourceTree = "<group>"; };
+		7C1A11945858001276189718 /* pugixml.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pugixml.hpp"; path = "pugixml.hpp"; sourceTree = "<group>"; };
+		19E0517F3CF2001276189718 /* pugixpath.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "pugixpath.cpp"; path = "pugixpath.cpp"; sourceTree = "<group>"; };
+		1DA04ADC64C3001276189718 /* libpugixml_d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libpugixml_d.a"; path = "libpugixml_d.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6C6F20C769C4001276187980 /* Frameworks */ = {
+		47481C4F0E03001276189718 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -30,31 +30,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0EC333EF6EA3001276187980 /* pugixml */ = {
+		65DB0F6D27EA001276189718 /* pugixml */ = {
 			isa = PBXGroup;
 			children = (
-				39D538816523001276187980 /* src */,
-				2370531E2CEF001276187980 /* Products */,
+				20852B6E3BB4001276189718 /* src */,
+				578963B4309E001276189718 /* Products */,
 			);
 			name = pugixml;
 			sourceTree = "<group>";
 		};
-		39D538816523001276187980 /* src */ = {
+		20852B6E3BB4001276189718 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				48FD751D6AE1001276187980 /* pugiconfig.hpp */,
-				5798321A608F001276187980 /* pugixml.cpp */,
-				503D140A3505001276187980 /* pugixml.hpp */,
-				759C4F2F1EA5001276187980 /* pugixpath.cpp */,
+				0A4C28F55399001276189718 /* pugiconfig.hpp */,
+				0E0405306C15001276189718 /* pugixml.cpp */,
+				7C1A11945858001276189718 /* pugixml.hpp */,
+				19E0517F3CF2001276189718 /* pugixpath.cpp */,
 			);
 			name = src;
 			path = ../src;
 			sourceTree = "<group>";
 		};
-		2370531E2CEF001276187980 /* Products */ = {
+		578963B4309E001276189718 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				657F5E385C32001276187980 /* libpugixml_d.a */,
+				1DA04ADC64C3001276189718 /* libpugixml_d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -62,13 +62,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		444856A82D91001276187980 /* pugixml */ = {
+		566D16C45B6D001276189718 /* pugixml */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 10DC4D226B9E001276187980 /* Build configuration list for PBXNativeTarget "pugixml" */;
+			buildConfigurationList = 714F05E01D71001276189718 /* Build configuration list for PBXNativeTarget "pugixml" */;
 			buildPhases = (
-				33F65676078B001276187980 /* Resources */,
-				48FE6B406296001276187980 /* Sources */,
-				6C6F20C769C4001276187980 /* Frameworks */,
+				0B66463C5F89001276189718 /* Resources */,
+				6E6449051D38001276189718 /* Sources */,
+				47481C4F0E03001276189718 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -76,7 +76,7 @@
 			);
 			name = pugixml;
 			productName = pugixml;
-			productReference = 657F5E385C32001276187980 /* libpugixml_d.a */;
+			productReference = 1DA04ADC64C3001276189718 /* libpugixml_d.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -87,17 +87,17 @@
 			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "pugixml" */;
 			compatibilityVersion = "Xcode 3.1";
 			hasScannedForEncodings = 1;
-			mainGroup = 0EC333EF6EA3001276187980 /* pugixml */;
+			mainGroup = 65DB0F6D27EA001276189718 /* pugixml */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				444856A82D91001276187980 /* libpugixml_d.a */,
+				566D16C45B6D001276189718 /* libpugixml_d.a */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		33F65676078B001276187980 /* Resources */ = {
+		0B66463C5F89001276189718 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -107,12 +107,12 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		48FE6B406296001276187980 /* Sources */ = {
+		6E6449051D38001276189718 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7B7157781F0E001276187980 /* pugixml.cpp in Sources */,
-				512576A93004001276187980 /* pugixpath.cpp in Sources */,
+				5314084032B5001276189718 /* pugixml.cpp in Sources */,
+				6ED63AE23641001276189718 /* pugixpath.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,7 +122,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		74ED18006B05001276187980 /* Debug */ = {
+		6B5515257190001276189718 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -134,7 +134,7 @@
 			};
 			name = "Debug";
 		};
-		0452792C7ED4001276187980 /* Release */ = {
+		4FDB54E4253E001276189718 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -147,10 +147,10 @@
 			};
 			name = "Release";
 		};
-		062C5D426ED4001276187980 /* Debug */ = {
+		5B6C3A6F39D0001276189718 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				COPY_PHASE_STRIP = NO;
@@ -162,17 +162,17 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "xcode3/Debug";
+				OBJROOT = "xcode3/Universal/Debug";
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
 				SYMROOT = "xcode3";
 			};
 			name = "Debug";
 		};
-		74A924703036001276187980 /* Release */ = {
+		36FC55CE27E8001276189718 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
 				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -182,7 +182,7 @@
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				OBJROOT = "xcode3/Release";
+				OBJROOT = "xcode3/Universal/Release";
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
 				SYMROOT = "xcode3";
@@ -192,11 +192,11 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		10DC4D226B9E001276187980 /* Build configuration list for PBXNativeTarget "libpugixml_d.a" */ = {
+		714F05E01D71001276189718 /* Build configuration list for PBXNativeTarget "libpugixml_d.a" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				74ED18006B05001276187980 /* Debug */,
-				0452792C7ED4001276187980 /* Release */,
+				6B5515257190001276189718 /* Debug */,
+				4FDB54E4253E001276189718 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Debug";
@@ -204,8 +204,8 @@
 		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "pugixml" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				062C5D426ED4001276187980 /* Debug */,
-				74A924703036001276187980 /* Release */,
+				5B6C3A6F39D0001276189718 /* Debug */,
+				36FC55CE27E8001276189718 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "Debug";

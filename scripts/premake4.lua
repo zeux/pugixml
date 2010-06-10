@@ -1,3 +1,6 @@
+-- Reset RNG seed to get consistent results across runs (i.e. XCode)
+math.randomseed(12345)
+
 local action = premake.action.current()
 
 if string.startswith(_ACTION, "vs") then
@@ -49,6 +52,10 @@ if string.startswith(_ACTION, "vs") then
 	configuration "ReleaseStatic" targetsuffix "_s"
 	configuration "Debug" targetsuffix "_d"
 else
+	if _ACTION == "xcode3" then
+		platforms "universal"
+	end
+
 	configurations { "Debug", "Release" }
 
 	configuration "Debug" targetsuffix "_d"
