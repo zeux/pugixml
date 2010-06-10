@@ -1,6 +1,17 @@
 #!/usr/bin/perl
 
 # pretty-printing
+sub prettysuffix
+{
+	my $suffix = shift;
+
+	return " C++0x" if ($suffix eq '_0x');
+	return " x64" if ($suffix eq '_x64');
+	return " PowerPC" if ($suffix eq '_ppc');
+
+	return "";
+}
+
 sub prettytoolset
 {
 	my $toolset = shift;
@@ -10,15 +21,11 @@ sub prettytoolset
 	return "Digital Mars C++ 8.51" if ($toolset eq 'dmc');
 	return "Sun C++ 5.10" if ($toolset eq 'suncc');
 
-	return "Intel C++ Compiler $1.0" if ($toolset =~ /^ic(\d+)$/);
-	return "Intel C++ Compiler $1.0 x64" if ($toolset =~ /^ic(\d+)_x64$/);
-	return "MinGW (GCC $1.$2)" if ($toolset =~ /^mingw(\d)(\d)$/);
-	return "MinGW (GCC $1.$2) C++0x" if ($toolset =~ /^mingw(\d)(\d)_0x$/);
-	return "MinGW (GCC $1.$2) x64" if ($toolset =~ /^mingw(\d)(\d)_x64$/);
+	return "Intel C++ Compiler $1.0" . prettysuffix($2) if ($toolset =~ /^ic(\d+)(.*)$/);
+	return "MinGW (GCC $1.$2)" . prettysuffix($3) if ($toolset =~ /^mingw(\d)(\d)(.*)$/);
 	return "Microsoft Visual C++ 7.1" if ($toolset eq 'msvc71');
-	return "Microsoft Visual C++ $1.0" if ($toolset =~ /^msvc(\d+)$/);
-	return "Microsoft Visual C++ $1.0 x64" if ($toolset =~ /^msvc(\d+)_x64$/);
-	return "GNU C++ Compiler $1" if ($toolset =~ /^gcc(.*)$/);
+	return "Microsoft Visual C++ $1.0" . prettysuffix($2) if ($toolset =~ /^msvc(\d+)(.*)$/);
+	return "GNU C++ Compiler $1" . prettysuffix($2) if ($toolset =~ /^gcc([\d.]*)(.*)$/);
 
 	$toolset;
 }

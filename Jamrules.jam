@@ -14,6 +14,20 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 	if ( $(OS) != MACOSX )
 	{
 		LDFLAGS += -static-libgcc -static ;
+		ARCH = "" ;
+	}
+	else
+	{
+		if ( $(toolset:I=_x64) )
+		{
+			ARCH = -arch x86_64 ;
+		}
+		else if ( $(toolset:I=_ppc) )
+		{
+			ARCH = -arch ppc ;
+		}
+
+		LDFLAGS += $(ARCH) ;
 	}
 
 	rule GetCFlags CONFIG : DEFINES
@@ -45,6 +59,8 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 		{
 			RESULT += -fno-exceptions ;
 		}
+
+		RESULT += $(ARCH) ;
 
 		return $(RESULT) ;
 	}
