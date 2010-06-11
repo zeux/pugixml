@@ -3,8 +3,19 @@
 TEST(parse_pi_skip)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<?pi?><?pi value?>"), parse_minimal));
-	CHECK(!doc.first_child());
+
+	unsigned int flag_sets[] = {parse_minimal, parse_minimal | parse_declaration};
+
+	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
+	{
+		unsigned int flags = flag_sets[i];
+
+		CHECK(doc.load(STR("<?pi?><?pi value?>"), flags));
+		CHECK(!doc.first_child());
+
+		CHECK(doc.load(STR("<?pi <tag/> value?>"), flags));
+		CHECK(!doc.first_child());
+	}
 }
 
 TEST(parse_pi_parse)
@@ -54,6 +65,10 @@ TEST(parse_pi_error)
 		CHECK(doc.load(STR("<?name value  ? "), flags).status == status_bad_pi);
 		CHECK(doc.load(STR("<?name value  ? >"), flags).status == status_bad_pi);
 		CHECK(doc.load(STR("<?name value  ? > "), flags).status == status_bad_pi);
+		CHECK(doc.load(STR("<?name&"), flags).status == status_bad_pi);
+		CHECK(doc.load(STR("<?name&?"), flags).status == status_bad_pi);
+		CHECK(doc.load(STR("<?name&?>"), flags).status == status_bad_pi);
+		CHECK(doc.load(STR("<?name& x?>"), flags).status == status_bad_pi);
 	}
 	
 	CHECK(doc.load(STR("<?xx#?>"), parse_minimal | parse_pi).status == status_bad_pi);
@@ -447,6 +462,8 @@ TEST(parse_attribute_error)
 	CHECK(doc.load(STR("<node #/>"), parse_minimal).status == status_bad_start_element);
 	CHECK(doc.load(STR("<node#/>"), parse_minimal).status == status_bad_start_element);
 	CHECK(doc.load(STR("<node id1='1'id2='2'/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load(STR("<node id&='1'/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load(STR("<node &='1'/>"), parse_minimal).status == status_bad_start_element);
 }
 
 TEST(parse_tag_single)
@@ -491,6 +508,8 @@ TEST(parse_tag_error)
 	CHECK(doc.load(STR("</node>"), parse_minimal).status == status_end_element_mismatch);
 	CHECK(doc.load(STR("</>"), parse_minimal).status == status_end_element_mismatch);
 	CHECK(doc.load(STR("<node></node v>"), parse_minimal).status == status_bad_end_element);
+	CHECK(doc.load(STR("<node&/>"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load(STR("<node& v='1'/>"), parse_minimal).status == status_bad_start_element);
 }
 
 TEST(parse_declaration_cases)
@@ -510,8 +529,19 @@ TEST(parse_declaration_attr_cases)
 TEST(parse_declaration_skip)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<?xml?><?xml version='1.0'?>"), parse_minimal));
-	CHECK(!doc.first_child());
+
+	unsigned int flag_sets[] = {parse_minimal, parse_minimal | parse_pi};
+
+	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
+	{
+		unsigned int flags = flag_sets[i];
+
+		CHECK(doc.load(STR("<?xml?><?xml version='1.0'?>"), flags));
+		CHECK(!doc.first_child());
+
+		CHECK(doc.load(STR("<?xml <tag/> ?>"), flags));
+		CHECK(!doc.first_child());
+	}
 }
 
 TEST(parse_declaration_parse)
