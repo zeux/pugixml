@@ -67,11 +67,11 @@ TEST(parse_pi_error)
 		CHECK(doc.load(STR("<?name value  ? > "), flags).status == status_bad_pi);
 		CHECK(doc.load(STR("<?name&"), flags).status == status_bad_pi);
 		CHECK(doc.load(STR("<?name&?"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name&?>"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name& x?>"), flags).status == status_bad_pi);
 	}
 	
 	CHECK(doc.load(STR("<?xx#?>"), parse_minimal | parse_pi).status == status_bad_pi);
+	CHECK(doc.load(STR("<?name&?>"), parse_minimal | parse_pi).status == status_bad_pi);
+	CHECK(doc.load(STR("<?name& x?>"), parse_minimal | parse_pi).status == status_bad_pi);
 }
 
 TEST(parse_comments_skip)
