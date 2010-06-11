@@ -360,6 +360,17 @@ else if ( $(toolset:I=^bcc) )
 }
 else if ( $(toolset:I=^suncc) )
 {
+	if ( $(toolset:I=_x64) )
+	{
+		ARCH = -m64 ;
+	}
+	else
+	{
+		ARCH = -m32 ;
+	}
+
+	LDFLAGS += $(ARCH) ;
+
 	rule GetCFlags CONFIG : DEFINES
 	{
 		local RESULT = -D$(DEFINES) ;
@@ -379,6 +390,8 @@ else if ( $(toolset:I=^suncc) )
 		{
 			RESULT += -noex ;
 		}
+
+		RESULT += $(ARCH) ;
 
 		return $(RESULT) ;
 	}

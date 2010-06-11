@@ -26,7 +26,7 @@ sub gcctoolset
 }
 
 $fast = (shift eq 'fast');
-@toolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw45_0x, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64) : ($^O =~ /solaris/) ? (suncc) : &gcctoolset();
+@toolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw45_0x, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64) : ($^O =~ /solaris/) ? (suncc, suncc_x64) : &gcctoolset();
 @configurations = (debug, release);
 @defines = (PUGIXML_NO_XPATH, PUGIXML_NO_EXCEPTIONS, PUGIXML_NO_STL, PUGIXML_WCHAR_MODE);
 $stddefine = 'PUGIXML_STANDARD';

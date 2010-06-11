@@ -7,7 +7,7 @@ sub prettysuffix
 
 	return " C++0x" if ($suffix eq '_0x');
 	return " x64" if ($suffix eq '_x64');
-	return " PowerPC" if ($suffix eq '_ppc');
+	return " PPC" if ($suffix eq '_ppc');
 
 	return "";
 }
@@ -19,7 +19,7 @@ sub prettytoolset
 	return "Borland C++ 5.82" if ($toolset eq 'bcc');
 	return "Metrowerks CodeWarrior 8" if ($toolset eq 'cw');
 	return "Digital Mars C++ 8.51" if ($toolset eq 'dmc');
-	return "Sun C++ 5.10" if ($toolset eq 'suncc');
+	return "Sun C++ 5.10" . prettysuffix($1) if ($toolset =~ /^suncc(.*)$/);
 
 	return "Intel C++ Compiler $1.0" . prettysuffix($2) if ($toolset =~ /^ic(\d+)(.*)$/);
 	return "MinGW (GCC $1.$2)" . prettysuffix($3) if ($toolset =~ /^mingw(\d)(\d)(.*)$/);
