@@ -1374,37 +1374,48 @@ namespace
 			{
 				unsigned int ucsc = 0;
 
-				++stre;
-
-				if (*stre == 'x') // &#x... (hex code)
+				if (stre[1] == 'x') // &#x... (hex code)
 				{
-					++stre;
-					
-					while (*stre)
+					stre += 2;
+
+					char_t ch = *stre;
+
+					if (ch == ';') return stre;
+
+					for (;;)
 					{
-						if (*stre >= '0' && *stre <= '9')
-							ucsc = 16 * ucsc + (*stre++ - '0');
-						else if (*stre >= 'A' && *stre <= 'F')
-							ucsc = 16 * ucsc + (*stre++ - 'A' + 10);
-						else if (*stre >= 'a' && *stre <= 'f')
-							ucsc = 16 * ucsc + (*stre++ - 'a' + 10);
-						else if (*stre == ';')
+						if (static_cast<unsigned int>(ch - '0') <= 9)
+							ucsc = 16 * ucsc + (ch - '0');
+						else if (static_cast<unsigned int>((ch | ' ') - 'a') <= 5)
+							ucsc = 16 * ucsc + ((ch | ' ') - 'a' + 10);
+						else if (ch == ';')
 							break;
 						else // cancel
 							return stre;
-					}
 
-					if (*stre != ';') return stre;
-						
+						ch = *++stre;
+					}
+					
 					++stre;
 				}
 				else	// &#... (dec code)
 				{
-					while (*stre >= '0' && *stre <= '9')
-						ucsc = 10 * ucsc + (*stre++ - '0');
+					char_t ch = *++stre;
 
-					if (*stre != ';') return stre;
-						
+					if (ch == ';') return stre;
+
+					for (;;)
+					{
+						if (static_cast<unsigned int>(ch - '0') <= 9)
+							ucsc = 10 * ucsc + (ch - '0');
+						else if (ch == ';')
+							break;
+						else // cancel
+							return stre;
+
+						ch = *++stre;
+					}
+					
 					++stre;
 				}
 

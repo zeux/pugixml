@@ -281,6 +281,47 @@ TEST(parse_escapes_code)
 	CHECK_STRING(doc.child_value(STR("node")), STR("\01  "));
 }
 
+TEST(parse_escapes_code_exhaustive_dec)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<node>&#/;&#01;&#2;&#3;&#4;&#5;&#6;&#7;&#8;&#9;&#:;&#a;&#A;&#XA;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&#/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#:;&#a;&#A;&#XA;"));
+}
+
+TEST(parse_escapes_code_exhaustive_hex)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<node>&#x/;&#x01;&#x2;&#x3;&#x4;&#x5;&#x6;&#x7;&#x8;&#x9;&#x:;&#x@;&#xA;&#xB;&#xC;&#xD;&#xE;&#xF;&#xG;&#x`;&#xa;&#xb;&#xc;&#xd;&#xe;&#xf;&#xg;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&#x/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#x:;&#x@;\xa\xb\xc\xd\xe\xf&#xG;&#x`;\xa\xb\xc\xd\xe\xf&#xg;"));
+}
+
+TEST(parse_escapes_code_restore)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<node>&#1&#32;&#x1&#32;&#1-&#32;&#x1-&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&#1 &#x1 &#1- &#x1- "));
+}
+
+TEST(parse_escapes_char_restore)
+{
+	xml_document doc;
+
+	CHECK(doc.load(STR("<node>&q&#32;&qu&#32;&quo&#32;&quot&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&q &qu &quo &quot "));
+
+	CHECK(doc.load(STR("<node>&a&#32;&ap&#32;&apo&#32;&apos&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&a &ap &apo &apos "));
+
+	CHECK(doc.load(STR("<node>&a&#32;&am&#32;&amp&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&a &am &amp "));
+
+	CHECK(doc.load(STR("<node>&l&#32;&lt&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&l &lt "));
+
+	CHECK(doc.load(STR("<node>&g&#32;&gt&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&g &gt "));
+}
+
 TEST(parse_escapes_unicode)
 {
 	xml_document doc;
@@ -312,6 +353,13 @@ TEST(parse_escapes_error)
 	CHECK(!doc.load(STR("<node id='&a")));
 	CHECK(!doc.load(STR("<node id='&amp")));
 	CHECK(!doc.load(STR("<node id='&apos")));
+}
+
+TEST(parse_escapes_code_invalid)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<node>&#;&#x;&;&#x-;&#-;</node>"), parse_minimal | parse_escapes));
+	CHECK_STRING(doc.child_value(STR("node")), STR("&#;&#x;&;&#x-;&#-;"));
 }
 
 TEST(parse_attribute_spaces)
