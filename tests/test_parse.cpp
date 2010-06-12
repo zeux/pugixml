@@ -577,6 +577,7 @@ TEST(parse_declaration_error)
 	}
 	
 	CHECK(doc.load(STR("<?xml version='1?>"), parse_minimal | parse_declaration).status == status_bad_attribute);
+	CHECK(doc.load(STR("<foo><?xml version='1'?></foo>"), parse_minimal | parse_declaration).status == status_bad_pi);
 }
 
 TEST(parse_empty)
