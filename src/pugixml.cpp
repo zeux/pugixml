@@ -2044,105 +2044,79 @@ namespace
 			// parse node contents, starting with question mark
 			++s;
 
-			if (!IS_CHARTYPE(*s, ct_start_symbol)) // bad PI
-				THROW_ERROR(status_bad_pi, s);
-			else if (OPTSET(parse_pi) || OPTSET(parse_declaration))
+			// read PI target
+			char_t* target = s;
+
+			if (!IS_CHARTYPE(*s, ct_start_symbol)) THROW_ERROR(status_bad_pi, s);
+
+			SCANWHILE(IS_CHARTYPE(*s, ct_symbol));
+			CHECK_ERROR(status_bad_pi, s);
+
+			// determine node type; stricmp / strcasecmp is not portable
+			bool declaration = (target[0] | ' ') == 'x' && (target[1] | ' ') == 'm' && (target[2] | ' ') == 'l' && target + 3 == s;
+
+			if (declaration ? OPTSET(parse_declaration) : OPTSET(parse_pi))
 			{
-				char_t* mark = s;
-				SCANWHILE(IS_CHARTYPE(*s, ct_symbol)); // Read PI target
-				CHECK_ERROR(status_bad_pi, s);
-
-				if (!IS_CHARTYPE(*s, ct_space) && *s != '?') // Target has to end with space or ?
-					THROW_ERROR(status_bad_pi, s);
-
-				ENDSEG();
-				if (*s == 0 && endch != '>') THROW_ERROR(status_bad_pi, s);
-
-				if (ch == '?') // nothing except target present
+				if (declaration)
 				{
-					if (!ENDSWITH(*s, '>')) THROW_ERROR(status_bad_pi, s);
-					s += (*s == '>');
+					// disallow non top-level declarations
+					if ((cursor->header & xml_memory_page_type_mask) != node_document) THROW_ERROR(status_bad_pi, s);
 
-					// stricmp / strcasecmp is not portable
-					if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
-						&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
-					{
-						if (OPTSET(parse_declaration))
-						{
-							PUSHNODE(node_declaration);
-
-							cursor->name = mark;
-
-							POPNODE();
-						}
-					}
-					else if (OPTSET(parse_pi))
-					{
-						PUSHNODE(node_pi); // Append a new node on the tree.
-
-						cursor->name = mark;
-
-						POPNODE();
-					}
-				}
-				// stricmp / strcasecmp is not portable
-				else if ((mark[0] == 'x' || mark[0] == 'X') && (mark[1] == 'm' || mark[1] == 'M')
-					&& (mark[2] == 'l' || mark[2] == 'L') && mark[3] == 0)
-				{
-					if (OPTSET(parse_declaration))
-					{
-						PUSHNODE(node_declaration);
-
-						cursor->name = mark;
-
-						// scan for tag end
-						mark = s;
-
-						SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>')); // Look for '?>'.
-						CHECK_ERROR(status_bad_pi, s);
-
-						// replace ending ? with / to terminate properly
-						*s = '/';
-
-						// parse attributes
-						s = mark;
-
-						// we exit from this function with cursor at node_declaration, which is a signal to parse() to go to LOC_ATTRIBUTES
-					}
+					PUSHNODE(node_declaration);
 				}
 				else
 				{
-					if (OPTSET(parse_pi))
-					{
-						PUSHNODE(node_pi); // Append a new node on the tree.
+					PUSHNODE(node_pi);
+				}
 
-						cursor->name = mark;
-					}
+				cursor->name = target;
 
-					// ch is a whitespace character, skip whitespaces
+				ENDSEG();
+
+				// parse value/attributes
+				if (ch == '?')
+				{
+					// empty node
+					if (!ENDSWITH(*s, '>')) THROW_ERROR(status_bad_pi, s);
+					s += (*s == '>');
+
+					POPNODE();
+				}
+				else if (IS_CHARTYPE(ch, ct_space))
+				{
 					SKIPWS();
+
+					// scan for tag end
+					char_t* value = s;
+
+					SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>'));
 					CHECK_ERROR(status_bad_pi, s);
 
-					mark = s;
-
-					SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>')); // Look for '?>'.
-					CHECK_ERROR(status_bad_pi, s);
-
-					ENDSEG();
-
-					s += (*s == '>'); // Step over >
-
-					if (OPTSET(parse_pi))
+					if (declaration)
 					{
-						cursor->value = mark;
+						// replace ending ? with / so that 'element' terminates properly
+						*s = '/';
 
+						// we exit from this function with cursor at node_declaration, which is a signal to parse() to go to LOC_ATTRIBUTES
+						s = value;
+					}
+					else
+					{
+						// store value and step over >
+						cursor->value = value;
 						POPNODE();
+
+						ENDSEG();
+
+						s += (*s == '>');
 					}
 				}
+				else THROW_ERROR(status_bad_pi, s);
 			}
-			else // not parsing PI
+			else
 			{
-				SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>')); // Look for '?>'.
+				// scan for tag end
+				SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>'));
 				CHECK_ERROR(status_bad_pi, s);
 
 				s += (s[1] == '>' ? 2 : 1);

@@ -513,10 +513,13 @@ TEST_XML(dom_node_copy_crossdoc, "<node/>")
 	CHECK_NODE(newdoc, STR("<node />"));
 }
 
-TEST_XML_FLAGS(dom_node_copy_types, "<root><?xml version='1.0'?><?pi value?><!--comment--><node id='1'>pcdata<![CDATA[cdata]]></node></root>", parse_default | parse_pi | parse_comments | parse_declaration)
+TEST_XML_FLAGS(dom_node_copy_types, "<?xml version='1.0'?><root><?pi value?><!--comment--><node id='1'>pcdata<![CDATA[cdata]]></node></root>", parse_default | parse_pi | parse_comments | parse_declaration)
 {
 	doc.append_copy(doc.child(STR("root")));
-	CHECK_NODE(doc, STR("<root><?xml version=\"1.0\"?><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?xml version=\"1.0\"?><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
+
+	doc.insert_copy_before(doc.first_child(), doc.first_child());
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><?xml version=\"1.0\"?><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
 }
 
 TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
