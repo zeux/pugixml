@@ -211,6 +211,41 @@ TEST_XML(document_save_declaration, "<node/>")
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n<node />\n"));
 }
 
+TEST_XML(document_save_declaration_present_first, "<node/>")
+{
+	doc.insert_child_before(node_declaration, doc.first_child()).append_attribute(STR("encoding")) = STR("utf8");
+
+	xml_writer_string writer;
+
+	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+
+	CHECK(writer.as_string() == STR("<?xml encoding=\"utf8\"?>\n<node />\n"));
+}
+
+TEST_XML(document_save_declaration_present_second, "<node/>")
+{
+	doc.insert_child_before(node_declaration, doc.first_child()).append_attribute(STR("encoding")) = STR("utf8");
+	doc.insert_child_before(node_comment, doc.first_child()).set_value(STR("text"));
+
+	xml_writer_string writer;
+
+	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+
+	CHECK(writer.as_string() == STR("<!--text-->\n<?xml encoding=\"utf8\"?>\n<node />\n"));
+}
+
+TEST_XML(document_save_declaration_present_last, "<node/>")
+{
+	doc.append_child(node_declaration).append_attribute(STR("encoding")) = STR("utf8");
+
+	xml_writer_string writer;
+
+	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+
+	// node writer only looks for declaration before the first element child
+	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n<node />\n<?xml encoding=\"utf8\"?>\n"));
+}
+
 TEST_XML(document_save_file, "<node/>")
 {
 #ifdef __unix

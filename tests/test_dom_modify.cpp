@@ -532,3 +532,51 @@ TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
 	CHECK(test_node(node, STR("<node attr1=\"3.40282e+038\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw) ||
 		  test_node(node, STR("<node attr1=\"3.40282e+38\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw));
 }
+
+TEST(dom_node_declaration_name)
+{
+	xml_document doc;
+	doc.append_child(node_declaration);
+
+	// name 'xml' is auto-assigned
+	CHECK(doc.first_child().type() == node_declaration);
+	CHECK_STRING(doc.first_child().name(), STR("xml"));
+
+	doc.insert_child_after(node_declaration, doc.first_child());
+	doc.insert_child_before(node_declaration, doc.first_child());
+
+	CHECK_NODE(doc, STR("<?xml?><?xml?><?xml?>"));
+}
+
+TEST(dom_node_declaration_top_level)
+{
+	xml_document doc;
+	doc.append_child().set_name(STR("node"));
+
+	xml_node node = doc.first_child();
+	node.append_child(node_pcdata).set_value(STR("text"));
+
+	CHECK(node.insert_child_before(node_declaration, node.first_child()) == xml_node());
+	CHECK(node.insert_child_after(node_declaration, node.first_child()) == xml_node());
+	CHECK(node.append_child(node_declaration) == xml_node());
+
+	CHECK_NODE(doc, STR("<node>text</node>"));
+
+	CHECK(doc.insert_child_before(node_declaration, node));
+	CHECK(doc.insert_child_after(node_declaration, node));
+	CHECK(doc.append_child(node_declaration));
+
+	CHECK_NODE(doc, STR("<?xml?><node>text</node><?xml?><?xml?>"));
+}
+
+TEST(dom_node_declaration_copy)
+{
+	xml_document doc;
+	doc.append_child(node_declaration);
+
+	doc.append_child().set_name(STR("node"));
+
+	doc.last_child().append_copy(doc.first_child());
+
+	CHECK_NODE(doc, STR("<?xml?><node />"));
+}

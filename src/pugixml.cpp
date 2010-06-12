@@ -2902,6 +2902,28 @@ namespace
 		}
 	}
 
+	inline bool has_declaration(const xml_node& node)
+	{
+		for (xml_node child = node.first_child(); child; child = child.next_sibling())
+		{
+			xml_node_type type = child.type();
+
+			if (type == node_declaration) return true;
+			if (type == node_element) return false;
+		}
+
+		return false;
+	}
+
+	inline bool allow_insert_child(xml_node_type parent, xml_node_type child)
+	{
+		if (parent != node_document && parent != node_element) return false;
+		if (child == node_document || child == node_null) return false;
+		if (parent != node_document && child == node_declaration) return false;
+
+		return true;
+	}
+
 	void recursive_copy_skip(xml_node& dest, const xml_node& source, const xml_node& skip)
 	{
 		assert(dest.type() == source.type());
@@ -3491,9 +3513,11 @@ namespace pugi
 
 	xml_node xml_node::root() const
 	{
-		xml_node r = *this;
-		while (r && r.parent()) r = r.parent();
-		return r;
+		xml_node_struct* r = _root;
+
+		while (r && r->parent) r = r->parent;
+
+		return xml_node(r);
 	}
 
 	const char_t* xml_node::child_value() const
@@ -3673,15 +3697,19 @@ namespace pugi
 
 	xml_node xml_node::append_child(xml_node_type type)
 	{
-		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
+		if (!allow_insert_child(this->type(), type)) return xml_node();
 		
-		return xml_node(append_node(_root, get_allocator(_root), type));
+		xml_node n(append_node(_root, get_allocator(_root), type));
+
+		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+
+		return n;
 	}
 
 	xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node)
 	{
-		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
-		if (node.parent() != *this) return xml_node();
+		if (!allow_insert_child(this->type(), type)) return xml_node();
+		if (!node._root || node._root->parent != _root) return xml_node();
 	
 		xml_node n(allocate_node(get_allocator(_root), type));
 		n._root->parent = _root;
@@ -3695,13 +3723,15 @@ namespace pugi
 		n._root->next_sibling = node._root;
 		node._root->prev_sibling_c = n._root;
 
+		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+
 		return n;
 	}
 
 	xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node)
 	{
-		if ((this->type() != node_element && this->type() != node_document) || type == node_document || type == node_null) return xml_node();
-		if (node.parent() != *this) return xml_node();
+		if (!allow_insert_child(this->type(), type)) return xml_node();
+		if (!node._root || node._root->parent != _root) return xml_node();
 	
 		xml_node n(allocate_node(get_allocator(_root), type));
 		n._root->parent = _root;
@@ -3714,6 +3744,8 @@ namespace pugi
 		n._root->next_sibling = node._root->next_sibling;
 		n._root->prev_sibling_c = node._root;
 		node._root->next_sibling = n._root;
+
+		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
 		return n;
 	}
@@ -3777,7 +3809,7 @@ namespace pugi
 
 	void xml_node::remove_child(const xml_node& n)
 	{
-		if (!_root || n.parent() != *this) return;
+		if (!_root || !n._root || n._root->parent != _root) return;
 
 		if (n._root->next_sibling) n._root->next_sibling->prev_sibling_c = n._root->prev_sibling_c;
 		else if (_root->first_child) _root->first_child->prev_sibling_c = n._root->prev_sibling_c;
@@ -4385,7 +4417,7 @@ namespace pugi
 
 		xml_buffered_writer buffered_writer(writer, encoding);
 
-		if (!(flags & format_no_declaration))
+		if (!(flags & format_no_declaration) && !has_declaration(*this))
 		{
 			buffered_writer.write(PUGIXML_TEXT("<?xml version=\"1.0\"?>"));
 			if (!(flags & format_raw)) buffered_writer.write('\n');
