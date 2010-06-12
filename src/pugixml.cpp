@@ -40,15 +40,13 @@
 #	pragma warning(disable: 4127) // conditional expression is constant
 #endif
 
-#ifdef __BORLANDC__
-#	pragma warn -8008 // condition is always false
-#	pragma warn -8066 // unreachable code
+#ifdef __INTEL_COMPILER
+#	pragma warning(disable: 177) // function was declared but never referenced 
 #endif
 
 #ifdef __BORLANDC__
-// BC workaround
-using std::memmove;
-using std::memcpy;
+#	pragma warn -8008 // condition is always false
+#	pragma warn -8066 // unreachable code
 #endif
 
 // uintptr_t
