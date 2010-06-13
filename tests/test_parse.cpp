@@ -585,3 +585,34 @@ TEST(parse_empty)
 	xml_document doc;
 	CHECK(doc.load(STR("")) && !doc.first_child());
 }
+
+TEST(parse_out_of_memory)
+{
+	test_runner::_memory_fail_threshold = 256;
+
+	xml_document doc;
+	CHECK(doc.load(STR("<foo a='1'/>")).status == status_out_of_memory);
+	CHECK(!doc.first_child());
+}
+
+TEST(parse_out_of_memory_halfway)
+{
+	unsigned int count = 10000;
+	char_t* text = new char_t[count * 4];
+
+	for (unsigned int i = 0; i < count; ++i)
+	{
+		text[4*i + 0] = '<';
+		text[4*i + 1] = 'n';
+		text[4*i + 2] = '/';
+		text[4*i + 3] = '>';
+	}
+
+	test_runner::_memory_fail_threshold = 65536;
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory);
+	CHECK_NODE(doc.first_child(), STR("<n />"));
+
+	delete[] text;
+}

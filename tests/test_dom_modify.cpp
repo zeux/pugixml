@@ -580,3 +580,80 @@ TEST(dom_node_declaration_copy)
 
 	CHECK_NODE(doc, STR("<?xml?><node />"));
 }
+
+TEST(dom_string_out_of_memory)
+{
+	unsigned int length = 65536;
+
+	char_t* string = new char_t[length + 1];
+	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
+	string[length] = 0;
+
+	xml_document doc;
+	xml_node node = doc.append_child();
+	xml_attribute attr = node.append_attribute(STR("a"));
+	xml_node text = node.append_child(node_pcdata);
+
+	// no value => long value
+	test_runner::_memory_fail_threshold = 32;
+
+	CHECK(!node.set_name(string));
+	CHECK(!text.set_value(string));
+	CHECK(!attr.set_name(string));
+	CHECK(!attr.set_value(string));
+
+	// set some names/values
+	test_runner::_memory_fail_threshold = 0;
+
+	node.set_name(STR("n"));
+	attr.set_value(STR("v"));
+	text.set_value(STR("t"));
+
+	// some value => long value
+	test_runner::_memory_fail_threshold = 32;
+
+	CHECK(!node.set_name(string));
+	CHECK(!text.set_value(string));
+	CHECK(!attr.set_name(string));
+	CHECK(!attr.set_value(string));
+
+	// check that original state was preserved
+	test_runner::_memory_fail_threshold = 0;
+
+	CHECK_NODE(doc, STR("<n a=\"v\">t</n>"));
+}
+
+TEST(dom_node_out_of_memory)
+{
+	test_runner::_memory_fail_threshold = 65536;
+
+	// exhaust memory limit
+	xml_document doc;
+
+	xml_node n = doc.append_child();
+	CHECK(n.set_name(STR("n")));
+
+	xml_attribute a = n.append_attribute(STR("a"));
+	CHECK(a);
+
+	while (n.append_child(node_comment) || n.append_attribute(STR("b")))
+	{
+		// nop
+	}
+
+	// verify all node modification operations
+	CHECK(!n.append_child());
+	CHECK(!n.insert_child_after(node_element, n.first_child()));
+	CHECK(!n.insert_child_before(node_element, n.first_child()));
+	CHECK(!n.append_attribute(STR("")));
+	CHECK(!n.insert_attribute_after(STR(""), a));
+	CHECK(!n.insert_attribute_before(STR(""), a));
+
+	// verify node copy operations
+	CHECK(!n.append_copy(n.first_child()));
+	CHECK(!n.insert_copy_after(n.first_child(), n.first_child()));
+	CHECK(!n.insert_copy_before(n.first_child(), n.first_child()));
+	CHECK(!n.append_copy(a));
+	CHECK(!n.insert_copy_after(a, a));
+	CHECK(!n.insert_copy_before(a, a));
+}

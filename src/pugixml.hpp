@@ -1811,9 +1811,6 @@ namespace pugi
 		/// Last parsed offset (in bytes from file/string start)
 		ptrdiff_t offset;
 
-		/// Line in parser source which reported this
-		unsigned int line;
-
 		/// Source document encoding
 		encoding_t encoding;
 

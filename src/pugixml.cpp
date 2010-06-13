@@ -26,6 +26,7 @@
 #include <string.h>
 #include <assert.h>
 #include <wchar.h>
+#include <setjmp.h>
 
 #ifndef PUGIXML_NO_STL
 #	include <istream>
@@ -38,6 +39,7 @@
 
 #ifdef _MSC_VER
 #	pragma warning(disable: 4127) // conditional expression is constant
+#	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
 #endif
 
 #ifdef __INTEL_COMPILER
@@ -292,6 +294,7 @@ namespace pugi
 
 			// allocate block with some alignment, leaving memory for worst-case padding
 			void* memory = global_allocate(size + xml_memory_page_alignment);
+			if (!memory) return 0;
 
 			// align upwards to page boundary
 			void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(memory) + (xml_memory_page_alignment - 1)) & ~(xml_memory_page_alignment - 1));
@@ -315,6 +318,7 @@ namespace pugi
 			const size_t large_allocation_threshold = xml_memory_page_size / 4;
 
 			xml_memory_page* page = allocate_page(size <= large_allocation_threshold ? xml_memory_page_size : size);
+			if (!page) return 0;
 
 			if (size <= large_allocation_threshold)
 			{
@@ -404,6 +408,8 @@ namespace pugi
 
 			xml_memory_page* page;
 			xml_memory_string_header* header = static_cast<xml_memory_string_header*>(allocate_memory(full_size, page));
+
+			if (!header) return 0;
 
 			// setup header
 			header->page = page;
@@ -546,6 +552,8 @@ namespace
 	PUGIXML_NO_INLINE xml_node_struct* append_node(xml_node_struct* node, xml_allocator& alloc, xml_node_type type = node_element)
 	{
 		xml_node_struct* child = allocate_node(alloc, type);
+		if (!child) return 0;
+
 		child->parent = node;
 
 		xml_node_struct* first_child = node->first_child;
@@ -570,6 +578,7 @@ namespace
 	PUGIXML_NO_INLINE xml_attribute_struct* append_attribute_ll(xml_node_struct* node, xml_allocator& alloc)
 	{
 		xml_attribute_struct* a = allocate_attribute(alloc);
+		if (!a) return 0;
 
 		xml_attribute_struct* first_attribute = node->first_attribute;
 
@@ -1786,30 +1795,30 @@ namespace
 		}
 	}
 
-	inline xml_parse_result make_parse_result(xml_parse_status status, ptrdiff_t offset, unsigned int line)
+	inline xml_parse_result make_parse_result(xml_parse_status status, ptrdiff_t offset = 0)
 	{
-		xml_parse_result result = {status, offset, line, encoding_auto};
+		xml_parse_result result = {status, offset, encoding_auto};
 		return result;
 	}
-
-	#define MAKE_PARSE_RESULT(status) make_parse_result(status, 0, __LINE__)
 
 	struct xml_parser
 	{
 		xml_allocator alloc;
+		char_t* error_offset;
+		jmp_buf error_handler;
 		
 		// Parser utilities.
 		#define SKIPWS()			{ while (IS_CHARTYPE(*s, ct_space)) ++s; }
 		#define OPTSET(OPT)			( optmsk & OPT )
-		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); }
+		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); if (!cursor) longjmp(error_handler, status_out_of_memory); }
 		#define POPNODE()			{ cursor = cursor->parent; }
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define SCANWHILE(X)		{ while ((X)) ++s; }
 		#define ENDSEG()			{ ch = *s; *s = 0; ++s; }
-		#define THROW_ERROR(err, m)	return make_parse_result(err, m - buffer_start, __LINE__)
+		#define THROW_ERROR(err, m)	error_offset = m, longjmp(error_handler, err)
 		#define CHECK_ERROR(err, m)	{ if (*s == 0) THROW_ERROR(err, m); }
 		
-		xml_parser(const xml_allocator& alloc): alloc(alloc)
+		xml_parser(const xml_allocator& alloc): alloc(alloc), error_offset(0)
 		{
 		}
 
@@ -1820,7 +1829,7 @@ namespace
 		// First group can not contain nested groups
 		// Second group can contain nested groups of the same type
 		// Third group can contain all other groups
-		xml_parse_result parse_doctype_primitive(char_t*& s, char_t* buffer_start)
+		void parse_doctype_primitive(char_t*& s)
 		{
 			if (*s == '"' || *s == '\'')
 			{
@@ -1849,11 +1858,9 @@ namespace
 				s += 4;
 			}
 			else THROW_ERROR(status_bad_doctype, s);
-
-			THROW_ERROR(status_ok, s);
 		}
 
-		xml_parse_result parse_doctype_ignore(char_t*& s, char_t* buffer_start)
+		void parse_doctype_ignore(char_t*& s)
 		{
 			assert(s[0] == '<' && s[1] == '!' && s[2] == '[');
 			s++;
@@ -1863,16 +1870,14 @@ namespace
 				if (s[0] == '<' && s[1] == '!' && s[2] == '[')
 				{
 					// nested ignore section
-					xml_parse_result res = parse_doctype_ignore(s, buffer_start);
-
-					if (!res) return res;
+					parse_doctype_ignore(s);
 				}
 				else if (s[0] == ']' && s[1] == ']' && s[2] == '>')
 				{
 					// ignore section end
 					s += 3;
 
-					THROW_ERROR(status_ok, s);
+					return;
 				}
 				else s++;
 			}
@@ -1880,7 +1885,7 @@ namespace
 			THROW_ERROR(status_bad_doctype, s);
 		}
 
-		xml_parse_result parse_doctype(char_t*& s, char_t* buffer_start, char_t endch, bool toplevel)
+		void parse_doctype(char_t*& s, char_t endch, bool toplevel)
 		{
 			assert(s[0] == '<' && s[1] == '!');
 			s++;
@@ -1892,38 +1897,32 @@ namespace
 					if (s[2] == '[')
 					{
 						// ignore
-						xml_parse_result res = parse_doctype_ignore(s, buffer_start);
-
-						if (!res) return res;
+						parse_doctype_ignore(s);
 					}
 					else
 					{
 						// some control group
-						xml_parse_result res = parse_doctype(s, buffer_start, endch, false);
-
-						if (!res) return res;
+						parse_doctype(s, endch, false);
 					}
 				}
 				else if (s[0] == '<' || s[0] == '"' || s[0] == '\'')
 				{
 					// unknown tag (forbidden), or some primitive group
-					xml_parse_result res = parse_doctype_primitive(s, buffer_start);
-
-					if (!res) return res;
+					parse_doctype_primitive(s);
 				}
 				else if (*s == '>')
 				{
 					s++;
 
-					THROW_ERROR(status_ok, s);
+					return;
 				}
 				else s++;
 			}
 
-			THROW_ERROR((toplevel && endch == '>') ? status_ok : status_bad_doctype, s);
+			if (!toplevel || endch != '>') THROW_ERROR(status_bad_doctype, s);
 		}
 
-		xml_parse_result parse_exclamation(char_t*& ref_s, xml_node_struct* cursor, unsigned int optmsk, char_t* buffer_start, char_t endch)
+		void parse_exclamation(char_t*& ref_s, xml_node_struct* cursor, unsigned int optmsk, char_t endch)
 		{
 			// load into registers
 			char_t* s = ref_s;
@@ -2018,9 +2017,7 @@ namespace
 
 				s -= 2;
 
-				xml_parse_result res = parse_doctype(s, buffer_start, endch, true);
-
-				if (!res) return res;
+				parse_doctype(s, endch, true);
 			}
 			else if (*s == 0 && endch == '-') THROW_ERROR(status_bad_comment, s);
 			else if (*s == 0 && endch == '[') THROW_ERROR(status_bad_cdata, s);
@@ -2028,11 +2025,9 @@ namespace
 
 			// store from registers
 			ref_s = s;
-
-			THROW_ERROR(status_ok, s);
 		}
 
-		xml_parse_result parse_question(char_t*& ref_s, xml_node_struct*& ref_cursor, unsigned int optmsk, char_t* buffer_start, char_t endch)
+		void parse_question(char_t*& ref_s, xml_node_struct*& ref_cursor, unsigned int optmsk, char_t endch)
 		{
 			// load into registers
 			char_t* s = ref_s;
@@ -2123,17 +2118,13 @@ namespace
 			// store from registers
 			ref_s = s;
 			ref_cursor = cursor;
-
-			THROW_ERROR(status_ok, s);
 		}
 
-		xml_parse_result parse(char_t* s, xml_node_struct* xmldoc, unsigned int optmsk, char_t endch)
+		void parse(char_t* s, xml_node_struct* xmldoc, unsigned int optmsk, char_t endch)
 		{
 			strconv_attribute_t strconv_attribute = get_strconv_attribute(optmsk);
 			strconv_pcdata_t strconv_pcdata = get_strconv_pcdata(optmsk);
 			
-			char_t* buffer_start = s;
-
 			char_t ch = 0;
 			xml_node_struct* cursor = xmldoc;
 			char_t* mark = s;
@@ -2168,6 +2159,8 @@ namespace
 								if (IS_CHARTYPE(*s, ct_start_symbol)) // <... #...
 								{
 									xml_attribute_struct* a = append_attribute_ll(cursor, alloc); // Make space for this attribute.
+									if (!a) THROW_ERROR(status_out_of_memory, 0);
+
 									a->name = s; // Save the offset.
 
 									SCANWHILE(IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
@@ -2291,17 +2284,13 @@ namespace
 					}
 					else if (*s == '?') // '<?...'
 					{
-						xml_parse_result quest_result = parse_question(s, cursor, optmsk, buffer_start, endch);
-
-						if (!quest_result) return quest_result;
+						parse_question(s, cursor, optmsk, endch);
 
 						if (cursor && (cursor->header & xml_memory_page_type_mask) == node_declaration) goto LOC_ATTRIBUTES;
 					}
 					else if (*s == '!') // '<!...'
 					{
-						xml_parse_result excl_result = parse_exclamation(s, cursor, optmsk, buffer_start, endch);
-
-						if (!excl_result) return excl_result;
+						parse_exclamation(s, cursor, optmsk, endch);
 					}
 					else if (*s == 0 && endch == '?') THROW_ERROR(status_bad_pi, s);
 					else THROW_ERROR(status_unrecognized_tag, s);
@@ -2345,8 +2334,6 @@ namespace
 
 			// check that last tag is closed
 			if (cursor != xmldoc) THROW_ERROR(status_end_element_mismatch, s);
-			
-			THROW_ERROR(status_ok, s);
 		}
 
 		static xml_parse_result parse(char_t* buffer, size_t length, xml_node_struct* xmldoc, unsigned int optmsk)
@@ -2355,7 +2342,7 @@ namespace
 			static_cast<xml_document_struct*>(xmldoc)->buffer = buffer;
 
 			// early-out for empty documents
-			if (length == 0) return MAKE_PARSE_RESULT(status_ok);
+			if (length == 0) return make_parse_result(status_ok);
 
 			// create parser on stack
 			xml_allocator& alloc = static_cast<xml_document_struct*>(xmldoc)->allocator;
@@ -2367,7 +2354,14 @@ namespace
 			buffer[length - 1] = 0;
 			
 			// perform actual parsing
-			xml_parse_result result = parser.parse(buffer, xmldoc, optmsk, endch);
+			int error = setjmp(parser.error_handler);
+
+			if (error == 0)
+			{
+				parser.parse(buffer, xmldoc, optmsk, endch);
+			}
+
+			xml_parse_result result = make_parse_result(static_cast<xml_parse_status>(error), parser.error_offset ? parser.error_offset - buffer : 0);
 
 			// update allocator state
 			alloc = parser.alloc;
@@ -2375,10 +2369,8 @@ namespace
 			// since we removed last character, we have to handle the only possible false positive
 			if (result && endch == '<')
 			{
-				char_t* buffer_start = buffer;
-
 				// there's no possible well-formed document with < at the end
-				THROW_ERROR(status_unrecognized_tag, buffer_start + length);
+				return make_parse_result(status_unrecognized_tag, length);
 			}
 
 			return result;
@@ -2977,7 +2969,7 @@ namespace
 #ifndef PUGIXML_NO_STL
 	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T, std::char_traits<T> >& stream, unsigned int options, encoding_t encoding)
 	{
-		if (!stream.good()) return MAKE_PARSE_RESULT(status_io_error);
+		if (!stream.good()) return make_parse_result(status_io_error);
 
 		// get length of remaining data in stream
 		std::streamoff pos = stream.tellg();
@@ -2985,13 +2977,13 @@ namespace
 		std::streamoff length = stream.tellg() - pos;
 		stream.seekg(pos, std::ios::beg);
 
-		if (!stream.good() || pos < 0 || length < 0) return MAKE_PARSE_RESULT(status_io_error);
+		if (!stream.good() || pos < 0 || length < 0) return make_parse_result(status_io_error);
 
 		// read stream data into memory
 		size_t read_length = static_cast<size_t>(length);
 
 		T* s = static_cast<T*>(global_allocate((read_length > 0 ? read_length : 1) * sizeof(T)));
-		if (!s) return MAKE_PARSE_RESULT(status_out_of_memory);
+		if (!s) return make_parse_result(status_out_of_memory);
 
 		stream.read(s, static_cast<std::streamsize>(read_length));
 
@@ -3002,7 +2994,7 @@ namespace
 		if (read_length > 0 && actual_length == 0)
 		{
 			global_deallocate(s);
-			return MAKE_PARSE_RESULT(status_io_error);
+			return make_parse_result(status_io_error);
 		}
 
 		// load data from buffer
@@ -3575,9 +3567,7 @@ namespace pugi
 		case node_pi:
 		case node_declaration:
 		case node_element:
-		{
 			return strcpy_insitu(_root->name, _root->header, xml_memory_page_name_allocated_mask, rhs);
-		}
 
 		default:
 			return false;
@@ -3592,9 +3582,7 @@ namespace pugi
 		case node_cdata:
 		case node_pcdata:
 		case node_comment:
-		{
 			return strcpy_insitu(_root->value, _root->header, xml_memory_page_value_allocated_mask, rhs);
-		}
 
 		default:
 			return false;
@@ -3606,6 +3594,8 @@ namespace pugi
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
 		xml_attribute a(append_attribute_ll(_root, get_allocator(_root)));
+		if (!a) return xml_attribute();
+
 		a.set_name(name);
 		
 		return a;
@@ -3623,6 +3613,8 @@ namespace pugi
 		if (cur != _root->first_attribute) return xml_attribute();
 
 		xml_attribute a(allocate_attribute(get_allocator(_root)));
+		if (!a) return xml_attribute();
+
 		a.set_name(name);
 
 		if (attr._attr->prev_attribute_c->next_attribute)
@@ -3649,6 +3641,8 @@ namespace pugi
 		if (cur != _root->first_attribute) return xml_attribute();
 
 		xml_attribute a(allocate_attribute(get_allocator(_root)));
+		if (!a) return xml_attribute();
+
 		a.set_name(name);
 
 		if (attr._attr->next_attribute)
@@ -3698,6 +3692,7 @@ namespace pugi
 		if (!allow_insert_child(this->type(), type)) return xml_node();
 		
 		xml_node n(append_node(_root, get_allocator(_root), type));
+		if (!n) return xml_node();
 
 		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
@@ -3710,6 +3705,8 @@ namespace pugi
 		if (!node._root || node._root->parent != _root) return xml_node();
 	
 		xml_node n(allocate_node(get_allocator(_root), type));
+		if (!n) return xml_node();
+
 		n._root->parent = _root;
 		
 		if (node._root->prev_sibling_c->next_sibling)
@@ -3732,6 +3729,8 @@ namespace pugi
 		if (!node._root || node._root->parent != _root) return xml_node();
 	
 		xml_node n(allocate_node(get_allocator(_root), type));
+		if (!n) return xml_node();
+
 		n._root->parent = _root;
 	
 		if (node._root->next_sibling)
@@ -4334,7 +4333,7 @@ namespace pugi
 		create();
 
 		FILE* file = fopen(name, "rb");
-		if (!file) return MAKE_PARSE_RESULT(status_file_not_found);
+		if (!file) return make_parse_result(status_file_not_found);
 
 		fseek(file, 0, SEEK_END);
 		long length = ftell(file);
@@ -4343,7 +4342,7 @@ namespace pugi
 		if (length < 0)
 		{
 			fclose(file);
-			return MAKE_PARSE_RESULT(status_io_error);
+			return make_parse_result(status_io_error);
 		}
 		
 		char* s = static_cast<char*>(global_allocate(length > 0 ? length : 1));
@@ -4351,7 +4350,7 @@ namespace pugi
 		if (!s)
 		{
 			fclose(file);
-			return MAKE_PARSE_RESULT(status_out_of_memory);
+			return make_parse_result(status_out_of_memory);
 		}
 
 		size_t read = fread(s, 1, (size_t)length, file);
@@ -4360,7 +4359,7 @@ namespace pugi
 		if (read != (size_t)length)
 		{
 			global_deallocate(s);
-			return MAKE_PARSE_RESULT(status_io_error);
+			return make_parse_result(status_io_error);
 		}
 		
 		return load_buffer_inplace_own(s, length, options, encoding);
@@ -4377,7 +4376,7 @@ namespace pugi
 		char_t* buffer = 0;
 		size_t length = 0;
 
-		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return MAKE_PARSE_RESULT(status_out_of_memory);
+		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return make_parse_result(status_out_of_memory);
 		
 		// delete original buffer if we performed a conversion
 		if (own && buffer != contents) global_deallocate(contents);

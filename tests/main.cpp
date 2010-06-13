@@ -15,7 +15,7 @@ static size_t g_memory_total_count = 0;
 
 static void* custom_allocate(size_t size)
 {
-	if (test_runner::_memory_fail_threshold > 0 && test_runner::_memory_fail_threshold < size)
+	if (test_runner::_memory_fail_threshold > 0 && test_runner::_memory_fail_threshold < g_memory_total_size + size)
 		return 0;
 	else
 	{
