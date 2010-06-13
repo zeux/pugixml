@@ -1804,8 +1804,8 @@ namespace
 	struct xml_parser
 	{
 		xml_allocator alloc;
-		char_t* error_offset;
 		jmp_buf error_handler;
+		char_t* error_offset;
 		
 		// Parser utilities.
 		#define SKIPWS()			{ while (IS_CHARTYPE(*s, ct_space)) ++s; }
