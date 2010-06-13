@@ -616,3 +616,52 @@ TEST(parse_out_of_memory_halfway)
 
 	delete[] text;
 }
+
+static bool test_offset(const char_t* contents, unsigned int options, pugi::xml_parse_status status, ptrdiff_t offset)
+{
+	xml_document doc;
+	xml_parse_result res = doc.load(contents, options);
+
+	return res.status == status && res.offset == offset;
+}
+
+#define CHECK_OFFSET(contents, options, status, offset) CHECK(test_offset(STR(contents), options, status, offset))
+
+TEST(parse_error_offset)
+{
+	CHECK_OFFSET("<node/>", parse_default, status_ok, 0);
+
+	test_runner::_memory_fail_threshold = 1;
+	CHECK_OFFSET("<node/>", parse_default, status_out_of_memory, 0);
+	test_runner::_memory_fail_threshold = 0;
+
+	CHECK_OFFSET("<3d/>", parse_default, status_unrecognized_tag, 1);
+	CHECK_OFFSET(" <3d/>", parse_default, status_unrecognized_tag, 2);
+	CHECK_OFFSET(" <", parse_default, status_unrecognized_tag, 2);
+
+	CHECK_OFFSET("<?pi", parse_default, status_bad_pi, 3);
+	CHECK_OFFSET("<?pi", parse_default | parse_pi, status_bad_pi, 3);
+	CHECK_OFFSET("<?xml", parse_default | parse_declaration, status_bad_pi, 4);
+
+	CHECK_OFFSET("<!----", parse_default, status_bad_comment, 5);
+	CHECK_OFFSET("<!----", parse_default | parse_comments, status_bad_comment, 4);
+
+	CHECK_OFFSET("<![CDA", parse_default, status_bad_cdata, 5);
+	CHECK_OFFSET("<![CDATA[non-terminated]]", parse_default, status_bad_cdata, 9);
+
+	CHECK_OFFSET("<!DOCTYPE doc", parse_default, status_bad_doctype, 12);
+	CHECK_OFFSET("<!DOCTYPE greeting [ <!ATTLIST list type    (bullets|ordered|glossary)  \"orde", parse_default, status_bad_doctype, 76);
+
+	CHECK_OFFSET("<node", parse_default, status_bad_start_element, 4);
+	CHECK_OFFSET("<node ", parse_default, status_bad_start_element, 5);
+	CHECK_OFFSET("<nod%>", parse_default, status_bad_start_element, 5);
+
+	CHECK_OFFSET("<node a=2>", parse_default, status_bad_attribute, 8);
+	CHECK_OFFSET("<node a='2>", parse_default, status_bad_attribute, 9);
+
+	CHECK_OFFSET("<n></n $>", parse_default, status_bad_end_element, 7);
+	CHECK_OFFSET("<n></n", parse_default, status_bad_end_element, 5);
+
+	CHECK_OFFSET("<no></na>", parse_default, status_end_element_mismatch, 8);
+	CHECK_OFFSET("<no></nod>", parse_default, status_end_element_mismatch, 9);
+}
