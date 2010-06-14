@@ -332,34 +332,100 @@ namespace
 		return (value != 0 && !is_nan(value));
 	}
 	
+	// gets mantissa digits in the form of 0.xxxxx with 0. implied and the exponent
+	void convert_number_to_mantissa_exponent(double value, char* buffer, char** out_mantissa, int* out_exponent)
+	{
+		// get a scientific notation value with IEEE DBL_DIG decimals
+		sprintf(buffer, "%.15e", value);
+
+		// get the exponent (possibly negative)
+		char* exponent_string = strchr(buffer, 'e');
+		assert(exponent_string);
+
+		int exponent = atoi(exponent_string + 1);
+
+		// extract mantissa string: skip sign
+		char* mantissa = buffer[0] == '-' ? buffer + 1 : buffer;
+		assert(mantissa[0] != '0' && mantissa[1] == '.');
+
+		// divide mantissa by 10 to eliminate integer part
+		mantissa[1] = mantissa[0];
+		mantissa++;
+		exponent++;
+
+		// remove extra mantissa digits and zero-terminate mantissa
+		char* mantissa_end = exponent_string;
+
+		while (mantissa != mantissa_end && *(mantissa_end - 1) == '0') --mantissa_end;
+
+		*mantissa_end = 0;
+
+		// fill results
+		*out_mantissa = mantissa;
+		*out_exponent = exponent;
+	}
+
 	string_t convert_number_to_string(double value)
 	{
+		// try special number conversion
 		const char_t* special = convert_number_to_string_special(value);
 		if (special) return special;
-		
-		char buf[512];
-		sprintf(buf, "%f", value);
-			
-		// trim trailing zeros after decimal point
-		if (strchr(buf, '.'))
+
+		// get mantissa + exponent form
+		char mantissa_buffer[64];
+
+		char* mantissa;
+		int exponent;
+		convert_number_to_mantissa_exponent(value, mantissa_buffer, &mantissa, &exponent);
+
+		// make the number!
+		char_t result[512];
+		char_t* s = result;
+
+		// sign
+		if (value < 0) *s++ = '-';
+
+		// integer part
+		if (exponent <= 0)
 		{
-			char* ptr = buf + strlen(buf) - 1;
-			for (; *ptr == '0'; --ptr) ;
-
-			// trim leftover decimal point (for integer numbers)
-			if (*ptr == '.') --ptr;
-
-			*(ptr+1) = 0;
+			*s++ = '0';
+		}
+		else
+		{
+			while (exponent > 0)
+			{
+				assert(*mantissa == 0 || (unsigned)(*mantissa - '0') <= 9);
+				*s++ = *mantissa ? *mantissa++ : '0';
+				exponent--;
+			}
 		}
 
-	#ifdef PUGIXML_WCHAR_MODE
-		wchar_t wbuf[512];
-		impl::widen_ascii(wbuf, buf);
-		
-		return string_t(wbuf);
-	#else
-		return string_t(buf);
-	#endif
+		// fractional part
+		if (*mantissa)
+		{
+			// decimal point
+			*s++ = '.';
+
+			// extra zeroes from negative exponent
+			while (exponent < 0)
+			{
+				*s++ = '0';
+				exponent++;
+			}
+
+			// extra mantissa digits
+			while (*mantissa)
+			{
+				assert((unsigned)(*mantissa - '0') <= 9);
+				*s++ = *mantissa++;
+			}
+		}
+
+		// zero-terminate
+		assert(s < result + sizeof(result) / sizeof(result[0]));
+		*s = 0;
+
+		return string_t(result);
 	}
 	
 	bool check_string_to_number_format(const char_t* string)

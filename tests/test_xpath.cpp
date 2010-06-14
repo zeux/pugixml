@@ -118,13 +118,27 @@ TEST(xpath_long_numbers_stringize)
 
 	xml_node c;
 
-	CHECK(test_xpath_string_prefix(c, str_flt_max, str_flt_max, 16));
-	CHECK(test_xpath_string_prefix(c, str_flt_max_dec, str_flt_max, 16));
+	CHECK(test_xpath_string_prefix(c, str_flt_max, str_flt_max, 15));
+	CHECK(test_xpath_string_prefix(c, str_flt_max_dec, str_flt_max, 15));
 
-#ifndef __BORLANDC__ // printf with %f format still results in 1.xxxe+308 form
-	CHECK(test_xpath_string_prefix(c, str_dbl_max, str_dbl_max, 16));
-	CHECK(test_xpath_string_prefix(c, str_dbl_max_dec, str_dbl_max, 16));
-#endif
+	CHECK(test_xpath_string_prefix(c, str_dbl_max, str_dbl_max, 15));
+	CHECK(test_xpath_string_prefix(c, str_dbl_max_dec, str_dbl_max, 15));
+}
+
+#include <stdio.h>
+
+TEST(xpath_denorm_numbers)
+{
+	pugi::string_t query;
+
+	// 10^-318 - double denormal
+	for (int i = 0; i < 106; ++i)
+	{
+		if (i != 0) query += STR(" * ");
+		query += STR("0.001");
+	}
+
+	CHECK_XPATH_STRING(xml_node(), query.c_str(), STR("0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000009999987484955998"));
 }
 
 TEST_XML(xpath_rexml_1, "<a><b><c id='a'/></b><c id='b'/></a>")

@@ -388,7 +388,6 @@ TEST(xpath_xalan_math_9)
 	CHECK_XPATH_STRING(c, STR("string(number('0.0004'))"), STR("0.0004"));
 	CHECK_XPATH_STRING(c, STR("string(-1 * number('0.0004'))"), STR("-0.0004"));
 
-#if 0 // $$ commented out temporarily because number formatting is not compliant yet
 	CHECK_XPATH_STRING(c, STR("string(number('0.0000000000001'))"), STR("0.0000000000001"));
 	CHECK_XPATH_STRING(c, STR("string(-1 * number('0.0000000000001'))"), STR("-0.0000000000001"));
 
@@ -397,7 +396,6 @@ TEST(xpath_xalan_math_9)
 
 	CHECK_XPATH_STRING(c, STR("string(number('0.0000000000001000000000000001'))"), STR("0.0000000000001000000000000001"));
 	CHECK_XPATH_STRING(c, STR("string(-1 * number('0.0000000000001000000000000001'))"), STR("-0.0000000000001000000000000001"));
-#endif
 
 	CHECK_XPATH_STRING(c, STR("string(number('0.0012'))"), STR("0.0012"));
 	CHECK_XPATH_STRING(c, STR("string(-1 * number('0.0012'))"), STR("-0.0012"));
