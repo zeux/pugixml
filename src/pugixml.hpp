@@ -56,11 +56,9 @@ namespace std
 #	endif
 #endif
 
-// No XPath without STL
-#ifdef PUGIXML_NO_STL
-#	ifndef PUGIXML_NO_XPATH
-#		define PUGIXML_NO_XPATH
-#	endif
+// No XPath without STL or exceptions
+#if (defined(PUGIXML_NO_STL) || defined(PUGIXML_NO_EXCEPTIONS)) && !defined(PUGIXML_NO_XPATH)
+#	define PUGIXML_NO_XPATH
 #endif
 
 // Include exception header for XPath

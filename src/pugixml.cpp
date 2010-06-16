@@ -17,10 +17,6 @@
 
 #include "pugixml.hpp"
 
-#if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_EXCEPTIONS)
-#error No exception mode can not be used with XPath support
-#endif
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
