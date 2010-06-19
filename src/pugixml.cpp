@@ -47,6 +47,10 @@
 #	pragma warn -8066 // unreachable code
 #endif
 
+#ifdef __SNC__
+#	pragma diag_suppress=178 // function waS declared but never referenced
+#endif
+
 // uintptr_t
 #if !defined(_MSC_VER) || _MSC_VER >= 1600
 #	include <stdint.h>
@@ -309,42 +313,7 @@ namespace pugi
 			global_deallocate(page->memory);
 		}
 
-		PUGIXML_NO_INLINE void* allocate_memory_oob(size_t size, xml_memory_page*& out_page)
-		{
-			const size_t large_allocation_threshold = xml_memory_page_size / 4;
-
-			xml_memory_page* page = allocate_page(size <= large_allocation_threshold ? xml_memory_page_size : size);
-			if (!page) return 0;
-
-			if (size <= large_allocation_threshold)
-			{
-				_root->busy_size = _busy_size;
-
-				// insert page at the end of linked list
-				page->prev = _root;
-				_root->next = page;
-				_root = page;
-
-				_busy_size = size;
-			}
-			else
-			{
-				// insert page before the end of linked list
-				assert(_root->prev);
-
-				page->prev = _root->prev;
-				page->next = _root;
-
-				_root->prev->next = page;
-				_root->prev = page;
-			}
-
-			// allocate inside page
-			page->busy_size = size;
-
-			out_page = page;
-			return page->data;
-		}
+		void* allocate_memory_oob(size_t size, xml_memory_page*& out_page);
 
 		void* allocate_memory(size_t size, xml_memory_page*& out_page)
 		{
@@ -426,6 +395,43 @@ namespace pugi
 		xml_memory_page* _root;
 		size_t _busy_size;
 	};
+
+	PUGIXML_NO_INLINE void* xml_allocator::allocate_memory_oob(size_t size, xml_memory_page*& out_page)
+	{
+		const size_t large_allocation_threshold = xml_memory_page_size / 4;
+
+		xml_memory_page* page = allocate_page(size <= large_allocation_threshold ? xml_memory_page_size : size);
+		if (!page) return 0;
+
+		if (size <= large_allocation_threshold)
+		{
+			_root->busy_size = _busy_size;
+
+			// insert page at the end of linked list
+			page->prev = _root;
+			_root->next = page;
+			_root = page;
+
+			_busy_size = size;
+		}
+		else
+		{
+			// insert page before the end of linked list
+			assert(_root->prev);
+
+			page->prev = _root->prev;
+			page->next = _root;
+
+			_root->prev->next = page;
+			_root->prev = page;
+		}
+
+		// allocate inside page
+		page->busy_size = size;
+
+		out_page = page;
+		return page->data;
+	}
 
 	/// A 'name=value' XML attribute structure.
 	struct xml_attribute_struct
