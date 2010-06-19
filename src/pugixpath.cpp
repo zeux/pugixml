@@ -40,6 +40,10 @@ typedef __int32 int32_t;
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
+#ifdef __INTEL_COMPILER
+#	pragma warning(disable: 1478 1786) // function was declared "deprecated"
+#endif
+
 #ifdef __SNC__
 #	pragma diag_suppress=237 // controlling expression is constant
 #endif
