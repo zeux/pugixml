@@ -106,7 +106,7 @@ namespace pugi
 	typedef char char_t;
 
 #	ifndef PUGIXML_NO_STL
-	// gcc3.4 has a bug which prevents string_t instantiation using char_t, so we have to use char type explicitly
+	// GCC 3.4 has a bug which prevents string_t instantiation using char_t, so we have to use char type explicitly
 	/// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > string_t;
 #	endif
@@ -268,12 +268,12 @@ namespace pugi
 
 	/**
 	 * These flags determine the encoding of input data for XML document. Default mode is encoding_auto,
-	 * which means that document encoding is autodetected from BOM and necessary encoding conversions are
+	 * which means that document encoding is auto-detected from BOM and necessary encoding conversions are
 	 * applied. You can override this mode by using any of the specific encodings.
 	 */
 	enum encoding_t
 	{
-		encoding_auto,      //!< Auto-detect input encoding using BOM or </<? detection; use UTF8 if BOM is not found
+		encoding_auto,      //!< Auto-detect input encoding using BOM or < / <? detection; use UTF8 if BOM is not found
 		encoding_utf8,      //!< UTF8 encoding
 		encoding_utf16_le,  //!< Little-endian UTF16
 		encoding_utf16_be,  //!< Big-endian UTF16
@@ -363,7 +363,7 @@ namespace pugi
 	class PUGIXML_CLASS xpath_query
 	{
 	private:
-		// Noncopyable semantics
+		// Non-copyable semantics
 		xpath_query(const xpath_query&);
 		xpath_query& operator=(const xpath_query&);
 
@@ -374,7 +374,7 @@ namespace pugi
 
 	public:
 		/**
-		 * Ctor from string with XPath expression.
+		 * Constructor from string with XPath expression.
 		 * Throws xpath_exception on compilation error, std::bad_alloc on out of memory error.
 		 *
 		 * \param query - string with XPath expression
@@ -382,7 +382,7 @@ namespace pugi
 		explicit xpath_query(const char_t* query);
 
 		/**
-		 * Dtor
+		 * Destructor
 		 */
 		~xpath_query();
 
@@ -446,7 +446,7 @@ namespace pugi
 	{
 	public:
 		/**
-		 * Virtual dtor
+		 * Virtual destructor
 		 */
 		virtual ~xml_writer() {}
 
@@ -527,12 +527,12 @@ namespace pugi
     	typedef xml_attribute_struct* xml_attribute::*unspecified_bool_type;
 #endif
 
-		/// \internal Initializing ctor
+		/// \internal Initializing constructor
 		explicit xml_attribute(xml_attribute_struct* attr);
 
 	public:
 		/**
-		 * Default ctor. Constructs an empty attribute.
+		 * Default constructor. Constructs an empty attribute.
 		 */
 		xml_attribute();
 		
@@ -788,7 +788,7 @@ namespace pugi
     	typedef xml_node_struct* xml_node::*unspecified_bool_type;
 #endif
 
-		/// \internal Initializing ctor
+		/// \internal Initializing constructor
 		explicit xml_node(xml_node_struct* p);
 
 	private:
@@ -813,7 +813,7 @@ namespace pugi
 
 	public:
 		/**
-		 * Default ctor. Constructs an empty node.
+		 * Default constructor. Constructs an empty node.
 		 */
 		xml_node();
 
@@ -1522,10 +1522,10 @@ namespace pugi
 		xml_node _prev;
 		xml_node _wrap;
 
-		/// \internal Initializing ctor
+		/// \internal Initializing constructor
 		explicit xml_node_iterator(xml_node_struct* ref);
 
-		/// \internal Initializing ctor (for past-the-end)
+		/// \internal Initializing constructor (for past-the-end)
 		xml_node_iterator(xml_node_struct* ref, xml_node_struct* prev);
 
 	public:
@@ -1542,12 +1542,12 @@ namespace pugi
 	#endif
 
 		/**
-		 * Default ctor
+		 * Default constructor
 		 */
 		xml_node_iterator();
 
 		/**
-		 * Initializing ctor
+		 * Initializing constructor
 		 *
 		 * \param node - node that iterator will point at
 		 */
@@ -1579,7 +1579,7 @@ namespace pugi
 		/**
 		 * Member access operator
 		 *
-		 * \return poitner to the node iterator points at
+		 * \return pointer to the node iterator points at
 		 */
 		xml_node* operator->();
 
@@ -1624,10 +1624,10 @@ namespace pugi
 		xml_attribute _prev;
 		xml_attribute _wrap;
 
-		/// \internal Initializing ctor
+		/// \internal Initializing constructor
 		explicit xml_attribute_iterator(xml_attribute_struct* ref);
 
-		/// \internal Initializing ctor (for past-the-end)
+		/// \internal Initializing constructor (for past-the-end)
 		xml_attribute_iterator(xml_attribute_struct* ref, xml_attribute_struct* prev);
 
 	public:
@@ -1644,12 +1644,12 @@ namespace pugi
 	#endif
 
 		/**
-		 * Default ctor
+		 * Default constructor
 		 */
 		xml_attribute_iterator();
 
 		/**
-		 * Initializing ctor
+		 * Initializing constructor
 		 *
 		 * \param node - node that iterator will point at
 		 */
@@ -1681,7 +1681,7 @@ namespace pugi
 		/**
 		 * Member access operator
 		 *
-		 * \return poitner to the node iterator points at
+		 * \return pointer to the node iterator points at
 		 */
 		xml_attribute* operator->();
 
@@ -1735,12 +1735,12 @@ namespace pugi
 	
 	public:
 		/**
-		 * Default ctor
+		 * Default constructor
 		 */
 		xml_tree_walker();
 
 		/**
-		 * Virtual dtor
+		 * Virtual destructor
 		 */
 		virtual ~xml_tree_walker();
 
@@ -1783,18 +1783,18 @@ namespace pugi
 		status_file_not_found, ///< File was not found during load_file()
 		status_io_error, ///< Error reading from file/stream
 		status_out_of_memory, ///< Could not allocate memory
-		status_internal_error, ///< Internal error occured
+		status_internal_error, ///< Internal error occurred
 
 		status_unrecognized_tag, ///< Parser could not determine tag type
 
-		status_bad_pi, ///< Parsing error occured while parsing document declaration/processing instruction (<?...?>)
-		status_bad_comment, ///< Parsing error occured while parsing comment (<!--...-->)
-		status_bad_cdata, ///< Parsing error occured while parsing CDATA section (<![CDATA[...]]>)
-		status_bad_doctype, ///< Parsing error occured while parsing document type declaration
-		status_bad_pcdata, ///< Parsing error occured while parsing PCDATA section (>...<)
-		status_bad_start_element, ///< Parsing error occured while parsing start element tag (<name ...>)
-		status_bad_attribute, ///< Parsing error occured while parsing element attribute
-		status_bad_end_element, ///< Parsing error occured while parsing end element tag (</name>)
+		status_bad_pi, ///< Parsing error occurred while parsing document declaration/processing instruction (<?...?>)
+		status_bad_comment, ///< Parsing error occurred while parsing comment (<!--...-->)
+		status_bad_cdata, ///< Parsing error occurred while parsing CDATA section (<![CDATA[...]]>)
+		status_bad_doctype, ///< Parsing error occurred while parsing document type declaration
+		status_bad_pcdata, ///< Parsing error occurred while parsing PCDATA section (>...<)
+		status_bad_start_element, ///< Parsing error occurred while parsing start element tag (<name ...>)
+		status_bad_attribute, ///< Parsing error occurred while parsing element attribute
+		status_bad_end_element, ///< Parsing error occurred while parsing end element tag (</name>)
 		status_end_element_mismatch ///< There was a mismatch of start-end tags (closing tag had incorrect name, some tag was not closed or there was an excessive closing tag)
 	};
 
@@ -1824,7 +1824,7 @@ namespace pugi
 
 	/**
 	 * Document class (DOM tree root).
-	 * This class has noncopyable semantics (private copy ctor/assignment operator).
+	 * This class has non-copyable semantics (private copy constructor/assignment operator).
 	 */
 	class PUGIXML_CLASS xml_document: public xml_node
 	{
@@ -1843,12 +1843,12 @@ namespace pugi
 
 	public:
 		/**
-		 * Default ctor, makes empty document
+		 * Default constructor, makes empty document
 		 */
 		xml_document();
 
 		/**
-		 * Dtor
+		 * Destructor
 		 */
 		~xml_document();
 
@@ -1857,7 +1857,7 @@ namespace pugi
 		/**
 		 * Load document from stream.
 		 *
-		 * \param stream - stream with xml data
+		 * \param stream - stream with XML data
 		 * \param options - parsing options
 		 * \param encoding - source data encoding
 		 * \return parsing result
@@ -1867,7 +1867,7 @@ namespace pugi
 		/**
 		 * Load document from stream.
 		 *
-		 * \param stream - stream with xml data
+		 * \param stream - stream with XML data
 		 * \param options - parsing options
 		 * \return parsing result
 		 */
@@ -1889,7 +1889,7 @@ namespace pugi
 		 * document's lifetime. Although, document does not gain ownership over the string, so you
 		 * should free the memory occupied by it manually.
 		 *
-		 * \param xmlstr - readwrite string with xml data
+		 * \param xmlstr - read/write string with XML data
 		 * \param options - parsing options
 		 * \return parsing result
 		 *
@@ -1903,7 +1903,7 @@ namespace pugi
 		 * about it's lifetime.
 		 * Call example: doc.parse(transfer_ownership_tag(), string, options);
 		 *
-		 * \param xmlstr - readwrite string with xml data
+		 * \param xmlstr - read/write string with XML data
 		 * \param options - parsing options
 		 * \return parsing result
 		 *
@@ -2164,18 +2164,18 @@ namespace pugi
 
 	public:
 		/**
-		 * Default ctor
+		 * Default constructor
 		 * Constructs empty set
 		 */
 		xpath_node_set();
 
 		/**
-         * Dtor
+         * Destructor
          */
 		~xpath_node_set();
 		
 		/**
-		 * Copy ctor
+		 * Copy constructor
 		 *
 		 * \param ns - set to copy
 		 */
@@ -2251,7 +2251,7 @@ namespace pugi
 
 #ifndef PUGIXML_NO_STL
 	/**
-	 * Convert wide string to utf8
+	 * Convert wide string to UTF8
 	 *
 	 * \param str - input wide string string
 	 * \return output UTF8 string
@@ -2259,7 +2259,7 @@ namespace pugi
 	std::basic_string<char, std::char_traits<char>, std::allocator<char> > PUGIXML_FUNCTION as_utf8(const wchar_t* str);
 	
 	/**
-	 * Convert utf8 to wide string
+	 * Convert UTF8 to wide string
 	 *
 	 * \param str - input UTF8 string
 	 * \return output wide string string
@@ -2269,7 +2269,7 @@ namespace pugi
 	PUGIXML_DEPRECATED std::basic_string<wchar_t, std::char_traits<wchar_t>, std::allocator<wchar_t> > PUGIXML_FUNCTION as_utf16(const char* str);
 
 	/**
-	 * Convert utf8 to wide string
+	 * Convert UTF8 to wide string
 	 *
 	 * \param str - input UTF8 string
 	 * \return output wide string string

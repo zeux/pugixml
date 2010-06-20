@@ -4199,7 +4199,7 @@ namespace pugi
 		case status_file_not_found: return "File was not found";
 		case status_io_error: return "Error reading from file/stream";
 		case status_out_of_memory: return "Could not allocate memory";
-		case status_internal_error: return "Internal error occured";
+		case status_internal_error: return "Internal error occurred";
 
 		case status_unrecognized_tag: return "Could not determine tag type";
 

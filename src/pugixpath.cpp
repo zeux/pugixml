@@ -2086,7 +2086,7 @@ namespace pugi
 					return !eval_node_set(c).empty();
 					
 				default:
-					assert(!"Wrong expression for ret type boolean");
+					assert(!"Wrong expression for return type boolean");
 					return false;
 				}
 			}
@@ -2182,7 +2182,7 @@ namespace pugi
 					return convert_string_to_number(eval_string(c).c_str());
 					
 				default:
-					assert(!"Wrong expression for ret type number");
+					assert(!"Wrong expression for return type number");
 					return 0;
 				}
 				
@@ -2385,7 +2385,7 @@ namespace pugi
 				}
 				
 				default:
-					assert(!"Wrong expression for ret type string");
+					assert(!"Wrong expression for return type string");
 					return string_t();
 				}
 			}
@@ -2506,7 +2506,7 @@ namespace pugi
 			}
 
 			default:
-				assert(!"Wrong expression for ret type node set");
+				assert(!"Wrong expression for return type node set");
 				return xpath_node_set();
 			}
 		}
