@@ -476,7 +476,7 @@ actions QuickbookAction
 
 actions XSLTProcAction
 {
-	%QUICKBOOK_PATH%\bin\xsltproc.exe --path$(SPACE)$(XSLPATH) --stringparam$(SPACE)$(XSLPARAM) --output $(<) $(XSL) $(>)
+	%QUICKBOOK_PATH%\bin\xsltproc.exe --path$(SPACE)$(XSLPATH:C) --stringparam$(SPACE)$(XSLPARAM) --output $(<) $(XSL) $(>)
 }
 
 rule MakeFileDir TARGET
@@ -601,6 +601,9 @@ rule Coverage TARGET : SOURCE
 
 rule Documentation TARGET : SOURCE
 {
+	# escape colon with %3A because colon is a path list separator
+	local XSLDIR = [ Subst $(QUICKBOOK_PATH) : ":" : "%%%%3A" ] ;
+
 	# quickbook -> boostbook
 	local BOOSTBOOK = $(BUILD)/$(SOURCE:S=.bb.xml) ;
 
@@ -611,16 +614,16 @@ rule Documentation TARGET : SOURCE
 	# boostbook -> docbook
 	local DOCBOOK = $(BUILD)/$(SOURCE:S=.db.xml) ;
 
-	XSL on $(DOCBOOK) = %QUICKBOOK_PATH%/boostbook/xsl/docbook.xsl ;
-	XSLPATH on $(DOCBOOK) = %QUICKBOOK_PATH%/boostbook/dtd %QUICKBOOK_PATH%/docbook-xml ;
+	XSL on $(DOCBOOK) = $(XSLDIR)/boostbook/xsl/docbook.xsl ;
+	XSLPATH on $(DOCBOOK) = $(XSLDIR)/boostbook/dtd $(XSLDIR)/docbook-xml ;
 	XSLTProcAction $(DOCBOOK) : $(BOOSTBOOK) ;
 	Depends $(DOCBOOK) : $(BOOSTBOOK) ;
 
 	# docbook -> html
 	local HTML = $(TARGET) ;
 
-	XSL on $(HTML) = %QUICKBOOK_PATH%/boostbook/xsl/html.xsl ;
-	XSLPATH on $(HTML) = %QUICKBOOK_PATH%/docbook-xml %QUICKBOOK_PATH%/docbook-xsl/html %QUICKBOOK_PATH%/docbook-xsl/lib ;
+	XSL on $(HTML) = $(XSLDIR)/boostbook/xsl/html.xsl ;
+	XSLPATH on $(HTML) = $(XSLDIR)/docbook-xml $(XSLDIR)/docbook-xsl/html $(XSLDIR)/docbook-xsl/lib ;
 
 	XSLPARAM on $(HTML) = 
 		"generate.manifest 0"
