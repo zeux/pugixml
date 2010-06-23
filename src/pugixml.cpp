@@ -4459,6 +4459,8 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str)
 	{
+		assert(str);
+
 		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
 
 		size_t length = wcslen(str);
@@ -4495,6 +4497,8 @@ namespace pugi
 
 	std::wstring PUGIXML_FUNCTION as_wide(const char* str)
 	{
+		assert(str);
+
 		const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
 		size_t size = strlen(str);
 
