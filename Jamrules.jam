@@ -469,6 +469,16 @@ else
 	}
 }
 
+actions QuickbookAction
+{
+	%QUICKBOOK_PATH%\bin\quickbook.exe --output-file $(<) --input-file $(>) >nul
+}
+
+actions XSLTProcAction
+{
+	%QUICKBOOK_PATH%\bin\xsltproc.exe --path$(SPACE)$(XSLPATH) --stringparam$(SPACE)$(XSLPARAM) --output $(<) $(XSL) $(>)
+}
+
 rule MakeFileDir TARGET
 {
 	local DIR = $(TARGET:D) ;
@@ -587,4 +597,41 @@ rule Coverage TARGET : SOURCE
 
 	CoverageAction $(TARGET) : $(FILES) ;
 	Depends $(TARGET) : $(SOURCE) ;
+}
+
+rule Documentation TARGET : SOURCE
+{
+	# quickbook -> boostbook
+	local BOOSTBOOK = $(BUILD)/$(SOURCE:S=.bb.xml) ;
+
+	MakeFileDir $(BOOSTBOOK) ;
+	QuickbookAction $(BOOSTBOOK) : $(SOURCE) ;
+	Depends $(BOOSTBOOK) : $(SOURCE) ;
+
+	# boostbook -> docbook
+	local DOCBOOK = $(BUILD)/$(SOURCE:S=.db.xml) ;
+
+	XSL on $(DOCBOOK) = %QUICKBOOK_PATH%/boostbook/xsl/docbook.xsl ;
+	XSLPATH on $(DOCBOOK) = %QUICKBOOK_PATH%/boostbook/dtd %QUICKBOOK_PATH%/docbook-xml ;
+	XSLTProcAction $(DOCBOOK) : $(BOOSTBOOK) ;
+	Depends $(DOCBOOK) : $(BOOSTBOOK) ;
+
+	# docbook -> html
+	local HTML = $(TARGET) ;
+
+	XSL on $(HTML) = %QUICKBOOK_PATH%/boostbook/xsl/html.xsl ;
+	XSLPATH on $(HTML) = %QUICKBOOK_PATH%/docbook-xml %QUICKBOOK_PATH%/docbook-xsl/html %QUICKBOOK_PATH%/docbook-xsl/lib ;
+
+	XSLPARAM on $(HTML) = 
+		"generate.manifest 0"
+		"html.stylesheet pugixml.css"
+		"root.filename $(TARGET:B)"
+		"generate.section.toc.level 1"
+		"toc.section.depth 3"
+		"admon.graphics.path images/"
+		"navig.graphics.path images/"
+		;
+
+	XSLTProcAction $(HTML) : $(DOCBOOK) ;
+	Depends $(HTML) : $(DOCBOOK) ;
 }

@@ -24,7 +24,7 @@ if ( ! $(toolset) )
 	}
 	else
 	{
-		exit You should specify a toolset ;
+		toolset = msvc ;
 	}
 }
 
@@ -103,3 +103,8 @@ for CONFIG in $(CONFIGURATIONS)
 		Depends $(TESTS)_coverage : $(TESTS)_run ;
 	}
 }
+
+# documentation
+Documentation docs/manual.html : docs/manual.qbk ;
+
+Alias docs : docs/manual.html ;

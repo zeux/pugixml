@@ -1,0 +1,408 @@
+[article pugixml
+    [quickbook 1.5]
+
+	[version 0.9]
+	[id manual]
+	[copyright 2010 Arseny Kapoulkine]
+	[purpose pugixml user manual]
+	[license Distributed under the MIT License]
+]
+
+PugiXML User Manual
+
+[section:introduction Introduction]
+
+$$$ minimalistic/lightweight; why should the user choose pugixml
+$$$ pugixml can write xml data too!
+$$$ unicode support
+$$$ low memory consumption and fragmentation
+$$$ this is the ref manual; here is the quick-start guide, here are the code samples
+
+pugixml is a C++ XML $$processing library$$. It consists of a DOM-like interface with rich traversal/modification capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and a XPath 1.0 implementation for complex data-driven tree queries. The library is [link manual.overview.portability extremely portable] and easy to integrate and use. pugixml is developed and maintained since 2006 and has ^many users^. All code is distributed under the MIT license, making it completely free to use even in commercial applications.
+
+Please note that pugixml's parser is a non-validating one; if you either need to process XML documents that do not fit in memory or need DTD/Schema validation, the library is not for you.
+
+[endsect] [/introduction]
+
+[section:overview Overview]
+
+[section:getting Getting pugixml]
+
+pugixml is distributed in source form. You can either download a source distribution or checkout the Subversion repository.
+
+[section:source Source distributions]
+
+You can download the latest source distribution via one of the following links:
+
+[pre
+[@http://pugixml.googlecode.com/files/pugixml-0.9.zip]
+[@http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz]
+]
+
+The distribution contains library source, documentation (the user manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.
+
+If you need an older version, you can download it from the [@http://code.google.com/p/pugixml/downloads/list version archive].
+
+[endsect] [/source]
+
+[section:subversion Subversion repository]
+
+The Subversion repository is located at http://pugixml.googlecode.com/svn/. There is a Subversion tag "release-{version}" for each version; also there is the "latest" tag, which always points to the latest stable release.
+
+For example, to checkout the current version, you can use this command:
+
+[pre svn checkout http://pugixml.googlecode.com/svn/tags/release-0.9/ pugixml]
+
+To checkout the latest version, you can use this command:
+
+[pre svn checkout http://pugixml.googlecode.com/svn/tags/latest/ pugixml]
+
+The repository contains library source, documentation, code examples and full unit test suite.
+
+Use latest version tag if you want to automatically get new versions via svn update. Use other tags if you want to switch to new versions only explicitly (for example, using svn switch command). Also please note that Subversion trunk contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from trunk without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
+
+[endsect] [/subversion]
+
+[endsect] [/getting]
+
+[section:building Building pugixml]
+
+pugixml is distributed in source form without any pre-built binaries; you have to build them yourself.
+ 
+The complete pugixml source consists of four files - two source files, pugixml.cpp and pugixpath.cpp, and two header files, pugixml.hpp and pugiconfig.hpp. pugixml.hpp is the primary header which you need to include in order to use pugixml classes/functions; pugiconfig.hpp is a supplementary configuration file (see [link manual.overview.building.config]). The rest of this guide assumes that pugixml.hpp is either in the current directory or in one of include directories of your projects, so that #include "pugixml.hpp" can find the header; however you can also use relative path (i.e. #include "../libs/pugixml/src/pugixml.hpp") or include directory-relative path (i.e. #include <xml/thirdparty/pugixml/src/pugixml.hpp>).
+ 
+You don't need to compile pugixpath.cpp unless you use XPath.
+
+[section:embed Building pugixml as a part of another static library/executable]
+ 
+The easiest way to build pugixml is to compile two source files, pugixml.cpp and pugixpath.cpp, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio, Apple Xcode, Code::Blocks or any other IDE, just add pugixml.cpp and pugixpath.cpp to one of your projects.
+
+If you're using Microsoft Visual Studio and the project has precompiled headers turned on, you'll see the following error messages:
+
+[pre pugixpath.cpp(3477) : fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?]
+
+The correct way to resolve this is to disable precompiled headers for pugixml.cpp and pugixpath.cpp; you have to set "Create/Use Precompiled Header" option (Properties dialog -> C/C++ -> Precompiled Headers -> Create/Use Precompiled Header) to "Not Using Precompiled Headers". You'll have to do it for both pugixml.cpp and pugixpath.cpp, for all project configurations/platforms (you can select Configuration "All Configurations" and Platform "All Platforms" before editing the option). $$images$$
+ 
+[endsect] [/embed]
+
+[section:static Building pugixml as a standalone static library]
+ 
+It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual Studio 2002, 2003 (.NET), 2005, 2008, 2010, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see [link manual.overview.feedback]. 
+
+In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2002-2008, you can add a dependency from your application project to pugixml one like this: $$images$$. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead: $$images$$. For other IDEs/systems, consult the relevant documentation.
+
+[endsect] [/static]
+
+[section:shared Building pugixml as a standalone shared library]
+ 
+It's possible to compile pugixml as a standalone shared library. The process is usually similar to the static library approach; however, no preconfigured projects/scripts are included into pugixml distribution, so you'll have to do it yourself. Generally, if you're using GCC-based toolchain, the process does not differ from building any other library as DLL (adding -shared to compilation flags should suffice); if you're using MSVC-based toolchain, you'll have to explicitly mark exported symbols with a declspec attribute. You can do it by defining PUGIXML_API macro, i.e. via pugiconfig.hpp:
+
+	#ifdef _DLL
+	#define PUGIXML_API __declspec(dllexport)
+	#else
+	#define PUGIXML_API __declspec(dllimport)
+	#endif
+
+[endsect] [/shared]
+ 
+[section:config Additional configuration options]
+
+pugixml uses several defines to control the compilation process. There are two ways to define them: either put the needed definitions to pugiconfig.hpp (it has some examples that are commented out) or provide them via compiler command-line. Define consistency is important, i.e. the definitions should match in all source files that include pugixml.hpp (including pugixml sources) throughout the application. Adding defines to pugiconfig.hpp lets you guarantee this, unless your macro definition is wrapped in preprocessor #if/#ifdef directive and this directive is not consistent. pugiconfig.hpp will never contain anything but comments, which means that when upgrading to new version, you can safely leave your modified version in tact.
+
+PUGIXML_WCHAR_MODE define toggles between UTF8-style interface (the in-memory text encoding is assumed to be UTF8, most functions use `char` as character type) and UTF16/UTF32-style interface (the in-memory text encoding is assumed to be UTF16/UTF32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [link manual.dom.unicode] for more details.
+
+PUGIXML_NO_STL define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. Note that as of version 0.9, STL is used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.
+
+PUGIXML_NO_EXCEPTION define disables use of exceptions in pugixml. As of version 0.9, exceptions are used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.
+
+PUGIXML_API, PUGIXML_CLASS and PUGIXML_FUNCTION defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of PUGIXML_CLASS or PUGIXML_FUNCTION definitions, PUGIXML_API definition is used instead. For example, to specify fixed calling convention, you can define PUGIXML_FUNCTION to i.e. __fastcall. Another example is DLL import/export attributes in MSVC (see [link manual.overview.building.shared]). Note that in that example PUGIXML_API is inconsistent between several source files; this is an exception to the consistency rule.
+ 
+[endsect] [/config]
+
+[endsect] [/building]
+
+[section:portability Portability]
+
+pugixml is written in standard-compliant C++ with some compiler-specific workarounds where appropriate. pugixml is compatible with the upcoming C++0x standard (verified using GCC 4.5). Each version is tested with a unit test suite (with code coverage about 99%) on the following platforms:
+
+$$all trademarks are properties of their respective owners, blablabla so that MS does not sue me?$$
+
+Microsoft Windows:
+    Borland C++ Compiler 5.82
+    Digital Mars C++ Compiler 8.51
+    Intel C++ Compiler 8.0, 9.0 x86/x64, 10.0 x86/x64, 11.0 x86/x64
+    Metrowerks CodeWarrior 8.0
+    Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64
+    MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
+
+Linux (GCC 4.4.3 x86/x64)
+FreeBSD (GCC 4.2.1 x86/x64)
+Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC)
+Microsoft Xbox 360
+Nintendo Wii (Metrowerks CodeWarrior 4.1)
+Sony Playstation Portable (GCC 3.4.2)
+Sony Playstation 3 (GCC 4.1.1, SNC 310.1)
+
+[endsect] [/portability]
+
+[section:feedback Feedback]
+
+If you believe you've found a bug in pugixml (bugs include compilation problems (errors/warnings), crashes, performance degradation and incorrect behavior), please file an issue via [@http://code.google.com/p/pugixml/issues/entry issue submission form]. Be sure to include the relevant information so that the bug can be reproduced: the version of pugixml, compiler version and target architecture, the code that uses pugixml and exhibits the bug, etc.
+
+Feature requests can be reported the same way as bugs, so if you're missing some functionality in pugixml or if the API is rough in some places and you can suggest an improvement, file an issue. However please note that there are many factors when considering API changes (compatibility with previous versions, API redundancy, etc.), so generally features that can be implemented via a small function without pugixml modification are not accepted. However, all rules have exceptions.
+
+If you have a contribution to pugixml, such as build script for some build system/IDE, or a well-designed set of helper functions, or a binding to some language other than C++, please file an issue. You can include the relevant patches as issue attachments. Your contribution has to be distributed under the terms of a license that's compatible with pugixml license; i.e. GPL/LGPL licensed code is not accepted.
+
+[endsect] [/feedback]
+
+[section:changelog Changelog]
+
+Only changes since version 0.5 are listed here; you can ^view the full changelog here^.
+ 
+Version 0.9:
+
+* Major Unicode improvements:
+	# Introduced encoding support (automatic/manual encoding detection on load, manual encoding selection on save, conversion from/to UTF8, UTF16 LE/BE, UTF32 LE/BE) 
+	# Introduced wchar_t mode (you can set PUGIXML_WCHAR_MODE define to switch pugixml internal encoding from UTF8 to wchar_t; all functions are switched to their Unicode variants) 
+	# Load/save functions now support wide streams
+
+* Bug fixes:
+	# Fixed document corruption on failed parsing bug 
+	# XPath string <-> number conversion improvements (increased precision, fixed crash for huge numbers) 
+	# Improved DOCTYPE parsing: now parser recognizes all well-formed DOCTYPE declarations 
+	# Fixed xml_attribute::as_uint() for large numbers (i.e. 2^32-1)
+
+* Specification changes:
+	# parse() API changed to load_buffer/load_buffer_inplace/load_buffer_inplace_own; load_buffer APIs do not require zero-terminated strings. 
+	# Renamed as_utf16 to as_wide 
+	# Changed xml_node::offset_debug return type and xml_parse_result::offset type to ptrdiff_t 
+	# Nodes/attributes with empty names are now printed as :anonymous
+
+* Performance improvements:
+	# Optimized document parsing and saving 
+	# Changed internal memory management: internal allocator is used for both metadata and name/value data; allocated pages are deleted if all allocations from them are deleted 
+	# Optimized memory consumption: sizeof(xml_node_struct) reduced from 40 bytes to 32 bytes on x86 
+	# Optimized debug mode parsing/saving by order of magnitude
+
+* Miscellaneous:
+	# All STL includes except <exception> in pugixml.hpp are replaced with forward declarations
+
+* Compatibility:
+	# parse() and as_utf16 are left for compatibility (these functions are deprecated and will be removed in pugixml-1.0) 
+	# Wildcard functions, document_order/precompute_document_order functions, format_write_bom_utf8 and parse_wnorm_attribute flags are deprecated and will be removed in version 1.0 
+
+[endsect] [/changelog]
+
+[section:thanks Acknowledgements]
+
+$$ intro text
+
+* Kristen Wegner <kristen at tima.net> for pugxml parser 
+* Neville Franks <readonly at getsoft.com> for contributions to pugxml parser
+
+[endsect] [/thanks]
+
+[section:license License]
+
+The pugixml library is distributed under the MIT license:
+
+[pre
+Copyright (c) 2006-2010 Arseny Kapoulkine
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+]
+
+[endsect] [/license]
+
+[endsect] [/overview]
+ 
+[section:dom Document object model]
+
+pugixml stores XML data in DOM-like way: the entire XML document (both document structure and element data) is stored in memory as a tree. The tree can be loaded from character stream (file, string, C++ I/O stream), then traversed via special API or XPath expressions. The whole tree is mutable: both node structure and node/attribute data can be changed at any time. Finally, the result of document transformations can be saved to a character stream (file, C++ I/O stream or custom transport).
+
+[section:tree Tree structure]
+
+The XML document is represented with a tree data structure. The root of the tree is the document itself, which corresponds to C++ type `xml_document`. Document has one or more child nodes, which correspond to C++ type `xml_node`. Nodes have different types; depending on a type, a node can have a collection of child nodes, a collection of attributes, which correspond to C++ type `xml_attribute`, and some additional data (i.e. name).
+
+The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
+
+* Document node (`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to `xml_document` class; note that `xml_document` is a sub-class of `xml_node`, so the entire node interface is also available. However, document node is special in several ways, which will be covered below. There can be only one document node in the tree; document node does not have any XML representation.
+
+* Element/tag node (`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name\/value pair. The example XML representation of element node is as follows: <node attr="value"> <child/> </node>. Here there are two element nodes; one with name "node", single attribute "attr" and single child "child", the other with name "child" and without any attributes or child nodes.
+
+* Plain character data nodes (`node_pcdata`) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. The example XML representation of text node is as follows: <node>text</node>. Here there is an element node "node", with a child PCDATA node with value "text". Note that plain character data is not a part of the element node but instead has its own node; for example, an element node can have several child PCDATA nodes: <node>text1<child/>text2</node>. Here "node" element has three children, two of which are PCDATA nodes.
+
+* Character data nodes (`node_cdata`) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA: <node><![CDATA[[text]]></node>. CDATA nodes make it easy to include non-escaped <, & and > characters in plain text. CDATA value can not contain the character sequence ]]>, since it is used to determine the end of node contents.
+
+* Comment nodes (`node_comment`) represent comments in XML. Comment nodes have a value, but do not have name or children/attributes. The example XML representation of comment node is as follows: <!-- comment text -->. Here the comment node has value " comment text ". By default comment nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding parse_comments flag.
+
+* Processing instruction node (`node_pi`) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as folows: <?name value?>. Here the name (also called PI target) is "name", and the value is "value". By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding parse_pi flag.
+
+* Declaration node (`node_declaration`) represents document declarations in XML. Declaration nodes have a name ("xml") and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (it's parent should be the document). The example XML representation of declaration node is as follows: <?xml version="1.0"?>. Here the node has name "xml" and a single attribute with name "version" and value "1.0". By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding parse_declaration flag. Also by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this by adding format_no_declaration flag.
+
+Finally, here is a complete example of XML document and the corresponding tree representation: $$image$$.
+
+[endsect] [/tree]
+
+[section:cpp C++ interface]
+
+All pugixml classes/functions are located in pugi namespace; you have to either use explicit name qualification (i.e. `pugi::xml_node`), or to gain access to relevant symbols via `using` directive (i.e. `using pugi::xml_node;`, or - not recommended! - `using namespace pugi;`). The namespace will be omitted from declarations in this documentation hereafter; all code examples will use fully-qualified names.
+
+Despite the fact that there are several node types, there are only three C++ types representing the tree (`xml_document`, `xml_node`, `xml_attribute`); some operations on `xml_node` are only valid for certain node types. They are described below.
+
+`xml_document` is the owner of the entire document structure; it is an non-copyable class. The interface of `xml_document` consists of parsing functions (see ^3. Parsing^), saving functions (see ^4. Saving^) and the interface of `xml_node`, which allows for document inspection and/or modification. Note that while `xml_document` is a sub-class of `xml_node`, `xml_node` is not a polymorphic type; the inheritance is only used to simplify usage.
+
+Default constructor of `xml_document` initializes the document to the tree with only a root node (document node). You can then populate it with data using either tree modification functions or parsing functions; all parsing functions destroy the previous tree with all occupied memory, which puts existing nodes/attributes from this document to invalid state; accessing them leads to undefined behavior. Destructor of `xml_document` also destroys the tree, thus the lifetime of the document object should exceed the lifetimes of any node/attributes objects that point to the tree.
+
+`xml_node` is the handle to document node; it can point to any node in the document, including document itself. There is a common interface for nodes of all types; the actual node type can be queried via type() method. Note that `xml_node` is only a handle to the actual node, not the node itself - you can have several `xml_node` objects pointing to the same underlying node. Destroying `xml_node` object does not destroy the node and does not remove it from the tree. Also there is a special value of `xml_node` type, known as null node or empty node. It does not correspond to any node in any document, and thus resembles null pointer. However, all operations are defined on empty nodes; generally the operations don't do anything and return empty nodes/attributes or empty strings as their result (see documentation for specific functions for more detailed information). This is useful for chaining calls; i.e. you can get the grandparent of a node like so: node.parent().parent(); if a node is a null node or it does not have a parent, the first parent() call returns null node; the second parent call then also returns null node, so you don't have to check for errors twice.
+
+`xml_attribute` is the handle to a XML attribute; it has the same semantics as `xml_node`, i.e. there can be several `xml_attribute` objects pointing to the same underlying node, there is a special null attribute value, which propagates to function results.
+
+Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. Once underlying node/attribute objects are destroyed, the handles to those objects become invalid. While this means that destruction of the entire tree invalidates all node/attribute handles, it also means that destroying a subtree (by calling remove_child) or removing an attribute invalidates the corresponding handles. There is no way to check handle validity; you have to ensure correctness through external mechanisms.
+
+Both `xml_node` and `xml_attribute` have the default constructor which initializes them to null objects; otherwise they try to behave like pointers, that is, they can be compared with other objects of the same type, making it possible to use them as keys of associative containers, they can be implicitly cast to boolean-like objects, so that you can test if the node/attribute is empty by just doing if (node) { ... } or if (!node) { ... } else { ... }. The size of both types is equal to that of a pointer, so they are nothing more than lightweight wrappers around pointers; you can safely pass or return `xml_node`/`xml_attribute` objects by value without additional overhead.
+
+[endsect] [/cpp]
+
+[section:unicode Unicode interface]
+
+There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via PUGIXML_WCHAR_MODE define; you can set it via pugiconfig.hpp or via preprocessor options, as discussed in [link manual.overview.building.config]. If this define is set, the wchar_t interface is used; otherwise (by default) the char interface is used. The exact wide character encoding is assumed to be either UTF-16 or UTF-32 and is determined based on size of `wchar_t` type.
+
+[note If size of `wchar_t` is 2, pugixml assumes UTF-16 encoding instead of UCS-2, which means that some code points are represented as two characters.]
+
+All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. For example, node name accessors look like this in char mode:
+
+	const char* name() const;
+	bool set_name(const char* value);
+
+and like this in wchar_t mode:
+
+	const wchar_t* name() const;
+	bool set_name(const wchar_t* value);
+
+There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode.
+
+In addition to the interface, the internal implementation changes to store XML data as `pugi::char_t`; this means that these two modes have different memory usage characteristics. The conversion to `pugi::char_t` upon document parsing and from `pugi::char_t` upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF8 is inconvenient to process and most of your XML data is localized, wchar_t mode is probably a better choice.
+
+There are cases when you'll have to convert string data between UTF-8 and wchar_t encodings; the following helper functions are provided for such purposes:
+
+	std::string as_utf8(const wchar_t* str);
+	std::wstring as_wide(const char* str);
+
+Both functions accept null-terminated string as an argument `str`, and return the converted string. `as_utf8` performs conversion from UTF-16/32 to UTF-8; `as_wide` performs conversion from UTF-8 to UTF-16/32. Invalid UTF sequences are silently discarded upon conversion.
+Passing null pointer results in undefined behavior.
+ 
+[endsect] [/unicode]
+
+[section:thread Thread-safety guarantees]
+
+Almost all functions in pugixml have the following thread-safety guarantees:
+
+* it is safe to call free functions from multiple threads
+* it is safe to perform concurrent read-only accesses to the same tree (all constant member functions do not modify the tree)
+* it is safe to perform concurrent read/write accesses, if there is only one read or write access to the single tree at a time
+
+Concurrent modification and traversing of a single tree requires synchronization, for example via reader-writer lock. Modification includes altering document structure and altering individual node/attribute data, i.e. changing names/values.
+
+The only exception is set_memory_management_functions; it modifies global variables and as such is not thread-safe; its usage policy has more restrictions, see [link manual.dom.memory.custom].
+
+[endsect] [/thread]
+
+[section:exception Exception guarantees]
+
+With the exception of XPath, pugixml itself does not throw any exceptions. Additionally, most pugixml functions have a no-throw exception guarantee.
+
+This is not applicable to functions that operate on STL strings or IO streams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::all_elements_by_name`) do not provide any exception guarantees beyond the ones provided by callback.
+
+XPath functions may throw xpath_exception on parsing error; also, XPath implementation uses STL, and thus may throw i.e. std::bad_alloc in low memory conditions. Still, XPath functions provide strong exception guarantee.
+
+[endsect] [/exception]
+
+[section:memory Memory management]
+
+$$$ intro text
+
+[section:custom Custom memory allocation/deallocation functions]
+
+All memory for tree structure/data is allocated via globally specified functions, which default to malloc/free. You can set your own allocation functions with set_memory_management functions. The function interfaces are the same as that of malloc/free:
+
+	typedef void* (*allocation_function)(size_t size);
+	typedef void (*deallocation_function)(void* ptr);
+
+You can use the following accessor functions to change or get current memory management functions:
+
+	void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
+	allocation_function get_memory_allocation_function();
+	deallocation_function get_memory_deallocation_function();
+
+Allocation function is called with the size (in bytes) as an argument and should return a pointer to memory block with alignment that is suitable for pointer storage and size that is greater or equal to the requested one. If the allocation fails, the function has to return null pointer (throwing an exception from allocation function results in undefined behavior). Deallocation function is called with the pointer that was returned by the previous call or with a null pointer; null pointer deallocation should be handled as a no-op. If memory management functions are not thread-safe, library thread safety is not guaranteed.
+
+This is a simple example of custom memory management:
+
+	void* custom_allocate(size_t size)
+	{
+		return new (std::nothrow) char[size];
+	}
+
+	void custom_deallocate(void* ptr)
+	{
+		delete[] static_cast<char*>(ptr);
+	}
+
+	int main()
+	{
+		pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
+	}
+
+When setting new memory management functions, care must be taken to make sure that there are no live pugixml objects. Otherwise when the objects are destroyed, the new deallocation function will be called with the memory obtained by the old allocation function, resulting in undefined behavior.
+
+[note Currently memory for XPath objects is allocated using default operators new/delete; this will change in the next version.]
+
+[endsect] [/custom]
+
+[section:internals Document memory management internals]
+
+Constructing a document object using the default constructor does not result in any allocations; document node is stored inside the `xml_document` object.
+
+When the document is loaded from file/buffer, unless an inplace loading function is used (see ^3. Parsing^), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the `xml_document` object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
+
+All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 kilobytes; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
+
+[endsect] [/internals]
+
+[endsect] [/memory]
+
+[endsect] [/dom]
+
+3. Parsing document (+ error handling!) (+ W3C conformance)
+
+4. Getting data from document
+
+5. Modifying document
+
+6. Saving document
+
+7. XPath (+ standard violations + performance checklist)
+8. Glossary + API reference (links to relevant user guide sections)
+
+
+Maybe we need user manual, quick one-page tutorial and examples, but don't need standalone API reference?
