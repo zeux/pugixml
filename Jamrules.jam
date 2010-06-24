@@ -599,10 +599,19 @@ rule Coverage TARGET : SOURCE
 	Depends $(TARGET) : $(SOURCE) ;
 }
 
+rule QuickbookImport SOURCE : IMPORT
+{
+	Includes $(SOURCE) : $(SOURCE:D)/$(IMPORT) ;
+}
+
 rule Documentation TARGET : SOURCE
 {
 	# escape colon with %3A because colon is a path list separator
 	local XSLDIR = [ Subst $(QUICKBOOK_PATH) : ":" : "%%%%3A" ] ;
+
+	# quickbook import scan
+	HDRRULE on $(SOURCE) = QuickbookImport ;
+	HDRSCAN on $(SOURCE) = "\\[import[ 	]+([^]]*)\\]" ;
 
 	# quickbook -> boostbook
 	local BOOSTBOOK = $(BUILD)/$(SOURCE:S=.bb.xml) ;
