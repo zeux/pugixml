@@ -375,22 +375,11 @@ You can use the following accessor functions to change or get current memory man
 
 Allocation function is called with the size (in bytes) as an argument and should return a pointer to memory block with alignment that is suitable for pointer storage and size that is greater or equal to the requested one. If the allocation fails, the function has to return null pointer (throwing an exception from allocation function results in undefined behavior). Deallocation function is called with the pointer that was returned by the previous call or with a null pointer; null pointer deallocation should be handled as a no-op. If memory management functions are not thread-safe, library thread safety is not guaranteed.
 
-This is a simple example of custom memory management:
+This is a simple example of custom memory management ([@samples/custom_memory_management.cpp])
 
-	void* custom_allocate(size_t size)
-	{
-		return new (std::nothrow) char[size];
-	}
-
-	void custom_deallocate(void* ptr)
-	{
-		delete[] static_cast<char*>(ptr);
-	}
-
-	int main()
-	{
-		pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
-	}
+[import samples/custom_memory_management.cpp]
+[code_custom_memory_management_decl]
+[code_custom_memory_management_call]
 
 When setting new memory management functions, care must be taken to make sure that there are no live pugixml objects. Otherwise when the objects are destroyed, the new deallocation function will be called with the memory obtained by the old allocation function, resulting in undefined behavior.
 
