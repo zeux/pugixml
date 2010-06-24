@@ -52,15 +52,15 @@ The Subversion repository is located at http://pugixml.googlecode.com/svn/. Ther
 
 For example, to checkout the current version, you can use this command:
 
-[pre svn checkout http://pugixml.googlecode.com/svn/tags/release-0.9/ pugixml]
+[pre svn checkout http://pugixml.googlecode.com/svn/tags/release-0.9 pugixml]
 
 To checkout the latest version, you can use this command:
 
-[pre svn checkout http://pugixml.googlecode.com/svn/tags/latest/ pugixml]
+[pre svn checkout http://pugixml.googlecode.com/svn/tags/latest pugixml]
 
 The repository contains library source, documentation, code examples and full unit test suite.
 
-Use latest version tag if you want to automatically get new versions via svn update. Use other tags if you want to switch to new versions only explicitly (for example, using svn switch command). Also please note that Subversion trunk contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from trunk without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
+Use latest version tag if you want to automatically get new versions via =svn update=. Use other tags if you want to switch to new versions only explicitly (for example, using =svn switch= command). Also please note that Subversion trunk contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from trunk without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
 
 [endsect] [/subversion]
 
@@ -72,11 +72,11 @@ pugixml is distributed in source form without any pre-built binaries; you have t
  
 The complete pugixml source consists of four files - two source files, [file pugixml.cpp] and [file pugixpath.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions; [file pugiconfig.hpp] is a supplementary configuration file (see [link manual.overview.building.config]). The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
  
-You don't need to compile [file pugixpath.cpp] unless you use XPath.
+[note You don't need to compile [file pugixpath.cpp] unless you use XPath.]
 
 [section:embed Building pugixml as a part of another static library/executable]
  
-The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio, Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects.
+The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[footnote All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects.
 
 If you're using Microsoft Visual Studio and the project has precompiled headers turned on, you'll see the following error messages:
 
@@ -84,6 +84,8 @@ If you're using Microsoft Visual Studio and the project has precompiled headers 
 
 The correct way to resolve this is to disable precompiled headers for [file pugixml.cpp] and [file pugixpath.cpp]; you have to set "Create/Use Precompiled Header" option (Properties dialog -> C/C++ -> Precompiled Headers -> Create/Use Precompiled Header) to "Not Using Precompiled Headers". You'll have to do it for both [file pugixml.cpp] and [file pugixpath.cpp], for all project configurations/platforms (you can select Configuration "All Configurations" and Platform "All Platforms" before editing the option):
 
+[table
+[[
 [@images/vs2005_pch1.png [$images/vs2005_pch1_thumb.png]]
 [$images/next.png]
 [@images/vs2005_pch2.png [$images/vs2005_pch2_thumb.png]]
@@ -91,6 +93,7 @@ The correct way to resolve this is to disable precompiled headers for [file pugi
 [@images/vs2005_pch3.png [$images/vs2005_pch3_thumb.png]]
 [$images/next.png]
 [@images/vs2005_pch4.png [$images/vs2005_pch4_thumb.png]]
+]] ]
  
 [endsect] [/embed]
 
@@ -100,7 +103,19 @@ It's possible to compile pugixml as a standalone static library. This process de
 
 $$ debug/release static
 
-In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2002-2008, you can add a dependency from your application project to pugixml one like this: $$images$$. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead: $$images$$. For other IDEs/systems, consult the relevant documentation.
+In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2002-2008, you can add a dependency from your application project to pugixml one. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead. For other IDEs/systems, consult the relevant documentation.
+
+[table
+[[Microsoft Visual Studio 2002-2008][Microsoft Visual Studio 2010]]
+[[
+[@images/vs2005_link1.png [$images/vs2005_link1_thumb.png]]
+[$images/next.png]
+[@images/vs2005_link2.png [$images/vs2005_link2_thumb.png]]
+][
+[@images/vs2010_link1.png [$images/vs2010_link1_thumb.png]]
+[$images/next.png]
+[@images/vs2010_link2.png [$images/vs2010_link2_thumb.png]]
+]] ]
 
 [endsect] [/static]
 
@@ -118,9 +133,9 @@ It's possible to compile pugixml as a standalone shared library. The process is 
  
 [section:config Additional configuration options]
 
-pugixml uses several defines to control the compilation process. There are two ways to define them: either put the needed definitions to [file pugiconfig.hpp] (it has some examples that are commented out) or provide them via compiler command-line. Define consistency is important, i.e. the definitions should match in all source files that include [file pugixml.hpp] (including pugixml sources) throughout the application. Adding defines to [file pugiconfig.hpp] lets you guarantee this, unless your macro definition is wrapped in preprocessor #if/#ifdef directive and this directive is not consistent. [file pugiconfig.hpp] will never contain anything but comments, which means that when upgrading to new version, you can safely leave your modified version intact.
+pugixml uses several defines to control the compilation process. There are two ways to define them: either put the needed definitions to [file pugiconfig.hpp] (it has some examples that are commented out) or provide them via compiler command-line. Define consistency is important, i.e. the definitions should match in all source files that include [file pugixml.hpp] (including pugixml sources) throughout the application. Adding defines to [file pugiconfig.hpp] lets you guarantee this, unless your macro definition is wrapped in preprocessor `#if`/`#ifdef` directive and this directive is not consistent. [file pugiconfig.hpp] will never contain anything but comments, which means that when upgrading to new version, you can safely leave your modified version intact.
 
-`PUGIXML_WCHAR_MODE` define toggles between UTF8-style interface (the in-memory text encoding is assumed to be UTF8, most functions use `char` as character type) and UTF16/UTF32-style interface (the in-memory text encoding is assumed to be UTF16/UTF32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [link manual.dom.unicode] for more details.
+`PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [link manual.dom.unicode] for more details.
 
 `PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation is not compiled; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
 
@@ -143,8 +158,6 @@ pugixml uses several defines to control the compilation process. There are two w
 [section:portability Portability]
 
 pugixml is written in standard-compliant C++ with some compiler-specific workarounds where appropriate. pugixml is compatible with the upcoming C++0x standard (verified using GCC 4.5). Each version is tested with a unit test suite (with code coverage about 99%) on the following platforms:
-
-$$all trademarks are properties of their respective owners, blablabla so that MS does not sue me?$$
 
 * Microsoft Windows:
     * Borland C++ Compiler 5.82
@@ -212,12 +225,17 @@ Version 0.9:
 
 [endsect] [/changelog]
 
-[section:thanks Acknowledgements]
+[section:thanks Acknowledgments]
 
-$$ intro text
+pugixml could not be developed without the help from many people; some of them are listed in this section. If you've played a part in pugixml development and you can not find yourself on this list, I'm truly sorry; please send me an e-mail so I can fix this.
 
-* Kristen Wegner <kristen at tima.net> for pugxml parser 
-* Neville Franks <readonly at getsoft.com> for contributions to pugxml parser
+Thanks to *Kristen Wegner* for pugxml parser, which was used as a basis for pugixml.
+
+Thanks to *Neville Franks* for contributions to pugxml parser.
+
+Thanks to *Artyom Palvelev* for suggesting a lazy gap contraction approach.
+
+Thanks to *Vyacheslav Egorov* for documentation proofreading.
 
 [endsect] [/thanks]
 
@@ -320,7 +338,7 @@ and like this in wchar_t mode:
 
 There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode.
 
-In addition to the interface, the internal implementation changes to store XML data as `pugi::char_t`; this means that these two modes have different memory usage characteristics. The conversion to `pugi::char_t` upon document parsing and from `pugi::char_t` upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF8 is inconvenient to process and most of your XML data is localized, wchar_t mode is probably a better choice.
+In addition to the interface, the internal implementation changes to store XML data as `pugi::char_t`; this means that these two modes have different memory usage characteristics. The conversion to `pugi::char_t` upon document parsing and from `pugi::char_t` upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is localized, wchar_t mode is probably a better choice.
 
 There are cases when you'll have to convert string data between UTF-8 and wchar_t encodings; the following helper functions are provided for such purposes:
 
