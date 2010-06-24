@@ -7,7 +7,7 @@
 	[license Distributed under the MIT License]
 ]
 
-[template file[name] [^[name]]]
+[template file[name] '''<filename>'''[name]'''</filename>''']
 [template newline[] \ ]
 [template sbr[] '''<sbr/>''']
 
@@ -50,7 +50,7 @@ If you need an older version, you can download it from the [@http://code.google.
 
 [section:subversion Subversion repository]
 
-The Subversion repository is located at http://pugixml.googlecode.com/svn/. There is a Subversion tag "release-{version}" for each version; also there is the "latest" tag, which always points to the latest stable release.
+The Subversion repository is located at [@http://pugixml.googlecode.com/svn/]. There is a Subversion tag "release-{version}" for each version; also there is the "latest" tag, which always points to the latest stable release.
 
 For example, to checkout the current version, you can use this command:
 
@@ -139,7 +139,7 @@ pugixml uses several defines to control the compilation process. There are two w
 
 `PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [link manual.dom.unicode] for more details.
 
-`PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation is not compiled; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
+`PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
 
 `PUGIXML_NO_STL` define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
 
@@ -191,7 +191,7 @@ If you have a contribution to pugixml, such as build script for some build syste
 
 [section:changelog Changelog]
 
-Only changes since version 0.5 are listed here; you can ^view the full changelog here^.
+Only changes since version 0.5 are listed here; you can [@changes.txt view the full changelog here].
  
 Version 0.9:
 
@@ -332,7 +332,7 @@ The tree nodes can be of one of the following types (which together form the enu
 
 	<?xml version="1.0"?>
 
-[:Here the node has name `"xml"` and a single attribute with name `"version"` and value `"1.0"`. By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_declaration` flag. Also by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this by adding `format_no_declaration` flag.]
+[:Here the node has name `"xml"` and a single attribute with name `"version"` and value `"1.0"`. By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_declaration` flag. Also, by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this by adding `format_no_declaration` flag.]
 
 Finally, here is a complete example of XML document and the corresponding tree representation:
 
@@ -348,10 +348,10 @@ Finally, here is a complete example of XML document and the corresponding tree r
 		some more text
 		<node attr1="value1" attr2="value2" />
 		<node attr1="value2">
-			<?include somedata?>
 			<innernode/>
 		</node>
 	</mesh>
+	<?include somedata?>
 ``
 ][
 [@images/dom_tree.png [$images/dom_tree_thumb.png]]
@@ -372,13 +372,13 @@ Default constructor of `xml_document` initializes the document to the tree with 
 
 [caution While technically node/attribute handles can be alive when the tree they're referring to is destroyed, calling any member function of these handles results in undefined behavior. Thus it is recommended to make sure that the document is destroyed only after all references to its nodes/attributes are destroyed.]
 
-`xml_node` is the handle to document node; it can point to any node in the document, including document itself. There is a common interface for nodes of all types; the actual node type can be queried via type() method. Note that `xml_node` is only a handle to the actual node, not the node itself - you can have several `xml_node` handles pointing to the same underlying object. Destroying `xml_node` handle does not destroy the node and does not remove it from the tree.
+`xml_node` is the handle to document node; it can point to any node in the document, including document itself. There is a common interface for nodes of all types; the actual node type can be queried via `type()` method. Note that `xml_node` is only a handle to the actual node, not the node itself - you can have several `xml_node` handles pointing to the same underlying object. Destroying `xml_node` handle does not destroy the node and does not remove it from the tree.
 
 There is a special value of `xml_node` type, known as null node or empty node. It does not correspond to any node in any document, and thus resembles null pointer. However, all operations are defined on empty nodes; generally the operations don't do anything and return empty nodes/attributes or empty strings as their result (see documentation for specific functions for more detailed information). This is useful for chaining calls; i.e. you can get the grandparent of a node like so: `node.parent().parent()`; if a node is a null node or it does not have a parent, the first `parent()` call returns null node; the second `parent()` call then also returns null node, so you don't have to check for errors twice.
 
 `xml_attribute` is the handle to a XML attribute; it has the same semantics as `xml_node`, i.e. there can be several `xml_attribute` handles pointing to the same underlying object, there is a special null attribute value, which propagates to function results.
 
-You can check if a given `xml_node`/`xml_attribute` object is null by calling the following method:
+You can check if a given `xml_node`/`xml_attribute` handle is null by calling the following method:
 
 	bool empty() const;
 
