@@ -4,9 +4,10 @@
 	[version 0.9]
 	[id manual]
 	[copyright 2010 Arseny Kapoulkine]
-	[purpose pugixml user manual]
 	[license Distributed under the MIT License]
 ]
+
+[template file[name] [^[name]]]
 
 PugiXML User Manual
 
@@ -69,19 +70,27 @@ Use latest version tag if you want to automatically get new versions via svn upd
 
 pugixml is distributed in source form without any pre-built binaries; you have to build them yourself.
  
-The complete pugixml source consists of four files - two source files, pugixml.cpp and pugixpath.cpp, and two header files, pugixml.hpp and pugiconfig.hpp. pugixml.hpp is the primary header which you need to include in order to use pugixml classes/functions; pugiconfig.hpp is a supplementary configuration file (see [link manual.overview.building.config]). The rest of this guide assumes that pugixml.hpp is either in the current directory or in one of include directories of your projects, so that #include "pugixml.hpp" can find the header; however you can also use relative path (i.e. #include "../libs/pugixml/src/pugixml.hpp") or include directory-relative path (i.e. #include <xml/thirdparty/pugixml/src/pugixml.hpp>).
+The complete pugixml source consists of four files - two source files, [file pugixml.cpp] and [file pugixpath.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions; [file pugiconfig.hpp] is a supplementary configuration file (see [link manual.overview.building.config]). The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
  
-You don't need to compile pugixpath.cpp unless you use XPath.
+You don't need to compile [file pugixpath.cpp] unless you use XPath.
 
 [section:embed Building pugixml as a part of another static library/executable]
  
-The easiest way to build pugixml is to compile two source files, pugixml.cpp and pugixpath.cpp, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio, Apple Xcode, Code::Blocks or any other IDE, just add pugixml.cpp and pugixpath.cpp to one of your projects.
+The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio, Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects.
 
 If you're using Microsoft Visual Studio and the project has precompiled headers turned on, you'll see the following error messages:
 
 [pre pugixpath.cpp(3477) : fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?]
 
-The correct way to resolve this is to disable precompiled headers for pugixml.cpp and pugixpath.cpp; you have to set "Create/Use Precompiled Header" option (Properties dialog -> C/C++ -> Precompiled Headers -> Create/Use Precompiled Header) to "Not Using Precompiled Headers". You'll have to do it for both pugixml.cpp and pugixpath.cpp, for all project configurations/platforms (you can select Configuration "All Configurations" and Platform "All Platforms" before editing the option). $$images$$
+The correct way to resolve this is to disable precompiled headers for [file pugixml.cpp] and [file pugixpath.cpp]; you have to set "Create/Use Precompiled Header" option (Properties dialog -> C/C++ -> Precompiled Headers -> Create/Use Precompiled Header) to "Not Using Precompiled Headers". You'll have to do it for both [file pugixml.cpp] and [file pugixpath.cpp], for all project configurations/platforms (you can select Configuration "All Configurations" and Platform "All Platforms" before editing the option):
+
+[@images/vs2005_pch1.png [$images/vs2005_pch1_thumb.png]]
+[$images/next.png]
+[@images/vs2005_pch2.png [$images/vs2005_pch2_thumb.png]]
+[$images/next.png]
+[@images/vs2005_pch3.png [$images/vs2005_pch3_thumb.png]]
+[$images/next.png]
+[@images/vs2005_pch4.png [$images/vs2005_pch4_thumb.png]]
  
 [endsect] [/embed]
 
@@ -89,13 +98,15 @@ The correct way to resolve this is to disable precompiled headers for pugixml.cp
  
 It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual Studio 2002, 2003 (.NET), 2005, 2008, 2010, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see [link manual.overview.feedback]. 
 
+$$ debug/release static
+
 In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2002-2008, you can add a dependency from your application project to pugixml one like this: $$images$$. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead: $$images$$. For other IDEs/systems, consult the relevant documentation.
 
 [endsect] [/static]
 
 [section:shared Building pugixml as a standalone shared library]
  
-It's possible to compile pugixml as a standalone shared library. The process is usually similar to the static library approach; however, no preconfigured projects/scripts are included into pugixml distribution, so you'll have to do it yourself. Generally, if you're using GCC-based toolchain, the process does not differ from building any other library as DLL (adding -shared to compilation flags should suffice); if you're using MSVC-based toolchain, you'll have to explicitly mark exported symbols with a declspec attribute. You can do it by defining PUGIXML_API macro, i.e. via pugiconfig.hpp:
+It's possible to compile pugixml as a standalone shared library. The process is usually similar to the static library approach; however, no preconfigured projects/scripts are included into pugixml distribution, so you'll have to do it yourself. Generally, if you're using GCC-based toolchain, the process does not differ from building any other library as DLL (adding -shared to compilation flags should suffice); if you're using MSVC-based toolchain, you'll have to explicitly mark exported symbols with a declspec attribute. You can do it by defining `PUGIXML_API` macro, i.e. via [file pugiconfig.hpp]:
 
 	#ifdef _DLL
 	#define PUGIXML_API __declspec(dllexport)
@@ -107,15 +118,23 @@ It's possible to compile pugixml as a standalone shared library. The process is 
  
 [section:config Additional configuration options]
 
-pugixml uses several defines to control the compilation process. There are two ways to define them: either put the needed definitions to pugiconfig.hpp (it has some examples that are commented out) or provide them via compiler command-line. Define consistency is important, i.e. the definitions should match in all source files that include pugixml.hpp (including pugixml sources) throughout the application. Adding defines to pugiconfig.hpp lets you guarantee this, unless your macro definition is wrapped in preprocessor #if/#ifdef directive and this directive is not consistent. pugiconfig.hpp will never contain anything but comments, which means that when upgrading to new version, you can safely leave your modified version in tact.
+pugixml uses several defines to control the compilation process. There are two ways to define them: either put the needed definitions to [file pugiconfig.hpp] (it has some examples that are commented out) or provide them via compiler command-line. Define consistency is important, i.e. the definitions should match in all source files that include [file pugixml.hpp] (including pugixml sources) throughout the application. Adding defines to [file pugiconfig.hpp] lets you guarantee this, unless your macro definition is wrapped in preprocessor #if/#ifdef directive and this directive is not consistent. [file pugiconfig.hpp] will never contain anything but comments, which means that when upgrading to new version, you can safely leave your modified version intact.
 
-PUGIXML_WCHAR_MODE define toggles between UTF8-style interface (the in-memory text encoding is assumed to be UTF8, most functions use `char` as character type) and UTF16/UTF32-style interface (the in-memory text encoding is assumed to be UTF16/UTF32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [link manual.dom.unicode] for more details.
+`PUGIXML_WCHAR_MODE` define toggles between UTF8-style interface (the in-memory text encoding is assumed to be UTF8, most functions use `char` as character type) and UTF16/UTF32-style interface (the in-memory text encoding is assumed to be UTF16/UTF32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [link manual.dom.unicode] for more details.
 
-PUGIXML_NO_STL define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. Note that as of version 0.9, STL is used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.
+`PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation is not compiled; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
 
-PUGIXML_NO_EXCEPTION define disables use of exceptions in pugixml. As of version 0.9, exceptions are used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.
+`PUGIXML_NO_STL` define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
 
-PUGIXML_API, PUGIXML_CLASS and PUGIXML_FUNCTION defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of PUGIXML_CLASS or PUGIXML_FUNCTION definitions, PUGIXML_API definition is used instead. For example, to specify fixed calling convention, you can define PUGIXML_FUNCTION to i.e. __fastcall. Another example is DLL import/export attributes in MSVC (see [link manual.overview.building.shared]). Note that in that example PUGIXML_API is inconsistent between several source files; this is an exception to the consistency rule.
+[note As of version 0.9, STL is used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
+
+`PUGIXML_NO_EXCEPTION` define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities
+
+[note As of version 0.9, exceptions are *only* used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
+
+`PUGIXML_API`, `PUGIXML_CLASS` and `PUGIXML_FUNCTION` defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [link manual.overview.building.shared]).
+
+[note In that example `PUGIXML_API` is inconsistent between several source files; this is an exception to the consistency rule.]
  
 [endsect] [/config]
 
@@ -127,21 +146,21 @@ pugixml is written in standard-compliant C++ with some compiler-specific workaro
 
 $$all trademarks are properties of their respective owners, blablabla so that MS does not sue me?$$
 
-Microsoft Windows:
-    Borland C++ Compiler 5.82
-    Digital Mars C++ Compiler 8.51
-    Intel C++ Compiler 8.0, 9.0 x86/x64, 10.0 x86/x64, 11.0 x86/x64
-    Metrowerks CodeWarrior 8.0
-    Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64
-    MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
+* Microsoft Windows:
+    * Borland C++ Compiler 5.82
+    * Digital Mars C++ Compiler 8.51
+    * Intel C++ Compiler 8.0, 9.0 x86/x64, 10.0 x86/x64, 11.0 x86/x64
+    * Metrowerks CodeWarrior 8.0
+    * Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64
+    * MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
 
-Linux (GCC 4.4.3 x86/x64)
-FreeBSD (GCC 4.2.1 x86/x64)
-Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC)
-Microsoft Xbox 360
-Nintendo Wii (Metrowerks CodeWarrior 4.1)
-Sony Playstation Portable (GCC 3.4.2)
-Sony Playstation 3 (GCC 4.1.1, SNC 310.1)
+* Linux (GCC 4.4.3 x86/x64)
+* FreeBSD (GCC 4.2.1 x86/x64)
+* Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC)
+* Microsoft Xbox 360
+* Nintendo Wii (Metrowerks CodeWarrior 4.1)
+* Sony Playstation Portable (GCC 3.4.2)
+* Sony Playstation 3 (GCC 4.1.1, SNC 310.1)
 
 [endsect] [/portability]
 
@@ -255,7 +274,7 @@ The tree nodes can be of one of the following types (which together form the enu
 
 * Comment nodes (`node_comment`) represent comments in XML. Comment nodes have a value, but do not have name or children/attributes. The example XML representation of comment node is as follows: <!-- comment text -->. Here the comment node has value " comment text ". By default comment nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding parse_comments flag.
 
-* Processing instruction node (`node_pi`) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as folows: <?name value?>. Here the name (also called PI target) is "name", and the value is "value". By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding parse_pi flag.
+* Processing instruction node (`node_pi`) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as follows: <?name value?>. Here the name (also called PI target) is "name", and the value is "value". By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding parse_pi flag.
 
 * Declaration node (`node_declaration`) represents document declarations in XML. Declaration nodes have a name ("xml") and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (it's parent should be the document). The example XML representation of declaration node is as follows: <?xml version="1.0"?>. Here the node has name "xml" and a single attribute with name "version" and value "1.0". By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding parse_declaration flag. Also by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this by adding format_no_declaration flag.
 
@@ -285,7 +304,7 @@ Both `xml_node` and `xml_attribute` have the default constructor which initializ
 
 [section:unicode Unicode interface]
 
-There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via PUGIXML_WCHAR_MODE define; you can set it via pugiconfig.hpp or via preprocessor options, as discussed in [link manual.overview.building.config]. If this define is set, the wchar_t interface is used; otherwise (by default) the char interface is used. The exact wide character encoding is assumed to be either UTF-16 or UTF-32 and is determined based on size of `wchar_t` type.
+There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via PUGIXML_WCHAR_MODE define; you can set it via [file pugiconfig.hpp] or via preprocessor options, as discussed in [link manual.overview.building.config]. If this define is set, the wchar_t interface is used; otherwise (by default) the char interface is used. The exact wide character encoding is assumed to be either UTF-16 or UTF-32 and is determined based on size of `wchar_t` type.
 
 [note If size of `wchar_t` is 2, pugixml assumes UTF-16 encoding instead of UCS-2, which means that some code points are represented as two characters.]
 
