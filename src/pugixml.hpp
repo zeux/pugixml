@@ -357,6 +357,10 @@ namespace pugi
 		xpath_type_boolean    ///< Boolean
 	};
 
+	/// XPath query return type classification
+	/// \deprecated This type is deprecated and will be removed in future versions; use xpath_value_type instead
+	typedef xpath_value_type xpath_type_t;
+
 	/**
 	 * A class that holds compiled XPath query and allows to evaluate query result
 	 */
