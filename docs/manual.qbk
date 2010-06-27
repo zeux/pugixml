@@ -187,6 +187,9 @@ Feature requests can be reported the same way as bugs, so if you're missing some
 
 If you have a contribution to pugixml, such as build script for some build system/IDE, or a well-designed set of helper functions, or a binding to some language other than C++, please file an issue. You can include the relevant patches as issue attachments. Your contribution has to be distributed under the terms of a license that's compatible with pugixml license; i.e. GPL/LGPL licensed code is not accepted.
 
+[#email]
+If filing an issue is not possible due to privacy or other concerns, you can contact pugixml author by e-mail directly: [@mailto:arseny.kapoulkine@gmail.com arseny.kapoulkine@gmail.com].
+
 [endsect] [/feedback]
 
 [section:changelog Changelog]
@@ -229,7 +232,7 @@ Version 0.9:
 
 [section:thanks Acknowledgments]
 
-pugixml could not be developed without the help from many people; some of them are listed in this section. If you've played a part in pugixml development and you can not find yourself on this list, I'm truly sorry; please send me an e-mail so I can fix this.
+pugixml could not be developed without the help from many people; some of them are listed in this section. If you've played a part in pugixml development and you can not find yourself on this list, I'm truly sorry; please [link email send me an e-mail] so I can fix this.
 
 Thanks to *Kristen Wegner* for pugxml parser, which was used as a basis for pugixml.
 
