@@ -8,16 +8,22 @@
 ]
 
 [template file[name] '''<filename>'''[name]'''</filename>''']
-[template newline[] \ ]
 [template sbr[] '''<sbr/>''']
+[template lbr[] '''<sbr/><sbr/>'''] [/ for empty lines in lists]
+[template sref[name] '''<link linkend="'''[name]'''" endterm="'''[name]'''.title" />''']
 
 PugiXML User Manual
+
+$$$ documentation suggestions, errors, etc. are welcome
+$$$ proofreading
+
+$$$ ideally code samples should reference manual parts - i.e. xml_parse_result and doc.child() should be clickable
 
 [section:overview Overview]
 
 [section:introduction Introduction]
 
-$$$ minimalistic/lightweight; why should the user choose pugixml
+$$$ minimalistic/lightweight; why should the user choose pugixml?
 $$$ pugixml can write xml data too!
 $$$ unicode support
 $$$ low memory consumption and fragmentation
@@ -172,7 +178,7 @@ Use latest version tag if you want to automatically get new versions via =svn up
 
 pugixml is distributed in source form without any pre-built binaries; you have to build them yourself.
  
-The complete pugixml source consists of four files - two source files, [file pugixml.cpp] and [file pugixpath.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions; [file pugiconfig.hpp] is a supplementary configuration file (see [link manual.install.building.config]). The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
+The complete pugixml source consists of four files - two source files, [file pugixml.cpp] and [file pugixpath.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions; [file pugiconfig.hpp] is a supplementary configuration file (see [sref manual.install.building.config]). The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
  
 [note You don't need to compile [file pugixpath.cpp] unless you use XPath.]
 
@@ -201,7 +207,7 @@ The correct way to resolve this is to disable precompiled headers for [file pugi
 
 [section:static Building pugixml as a standalone static library]
  
-It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual Studio 2002, 2003 (.NET), 2005, 2008, 2010, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see [link manual.overview.feedback]. 
+It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual Studio 2002, 2003 (.NET), 2005, 2008, 2010, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see [sref manual.overview.feedback]. 
 
 $$ debug/release static
 
@@ -237,19 +243,26 @@ It's possible to compile pugixml as a standalone shared library. The process is 
 
 pugixml uses several defines to control the compilation process. There are two ways to define them: either put the needed definitions to [file pugiconfig.hpp] (it has some examples that are commented out) or provide them via compiler command-line. Define consistency is important, i.e. the definitions should match in all source files that include [file pugixml.hpp] (including pugixml sources) throughout the application. Adding defines to [file pugiconfig.hpp] lets you guarantee this, unless your macro definition is wrapped in preprocessor `#if`/`#ifdef` directive and this directive is not consistent. [file pugiconfig.hpp] will never contain anything but comments, which means that when upgrading to new version, you can safely leave your modified version intact.
 
-`PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [link manual.dom.unicode] for more details.
+[#PUGIXML_WCHAR_MODE]
+`PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [sref manual.dom.unicode] for more details.
 
+[#PUGIXML_NO_XPATH]
 `PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
 
+[#PUGIXML_NO_STL]
 `PUGIXML_NO_STL` define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
 
 [note As of version 0.9, STL is used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
 
-`PUGIXML_NO_EXCEPTION` define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities
+[#PUGIXML_NO_EXCEPTIONS]
+`PUGIXML_NO_EXCEPTIONS` define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities
 
 [note As of version 0.9, exceptions are *only* used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
 
-`PUGIXML_API`, `PUGIXML_CLASS` and `PUGIXML_FUNCTION` defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [link manual.install.building.shared]).
+[#PUGIXML_API]
+[#PUGIXML_CLASS]
+[#PUGIXML_FUNCTION]
+`PUGIXML_API`, `PUGIXML_CLASS` and `PUGIXML_FUNCTION` defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [sref manual.install.building.shared]).
 
 [note In that example `PUGIXML_API` is inconsistent between several source files; this is an exception to the consistency rule.]
  
@@ -289,53 +302,50 @@ pugixml stores XML data in DOM-like way: the entire XML document (both document 
 
 The XML document is represented with a tree data structure. The root of the tree is the document itself, which corresponds to C++ type `xml_document`. Document has one or more child nodes, which correspond to C++ type `xml_node`. Nodes have different types; depending on a type, a node can have a collection of child nodes, a collection of attributes, which correspond to C++ type `xml_attribute`, and some additional data (i.e. name).
 
+[#xml_node_type]
 The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
 
-* Document node (`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to `xml_document` class; note that `xml_document` is a sub-class of `xml_node`, so the entire node interface is also available. However, document node is special in several ways, which will be covered below. There can be only one document node in the tree; document node does not have any XML representation.
+* [#node_document]
+Document node (`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to `xml_document` class; note that `xml_document` is a sub-class of `xml_node`, so the entire node interface is also available. However, document node is special in several ways, which will be covered below. There can be only one document node in the tree; document node does not have any XML representation.
+[lbr]
 
-[newline]
-
-* Element/tag node (`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element node is as follows:
+* [#node_element]
+Element/tag node (`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element node is as follows:
 
 	<node attr="value"><child/></node>
 
 [:There are two element nodes here; one has name `"node"`, single attribute `"attr"` and single child `"child"`, another has name `"child"` and does not have any attributes or child nodes.]
 
-[newline]
-
-* Plain character data nodes (`node_pcdata`) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, and element node can have several child PCDATA nodes. The example XML representation of text node is as follows:
+* [#node_pcdata]
+Plain character data nodes (`node_pcdata`) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, and element node can have several child PCDATA nodes. The example XML representation of text node is as follows:
 
 	<node> text1 <child/> text2 </node>
 
 [:Here `"node"` element has three children, two of which are PCDATA nodes with values `"text1"` and `"text2"`.]
 
-[newline]
-
-* Character data nodes (`node_cdata`) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
+* [#node_cdata]
+Character data nodes (`node_cdata`) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
 
 	<node> <![CDATA[[text1]]> <child/> <![CDATA[[text2]]> </node>
 
 [:CDATA nodes make it easy to include non-escaped <, & and > characters in plain text. CDATA value can not contain the character sequence \]\]>, since it is used to determine the end of node contents.]
 
-[newline]
-
-* Comment nodes (`node_comment`) represent comments in XML. Comment nodes have a value, but do not have name or children/attributes. The example XML representation of comment node is as follows:
+* [#node_comment]
+Comment nodes (`node_comment`) represent comments in XML. Comment nodes have a value, but do not have name or children/attributes. The example XML representation of comment node is as follows:
 
 	<!-- comment text -->
 
 [:Here the comment node has value `"comment text"`. By default comment nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_comments` flag.]
 
-[newline]
-
-* Processing instruction node (`node_pi`) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as follows:
+* [#node_pi]
+Processing instruction node (`node_pi`) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as follows:
 
 	<?name value?>
 
 [:Here the name (also called PI target) is `"name"`, and the value is `"value"`. By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_pi` flag.]
 
-[newline]
-
-* Declaration node (`node_declaration`) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (it's parent should be the document). The example XML representation of declaration node is as follows:
+* [#node_declaration]
+Declaration node (`node_declaration`) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (it's parent should be the document). The example XML representation of declaration node is as follows:
 
 	<?xml version="1.0"?>
 
@@ -373,32 +383,49 @@ Finally, here is a complete example of XML document and the corresponding tree r
 
 Despite the fact that there are several node types, there are only three C++ types representing the tree (`xml_document`, `xml_node`, `xml_attribute`); some operations on `xml_node` are only valid for certain node types. They are described below.
 
-`xml_document` is the owner of the entire document structure; it is a non-copyable class. The interface of `xml_document` consists of loading functions (see [link manual.loading]), saving functions (see [link manual.saving]) and the interface of `xml_node`, which allows for document inspection and/or modification. Note that while `xml_document` is a sub-class of `xml_node`, `xml_node` is not a polymorphic type; the inheritance is only used to simplify usage.
+[#xml_document]
+`xml_document` is the owner of the entire document structure; it is a non-copyable class. The interface of `xml_document` consists of loading functions (see [sref manual.loading]), saving functions (see [sref manual.saving]) and the interface of `xml_node`, which allows for document inspection and/or modification. Note that while `xml_document` is a sub-class of `xml_node`, `xml_node` is not a polymorphic type; the inheritance is only used to simplify usage.
 
+[#xml_document::ctor]
+[#xml_document::dtor]
 Default constructor of `xml_document` initializes the document to the tree with only a root node (document node). You can then populate it with data using either tree modification functions or loading functions; all loading functions destroy the previous tree with all occupied memory, which puts existing nodes/attributes from this document to invalid state. Destructor of `xml_document` also destroys the tree, thus the lifetime of the document object should exceed the lifetimes of any node/attribute handles that point to the tree.
 
 [caution While technically node/attribute handles can be alive when the tree they're referring to is destroyed, calling any member function of these handles results in undefined behavior. Thus it is recommended to make sure that the document is destroyed only after all references to its nodes/attributes are destroyed.]
 
-`xml_node` is the handle to document node; it can point to any node in the document, including document itself. There is a common interface for nodes of all types; the actual node type can be queried via `type()` method. Note that `xml_node` is only a handle to the actual node, not the node itself - you can have several `xml_node` handles pointing to the same underlying object. Destroying `xml_node` handle does not destroy the node and does not remove it from the tree.
+[#xml_node]
+[#xml_node::type]
+`xml_node` is the handle to document node; it can point to any node in the document, including document itself. There is a common interface for nodes of all types; the actual node type can be queried via `xml_node::type()` method. Note that `xml_node` is only a handle to the actual node, not the node itself - you can have several `xml_node` handles pointing to the same underlying object. Destroying `xml_node` handle does not destroy the node and does not remove it from the tree. The size of `xml_node` is equal to that of a pointer, so it is nothing more than a lightweight wrapper around pointer; you can safely pass or return `xml_node` objects by value without additional overhead.
 
-There is a special value of `xml_node` type, known as null node or empty node. It does not correspond to any node in any document, and thus resembles null pointer. However, all operations are defined on empty nodes; generally the operations don't do anything and return empty nodes/attributes or empty strings as their result (see documentation for specific functions for more detailed information). This is useful for chaining calls; i.e. you can get the grandparent of a node like so: `node.parent().parent()`; if a node is a null node or it does not have a parent, the first `parent()` call returns null node; the second `parent()` call then also returns null node, so you don't have to check for errors twice.
+[#node_null]
+There is a special value of `xml_node` type, known as null node or empty node (such nodes have type `node_null`). It does not correspond to any node in any document, and thus resembles null pointer. However, all operations are defined on empty nodes; generally the operations don't do anything and return empty nodes/attributes or empty strings as their result (see documentation for specific functions for more detailed information). This is useful for chaining calls; i.e. you can get the grandparent of a node like so: `node.parent().parent()`; if a node is a null node or it does not have a parent, the first `parent()` call returns null node; the second `parent()` call then also returns null node, so you don't have to check for errors twice.
 
+[#xml_attribute]
 `xml_attribute` is the handle to a XML attribute; it has the same semantics as `xml_node`, i.e. there can be several `xml_attribute` handles pointing to the same underlying object, there is a special null attribute value, which propagates to function results.
 
-You can check if a given `xml_node`/`xml_attribute` handle is null by calling the following methods:
+[#xml_attribute::ctor]
+[#xml_node::ctor]
+Both `xml_node` and `xml_attribute` have the default constructor which initializes them to null objects.
 
-	bool xml_node::empty() const;
+[#xml_attribute::comparison]
+[#xml_node::comparison]
+`xml_node` and `xml_attribute` try to behave like pointers, that is, they can be compared with other objects of the same type, making it possible to use them as keys of associative containers. All handles to the same underlying object are equal, and any two handles to different underlying objects are not equal. Null handles only compare as equal to themselves. The result of relational comparison can not be reliably determined from the order of nodes in file or other ways. Do not use relational comparison operators except for search optimization (i.e. associative container keys).
+
+[#xml_attribute::unspecified_bool_type]
+[#xml_node::unspecified_bool_type]
+[#xml_attribute::empty]
+[#xml_node::empty]
+Additionally handles they can be implicitly cast to boolean-like objects, so that you can test if the node\/attribute is empty by just doing `if (node) { ... }` or `if (!node) { ... } else { ... }`. Alternatively you can check if a given `xml_node`/`xml_attribute` handle is null by calling the following methods:
+
 	bool xml_attribute::empty() const;
+	bool xml_node::empty() const;
 
 Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. Once underlying node/attribute objects are destroyed, the handles to those objects become invalid. While this means that destruction of the entire tree invalidates all node/attribute handles, it also means that destroying a subtree (by calling `remove_child`) or removing an attribute invalidates the corresponding handles. There is no way to check handle validity; you have to ensure correctness through external mechanisms.
-
-Both `xml_node` and `xml_attribute` have the default constructor which initializes them to null objects; otherwise they try to behave like pointers, that is, they can be compared with other objects of the same type, making it possible to use them as keys of associative containers, they can be implicitly cast to boolean-like objects, so that you can test if the node\/attribute is empty by just doing `if (node) { ... }` or `if (!node) { ... } else { ... }`. The size of both types is equal to that of a pointer, so they are nothing more than lightweight wrappers around pointers; you can safely pass or return `xml_node`/`xml_attribute` objects by value without additional overhead.
 
 [endsect] [/cpp]
 
 [section:unicode Unicode interface]
 
-There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via `PUGIXML_WCHAR_MODE` define; you can set it via [file pugiconfig.hpp] or via preprocessor options, as discussed in [link manual.install.building.config]. If this define is set, the wchar_t interface is used; otherwise (by default) the char interface is used. The exact wide character encoding is assumed to be either UTF-16 or UTF-32 and is determined based on size of `wchar_t` type.
+There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via `PUGIXML_WCHAR_MODE` define; you can set it via [file pugiconfig.hpp] or via preprocessor options, as discussed in [sref manual.install.building.config]. If this define is set, the wchar_t interface is used; otherwise (by default) the char interface is used. The exact wide character encoding is assumed to be either UTF-16 or UTF-32 and is determined based on size of `wchar_t` type.
 
 [note If size of `wchar_t` is 2, pugixml assumes UTF-16 encoding instead of UCS-2, which means that some characters are represented as two code points.]
 
@@ -412,10 +439,14 @@ and like this in wchar_t mode:
 	const wchar_t* xml_node::name() const;
 	bool xml_node::set_name(const wchar_t* value);
 
+[#char_t]
+[#string_t]
 There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode.
 
 In addition to the interface, the internal implementation changes to store XML data as `pugi::char_t`; this means that these two modes have different memory usage characteristics. The conversion to `pugi::char_t` upon document loading and from `pugi::char_t` upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is localized, wchar_t mode is probably a better choice.
 
+[#as_utf8]
+[#as_wide]
 There are cases when you'll have to convert string data between UTF-8 and wchar_t encodings; the following helper functions are provided for such purposes:
 
 	std::string as_utf8(const wchar_t* str);
@@ -443,7 +474,7 @@ Almost all functions in pugixml have the following thread-safety guarantees:
 
 Concurrent modification and traversing of a single tree requires synchronization, for example via reader-writer lock. Modification includes altering document structure and altering individual node/attribute data, i.e. changing names/values.
 
-The only exception is `set_memory_management_functions`; it modifies global variables and as such is not thread-safe. Its usage policy has more restrictions, see [link manual.dom.memory.custom].
+The only exception is `set_memory_management_functions`; it modifies global variables and as such is not thread-safe. Its usage policy has more restrictions, see [sref manual.dom.memory.custom].
 
 [endsect] [/thread]
 
@@ -463,11 +494,16 @@ pugixml requests the memory needed for document storage in big chunks, and alloc
 
 [section:custom Custom memory allocation/deallocation functions]
 
+[#allocation_function]
+[#deallocation_function]
 All memory for tree structure/data is allocated via globally specified functions, which default to malloc/free. You can set your own allocation functions with set_memory_management functions. The function interfaces are the same as that of malloc/free:
 
 	typedef void* (*allocation_function)(size_t size);
 	typedef void (*deallocation_function)(void* ptr);
 
+[#set_memory_management_functions]
+[#get_memory_allocation_function]
+[#get_memory_deallocation_function]
 You can use the following accessor functions to change or get current memory management functions:
 
 	void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
@@ -492,7 +528,7 @@ When setting new memory management functions, care must be taken to make sure th
 
 Constructing a document object using the default constructor does not result in any allocations; document node is stored inside the `xml_document` object.
 
-When the document is loaded from file/buffer, unless an inplace loading function is used (see [link manual.loading.memory]), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the `xml_document` object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
+When the document is loaded from file/buffer, unless an inplace loading function is used (see [sref manual.loading.memory]), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the `xml_document` object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
 
 All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 kilobytes; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
 
@@ -504,19 +540,20 @@ All additional memory, such as memory for document structure (node/attribute obj
 
 [section:loading Loading document]
 
-pugixml provides several functions for loading XML data from various places - files, C++ iostreams, memory buffers. All functions use an extremely fast non-validating parser. This parser is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed because of performance reasons. Also some XML transformations (i.e. EOL handling or attribute value normalization) can impact parsing speed and thus can be disabled. However for vast majority of XML documents there is no performance difference between different parsing options. Parsing options also control whether certain XML nodes are parsed; see [link manual.loading.options] for more information.
+pugixml provides several functions for loading XML data from various places - files, C++ iostreams, memory buffers. All functions use an extremely fast non-validating parser. This parser is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed because of performance reasons. Also some XML transformations (i.e. EOL handling or attribute value normalization) can impact parsing speed and thus can be disabled. However for vast majority of XML documents there is no performance difference between different parsing options. Parsing options also control whether certain XML nodes are parsed; see [sref manual.loading.options] for more information.
 
-XML data is always converted to internal character format (see [link manual.dom.unicode]) before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since its a strict subset of UTF-16) and handles all encoding conversions automatically. Unless explicit encoding is specified, loading functions perform automatic encoding detection based on first few characters of XML data, so in almost all cases you do not have to specify document encoding. Encoding conversion is described in more detail in [link manual.loading.encoding].
+XML data is always converted to internal character format (see [sref manual.dom.unicode]) before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since its a strict subset of UTF-16) and handles all encoding conversions automatically. Unless explicit encoding is specified, loading functions perform automatic encoding detection based on first few characters of XML data, so in almost all cases you do not have to specify document encoding. Encoding conversion is described in more detail in [sref manual.loading.encoding].
 
 [section:file Loading document from file]
 
+[#xml_document::load_file]
 The most common source of XML data is files; pugixml provides a separate function for loading XML document from file:
 
 	xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
 	
-This function accepts file path as its first argument, and also two optional arguments, which specify parsing options (see [link manual.loading.options]) and input data encoding (see [link manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to file opening function as-is without any modifications.
+This function accepts file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
 
-`load_file` returns the result of the operation in a `xml_parse_result` object; this object contains the operation status, and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [link manual.loading.errors] for error handling details.
+`load_file` destroys the existing document tree and then tries to load the new tree from the specified file. The result of the operation is returned in a `xml_parse_result` object; this object contains the operation status, and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [sref manual.loading.errors] for error handling details.
 
 [note As of version 0.9, there is no function for loading XML document from wide character path. Unfortunately, there is no portable way to do this; the version 1.0 will provide such function only for platforms with the corresponding functionality. You can use stream-loading functions as a workaround if your STL implementation can open file streams via `wchar_t` paths.]
 
@@ -563,5 +600,335 @@ foo
 7. XPath (+ standard violations + performance checklist)
 8. Glossary + API reference (links to relevant user guide sections)
 
+[section:apiref API reference]
+
+Macros:
+
+* `#define `[link PUGIXML_WCHAR_MODE]
+* `#define `[link PUGIXML_NO_XPATH]
+* `#define `[link PUGIXML_NO_STL]
+* `#define `[link PUGIXML_NO_EXCEPTIONS]
+* `#define `[link PUGIXML_API]
+* `#define `[link PUGIXML_CLASS]
+* `#define `[link PUGIXML_FUNCTION]
+
+Types:
+
+* `typedef `/configuration-defined type/ [link char_t]`;`
+* `typedef `/configuration-defined type/ [link string_t]`;`
+* `typedef void* (*`[link allocation_function]`)(size_t size);`
+* `typedef void (*`[link deallocation_function]`)(void* ptr);`
+
+Enumerations:
+
+* `enum `[link xml_node_type]
+	* [link node_null]
+	* [link node_document]
+	* [link node_element]
+	* [link node_pcdata]
+	* [link node_cdata]
+	* [link node_comment]
+	* [link node_pi]
+	* [link node_declaration]
+
+* encoding_t
+	* encoding_auto
+	* encoding_utf8
+	* encoding_utf16_le
+	* encoding_utf16_be
+	* encoding_utf16
+	* encoding_utf32_le
+	* encoding_utf32_be
+	* encoding_utf32
+	* encoding_wchar
+
+* xpath_type_t
+	* xpath_type_none
+	* xpath_type_node_set
+	* xpath_type_number
+	* xpath_type_string
+	* xpath_type_boolean
+
+* xml_parse_status
+	* status_ok
+	* status_file_not_found
+	* status_io_error
+	* status_out_of_memory
+	* status_internal_error
+	* status_unrecognized_tag
+	* status_bad_pi
+	* status_bad_comment
+	* status_bad_cdata
+	* status_bad_doctype
+	* status_bad_pcdata
+	* status_bad_start_element
+	* status_bad_attribute
+	* status_bad_end_element
+	* status_end_element_mismatch
+
+Constants:
+
+* Formatting options bit flags:
+	* format_default
+	* format_indent
+	* format_no_declaration
+	* format_raw
+	* format_write_bom
+
+* Parsing options bit flags:
+	* parse_cdata
+	* parse_comments
+	* parse_declaration
+	* parse_default
+	* parse_eol
+	* parse_escapes
+	* parse_minimal
+	* parse_pi
+	* parse_ws_pcdata
+ 	* parse_wconv_attribute
+		
+Classes:
+
+* `class `[link xml_attribute]
+	* [link xml_attribute::ctor xml_attribute]`();`
+	[lbr]
+
+	* `bool `[link xml_attribute::empty empty]`() const;`
+	* `operator `[link xml_attribute::unspecified_bool_type unspecified_bool_type]`() const;`
+	[lbr]
+
+	* `bool `[link xml_attribute::comparison operator==]`(const xml_attribute& r) const;`
+	* `bool `[link xml_attribute::comparison operator!=]`(const xml_attribute& r) const;`
+	* `bool `[link xml_attribute::comparison operator<]`(const xml_attribute& r) const;`
+	* `bool `[link xml_attribute::comparison operator>]`(const xml_attribute& r) const;`
+	* `bool `[link xml_attribute::comparison operator<=]`(const xml_attribute& r) const;`
+	* `bool `[link xml_attribute::comparison operator>=]`(const xml_attribute& r) const;`
+	[lbr]
+
+	* xml_attribute next_attribute() const;
+	* xml_attribute previous_attribute() const;
+	* int as_int() const;
+
+	* unsigned int as_uint() const;
+	* double as_double() const;
+	* float as_float() const;
+	* bool as_bool() const;
+
+	* xml_attribute& operator=(const char_t* rhs);
+	* xml_attribute& operator=(int rhs);
+	* xml_attribute& operator=(unsigned int rhs);
+	* xml_attribute& operator=(double rhs);
+	* xml_attribute& operator=(bool rhs);
+
+	* bool set_name(const char_t* rhs);
+	* bool set_value(const char_t* rhs);
+	* bool set_value(int rhs);
+	* bool set_value(unsigned int rhs);
+	* bool set_value(double rhs);
+	* bool set_value(bool rhs);
+
+	* const char_t* name() const;
+	* const char_t* value() const;
+	[lbr]
+
+* `class `[link xml_node]
+	* [link xml_node::ctor xml_node]`();`
+	[lbr]
+
+	* `bool `[link xml_node::empty empty]`() const;`
+	* `operator `[link xml_node::unspecified_bool_type unspecified_bool_type]`() const;`
+	[lbr]
+
+	* `bool `[link xml_node::comparison operator==]`(const xml_node& r) const;`
+	* `bool `[link xml_node::comparison operator!=]`(const xml_node& r) const;`
+	* `bool `[link xml_node::comparison operator<]`(const xml_node& r) const;`
+	* `bool `[link xml_node::comparison operator>]`(const xml_node& r) const;`
+	* `bool `[link xml_node::comparison operator<=]`(const xml_node& r) const;`
+	* `bool `[link xml_node::comparison operator>=]`(const xml_node& r) const;`
+	[lbr]
+
+	* `xml_node_type `[link xml_node::type type]`() const;`
+	[lbr]
+
+	* const char_t* name() const;
+	* const char_t* value() const;
+	* xml_node child(const char_t* name) const;
+	* xml_attribute attribute(const char_t* name) const;
+	* xml_node next_sibling(const char_t* name) const;
+	* xml_node next_sibling() const;
+	* xml_node previous_sibling(const char_t* name) const;
+	* xml_node previous_sibling() const;
+	* xml_node parent() const;
+	* xml_node root() const;
+	* const char_t* child_value() const;
+	* const char_t* child_value(const char_t* name) const;
+	* bool set_name(const char_t* rhs);
+	* bool set_value(const char_t* rhs);
+	* xml_attribute append_attribute(const char_t* name);
+	* xml_attribute insert_attribute_after(const char_t* name, const xml_attribute& attr);
+	* xml_attribute insert_attribute_before(const char_t* name, const xml_attribute& attr);
+	* xml_attribute append_copy(const xml_attribute& proto);
+	* xml_attribute insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
+	* xml_attribute insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
+	* xml_node append_child(xml_node_type type = node_element);
+	* xml_node insert_child_after(xml_node_type type, const xml_node& node);
+	* xml_node insert_child_before(xml_node_type type, const xml_node& node);
+	* xml_node append_copy(const xml_node& proto);
+	* xml_node insert_copy_after(const xml_node& proto, const xml_node& node);
+	* xml_node insert_copy_before(const xml_node& proto, const xml_node& node);
+	* void remove_attribute(const xml_attribute& a);
+	* void remove_attribute(const char_t* name);
+	* void remove_child(const xml_node& n);
+	* void remove_child(const char_t* name);
+	* xml_attribute first_attribute() const;
+	* xml_attribute last_attribute() const;
+	* template <typename OutputIterator> void all_elements_by_name(const char_t* name, OutputIterator it) const
+	* xml_node first_child() const;
+	* xml_node last_child() const;
+	* template <typename Predicate> xml_attribute find_attribute(Predicate pred) const
+	* template <typename Predicate> xml_node find_child(Predicate pred) const
+	* template <typename Predicate> xml_node find_node(Predicate pred) const
+	* xml_node find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
+	* xml_node find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
+	* string_t path(char_t delimiter = '/') const;
+	* xml_node first_element_by_path(const char_t* path, char_t delimiter = '/') const;
+	* bool traverse(xml_tree_walker& walker);
+	* xpath_node select_single_node(const char_t* query) const;
+	* xpath_node select_single_node(const xpath_query& query) const;
+	* xpath_node_set select_nodes(const char_t* query) const;
+	* xpath_node_set select_nodes(const xpath_query& query) const;
+	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
+	* void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
+	* void print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
+
+	* typedef xml_node_iterator iterator;
+	* typedef xml_attribute_iterator attribute_iterator;
+
+	* iterator begin() const;
+	* iterator end() const;
+
+	* attribute_iterator attributes_begin() const;
+	* attribute_iterator attributes_end() const;
+
+	* ptrdiff_t offset_debug() const;
+	[lbr]
+
+* `class `[link xml_document]
+	* [link xml_document::ctor xml_document]`();`
+	* `~`[link xml_document::dtor xml_document]`();`
+	[lbr]
+
+	* xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+	* xml_parse_result load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options = parse_default);
+	[lbr]
+
+	* xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
+	[lbr]
+
+	* `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, encoding_t encoding = encoding_auto);`
+	[lbr]
+
+	* xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+	* xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+	* xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+	[lbr]
+
+	* void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+	[lbr]
+
+	* void save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+	* void save(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default) const;
+	[lbr]
+
+	* bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+	[lbr]
+
+* xpath_query
+	* explicit xpath_query(const char_t* query);
+	* ~xpath_query();
+	* xpath_type_t return_type() const;
+	* bool evaluate_boolean(const xml_node& n) const;
+	* double evaluate_number(const xml_node& n) const;
+	* string_t evaluate_string(const xml_node& n) const;
+	* xpath_node_set evaluate_node_set(const xml_node& n) const;
+
+* xml_writer
+	* virtual ~xml_writer() {}
+	* virtual void write(const void* data, size_t size) = 0;
+
+* xml_writer_file
+	* xml_writer_file(void* file);
+	* virtual void write(const void* data, size_t size);
+
+* xml_writer_stream
+	* xml_writer_stream(std::basic_ostream<char, std::char_traits<char> >& stream);
+	* xml_writer_stream(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream);
+
+	* virtual void write(const void* data, size_t size);
+* xml_node_iterator
+* xml_attribute_iterator
+
+* xml_tree_walker
+	* int depth() const;
+	* xml_tree_walker();
+	* virtual ~xml_tree_walker();
+
+	* virtual bool begin(xml_node&);
+	* virtual bool for_each(xml_node&) = 0;
+	* virtual bool end(xml_node&);
+
+* xml_parse_result
+	* xml_parse_status status;
+	* ptrdiff_t offset;
+	* encoding_t encoding;
+	* operator bool() const
+	* const char* description() const;
+
+* xpath_exception
+	* explicit xpath_exception(const char* message);
+	* virtual const char* what() const throw();
+
+* xpath_node
+	* xpath_node();
+	* xpath_node(const xml_node& node);
+	* xpath_node(const xml_attribute& attribute, const xml_node& parent);
+	* xml_node node() const;
+	* xml_attribute attribute() const;
+	* xml_node parent() const;
+	* operator unspecified_bool_type() const;
+	* bool operator!() const;
+	* bool operator==(const xpath_node& n) const;
+	* bool operator!=(const xpath_node& n) const;
+
+* xpath_node_set
+	* enum type_t
+		* type_unsorted
+		* type_sorted
+		* type_sorted_reverse
+
+	* typedef const xpath_node* const_iterator;
+
+	* xpath_node_set();
+	* ~xpath_node_set();
+	* xpath_node_set(const xpath_node_set& ns);
+	* xpath_node_set& operator=(const xpath_node_set& ns);
+	* type_t type() const;
+	* size_t size() const;
+	* xpath_node operator[](size_t index) const;
+	* const_iterator begin() const;
+	* const_iterator end() const;
+	* void sort(bool reverse = false);
+	* xpath_node first() const;
+	* bool empty() const;
+
+Functions:
+
+* [link as_utf8]
+* [link as_wide]
+* [link get_memory_allocation_function]
+* [link get_memory_deallocation_function]
+* [link set_memory_management_functions]
+
+[endsect] [/apiref]
 
 Maybe we need user manual, quick one-page tutorial and examples, but don't need standalone API reference?
