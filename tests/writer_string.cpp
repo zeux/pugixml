@@ -39,7 +39,7 @@ std::basic_string<pugi::char_t> xml_writer_string::as_string() const
 	return std::basic_string<pugi::char_t>(reinterpret_cast<const pugi::char_t*>(contents.data()), contents.size() / sizeof(pugi::char_t));
 }
 
-std::string save_narrow(const pugi::xml_document& doc, unsigned int flags, pugi::encoding_t encoding)
+std::string save_narrow(const pugi::xml_document& doc, unsigned int flags, pugi::xml_encoding encoding)
 {
 	xml_writer_string writer;
 
@@ -48,12 +48,12 @@ std::string save_narrow(const pugi::xml_document& doc, unsigned int flags, pugi:
 	return writer.as_narrow();
 }
 
-bool test_save_narrow(const pugi::xml_document& doc, unsigned int flags, pugi::encoding_t encoding, const char* expected, size_t length)
+bool test_save_narrow(const pugi::xml_document& doc, unsigned int flags, pugi::xml_encoding encoding, const char* expected, size_t length)
 {
 	return test_narrow(save_narrow(doc, flags, encoding), expected, length);
 }
 
-std::string write_narrow(pugi::xml_node node, unsigned int flags, pugi::encoding_t encoding)
+std::string write_narrow(pugi::xml_node node, unsigned int flags, pugi::xml_encoding encoding)
 {
 	xml_writer_string writer;
 
@@ -62,12 +62,12 @@ std::string write_narrow(pugi::xml_node node, unsigned int flags, pugi::encoding
 	return writer.as_narrow();
 }
 
-bool test_write_narrow(pugi::xml_node node, unsigned int flags, pugi::encoding_t encoding, const char* expected, size_t length)
+bool test_write_narrow(pugi::xml_node node, unsigned int flags, pugi::xml_encoding encoding, const char* expected, size_t length)
 {
 	return test_narrow(write_narrow(node, flags, encoding), expected, length);
 }
 
-std::wstring write_wide(pugi::xml_node node, unsigned int flags, pugi::encoding_t encoding)
+std::wstring write_wide(pugi::xml_node node, unsigned int flags, pugi::xml_encoding encoding)
 {
 	xml_writer_string writer;
 

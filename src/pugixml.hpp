@@ -271,7 +271,7 @@ namespace pugi
 	 * which means that document encoding is auto-detected from BOM and necessary encoding conversions are
 	 * applied. You can override this mode by using any of the specific encodings.
 	 */
-	enum encoding_t
+	enum xml_encoding
 	{
 		encoding_auto,      //!< Auto-detect input encoding using BOM or < / <? detection; use UTF8 if BOM is not found
 		encoding_utf8,      //!< UTF8 encoding
@@ -348,7 +348,7 @@ namespace pugi
 	class xpath_allocator;
 	
 	/// XPath query return type classification
-	enum xpath_type_t
+	enum xpath_value_type
 	{
 		xpath_type_none,      ///< Unknown type (query failed to compile)
 		xpath_type_node_set,  ///< Node set (xpath_node_set)
@@ -391,7 +391,7 @@ namespace pugi
 		 *
 		 * \return expression return type
 		 **/
-		xpath_type_t return_type() const;
+		xpath_value_type return_type() const;
 		
 		/**
 		 * Evaluate expression as boolean value for the context node \a n.
@@ -1467,7 +1467,7 @@ namespace pugi
 		 * \param encoding - encoding used for writing
 		 * \param depth - starting depth (used for indentation)
 		 */
-		void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
+		void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 
 	#ifndef PUGIXML_NO_STL
 		/**
@@ -1479,7 +1479,7 @@ namespace pugi
 		 * \param encoding - encoding used for writing
 		 * \param depth - starting depth (used for indentation)
 		 */
-		void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
+		void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 
 		/**
 		 * Print subtree to stream
@@ -1810,7 +1810,7 @@ namespace pugi
 		ptrdiff_t offset;
 
 		/// Source document encoding
-		encoding_t encoding;
+		xml_encoding encoding;
 
 		/// Cast to bool operator
 		operator bool() const
@@ -1839,7 +1839,7 @@ namespace pugi
 		void create();
 		void destroy();
 
-		xml_parse_result load_buffer_impl(void* contents, size_t size, unsigned int options, encoding_t encoding, bool is_mutable, bool own);
+		xml_parse_result load_buffer_impl(void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own);
 
 	public:
 		/**
@@ -1862,7 +1862,7 @@ namespace pugi
 		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
-		xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+		xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
 		/**
 		 * Load document from stream.
@@ -1919,7 +1919,7 @@ namespace pugi
 		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
-		xml_parse_result load_file(const char* path, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+		xml_parse_result load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
 		/**
 		 * Load document from buffer
@@ -1930,7 +1930,7 @@ namespace pugi
 		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
-		xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+		xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
 		/**
 		 * Load document from buffer in-situ.
@@ -1943,7 +1943,7 @@ namespace pugi
 		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
-		xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+		xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
 		/**
 		 * Load document from buffer in-situ (gains buffer ownership).
@@ -1957,7 +1957,7 @@ namespace pugi
 		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
-		xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+		xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
 		/**
 		 * Save XML to writer
@@ -1967,7 +1967,7 @@ namespace pugi
 		 * \param flags - formatting flags
 		 * \param encoding - encoding used for writing
 		 */
-		void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+		void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
 	#ifndef PUGIXML_NO_STL
 		/**
@@ -1978,7 +1978,7 @@ namespace pugi
 		 * \param flags - formatting flags
 		 * \param encoding - encoding used for writing
 		 */
-		void save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+		void save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
 		/**
 		 * Save XML to stream
@@ -1999,7 +1999,7 @@ namespace pugi
 		 * \param encoding - encoding used for writing
 		 * \return success flag
 		 */
-		bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+		bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
 		/**
 		 * Compute document order for the whole tree

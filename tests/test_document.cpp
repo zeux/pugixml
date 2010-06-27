@@ -394,7 +394,7 @@ TEST(document_load_file_convert_auto)
 		"tests/data/utftest_utf8_nodecl.xml"
 	};
 
-	encoding_t encodings[] =
+	xml_encoding encodings[] =
 	{
 		encoding_utf16_be, encoding_utf16_be, encoding_utf16_be,
 		encoding_utf16_le, encoding_utf16_le, encoding_utf16_le,
@@ -435,7 +435,7 @@ TEST(document_load_file_convert_specific)
 		"tests/data/utftest_utf8_nodecl.xml"
 	};
 
-	encoding_t encodings[] =
+	xml_encoding encodings[] =
 	{
 		encoding_utf16_be, encoding_utf16_be, encoding_utf16_be,
 		encoding_utf16_le, encoding_utf16_le, encoding_utf16_le,
@@ -448,7 +448,7 @@ TEST(document_load_file_convert_specific)
 	{
 		for (unsigned int j = 0; j < sizeof(files) / sizeof(files[0]); ++j)
 		{
-			encoding_t encoding = encodings[j];
+			xml_encoding encoding = encodings[j];
 
 			xml_document doc;
 			xml_parse_result res = doc.load_file(files[i], parse_default, encoding);
@@ -490,7 +490,7 @@ TEST(document_load_file_convert_native_endianness)
 		}
 	};
 
-	encoding_t encodings[] =
+	xml_encoding encodings[] =
 	{
 		encoding_utf16, encoding_utf16, encoding_utf16,
 		encoding_utf32, encoding_utf32, encoding_utf32
@@ -503,7 +503,7 @@ TEST(document_load_file_convert_native_endianness)
 
 		for (unsigned int j = 0; j < sizeof(encodings) / sizeof(encodings[0]); ++j)
 		{
-			encoding_t encoding = encodings[j];
+			xml_encoding encoding = encodings[j];
 
 			// check file with right endianness
 			{
@@ -554,7 +554,7 @@ TEST(document_contents_preserve)
 	struct file_t
 	{
 		const char* path;
-		encoding_t encoding;
+		xml_encoding encoding;
 
 		char* data;
 		size_t size;
@@ -596,7 +596,7 @@ TEST(document_contents_preserve)
 	}
 }
 
-static bool test_parse_fail(const void* buffer, size_t size, encoding_t encoding = encoding_utf8)
+static bool test_parse_fail(const void* buffer, size_t size, xml_encoding encoding = encoding_utf8)
 {
 	// copy buffer to heap (to enable out-of-bounds checks)
 	void* temp = malloc(size);
@@ -646,7 +646,7 @@ TEST(document_convert_invalid_utf16)
 
 TEST(document_load_buffer_empty)
 {
-	encoding_t encodings[] =
+	xml_encoding encodings[] =
 	{
 		encoding_auto,
 		encoding_utf8,
@@ -663,7 +663,7 @@ TEST(document_load_buffer_empty)
 
 	for (unsigned int i = 0; i < sizeof(encodings) / sizeof(encodings[0]); ++i)
 	{
-		encoding_t encoding = encodings[i];
+		xml_encoding encoding = encodings[i];
 
 		xml_document doc;
 		CHECK(doc.load_buffer(buffer, 0, parse_default, encoding) && !doc.first_child());

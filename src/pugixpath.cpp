@@ -1315,7 +1315,7 @@ namespace pugi
 	private:
 		ast_type_t m_type;
 		
-		xpath_type_t m_rettype;
+		xpath_value_type m_rettype;
 
 		// tree node structure
 		xpath_ast_node* m_left;
@@ -1336,7 +1336,7 @@ namespace pugi
 
 		template <class Comp> static bool compare_eq(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const Comp& comp)
 		{
-			xpath_type_t lt = lhs->rettype(), rt = rhs->rettype();
+			xpath_value_type lt = lhs->rettype(), rt = rhs->rettype();
 
 			if (lt != xpath_type_node_set && rt != xpath_type_node_set)
 			{
@@ -1405,7 +1405,7 @@ namespace pugi
 
 		template <class Comp> static bool compare_rel(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const Comp& comp)
 		{
-			xpath_type_t lt = lhs->rettype(), rt = rhs->rettype();
+			xpath_value_type lt = lhs->rettype(), rt = rhs->rettype();
 
 			if (lt != xpath_type_node_set && rt != xpath_type_node_set)
 				return comp(lhs->eval_number(c), rhs->eval_number(c));
@@ -1955,7 +1955,7 @@ namespace pugi
 			else m_contents = 0;
 		}
 	public:
-		xpath_ast_node(ast_type_t type, xpath_type_t rettype, const xpath_lexer_string& contents, xpath_allocator& a):
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype, const xpath_lexer_string& contents, xpath_allocator& a):
 			m_type(type), m_rettype(rettype), m_left(0), m_right(0), m_third(0), m_next(0), m_contents(0),
 			m_axis(axis_self), m_test(nodetest_none)
 		{
@@ -1968,7 +1968,7 @@ namespace pugi
 		{
 		}
 
-		xpath_ast_node(ast_type_t type, xpath_type_t rettype, xpath_ast_node* left = 0, xpath_ast_node* right = 0, xpath_ast_node* third = 0):
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype, xpath_ast_node* left = 0, xpath_ast_node* right = 0, xpath_ast_node* third = 0):
 			m_type(type), m_rettype(rettype), m_left(left), m_right(right), m_third(third), m_next(0), m_contents(0),
 			m_axis(axis_self), m_test(nodetest_none)
 		{
@@ -2608,7 +2608,7 @@ namespace pugi
 			}
 		}
 
-		xpath_type_t rettype() const
+		xpath_value_type rettype() const
 		{
 			return m_rettype;
 		}
@@ -3429,7 +3429,7 @@ namespace pugi
 		m_root = p.parse();
 	}
 
-	xpath_type_t xpath_query::return_type() const
+	xpath_value_type xpath_query::return_type() const
 	{
 		if (!m_root) return xpath_type_none;
 

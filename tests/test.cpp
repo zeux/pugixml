@@ -171,7 +171,7 @@ bool is_little_endian()
 	return *reinterpret_cast<char*>(&ui) == 1;
 }
 
-pugi::encoding_t get_native_encoding()
+pugi::xml_encoding get_native_encoding()
 {
 #ifdef PUGIXML_WCHAR_MODE
 	return pugi::encoding_wchar;
