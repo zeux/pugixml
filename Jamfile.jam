@@ -108,3 +108,28 @@ for CONFIG in $(CONFIGURATIONS)
 Documentation docs/manual.html : docs/manual.qbk ;
 
 Alias docs : docs/manual.html ;
+
+# samples
+for SAMPLE in [ Glob docs/samples : *.cpp ]
+{
+	local CONFIG = "debug" ;
+	local DEFINES = "PUGIXML_STANDARD" ;
+
+	# build folder
+	local CFGBUILD = $(BUILD)/$(toolset)/$(DEFINES:J=_)/$(CONFIG) ;
+
+	# compilation options
+	local CFGFLAGS = $(CCFLAGS) [ GetCFlags $(CONFIG) : $(DEFINES) ] ;
+	CFGFLAGS += -I src ;
+
+	# build and run sample
+	local EXECUTABLE = $(CFGBUILD)/samples/$(SAMPLE:S=.exe) ;
+	local PUGIXML = $(CFGBUILD)/pugixml.lib ;
+
+	Application $(EXECUTABLE) : $(SAMPLE) : $(CFGFLAGS) : $(PUGIXML) ;
+
+	RunSampleAction $(EXECUTABLE)_run : $(EXECUTABLE) ;
+	Depends $(EXECUTABLE)_run : $(EXECUTABLE) ;
+
+	Depends samples : $(EXECUTABLE)_run ;
+}

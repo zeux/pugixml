@@ -441,6 +441,12 @@ if ( $(UNIX) )
 		$(>)
 	}
 
+	actions RunSampleAction
+	{
+		cd docs/samples
+		../../$(>)
+	}
+
 	actions quietly ignore MakeDirAction
 	{
 		mkdir -p $(<)
@@ -456,6 +462,12 @@ else
 	actions screenoutput RunAction
 	{
 		$(>:\\)
+	}
+
+	actions RunSampleAction
+	{
+		cd docs\samples
+		..\..\$(>:\\)
 	}
 
 	actions quietly ignore MakeDirAction
