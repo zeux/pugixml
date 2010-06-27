@@ -30,6 +30,7 @@
 	Compatibility: 
 		parse() and as_utf16 are left for compatibility (these functions are deprecated and will be removed in pugixml-1.0) 
 		Wildcard functions, document_order/precompute_document_order functions, format_write_bom_utf8 and parse_wnorm_attribute flags are deprecated and will be removed in version 1.0
+		xpath_type_t enumeration was renamed to xpath_value_type
 
 8.11.2009 - v0.5 
 	Major bugfix release. Changes: 
