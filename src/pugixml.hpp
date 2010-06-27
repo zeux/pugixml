@@ -1914,12 +1914,12 @@ namespace pugi
 		/**
 		 * Load document from file
 		 *
-		 * \param name - file name
+		 * \param path - file path
 		 * \param options - parsing options
 		 * \param encoding - source data encoding
 		 * \return parsing result
 		 */
-		xml_parse_result load_file(const char* name, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+		xml_parse_result load_file(const char* path, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
 
 		/**
 		 * Load document from buffer
@@ -1993,13 +1993,13 @@ namespace pugi
 		/**
 		 * Save XML to file
 		 *
-		 * \param name - file name
+		 * \param path - file path
 		 * \param indent - indentation string
 		 * \param flags - formatting flags
 		 * \param encoding - encoding used for writing
 		 * \return success flag
 		 */
-		bool save_file(const char* name, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+		bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
 
 		/**
 		 * Compute document order for the whole tree

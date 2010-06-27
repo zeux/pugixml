@@ -4328,11 +4328,11 @@ namespace pugi
 		return load_buffer_inplace_own(xmlstr, strlen(xmlstr), options, encoding_utf8);
 	}
 
-	xml_parse_result xml_document::load_file(const char* name, unsigned int options, encoding_t encoding)
+	xml_parse_result xml_document::load_file(const char* path, unsigned int options, encoding_t encoding)
 	{
 		create();
 
-		FILE* file = fopen(name, "rb");
+		FILE* file = fopen(path, "rb");
 		if (!file) return make_parse_result(status_file_not_found);
 
 		fseek(file, 0, SEEK_END);
@@ -4439,9 +4439,9 @@ namespace pugi
 	}
 #endif
 
-	bool xml_document::save_file(const char* name, const char_t* indent, unsigned int flags, encoding_t encoding) const
+	bool xml_document::save_file(const char* path, const char_t* indent, unsigned int flags, encoding_t encoding) const
 	{
-		FILE* file = fopen(name, "wb");
+		FILE* file = fopen(path, "wb");
 		if (!file) return false;
 
 		xml_writer_file writer(file);
