@@ -10,7 +10,7 @@
 [template file[name] '''<filename>'''[name]'''</filename>''']
 [template sbr[] '''<sbr/>''']
 [template lbr[] '''<sbr/><sbr/>'''] [/ for empty lines in lists]
-[template sref[name] '''<link linkend="'''[name]'''" endterm="'''[name]'''.title" />''']
+[template sref[name] '''<xref linkend="'''[name]'''" xrefstyle="select:title" />''']
 
 PugiXML User Manual
 
@@ -549,7 +549,7 @@ XML data is always converted to internal character format (see [sref manual.dom.
 [#xml_document::load_file]
 The most common source of XML data is files; pugixml provides a separate function for loading XML document from file:
 
-	xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+	xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 	
 This function accepts file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
 
@@ -631,7 +631,7 @@ Enumerations:
 	* [link node_pi]
 	* [link node_declaration]
 
-* encoding_t
+* xml_encoding
 	* encoding_auto
 	* encoding_utf8
 	* encoding_utf16_le
@@ -642,7 +642,7 @@ Enumerations:
 	* encoding_utf32
 	* encoding_wchar
 
-* xpath_type_t
+* xpath_value_type
 	* xpath_type_none
 	* xpath_type_node_set
 	* xpath_type_number
@@ -797,8 +797,8 @@ Classes:
 	* xpath_node select_single_node(const xpath_query& query) const;
 	* xpath_node_set select_nodes(const char_t* query) const;
 	* xpath_node_set select_nodes(const xpath_query& query) const;
-	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
-	* void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto, unsigned int depth = 0) const;
+	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+	* void print(std::basic_ostream<char, std::char_traits<char> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 	* void print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
 
 	* typedef xml_node_iterator iterator;
@@ -818,35 +818,35 @@ Classes:
 	* `~`[link xml_document::dtor xml_document]`();`
 	[lbr]
 
-	* xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+	* xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 	* xml_parse_result load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options = parse_default);
 	[lbr]
 
 	* xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
 	[lbr]
 
-	* `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, encoding_t encoding = encoding_auto);`
+	* `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
 	[lbr]
 
-	* xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
-	* xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
-	* xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, encoding_t encoding = encoding_auto);
+	* xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+	* xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+	* xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 	[lbr]
 
-	* void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+	* void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 	[lbr]
 
-	* void save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+	* void save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 	* void save(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default) const;
 	[lbr]
 
-	* bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, encoding_t encoding = encoding_auto) const;
+	* bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 	[lbr]
 
 * xpath_query
 	* explicit xpath_query(const char_t* query);
 	* ~xpath_query();
-	* xpath_type_t return_type() const;
+	* xpath_value_type return_type() const;
 	* bool evaluate_boolean(const xml_node& n) const;
 	* double evaluate_number(const xml_node& n) const;
 	* string_t evaluate_string(const xml_node& n) const;
@@ -880,7 +880,7 @@ Classes:
 * xml_parse_result
 	* xml_parse_status status;
 	* ptrdiff_t offset;
-	* encoding_t encoding;
+	* xml_encoding encoding;
 	* operator bool() const
 	* const char* description() const;
 
