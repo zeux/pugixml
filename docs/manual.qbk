@@ -445,7 +445,7 @@ The only exception is `set_memory_management_functions`; it modifies global vari
 
 With the exception of XPath, pugixml itself does not throw any exceptions. Additionally, most pugixml functions have a no-throw exception guarantee.
 
-This is not applicable to functions that operate on STL strings or IO streams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::all_elements_by_name`) do not provide any exception guarantees beyond the ones provided by callback.
+This is not applicable to functions that operate on STL strings or IOstreams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::all_elements_by_name`) do not provide any exception guarantees beyond the ones provided by callback.
 
 XPath functions may throw `xpath_exception` on parsing error; also, XPath implementation uses STL, and thus may throw i.e. `std::bad_alloc` in low memory conditions. Still, XPath functions provide strong exception guarantee.
 
@@ -528,11 +528,59 @@ This is a simple example of loading XML document from file ([@samples/load_file.
 [endsect] [/file]
 
 [section:memory Loading document from memory]
-foo
+
+[#xml_document::load_buffer]
+[#xml_document::load_buffer_inplace]
+[#xml_document::load_buffer_inplace_own]
+Sometimes XML data should be loaded from some other source than file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from gzip-compressed files. All these scenarios require loading document from memory. First you should prepare a contiguous memory block with all XML data; then you have to invoke one of buffer loading functions. These functions will handle the necessary encoding conversions, if any, and then will parse the data into the corresponding XML tree. There are several buffer loading functions, which differ in the behavior and thus in performance/memory usage:
+
+	xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+	xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+	xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+
+All functions accept the buffer which is represented by a pointer to XML data, `contents`, and data size in bytes. Also there are two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The buffer does not have to be zero-terminated.
+
+`load_buffer` function works with immutable buffer - it does not ever modify the buffer. Because of this restriction it has to create a private buffer and copy XML data to it before parsing (applying encoding conversions if necessary). This copy operation carries a performance penalty, so inplace functions are provided - `load_buffer_inplace` and `load_buffer_inplace_own` store the document data in the buffer, modifying it in the process. In order for the document to stay valid, you have to make sure that the buffers lifetime exceeds that of the tree if you're using inplace functions. In addition to that, `load_buffer_inplace` does not assume ownership of the buffer, so you'll have to destroy it yourself; `load_buffer_inplace_own` assumes ownership of the buffer and destroys it once it is not needed. This means that if you're using `load_buffer_inplace_own`, you have to allocate memory with pugixml allocation function (you can get it via [link get_memory_allocation_function]).
+
+The best way from the performance/memory point of view is to load document using `load_buffer_inplace_own`; this function has maximum control of the buffer with XML data so it is able to avoid redundant copies and reduce peak memory usage while parsing. This is the recommended function if you have to load the document from memory and performance is critical.
+
+[#xml_document::load_string]
+There is also a simple helper function for cases when you want to load the XML document from null-terminated character string:
+
+	xml_parse_result xml_document::load(const char_t* contents, unsigned int options = parse_default);
+
+It is equivalent to calling `load_buffer` with `size = strlen(contents)`. This function assumes native encoding for input data, so it does not do any encoding conversion. In general, this function is fine for loading small documents from string literals, but has more overhead and less functionality than buffer loading functions.
+
+This is an example of loading XML document from memory using different functions ([@samples/load_memory.cpp]):
+
+[import samples/load_memory.cpp]
+[code_load_memory_decl]
+[code_load_memory_buffer]
+[code_load_memory_buffer_inplace]
+[code_load_memory_buffer_inplace_own]
+[code_load_memory_string]
+
 [endsect] [/memory]
 
-[section:stream Loading document from C++ IO streams]
-foo
+[section:stream Loading document from C++ IOstreams]
+
+[#xml_document::load_stream]
+For additional interoperability pugixml provides functions for loading document from any object which implements C++ `std::istream` interface. This allows you to load documents from any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). There are two functions, one works with narrow character streams, another handles wide character ones:
+
+	xml_parse_result xml_document::load(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+	xml_parse_result xml_document::load(std::wistream& stream, unsigned int options = parse_default);
+
+`load` with `std::istream` argument loads the document from stream from the current read position to the end, treating the stream contents as a byte stream of the specified encoding (with encoding autodetection as necessary). Thus calling `xml_document::load` on an opened `std::ifstream` object is equivalent to calling `xml_document::load_file`.
+
+`load` with `std::wstream` argument treats the stream contents as a wide character stream (encoding is always `encoding_wchar`). Because of this, using `load` with wide character streams requires careful (usually platform-specific) stream setup (i.e using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to load documents from non-Unicode encodings, i.e. you can load Shift-JIS encoded data if you set the correct locale.
+
+This is a simple example of loading XML document from file using streams ([@samples/load_stream.cpp]); read the sample code for more complex examples involving wide streams and locales:
+
+[import samples/load_stream.cpp]
+[code_load_stream]
+
+Stream loading requires working seek/tell functions and therefore may fail when used with some stream implementations like gzstream.
+
 [endsect] [/stream]
 
 [section:errors Handling parsing errors]
@@ -952,19 +1000,19 @@ Classes:
 	* `~`[link xml_document::dtor xml_document]`();`
 	[lbr]
 
-	* xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
-	* xml_parse_result load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options = parse_default);
+	* `xml_parse_result `[link xml_document::load_stream load]`(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+	* `xml_parse_result `[link xml_document::load_stream load]`(std::wistream& stream, unsigned int options = parse_default);`
 	[lbr]
 
-	* xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
+	* `xml_parse_result `[link xml_document::load_string load]`(const char_t* contents, unsigned int options = parse_default);`
 	[lbr]
 
 	* `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
 	[lbr]
 
-	* xml_parse_result load_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
-	* xml_parse_result load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
-	* xml_parse_result load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+	* `xml_parse_result `[link xml_document::load_buffer load_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+	* `xml_parse_result `[link xml_document::load_buffer_inplace load_buffer_inplace]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+	* `xml_parse_result `[link xml_document::load_buffer_inplace_own load_buffer_inplace_own]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
 	[lbr]
 
 	* void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
