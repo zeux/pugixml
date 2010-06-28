@@ -474,6 +474,29 @@ namespace
 		return atof(string);
 	#endif
 	}
+
+	double convert_string_to_number(const char_t* begin, const char_t* end)
+	{
+		char_t buffer[32];
+
+		size_t length = static_cast<size_t>(end - begin);
+
+		if (length < sizeof(buffer) / sizeof(buffer[0]))
+		{
+			// optimized on-stack conversion
+			memcpy(buffer, begin, length * sizeof(char_t));
+			buffer[length] = 0;
+
+			return convert_string_to_number(buffer);
+		}
+		else
+		{
+			// need to make dummy on-heap copy
+			string_t copy(begin, end);
+
+			return convert_string_to_number(copy.c_str());
+		}
+	}
 	
 	double round_nearest(double value)
 	{
@@ -1313,24 +1336,29 @@ namespace pugi
 	class xpath_ast_node
 	{
 	private:
-		ast_type_t m_type;
-		
-		xpath_value_type m_rettype;
+		// node type
+		char m_type;
+		char m_rettype;
+
+		// for ast_step / ast_predicate
+		char m_axis;
+		char m_test;
 
 		// tree node structure
 		xpath_ast_node* m_left;
 		xpath_ast_node* m_right;
-		xpath_ast_node* m_third;
 		xpath_ast_node* m_next;
 
-		// string value for ast_constant
-		// node test for ast_step (node name/namespace/node type/pi target)
-		const char_t* m_contents;
+		union
+		{
+			// value for ast_string_constant
+			const char_t* string;
+			// value for ast_number_constant
+			double number;
+			// node test for ast_step (node name/namespace/node type/pi target)
+			const char_t* nodetest;
+		} m_data;
 
-		// for t_step / t_predicate
-		axis_t m_axis;
-		nodetest_t m_test;
-		
 		xpath_ast_node(const xpath_ast_node&);
 		xpath_ast_node& operator=(const xpath_ast_node&);
 
@@ -1503,14 +1531,16 @@ namespace pugi
 		{
 			if (!a) return;
 
+			const char_t* name = a.name();
+
 			// There are no attribute nodes corresponding to attributes that declare namespaces
 			// That is, "xmlns:..." or "xmlns"
-			if (starts_with(a.name(), PUGIXML_TEXT("xmlns")) && (a.name()[5] == 0 || a.name()[5] == ':')) return;
+			if (starts_with(name, PUGIXML_TEXT("xmlns")) && (name[5] == 0 || name[5] == ':')) return;
 			
 			switch (m_test)
 			{
 			case nodetest_name:
-				if (impl::strequal(a.name(), m_contents)) ns.push_back(xpath_node(a, parent));
+				if (impl::strequal(name, m_data.nodetest)) ns.push_back(xpath_node(a, parent));
 				break;
 				
 			case nodetest_type_node:
@@ -1519,7 +1549,7 @@ namespace pugi
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (starts_with(a.name(), m_contents))
+				if (starts_with(name, m_data.nodetest))
 					ns.push_back(xpath_node(a, parent));
 				break;
 			
@@ -1535,7 +1565,7 @@ namespace pugi
 			switch (m_test)
 			{
 			case nodetest_name:
-				if (n.type() == node_element && impl::strequal(n.name(), m_contents)) ns.push_back(n);
+				if (n.type() == node_element && impl::strequal(n.name(), m_data.nodetest)) ns.push_back(n);
 				break;
 				
 			case nodetest_type_node:
@@ -1558,7 +1588,7 @@ namespace pugi
 				break;
 									
 			case nodetest_pi:
-				if (n.type() == node_pi && impl::strequal(n.name(), m_contents))
+				if (n.type() == node_pi && impl::strequal(n.name(), m_data.nodetest))
 					ns.push_back(n);
 				break;
 				
@@ -1568,7 +1598,7 @@ namespace pugi
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (n.type() == node_element && starts_with(n.name(), m_contents))
+				if (n.type() == node_element && starts_with(n.name(), m_data.nodetest))
 					ns.push_back(n);
 				break;
 
@@ -1940,7 +1970,7 @@ namespace pugi
 			}
 		}
 		
-		void set_contents(const xpath_lexer_string& value, xpath_allocator& a)
+		static const char_t* duplicate_string(const xpath_lexer_string& value, xpath_allocator& a)
 		{
 			if (value.begin)
 			{
@@ -1950,35 +1980,34 @@ namespace pugi
 				memcpy(c, value.begin, length * sizeof(char_t));
 				c[length] = 0;
 
-				m_contents = c;
+				return c;
 			}
-			else m_contents = 0;
+			else return 0;
 		}
 	public:
-		xpath_ast_node(ast_type_t type, xpath_value_type rettype, const xpath_lexer_string& contents, xpath_allocator& a):
-			m_type(type), m_rettype(rettype), m_left(0), m_right(0), m_third(0), m_next(0), m_contents(0),
-			m_axis(axis_self), m_test(nodetest_none)
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype, const xpath_lexer_string& value, xpath_allocator& a):
+			m_type((char)type), m_rettype((char)rettype), m_axis(0), m_test(0), m_left(0), m_right(0), m_next(0)
 		{
-			set_contents(contents, a);
-		}
-		
-		xpath_ast_node(ast_type_t type, xpath_ast_node* left, xpath_ast_node* right, axis_t axis):
-			m_type(type), m_rettype(xpath_type_node_set), m_left(left), m_right(right), m_third(0), m_next(0), m_contents(0),
-			m_axis(axis), m_test(nodetest_none)
-		{
+			assert(type == ast_string_constant);
+			m_data.string = duplicate_string(value, a);
 		}
 
-		xpath_ast_node(ast_type_t type, xpath_value_type rettype, xpath_ast_node* left = 0, xpath_ast_node* right = 0, xpath_ast_node* third = 0):
-			m_type(type), m_rettype(rettype), m_left(left), m_right(right), m_third(third), m_next(0), m_contents(0),
-			m_axis(axis_self), m_test(nodetest_none)
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype, double value):
+			m_type((char)type), m_rettype((char)rettype), m_axis(0), m_test(0), m_left(0), m_right(0), m_next(0)
+		{
+			assert(type == ast_number_constant);
+			m_data.number = value;
+		}
+		
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype, xpath_ast_node* left = 0, xpath_ast_node* right = 0):
+			m_type((char)type), m_rettype((char)rettype), m_axis(0), m_test(0), m_left(left), m_right(right), m_next(0)
 		{
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const xpath_lexer_string& contents, xpath_allocator& a):
-			m_type(type), m_rettype(xpath_type_node_set), m_left(left), m_right(0), m_third(0), m_next(0), m_contents(0),
-			m_axis(axis), m_test(test)
+			m_type((char)type), m_rettype(xpath_type_node_set), m_axis((char)axis), m_test((char)test), m_left(left), m_right(0), m_next(0)
 		{
-			set_contents(contents, a);
+			m_data.nodetest = duplicate_string(contents, a);
 		}
 
 		void set_next(xpath_ast_node* value)
@@ -2116,7 +2145,7 @@ namespace pugi
 				return -m_left->eval_number(c);
 
 			case ast_number_constant:
-				return convert_string_to_number(m_contents);
+				return m_data.number;
 
 			case ast_func_last:
 				return (double)c.size;
@@ -2195,7 +2224,7 @@ namespace pugi
 			switch (m_type)
 			{
 			case ast_string_constant:
-				return m_contents;
+				return m_data.string;
 			
 			case ast_func_local_name_0:
 			{
@@ -2307,7 +2336,7 @@ namespace pugi
 			{
 				string_t s = m_left->eval_string(c);
 				double first = round_nearest(m_right->eval_number(c));
-				double last = first + round_nearest(m_third->eval_number(c));
+				double last = first + round_nearest(m_right->m_next->eval_number(c));
 				
 				if (is_nan(first) || is_nan(last)) return string_t();
 				else if (first >= s.length() + 1) return string_t();
@@ -2351,7 +2380,7 @@ namespace pugi
 			{
 				string_t s = m_left->eval_string(c);
 				string_t from = m_right->eval_string(c);
-				string_t to = m_third->eval_string(c);
+				string_t to = m_right->m_next->eval_string(c);
 				
 				for (string_t::iterator it = s.begin(); it != s.end(); )
 				{
@@ -2511,106 +2540,40 @@ namespace pugi
 			}
 		}
 		
-		bool contains(ast_type_t type)
+		bool is_posinv()
 		{
-			if (m_type == type) return true;
-			
 			switch (m_type)
 			{
-			case ast_op_or:
-			case ast_op_and:
-			case ast_op_equal:
-			case ast_op_not_equal:
-			case ast_op_less:
-			case ast_op_greater:
-			case ast_op_less_or_equal:
-			case ast_op_greater_or_equal:
-			case ast_op_add:
-			case ast_op_subtract:
-			case ast_op_multiply:
-			case ast_op_divide:
-			case ast_op_mod:
-			case ast_op_negate:
-				return m_left->contains(type) || m_right->contains(type);
-			
-			case ast_op_union:
+			case ast_func_position:
+				return false;
+
+			case ast_string_constant:
+			case ast_number_constant:
+			// $$ case ast_variable:
+				return true;
+
+			case ast_step:
+			case ast_step_root:
+				return true;
+
 			case ast_predicate:
 			case ast_filter:
 			case ast_filter_posinv:
-				return false;
-			
-			case ast_string_constant:
-			case ast_number_constant:
-			case ast_func_last:
-			case ast_func_position:
-				return false;
-		
-			case ast_func_count:
-			case ast_func_id:
-			case ast_func_local_name_0:
-			case ast_func_local_name_1:
-			case ast_func_namespace_uri_0:
-			case ast_func_namespace_uri_1:
-			case ast_func_name_0:
-			case ast_func_name_1:
-			case ast_func_string_0:
-			case ast_func_string_1:
-				if (m_left) return m_left->contains(type);
-				return false;
-				
-			case ast_func_concat:
-			{
-				if (m_left->contains(type)) return true;
+				return true;
+
+			default:
+				if (m_left && !m_left->is_posinv()) return false;
 				
 				for (xpath_ast_node* n = m_right; n; n = n->m_next)
-					if (n->contains(type)) return true;
+					if (!n->is_posinv()) return false;
 					
-				return false;
-			}
-			
-			case ast_func_starts_with:
-			case ast_func_contains:
-			case ast_func_substring_before:
-			case ast_func_substring_after:
-			case ast_func_substring_2:
-			case ast_func_substring_3:
-			case ast_func_string_length_0:
-			case ast_func_string_length_1:
-			case ast_func_normalize_space_0:
-			case ast_func_normalize_space_1:
-			case ast_func_translate:
-			case ast_func_boolean:
-			case ast_func_not:
-			case ast_func_true:
-			case ast_func_false:
-			case ast_func_lang:
-			case ast_func_number_0:
-			case ast_func_number_1:
-			case ast_func_sum:
-			case ast_func_floor:
-			case ast_func_ceiling:
-			case ast_func_round:
-				if (m_left && m_left->contains(type)) return true;
-				if (m_right && m_right->contains(type)) return true;
-				if (m_third && m_third->contains(type)) return true;
-
-				return false;
-		
-			case ast_step:
-			case ast_step_root:
-				return false;
-			
-			default:
-				throw xpath_exception("Unknown semantics error");
-#ifdef __DMC__				
-				return false; // Digital Mars C++
-#endif
+				return true;
 			}
 		}
 
 		xpath_value_type rettype() const
 		{
-			return m_rettype;
+			return static_cast<xpath_value_type>(m_rettype);
 		}
 	};
 
@@ -2628,7 +2591,7 @@ namespace pugi
 		xpath_parser(const xpath_parser&);
 		xpath_parser& operator=(const xpath_parser&);
 
-		xpath_ast_node* parse_function_helper(ast_type_t type0, ast_type_t type1, size_t argc, xpath_ast_node* args[4])
+		xpath_ast_node* parse_function_helper(ast_type_t type0, ast_type_t type1, size_t argc, xpath_ast_node* args[2])
 		{
 			assert(argc <= 1);
 
@@ -2637,7 +2600,7 @@ namespace pugi
 			return new (m_alloc.node()) xpath_ast_node(argc == 0 ? type0 : type1, xpath_type_string, args[0]);
 		}
 
-		xpath_ast_node* parse_function(const xpath_lexer_string& name, size_t argc, xpath_ast_node* args[4])
+		xpath_ast_node* parse_function(const xpath_lexer_string& name, size_t argc, xpath_ast_node* args[2])
 		{
 			switch (name.begin[0])
 			{
@@ -2655,7 +2618,7 @@ namespace pugi
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
 					return new (m_alloc.node()) xpath_ast_node(ast_func_contains, xpath_type_string, args[0], args[1]);
-				else if (name == PUGIXML_TEXT("concat") && argc == 2)
+				else if (name == PUGIXML_TEXT("concat") && argc >= 2)
 					return new (m_alloc.node()) xpath_ast_node(ast_func_concat, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("ceiling") && argc == 1)
 					return new (m_alloc.node()) xpath_ast_node(ast_func_ceiling, xpath_type_number, args[0]);
@@ -2724,7 +2687,7 @@ namespace pugi
 				else if (name == PUGIXML_TEXT("substring-after") && argc == 2)
 					return new (m_alloc.node()) xpath_ast_node(ast_func_substring_after, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("substring") && (argc == 2 || argc == 3))
-					return new (m_alloc.node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1], args[2]);
+					return new (m_alloc.node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("sum") && argc == 1)
 				{
 					if (args[0]->rettype() != xpath_type_node_set) throw xpath_exception("sum() has to be applied to node set");
@@ -2735,7 +2698,7 @@ namespace pugi
 			
 			case 't':
 				if (name == PUGIXML_TEXT("translate") && argc == 3)
-					return new (m_alloc.node()) xpath_ast_node(ast_func_translate, xpath_type_string, args[0], args[1], args[2]);
+					return new (m_alloc.node()) xpath_ast_node(ast_func_translate, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("true") && argc == 0)
 					return new (m_alloc.node()) xpath_ast_node(ast_func_true, xpath_type_boolean);
 					
@@ -2884,7 +2847,9 @@ namespace pugi
 
 			case lex_number:
 			{
-				xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_number_constant, xpath_type_number, m_lexer.contents(), m_alloc);
+				double value = convert_string_to_number(m_lexer.contents().begin, m_lexer.contents().end);
+
+				xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
 				m_lexer.next();
 
 				return n;
@@ -2892,14 +2857,13 @@ namespace pugi
 
 			case lex_string:
 			{
-				xpath_ast_node* args[4] = {0};
+				xpath_ast_node* args[2] = {0};
 				size_t argc = 0;
 				
 				xpath_lexer_string function = m_lexer.contents();
 				m_lexer.next();
 				
-				bool func_concat = (function == PUGIXML_TEXT("concat"));
-				xpath_ast_node* last_concat = 0;
+				xpath_ast_node* last_arg = 0;
 				
 				if (m_lexer.current() != lex_open_brace)
 					throw xpath_exception("Unrecognized function call");
@@ -2916,19 +2880,11 @@ namespace pugi
 					
 					xpath_ast_node* n = parse_expression();
 					
-					if (func_concat)
-					{
-						if (argc < 2) args[argc++] = last_concat = n;
-						else
-						{
-							last_concat->set_next(n);
-							last_concat = n;
-						}
-					}
-					else if (argc >= 4)
-						throw xpath_exception("Too many function arguments");
-					else
-						args[argc++] = n;
+					if (argc < 2) args[argc] = n;
+					else last_arg->set_next(n);
+
+					argc++;
+					last_arg = n;
 				}
 				
 				m_lexer.next();
@@ -2959,9 +2915,9 @@ namespace pugi
 
 				if (n->rettype() != xpath_type_node_set) throw xpath_exception("Predicate has to be applied to node set");
 
-				bool posinv = expr->rettype() != xpath_type_number && !expr->contains(ast_func_position);
+				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv();
 
-	    		n = new (m_alloc.node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, n, expr, axis_child);
+	    		n = new (m_alloc.node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, xpath_type_node_set, n, expr);
 
 	    		if (m_lexer.current() != lex_close_square_brace)
 	    			throw xpath_exception("Unmatched square brace");
@@ -3107,7 +3063,7 @@ namespace pugi
 				
 				xpath_ast_node* expr = parse_expression();
 
-				xpath_ast_node* pred = new (m_alloc.node()) xpath_ast_node(ast_predicate, expr, 0, axis);
+				xpath_ast_node* pred = new (m_alloc.node()) xpath_ast_node(ast_predicate, xpath_type_node_set, expr);
 				
 				if (m_lexer.current() != lex_close_square_brace)
 	    			throw xpath_exception("unmatched square brace");
