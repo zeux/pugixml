@@ -22,7 +22,7 @@ int main()
 
 	{
 	//[code_load_memory_buffer_inplace
-		// You can use load_buffer_inplace to load document from mutable memory block; memory blocks lifetime must exceed that of document
+		// You can use load_buffer_inplace to load document from mutable memory block; the block's lifetime must exceed that of document
 		char* buffer = new char[size];
 		memcpy(buffer, source, size);
 
