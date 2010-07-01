@@ -424,24 +424,40 @@ TEST(parse_attribute_eol_wconv)
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("    val1   val2 val3 val4  "));
 }
 
-TEST(parse_attribute_variations)
+TEST(parse_attribute_wnorm)
 {
 	xml_document doc;
 
 	for (int eol = 0; eol < 2; ++eol)
 		for (int wconv = 0; wconv < 2; ++wconv)
-			for (int escapes = 0; escapes < 2; ++escapes)
-			{
-				unsigned int flags = parse_minimal;
-				
-				 flags |= (eol ? parse_eol : 0);
-				 flags |= (wconv ? parse_wconv_attribute : 0);
-				 flags |= (escapes ? parse_escapes : 0);
-
-				CHECK(doc.load(STR("<node id='1'/>"), flags));
-				CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
-			}
+		{
+			unsigned int flags = parse_minimal | parse_wnorm_attribute | (eol ? parse_eol : 0) | (wconv ? parse_wconv_attribute : 0);
+			CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), flags));
+			CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("val1 val2 val3 val4"));
+		}
 }
+
+TEST(parse_attribute_variations)
+{
+	xml_document doc;
+
+	for (int wnorm = 0; wnorm < 2; ++wnorm)
+		for (int eol = 0; eol < 2; ++eol)
+			for (int wconv = 0; wconv < 2; ++wconv)
+				for (int escapes = 0; escapes < 2; ++escapes)
+				{
+					unsigned int flags = parse_minimal;
+					
+					 flags |= (wnorm ? parse_wnorm_attribute : 0);
+					 flags |= (eol ? parse_eol : 0);
+					 flags |= (wconv ? parse_wconv_attribute : 0);
+					 flags |= (escapes ? parse_escapes : 0);
+
+					CHECK(doc.load(STR("<node id='1'/>"), flags));
+					CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
+				}
+}
+
 
 TEST(parse_attribute_error)
 {

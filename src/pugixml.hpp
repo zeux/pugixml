@@ -227,12 +227,7 @@ namespace pugi
  	 * 3. Leading/trailing whitespace characters are trimmed
  	 * 
  	 * This flag is off by default.
-	 *
-	 * \deprecated This flag is deprecated
  	 */
-#if !defined(__INTEL_COMPILER) || __INTEL_COMPILER > 800
-	PUGIXML_DEPRECATED
-#endif
  	const unsigned int parse_wnorm_attribute	= 0x0080;
 
  	/**
