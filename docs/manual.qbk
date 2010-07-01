@@ -750,13 +750,13 @@ The algorithm used for `encoding_auto` correctly detects any supported Unicode e
 
 [endsect] [/encoding]
 
-[section:w3c W3C recommendation conformance]
+[section:w3c Conformance to W3C specification]
 
 pugixml is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed because of performance reasons.
 
 There is only one non-conformant behavior when dealing with valid XML documents: pugixml does not use information supplied in document type declaration for parsing. This means that entities declared in DOCTYPE are not expanded, and all attribute/PCDATA values are always processed in a uniform way that depends only on parsing options.
 
-As for rejecting invalid XML documents, there are a number of incompatibilities with W3C recommendation, including:
+As for rejecting invalid XML documents, there are a number of incompatibilities with W3C specification, including:
 
 * Multiple attributes of the same node can have equal names.
 * All non-ASCII characters are treated in the same way as symbols of English alphabet, so some invalid tag names are not rejected.
