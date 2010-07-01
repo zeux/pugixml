@@ -692,7 +692,13 @@ These flags control the transformation of tree element contents:
 [lbr]
 
 * [#parse_wconv_attribute]
-`parse_wconv_attribute` determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if `parse_eol` is set, i.e. `\r\n` is converted to single space. This flag is *on* by default.
+`parse_wconv_attribute` determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if `parse_eol` is set, i.e. `\r\n` is converted to single space.  This flag is *on* by default.
+[lbr]
+
+* [#parse_wnorm_attribute]
+`parse_wnorm_attribute` determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if `parse_wconv_attribute` was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. The value of `parse_wconv_attribute` has no effect if this flag is on. This flag is *off* by default.
+
+[note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; `parse_wnorm_attribute` performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes behave as if they are declared as [^CDATA], thus `parse_wconv_attribute` is the default option.]
 
 Additionally there are two predefined option masks:
 
@@ -813,7 +819,7 @@ Major release, featuring extended and improved Unicode support, miscellaneous pe
 
 * Compatibility:
 	# parse() and as_utf16 are left for compatibility (these functions are deprecated and will be removed in version 1.0)
-	# Wildcard functions, document_order/precompute_document_order functions, format_write_bom_utf8 and parse_wnorm_attribute flags are deprecated and will be removed in version 1.0
+	# Wildcard functions, document_order/precompute_document_order functions and format_write_bom_utf8 flag are deprecated and will be removed in version 1.0
 	# xpath_type_t enumeration was renamed to xpath_value_type; xpath_type_t is deprecated and will be removed in version 1.0
 
 [h5 8.11.2009 - version 0.5]
@@ -1038,6 +1044,7 @@ Constants:
 	* [link parse_pi]
 	* [link parse_ws_pcdata]
  	* [link parse_wconv_attribute]
+ 	* [link parse_wnorm_attribute]
 		
 Classes:
 
