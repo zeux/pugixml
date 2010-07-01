@@ -505,7 +505,7 @@ All additional memory, such as memory for document structure (node/attribute obj
 
 pugixml provides several functions for loading XML data from various places - files, C++ iostreams, memory buffers. All functions use an extremely fast non-validating parser. This parser is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed because of performance reasons. Also some XML transformations (i.e. EOL handling or attribute value normalization) can impact parsing speed and thus can be disabled. However for vast majority of XML documents there is no performance difference between different parsing options. Parsing options also control whether certain XML nodes are parsed; see [sref manual.loading.options] for more information.
 
-XML data is always converted to internal character format (see [sref manual.dom.unicode]) before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since its a strict subset of UTF-16) and handles all encoding conversions automatically. Unless explicit encoding is specified, loading functions perform automatic encoding detection based on first few characters of XML data, so in almost all cases you do not have to specify document encoding. Encoding conversion is described in more detail in [sref manual.loading.encoding].
+XML data is always converted to internal character format (see [sref manual.dom.unicode]) before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions automatically. Unless explicit encoding is specified, loading functions perform automatic encoding detection based on first few characters of XML data, so in almost all cases you do not have to specify document encoding. Encoding conversion is described in more detail in [sref manual.loading.encoding].
 
 [section:file Loading document from file]
 
@@ -713,7 +713,7 @@ This is a simple example of using different parsing options ([@samples/load_opti
 [section:encoding Encodings]
 
 [#xml_encoding]
-pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since its a strict subset of UTF-16) and handles all encoding conversions. Most loading functions accept the optional parameter `encoding`. This is a value of enumeration type `xml_encoding`, that can have the following values:
+pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions. Most loading functions accept the optional parameter `encoding`. This is a value of enumeration type `xml_encoding`, that can have the following values:
 
 * [#encoding_auto]
 `encoding_auto` means that pugixml will try to guess the encoding based on source XML data. The algorithm is a modified version of the one presented in Appendix F.1 of XML recommendation; it tries to match the first few bytes of input data with the following patterns in strict order:
@@ -751,7 +751,21 @@ The algorithm used for `encoding_auto` correctly detects any supported Unicode e
 [endsect] [/encoding]
 
 [section:w3c W3C recommendation conformance]
-foo
+
+pugixml is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed because of performance reasons.
+
+There is only one non-conformant behavior when dealing with valid XML documents: pugixml does not use information supplied in document type declaration for parsing. This means that entities declared in DOCTYPE are not expanded, and all attribute/PCDATA values are always processed in a uniform way that depends only on parsing options.
+
+As for rejecting invalid XML documents, there are a number of incompatibilities with W3C recommendation, including:
+
+* Multiple attributes of the same node can have equal names.
+* All non-ASCII characters are treated in the same way as symbols of English alphabet, so some invalid tag names are not rejected.
+* Attribute values which contain [^<] are not rejected.
+* Invalid entity/character references are not rejected and are instead left as is.
+* Comment values can contain [^--].
+* XML data is not required to begin with document declaration; additionally, document declaration can appear after comments and other nodes.
+* Invalid document type declarations are silently ignored in some cases.
+
 [endsect] [/w3c]
 
 [endsect] [/loading]
