@@ -11,6 +11,7 @@
 [template sbr[] '''<sbr/>''']
 [template lbr[] '''<sbr/><sbr/>'''] [/ for empty lines in lists]
 [template sref[name] '''<xref linkend="'''[name]'''" xrefstyle="select:title" />''']
+[template anchor[name] '''<anchor id="'''[name]'''" />'''[^[name]]]
 
 PugiXML User Manual
 
@@ -206,26 +207,19 @@ It's possible to compile pugixml as a standalone shared library. The process is 
 
 pugixml uses several defines to control the compilation process. There are two ways to define them: either put the needed definitions to [file pugiconfig.hpp] (it has some examples that are commented out) or provide them via compiler command-line. Define consistency is important, i.e. the definitions should match in all source files that include [file pugixml.hpp] (including pugixml sources) throughout the application. Adding defines to [file pugiconfig.hpp] lets you guarantee this, unless your macro definition is wrapped in preprocessor `#if`/`#ifdef` directive and this directive is not consistent. [file pugiconfig.hpp] will never contain anything but comments, which means that when upgrading to new version, you can safely leave your modified version intact.
 
-[#PUGIXML_WCHAR_MODE]
-`PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [sref manual.dom.unicode] for more details.
+[anchor PUGIXML_WCHAR_MODE] define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [sref manual.dom.unicode] for more details.
 
-[#PUGIXML_NO_XPATH]
-`PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
+[anchor PUGIXML_NO_XPATH] define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
 
-[#PUGIXML_NO_STL]
-`PUGIXML_NO_STL` define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
+[anchor PUGIXML_NO_STL] define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
 
 [note As of version 0.9, STL is used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
 
-[#PUGIXML_NO_EXCEPTIONS]
-`PUGIXML_NO_EXCEPTIONS` define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities
+[anchor PUGIXML_NO_EXCEPTIONS] define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities
 
 [note As of version 0.9, exceptions are *only* used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
 
-[#PUGIXML_API]
-[#PUGIXML_CLASS]
-[#PUGIXML_FUNCTION]
-`PUGIXML_API`, `PUGIXML_CLASS` and `PUGIXML_FUNCTION` defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [sref manual.install.building.shared]).
+[anchor PUGIXML_API], [anchor PUGIXML_CLASS] and [anchor PUGIXML_FUNCTION] defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [sref manual.install.building.shared]).
 
 [note In that example `PUGIXML_API` is inconsistent between several source files; this is an exception to the consistency rule.]
  
@@ -268,47 +262,40 @@ The XML document is represented with a tree data structure. The root of the tree
 [#xml_node_type]
 The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
 
-* [#node_document]
-Document node (`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to `xml_document` class; note that `xml_document` is a sub-class of `xml_node`, so the entire node interface is also available. However, document node is special in several ways, which will be covered below. There can be only one document node in the tree; document node does not have any XML representation.
+* Document node ([anchor node_document]) - this is the root of the tree, which consists of several child nodes. This node corresponds to `xml_document` class; note that `xml_document` is a sub-class of `xml_node`, so the entire node interface is also available. However, document node is special in several ways, which will be covered below. There can be only one document node in the tree; document node does not have any XML representation.
 [lbr]
 
-* [#node_element]
-Element/tag node (`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element node is as follows:
+* Element/tag node ([anchor node_element]) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element node is as follows:
 
 	<node attr="value"><child/></node>
 
 [:There are two element nodes here; one has name `"node"`, single attribute `"attr"` and single child `"child"`, another has name `"child"` and does not have any attributes or child nodes.]
 
-* [#node_pcdata]
-Plain character data nodes (`node_pcdata`) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, and element node can have several child PCDATA nodes. The example XML representation of text node is as follows:
+* Plain character data nodes ([anchor node_pcdata]) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, and element node can have several child PCDATA nodes. The example XML representation of text node is as follows:
 
 	<node> text1 <child/> text2 </node>
 
 [:Here `"node"` element has three children, two of which are PCDATA nodes with values `"text1"` and `"text2"`.]
 
-* [#node_cdata]
-Character data nodes (`node_cdata`) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
+* Character data nodes ([anchor node_cdata]) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
 
 	<node> <![CDATA[[text1]]> <child/> <![CDATA[[text2]]> </node>
 
 [:CDATA nodes make it easy to include non-escaped <, & and > characters in plain text. CDATA value can not contain the character sequence \]\]>, since it is used to determine the end of node contents.]
 
-* [#node_comment]
-Comment nodes (`node_comment`) represent comments in XML. Comment nodes have a value, but do not have name or children/attributes. The example XML representation of comment node is as follows:
+* Comment nodes ([anchor node_comment]) represent comments in XML. Comment nodes have a value, but do not have name or children/attributes. The example XML representation of comment node is as follows:
 
 	<!-- comment text -->
 
 [:Here the comment node has value `"comment text"`. By default comment nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_comments` flag.]
 
-* [#node_pi]
-Processing instruction node (`node_pi`) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as follows:
+* Processing instruction node ([anchor node_pi]) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as follows:
 
 	<?name value?>
 
 [:Here the name (also called PI target) is `"name"`, and the value is `"value"`. By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_pi` flag.]
 
-* [#node_declaration]
-Declaration node (`node_declaration`) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (it's parent should be the document). The example XML representation of declaration node is as follows:
+* Declaration node ([anchor node_declaration]) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (it's parent should be the document). The example XML representation of declaration node is as follows:
 
 	<?xml version="1.0"?>
 
@@ -602,34 +589,22 @@ All document loading functions return the parsing result via `xml_parse_result` 
 [#xml_parse_result::status]
 Parsing status is represented as the `xml_parse_status` enumeration and can be one of the following:
 
-* [#status_ok]
-`status_ok` means that no error was encountered during parsing; the source stream represents the valid XML document which was fully parsed and converted to a tree.
+* [anchor status_ok] means that no error was encountered during parsing; the source stream represents the valid XML document which was fully parsed and converted to a tree.
 [lbr]
 
-* [#status_file_not_found]
-`status_file_not_found` is only returned by `load_file` function and means that file could not be opened.
-* [#status_io_error]
-`status_io_error` is returned by `load_file` function and by `load` functions with `std::istream`/`std::wstream` arguments; it means that some I/O error has occured during reading the file/stream.
-* [#status_out_of_memory]
-`status_out_of_memory` means that there was not enough memory during some allocation; any allocation failure during parsing results in this error.
-* [#status_internal_error]
-`status_internal_error` means that something went horribly wrong; currently this error does not occur
+* [anchor status_file_not_found] is only returned by `load_file` function and means that file could not be opened.
+* [anchor status_io_error] is returned by `load_file` function and by `load` functions with `std::istream`/`std::wstream` arguments; it means that some I/O error has occured during reading the file/stream.
+* [anchor status_out_of_memory] means that there was not enough memory during some allocation; any allocation failure during parsing results in this error.
+* [anchor status_internal_error] means that something went horribly wrong; currently this error does not occur
 [lbr]
 
-* [#status_unrecognized_tag]
-`status_unrecognized_tag` means that parsing stopped due to a tag with either an empty name or a name which starts with incorrect character, such as [^#].
-* [#status_bad_pi]
-`status_bad_pi` means that parsing stopped due to incorrect document declaration/processing instruction
-* [#status_bad_comment][#status_bad_cdata][#status_bad_doctype][#status_bad_pcdata]
-`status_bad_comment`, `status_bad_cdata`, `status_bad_doctype` and `status_bad_pcdata` mean that parsing stopped due to the invalid construct of the respective type
-* [#status_bad_start_element]
-`status_bad_start_element` means that parsing stopped because starting tag either had no closing `>` symbol or contained some incorrect symbol
-* [#status_bad_attribute]
-`status_bad_attribute` means that parsing stopped because there was an incorrect attribute, such as an attribute without value or with value that is not quoted (note that `<node attr=1>` is incorrect in XML)
-* [#status_bad_end_element]
-`status_bad_end_element` means that parsing stopped because ending tag had incorrect syntax (i.e. extra non-whitespace symbols between tag name and `>`)
-* [#status_end_element_mismatch]
-`status_end_element_mismatch` means that parsing stopped because the closing tag did not match the opening one (i.e. `<node></nedo>`) or because some tag was not closed at all
+* [anchor status_unrecognized_tag] means that parsing stopped due to a tag with either an empty name or a name which starts with incorrect character, such as [^#].
+* [anchor status_bad_pi] means that parsing stopped due to incorrect document declaration/processing instruction
+* [anchor status_bad_comment], [anchor status_bad_cdata], [anchor status_bad_doctype] and [anchor status_bad_pcdata] mean that parsing stopped due to the invalid construct of the respective type
+* [anchor status_bad_start_element] means that parsing stopped because starting tag either had no closing `>` symbol or contained some incorrect symbol
+* [anchor status_bad_attribute] means that parsing stopped because there was an incorrect attribute, such as an attribute without value or with value that is not quoted (note that `<node attr=1>` is incorrect in XML)
+* [anchor status_bad_end_element] means that parsing stopped because ending tag had incorrect syntax (i.e. extra non-whitespace symbols between tag name and `>`)
+* [anchor status_end_element_mismatch] means that parsing stopped because the closing tag did not match the opening one (i.e. `<node></nedo>`) or because some tag was not closed at all
 
 [#xml_parse_result::description]
 `description()` member function can be used to convert parsing status to a string; the returned message is always in English, so you'll have to write your own function if you need a localized string. However please note that the exact messages returned by `description()` function may change from version to version, so any complex status handling should be based on `status` value.
@@ -662,52 +637,41 @@ All document loading functions accept the optional parameter `options`. This is 
 
 These flags control the resulting tree contents:
 
-* [#parse_declaration]
-`parse_declaration` determines if XML document declaration (node with type [link node_declaration]) are to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness. This flag is *off* by default.
+* [anchor parse_declaration] determines if XML document declaration (node with type [link node_declaration]) are to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness. This flag is *off* by default.
 [lbr]
 
-* [#parse_pi]
-`parse_pi` determines if processing instructions (nodes with type [link node_pi]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. Note that `<?xml ...?>` (document declaration) is not considered to be a PI. This flag is *off* by default.
+* [anchor parse_pi] determines if processing instructions (nodes with type [link node_pi]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. Note that `<?xml ...?>` (document declaration) is not considered to be a PI. This flag is *off* by default.
 [lbr]
 
-* [#parse_comments]
-`parse_comments` determines if comments (nodes with type [link node_comment]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *off* by default.
+* [anchor parse_comments] determines if comments (nodes with type [link node_comment]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *off* by default.
 [lbr]
 
-* [#parse_cdata]
-`parse_cdata` determines if CDATA sections (nodes with type [link node_cdata]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *on* by default.
+* [anchor parse_cdata] determines if CDATA sections (nodes with type [link node_cdata]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *on* by default.
 [lbr]
 
-* [#parse_ws_pcdata]
-`parse_ws_pcdata` determines if PCDATA nodes (nodes with type [link node_pcdata]) that consist only of whitespace characters are to be put in DOM tree. Often whitespace-only data is not significant for the application, and the cost of allocating and storing such nodes (both memory and speed-wise) can be significant. For example, after parsing XML string `<node> <a/> </node>`, `<node>` element will have three children when `parse_ws_pcdata` is set (child with type `node_pcdata` and value `" "`, child with type `node_element` and name `"a"`, and another child with type `node_pcdata` and value `" "`), and only one child when `parse_ws_pcdata` is not set. This flag is *off* by default.
+* [anchor parse_ws_pcdata] determines if PCDATA nodes (nodes with type [link node_pcdata]) that consist only of whitespace characters are to be put in DOM tree. Often whitespace-only data is not significant for the application, and the cost of allocating and storing such nodes (both memory and speed-wise) can be significant. For example, after parsing XML string `<node> <a/> </node>`, `<node>` element will have three children when `parse_ws_pcdata` is set (child with type `node_pcdata` and value `" "`, child with type `node_element` and name `"a"`, and another child with type `node_pcdata` and value `" "`), and only one child when `parse_ws_pcdata` is not set. This flag is *off* by default.
 
 These flags control the transformation of tree element contents:
 
-* [#parse_escapes]
-`parse_escapes` determines if character and entity references are to be expanded during the parsing process. Character references have the form [^&#...;] or [^&#x...;] ([^...] is Unicode numeric representation of character in either decimal ([^&#...;]) or hexadecimal ([^&#x...;]) form), entity references are [^&lt;], [^&gt;], [^&amp;], [^&apos;] and [^&quot;] (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed in attribute values and PCDATA content. This flag is *on* by default.
+* [anchor parse_escapes] determines if character and entity references are to be expanded during the parsing process. Character references have the form [^&#...;] or [^&#x...;] ([^...] is Unicode numeric representation of character in either decimal ([^&#...;]) or hexadecimal ([^&#x...;]) form), entity references are [^&lt;], [^&gt;], [^&amp;], [^&apos;] and [^&quot;] (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed in attribute values and PCDATA content. This flag is *on* by default.
 [lbr]
 
-* [#parse_eol]
-`parse_eol` determines if EOL handling (that is, replacing sequences `0x0d 0x0a` by a single `0x0a` character, and replacing all standalone `0x0d` characters by `0x0a`) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values). This flag is *on* by default.
+* [anchor parse_eol] determines if EOL handling (that is, replacing sequences `0x0d 0x0a` by a single `0x0a` character, and replacing all standalone `0x0d` characters by `0x0a`) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values). This flag is *on* by default.
 [lbr]
 
-* [#parse_wconv_attribute]
-`parse_wconv_attribute` determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if `parse_eol` is set, i.e. `\r\n` is converted to single space.  This flag is *on* by default.
+* [anchor parse_wconv_attribute] determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if `parse_eol` is set, i.e. `\r\n` is converted to single space.  This flag is *on* by default.
 [lbr]
 
-* [#parse_wnorm_attribute]
-`parse_wnorm_attribute` determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if `parse_wconv_attribute` was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. The value of `parse_wconv_attribute` has no effect if this flag is on. This flag is *off* by default.
+* [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if `parse_wconv_attribute` was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. The value of `parse_wconv_attribute` has no effect if this flag is on. This flag is *off* by default.
 
 [note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; `parse_wnorm_attribute` performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes behave as if they are declared as [^CDATA], thus `parse_wconv_attribute` is the default option.]
 
 Additionally there are two predefined option masks:
 
-* [#parse_minimal]
-`parse_minimal` has all options turned off. This option mask means that pugixml does not add declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as discussed above, in practice `parse_default` is usually equally fast.
+* [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as discussed above, in practice `parse_default` is usually equally fast.
 [lbr]
 
-* [#parse_default]
-`parse_default` is the default set of flags, i.e. it has all options set to their default values. It includes parsing CDATA sections (comments/PIs are not parsed), performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed (by default) for performance reasons.
+* [anchor parse_default] is the default set of flags, i.e. it has all options set to their default values. It includes parsing CDATA sections (comments/PIs are not parsed), performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed (by default) for performance reasons.
 
 This is a simple example of using different parsing options ([@samples/load_options.cpp]):
 
@@ -721,8 +685,7 @@ This is a simple example of using different parsing options ([@samples/load_opti
 [#xml_encoding]
 pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions. Most loading functions accept the optional parameter `encoding`. This is a value of enumeration type `xml_encoding`, that can have the following values:
 
-* [#encoding_auto]
-`encoding_auto` means that pugixml will try to guess the encoding based on source XML data. The algorithm is a modified version of the one presented in Appendix F.1 of XML recommendation; it tries to match the first few bytes of input data with the following patterns in strict order:
+* [anchor encoding_auto] means that pugixml will try to guess the encoding based on source XML data. The algorithm is a modified version of the one presented in Appendix F.1 of XML recommendation; it tries to match the first few bytes of input data with the following patterns in strict order:
 [lbr]
 	* If first four bytes match UTF-32 BOM (Byte Order Mark), encoding is assumed to be UTF-32 with the endianness equal to that of BOM;
 	* If first two bytes match UTF-16 BOM, encoding is assumed to be UTF-16 with the endianness equal to that of BOM;
@@ -733,22 +696,14 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
 	* Otherwise encoding is assumed to be UTF-8.
 	[lbr]
 
-* [#encoding_utf8]
-`encoding_utf8` corresponds to UTF-8 encoding as defined in Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
-* [#encoding_utf16_le]
-`encoding_utf16_le` corresponds to little-endian UTF-16 encoding as defined in Unicode standard; surrogate pairs are supported.
-* [#encoding_utf16_be]
-`encoding_utf16_be` corresponds to big-endian UTF-16 encoding as defined in Unicode standard; surrogate pairs are supported.
-* [#encoding_utf16]
-`encoding_utf16` corresponds to UTF-16 encoding as defined in Unicode standard; the endianness is assumed to be that of target platform.
-* [#encoding_utf32_le]
-`encoding_utf32_le` corresponds to little-endian UTF-32 encoding as defined in Unicode standard.
-* [#encoding_utf32_be]
-`encoding_utf32_le` corresponds to big-endian UTF-32 encoding as defined in Unicode standard.
-* [#encoding_utf32]
-`encoding_utf32` corresponds to UTF-32 encoding as defined in Unicode standard; the endianness is assumed to be that of target platform.
-* [#encoding_wchar]
-`encoding_wchar` corresponds to the encoding of `wchar_t` type; it has the same meaning as either `encoding_utf16` or `encoding_utf32`, depending on `wchar_t` size.
+* [anchor encoding_utf8] corresponds to UTF-8 encoding as defined in Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
+* [anchor encoding_utf16_le] corresponds to little-endian UTF-16 encoding as defined in Unicode standard; surrogate pairs are supported.
+* [anchor encoding_utf16_be] corresponds to big-endian UTF-16 encoding as defined in Unicode standard; surrogate pairs are supported.
+* [anchor encoding_utf16] corresponds to UTF-16 encoding as defined in Unicode standard; the endianness is assumed to be that of target platform.
+* [anchor encoding_utf32_le] corresponds to little-endian UTF-32 encoding as defined in Unicode standard.
+* [anchor encoding_utf32_be] corresponds to big-endian UTF-32 encoding as defined in Unicode standard.
+* [anchor encoding_utf32] corresponds to UTF-32 encoding as defined in Unicode standard; the endianness is assumed to be that of target platform.
+* [anchor encoding_wchar] corresponds to the encoding of `wchar_t` type; it has the same meaning as either `encoding_utf16` or `encoding_utf32`, depending on `wchar_t` size.
 
 The algorithm used for `encoding_auto` correctly detects any supported Unicode encoding for all well-formed XML documents (since they start with document declaration) and for all other XML documents that start with [^<]; if your XML document does not start with [^<] and has encoding that is different from UTF-8, use the specific encoding.
 
@@ -783,7 +738,6 @@ As for rejecting invalid XML documents, there are a number of incompatibilities 
 6. Saving document
 
 7. XPath (+ standard violations + performance checklist)
-8. Glossary + API reference (links to relevant user guide sections)
 
 [section:changes Changelog]
 
