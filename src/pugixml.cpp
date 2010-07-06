@@ -3981,9 +3981,9 @@ namespace pugi
 			while (cur && cur != *this);
 		}
 
-		if (!walker.end(*this)) return false;
-		
-		return true;
+		assert(walker._depth == -1);
+
+		return walker.end(*this);
 	}
 
 	unsigned int xml_node::document_order() const
