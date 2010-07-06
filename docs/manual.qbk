@@ -295,7 +295,7 @@ The tree nodes can be of one of the following types (which together form the enu
 
 [:Here the name (also called PI target) is `"name"`, and the value is `"value"`. By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_pi` flag.]
 
-* Declaration node ([anchor node_declaration]) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (it's parent should be the document). The example XML representation of declaration node is as follows:
+* Declaration node ([anchor node_declaration]) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (its parent should be the document). The example XML representation of declaration node is as follows:
 
 	<?xml version="1.0"?>
 
@@ -871,7 +871,7 @@ Child node lists and attribute lists are simply double-linked lists; while you c
 	attribute_iterator xml_node::attributes_begin() const;
 	attribute_iterator xml_node::attributes_end() const;
 
-`begin` and `attributes_begin` return iterators that point to the first node\/attribute, respectively; `end` and `attributes_end` return past-the-end iterator for node\/attribute list, respectively - this iterator can't be dereferenced, but decrementing it results in an iterator pointing to the last element in the list (except for empty lists, where decrementing past-the-end iterator is not defined). Past-the-end iterator is commonly used as a termination value for iteration loops (see sample below). If you want to get an iterator that points to an existing handle, you can construct the iterator with the handle as a single constructor argument, like so: `xml_node_iterator(node)`.
+`begin` and `attributes_begin` return iterators that point to the first node\/attribute, respectively; `end` and `attributes_end` return past-the-end iterator for node\/attribute list, respectively - this iterator can't be dereferenced, but decrementing it results in an iterator pointing to the last element in the list (except for empty lists, where decrementing past-the-end iterator is not defined). Past-the-end iterator is commonly used as a termination value for iteration loops (see sample below). If you want to get an iterator that points to an existing handle, you can construct the iterator with the handle as a single constructor argument, like so: `xml_node_iterator(node)`. For `xml_attribute_iterator`, you'll have to provide both an attribute and its parent node.
 
 `begin` and `end` return equal iterators if called on null node; such iterators can't be dereferenced. `attributes_begin` and `attributes_end` behave the same way. For correct iterator usage this means that child node\/attribute collections of null nodes appear to be empty.
 
