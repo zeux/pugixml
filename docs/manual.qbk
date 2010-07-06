@@ -731,15 +731,132 @@ As for rejecting invalid XML documents, there are a number of incompatibilities 
 
 [endsect] [/loading]
 
-4. Getting data from document
+[section:getting Getting data from document $$$]
 
-5. Modifying document
+pugixml features an extensive interface for getting various types of data from the document and for traversing the document. This section provides documentation for all such functions that do not modify the tree except for XPath-related functions; see [sref manual.xpath] for XPath reference. As discussed in [sref manual.dom.cpp], there are two types of handles to tree data - [link xml_node] and [link xml_attribute]. The handles have special null (empty) values which propagate through various functions and thus are useful for writing more concise code; see [link node_null this description] for details. The documentation in this section will explicitly state the results of all function in case of null inputs.
 
-6. Saving document
+[import samples/traverse_base.cpp]
 
-7. XPath (+ standard violations + performance checklist)
+[section:basic Basic traversal functions]
+
+[#xml_node::parent][#xml_node::first_child][#xml_node::last_child][#xml_node::next_sibling][#xml_node::previous_sibling][#xml_attribute::next_attribute][#xml_attribute::previous_attribute]
+The internal representation of the document is a tree, where each node has a list of child nodes (the order of children corresponds to their order in the XML representation), and additionally element nodes have a list of attributes, which is also ordered. Several functions are provided in order to let you get from one node in the tree to the other. These functions roughly correspond to the internal representation, and thus are usually building blocks for other methods of traversing (i.e. XPath traversals are based on these functions).
+
+	xml_node xml_node::parent() const;
+	xml_node xml_node::first_child() const;
+	xml_node xml_node::last_child() const;
+	xml_node xml_node::next_sibling() const;
+	xml_node xml_node::previous_sibling() const;
+
+	xml_attribute xml_node::first_attribute() const;
+	xml_attribute xml_node::last_attribute() const;
+	xml_attribute xml_attribute::next_attribute() const;
+	xml_attribute xml_attribute::previous_attribute() const;
+
+`parent` function returns the node's parent; all nodes except the document have non-null parent. `first_child` and `last_child` return the first and last child of the node, respectively; note that only document nodes and element nodes can have non-empty child node list. If node has no children, both functions return null nodes. `next_sibling` and `previous_sibling` return the node that's immediately to the right\/left of this node in the children list, respectively - for example, in `<a/><b/><c/>`, calling `next_sibling` for a handle that points to `<b/>` results in a handle pointing to `<c/>`, and calling `previous_sibling` results in handle pointing to `<a/>`. If node does not have next/previous sibling (this happens if it is the last/first node in the list, respectively), the functions return null nodes. `first_attribute`, `last_attribute`, `next_attribute` and `previous_attribute` functions behave the same way as corresponding child node functions and allow to iterate through attribute list in the same way.
+
+[note Because of memory consumption reasons, attributes do not have a link to their parent nodes. Thus there is no `xml_attribute::parent()` function.]
+
+Calling any of the functions above on the null handle results in a null handle - i.e. `node.first_child().next_sibling()` returns the second child of `node`, and null handle if there is no children at all or if there is only one.
+
+With these functions, you can iterate through all child nodes and display all attributes like this ([@samples/traverse_base.cpp]):
+
+[code_traverse_base_basic]
+
+[endsect] [/basic]
+
+[section:nodedata Getting node data]
+
+[#xml_node::name][#xml_node::value]
+Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node types, name or value may be absent. `node_document` nodes do not have name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
+
+	const char_t* xml_node::name() const;
+	const char_t* xml_node::value() const;
+
+In case node does not have a name or value or if the node handle is null, both functions return empty strings - they never return null pointers.
+
+[#xml_node::child_value]
+It is common to store data as a text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type `node_pcdata` with value `"This is a node"`. pugixml provides two helper functions to parse such data:
+
+	const char_t* xml_node::child_value() const;
+	const char_t* xml_node::child_value(const char_t* name) const;
+
+`child_value()` returns the value of the first child with type `node_pcdata` or `node_cdata`; `child_value(name)` is a simple wrapper for `child(name).child_value()`. For the above example, calling `node.child_value("description")` and `description.child_value()` will both produce string `"This is a node"`. If there is no child with relevant type, or if the handle is null, `child_value` functions return empty string.
+
+There is an example of using some of these functions [link code_traverse_base_data at the end of the next section].
+
+[endsect] [/nodedata]
+
+[section:attrdata Getting attribute data]
+
+[#xml_attribute::name][#xml_attribute::value]
+All attributes have name and value, both of which are strings (value may be empty). There are two corresponding accessors, like for `xml_node`:
+
+	const char_t* xml_attribute::name() const;
+	const char_t* xml_attribute::value() const;
+
+In case attribute handle is null, both functions return empty strings - they never return null pointers.
+
+[#xml_attribute::as_int][#xml_attribute::as_uint][#xml_attribute::as_double][#xml_attribute::as_float][#xml_attribute::as_bool]
+In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type. The accessors are as follows:
+
+	int xml_attribute::as_int() const;
+	unsigned int xml_attribute::as_uint() const;
+	double xml_attribute::as_double() const;
+	float xml_attribute::as_float() const;
+	bool xml_attribute::as_bool() const;
+
+`as_int`, `as_uint`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `0` is returned. Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as a decimal number (`as_int` or `as_uint`) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
+
+In case the input string contains a number that is out of the target numeric range, the result is undefined.
+
+[caution Number conversion functions depend on current C locale as set with `setlocale`, so may return unexpected results if the locale is different from `"C"`.]
+
+`as_bool` converts attribute value to boolean as follows: if attribute handle is null or attribute value is empty, `false` is returned. Otherwise, `true` is returned if first character is one of `'1', 't', 'T', 'y', 'Y'`. This means that strings like `"true"` and `"yes"` are recognized as `true`, while strings like `"false"` and `"no"` are recognized as `false`. For more complex matching you'll have to write your own function.
+
+[note There are no portable 64-bit types in C++, so there is no corresponding conversion function. If your platform has a 64-bit integer, you can easily write a conversion function yourself.]
+
+[#code_traverse_base_data]
+Here is a simple example of using these functions, along with node data retrieval ones ([@samples/traverse_base.cpp]):
+
+[code_traverse_base_data]
+
+[endsect] [/attrdata]
+
+[section:contents Contents-based traversal functions]
+
+[#xml_node::child][#xml_node::attribute][#xml_node::next_sibling_name][#xml_node::previous_sibling_name]
+Since a lot of document traversal consists of finding the node/attribute with the correct name
+
+[endsect] [/contents]
+
+[section:iterators Iterators $$$]
+[endsect] [/iterators]
+
+[section:walker Walker $$$]
+[endsect] [/walker]
+
+[section:predicate Predicate $$$]
+[endsect] [/predicate]
+
+[endsect] [/getting]
+
+[section:modify Modifying document $$$]
+[endsect] [/modify]
+
+[section:saving Saving document]
+[endsect] [/saving]
+
+[section:xpath XPath $$$]
+
+$$$ standard violations
+$$$ performance checklist
+
+[endsect] [/xpath]
 
 [section:changes Changelog]
+
+$$$ move somewhere else
 
 [h5 1.07.2010 - version 0.9]
 
@@ -1018,14 +1135,20 @@ Classes:
 	* `bool `[link xml_attribute::comparison operator>=]`(const xml_attribute& r) const;`
 	[lbr]
 
-	* xml_attribute next_attribute() const;
-	* xml_attribute previous_attribute() const;
-	* int as_int() const;
+	* `xml_attribute `[link xml_attribute::next_attribute next_attribute]`() const;`
+	* `xml_attribute `[link xml_attribute::previous_attribute previous_attribute]`() const;`
+	[lbr]
 
-	* unsigned int as_uint() const;
-	* double as_double() const;
-	* float as_float() const;
-	* bool as_bool() const;
+	* `const char_t* `[link xml_attribute::name name]`() const;`
+	* `const char_t* `[link xml_attribute::value value]`() const;`
+	[lbr]
+
+	* `int `[link xml_attribute::as_int as_int]`() const;`
+	* `unsigned int `[link xml_attribute::as_uint as_uint]`() const;`
+	* `double `[link xml_attribute::as_double as_double]`() const;`
+	* `float `[link xml_attribute::as_float as_float]`() const;`
+	* `bool `[link xml_attribute::as_bool as_bool]`() const;`
+	[lbr]
 
 	* xml_attribute& operator=(const char_t* rhs);
 	* xml_attribute& operator=(int rhs);
@@ -1039,10 +1162,6 @@ Classes:
 	* bool set_value(unsigned int rhs);
 	* bool set_value(double rhs);
 	* bool set_value(bool rhs);
-
-	* const char_t* name() const;
-	* const char_t* value() const;
-	[lbr]
 
 * `class `[link xml_node]
 	* [link xml_node::ctor xml_node]`();`
@@ -1063,18 +1182,44 @@ Classes:
 	* `xml_node_type `[link xml_node::type type]`() const;`
 	[lbr]
 
-	* const char_t* name() const;
-	* const char_t* value() const;
-	* xml_node child(const char_t* name) const;
-	* xml_attribute attribute(const char_t* name) const;
-	* xml_node next_sibling(const char_t* name) const;
-	* xml_node next_sibling() const;
-	* xml_node previous_sibling(const char_t* name) const;
-	* xml_node previous_sibling() const;
-	* xml_node parent() const;
+	* `const char_t* `[link xml_node::name name]`() const;`
+	* `const char_t* `[link xml_node::value value]`() const;`
+	[lbr]
+
+	* `xml_node `[link xml_node::parent parent]`() const;`
+	* `xml_node `[link xml_node::first_child first_child]`() const;`
+	* `xml_node `[link xml_node::last_child last_child]`() const;`
+	* `xml_node `[link xml_node::next_sibling next_sibling]`() const;`
+	* `xml_node `[link xml_node::previous_sibling previous_sibling]`() const;`
+	[lbr]
+
+	* `xml_attribute `[link xml_node::first_attribute first_attribute]`() const;`
+	* `xml_attribute `[link xml_node::last_attribute last_attribute]`() const;`
+	[lbr]
+
+	* `xml_node `[link xml_node::child child]`(const char_t* name) const;`
+	* `xml_attribute `[link xml_node::attribute attribute]`(const char_t* name) const;`
+	* `xml_node `[link xml_node::next_sibling_name next_sibling]`(const char_t* name) const;`
+	* `xml_node `[link xml_node::previous_sibling_name previous_sibling]`(const char_t* name) const;`
+	[lbr]
+
+	* `const char_t* `[link xml_node::child_value child_value]`() const;`
+	* `const char_t* `[link xml_node::child_value child_value]`(const char_t* name) const;`
+	[lbr]
+
+	* typedef xml_node_iterator iterator;
+	* iterator begin() const;
+	* iterator end() const;
+	[lbr]
+
+	* typedef xml_attribute_iterator attribute_iterator;
+	* attribute_iterator attributes_begin() const;
+	* attribute_iterator attributes_end() const;
+	[lbr]
+
 	* xml_node root() const;
-	* const char_t* child_value() const;
-	* const char_t* child_value(const char_t* name) const;
+	[lbr]
+
 	* bool set_name(const char_t* rhs);
 	* bool set_value(const char_t* rhs);
 	* xml_attribute append_attribute(const char_t* name);
@@ -1093,11 +1238,7 @@ Classes:
 	* void remove_attribute(const char_t* name);
 	* void remove_child(const xml_node& n);
 	* void remove_child(const char_t* name);
-	* xml_attribute first_attribute() const;
-	* xml_attribute last_attribute() const;
 	* template <typename OutputIterator> void all_elements_by_name(const char_t* name, OutputIterator it) const
-	* xml_node first_child() const;
-	* xml_node last_child() const;
 	* template <typename Predicate> xml_attribute find_attribute(Predicate pred) const
 	* template <typename Predicate> xml_node find_child(Predicate pred) const
 	* template <typename Predicate> xml_node find_node(Predicate pred) const
@@ -1113,15 +1254,6 @@ Classes:
 	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 	* void print(std::ostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 	* void print(std::wostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
-
-	* typedef xml_node_iterator iterator;
-	* typedef xml_attribute_iterator attribute_iterator;
-
-	* iterator begin() const;
-	* iterator end() const;
-
-	* attribute_iterator attributes_begin() const;
-	* attribute_iterator attributes_end() const;
 
 	* ptrdiff_t offset_debug() const;
 	[lbr]
