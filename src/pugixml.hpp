@@ -791,6 +791,25 @@ namespace pugi
 		explicit xml_node(xml_node_struct* p);
 
 	private:
+		template <typename OutputIterator> void all_elements_by_name_helper(const char_t* name, OutputIterator it) const
+		{
+			if (!_root) return;
+			
+			for (xml_node node = first_child(); node; node = node.next_sibling())
+			{
+				if (node.type() == node_element)
+				{
+					if (impl::strequal(name, node.name()))
+					{
+						*it = node;
+						++it;
+					}
+					
+					if (node.first_child()) node.all_elements_by_name_helper(name, it);
+				}
+			}
+		}
+
 		template <typename OutputIterator> void all_elements_by_name_w_helper(const char_t* name, OutputIterator it) const
 		{
 			if (!_root) return;
@@ -1241,24 +1260,12 @@ namespace pugi
 		 *
 		 * \param name - node name
 		 * \param it - output iterator (for example, std::back_insert_iterator (result of std::back_inserter))
+		 *
+		 * \deprecated This function is deprecated
 		 */
-		template <typename OutputIterator> void all_elements_by_name(const char_t* name, OutputIterator it) const
+		template <typename OutputIterator> PUGIXML_DEPRECATED void all_elements_by_name(const char_t* name, OutputIterator it) const
 		{
-			if (!_root) return;
-			
-			for (xml_node node = first_child(); node; node = node.next_sibling())
-			{
-				if (node.type() == node_element)
-				{
-					if (impl::strequal(name, node.name()))
-					{
-						*it = node;
-						++it;
-					}
-				
-					if (node.first_child()) node.all_elements_by_name(name, it);
-				}
-			}
+			all_elements_by_name_helper(name, it);
 		}
 
 		/**

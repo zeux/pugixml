@@ -132,6 +132,26 @@ TEST_XML(dom_node_find_child_by_attribute_w, "<node><child1 attr='value1'/><chil
 	CHECK(node.find_child_by_attribute_w(STR("attr3"), STR("val*[0123456789]")) == xml_node());
 }
 
+TEST_XML(dom_node_all_elements_by_name, "<node><child><child/><child/></child></node>")
+{
+	std::vector<xml_node> v;
+
+	v.clear();
+	xml_node().all_elements_by_name(STR("node"), std::back_inserter(v));
+	CHECK(v.empty());
+
+	v.clear();
+	doc.all_elements_by_name(STR("node"), std::back_inserter(v));
+	CHECK(v.size() == 1 && v[0] == doc.child(STR("node")));
+
+	v.clear();
+	doc.all_elements_by_name(STR("child"), std::back_inserter(v));
+	CHECK(v.size() == 3);
+	CHECK(v[0] == doc.child(STR("node")).child(STR("child")));
+	CHECK(v[1] == doc.child(STR("node")).child(STR("child")).first_child());
+	CHECK(v[2] == doc.child(STR("node")).child(STR("child")).last_child());
+}
+
 TEST_XML(dom_node_all_elements_by_name_w, "<node><child><child/><child/></child></node>")
 {
 	std::vector<xml_node> v;

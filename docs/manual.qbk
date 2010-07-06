@@ -432,7 +432,7 @@ The only exception is `set_memory_management_functions`; it modifies global vari
 
 With the exception of XPath, pugixml itself does not throw any exceptions. Additionally, most pugixml functions have a no-throw exception guarantee.
 
-This is not applicable to functions that operate on STL strings or IOstreams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::all_elements_by_name`) do not provide any exception guarantees beyond the ones provided by callback.
+This is not applicable to functions that operate on STL strings or IOstreams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::find_node`) do not provide any exception guarantees beyond the ones provided by callback.
 
 XPath functions may throw `xpath_exception` on parsing error; also, XPath implementation uses STL, and thus may throw i.e. `std::bad_alloc` in low memory conditions. Still, XPath functions provide strong exception guarantee.
 
@@ -915,7 +915,7 @@ Major release, featuring extended and improved Unicode support, miscellaneous pe
 
 * Compatibility:
 	# parse() and as_utf16 are left for compatibility (these functions are deprecated and will be removed in version 1.0)
-	# Wildcard functions, document_order/precompute_document_order functions and format_write_bom_utf8 flag are deprecated and will be removed in version 1.0
+	# Wildcard functions, document_order/precompute_document_order functions, all_elements_by_name function and format_write_bom_utf8 flag are deprecated and will be removed in version 1.0
 	# xpath_type_t enumeration was renamed to xpath_value_type; xpath_type_t is deprecated and will be removed in version 1.0
 
 [h5 8.11.2009 - version 0.5]
@@ -1265,7 +1265,6 @@ Classes:
 	* void remove_attribute(const char_t* name);
 	* void remove_child(const xml_node& n);
 	* void remove_child(const char_t* name);
-	* template <typename OutputIterator> void all_elements_by_name(const char_t* name, OutputIterator it) const
 	* template <typename Predicate> xml_attribute find_attribute(Predicate pred) const
 	* template <typename Predicate> xml_node find_child(Predicate pred) const
 	* template <typename Predicate> xml_node find_node(Predicate pred) const
