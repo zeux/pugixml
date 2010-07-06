@@ -3330,22 +3330,22 @@ namespace pugi
 
 	xml_node::iterator xml_node::begin() const
 	{
-		return _root ? iterator(_root->first_child) : iterator();
+		return iterator(_root ? _root->first_child : 0, _root);
 	}
 
 	xml_node::iterator xml_node::end() const
 	{
-		return _root && _root->first_child ? iterator(0, _root->first_child->prev_sibling_c) : iterator();
+		return iterator(0, _root);
 	}
 	
 	xml_node::attribute_iterator xml_node::attributes_begin() const
 	{
-		return _root ? attribute_iterator(_root->first_attribute) : attribute_iterator();
+		return attribute_iterator(_root ? _root->first_attribute : 0, _root);
 	}
 
 	xml_node::attribute_iterator xml_node::attributes_end() const
 	{
-		return _root && _root->first_attribute ? attribute_iterator(0, _root->first_attribute->prev_attribute_c) : attribute_iterator();
+		return attribute_iterator(0, _root);
 	}
 
 	bool xml_node::operator==(const xml_node& r) const
@@ -4066,42 +4066,40 @@ namespace pugi
 	{
 	}
 
-	xml_node_iterator::xml_node_iterator(const xml_node& node): _wrap(node)
+	xml_node_iterator::xml_node_iterator(const xml_node& node): _wrap(node), _parent(node.parent())
 	{
 	}
 
-	xml_node_iterator::xml_node_iterator(xml_node_struct* ref): _wrap(ref)
-	{
-	}
-		
-	xml_node_iterator::xml_node_iterator(xml_node_struct* ref, xml_node_struct* prev): _prev(prev), _wrap(ref)
+	xml_node_iterator::xml_node_iterator(xml_node_struct* ref, xml_node_struct* parent): _wrap(ref), _parent(parent)
 	{
 	}
 
 	bool xml_node_iterator::operator==(const xml_node_iterator& rhs) const
 	{
-		return (_wrap == rhs._wrap);
+		return _wrap._root == rhs._wrap._root && _parent._root == rhs._parent._root;
 	}
 	
 	bool xml_node_iterator::operator!=(const xml_node_iterator& rhs) const
 	{
-		return (_wrap != rhs._wrap);
+		return _wrap._root != rhs._wrap._root || _parent._root != rhs._parent._root;
 	}
 
 	xml_node& xml_node_iterator::operator*()
 	{
+		assert(_wrap._root);
 		return _wrap;
 	}
 
 	xml_node* xml_node_iterator::operator->()
 	{
+		assert(_wrap._root);
 		return &_wrap;
 	}
 
 	const xml_node_iterator& xml_node_iterator::operator++()
 	{
-		_prev = _wrap;
-		_wrap = xml_node(_wrap._root->next_sibling);
+		assert(_wrap._root);
+		_wrap._root = _wrap._root->next_sibling;
 		return *this;
 	}
 
@@ -4115,7 +4113,7 @@ namespace pugi
 	const xml_node_iterator& xml_node_iterator::operator--()
 	{
 		if (_wrap._root) _wrap = _wrap.previous_sibling();
-		else _wrap = _prev;
+		else _wrap = _parent.last_child();
 		return *this;
 	}
 
@@ -4130,42 +4128,40 @@ namespace pugi
 	{
 	}
 
-	xml_attribute_iterator::xml_attribute_iterator(const xml_attribute& attr): _wrap(attr)
+	xml_attribute_iterator::xml_attribute_iterator(const xml_attribute& attr, const xml_node& parent): _wrap(attr), _parent(parent)
 	{
 	}
 
-	xml_attribute_iterator::xml_attribute_iterator(xml_attribute_struct* ref): _wrap(ref)
-	{
-	}
-		
-	xml_attribute_iterator::xml_attribute_iterator(xml_attribute_struct* ref, xml_attribute_struct* prev): _prev(prev), _wrap(ref)
+	xml_attribute_iterator::xml_attribute_iterator(xml_attribute_struct* ref, xml_node_struct* parent): _wrap(ref), _parent(parent)
 	{
 	}
 
 	bool xml_attribute_iterator::operator==(const xml_attribute_iterator& rhs) const
 	{
-		return (_wrap == rhs._wrap);
+		return _wrap._attr == rhs._wrap._attr && _parent._root == rhs._parent._root;
 	}
 	
 	bool xml_attribute_iterator::operator!=(const xml_attribute_iterator& rhs) const
 	{
-		return (_wrap != rhs._wrap);
+		return _wrap._attr != rhs._wrap._attr || _parent._root != rhs._parent._root;
 	}
 
 	xml_attribute& xml_attribute_iterator::operator*()
 	{
+		assert(_wrap._attr);
 		return _wrap;
 	}
 
 	xml_attribute* xml_attribute_iterator::operator->()
 	{
+		assert(_wrap._attr);
 		return &_wrap;
 	}
 
 	const xml_attribute_iterator& xml_attribute_iterator::operator++()
 	{
-		_prev = _wrap;
-		_wrap = xml_attribute(_wrap._attr->next_attribute);
+		assert(_wrap._attr);
+		_wrap._attr = _wrap._attr->next_attribute;
 		return *this;
 	}
 
@@ -4179,7 +4175,7 @@ namespace pugi
 	const xml_attribute_iterator& xml_attribute_iterator::operator--()
 	{
 		if (_wrap._attr) _wrap = _wrap.previous_attribute();
-		else _wrap = _prev;
+		else _wrap = _parent.last_attribute();
 		return *this;
 	}
 

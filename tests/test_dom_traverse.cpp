@@ -152,7 +152,7 @@ TEST_XML(dom_attr_iterator, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/
 	CHECK(xml_node().attributes_begin() == xml_attribute_iterator());
 	CHECK(xml_node().attributes_end() == xml_attribute_iterator());
 
-	CHECK(node1.attributes_begin() == xml_attribute_iterator(node1.attribute(STR("attr1"))));
+	CHECK(node1.attributes_begin() == xml_attribute_iterator(node1.attribute(STR("attr1")), node1));
 	CHECK(move_iter(node1.attributes_begin(), 1) == node1.attributes_end());
 	CHECK(move_iter(node1.attributes_end(), -1) == node1.attributes_begin());
 	CHECK(*node1.attributes_begin() == node1.attribute(STR("attr1")));
@@ -161,10 +161,10 @@ TEST_XML(dom_attr_iterator, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/
 	CHECK(move_iter(node2.attributes_begin(), 2) == node2.attributes_end());
 	CHECK(move_iter(node2.attributes_end(), -2) == node2.attributes_begin());
 
-	CHECK(node3.attributes_begin() == xml_attribute_iterator());
+	CHECK(node3.attributes_begin() != xml_attribute_iterator());
 	CHECK(node3.attributes_begin() == node3.attributes_end());
 
-	xml_attribute_iterator it = node2.attribute(STR("attr2"));
+	xml_attribute_iterator it = xml_attribute_iterator(node2.attribute(STR("attr2")), node2);
 	xml_attribute_iterator itt = it;
 
 	CHECK(itt++ == it);
@@ -180,6 +180,52 @@ TEST_XML(dom_attr_iterator, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/
 	CHECK(itt == it);
 
 	CHECK(++itt != it);
+}
+
+TEST_XML(dom_attr_iterator_end, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/><node3/></node>")
+{
+	xml_node node1 = doc.child(STR("node")).child(STR("node1"));
+	xml_node node2 = doc.child(STR("node")).child(STR("node2"));
+	xml_node node3 = doc.child(STR("node")).child(STR("node3"));
+
+	CHECK(node1.attributes_end() != node2.attributes_end() && node1.attributes_end() != node3.attributes_end() && node2.attributes_end() != node3.attributes_end());
+	CHECK(node1.attributes_end() != xml_attribute_iterator() && node2.attributes_end() != xml_attribute_iterator() && node3.attributes_end() != xml_attribute_iterator());
+}
+
+TEST_XML(dom_attr_iterator_invalidate, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/><node3/></node>")
+{
+	xml_node node2 = doc.child(STR("node")).child(STR("node2"));
+
+	xml_attribute_iterator it1 = node2.attributes_begin();
+	xml_attribute_iterator it2 = move_iter(it1, 1);
+	xml_attribute_iterator it3 = move_iter(it2, 1);
+
+	CHECK(it3 == node2.attributes_end());
+
+	// removing attr2, it2 is invalid now, it3 is still past-the-end
+	node2.remove_attribute(*it2);
+
+	CHECK(node2.attributes_end() == it3);
+	CHECK(move_iter(it1, 1) == it3);
+	CHECK(move_iter(it3, -1) == it1);
+	CHECK_STRING(it1->name(), STR("attr1"));
+
+	// adding attr2 back, it3 is still past-the-end!
+	xml_attribute_iterator it2new = xml_attribute_iterator(node2.append_attribute(STR("attr2-new")), node2);
+
+	CHECK(node2.attributes_end() == it3);
+	CHECK(move_iter(it1, 1) == it2new);
+	CHECK(move_iter(it2new, 1) == it3);
+	CHECK(move_iter(it3, -1) == it2new);
+	CHECK_STRING(it2new->name(), STR("attr2-new"));
+
+	// removing both attributes, it3 is now equal to the begin
+	node2.remove_attribute(*it1);
+	node2.remove_attribute(*it2new);
+	CHECK(!node2.first_attribute());
+
+	CHECK(node2.attributes_begin() == it3);
+	CHECK(node2.attributes_end() == it3);
 }
 
 TEST_XML(dom_node_bool_ops, "<node/>")
@@ -220,7 +266,7 @@ TEST_XML(dom_node_iterator, "<node><node1><child1/></node1><node2><child1/><chil
 	CHECK(move_iter(node2.begin(), 2) == node2.end());
 	CHECK(move_iter(node2.end(), -2) == node2.begin());
 
-	CHECK(node3.begin() == xml_node_iterator());
+	CHECK(node3.begin() != xml_node_iterator());
 	CHECK(node3.begin() == node3.end());
 
 	xml_node_iterator it = node2.child(STR("child2"));
@@ -239,6 +285,53 @@ TEST_XML(dom_node_iterator, "<node><node1><child1/></node1><node2><child1/><chil
 	CHECK(itt == it);
 
 	CHECK(++itt != it);
+}
+
+TEST_XML(dom_node_iterator_end, "<node><node1><child1/></node1><node2><child1/><child2/></node2><node3/></node>")
+{
+	xml_node node1 = doc.child(STR("node")).child(STR("node1"));
+	xml_node node2 = doc.child(STR("node")).child(STR("node2"));
+	xml_node node3 = doc.child(STR("node")).child(STR("node3"));
+
+	CHECK(node1.end() != node2.end() && node1.end() != node3.end() && node2.end() != node3.end());
+	CHECK(node1.end() != xml_node_iterator() && node2.end() != xml_node_iterator() && node3.end() != xml_node_iterator());
+}
+
+TEST_XML(dom_node_iterator_invalidate, "<node><node1><child1/></node1><node2><child1/><child2/></node2><node3/></node>")
+{
+	xml_node node2 = doc.child(STR("node")).child(STR("node2"));
+
+	xml_node_iterator it1 = node2.begin();
+	xml_node_iterator it2 = move_iter(it1, 1);
+	xml_node_iterator it3 = move_iter(it2, 1);
+
+	CHECK(it3 == node2.end());
+
+	// removing child2, it2 is invalid now, it3 is still past-the-end
+	node2.remove_child(*it2);
+
+	CHECK(node2.end() == it3);
+	CHECK(move_iter(it1, 1) == it3);
+	CHECK(move_iter(it3, -1) == it1);
+	CHECK_STRING(it1->name(), STR("child1"));
+
+	// adding attr2 back, it3 is still past-the-end!
+	xml_node_iterator it2new = node2.append_child();
+	it2new->set_name(STR("child2-new"));
+
+	CHECK(node2.end() == it3);
+	CHECK(move_iter(it1, 1) == it2new);
+	CHECK(move_iter(it2new, 1) == it3);
+	CHECK(move_iter(it3, -1) == it2new);
+	CHECK_STRING(it2new->name(), STR("child2-new"));
+
+	// removing both nodes, it3 is now equal to the begin
+	node2.remove_child(*it1);
+	node2.remove_child(*it2new);
+	CHECK(!node2.first_child());
+
+	CHECK(node2.begin() == it3);
+	CHECK(node2.end() == it3);
 }
 
 TEST_XML(dom_node_parent, "<node><child/></node>")

@@ -775,6 +775,7 @@ namespace pugi
 	 */
 	class PUGIXML_CLASS xml_node
 	{
+		friend class xml_attribute_iterator;
 		friend class xml_node_iterator;
 
 	protected:
@@ -1525,14 +1526,11 @@ namespace pugi
 		friend class xml_node;
 
 	private:
-		xml_node _prev;
 		xml_node _wrap;
+		xml_node _parent;
 
 		/// \internal Initializing constructor
-		explicit xml_node_iterator(xml_node_struct* ref);
-
-		/// \internal Initializing constructor (for past-the-end)
-		xml_node_iterator(xml_node_struct* ref, xml_node_struct* prev);
+		xml_node_iterator(xml_node_struct* ref, xml_node_struct* parent);
 
 	public:
 		/**
@@ -1627,14 +1625,11 @@ namespace pugi
 		friend class xml_node;
 
 	private:
-		xml_attribute _prev;
 		xml_attribute _wrap;
+		xml_node _parent;
 
 		/// \internal Initializing constructor
-		explicit xml_attribute_iterator(xml_attribute_struct* ref);
-
-		/// \internal Initializing constructor (for past-the-end)
-		xml_attribute_iterator(xml_attribute_struct* ref, xml_attribute_struct* prev);
+		xml_attribute_iterator(xml_attribute_struct* ref, xml_node_struct* parent);
 
 	public:
 		/**
@@ -1657,9 +1652,10 @@ namespace pugi
 		/**
 		 * Initializing constructor
 		 *
-		 * \param node - node that iterator will point at
+		 * \param attr - attribute that iterator will point at
+		 * \param parent - parent node of the attribute
 		 */
-		xml_attribute_iterator(const xml_attribute& node);
+		xml_attribute_iterator(const xml_attribute& attr, const xml_node& parent);
 
 		/**
 		 * Check if this iterator is equal to \a rhs
