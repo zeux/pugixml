@@ -855,7 +855,35 @@ Here is a simple example of using these functions ([@samples/traverse_base.cpp])
 
 [endsect] [/contents]
 
-[section:iterators Iterators $$$]
+[section:iterators Traversing node/attribute lists via iterators]
+
+[#xml_node_iterator][#xml_attribute_iterator][#xml_node::begin][#xml_node::end][#xml_node::attributes_begin][#xml_node::attributes_end]
+Child node lists and attribute lists are simply double-linked lists; while you can use `previous_sibling`/`next_sibling` and other such functions for iteration, pugixml additionally provides node and attribute iterators, so that you can treat nodes as containers of other nodes or attributes:
+
+	class xml_node_iterator;
+	class xml_attribute_iterator;
+	
+	typedef xml_node_iterator xml_node::iterator;
+	iterator xml_node::begin() const;
+	iterator xml_node::end() const;
+
+	typedef xml_attribute_iterator xml_node::attribute_iterator;
+	attribute_iterator xml_node::attributes_begin() const;
+	attribute_iterator xml_node::attributes_end() const;
+
+`begin` and `attributes_begin` return iterators that point to the first node\/attribute, respectively; `end` and `attributes_end` return past-the-end iterator for node\/attribute list, respectively - this iterator can't be dereferenced, but decrementing it results in an iterator pointing to the last element in the list (except for empty lists, where decrementing past-the-end iterator is not defined). Past-the-end iterator is commonly used as a termination value for iteration loops (see sample below). If you want to get an iterator that points to an existing handle, you can construct the iterator with the handle as a single constructor argument, like so: `xml_node_iterator(node)`.
+
+`begin` and `end` return equal iterators if called on null node; such iterators can't be dereferenced. `attributes_begin` and `attributes_end` behave the same way. For correct iterator usage this means that child node\/attribute collections of null nodes appear to be empty.
+
+Both types of iterators have bidirectional iterator semantics (i.e. they can be incremented and decremented, but efficient random access is not supported) and support all usual iterator operations - comparison, dereference, etc. The iterators are invalidated if the node\/attribute objects they're pointing to are removed from the tree; adding nodes\/attributes does not invalidate any iterators.
+
+Here is a simple example of using iterators for document traversal ([@samples/traverse_iter.cpp]):
+
+[import samples/traverse_iter.cpp]
+[code_traverse_iter]
+
+[caution Node and attribute iterators are somewhere in the middle between const and non-const iterators. While dereference operation yields a non-constant reference to the object, so that you can use it for tree modification operations, modifying this reference by assignment - i.e. passing iterators to a function like `std::sort` - will not give expected results, as assignment modifies local handle that's stored in the iterator.]
+
 [endsect] [/iterators]
 
 [section:walker Walker $$$]
@@ -1188,6 +1216,9 @@ Classes:
 	* bool set_value(double rhs);
 	* bool set_value(bool rhs);
 
+* `class `[link xml_node_iterator]
+* `class `[link xml_attribute_iterator]
+
 * `class `[link xml_node]
 	* [link xml_node::ctor xml_node]`();`
 	[lbr]
@@ -1234,14 +1265,14 @@ Classes:
 	* `const char_t* `[link xml_node::child_value child_value]`(const char_t* name) const;`
 	[lbr]
 
-	* typedef xml_node_iterator iterator;
-	* iterator begin() const;
-	* iterator end() const;
+	* `typedef xml_node_iterator `[link xml_node_iterator iterator]`;`
+	* `iterator `[xml_node::begin begin]`() const;`
+	* `iterator `[xml_node::end end]`() const;`
 	[lbr]
 
-	* typedef xml_attribute_iterator attribute_iterator;
-	* attribute_iterator attributes_begin() const;
-	* attribute_iterator attributes_end() const;
+	* `typedef xml_attribute_iterator `[link xml_attribute_iterator attribute_iterator]`;`
+	* `attribute_iterator `[link xml_node::attributes_begin attributes_begin]`() const;`
+	* `attribute_iterator `[link xml_node::attributes_end attributes_end]`() const;`
 	[lbr]
 
 	* xml_node root() const;
@@ -1343,8 +1374,6 @@ Classes:
 	* xml_writer_stream(std::wostream& stream);
 
 	* virtual void write(const void* data, size_t size);
-* xml_node_iterator
-* xml_attribute_iterator
 
 * xml_tree_walker
 	* int depth() const;
