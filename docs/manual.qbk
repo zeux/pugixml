@@ -739,7 +739,7 @@ pugixml features an extensive interface for getting various types of data from t
 
 [section:basic Basic traversal functions]
 
-[#xml_node::parent][#xml_node::first_child][#xml_node::last_child][#xml_node::next_sibling][#xml_node::previous_sibling][#xml_attribute::next_attribute][#xml_attribute::previous_attribute]
+[#xml_node::parent][#xml_node::first_child][#xml_node::last_child][#xml_node::next_sibling][#xml_node::previous_sibling][#xml_node::first_attribute][#xml_node::last_attribute][#xml_attribute::next_attribute][#xml_attribute::previous_attribute]
 The internal representation of the document is a tree, where each node has a list of child nodes (the order of children corresponds to their order in the XML representation), and additionally element nodes have a list of attributes, which is also ordered. Several functions are provided in order to let you get from one node in the tree to the other. These functions roughly correspond to the internal representation, and thus are usually building blocks for other methods of traversing (i.e. XPath traversals are based on these functions).
 
 	xml_node xml_node::parent() const;
@@ -768,7 +768,7 @@ With these functions, you can iterate through all child nodes and display all at
 [section:nodedata Getting node data]
 
 [#xml_node::name][#xml_node::value]
-Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node types, name or value may be absent. `node_document` nodes do not have name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
+Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. `node_document` nodes do not have name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
 
 	const char_t* xml_node::name() const;
 	const char_t* xml_node::value() const;
@@ -826,7 +826,32 @@ Here is a simple example of using these functions, along with node data retrieva
 [section:contents Contents-based traversal functions]
 
 [#xml_node::child][#xml_node::attribute][#xml_node::next_sibling_name][#xml_node::previous_sibling_name]
-Since a lot of document traversal consists of finding the node/attribute with the correct name
+Since a lot of document traversal consists of finding the node/attribute with the correct name, there are special functions for that purpose:
+
+	xml_node xml_node::child(const char_t* name) const;
+	xml_attribute xml_node::attribute(const char_t* name) const;
+	xml_node xml_node::next_sibling(const char_t* name) const;
+	xml_node xml_node::previous_sibling(const char_t* name) const;
+
+`child` and `attribute` return the first child/attribute with the specified name; `next_sibling` and `previous_sibling` return the first sibling in the corresponding direction with the specified name. All string comparisons are case-sensitive. In case the node handle is null or there is no node\/attribute with the specified name, null handle is returned.
+
+`child` and `next_sibling` functions can be used together to loop through all child nodes with the desired name like this:
+
+    for (pugi::xml_node tool = tools.child("Tool"); tool; tool = tool.next_sibling("Tool"))
+
+[#xml_node::find_child_by_attribute]
+Occasionally the needed node is specified not by the unique name but instead by the value of some attribute; for example, it is common to have node collections with each node having a unique id: `<group><item id="1"/> <item id="2"/></group>`. There are two functions for finding child nodes based on the attribute values:
+
+	xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
+	xml_node xml_node::find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
+
+The three-argument function returns the first child node with the specified name which has an attribute with the specified name/value; the two-argument function skips the name test for the node, which can be useful for searching in heterogeneous collections. If the node handle is null or if no node is found, null handle is returned. All string comparisons are case-sensitive.
+
+In all of the above functions, all arguments have to be valid strings; passing null pointers results in undefined behavior.
+
+Here is a simple example of using these functions ([@samples/traverse_base.cpp]):
+
+[code_traverse_base_contents]
 
 [endsect] [/contents]
 
@@ -1201,6 +1226,8 @@ Classes:
 	* `xml_attribute `[link xml_node::attribute attribute]`(const char_t* name) const;`
 	* `xml_node `[link xml_node::next_sibling_name next_sibling]`(const char_t* name) const;`
 	* `xml_node `[link xml_node::previous_sibling_name previous_sibling]`(const char_t* name) const;`
+	* `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;`
+	* `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* attr_name, const char_t* attr_value) const;`
 	[lbr]
 
 	* `const char_t* `[link xml_node::child_value child_value]`() const;`
@@ -1242,8 +1269,6 @@ Classes:
 	* template <typename Predicate> xml_attribute find_attribute(Predicate pred) const
 	* template <typename Predicate> xml_node find_child(Predicate pred) const
 	* template <typename Predicate> xml_node find_node(Predicate pred) const
-	* xml_node find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
-	* xml_node find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
 	* string_t path(char_t delimiter = '/') const;
 	* xml_node first_element_by_path(const char_t* path, char_t delimiter = '/') const;
 	* bool traverse(xml_tree_walker& walker);

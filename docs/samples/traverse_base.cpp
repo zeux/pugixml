@@ -39,16 +39,11 @@ int main()
     std::cout << std::endl;
 
     //[code_traverse_base_contents
+    std::cout << "Tool for *.dae generation: " << tools.find_child_by_attribute("Tool", "OutputFileMasks", "*.dae").attribute("Filename").value() << "\n";
+
     for (pugi::xml_node tool = tools.child("Tool"); tool; tool = tool.next_sibling("Tool"))
     {
-        std::cout << "Tool " << tool.attribute("Filename").value() << ":";
-
-        for (pugi::xml_attribute attr = tool.first_attribute(); attr; attr = attr.next_attribute())
-        {
-            if (strcmp(attr.name(), "Filename") != 0) std::cout << " " << attr.name() << "=" << attr.value();
-        }
-
-        std::cout << std::endl;
+        std::cout << "Tool " << tool.attribute("Filename").value() << "\n";
     }
     //]
 }
