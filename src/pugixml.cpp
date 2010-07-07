@@ -3774,21 +3774,21 @@ namespace pugi
 		return result;
 	}
 
-	void xml_node::remove_attribute(const char_t* name)
+	bool xml_node::remove_attribute(const char_t* name)
 	{
-		remove_attribute(attribute(name));
+		return remove_attribute(attribute(name));
 	}
 
-	void xml_node::remove_attribute(const xml_attribute& a)
+	bool xml_node::remove_attribute(const xml_attribute& a)
 	{
-		if (!_root || !a._attr) return;
+		if (!_root || !a._attr) return false;
 
 		// check that attribute belongs to *this
 		xml_attribute_struct* attr = a._attr;
 
 		while (attr->prev_attribute_c->next_attribute) attr = attr->prev_attribute_c;
 
-		if (attr != _root->first_attribute) return;
+		if (attr != _root->first_attribute) return false;
 
 		if (a._attr->next_attribute) a._attr->next_attribute->prev_attribute_c = a._attr->prev_attribute_c;
 		else if (_root->first_attribute) _root->first_attribute->prev_attribute_c = a._attr->prev_attribute_c;
@@ -3797,16 +3797,18 @@ namespace pugi
 		else _root->first_attribute = a._attr->next_attribute;
 
 		destroy_attribute(a._attr, get_allocator(_root));
+
+		return true;
 	}
 
-	void xml_node::remove_child(const char_t* name)
+	bool xml_node::remove_child(const char_t* name)
 	{
-		remove_child(child(name));
+		return remove_child(child(name));
 	}
 
-	void xml_node::remove_child(const xml_node& n)
+	bool xml_node::remove_child(const xml_node& n)
 	{
-		if (!_root || !n._root || n._root->parent != _root) return;
+		if (!_root || !n._root || n._root->parent != _root) return false;
 
 		if (n._root->next_sibling) n._root->next_sibling->prev_sibling_c = n._root->prev_sibling_c;
 		else if (_root->first_child) _root->first_child->prev_sibling_c = n._root->prev_sibling_c;
@@ -3815,6 +3817,8 @@ namespace pugi
 		else _root->first_child = n._root->next_sibling;
         
         destroy_node(n._root, get_allocator(_root));
+
+		return true;
 	}
 
 	xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const

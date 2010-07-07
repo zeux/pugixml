@@ -1217,29 +1217,33 @@ namespace pugi
 		 * Remove specified attribute
 		 *
 		 * \param a - attribute to be removed
+		 * \return success flag
 		 */
-		void remove_attribute(const xml_attribute& a);
+		bool remove_attribute(const xml_attribute& a);
 
 		/**
 		 * Remove attribute with the specified name, if any
 		 *
 		 * \param name - attribute name
+		 * \return success flag
 		 */
-		void remove_attribute(const char_t* name);
+		bool remove_attribute(const char_t* name);
 
 		/**
 		 * Remove specified child
 		 *
 		 * \param n - child node to be removed
+		 * \return success flag
 		 */
-		void remove_child(const xml_node& n);
+		bool remove_child(const xml_node& n);
 
 		/**
 		 * Remove child with the specified name, if any
 		 *
 		 * \param name - child name
+		 * \return success flag
 		 */
-		void remove_child(const char_t* name);
+		bool remove_child(const char_t* name);
 
 	public:
 		/**

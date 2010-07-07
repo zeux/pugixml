@@ -273,21 +273,21 @@ TEST_XML(dom_node_insert_copy_before_attribute, "<node a1='v1'><child a2='v2'/><
 
 TEST_XML(dom_node_remove_attribute, "<node a1='v1' a2='v2' a3='v3'><child a4='v4'/></node>")
 {
-	xml_node().remove_attribute(STR("a"));
-	xml_node().remove_attribute(xml_attribute());
+	CHECK(!xml_node().remove_attribute(STR("a")));
+	CHECK(!xml_node().remove_attribute(xml_attribute()));
 	
 	xml_node node = doc.child(STR("node"));
 	xml_node child = node.child(STR("child"));
 
-	node.remove_attribute(STR("a"));
-	node.remove_attribute(xml_attribute());
-	node.remove_attribute(child.attribute(STR("a4")));
+	CHECK(!node.remove_attribute(STR("a")));
+	CHECK(!node.remove_attribute(xml_attribute()));
+	CHECK(!node.remove_attribute(child.attribute(STR("a4"))));
 
 	CHECK_NODE(doc, STR("<node a1=\"v1\" a2=\"v2\" a3=\"v3\"><child a4=\"v4\" /></node>"));
 
-	node.remove_attribute(STR("a1"));
-	node.remove_attribute(node.attribute(STR("a3")));
-	child.remove_attribute(STR("a4"));
+	CHECK(node.remove_attribute(STR("a1")));
+	CHECK(node.remove_attribute(node.attribute(STR("a3"))));
+	CHECK(child.remove_attribute(STR("a4")));
 
 	CHECK_NODE(doc, STR("<node a2=\"v2\"><child /></node>"));
 }
@@ -388,21 +388,21 @@ TEST_XML(dom_node_insert_child_before, "<node>foo<child/></node>")
 
 TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node>")
 {
-	xml_node().remove_child(STR("a"));
-	xml_node().remove_child(xml_node());
+	CHECK(!xml_node().remove_child(STR("a")));
+	CHECK(!xml_node().remove_child(xml_node()));
 	
 	xml_node node = doc.child(STR("node"));
 	xml_node child = node.child(STR("child"));
 
-	node.remove_child(STR("a"));
-	node.remove_child(xml_node());
-	node.remove_child(child.child(STR("n4")));
+	CHECK(!node.remove_child(STR("a")));
+	CHECK(!node.remove_child(xml_node()));
+	CHECK(!node.remove_child(child.child(STR("n4"))));
 
 	CHECK_NODE(doc, STR("<node><n1 /><n2 /><n3 /><child><n4 /></child></node>"));
 
-	node.remove_child(STR("n1"));
-	node.remove_child(node.child(STR("n3")));
-	child.remove_child(STR("n4"));
+	CHECK(node.remove_child(STR("n1")));
+	CHECK(node.remove_child(node.child(STR("n3"))));
+	CHECK(child.remove_child(STR("n4")));
 
 	CHECK_NODE(doc, STR("<node><n2 /><child /></node>"));
 }
