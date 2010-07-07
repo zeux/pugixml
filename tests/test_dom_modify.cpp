@@ -413,7 +413,7 @@ TEST_XML(dom_node_remove_child_complex, "<node id='1'><n1 id1='1' id2='2'/><n2/>
 
 	CHECK_NODE(doc, STR("<node id=\"1\"><n2 /><n3 /><child><n4 /></child></node>"));
 
-	doc.remove_child(STR("node"));
+	CHECK(doc.remove_child(STR("node")));
 
 	CHECK_NODE(doc, STR(""));
 }
@@ -422,8 +422,8 @@ TEST_XML(dom_node_remove_child_complex_allocated, "<node id='1'><n1 id1='1' id2=
 {
 	doc.append_copy(doc.child(STR("node")));
 
-	doc.remove_child(STR("node"));
-	doc.remove_child(STR("node"));
+	CHECK(doc.remove_child(STR("node")));
+	CHECK(doc.remove_child(STR("node")));
 
 	CHECK_NODE(doc, STR(""));
 }
