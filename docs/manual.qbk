@@ -964,7 +964,7 @@ While pugixml supports complex XPath expressions, sometimes a simple path handli
 	string_t xml_node::path(char_t delimiter = '/') const;
 	xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter = '/') const;
 
-Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, `<c/>` has a path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<b/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
+Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, `<c/>` has a path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<a/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
 
 In case path component is ambiguous (if there are two nodes with given name), the first one is selected; paths are not guaranteed to uniquely identify nodes in a document. If any component of a path is not found, the result of `first_element_by_path` is null node; also `first_element_by_path` returns null node for null nodes, in which case the path does not matter. `path` returns an empty string for null nodes. 
 
@@ -1012,6 +1012,7 @@ Major release, featuring extended and improved Unicode support, miscellaneous pe
 	# XPath string <-> number conversion improvements (increased precision, fixed crash for huge numbers)
 	# Improved DOCTYPE parsing: now parser recognizes all well-formed DOCTYPE declarations
 	# Fixed xml_attribute::as_uint() for large numbers (i.e. 2^32-1)
+	# Fixed xml_node::first_element_by_path for path components that are prefixes of node names, but are not exactly equal to them.
 
 * Specification changes:
 	# parse() API changed to load_buffer/load_buffer_inplace/load_buffer_inplace_own; load_buffer APIs do not require zero-terminated strings.
