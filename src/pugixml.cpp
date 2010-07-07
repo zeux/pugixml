@@ -134,7 +134,7 @@ namespace pugi
 				if (lhs[i] != rhs[i])
 					return false;
 		
-			return true;
+			return lhs[count] == 0;
 		}
 		
 		// Character set pattern match.

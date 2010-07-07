@@ -940,9 +940,7 @@ namespace pugi
 		{
 			size_t length = static_cast<size_t>(end - begin);
 
-			if (!impl::strequalrange(other, begin, length)) return false;
-			
-			return other[length] == 0;
+			return impl::strequalrange(other, begin, length);
 		}
 	};
 
