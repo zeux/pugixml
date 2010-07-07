@@ -938,7 +938,7 @@ The predicate should be either a plain function or a function object which accep
 
 `find_child` function iterates through all child nodes of the specified node, and returns the first node for which predicate returned `true`. If predicate returned `false` for all nodes or if there were no child nodes (including the case where the node is null), null node is returned.
 
-`find_node` function performs a depth-first traversal through the subtree of the specified node (excluding the node itself), and returns the first noed for which predicate returned `true`. If predicate returned `false` for all nodes or if subtree was empty, null node is returned.
+`find_node` function performs a depth-first traversal through the subtree of the specified node (excluding the node itself), and returns the first node for which predicate returned `true`. If predicate returned `false` for all nodes or if subtree was empty, null node is returned.
 
 This is an example of using predicate-based functions ([@samples/traverse_predicate.cpp]):
 
@@ -949,6 +949,34 @@ This is an example of using predicate-based functions ([@samples/traverse_predic
 [endsect] [/predicate]
 
 [section:misc Miscellaneous functions]
+
+[#xml_node::root]
+If you need to get the document root of some node, you can use the following function:
+
+	xml_node xml_node::root() const;
+
+This function returns the node with type `node_document`, which is the root node of the document the node belongs to (unless the node is null, in which case null node is returned). Currently this function has logarithmic complexity, since it simply finds such ancestor of the given node which itself has no parent.
+
+[#xml_node::path]
+[#xml_node::first_element_by_path]
+While pugixml supports complex XPath expressions, sometimes a simple path handling facility is needed. There are two functions, for getting node path and for converting path to a node:
+
+	string_t xml_node::path(char_t delimiter = '/') const;
+	xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter = '/') const;
+
+Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, `<c/>` has a path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<b/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
+
+In case path component is ambiguous (if there are two nodes with given name), the first one is selected; paths are not guaranteed to uniquely identify nodes in a document. If any component of a path is not found, the result of `first_element_by_path` is null node; also `first_element_by_path` returns null node for null nodes, in which case the path does not matter. `path` returns an empty string for null nodes. 
+
+[note `path` function returns the result as STL string, and thus is not available if `PUGIXML_NO_STL` is defined.]
+
+[#xml_node::offset_debug]
+pugixml does not record row/column information for nodes upon parsing for efficiency reasons. However, if the node has not changed in a significant way since parsing (the name/value are not changed, and the node itself is the original one, i.e. it was not deleted from the tree and re-added later), it is possible to get the offset from the beginning of XML buffer:
+
+	ptrdiff_t xml_node::offset_debug() const;
+
+If the offset is not available (this happens if the node is null, was not originally parsed from a stream, or has changed in a significant way), the function returns -1. Otherwise it returns the offset to node's data from the beginning of XML buffer in `pugi::char_t` units. For more information on parsing offsets, see [link xml_parse_result::offset parsing error handling documentation].
+
 [endsect] [/misc]
 
 [endsect] [/getting]
@@ -1271,6 +1299,7 @@ Classes:
 	* xml_attribute& operator=(unsigned int rhs);
 	* xml_attribute& operator=(double rhs);
 	* xml_attribute& operator=(bool rhs);
+	[lbr]
 
 	* bool set_name(const char_t* rhs);
 	* bool set_value(const char_t* rhs);
@@ -1327,8 +1356,8 @@ Classes:
 	[lbr]
 
 	* `typedef xml_node_iterator `[link xml_node_iterator iterator]`;`
-	* `iterator `[xml_node::begin begin]`() const;`
-	* `iterator `[xml_node::end end]`() const;`
+	* `iterator `[link xml_node::begin begin]`() const;`
+	* `iterator `[link xml_node::end end]`() const;`
 	[lbr]
 
 	* `typedef xml_attribute_iterator `[link xml_attribute_iterator attribute_iterator]`;`
