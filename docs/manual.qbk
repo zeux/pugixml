@@ -311,7 +311,7 @@ Finally, here is a complete example of XML document and the corresponding tree r
 	<mesh name="mesh_root">
 		<!-- here is a mesh node -->
 		some text
-		<![CDATA[[someothertext]]>
+		<![CDATA[someothertext]]>
 		some more text
 		<node attr1="value1" attr2="value2" />
 		<node attr1="value2">
@@ -507,7 +507,7 @@ This function accepts file path as its first argument, and also two optional arg
 
 [note As of version 0.9, there is no function for loading XML document from wide character path. Unfortunately, there is no portable way to do this; the version 1.0 will provide such function only for platforms with the corresponding functionality. You can use stream-loading functions as a workaround if your STL implementation can open file streams via `wchar_t` paths.]
 
-This is a simple example of loading XML document from file ([@samples/load_file.cpp]):
+This is an example of loading XML document from file ([@samples/load_file.cpp]):
 
 [import samples/load_file.cpp]
 [code_load_file]
@@ -622,7 +622,7 @@ Parsing result also has an `encoding` member, which can be used to check that th
 [#xml_parse_result::bool]
 Parsing result object can be implicitly converted to `bool`; if you do not want to handle parsing errors thoroughly, you can just check the return value of load functions as if it was a `bool`: `if (doc.load_file("file.xml")) { ... } else { ... }`.
 
-This is a simple example of handling loading errors ([@samples/load_error_handling.cpp]):
+This is an example of handling loading errors ([@samples/load_error_handling.cpp]):
 
 [import samples/load_error_handling.cpp]
 [code_load_error_handling]
@@ -673,7 +673,7 @@ Additionally there are two predefined option masks:
 
 * [anchor parse_default] is the default set of flags, i.e. it has all options set to their default values. It includes parsing CDATA sections (comments/PIs are not parsed), performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed (by default) for performance reasons.
 
-This is a simple example of using different parsing options ([@samples/load_options.cpp]):
+This is an example of using different parsing options ([@samples/load_options.cpp]):
 
 [import samples/load_options.cpp]
 [code_load_options]
@@ -817,7 +817,7 @@ In case the input string contains a number that is out of the target numeric ran
 [note There are no portable 64-bit types in C++, so there is no corresponding conversion function. If your platform has a 64-bit integer, you can easily write a conversion function yourself.]
 
 [#code_traverse_base_data]
-Here is a simple example of using these functions, along with node data retrieval ones ([@samples/traverse_base.cpp]):
+This is an example of using these functions, along with node data retrieval ones ([@samples/traverse_base.cpp]):
 
 [code_traverse_base_data]
 
@@ -849,7 +849,7 @@ The three-argument function returns the first child node with the specified name
 
 In all of the above functions, all arguments have to be valid strings; passing null pointers results in undefined behavior.
 
-Here is a simple example of using these functions ([@samples/traverse_base.cpp]):
+This is an example of using these functions ([@samples/traverse_base.cpp]):
 
 [code_traverse_base_contents]
 
@@ -877,7 +877,7 @@ Child node lists and attribute lists are simply double-linked lists; while you c
 
 Both types of iterators have bidirectional iterator semantics (i.e. they can be incremented and decremented, but efficient random access is not supported) and support all usual iterator operations - comparison, dereference, etc. The iterators are invalidated if the node\/attribute objects they're pointing to are removed from the tree; adding nodes\/attributes does not invalidate any iterators.
 
-Here is a simple example of using iterators for document traversal ([@samples/traverse_iter.cpp]):
+Here is an example of using iterators for document traversal ([@samples/traverse_iter.cpp]):
 
 [import samples/traverse_iter.cpp]
 [code_traverse_iter]
@@ -886,11 +886,70 @@ Here is a simple example of using iterators for document traversal ([@samples/tr
 
 [endsect] [/iterators]
 
-[section:walker Walker $$$]
+[section:walker Recursive traversal with xml_tree_walker]
+
+[#xml_tree_walker]
+The methods described above allow traversal of immediate children of some node; if you want to do a deep tree traversal, you'll have to do it via a recursive function or some equivalent method. However, pugixml provides a helper for depth-first traversal of a subtree. In order to use it, you have to implement `xml_tree_walker` interface and to call `traverse` function:
+
+	class xml_tree_walker
+	{
+	public:
+		virtual bool begin(xml_node& node);
+		virtual bool for_each(xml_node& node) = 0;
+		virtual bool end(xml_node& node);
+
+		int depth() const;
+	};
+
+	bool xml_node::traverse(xml_tree_walker& walker);
+
+[#xml_tree_walker::begin][#xml_tree_walker::for_each][#xml_tree_walker::end][#xml_node::traverse]
+The traversal is launched by calling `traverse` function on traversal root and proceeds as follows:
+
+* First, `begin` function is called with traversal root as its argument.
+* Then, `for_each` function is called for all nodes in the traversal subtree in depth first order, excluding the traversal root. Node is passed as an argument.
+* Finally, `end` function is called with traversal root as its argument.
+
+If `begin`, `end` or any of the `for_each` calls return `false`, the traversal is terminated and `false` is returned as the traversal result; otherwise, the traversal results in `true`. Note that you don't have to override `begin` or `end` functions; their default implementations return `true`.
+
+[#xml_tree_walker::depth]
+You can get the node's depth relative to the traversal root at any point by calling `depth` function. It returns `-1` if called from `begin`\/`end`, and returns 0-based depth if called from `for_each` - depth is 0 for all children of the traversal root, 1 for all grandchildren and so on.
+
+This is an example of traversing tree hierarchy with xml_tree_walker ([@samples/traverse_walker.cpp]):
+
+[import samples/traverse_walker.cpp]
+[code_traverse_walker_impl]
+[code_traverse_walker_traverse]
+
 [endsect] [/walker]
 
-[section:predicate Predicate $$$]
+[section:predicate Searching for nodes/attributes with predicates]
+
+[#xml_node::find_attribute][#xml_node::find_child][#xml_node::find_node]
+While there are existing functions for getting a node/attribute with known contents, they are often not sufficient for simple queries. As an alternative to iterating manually through nodes/attributes until the needed one is found, you can make a predicate and call one of `find_` functions:
+
+	template <typename Predicate> xml_attribute xml_node::find_attribute(Predicate pred) const;
+	template <typename Predicate> xml_node xml_node::find_child(Predicate pred) const;
+	template <typename Predicate> xml_node xml_node::find_node(Predicate pred) const;
+
+The predicate should be either a plain function or a function object which accepts one argument of type `xml_attribute` (for `find_attribute`) or `xml_node` (for `find_child` and `find_node`), and returns `bool`. The predicate is never called with null handle as an argument.
+
+`find_attribute` function iterates through all attributes of the specified node, and returns the first attribute for which predicate returned `true`. If predicate returned `false` for all attributes or if there were no attributes (including the case where the node is null), null attribute is returned.
+
+`find_child` function iterates through all child nodes of the specified node, and returns the first node for which predicate returned `true`. If predicate returned `false` for all nodes or if there were no child nodes (including the case where the node is null), null node is returned.
+
+`find_node` function performs a depth-first traversal through the subtree of the specified node (excluding the node itself), and returns the first noed for which predicate returned `true`. If predicate returned `false` for all nodes or if subtree was empty, null node is returned.
+
+This is an example of using predicate-based functions ([@samples/traverse_predicate.cpp]):
+
+[import samples/traverse_predicate.cpp]
+[code_traverse_predicate_decl]
+[code_traverse_predicate_find]
+
 [endsect] [/predicate]
+
+[section:misc Miscellaneous functions]
+[endsect] [/misc]
 
 [endsect] [/getting]
 
@@ -1112,6 +1171,7 @@ Enumerations:
 	* [link node_comment]
 	* [link node_pi]
 	* [link node_declaration]
+	[lbr]
 
 * `enum `[link xml_parse_status]
 	* [link status_ok]
@@ -1129,6 +1189,7 @@ Enumerations:
 	* [link status_bad_attribute]
 	* [link status_bad_end_element]
 	* [link status_end_element_mismatch]
+	[lbr]
 
 * [link xml_encoding]
 	* [link encoding_auto]
@@ -1140,6 +1201,7 @@ Enumerations:
 	* [link encoding_utf32_be]
 	* [link encoding_utf32]
 	* [link encoding_wchar]
+	[lbr]
 
 * xpath_value_type
 	* xpath_type_none
@@ -1156,6 +1218,7 @@ Constants:
 	* format_no_declaration
 	* format_raw
 	* format_write_bom
+	[lbr]
 
 * Parsing options bit flags:
 	* [link parse_cdata]
@@ -1215,9 +1278,7 @@ Classes:
 	* bool set_value(unsigned int rhs);
 	* bool set_value(double rhs);
 	* bool set_value(bool rhs);
-
-* `class `[link xml_node_iterator]
-* `class `[link xml_attribute_iterator]
+	[lbr]
 
 * `class `[link xml_node]
 	* [link xml_node::ctor xml_node]`();`
@@ -1275,7 +1336,18 @@ Classes:
 	* `attribute_iterator `[link xml_node::attributes_end attributes_end]`() const;`
 	[lbr]
 
-	* xml_node root() const;
+	* `bool `[link xml_node::traverse traverse]`(xml_tree_walker& walker);`
+	[lbr]
+
+	* `template <typename Predicate> xml_attribute `[link xml_node::find_attribute find_attribute]`(Predicate pred) const;`
+	* `template <typename Predicate> xml_node `[link xml_node::find_child find_child]`(Predicate pred) const;`
+	* `template <typename Predicate> xml_node `[link xml_node::find_node find_node]`(Predicate pred) const;`
+	[lbr]
+
+	* `string_t `[link xml_node::path path]`(char_t delimiter = '/') const;`
+	* `xml_node `[link xml_node::first_element_by_path]`(const char_t* path, char_t delimiter = '/') const;`
+	* `xml_node `[link xml_node::root root]`() const;`
+	* `ptrdiff_t `[link xml_node::offset_debug offset_debug]`() const;`
 	[lbr]
 
 	* bool set_name(const char_t* rhs);
@@ -1296,21 +1368,13 @@ Classes:
 	* void remove_attribute(const char_t* name);
 	* void remove_child(const xml_node& n);
 	* void remove_child(const char_t* name);
-	* template <typename Predicate> xml_attribute find_attribute(Predicate pred) const
-	* template <typename Predicate> xml_node find_child(Predicate pred) const
-	* template <typename Predicate> xml_node find_node(Predicate pred) const
-	* string_t path(char_t delimiter = '/') const;
-	* xml_node first_element_by_path(const char_t* path, char_t delimiter = '/') const;
-	* bool traverse(xml_tree_walker& walker);
+	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+	* void print(std::ostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+	* void print(std::wostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
 	* xpath_node select_single_node(const char_t* query) const;
 	* xpath_node select_single_node(const xpath_query& query) const;
 	* xpath_node_set select_nodes(const char_t* query) const;
 	* xpath_node_set select_nodes(const xpath_query& query) const;
-	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
-	* void print(std::ostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
-	* void print(std::wostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
-
-	* ptrdiff_t offset_debug() const;
 	[lbr]
 
 * `class `[link xml_document]
@@ -1351,6 +1415,20 @@ Classes:
 
 	* `operator `[link xml_parse_result::bool bool]`() const;`
 	* `const char* `[link xml_parse_result::description description]`() const;`
+	[lbr]
+
+* `class `[link xml_node_iterator]
+* `class `[link xml_attribute_iterator]
+[lbr]
+
+* `class `[link xml_tree_walker]
+	* `virtual bool `[link xml_tree_walker::begin begin]`(xml_node& node);`
+	* `virtual bool `[link xml_tree_walker::for_each for_each]`(xml_node& node) = 0;`
+	* `virtual bool `[link xml_tree_walker::end end]`(xml_node& node);`
+	[lbr]
+
+	* `int `[link xml_tree_walker::depth depth]`() const;`
+	[lbr]
 
 * xpath_query
 	* explicit xpath_query(const char_t* query);
@@ -1374,15 +1452,6 @@ Classes:
 	* xml_writer_stream(std::wostream& stream);
 
 	* virtual void write(const void* data, size_t size);
-
-* xml_tree_walker
-	* int depth() const;
-	* xml_tree_walker();
-	* virtual ~xml_tree_walker();
-
-	* virtual bool begin(xml_node&);
-	* virtual bool for_each(xml_node&) = 0;
-	* virtual bool end(xml_node&);
 
 * xpath_exception
 	* explicit xpath_exception(const char* message);
@@ -1430,5 +1499,3 @@ Functions:
 * [link set_memory_management_functions]
 
 [endsect] [/apiref]
-
-Maybe we need user manual, quick one-page tutorial and examples, but don't need standalone API reference?
