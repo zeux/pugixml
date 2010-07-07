@@ -3945,7 +3945,8 @@ namespace pugi
 	{
 		walker._depth = -1;
 		
-		if (!walker.begin(*this)) return false;
+		xml_node arg_begin = *this;
+		if (!walker.begin(arg_begin)) return false;
 
 		xml_node cur = first_child();
 				
@@ -3955,7 +3956,8 @@ namespace pugi
 
 			do 
 			{
-				if (!walker.for_each(cur))
+				xml_node arg_for_each = cur;
+				if (!walker.for_each(arg_for_each))
 					return false;
 						
 				if (cur.first_child())
@@ -3983,7 +3985,8 @@ namespace pugi
 
 		assert(walker._depth == -1);
 
-		return walker.end(*this);
+		xml_node arg_end = *this;
+		return walker.end(arg_end);
 	}
 
 	unsigned int xml_node::document_order() const
