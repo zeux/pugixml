@@ -983,7 +983,7 @@ If the offset is not available (this happens if the node is null, was not origin
 
 [section:modify Modifying document data]
 
-The document in pugixml is fully mutable: you can completely change the document structure and modify the data of nodes/attributes easily. This section provides documentation for these functions. All functions take care of memory management and structural integrity themselves, so they always result in structurally valid tree - however, it is possible to create an invalid XML tree (for example, by adding two attributes with the same name or by setting attribute/node name to empty/invalid string). Tree modification is optimized for performance and for memory consumption, so if you have enough memory you can create documents from scratch with pugixml and later save them to file/stream instead of relying on error-prone manual text writing and without too much overhead.
+The document in pugixml is fully mutable: you can completely change the document structure and modify the data of nodes/attributes. This section provides documentation for the relevant functions. All functions take care of memory management and structural integrity themselves, so they always result in structurally valid tree - however, it is possible to create an invalid XML tree (for example, by adding two attributes with the same name or by setting attribute/node name to empty/invalid string). Tree modification is optimized for performance and for memory consumption, so if you have enough memory you can create documents from scratch with pugixml and later save them to file/stream instead of relying on error-prone manual text writing and without too much overhead.
 
 All member functions that change node/attribute data or structure are non-constant and thus can not be called on constant handles. However, you can easily convert constant handle to non-constant one by simple assignment: `void foo(const pugi::xml_node& n) { pugi::xml_node nc = n; }`, so const-correctness here mainly provides additional documentation.
 
@@ -1069,7 +1069,7 @@ All functions return the handle to newly created object on success, and null han
 
 * Adding fails if the target node is null;
 * Only `node_element` nodes can contain attributes, so attribute adding fails if node is not an element;
-* Only `node_document` and `node_element` nodes can contain children, so child node adding fails if target node is not an element;
+* Only `node_document` and `node_element` nodes can contain children, so child node adding fails if target node is not an element or a document;
 * `node_document` and `node_null` nodes can not be inserted as children, so passing `node_document` or `node_null` value as type results in operation failure;
 * `node_declaration` nodes can only be added as children of the document node; attempt to insert declaration node as a child of an element node fails;
 * Adding node/attribute results in memory allocation, which may fail;
