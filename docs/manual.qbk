@@ -559,7 +559,7 @@ For additional interoperability pugixml provides functions for loading document 
 
 `load` with `std::istream` argument loads the document from stream from the current read position to the end, treating the stream contents as a byte stream of the specified encoding (with encoding autodetection as necessary). Thus calling `xml_document::load` on an opened `std::ifstream` object is equivalent to calling `xml_document::load_file`.
 
-`load` with `std::wstream` argument treats the stream contents as a wide character stream (encoding is always `encoding_wchar`). Because of this, using `load` with wide character streams requires careful (usually platform-specific) stream setup (i.e using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to load documents from non-Unicode encodings, i.e. you can load Shift-JIS encoded data if you set the correct locale.
+`load` with `std::wstream` argument treats the stream contents as a wide character stream (encoding is always `encoding_wchar`). Because of this, using `load` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to load documents from non-Unicode encodings, i.e. you can load Shift-JIS encoded data if you set the correct locale.
 
 This is a simple example of loading XML document from file using streams ([@samples/load_stream.cpp]); read the sample code for more complex examples involving wide streams and locales:
 
@@ -997,7 +997,7 @@ As discussed before, nodes can have name and value, both of which are strings. D
 	bool xml_node::set_name(const char_t* rhs);
 	bool xml_node::set_value(const char_t* rhs);
 
-Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a `node_pcdata` node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value contents is not verified, so take care to use only valid XML names, or the document may become malformed.
+Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a `node_pcdata` node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
 
 There is no equivalent of `child_value` function for modifying text children of the node.
 
@@ -1015,7 +1015,7 @@ All attributes have name and value, both of which are strings (value may be empt
 	bool xml_attribute::set_name(const char_t* rhs);
 	bool xml_attribute::set_value(const char_t* rhs);
 
-Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the attribute handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value contents is not verified, so take care to use only valid XML names, or the document may become malformed.
+Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the attribute handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
 
 In addition to string functions, several functions are provided for handling attributes with numbers and booleans as values:
 
@@ -1153,7 +1153,7 @@ Often after creating a new document or loading the existing one and processing i
 
 The node/attribute data is written to the destination properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped. In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For proper output, make sure all node and attribute names are set to meaningful values.
 
-[caution Currently the contents of CDATA sections is not escaped, so CDATA sections with values that contain `"]]>"` will result in malformed document. This will be fixed in version 1.0.]
+[caution Currently the content of CDATA sections is not escaped, so CDATA sections with values that contain `"]]>"` will result in malformed document. This will be fixed in version 1.0.]
 
 [section:file Saving document to a file]
 
@@ -1184,7 +1184,7 @@ For additional interoperability pugixml provides functions for saving document t
 	void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 	void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
 
-`save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with `encoding_wchar` encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
+`save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with `encoding_wchar` encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
 
 [#xml_writer_stream]
 Calling `save` with stream target is equivalent to creating a `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
@@ -1246,7 +1246,7 @@ All saving functions accept the optional parameter `flags`. This is a bitmask th
 
 These flags control the resulting tree contents:
 
-* [anchor format_indent] determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving function, and is `"\t"` by default). If this flag is on, before every node the indentation string is output several times, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if `format_raw` is enabled. This flag is *on* by default.
+* [anchor format_indent] determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is `"\t"` by default). If this flag is on, before every node the indentation string is output several times, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if `format_raw` is enabled. This flag is *on* by default.
 [lbr]
 
 * [anchor format_raw] switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with `parse_ws_pcdata` flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
