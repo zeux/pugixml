@@ -731,7 +731,7 @@ As for rejecting invalid XML documents, there are a number of incompatibilities 
 
 [endsect] [/loading]
 
-[section:getting Getting data from document $$$]
+[section:access Accessing document data]
 
 pugixml features an extensive interface for getting various types of data from the document and for traversing the document. This section provides documentation for all such functions that do not modify the tree except for XPath-related functions; see [sref manual.xpath] for XPath reference. As discussed in [sref manual.dom.cpp], there are two types of handles to tree data - [link xml_node] and [link xml_attribute]. The handles have special null (empty) values which propagate through various functions and thus are useful for writing more concise code; see [link node_null this description] for details. The documentation in this section will explicitly state the results of all function in case of null inputs.
 
@@ -964,7 +964,7 @@ While pugixml supports complex XPath expressions, sometimes a simple path handli
 	string_t xml_node::path(char_t delimiter = '/') const;
 	xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter = '/') const;
 
-Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, `<c/>` has a path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<a/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
+Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, node `<c/>` has path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<a/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
 
 In case path component is ambiguous (if there are two nodes with given name), the first one is selected; paths are not guaranteed to uniquely identify nodes in a document. If any component of a path is not found, the result of `first_element_by_path` is null node; also `first_element_by_path` returns null node for null nodes, in which case the path does not matter. `path` returns an empty string for null nodes. 
 
@@ -979,9 +979,172 @@ If the offset is not available (this happens if the node is null, was not origin
 
 [endsect] [/misc]
 
-[endsect] [/getting]
+[endsect] [/access]
 
-[section:modify Modifying document $$$]
+[section:modify Modifying document data]
+
+The document in pugixml is fully mutable: you can completely change the document structure and modify the data of nodes/attributes easily. This section provides documentation for these functions. All functions take care of memory management and structural integrity themselves, so they always result in structurally valid tree - however, it is possible to create an invalid XML tree (for example, by adding two attributes with the same name or by setting attribute/node name to empty/invalid string). Tree modification is optimized for performance and for memory consumption, so if you have enough memory you can create documents from scratch with pugixml and later save them to file/stream instead of relying on error-prone manual text writing and without too much overhead.
+
+All member functions that change node/attribute data or structure are non-constant and thus can not be called on constant handles. However, you can easily convert constant handle to non-constant one by simple assignment: `void foo(const pugi::xml_node& n) { pugi::xml_node nc = n; }`, so const-correctness here mainly provides additional documentation.
+
+[import samples/modify_base.cpp]
+
+[section:nodedata Setting node data]
+
+[#xml_node::set_name][#xml_node::set_value]
+As discussed before, nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. `node_document` nodes do not have name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to set node's name or value, you can use the following functions:
+
+	bool xml_node::set_name(const char_t* rhs);
+	bool xml_node::set_value(const char_t* rhs);
+
+Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a `node_pcdata` node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value contents is not verified, so take care to use only valid XML names, or the document may become malformed.
+
+There is no equivalent of `child_value` function for modifying text children of the node.
+
+This is an example of setting node name and value ([@samples/modify_base.cpp]):
+
+[code_modify_base_node]
+
+[endsect] [/nodedata]
+
+[section:attrdata Setting attribute data]
+
+[#xml_attribute::set_name][#xml_attribute::set_value]
+All attributes have name and value, both of which are strings (value may be empty). You can set them with the following functions:
+
+	bool xml_attribute::set_name(const char_t* rhs);
+	bool xml_attribute::set_value(const char_t* rhs);
+
+Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the attribute handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value contents is not verified, so take care to use only valid XML names, or the document may become malformed.
+
+In addition to string functions, several functions are provided for handling attributes with numbers and booleans as values:
+
+	bool xml_attribute::set_value(int rhs);
+	bool xml_attribute::set_value(unsigned int rhs);
+	bool xml_attribute::set_value(double rhs);
+	bool xml_attribute::set_value(bool rhs);
+	
+The above functions convert the argument to string and then call the base `set_value` function. Integers are converted to a decimal form, floating-point numbers are converted to either decimal or scientific form, depending on the number magnitude, boolean values are converted to either `"true"` or `"false"`.
+
+[caution Number conversion functions depend on current C locale as set with `setlocale`, so may generate unexpected results if the locale is different from `"C"`.]
+
+[note There are no portable 64-bit types in C++, so there is no corresponding `set_value` function. If your platform has a 64-bit integer, you can easily write such a function yourself.]
+
+[#xml_attribute::assign]
+
+For convenience, all `set_value` functions have the corresponding assignment operators:
+
+	xml_attribute& xml_attribute::operator=(const char_t* rhs);
+	xml_attribute& xml_attribute::operator=(int rhs);
+	xml_attribute& xml_attribute::operator=(unsigned int rhs);
+	xml_attribute& xml_attribute::operator=(double rhs);
+	xml_attribute& xml_attribute::operator=(bool rhs);
+
+These operators simply call the right `set_value` function and return the attribute they're called on; the return value of `set_value` is ignored, so errors are not detected.
+
+This is an example of setting attribute name and value ([@samples/modify_base.cpp]):
+
+[code_modify_base_attr]
+
+[endsect] [/attrdata]
+
+[section:add Adding nodes/attributes]
+
+[#xml_node::append_attribute][#xml_node::insert_attribute_after][#xml_node::insert_attribute_before][#xml_node::append_child][#xml_node::insert_child_after][#xml_node::insert_child_before]
+Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before\/after some after node:
+
+	xml_attribute xml_node::append_attribute(const char_t* name);
+	xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr);
+	xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr);
+
+	xml_node xml_node::append_child(xml_node_type type = node_element);
+	xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node);
+	xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node);
+
+`append_attribute` and `append_child` create a new node/attribute at the end of the corresponding list of the node the method is called on; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node\/attribute before or after specified node\/attribute.
+
+Attribute functions create an attribute with the specified name; you can specify the empty name and change the name later if you want to. Node functions create the node with the specified type; since node type can't be changed, you have to know the desired type beforehand. Also note that not all types can be added as children; see below for clarification.
+
+All functions return the handle to newly created object on success, and null handle on failure. There are several reasons for failure:
+
+* Adding fails if the target node is null;
+* Only `node_element` nodes can contain attributes, so attribute adding fails if node is not an element;
+* Only `node_document` and `node_element` nodes can contain children, so child node adding fails if target node is not an element;
+* `node_document` and `node_null` nodes can not be inserted as children, so passing `node_document` or `node_null` value as type results in operation failure;
+* `node_declaration` nodes can only be added as children of the document node; attempt to insert declaration node as a child of an element node fails;
+* Adding node/attribute results in memory allocation, which may fail;
+* Insertion functions fail if the specified node or attribute is not in the target node's children/attribute list.
+
+Even if the operation fails, the document remains in consistent state, but the requested node/attribute is not added.
+
+[caution attribute() and child() functions do not add attributes or nodes to the tree, so code like `node.attribute("id") = 123;` will not do anything if `node` does not have an attribute with name `"id"`. Make sure you're operating with existing attributes/nodes by adding them if necessary.]
+
+This is an example of adding new attributes\/nodes to the document ([@samples/modify_add.cpp]):
+
+[import samples/modify_add.cpp]
+[code_modify_add]
+
+[endsect] [/add]
+
+[section:remove Removing nodes/attributes]
+
+[#xml_node::remove_attribute][#xml_node::remove_child]
+If you do not want your document to contain some node or attribute, you can remove it with one of the following functions:
+
+	bool xml_node::remove_attribute(const xml_attribute& a);
+	bool xml_node::remove_child(const xml_node& n);
+
+`remove_attribute` removes the attribute from the attribute list of the node, and returns the operation result. `remove_child` removes the child node with the entire subtree (including all descendant nodes and attributes) from the document, and returns the operation result. Removing fails if one of the following is true:
+
+* The node the function is called on is null;
+* The attribute\/node to be removed is null;
+* The attribute\/node to be removed is not in the node's attribute\/child list.
+
+Removing the attribute or node invalidates all handles to the same underlying object, and also invalidates all iterators pointing to the same object. Removing node also invalidates all past-the-end iterators to its attribute or child node list. Be careful to ensure that all such handles and iterators either do not exist or are not used after the attribute\/node is removed.
+
+If you want to remove the attribute or child node by its name, two additional helper functions are available:
+
+	bool xml_node::remove_attribute(const char_t* name);
+	bool xml_node::remove_child(const char_t* name);
+
+These functions look for the first attribute or child with the specified name, and then remove it, returning the result. If there is no attribute or child with such name, the function returns `false`; if there are two nodes with the given name, only the first node is deleted. If you want to delete all nodes with the specified name, you can use code like this: `while (node.remove_child("tool")) ;`.
+
+This is an example of removing attributes\/nodes from the document ([@samples/modify_remove.cpp]):
+
+[import samples/modify_remove.cpp]
+[code_modify_remove]
+
+[endsect] [/remove]
+
+[section:clone Cloning nodes/attributes]
+
+[#xml_node::append_copy][#xml_node::insert_copy_after][#xml_node::insert_copy_before]
+With the help of previously described functions, it is possible to create trees with any contents and structure, including cloning the existing data. However since this is an often needed operation, pugixml provides built-in node/attribute cloning facilities. Since nodes and attributes do not exist outside of document tree, you can't create a standalone copy - you have to immediately insert it somewhere in the tree. For this, you can use one of the following functions:
+
+	xml_attribute xml_node::append_copy(const xml_attribute& proto);
+	xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
+	xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
+	xml_node xml_node::append_copy(const xml_node& proto);
+	xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node);
+	xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node);
+
+These functions mirror the structure of `append_child`, `insert_child_before` and related functions - they take the handle to the prototype object, which is to be cloned, insert a new attribute\/node at the appropriate place, and then copy the attribute data or the whole node subtree to the new object. The functions return the handle to the resulting duplicate object, or null handle on failure.
+
+The attribute is copied along with the name and value; the node is copied along with its type, name and value; additionally attribute list and all children are recursively cloned, resulting in the deep subtree clone. The prototype object can be a part of the same document, or a part of any other document.
+
+The failure conditions resemble those of `append_child`, `insert_child_before` and related functions, [link xml_node::append_child consult their documentation for more information]. There are additional caveats specific to cloning functions:
+
+* Cloning null handles results in operation failure;
+* Node cloning starts with insertion of the node of the same type as that of the prototype; for this reason, cloning functions can not be directly used to clone entire documents, since `node_document` is not a valid insertion type. The example below provides a workaround.
+* It is possible to copy a subtree as a child of some node inside this subtree, i.e. `node.append_copy(node.parent().parent());`. This is a valid operation, and it results in a clone of the subtree in the state before cloning started, i.e. no infinite recursion takes place.
+
+This is an example with one possible implementation of include tags in XML ([@samples/include.cpp]). It illustrates node cloning and usage of other document modification functions:
+
+[import samples/include.cpp]
+[code_include]
+
+[endsect] [/clone]
+
 [endsect] [/modify]
 
 [section:saving Saving document]
@@ -1028,6 +1191,7 @@ Major release, featuring extended and improved Unicode support, miscellaneous pe
 
 * Miscellaneous:
 	# All STL includes except <exception> in pugixml.hpp are replaced with forward declarations
+	# xml_node::remove_child and xml_node::remove_attribute now return the operation result
 
 * Compatibility:
 	# parse() and as_utf16 are left for compatibility (these functions are deprecated and will be removed in version 1.0)
@@ -1295,19 +1459,19 @@ Classes:
 	* `bool `[link xml_attribute::as_bool as_bool]`() const;`
 	[lbr]
 
-	* xml_attribute& operator=(const char_t* rhs);
-	* xml_attribute& operator=(int rhs);
-	* xml_attribute& operator=(unsigned int rhs);
-	* xml_attribute& operator=(double rhs);
-	* xml_attribute& operator=(bool rhs);
+	* `bool `[link xml_attribute::set_name set_name]`(const char_t* rhs);`
+	* `bool `[link xml_attribute::set_value set_value]`(const char_t* rhs);`
+	* `bool `[link xml_attribute::set_value set_value]`(int rhs);`
+	* `bool `[link xml_attribute::set_value set_value]`(unsigned int rhs);`
+	* `bool `[link xml_attribute::set_value set_value]`(double rhs);`
+	* `bool `[link xml_attribute::set_value set_value]`(bool rhs);`
 	[lbr]
 
-	* bool set_name(const char_t* rhs);
-	* bool set_value(const char_t* rhs);
-	* bool set_value(int rhs);
-	* bool set_value(unsigned int rhs);
-	* bool set_value(double rhs);
-	* bool set_value(bool rhs);
+	* `xml_attribute& `[link xml_attribute::assign operator=]`(const char_t* rhs);`
+	* `xml_attribute& `[link xml_attribute::assign operator=]`(int rhs);`
+	* `xml_attribute& `[link xml_attribute::assign operator=]`(unsigned int rhs);`
+	* `xml_attribute& `[link xml_attribute::assign operator=]`(double rhs);`
+	* `xml_attribute& `[link xml_attribute::assign operator=]`(bool rhs);`
 	[lbr]
 
 * `class `[link xml_node]
@@ -1380,27 +1544,41 @@ Classes:
 	* `ptrdiff_t `[link xml_node::offset_debug offset_debug]`() const;`
 	[lbr]
 
-	* bool set_name(const char_t* rhs);
-	* bool set_value(const char_t* rhs);
-	* xml_attribute append_attribute(const char_t* name);
-	* xml_attribute insert_attribute_after(const char_t* name, const xml_attribute& attr);
-	* xml_attribute insert_attribute_before(const char_t* name, const xml_attribute& attr);
-	* xml_attribute append_copy(const xml_attribute& proto);
-	* xml_attribute insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
-	* xml_attribute insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
-	* xml_node append_child(xml_node_type type = node_element);
-	* xml_node insert_child_after(xml_node_type type, const xml_node& node);
-	* xml_node insert_child_before(xml_node_type type, const xml_node& node);
-	* xml_node append_copy(const xml_node& proto);
-	* xml_node insert_copy_after(const xml_node& proto, const xml_node& node);
-	* xml_node insert_copy_before(const xml_node& proto, const xml_node& node);
-	* void remove_attribute(const xml_attribute& a);
-	* void remove_attribute(const char_t* name);
-	* void remove_child(const xml_node& n);
-	* void remove_child(const char_t* name);
+	* `bool `[link xml_node::set_name set_name]`(const char_t* rhs);`
+	* `bool `[link xml_node::set_value set_value]`(const char_t* rhs);`
+	[lbr]
+
+	* `xml_attribute `[link xml_node::append_attribute append_attribute]`(const char_t* name);`
+	* `xml_attribute `[link xml_node::insert_attribute_after insert_attribute_after]`(const char_t* name, const xml_attribute& attr);`
+	* `xml_attribute `[link xml_node::insert_attribute_before insert_attribute_before]`(const char_t* name, const xml_attribute& attr);`
+	[lbr]
+
+	* `xml_node `[link xml_node::append_child append_child]`(xml_node_type type = node_element);`
+	* `xml_node `[link xml_node::insert_child_after insert_child_after]`(xml_node_type type, const xml_node& node);`
+	* `xml_node `[link xml_node::insert_child_before insert_child_before]`(xml_node_type type, const xml_node& node);`
+	[lbr]
+
+	* `xml_attribute `[link xml_node::append_copy append_copy]`(const xml_attribute& proto);`
+	* `xml_attribute `[link xml_node::insert_copy_after insert_copy_after]`(const xml_attribute& proto, const xml_attribute& attr);`
+	* `xml_attribute `[link xml_node::insert_copy_before insert_copy_before]`(const xml_attribute& proto, const xml_attribute& attr);`
+	[lbr]
+
+	* `xml_node `[link xml_node::append_copy append_copy]`(const xml_node& proto);`
+	* `xml_node `[link xml_node::insert_copy_after insert_copy_after]`(const xml_node& proto, const xml_node& node);`
+	* `xml_node `[link xml_node::insert_copy_before insert_copy_before]`(const xml_node& proto, const xml_node& node);`
+	[lbr]
+
+	* `bool `[link xml_node::remove_attribute remove_attribute]`(const xml_attribute& a);`
+	* `bool `[link xml_node::remove_attribute remove_attribute]`(const char_t* name);`
+	* `bool `[link xml_node::remove_child remove_child]`(const xml_node& n);`
+	* `bool `[link xml_node::remove_child remove_child]`(const char_t* name);`
+	[lbr]
+
 	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 	* void print(std::ostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 	* void print(std::wostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
+	[lbr]
+
 	* xpath_node select_single_node(const char_t* query) const;
 	* xpath_node select_single_node(const xpath_query& query) const;
 	* xpath_node_set select_nodes(const char_t* query) const;
