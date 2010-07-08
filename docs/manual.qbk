@@ -350,7 +350,7 @@ Default constructor of `xml_document` initializes the document to the tree with 
 There is a special value of `xml_node` type, known as null node or empty node (such nodes have type `node_null`). It does not correspond to any node in any document, and thus resembles null pointer. However, all operations are defined on empty nodes; generally the operations don't do anything and return empty nodes/attributes or empty strings as their result (see documentation for specific functions for more detailed information). This is useful for chaining calls; i.e. you can get the grandparent of a node like so: `node.parent().parent()`; if a node is a null node or it does not have a parent, the first `parent()` call returns null node; the second `parent()` call then also returns null node, so you don't have to check for errors twice.
 
 [#xml_attribute]
-`xml_attribute` is the handle to a XML attribute; it has the same semantics as `xml_node`, i.e. there can be several `xml_attribute` handles pointing to the same underlying object, there is a special null attribute value, which propagates to function results.
+`xml_attribute` is the handle to an XML attribute; it has the same semantics as `xml_node`, i.e. there can be several `xml_attribute` handles pointing to the same underlying object, there is a special null attribute value, which propagates to function results.
 
 [#xml_attribute::ctor]
 [#xml_node::ctor]
@@ -503,7 +503,7 @@ The most common source of XML data is files; pugixml provides a separate functio
 	
 This function accepts file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
 
-`load_file` destroys the existing document tree and then tries to load the new tree from the specified file. The result of the operation is returned in a `xml_parse_result` object; this object contains the operation status, and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [sref manual.loading.errors] for error handling details.
+`load_file` destroys the existing document tree and then tries to load the new tree from the specified file. The result of the operation is returned in an `xml_parse_result` object; this object contains the operation status, and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [sref manual.loading.errors] for error handling details.
 
 [note As of version 0.9, there is no function for loading XML document from wide character path. Unfortunately, there is no portable way to do this; the version 1.0 will provide such function only for platforms with the corresponding functionality. You can use stream-loading functions as a workaround if your STL implementation can open file streams via `wchar_t` paths.]
 
@@ -1165,7 +1165,7 @@ If you want to save the whole document to a file, you can use the following func
 This function accepts file path as its first argument, and also three optional arguments, which specify indentation and other output options (see [sref manual.saving.options]) and output data encoding (see [sref manual.saving.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
 
 [#xml_writer_file]
-`save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns `false`. Calling `save_file` is equivalent to creating a `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
+`save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns `false`. Calling `save_file` is equivalent to creating an `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
 
 [note As of version 0.9, there is no function for saving XML document to wide character paths. Unfortunately, there is no portable way to do this; the version 1.0 will provide such function only for platforms with the corresponding functionality. You can use stream-saving functions as a workaround if your STL implementation can open file streams via wchar_t paths.]
 
@@ -1187,7 +1187,7 @@ For additional interoperability pugixml provides functions for saving document t
 `save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with `encoding_wchar` encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
 
 [#xml_writer_stream]
-Calling `save` with stream target is equivalent to creating a `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
+Calling `save` with stream target is equivalent to creating an `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
 
 This is a simple example of saving XML document to standard output ([@samples/save_stream.cpp]):
 
