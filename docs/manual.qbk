@@ -776,7 +776,7 @@ Apart from structural information (parent, child nodes, attributes), nodes can h
 In case node does not have a name or value or if the node handle is null, both functions return empty strings - they never return null pointers.
 
 [#xml_node::child_value]
-It is common to store data as a text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type `node_pcdata` with value `"This is a node"`. pugixml provides two helper functions to parse such data:
+It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type `node_pcdata` with value `"This is a node"`. pugixml provides two helper functions to parse such data:
 
 	const char_t* xml_node::child_value() const;
 	const char_t* xml_node::child_value(const char_t* name) const;
@@ -1148,6 +1148,139 @@ This is an example with one possible implementation of include tags in XML ([@sa
 [endsect] [/modify]
 
 [section:saving Saving document]
+
+Often after creating a new document or loading the existing one and processing it, it is necessary to save the result back to file. Also it is occasionally useful to output the whole document or a subtree to some stream; use cases include debug printing, serialization via network or other text-oriented medium, etc. pugixml provides several functions to output any subtree of the document to a file, stream or another generic transport interface; these functions allow to customize the output format (see [sref manual.saving.options]), and also perform necessary encoding conversions (see [sref manual.saving.encoding]). This section documents the relevant functionality.
+
+The node/attribute data is written to the destination properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped. In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For proper output, make sure all node and attribute names are set to meaningful values.
+
+[caution Currently the contents of CDATA sections is not escaped, so CDATA sections with values that contain `"]]>"` will result in malformed document. This will be fixed in version 1.0.]
+
+[section:file Saving document to a file]
+
+[#xml_document::save_file]
+If you want to save the whole document to a file, you can use the following function:
+
+	bool xml_document::save_file(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+
+This function accepts file path as its first argument, and also three optional arguments, which specify indentation and other output options (see [sref manual.saving.options]) and output data encoding (see [sref manual.saving.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
+
+[#xml_writer_file]
+`save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns `false`. Calling `save_file` is equivalent to creating a `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
+
+[note As of version 0.9, there is no function for saving XML document to wide character paths. Unfortunately, there is no portable way to do this; the version 1.0 will provide such function only for platforms with the corresponding functionality. You can use stream-saving functions as a workaround if your STL implementation can open file streams via wchar_t paths.]
+
+This is a simple example of saving XML document to file ([@samples/save_file.cpp]):
+
+[import samples/save_file.cpp]
+[code_save_file]
+
+[endsect] [/file]
+
+[section:stream Saving document to C++ IOstreams]
+
+[#xml_document::save_stream]
+For additional interoperability pugixml provides functions for saving document to any object which implements C++ std::ostream interface. This allows you to save documents to any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). Most notably, this allows for easy debug output, since you can use `std::cout` stream as saving target. There are two functions, one works with narrow character streams, another handles wide character ones:
+
+	void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+	void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
+
+`save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with `encoding_wchar` encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
+
+[#xml_writer_stream]
+Calling `save` with stream target is equivalent to creating a `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
+
+This is a simple example of saving XML document to standard output ([@samples/save_stream.cpp]):
+
+[import samples/save_stream.cpp]
+[code_save_stream]
+
+[endsect] [/stream]
+
+[section:writer Saving document via writer interface]
+
+[#xml_document::save][#xml_writer][#xml_writer::write]
+All of the above saving functions are implemented in terms of writer interface. This is a simple interface with a single function, which is called several times during output process with chunks of document data as input:
+
+	class xml_writer
+	{
+	public:
+		virtual void write(const void* data, size_t size) = 0;
+	};
+
+	void xml_document::save(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+
+In order to output the document via some custom transport, for example sockets, you should create an object which implements `xml_writer_file` interface and pass it to `save` function. `xml_writer_file::write` function is called with a buffer as an input, where `data` points to buffer start, and `size` is equal to the buffer size in bytes. `write` implementation must write the buffer to the transport; it can not save the passed buffer pointer, as the buffer contents will change after `write` returns. The buffer contains the chunk of document data in the desired encoding.
+
+`write` function is called with relatively large blocks (size is usually several kilobytes, except for the first block with BOM, which is output only if `format_write_bom` is set, and last block, which may be small), so there is often no need for additional buffering in the implementation.
+
+This is a simple example of custom writer for saving document data to STL string ([@samples/save_custom_writer.cpp]); read the sample code for more complex examples:
+
+[import samples/save_custom_writer.cpp]
+[code_save_custom_writer]
+
+[endsect] [/writer]
+
+[section:subtree Saving a single subtree]
+
+[#xml_node::print][#xml_node::print_stream]
+While the previously described functions saved the whole document to the destination, it is easy to save a single subtree. The following functions are provided:
+
+	void xml_node::print(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+	void xml_node::print(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
+	void xml_node::print(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+
+These functions have the same arguments with the same meaning as the corresponding `xml_document::save` functions, and allow you to save the subtree to either a C++ IOstream or to any object that implements `xml_writer` interface.
+
+Saving a subtree differs from saving the whole document: the process behaves as if `format_write_bom` is off, and `format_no_declaration` is on, even if actual values of the flags are different. This means that BOM is not written to the destination, and document declaration is only written if it is the node itself or is one of node's children. Note that this also holds if you're saving a document; this example ([@samples/save_subtree.cpp]) illustrates the difference:
+
+[import samples/save_subtree.cpp]
+[code_save_subtree]
+
+[endsect] [/subtree]
+
+[section:options Output options]
+
+All saving functions accept the optional parameter `flags`. This is a bitmask that customizes the output format; you can select the way the document nodes are printed and select the needed additional information that is output before the document contents.
+
+[note You should use the usual bitwise arithmetics to manipulate the bitmask: to enable a flag, use `mask | flag`; to disable a flag, use `mask & ~flag`.]
+
+These flags control the resulting tree contents:
+
+* [anchor format_indent] determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving function, and is `"\t"` by default). If this flag is on, before every node the indentation string is output several times, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if `format_raw` is enabled. This flag is *on* by default.
+[lbr]
+
+* [anchor format_raw] switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with `parse_ws_pcdata` flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
+
+These flags control the additional output information:
+
+* [anchor format_no_declaration] allows to disable default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.
+[lbr]
+
+* [anchor format_write_bom] allows to enable Byte Order Mark (BOM) output. By default, no BOM is output, so in case of non UTF-8 encodings the resulting document's encoding may not be recognized by some parsers and text editors, if they do not implement sophisticated encoding detection. Enabling this flag adds an encoding-specific BOM to the output. This flag has no effect in `xml_node::print` functions: they never output the BOM. This flag is *off* by default.
+
+Additionally, there is one predefined option mask:
+
+* [anchor format_default] is the default set of flags, i.e. it has all options set to their default values. It sets formatted output with indentation, without BOM and with default node declaration, if necessary.
+
+This is an example that shows the outputs of different output options ([@samples/save_options.cpp]):
+
+[import samples/save_options.cpp]
+[code_save_options]
+
+[endsect] [/options]
+
+[section:encoding Encodings]
+
+pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions during output. The output encoding is set via the `encoding` parameter of saving functions, which is of type `xml_encoding`. The possible values for the encoding are documented in [sref manual.loading.encoding]; the only flag that has a different meaning is `encoding_auto`.
+
+While all other flags set the exact encoding, `encoding_auto` is meant for automatic encoding detection. The automatic detection does not make sense for output encoding, since there is usually nothing to infer the actual encoding from, so here `encoding_auto` means UTF-8 encoding, which is the most popular encoding for XML data storage. This is also the default value of output encoding; specify another value if you do not want UTF-8 encoded output.
+
+Also note that wide stream saving functions do not have `encoding` argument and always assume `encoding_wchar` encoding.
+
+[note The current behavior for Unicode conversion is to skip all invalid UTF sequences during conversion. This behavior should not be relied upon; if your node/attribute names do not contain any valid UTF sequences, they may be output as if they are empty, which will result in malformed XML document.]
+
+[endsect] [/encoding]
+
 [endsect] [/saving]
 
 [section:xpath XPath $$$]
@@ -1406,11 +1539,11 @@ Enumerations:
 Constants:
 
 * Formatting options bit flags:
-	* format_default
-	* format_indent
-	* format_no_declaration
-	* format_raw
-	* format_write_bom
+	* [link format_default]
+	* [link format_indent]
+	* [link format_no_declaration]
+	* [link format_raw]
+	* [link format_write_bom]
 	[lbr]
 
 * Parsing options bit flags:
@@ -1574,9 +1707,9 @@ Classes:
 	* `bool `[link xml_node::remove_child remove_child]`(const char_t* name);`
 	[lbr]
 
-	* void print(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
-	* void print(std::ostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
-	* void print(std::wostream& os, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, unsigned int depth = 0) const;
+	* `void `[link xml_node::print print]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
+	* `void `[link xml_node::print_stream print]`(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
+	* `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
 	[lbr]
 
 	* xpath_node select_single_node(const char_t* query) const;
@@ -1605,14 +1738,14 @@ Classes:
 	* `xml_parse_result `[link xml_document::load_buffer_inplace_own load_buffer_inplace_own]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
 	[lbr]
 
-	* void save(xml_writer& writer, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+	* `bool `[link xml_document::save_file save_file]`(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
 	[lbr]
 
-	* void save(std::ostream& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
-	* void save(std::wostream& stream, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default) const;
+	* `void `[link xml_document::save_stream save]`(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+	* `void `[link xml_document::save_stream save]`(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;`
 	[lbr]
 
-	* bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+	* `void `[link xml_document::save save]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
 	[lbr]
 
 * `struct `[link xml_parse_result]
@@ -1638,6 +1771,19 @@ Classes:
 	* `int `[link xml_tree_walker::depth depth]`() const;`
 	[lbr]
 
+* `class `[link xml_writer]
+	* `virtual void `[link xml_writer::write write]`(const void* data, size_t size) = 0;`
+	[lbr]
+
+* `class `[link xml_writer_file]`: public xml_writer`
+	* [link xml_writer_file]`(void* file);`
+	[lbr]
+
+* `class `[link xml_writer_stream]`: public xml_writer`
+	* [link xml_writer_stream]`(std::ostream& stream);`
+	* [link xml_writer_stream]`(std::wostream& stream);`
+	[lbr]
+
 * xpath_query
 	* explicit xpath_query(const char_t* query);
 	* ~xpath_query();
@@ -1647,19 +1793,6 @@ Classes:
 	* string_t evaluate_string(const xml_node& n) const;
 	* xpath_node_set evaluate_node_set(const xml_node& n) const;
 
-* xml_writer
-	* virtual ~xml_writer() {}
-	* virtual void write(const void* data, size_t size) = 0;
-
-* xml_writer_file
-	* xml_writer_file(void* file);
-	* virtual void write(const void* data, size_t size);
-
-* xml_writer_stream
-	* xml_writer_stream(std::ostream& stream);
-	* xml_writer_stream(std::wostream& stream);
-
-	* virtual void write(const void* data, size_t size);
 
 * xpath_exception
 	* explicit xpath_exception(const char* message);
