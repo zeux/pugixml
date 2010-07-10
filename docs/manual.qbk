@@ -1283,10 +1283,169 @@ Also note that wide stream saving functions do not have `encoding` argument and 
 
 [endsect] [/saving]
 
-[section:xpath XPath $$$]
+[section:xpath XPath]
 
-$$$ standard violations
-$$$ performance checklist
+If the task at hand is to select a subset of document nodes that match some criteria, it is possible to code a function using the existing traversal functionality for any practical criteria. However, often either a data-driven approach is desirable, in case the criteria are not predefined and come from a file, or it is inconvenient to use traversal interfaces and a higher-level DSL is required. There is a standard language for XML processing, XPath, that can be useful for these cases. pugixml implements an almost complete subset of XPath 1.0. Because of differences in document object model and some performance implications, there are minor violations of the official specifications, which can be found in [sref manual.xpath.w3c]. The rest of this section describes the interface for XPath functionality. Please note that if you wish to learn to use XPath language, you have to look for other tutorials or manuals; for example, you can read [@http://www.w3schools.com/xpath/ W3Schools XPath tutorial], [@http://www.tizag.com/xmlTutorial/xpathtutorial.php XPath tutorial at tizag.com], and [@http://www.w3.org/TR/xpath/ the XPath 1.0 specification].
+
+[note As of version 0.9, you need both STL and exception support to use XPath; XPath is disabled if either `PUGIXML_NO_STL` or `PUGIXML_NO_EXCEPTIONS` is defined.]
+
+[section:types XPath types]
+
+[#xpath_value_type][#xpath_type_number][#xpath_type_string][#xpath_type_boolean][#xpath_type_node_set][#xpath_type_none]
+Each XPath expression can have one of the following types: boolean, number, string or node set. Boolean type corresponds to `bool` type, number type corresponds to `double` type, string type corresponds to either `std::string` or `std::wstring`, depending on whether [link manual.dom.unicode wide character interface is enabled], and node set corresponds to `xpath_node_set` type. There is an enumeration, `xpath_value_type`, which can take the values `xpath_type_boolean`, `xpath_type_number`, `xpath_type_string` or `xpath_type_node_set`, accordingly.
+
+[#xpath_node][#xpath_node::node][#xpath_node::attribute][#xpath_node::parent]
+Because an XPath node can be either a node or an attribute, there is a special type, `xpath_node`, which is a discriminated union of these types. A value of this type contains two node handles, one of `xml_node` type, and another one of `xml_attribute` type; at most one of them can be non-null. The accessors to get these handles are available:
+
+	xml_node xpath_node::node() const;
+	xml_attribute xpath_node::attribute() const;
+	xml_node xpath_node::parent() const;
+
+Note that as per XPath specification, each XPath node has a parent; the `parent` function returns the node's parent if the XPath node corresponds to `xml_node` handle (equivalent to `node().parent()`), or the node to which the attribute belongs to, if the XPath node corresponds to `xml_attribute` handle. XPath nodes can be null, in which case all three accessors return null handles.
+
+[#xpath_node::unspecified_bool_type][#xpath_node::comparison]
+Like node and attribute handles, XPath node handles can be implicitly cast to boolean-like object to check if it is a null node, and also can be compared for equality with each other.
+
+[#xpath_node::ctor]
+You can also create XPath nodes with one of tree constructors: the default constructor, the constructor that takes node argument, and the constructor that takes attribute and node arguments (in which case the attribute must belong to the attribute list of the node). However, usually you don't need to create your own XPath node objects, since they are returned to you via selection functions.
+
+[#xpath_node_set]
+XPath expressions operate not on single nodes, but instead on node sets. A node set is a collection of nodes, which can be optionally ordered in either a forward document order or a reverse one. Document order is defined in XPath specification; an XPath node is before another node in document order if it appears before it in XML representation of the corresponding document.
+
+[#xpath_node_set::const_iterator][#xpath_node_set::begin][#xpath_node_set::end]
+Node sets are represented by `xpath_node_set` object, which has an interface that resembles one of sequential random-access containers. It has an iterator type along with usual begin/past-the-end iterator accessors:
+
+	typedef const xpath_node* xpath_node_set::const_iterator;
+	const_iterator xpath_node_set::begin() const;
+	const_iterator xpath_node_set::end() const;
+
+[#xpath_node_set::index][#xpath_node_set::size][#xpath_node_set::empty]
+And it also can be iterated via indices, just like `std::vector`:
+
+	const xpath_node& xpath_node_set::operator[](size_t index) const;
+	size_t xpath_node_set::size() const;
+	bool xpath_node_set::empty() const;
+
+All of the above operations have the same semantics as that of `std::vector`: the iterators are random-access, all of the above operations are constant time, and accessing the element at index that is greater or equal than the set size results in undefined behavior. You can use both iterator-based and index-based access for iteration, however the iterator-based can be faster.
+
+[#xpath_node_set::type][#xpath_node_set::type_unsorted][#xpath_node_set::type_sorted][#xpath_node_set::type_sorted_reverse][#xpath_node_set::sort]
+The order of iteration depends on the order of nodes inside the set; the order can be queried via the following function:
+
+	enum xpath_node_set::type_t {type_unsorted, type_sorted, type_sorted_reverse};
+	type_t xpath_node_set::type() const;
+
+`type` function returns the current order of nodes; `type_sorted` means that the nodes are in forward document order, `type_sorted_reverse` means that the nodes are in reverse document order, and `type_unsorted` means that neither order is guaranteed (nodes can accidentally be in a sorted order even if `type()` returns `type_sorted`). If you require a specific order of iteration, you can change it via `sort` function:
+
+	void xpath_node_set::sort(bool reverse = false);
+
+Calling `sort` sorts the nodes in either forward or reverse document order, depending on the argument; after this call `type()` will return `type_sorted` or `type_sorted_reverse`.
+
+[#xpath_node_set::first]
+Often the actual iteration is not needed; instead, only the first element in document order is required. For this, a special accessor is provided:
+
+	xpath_node xpath_node_set::first() const;
+
+This function returns the first node in forward document order from the set, or null node if the set is empty. Note that while the result of the node does not depend on the order of nodes in the set (i.e. on the result of `type()`), the complexity does - if the set is sorted, the complexity is constant, otherwise it is linear in the number of elements or worse.
+
+[endsect] [/types]
+
+[section:select Selecting nodes via XPath expression]
+
+[#xml_node::select_single_node][#xml_node::select_nodes]
+If you want to select nodes that match some XPath expression, you can do it with the following functions:
+
+	xpath_node xml_node::select_single_node(const char_t* query) const;
+	xpath_node_set xml_node::select_nodes(const char_t* query) const;
+
+`select_nodes` function compiles the expression and then executes it with the node as a context node, and returns the resulting node set. `select_single_node` returns only the first node in document order from the result, and is equivalent to calling `select_nodes(query).first()`. If the XPath expression does not match anything, or the node handle is null, `select_nodes` returns an empty set, and `select_single_node` returns null XPath node.
+
+Both functions throw `xpath_exception` if the query can not be compiled or if it returns a value with type other than node set; see [sref manual.xpath.errors] for details.
+
+[#xml_node::select_single_node_precomp][#xml_node::select_nodes_precomp]
+While compiling expressions is fast, the compilation time can introduce a significant overhead if the same expression is used many times on small subtrees. If you're doing many similar queries, consider compiling them into query objects (see [sref manual.xpath.query] for further reference). Once you get a compiled query object, you can pass it to select functions instead of an expression string:
+
+	xpath_node xml_node::select_single_node(const xpath_query& query) const;
+	xpath_node_set xml_node::select_nodes(const xpath_query& query) const;
+
+Both functions throw `xpath_exception` if the query returns a value with type other than node set.
+
+This is an example of selecting nodes using XPath expressions ([@samples/xpath_select.cpp]):
+
+[import samples/xpath_select.cpp]
+[code_xpath_select]
+
+[endsect] [/select]
+
+[section:query Using query objects]
+
+[#xpath_query]
+When you call `select_nodes` with a expression string as an argument, a query object is created under the covers. A query object represents a compiled XPath expression. Query objects can be needed in the following circumstances:
+
+* You can precompile expressions to query objects to save compilation time if it becomes an issue;
+* You can use query objects to evaluate XPath expressions which result in booleans, numbers or strings;
+* You can get the type of expression value via query object.
+
+Query objects correspond to `xpath_query` type. They are immutable and non-copyable: they are bound to the expression at creation time and can not be cloned. If you want to put query objects in a container, allocate them on heap via `new` operator and store pointers to `xpath_query` in the container.
+
+[#xpath_query::ctor]
+You can create a query object with the constructor, that takes XPath expression as an argument:
+
+	explicit xpath_query::xpath_query(const char_t* query);
+
+[#xpath_query::return_type]
+The expression is compiled and the compiled representation is stored in the new query object. If compilation fails, `xpath_exception` is thrown (see [sref manual.xpath.errors] for details). After the query is created, you can query the type of the evaluation result using the following function:
+
+	xpath_value_type xpath_query::return_type() const;
+
+[#xpath_query::evaluate_boolean][#xpath_query::evaluate_number][#xpath_query::evaluate_string][#xpath_query::evaluate_node_set]
+You can evaluate the query using one of the following functions:
+
+	bool xpath_query::evaluate_boolean(const xml_node& n) const;
+	double xpath_query::evaluate_number(const xml_node& n) const;
+	string_t xpath_query::evaluate_string(const xml_node& n) const;
+	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const;
+
+All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. By XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` throws an `xpath_exception` if the return type is not node set.
+
+[note Calling `node.select_nodes("query")` is equivalent to calling `xpath_query("query").evaluate_node_set(node)`.]
+
+This is an example of using query objects ([@samples/xpath_query.cpp]):
+
+[import samples/xpath_query.cpp]
+[code_xpath_query]
+
+[endsect] [/query]
+
+[section:errors Error handling]
+
+[#xpath_exception][#xpath_exception::what]
+As of version 0.9, all XPath errors result in thrown exceptions. The errors can arise during expression compilation or node set evaluation. In both cases, an `xpath_exception` object is thrown. This is an exception object that implements `std::exception` interface, and thus has a single function `what()`:
+
+	virtual const char* xpath_exception::what() const throw();
+
+This function returns the error message. Currently it is impossible to get the exact place where query compilation failed. This functionality, along with optional error handling without exceptions, will be available in version 1.0.
+
+This is an example of XPath error handling ([@samples/xpath_error.cpp]):
+
+[import samples/xpath_error.cpp]
+[code_xpath_error]
+
+[endsect] [/errors]
+
+[section:w3c Conformance to W3C specification]
+
+Because of the differences in document object models, performance considerations and implementation complexity, pugixml does not provide a fully conformant XPath 1.0 implementation. This is the current list of incompatibilities:
+
+* Consecutive text nodes sharing the same parent are not merged, i.e. in `<node>text1 <![CDATA[data]]> text2</node>` node should have one text node children, but instead has three.
+* Since document can't have a document type declaration, `id()` function always returns an empty node set.
+* Namespace nodes are not supported (affects namespace:: axis).
+* Name tests are performed on QNames in XML document instead of expanded names; for `<foo xmlns:ns1='uri' xmlns:ns2='uri'><ns1:child/><ns2:child/></foo>`, query `foo/ns1:*` will return only the first child, not both of them. Compliant XPath implementations can return both nodes if the user provides appropriate namespace declarations.
+* String functions consider a character to be either a single `char` value or a single `wchar_t` value, depending on the library configuration; this means that some string functions are not fully Unicode-aware. This affects `substring()`, `string-length()` and `translate()` functions.
+* Variable references are not supported.
+
+Some of these incompatibilities will be fixed in version 1.0.
+
+[endsect] [/w3c]
 
 [endsect] [/xpath]
 
@@ -1517,7 +1676,7 @@ Enumerations:
 	* [link status_end_element_mismatch]
 	[lbr]
 
-* [link xml_encoding]
+* `enum `[link xml_encoding]
 	* [link encoding_auto]
 	* [link encoding_utf8]
 	* [link encoding_utf16_le]
@@ -1529,12 +1688,12 @@ Enumerations:
 	* [link encoding_wchar]
 	[lbr]
 
-* xpath_value_type
-	* xpath_type_none
-	* xpath_type_node_set
-	* xpath_type_number
-	* xpath_type_string
-	* xpath_type_boolean
+* `enum `[link xpath_value_type]
+	* [link xpath_type_none]
+	* [link xpath_type_node_set]
+	* [link xpath_type_number]
+	* [link xpath_type_string]
+	* [link xpath_type_boolean]
 
 Constants:
 
@@ -1712,10 +1871,10 @@ Classes:
 	* `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
 	[lbr]
 
-	* xpath_node select_single_node(const char_t* query) const;
-	* xpath_node select_single_node(const xpath_query& query) const;
-	* xpath_node_set select_nodes(const char_t* query) const;
-	* xpath_node_set select_nodes(const xpath_query& query) const;
+	* `xpath_node `[link xml_node::select_single_node select_single_node]`(const char_t* query) const;`
+	* `xpath_node `[link xml_node::select_single_node_precomp select_single_node]`(const xpath_query& query) const;`
+	* `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query) const;`
+	* `xpath_node_set `[link xml_node::select_nodes_precomp select_nodes]`(const xpath_query& query) const;`
 	[lbr]
 
 * `class `[link xml_document]
@@ -1784,52 +1943,56 @@ Classes:
 	* [link xml_writer_stream]`(std::wostream& stream);`
 	[lbr]
 
-* xpath_query
-	* explicit xpath_query(const char_t* query);
-	* ~xpath_query();
-	* xpath_value_type return_type() const;
-	* bool evaluate_boolean(const xml_node& n) const;
-	* double evaluate_number(const xml_node& n) const;
-	* string_t evaluate_string(const xml_node& n) const;
-	* xpath_node_set evaluate_node_set(const xml_node& n) const;
+* `class `[link xpath_query]
+	* `explicit `[link xpath_query::ctor]`(const char_t* query);`
+	[lbr]
 
+	* `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xml_node& n) const;`
+	* `double `[link xpath_query::evaluate_number evaluate_number]`(const xml_node& n) const;`
+	* `string_t `[link xpath_query::evaluate_string evaluate_string]`(const xml_node& n) const;`
+	* `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xml_node& n) const;`
+	[lbr]
 
-* xpath_exception
-	* explicit xpath_exception(const char* message);
-	* virtual const char* what() const throw();
+	* `xpath_value_type `[link xpath_query::return_type return_type]`() const;`
+	[lbr]
 
-* xpath_node
-	* xpath_node();
-	* xpath_node(const xml_node& node);
-	* xpath_node(const xml_attribute& attribute, const xml_node& parent);
-	* xml_node node() const;
-	* xml_attribute attribute() const;
-	* xml_node parent() const;
-	* operator unspecified_bool_type() const;
-	* bool operator!() const;
-	* bool operator==(const xpath_node& n) const;
-	* bool operator!=(const xpath_node& n) const;
+* `class `[link xpath_exception]`: public std::exception`
+	* `virtual const char* `[link xpath_exception::what what]`() const throw();`
+	[lbr]
 
-* xpath_node_set
-	* enum type_t
-		* type_unsorted
-		* type_sorted
-		* type_sorted_reverse
+* `class `[link xpath_node]
+	* [link xpath_node::ctor xpath_node]`();`
+	* [link xpath_node::ctor xpath_node]`(const xml_node& node);`
+	* [link xpath_node::ctor xpath_node]`(const xml_attribute& attribute, const xml_node& parent);`
+	[lbr]
 
-	* typedef const xpath_node* const_iterator;
+	* `xml_node `[link xpath_node::node node]`() const;`
+	* `xml_attribute `[link xpath_node::attribute attribute]`() const;`
+	* `xml_node `[link xpath_node::parent parent]`() const;`
+	[lbr]
 
-	* xpath_node_set();
-	* ~xpath_node_set();
-	* xpath_node_set(const xpath_node_set& ns);
-	* xpath_node_set& operator=(const xpath_node_set& ns);
-	* type_t type() const;
-	* size_t size() const;
-	* xpath_node operator[](size_t index) const;
-	* const_iterator begin() const;
-	* const_iterator end() const;
-	* void sort(bool reverse = false);
-	* xpath_node first() const;
-	* bool empty() const;
+	* `operator `[link xpath_node::unspecified_bool_type unspecified_bool_type]`() const;`
+	* `bool `[link xpath_node::comparison operator==]`(const xpath_node& n) const;`
+	* `bool `[link xpath_node::comparison operator!=]`(const xpath_node& n) const;`
+	[lbr]
+
+* `class `[link xpath_node_set]
+	* `typedef const xpath_node* `[link xpath_node_set::const_iterator const_iterator]`;`
+	* `const_iterator `[link xpath_node_set::begin begin]`() const;`
+	* `const_iterator `[link xpath_node_set::end end]`() const;`
+	[lbr]
+
+	* `const xpath_node& `[link xpath_node_set::index operator\[\]]`(size_t index) const;`
+	* `size_t `[link xpath_node_set::size size]`() const;`
+	* `bool `[link xpath_node_set::empty empty]`() const;`
+	[lbr]
+
+	* `xpath_node `[link xpath_node_set::first first]`() const;`
+	[lbr]
+
+	* `enum type_t {`[link xpath_node_set::type_unsorted type_unsorted], [link xpath_node_set::type_sorted type_sorted], [link xpath_node_set::type_sorted_reverse type_sorted_reverse]`};`
+	* `type_t `[link xpath_node_set::type type]`() const;`
+	* `void `[link xpath_node_set::sort sort]`(bool reverse = false);`
 
 Functions:
 
