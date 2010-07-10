@@ -87,7 +87,6 @@ inline void xpath_api_node_accessors_helper(const xpath_node_set& set)
 	CHECK(!set.empty());
 	CHECK_STRING(set[0].node().name(), STR("foo"));
 	CHECK_STRING(set[1].node().name(), STR("foo"));
-	CHECK(!set[2]);
 	CHECK(set.first() == set[0]);
 	CHECK(set.begin() + 2 == set.end());
 	CHECK(set.begin()[0] == set[0] && set.begin()[1] == set[1]);
@@ -99,7 +98,6 @@ TEST_XML(xpath_api_nodeset_accessors, "<node><foo/><foo/></node>")
 	CHECK(null.size() == 0);
 	CHECK(null.type() == xpath_node_set::type_unsorted);
 	CHECK(null.empty());
-	CHECK(!null[0]);
 	CHECK(!null.first());
 	CHECK(null.begin() == null.end());
 

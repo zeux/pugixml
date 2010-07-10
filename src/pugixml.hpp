@@ -2215,7 +2215,7 @@ namespace pugi
 		 * \param index - requested index
 		 * \return element
 		 */
-		xpath_node operator[](size_t index) const;
+		const xpath_node& operator[](size_t index) const;
 		
 		/**
 		 * Get begin constant iterator for collection

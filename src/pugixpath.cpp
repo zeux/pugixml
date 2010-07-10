@@ -792,9 +792,10 @@ namespace pugi
 		return size() == 0;
 	}
 		
-	xpath_node xpath_node_set::operator[](size_t index) const
+	const xpath_node& xpath_node_set::operator[](size_t index) const
 	{
-		return (index >= size()) ? xpath_node() : m_begin[index];
+		assert(index < size());
+		return m_begin[index];
 	}
 
 	xpath_node_set::iterator xpath_node_set::mut_begin()
