@@ -1,4 +1,4 @@
-[article pugixml
+[book pugixml
     [quickbook 1.5]
 
 	[version 0.9]
@@ -23,7 +23,7 @@ pugixml enables very fast, convenient and memory-efficient XML document processi
 
 This is the complete user manual for pugixml, which describes all features of the library in detail. If you want to start writing code as quickly as possible, you are advised to [@quickstart.html read the quick start guide first].
 
-[note No documentation is perfect, neither is this one. If you encounter a description that is unclear, please file an issue as described in [sref manual.overview.feedback]. Also if you can spare the time for a full proof-reading, including spelling and grammar, that would be great! Please send me an e-mail; as a token of appreciation, your name will be put into the corresponding section of this documentation.]
+[note No documentation is perfect, neither is this one. If you encounter a description that is unclear, please file an issue as described in [sref manual.overview.feedback]. Also if you can spare the time for a full proof-reading, including spelling and grammar, that would be great! Please [link email send me an e-mail]; as a token of appreciation, your name will be included into the [link manual.overview.thanks corresponding section] of this documentation.]
 
 [endsect] [/introduction]
 
@@ -1996,3 +1996,10 @@ Functions:
 * [link set_memory_management_functions]
 
 [endsect] [/apiref]
+
+[section:toc Table of contents]
+
+toc-placeholder
+
+[endsect] [/toc]
+

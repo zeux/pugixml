@@ -486,9 +486,12 @@ actions QuickbookAction
 	%QUICKBOOK_PATH%\bin\quickbook.exe --output-file $(<) --input-file $(>) >nul
 }
 
-actions XSLTProcAction
+actions response XSLTProcAction
 {
-	%QUICKBOOK_PATH%\bin\xsltproc.exe --path$(SPACE)$(XSLPATH:C) --stringparam$(SPACE)$(XSLPARAM) --output $(<) $(XSL) $(>)
+	%QUICKBOOK_PATH%\bin\xsltproc.exe --path$(SPACE)$(XSLPATH:C) --stringparam$(SPACE)$(XSLPARAM) --output $(<) @(<?xml version="1.0"?>
+	<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+	<xsl:import$(SPACE)href="file:///$(XSL:/)"$(SPACE)/>
+	</xsl:stylesheet>) $(>)
 }
 
 rule MakeFileDir TARGET
@@ -616,7 +619,13 @@ rule QuickbookImport SOURCE : IMPORT
 	Includes $(SOURCE) : $(SOURCE:D)/$(IMPORT) ;
 }
 
-rule Documentation TARGET : SOURCE
+rule FullPath FILE
+{
+	local PWD = [ Subst [ Shell "cd" ] : "%c" : "" ] ;
+	return "$(PWD)/$(FILE)" ;
+}
+
+rule Documentation TARGET : SOURCE : STYLESHEET
 {
 	# escape colon with %3A because colon is a path list separator
 	local XSLDIR = [ Subst $(QUICKBOOK_PATH) : ":" : "%%%%3A" ] ;
@@ -635,7 +644,7 @@ rule Documentation TARGET : SOURCE
 	# boostbook -> docbook
 	local DOCBOOK = $(BUILD)/$(SOURCE:S=.db.xml) ;
 
-	XSL on $(DOCBOOK) = $(XSLDIR)/boostbook/xsl/docbook.xsl ;
+	XSL on $(DOCBOOK) = $(QUICKBOOK_PATH)/boostbook/xsl/docbook.xsl ;
 	XSLPATH on $(DOCBOOK) = $(XSLDIR)/boostbook/dtd $(XSLDIR)/docbook-xml ;
 	XSLTProcAction $(DOCBOOK) : $(BOOSTBOOK) ;
 	Depends $(DOCBOOK) : $(BOOSTBOOK) ;
@@ -643,7 +652,7 @@ rule Documentation TARGET : SOURCE
 	# docbook -> html
 	local HTML = $(TARGET) ;
 
-	XSL on $(HTML) = $(XSLDIR)/boostbook/xsl/html.xsl ;
+	XSL on $(HTML) = $(QUICKBOOK_PATH)/boostbook/xsl/html.xsl [ FullPath $(STYLESHEET) ] ;
 	XSLPATH on $(HTML) = $(XSLDIR)/docbook-xml $(XSLDIR)/docbook-xsl/html $(XSLDIR)/docbook-xsl/lib ;
 
 	XSLPARAM on $(HTML) = 
@@ -657,5 +666,5 @@ rule Documentation TARGET : SOURCE
 		;
 
 	XSLTProcAction $(HTML) : $(DOCBOOK) ;
-	Depends $(HTML) : $(DOCBOOK) ;
+	Depends $(HTML) : $(DOCBOOK) $(STYLESHEET) ;
 }

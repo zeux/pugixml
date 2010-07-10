@@ -105,7 +105,7 @@ for CONFIG in $(CONFIGURATIONS)
 }
 
 # documentation
-Documentation docs/manual.html : docs/manual.qbk ;
+Documentation docs/manual.html : docs/manual.qbk : docs/manual.xsl ;
 
 Alias docs : docs/manual.html ;
 
