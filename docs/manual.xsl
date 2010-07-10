@@ -24,7 +24,7 @@
 
 	<xsl:template name="navbar.contents">
 		<xsl:value-of select="/*/title" /> user manual |
-		<xsl:call-template name="navbar.section"><xsl:with-param name="name" select="'manual.overview'" /></xsl:call-template> |
+		<xsl:call-template name="navbar.section"><xsl:with-param name="name" select="'manual'" /><xsl:with-param name="text" select="'Overview'" /></xsl:call-template> |
 		<xsl:call-template name="navbar.section"><xsl:with-param name="name" select="'manual.install'" /></xsl:call-template> |
 		Document:
 		<xsl:call-template name="navbar.section"><xsl:with-param name="name" select="'manual.dom'" /><xsl:with-param name="text" select="'Object model'" /></xsl:call-template>
@@ -90,6 +90,9 @@
 				<xsl:with-param name="toc.title.p" select="false()" />
 			</xsl:call-template>
 		</xsl:for-each>
+	</xsl:template>
+
+    <xsl:template name="book.titlepage">
 	</xsl:template>
 </xsl:stylesheet>  
 
