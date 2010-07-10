@@ -7,7 +7,7 @@ int main()
 	pugi::xml_document doc;
 	if (!doc.load_file("xgconsole.xml")) return -1;
 
-//[code_xpath_errors
+//[code_xpath_error
 	// Exception is thrown for incorrect query syntax
 	try
 	{

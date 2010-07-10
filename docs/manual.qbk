@@ -13,27 +13,17 @@
 [template sref[name] '''<xref linkend="'''[name]'''" xrefstyle="select:title" />''']
 [template anchor[name] '''<anchor id="'''[name]'''" />'''[^[name]]]
 
-PugiXML User Manual
-
-$$$ documentation suggestions, errors, etc. are welcome
-$$$ proofreading
-
-$$$ ideally code samples should reference manual parts - i.e. xml_parse_result and doc.child() should be clickable
-$$$ do something with main TOC
-
 [section:overview Overview]
 
 [section:introduction Introduction]
 
-$$$ minimalistic/lightweight; why should the user choose pugixml?
-$$$ pugixml can write xml data too!
-$$$ unicode support
-$$$ low memory consumption and fragmentation
-$$$ this is the ref manual; here is the quick-start guide, here are the code samples
+pugixml is a light-weight C++ XML processing library. It consists of a DOM-like interface with rich traversal/modification capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and an XPath 1.0 implementation for complex data-driven tree queries. Full Unicode support is also available, with [link manual.dom.unicode two Unicode interface variants] and conversions between different Unicode encodings (which happen automatically during parsing/saving). The library is [link manual.install.portability extremely portable] and easy to integrate and use. pugixml is developed and maintained since 2006 and has many users. All code is distributed under the MIT license, making it completely free to use in both open-source and proprietary applications.
 
-pugixml is a C++ XML $$processing library$$. It consists of a DOM-like interface with rich traversal/modification capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and a XPath 1.0 implementation for complex data-driven tree queries. The library is [link manual.install.portability extremely portable] and easy to integrate and use. pugixml is developed and maintained since 2006 and has ^many users^. All code is distributed under the MIT license, making it completely free to use even in commercial applications.
+pugixml enables very fast, convenient and memory-efficient XML document processing. However, since pugixml has a DOM parser, it can't process XML documents that do not fit in memory; also the parser is a non-validating one, so if you need DTD/Schema validation, the library is not for you.
 
-Please note that pugixml's parser is a non-validating one; if you either need to process XML documents that do not fit in memory or need DTD/Schema validation, the library is not for you.
+This is the complete user manual for pugixml, which describes all features of the library in detail. If you want to start writing code as quickly as possible, you are advised to [@quickstart.html read the quick start guide first].
+
+[note No documentation is perfect, neither is this one. If you encounter a description that is unclear, please file an issue as described in [sref manual.overview.feedback]. Also if you can spare the time for a full proof-reading, including spelling and grammar, that would be great! Please send me an e-mail; as a token of appreciation, your name will be put into the corresponding section of this documentation.]
 
 [endsect] [/introduction]
 
@@ -1299,9 +1289,14 @@ Because an XPath node can be either a node or an attribute, there is a special t
 
 	xml_node xpath_node::node() const;
 	xml_attribute xpath_node::attribute() const;
+
+XPath nodes can be null, in which case both accessors return null handles.
+
+Note that as per XPath specification, each XPath node has a parent, which can be retrieved via this function:
+
 	xml_node xpath_node::parent() const;
 
-Note that as per XPath specification, each XPath node has a parent; the `parent` function returns the node's parent if the XPath node corresponds to `xml_node` handle (equivalent to `node().parent()`), or the node to which the attribute belongs to, if the XPath node corresponds to `xml_attribute` handle. XPath nodes can be null, in which case all three accessors return null handles.
+`parent` function returns the node's parent if the XPath node corresponds to `xml_node` handle (equivalent to `node().parent()`), or the node to which the attribute belongs to, if the XPath node corresponds to `xml_attribute` handle. For null nodes, `parent` returns null handle.
 
 [#xpath_node::unspecified_bool_type][#xpath_node::comparison]
 Like node and attribute handles, XPath node handles can be implicitly cast to boolean-like object to check if it is a null node, and also can be compared for equality with each other.
@@ -1334,7 +1329,7 @@ The order of iteration depends on the order of nodes inside the set; the order c
 	enum xpath_node_set::type_t {type_unsorted, type_sorted, type_sorted_reverse};
 	type_t xpath_node_set::type() const;
 
-`type` function returns the current order of nodes; `type_sorted` means that the nodes are in forward document order, `type_sorted_reverse` means that the nodes are in reverse document order, and `type_unsorted` means that neither order is guaranteed (nodes can accidentally be in a sorted order even if `type()` returns `type_sorted`). If you require a specific order of iteration, you can change it via `sort` function:
+`type` function returns the current order of nodes; `type_sorted` means that the nodes are in forward document order, `type_sorted_reverse` means that the nodes are in reverse document order, and `type_unsorted` means that neither order is guaranteed (nodes can accidentally be in a sorted order even if `type()` returns `type_unsorted`). If you require a specific order of iteration, you can change it via `sort` function:
 
 	void xpath_node_set::sort(bool reverse = false);
 
@@ -1379,7 +1374,7 @@ This is an example of selecting nodes using XPath expressions ([@samples/xpath_s
 [section:query Using query objects]
 
 [#xpath_query]
-When you call `select_nodes` with a expression string as an argument, a query object is created under the covers. A query object represents a compiled XPath expression. Query objects can be needed in the following circumstances:
+When you call `select_nodes` with an expression string as an argument, a query object is created behind the scene. A query object represents a compiled XPath expression. Query objects can be needed in the following circumstances:
 
 * You can precompile expressions to query objects to save compilation time if it becomes an issue;
 * You can use query objects to evaluate XPath expressions which result in booleans, numbers or strings;
@@ -1388,7 +1383,7 @@ When you call `select_nodes` with a expression string as an argument, a query ob
 Query objects correspond to `xpath_query` type. They are immutable and non-copyable: they are bound to the expression at creation time and can not be cloned. If you want to put query objects in a container, allocate them on heap via `new` operator and store pointers to `xpath_query` in the container.
 
 [#xpath_query::ctor]
-You can create a query object with the constructor, that takes XPath expression as an argument:
+You can create a query object with the constructor that takes XPath expression as an argument:
 
 	explicit xpath_query::xpath_query(const char_t* query);
 
@@ -1450,8 +1445,6 @@ Some of these incompatibilities will be fixed in version 1.0.
 [endsect] [/xpath]
 
 [section:changes Changelog]
-
-$$$ move somewhere else
 
 [h5 1.07.2010 - version 0.9]
 
