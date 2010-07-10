@@ -2815,7 +2815,7 @@ namespace pugi
 	    	{
 	    	case lex_var_ref:
 	    	{
-				throw xpath_exception("variables are not supported");
+				throw xpath_exception("Variables are not supported");
 
 			#ifdef __DMC__	    	
 	    		return 0; // Digital Mars C++
@@ -2829,7 +2829,7 @@ namespace pugi
 				xpath_ast_node* n = parse_expression();
 
 				if (m_lexer.current() != lex_close_brace)
-					throw xpath_exception("unmatched braces");
+					throw xpath_exception("Unmatched braces");
 
 				m_lexer.next();
 
@@ -2874,7 +2874,7 @@ namespace pugi
 				while (m_lexer.current() != lex_close_brace)
 				{
 					if (m_lexer.current() != lex_comma)
-						throw xpath_exception("no comma between function arguments");
+						throw xpath_exception("No comma between function arguments");
 					m_lexer.next();
 					
 					xpath_ast_node* n = parse_expression();
@@ -2892,7 +2892,7 @@ namespace pugi
 			}
 
 	    	default:
-	    		throw xpath_exception("unrecognizable primary expression");
+	    		throw xpath_exception("Unrecognizable primary expression");
 			#ifdef __DMC__	    	
 	    		return 0; // Digital Mars C++
 			#endif
@@ -3065,7 +3065,7 @@ namespace pugi
 				xpath_ast_node* pred = new (m_alloc.node()) xpath_ast_node(ast_predicate, xpath_type_node_set, expr);
 				
 				if (m_lexer.current() != lex_close_square_brace)
-	    			throw xpath_exception("unmatched square brace");
+	    			throw xpath_exception("Unmatched square brace");
 				m_lexer.next();
 				
 				if (last) last->set_next(pred);
