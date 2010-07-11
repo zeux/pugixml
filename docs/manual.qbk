@@ -161,14 +161,14 @@ The correct way to resolve this is to disable precompiled headers for [file pugi
 
 [section:static Building pugixml as a standalone static library]
  
-It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual Studio 2002, 2003 (.NET), 2005, 2008, 2010, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see [sref manual.overview.feedback]. 
+It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual Studio 2005, 2008, 2010, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see [sref manual.overview.feedback]. 
 
-$$ debug/release static
+There are two projects for each version of Microsoft Visual Studio: one for dynamically linked CRT, which has a name like [file pugixml_vs2008.vcproj], and another one for statically linked CRT, which has a name like [file pugixml_vs2008_static.vcproj]. You should select the version that matches the CRT used in your application; the default option for new projects created by Microsoft Visual Studio is dynamically linked CRT, so unless you changed the defaults, you should use the version with dynamic CRT (i.e. [file pugixml_vs2008.vcproj] for Microsoft Visual Studio 2008).
 
-In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2002-2008, you can add a dependency from your application project to pugixml one. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead. For other IDEs/systems, consult the relevant documentation.
+In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2005/2008, you can add a dependency from your application project to pugixml one. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead. For other IDEs/systems, consult the relevant documentation.
 
 [table
-[[Microsoft Visual Studio 2002-2008][Microsoft Visual Studio 2010]]
+[[Microsoft Visual Studio 2005/2008][Microsoft Visual Studio 2010]]
 [[
 [@images/vs2005_link1.png [$images/vs2005_link1_thumb.png]]
 [$images/next.png]
