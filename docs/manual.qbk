@@ -21,7 +21,7 @@ pugixml is a light-weight C++ XML processing library. It consists of a DOM-like 
 
 pugixml enables very fast, convenient and memory-efficient XML document processing. However, since pugixml has a DOM parser, it can't process XML documents that do not fit in memory; also the parser is a non-validating one, so if you need DTD/Schema validation, the library is not for you.
 
-This is the complete user manual for pugixml, which describes all features of the library in detail. If you want to start writing code as quickly as possible, you are advised to [@quickstart.html read the quick start guide first].
+This is the complete manual for pugixml, which describes all features of the library in detail. If you want to start writing code as quickly as possible, you are advised to [@quickstart.html read the quick start guide first].
 
 [note No documentation is perfect, neither is this one. If you encounter a description that is unclear, please file an issue as described in [sref manual.overview.feedback]. Also if you can spare the time for a full proof-reading, including spelling and grammar, that would be great! Please [link email send me an e-mail]; as a token of appreciation, your name will be included into the [link manual.overview.thanks corresponding section] of this documentation.]
 
@@ -102,7 +102,7 @@ You can download the latest source distribution via one of the following links:
 [@http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz]
 ]
 
-The distribution contains library source, documentation (the user manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.
+The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.
 
 If you need an older version, you can download it from the [@http://code.google.com/p/pugixml/downloads/list version archive].
 
@@ -1617,9 +1617,9 @@ First private release for testing purposes
 
 [endsect] [/changes]
 
-[section:apiref API reference]
+[section:apiref API Reference]
 
-This is the reference for all macros, types, enumerations, classes and functions in pugixml. Each symbol is a link that leads to the relevant section of the user manual.
+This is the reference for all macros, types, enumerations, classes and functions in pugixml. Each symbol is a link that leads to the relevant section of the manual.
 
 Macros:
 
@@ -1997,7 +1997,7 @@ Functions:
 
 [endsect] [/apiref]
 
-[section:toc Table of contents]
+[section:toc Table of Contents]
 
 toc-placeholder
 

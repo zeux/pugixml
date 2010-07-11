@@ -23,7 +23,7 @@
 	</xsl:template>
 
 	<xsl:template name="navbar.contents">
-		<xsl:value-of select="/*/title" /> user manual |
+		<xsl:value-of select="/*/title" /> manual |
 		<xsl:call-template name="navbar.section"><xsl:with-param name="name" select="'manual'" /><xsl:with-param name="text" select="'Overview'" /></xsl:call-template> |
 		<xsl:call-template name="navbar.section"><xsl:with-param name="name" select="'manual.install'" /></xsl:call-template> |
 		Document:
