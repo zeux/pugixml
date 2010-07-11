@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="8.00"
 	Name="pugixml"
 	ProjectGUID="{89A1E353-E2DC-495C-B403-742BE206ACED}"
 	RootNamespace="pugixml"
@@ -20,8 +20,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="vs2008\x32"
-			IntermediateDirectory="vs2008\x32\Debug"
+			OutputDirectory="vs2005\x32"
+			IntermediateDirectory="vs2005\x32\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -45,11 +45,12 @@
 				Optimization="0"
 				PreprocessorDefinitions="_DEBUG"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_d.pdb"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_sd.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -64,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_d.lib"
+				OutputFile="$(OutDir)\pugixml_sd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -93,8 +94,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="vs2008\x64"
-			IntermediateDirectory="vs2008\x64\Debug"
+			OutputDirectory="vs2005\x64"
+			IntermediateDirectory="vs2005\x64\Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -119,11 +120,12 @@
 				Optimization="0"
 				PreprocessorDefinitions="_DEBUG"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_d.pdb"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_sd.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -138,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_d.lib"
+				OutputFile="$(OutDir)\pugixml_sd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -167,8 +169,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="vs2008\x32"
-			IntermediateDirectory="vs2008\x32\Release"
+			OutputDirectory="vs2005\x32"
+			IntermediateDirectory="vs2005\x32\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -192,11 +194,12 @@
 				Optimization="3"
 				PreprocessorDefinitions="NDEBUG"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml.pdb"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_s.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -211,7 +214,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml.lib"
+				OutputFile="$(OutDir)\pugixml_s.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -240,8 +243,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="vs2008\x64"
-			IntermediateDirectory="vs2008\x64\Release"
+			OutputDirectory="vs2005\x64"
+			IntermediateDirectory="vs2005\x64\Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -266,11 +269,12 @@
 				Optimization="3"
 				PreprocessorDefinitions="NDEBUG"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml.pdb"
+				Detect64BitPortabilityProblems="true"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_s.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -285,7 +289,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml.lib"
+				OutputFile="$(OutDir)\pugixml_s.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

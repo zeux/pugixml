@@ -1,6 +1,7 @@
 -- Reset RNG seed to get consistent results across runs (i.e. XCode)
 math.randomseed(12345)
 
+local static = _ARGS[1] == 'static'
 local action = premake.action.current()
 
 if string.startswith(_ACTION, "vs") then
@@ -17,7 +18,7 @@ if string.startswith(_ACTION, "vs") then
 
 		-- Rename output file
 		function action.onproject(prj)
-			premake.generate(prj, "%%_" .. _ACTION .. ".vcproj", premake.vs200x_vcproj)
+			premake.generate(prj, "%%_" .. _ACTION .. (static and "_static" or "") .. ".vcproj", premake.vs200x_vcproj)
 		end
 	end
 elseif _ACTION == "codeblocks" then
@@ -46,11 +47,14 @@ if string.startswith(_ACTION, "vs") then
 		configuration "x64" targetdir(_ACTION .. "/x64")
 	end
 
-	configurations { "Debug", "Release", "DebugStatic", "ReleaseStatic" }
+	configurations { "Debug", "Release" }
 
-	configuration "DebugStatic" targetsuffix "_sd"
-	configuration "ReleaseStatic" targetsuffix "_s"
-	configuration "Debug" targetsuffix "_d"
+    if static then
+        configuration "Debug" targetsuffix "_sd"
+        configuration "Release" targetsuffix "_s"
+    else
+        configuration "Debug" targetsuffix "_d"
+    end
 else
 	if _ACTION == "xcode3" then
 		platforms "universal"
@@ -68,13 +72,15 @@ project "pugixml"
 	flags { "NoPCH", "NoMinimalRebuild" }
 	uuid "89A1E353-E2DC-495C-B403-742BE206ACED"
 
-configuration "Debug*"
+configuration "Debug"
 	defines { "_DEBUG" }
 	flags { "Symbols" }
 
-configuration "Release*"
+configuration "Release"
 	defines { "NDEBUG" }
 	flags { "Optimize" }
 
-configuration "*Static"
-	flags { "StaticRuntime" }
+if static then
+    configuration "*"
+        flags { "StaticRuntime" }
+end

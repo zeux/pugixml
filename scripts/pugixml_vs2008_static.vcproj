@@ -45,11 +45,11 @@
 				Optimization="0"
 				PreprocessorDefinitions="_DEBUG"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_d.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_sd.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_d.lib"
+				OutputFile="$(OutDir)\pugixml_sd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -119,11 +119,11 @@
 				Optimization="0"
 				PreprocessorDefinitions="_DEBUG"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_d.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_sd.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_d.lib"
+				OutputFile="$(OutDir)\pugixml_sd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -192,11 +192,11 @@
 				Optimization="3"
 				PreprocessorDefinitions="NDEBUG"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_s.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -211,7 +211,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml.lib"
+				OutputFile="$(OutDir)\pugixml_s.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -266,11 +266,11 @@
 				Optimization="3"
 				PreprocessorDefinitions="NDEBUG"
 				StringPooling="true"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				ProgramDataBaseFileName="$(OutDir)\pugixml.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixml_s.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -285,7 +285,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml.lib"
+				OutputFile="$(OutDir)\pugixml_s.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
