@@ -4,7 +4,7 @@
 
 int main()
 {
-	pugi::xml_document doc;
+    pugi::xml_document doc;
     if (!doc.load_file("xgconsole.xml")) return -1;
 
     pugi::xml_node tools = doc.child("Profile").child("Tools");
@@ -23,3 +23,5 @@ int main()
     }
     //]
 }
+
+// vim:et

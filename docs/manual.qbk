@@ -1,10 +1,10 @@
 [book pugixml
     [quickbook 1.5]
 
-	[version 0.9]
-	[id manual]
-	[copyright 2010 Arseny Kapoulkine]
-	[license Distributed under the MIT License]
+    [version 0.9]
+    [id manual]
+    [copyright 2010 Arseny Kapoulkine]
+    [license Distributed under the MIT License]
 ]
 
 [template file[name] '''<filename>'''[name]'''</filename>''']
@@ -185,11 +185,11 @@ In addition to adding pugixml project to your workspace, you'll have to make sur
  
 It's possible to compile pugixml as a standalone shared library. The process is usually similar to the static library approach; however, no preconfigured projects/scripts are included into pugixml distribution, so you'll have to do it yourself. Generally, if you're using GCC-based toolchain, the process does not differ from building any other library as DLL (adding -shared to compilation flags should suffice); if you're using MSVC-based toolchain, you'll have to explicitly mark exported symbols with a declspec attribute. You can do it by defining `PUGIXML_API` macro, i.e. via [file pugiconfig.hpp]:
 
-	#ifdef _DLL
-	#define PUGIXML_API __declspec(dllexport)
-	#else
-	#define PUGIXML_API __declspec(dllimport)
-	#endif
+    #ifdef _DLL
+    #define PUGIXML_API __declspec(dllexport)
+    #else
+    #define PUGIXML_API __declspec(dllimport)
+    #endif
 
 [endsect] [/shared]
  
@@ -257,37 +257,37 @@ The tree nodes can be of one of the following types (which together form the enu
 
 * Element/tag node ([anchor node_element]) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element node is as follows:
 
-	<node attr="value"><child/></node>
+    <node attr="value"><child/></node>
 
 [:There are two element nodes here; one has name `"node"`, single attribute `"attr"` and single child `"child"`, another has name `"child"` and does not have any attributes or child nodes.]
 
 * Plain character data nodes ([anchor node_pcdata]) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, and element node can have several child PCDATA nodes. The example XML representation of text node is as follows:
 
-	<node> text1 <child/> text2 </node>
+    <node> text1 <child/> text2 </node>
 
 [:Here `"node"` element has three children, two of which are PCDATA nodes with values `"text1"` and `"text2"`.]
 
 * Character data nodes ([anchor node_cdata]) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
 
-	<node> <![CDATA[[text1]]> <child/> <![CDATA[[text2]]> </node>
+    <node> <![CDATA[[text1]]> <child/> <![CDATA[[text2]]> </node>
 
 [:CDATA nodes make it easy to include non-escaped <, & and > characters in plain text. CDATA value can not contain the character sequence \]\]>, since it is used to determine the end of node contents.]
 
 * Comment nodes ([anchor node_comment]) represent comments in XML. Comment nodes have a value, but do not have name or children/attributes. The example XML representation of comment node is as follows:
 
-	<!-- comment text -->
+    <!-- comment text -->
 
 [:Here the comment node has value `"comment text"`. By default comment nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_comments` flag.]
 
 * Processing instruction node ([anchor node_pi]) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of PI node is as follows:
 
-	<?name value?>
+    <?name value?>
 
 [:Here the name (also called PI target) is `"name"`, and the value is `"value"`. By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_pi` flag.]
 
 * Declaration node ([anchor node_declaration]) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (its parent should be the document). The example XML representation of declaration node is as follows:
 
-	<?xml version="1.0"?>
+    <?xml version="1.0"?>
 
 [:Here the node has name `"xml"` and a single attribute with name `"version"` and value `"1.0"`. By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_declaration` flag. Also, by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this by adding `format_no_declaration` flag.]
 
@@ -297,18 +297,18 @@ Finally, here is a complete example of XML document and the corresponding tree r
 
 [[
 ``
-	<?xml version="1.0"?>
-	<mesh name="mesh_root">
-		<!-- here is a mesh node -->
-		some text
-		<![CDATA[someothertext]]>
-		some more text
-		<node attr1="value1" attr2="value2" />
-		<node attr1="value2">
-			<innernode/>
-		</node>
-	</mesh>
-	<?include somedata?>
+    <?xml version="1.0"?>
+    <mesh name="mesh_root">
+        <!-- here is a mesh node -->
+        some text
+        <![CDATA[someothertext]]>
+        some more text
+        <node attr1="value1" attr2="value2" />
+        <node attr1="value2">
+            <innernode/>
+        </node>
+    </mesh>
+    <?include somedata?>
 ``
 ][
 [@images/dom_tree.png [$images/dom_tree_thumb.png]]
@@ -356,8 +356,8 @@ Both `xml_node` and `xml_attribute` have the default constructor which initializ
 [#xml_node::empty]
 Additionally handles they can be implicitly cast to boolean-like objects, so that you can test if the node\/attribute is empty by just doing `if (node) { ... }` or `if (!node) { ... } else { ... }`. Alternatively you can check if a given `xml_node`/`xml_attribute` handle is null by calling the following methods:
 
-	bool xml_attribute::empty() const;
-	bool xml_node::empty() const;
+    bool xml_attribute::empty() const;
+    bool xml_node::empty() const;
 
 Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. Once underlying node/attribute objects are destroyed, the handles to those objects become invalid. While this means that destruction of the entire tree invalidates all node/attribute handles, it also means that destroying a subtree (by calling `remove_child`) or removing an attribute invalidates the corresponding handles. There is no way to check handle validity; you have to ensure correctness through external mechanisms.
 
@@ -371,13 +371,13 @@ There are two choices of interface and internal representation when configuring 
 
 All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. For example, node name accessors look like this in char mode:
 
-	const char* xml_node::name() const;
-	bool xml_node::set_name(const char* value);
+    const char* xml_node::name() const;
+    bool xml_node::set_name(const char* value);
 
 and like this in wchar_t mode:
 
-	const wchar_t* xml_node::name() const;
-	bool xml_node::set_name(const wchar_t* value);
+    const wchar_t* xml_node::name() const;
+    bool xml_node::set_name(const wchar_t* value);
 
 [#char_t]
 [#string_t]
@@ -389,8 +389,8 @@ In addition to the interface, the internal implementation changes to store XML d
 [#as_wide]
 There are cases when you'll have to convert string data between UTF-8 and wchar_t encodings; the following helper functions are provided for such purposes:
 
-	std::string as_utf8(const wchar_t* str);
-	std::wstring as_wide(const char* str);
+    std::string as_utf8(const wchar_t* str);
+    std::wstring as_wide(const char* str);
 
 Both functions accept null-terminated string as an argument `str`, and return the converted string. `as_utf8` performs conversion from UTF-16/32 to UTF-8; `as_wide` performs conversion from UTF-8 to UTF-16/32. Invalid UTF sequences are silently discarded upon conversion. `str` has to be a valid string; passing null pointer results in undefined behavior.
 
@@ -438,17 +438,17 @@ pugixml requests the memory needed for document storage in big chunks, and alloc
 [#deallocation_function]
 All memory for tree structure/data is allocated via globally specified functions, which default to malloc/free. You can set your own allocation functions with set_memory_management functions. The function interfaces are the same as that of malloc/free:
 
-	typedef void* (*allocation_function)(size_t size);
-	typedef void (*deallocation_function)(void* ptr);
+    typedef void* (*allocation_function)(size_t size);
+    typedef void (*deallocation_function)(void* ptr);
 
 [#set_memory_management_functions]
 [#get_memory_allocation_function]
 [#get_memory_deallocation_function]
 You can use the following accessor functions to change or get current memory management functions:
 
-	void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
-	allocation_function get_memory_allocation_function();
-	deallocation_function get_memory_deallocation_function();
+    void set_memory_management_functions(allocation_function allocate, deallocation_function deallocate);
+    allocation_function get_memory_allocation_function();
+    deallocation_function get_memory_deallocation_function();
 
 Allocation function is called with the size (in bytes) as an argument and should return a pointer to memory block with alignment that is suitable for pointer storage and size that is greater or equal to the requested one. If the allocation fails, the function has to return null pointer (throwing an exception from allocation function results in undefined behavior). Deallocation function is called with the pointer that was returned by the previous call or with a null pointer; null pointer deallocation should be handled as a no-op. If memory management functions are not thread-safe, library thread safety is not guaranteed.
 
@@ -489,8 +489,8 @@ XML data is always converted to internal character format (see [sref manual.dom.
 [#xml_document::load_file]
 The most common source of XML data is files; pugixml provides a separate function for loading XML document from file:
 
-	xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
-	
+    xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    
 This function accepts file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
 
 `load_file` destroys the existing document tree and then tries to load the new tree from the specified file. The result of the operation is returned in an `xml_parse_result` object; this object contains the operation status, and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [sref manual.loading.errors] for error handling details.
@@ -511,9 +511,9 @@ This is an example of loading XML document from file ([@samples/load_file.cpp]):
 [#xml_document::load_buffer_inplace_own]
 Sometimes XML data should be loaded from some other source than file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from gzip-compressed files. All these scenarios require loading document from memory. First you should prepare a contiguous memory block with all XML data; then you have to invoke one of buffer loading functions. These functions will handle the necessary encoding conversions, if any, and then will parse the data into the corresponding XML tree. There are several buffer loading functions, which differ in the behavior and thus in performance/memory usage:
 
-	xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
-	xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
-	xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
 All functions accept the buffer which is represented by a pointer to XML data, `contents`, and data size in bytes. Also there are two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The buffer does not have to be zero-terminated.
 
@@ -524,7 +524,7 @@ The best way from the performance/memory point of view is to load document using
 [#xml_document::load_string]
 There is also a simple helper function for cases when you want to load the XML document from null-terminated character string:
 
-	xml_parse_result xml_document::load(const char_t* contents, unsigned int options = parse_default);
+    xml_parse_result xml_document::load(const char_t* contents, unsigned int options = parse_default);
 
 It is equivalent to calling `load_buffer` with `size = strlen(contents)`. This function assumes native encoding for input data, so it does not do any encoding conversion. In general, this function is fine for loading small documents from string literals, but has more overhead and less functionality than buffer loading functions.
 
@@ -544,8 +544,8 @@ This is an example of loading XML document from memory using different functions
 [#xml_document::load_stream]
 For additional interoperability pugixml provides functions for loading document from any object which implements C++ `std::istream` interface. This allows you to load documents from any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). There are two functions, one works with narrow character streams, another handles wide character ones:
 
-	xml_parse_result xml_document::load(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
-	xml_parse_result xml_document::load(std::wistream& stream, unsigned int options = parse_default);
+    xml_parse_result xml_document::load(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result xml_document::load(std::wistream& stream, unsigned int options = parse_default);
 
 `load` with `std::istream` argument loads the document from stream from the current read position to the end, treating the stream contents as a byte stream of the specified encoding (with encoding autodetection as necessary). Thus calling `xml_document::load` on an opened `std::ifstream` object is equivalent to calling `xml_document::load_file`.
 
@@ -565,15 +565,15 @@ Stream loading requires working seek/tell functions and therefore may fail when 
 [#xml_parse_result]
 All document loading functions return the parsing result via `xml_parse_result` object. It contains parsing status, the offset of last successfully parsed character from the beginning of the source stream, and the encoding of the source stream:
 
-	struct xml_parse_result
-	{
-		xml_parse_status status;
-		ptrdiff_t offset;
-		xml_encoding encoding;
+    struct xml_parse_result
+    {
+        xml_parse_status status;
+        ptrdiff_t offset;
+        xml_encoding encoding;
 
-		operator bool() const;
-		const char* description() const;
-	};
+        operator bool() const;
+        const char* description() const;
+    };
 
 [#xml_parse_status]
 [#xml_parse_result::status]
@@ -677,14 +677,14 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
 
 * [anchor encoding_auto] means that pugixml will try to guess the encoding based on source XML data. The algorithm is a modified version of the one presented in Appendix F.1 of XML recommendation; it tries to match the first few bytes of input data with the following patterns in strict order:
 [lbr]
-	* If first four bytes match UTF-32 BOM (Byte Order Mark), encoding is assumed to be UTF-32 with the endianness equal to that of BOM;
-	* If first two bytes match UTF-16 BOM, encoding is assumed to be UTF-16 with the endianness equal to that of BOM;
-	* If first three bytes match UTF-8 BOM, encoding is assumed to be UTF-8;
-	* If first four bytes match UTF-32 representation of [^<], encoding is assumed to be UTF-32 with the corresponding endianness;
-	* If first four bytes match UTF-16 representation of [^<?], encoding is assumed to be UTF-16 with the corresponding endianness;
-	* If first two bytes match UTF-16 representation of [^<], encoding is assumed to be UTF-16 with the corresponding endianness (this guess may yield incorrect result, but it's better than UTF-8);
-	* Otherwise encoding is assumed to be UTF-8.
-	[lbr]
+    * If first four bytes match UTF-32 BOM (Byte Order Mark), encoding is assumed to be UTF-32 with the endianness equal to that of BOM;
+    * If first two bytes match UTF-16 BOM, encoding is assumed to be UTF-16 with the endianness equal to that of BOM;
+    * If first three bytes match UTF-8 BOM, encoding is assumed to be UTF-8;
+    * If first four bytes match UTF-32 representation of [^<], encoding is assumed to be UTF-32 with the corresponding endianness;
+    * If first four bytes match UTF-16 representation of [^<?], encoding is assumed to be UTF-16 with the corresponding endianness;
+    * If first two bytes match UTF-16 representation of [^<], encoding is assumed to be UTF-16 with the corresponding endianness (this guess may yield incorrect result, but it's better than UTF-8);
+    * Otherwise encoding is assumed to be UTF-8.
+    [lbr]
 
 * [anchor encoding_utf8] corresponds to UTF-8 encoding as defined in Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
 * [anchor encoding_utf16_le] corresponds to little-endian UTF-16 encoding as defined in Unicode standard; surrogate pairs are supported.
@@ -732,16 +732,16 @@ pugixml features an extensive interface for getting various types of data from t
 [#xml_node::parent][#xml_node::first_child][#xml_node::last_child][#xml_node::next_sibling][#xml_node::previous_sibling][#xml_node::first_attribute][#xml_node::last_attribute][#xml_attribute::next_attribute][#xml_attribute::previous_attribute]
 The internal representation of the document is a tree, where each node has a list of child nodes (the order of children corresponds to their order in the XML representation), and additionally element nodes have a list of attributes, which is also ordered. Several functions are provided in order to let you get from one node in the tree to the other. These functions roughly correspond to the internal representation, and thus are usually building blocks for other methods of traversing (i.e. XPath traversals are based on these functions).
 
-	xml_node xml_node::parent() const;
-	xml_node xml_node::first_child() const;
-	xml_node xml_node::last_child() const;
-	xml_node xml_node::next_sibling() const;
-	xml_node xml_node::previous_sibling() const;
+    xml_node xml_node::parent() const;
+    xml_node xml_node::first_child() const;
+    xml_node xml_node::last_child() const;
+    xml_node xml_node::next_sibling() const;
+    xml_node xml_node::previous_sibling() const;
 
-	xml_attribute xml_node::first_attribute() const;
-	xml_attribute xml_node::last_attribute() const;
-	xml_attribute xml_attribute::next_attribute() const;
-	xml_attribute xml_attribute::previous_attribute() const;
+    xml_attribute xml_node::first_attribute() const;
+    xml_attribute xml_node::last_attribute() const;
+    xml_attribute xml_attribute::next_attribute() const;
+    xml_attribute xml_attribute::previous_attribute() const;
 
 `parent` function returns the node's parent; all nodes except the document have non-null parent. `first_child` and `last_child` return the first and last child of the node, respectively; note that only document nodes and element nodes can have non-empty child node list. If node has no children, both functions return null nodes. `next_sibling` and `previous_sibling` return the node that's immediately to the right\/left of this node in the children list, respectively - for example, in `<a/><b/><c/>`, calling `next_sibling` for a handle that points to `<b/>` results in a handle pointing to `<c/>`, and calling `previous_sibling` results in handle pointing to `<a/>`. If node does not have next/previous sibling (this happens if it is the last/first node in the list, respectively), the functions return null nodes. `first_attribute`, `last_attribute`, `next_attribute` and `previous_attribute` functions behave the same way as corresponding child node functions and allow to iterate through attribute list in the same way.
 
@@ -760,16 +760,16 @@ With these functions, you can iterate through all child nodes and display all at
 [#xml_node::name][#xml_node::value]
 Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. `node_document` nodes do not have name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
 
-	const char_t* xml_node::name() const;
-	const char_t* xml_node::value() const;
+    const char_t* xml_node::name() const;
+    const char_t* xml_node::value() const;
 
 In case node does not have a name or value or if the node handle is null, both functions return empty strings - they never return null pointers.
 
 [#xml_node::child_value]
 It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type `node_pcdata` with value `"This is a node"`. pugixml provides two helper functions to parse such data:
 
-	const char_t* xml_node::child_value() const;
-	const char_t* xml_node::child_value(const char_t* name) const;
+    const char_t* xml_node::child_value() const;
+    const char_t* xml_node::child_value(const char_t* name) const;
 
 `child_value()` returns the value of the first child with type `node_pcdata` or `node_cdata`; `child_value(name)` is a simple wrapper for `child(name).child_value()`. For the above example, calling `node.child_value("description")` and `description.child_value()` will both produce string `"This is a node"`. If there is no child with relevant type, or if the handle is null, `child_value` functions return empty string.
 
@@ -782,19 +782,19 @@ There is an example of using some of these functions [link code_traverse_base_da
 [#xml_attribute::name][#xml_attribute::value]
 All attributes have name and value, both of which are strings (value may be empty). There are two corresponding accessors, like for `xml_node`:
 
-	const char_t* xml_attribute::name() const;
-	const char_t* xml_attribute::value() const;
+    const char_t* xml_attribute::name() const;
+    const char_t* xml_attribute::value() const;
 
 In case attribute handle is null, both functions return empty strings - they never return null pointers.
 
 [#xml_attribute::as_int][#xml_attribute::as_uint][#xml_attribute::as_double][#xml_attribute::as_float][#xml_attribute::as_bool]
 In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type. The accessors are as follows:
 
-	int xml_attribute::as_int() const;
-	unsigned int xml_attribute::as_uint() const;
-	double xml_attribute::as_double() const;
-	float xml_attribute::as_float() const;
-	bool xml_attribute::as_bool() const;
+    int xml_attribute::as_int() const;
+    unsigned int xml_attribute::as_uint() const;
+    double xml_attribute::as_double() const;
+    float xml_attribute::as_float() const;
+    bool xml_attribute::as_bool() const;
 
 `as_int`, `as_uint`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `0` is returned. Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as a decimal number (`as_int` or `as_uint`) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
 
@@ -818,10 +818,10 @@ This is an example of using these functions, along with node data retrieval ones
 [#xml_node::child][#xml_node::attribute][#xml_node::next_sibling_name][#xml_node::previous_sibling_name]
 Since a lot of document traversal consists of finding the node/attribute with the correct name, there are special functions for that purpose:
 
-	xml_node xml_node::child(const char_t* name) const;
-	xml_attribute xml_node::attribute(const char_t* name) const;
-	xml_node xml_node::next_sibling(const char_t* name) const;
-	xml_node xml_node::previous_sibling(const char_t* name) const;
+    xml_node xml_node::child(const char_t* name) const;
+    xml_attribute xml_node::attribute(const char_t* name) const;
+    xml_node xml_node::next_sibling(const char_t* name) const;
+    xml_node xml_node::previous_sibling(const char_t* name) const;
 
 `child` and `attribute` return the first child/attribute with the specified name; `next_sibling` and `previous_sibling` return the first sibling in the corresponding direction with the specified name. All string comparisons are case-sensitive. In case the node handle is null or there is no node\/attribute with the specified name, null handle is returned.
 
@@ -832,8 +832,8 @@ Since a lot of document traversal consists of finding the node/attribute with th
 [#xml_node::find_child_by_attribute]
 Occasionally the needed node is specified not by the unique name but instead by the value of some attribute; for example, it is common to have node collections with each node having a unique id: `<group><item id="1"/> <item id="2"/></group>`. There are two functions for finding child nodes based on the attribute values:
 
-	xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
-	xml_node xml_node::find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
+    xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
+    xml_node xml_node::find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
 
 The three-argument function returns the first child node with the specified name which has an attribute with the specified name/value; the two-argument function skips the name test for the node, which can be useful for searching in heterogeneous collections. If the node handle is null or if no node is found, null handle is returned. All string comparisons are case-sensitive.
 
@@ -850,16 +850,16 @@ This is an example of using these functions ([@samples/traverse_base.cpp]):
 [#xml_node_iterator][#xml_attribute_iterator][#xml_node::begin][#xml_node::end][#xml_node::attributes_begin][#xml_node::attributes_end]
 Child node lists and attribute lists are simply double-linked lists; while you can use `previous_sibling`/`next_sibling` and other such functions for iteration, pugixml additionally provides node and attribute iterators, so that you can treat nodes as containers of other nodes or attributes:
 
-	class xml_node_iterator;
-	class xml_attribute_iterator;
-	
-	typedef xml_node_iterator xml_node::iterator;
-	iterator xml_node::begin() const;
-	iterator xml_node::end() const;
+    class xml_node_iterator;
+    class xml_attribute_iterator;
+    
+    typedef xml_node_iterator xml_node::iterator;
+    iterator xml_node::begin() const;
+    iterator xml_node::end() const;
 
-	typedef xml_attribute_iterator xml_node::attribute_iterator;
-	attribute_iterator xml_node::attributes_begin() const;
-	attribute_iterator xml_node::attributes_end() const;
+    typedef xml_attribute_iterator xml_node::attribute_iterator;
+    attribute_iterator xml_node::attributes_begin() const;
+    attribute_iterator xml_node::attributes_end() const;
 
 `begin` and `attributes_begin` return iterators that point to the first node\/attribute, respectively; `end` and `attributes_end` return past-the-end iterator for node\/attribute list, respectively - this iterator can't be dereferenced, but decrementing it results in an iterator pointing to the last element in the list (except for empty lists, where decrementing past-the-end iterator is not defined). Past-the-end iterator is commonly used as a termination value for iteration loops (see sample below). If you want to get an iterator that points to an existing handle, you can construct the iterator with the handle as a single constructor argument, like so: `xml_node_iterator(node)`. For `xml_attribute_iterator`, you'll have to provide both an attribute and its parent node.
 
@@ -881,17 +881,17 @@ Here is an example of using iterators for document traversal ([@samples/traverse
 [#xml_tree_walker]
 The methods described above allow traversal of immediate children of some node; if you want to do a deep tree traversal, you'll have to do it via a recursive function or some equivalent method. However, pugixml provides a helper for depth-first traversal of a subtree. In order to use it, you have to implement `xml_tree_walker` interface and to call `traverse` function:
 
-	class xml_tree_walker
-	{
-	public:
-		virtual bool begin(xml_node& node);
-		virtual bool for_each(xml_node& node) = 0;
-		virtual bool end(xml_node& node);
+    class xml_tree_walker
+    {
+    public:
+        virtual bool begin(xml_node& node);
+        virtual bool for_each(xml_node& node) = 0;
+        virtual bool end(xml_node& node);
 
-		int depth() const;
-	};
+        int depth() const;
+    };
 
-	bool xml_node::traverse(xml_tree_walker& walker);
+    bool xml_node::traverse(xml_tree_walker& walker);
 
 [#xml_tree_walker::begin][#xml_tree_walker::for_each][#xml_tree_walker::end][#xml_node::traverse]
 The traversal is launched by calling `traverse` function on traversal root and proceeds as follows:
@@ -918,9 +918,9 @@ This is an example of traversing tree hierarchy with xml_tree_walker ([@samples/
 [#xml_node::find_attribute][#xml_node::find_child][#xml_node::find_node]
 While there are existing functions for getting a node/attribute with known contents, they are often not sufficient for simple queries. As an alternative to iterating manually through nodes/attributes until the needed one is found, you can make a predicate and call one of `find_` functions:
 
-	template <typename Predicate> xml_attribute xml_node::find_attribute(Predicate pred) const;
-	template <typename Predicate> xml_node xml_node::find_child(Predicate pred) const;
-	template <typename Predicate> xml_node xml_node::find_node(Predicate pred) const;
+    template <typename Predicate> xml_attribute xml_node::find_attribute(Predicate pred) const;
+    template <typename Predicate> xml_node xml_node::find_child(Predicate pred) const;
+    template <typename Predicate> xml_node xml_node::find_node(Predicate pred) const;
 
 The predicate should be either a plain function or a function object which accepts one argument of type `xml_attribute` (for `find_attribute`) or `xml_node` (for `find_child` and `find_node`), and returns `bool`. The predicate is never called with null handle as an argument.
 
@@ -943,7 +943,7 @@ This is an example of using predicate-based functions ([@samples/traverse_predic
 [#xml_node::root]
 If you need to get the document root of some node, you can use the following function:
 
-	xml_node xml_node::root() const;
+    xml_node xml_node::root() const;
 
 This function returns the node with type `node_document`, which is the root node of the document the node belongs to (unless the node is null, in which case null node is returned). Currently this function has logarithmic complexity, since it simply finds such ancestor of the given node which itself has no parent.
 
@@ -951,8 +951,8 @@ This function returns the node with type `node_document`, which is the root node
 [#xml_node::first_element_by_path]
 While pugixml supports complex XPath expressions, sometimes a simple path handling facility is needed. There are two functions, for getting node path and for converting path to a node:
 
-	string_t xml_node::path(char_t delimiter = '/') const;
-	xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter = '/') const;
+    string_t xml_node::path(char_t delimiter = '/') const;
+    xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter = '/') const;
 
 Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, node `<c/>` has path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<a/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
 
@@ -963,7 +963,7 @@ In case path component is ambiguous (if there are two nodes with given name), th
 [#xml_node::offset_debug]
 pugixml does not record row/column information for nodes upon parsing for efficiency reasons. However, if the node has not changed in a significant way since parsing (the name/value are not changed, and the node itself is the original one, i.e. it was not deleted from the tree and re-added later), it is possible to get the offset from the beginning of XML buffer:
 
-	ptrdiff_t xml_node::offset_debug() const;
+    ptrdiff_t xml_node::offset_debug() const;
 
 If the offset is not available (this happens if the node is null, was not originally parsed from a stream, or has changed in a significant way), the function returns -1. Otherwise it returns the offset to node's data from the beginning of XML buffer in `pugi::char_t` units. For more information on parsing offsets, see [link xml_parse_result::offset parsing error handling documentation].
 
@@ -984,8 +984,8 @@ All member functions that change node/attribute data or structure are non-consta
 [#xml_node::set_name][#xml_node::set_value]
 As discussed before, nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. `node_document` nodes do not have name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to set node's name or value, you can use the following functions:
 
-	bool xml_node::set_name(const char_t* rhs);
-	bool xml_node::set_value(const char_t* rhs);
+    bool xml_node::set_name(const char_t* rhs);
+    bool xml_node::set_value(const char_t* rhs);
 
 Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a `node_pcdata` node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
 
@@ -1002,18 +1002,18 @@ This is an example of setting node name and value ([@samples/modify_base.cpp]):
 [#xml_attribute::set_name][#xml_attribute::set_value]
 All attributes have name and value, both of which are strings (value may be empty). You can set them with the following functions:
 
-	bool xml_attribute::set_name(const char_t* rhs);
-	bool xml_attribute::set_value(const char_t* rhs);
+    bool xml_attribute::set_name(const char_t* rhs);
+    bool xml_attribute::set_value(const char_t* rhs);
 
 Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the attribute handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
 
 In addition to string functions, several functions are provided for handling attributes with numbers and booleans as values:
 
-	bool xml_attribute::set_value(int rhs);
-	bool xml_attribute::set_value(unsigned int rhs);
-	bool xml_attribute::set_value(double rhs);
-	bool xml_attribute::set_value(bool rhs);
-	
+    bool xml_attribute::set_value(int rhs);
+    bool xml_attribute::set_value(unsigned int rhs);
+    bool xml_attribute::set_value(double rhs);
+    bool xml_attribute::set_value(bool rhs);
+    
 The above functions convert the argument to string and then call the base `set_value` function. Integers are converted to a decimal form, floating-point numbers are converted to either decimal or scientific form, depending on the number magnitude, boolean values are converted to either `"true"` or `"false"`.
 
 [caution Number conversion functions depend on current C locale as set with `setlocale`, so may generate unexpected results if the locale is different from `"C"`.]
@@ -1024,11 +1024,11 @@ The above functions convert the argument to string and then call the base `set_v
 
 For convenience, all `set_value` functions have the corresponding assignment operators:
 
-	xml_attribute& xml_attribute::operator=(const char_t* rhs);
-	xml_attribute& xml_attribute::operator=(int rhs);
-	xml_attribute& xml_attribute::operator=(unsigned int rhs);
-	xml_attribute& xml_attribute::operator=(double rhs);
-	xml_attribute& xml_attribute::operator=(bool rhs);
+    xml_attribute& xml_attribute::operator=(const char_t* rhs);
+    xml_attribute& xml_attribute::operator=(int rhs);
+    xml_attribute& xml_attribute::operator=(unsigned int rhs);
+    xml_attribute& xml_attribute::operator=(double rhs);
+    xml_attribute& xml_attribute::operator=(bool rhs);
 
 These operators simply call the right `set_value` function and return the attribute they're called on; the return value of `set_value` is ignored, so errors are not detected.
 
@@ -1043,13 +1043,13 @@ This is an example of setting attribute name and value ([@samples/modify_base.cp
 [#xml_node::append_attribute][#xml_node::insert_attribute_after][#xml_node::insert_attribute_before][#xml_node::append_child][#xml_node::insert_child_after][#xml_node::insert_child_before]
 Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before\/after some after node:
 
-	xml_attribute xml_node::append_attribute(const char_t* name);
-	xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr);
-	xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr);
+    xml_attribute xml_node::append_attribute(const char_t* name);
+    xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr);
+    xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr);
 
-	xml_node xml_node::append_child(xml_node_type type = node_element);
-	xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node);
-	xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node);
+    xml_node xml_node::append_child(xml_node_type type = node_element);
+    xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node);
+    xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node);
 
 `append_attribute` and `append_child` create a new node/attribute at the end of the corresponding list of the node the method is called on; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node\/attribute before or after specified node\/attribute.
 
@@ -1081,8 +1081,8 @@ This is an example of adding new attributes\/nodes to the document ([@samples/mo
 [#xml_node::remove_attribute][#xml_node::remove_child]
 If you do not want your document to contain some node or attribute, you can remove it with one of the following functions:
 
-	bool xml_node::remove_attribute(const xml_attribute& a);
-	bool xml_node::remove_child(const xml_node& n);
+    bool xml_node::remove_attribute(const xml_attribute& a);
+    bool xml_node::remove_child(const xml_node& n);
 
 `remove_attribute` removes the attribute from the attribute list of the node, and returns the operation result. `remove_child` removes the child node with the entire subtree (including all descendant nodes and attributes) from the document, and returns the operation result. Removing fails if one of the following is true:
 
@@ -1094,8 +1094,8 @@ Removing the attribute or node invalidates all handles to the same underlying ob
 
 If you want to remove the attribute or child node by its name, two additional helper functions are available:
 
-	bool xml_node::remove_attribute(const char_t* name);
-	bool xml_node::remove_child(const char_t* name);
+    bool xml_node::remove_attribute(const char_t* name);
+    bool xml_node::remove_child(const char_t* name);
 
 These functions look for the first attribute or child with the specified name, and then remove it, returning the result. If there is no attribute or child with such name, the function returns `false`; if there are two nodes with the given name, only the first node is deleted. If you want to delete all nodes with the specified name, you can use code like this: `while (node.remove_child("tool")) ;`.
 
@@ -1111,12 +1111,12 @@ This is an example of removing attributes\/nodes from the document ([@samples/mo
 [#xml_node::append_copy][#xml_node::insert_copy_after][#xml_node::insert_copy_before]
 With the help of previously described functions, it is possible to create trees with any contents and structure, including cloning the existing data. However since this is an often needed operation, pugixml provides built-in node/attribute cloning facilities. Since nodes and attributes do not exist outside of document tree, you can't create a standalone copy - you have to immediately insert it somewhere in the tree. For this, you can use one of the following functions:
 
-	xml_attribute xml_node::append_copy(const xml_attribute& proto);
-	xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
-	xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
-	xml_node xml_node::append_copy(const xml_node& proto);
-	xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node);
-	xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node);
+    xml_attribute xml_node::append_copy(const xml_attribute& proto);
+    xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
+    xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
+    xml_node xml_node::append_copy(const xml_node& proto);
+    xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node);
+    xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node);
 
 These functions mirror the structure of `append_child`, `insert_child_before` and related functions - they take the handle to the prototype object, which is to be cloned, insert a new attribute\/node at the appropriate place, and then copy the attribute data or the whole node subtree to the new object. The functions return the handle to the resulting duplicate object, or null handle on failure.
 
@@ -1150,7 +1150,7 @@ The node/attribute data is written to the destination properly formatted accordi
 [#xml_document::save_file]
 If you want to save the whole document to a file, you can use the following function:
 
-	bool xml_document::save_file(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+    bool xml_document::save_file(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
 This function accepts file path as its first argument, and also three optional arguments, which specify indentation and other output options (see [sref manual.saving.options]) and output data encoding (see [sref manual.saving.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
 
@@ -1171,8 +1171,8 @@ This is a simple example of saving XML document to file ([@samples/save_file.cpp
 [#xml_document::save_stream]
 For additional interoperability pugixml provides functions for saving document to any object which implements C++ std::ostream interface. This allows you to save documents to any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). Most notably, this allows for easy debug output, since you can use `std::cout` stream as saving target. There are two functions, one works with narrow character streams, another handles wide character ones:
 
-	void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
-	void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
+    void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+    void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
 
 `save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with `encoding_wchar` encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
 
@@ -1191,13 +1191,13 @@ This is a simple example of saving XML document to standard output ([@samples/sa
 [#xml_document::save][#xml_writer][#xml_writer::write]
 All of the above saving functions are implemented in terms of writer interface. This is a simple interface with a single function, which is called several times during output process with chunks of document data as input:
 
-	class xml_writer
-	{
-	public:
-		virtual void write(const void* data, size_t size) = 0;
-	};
+    class xml_writer
+    {
+    public:
+        virtual void write(const void* data, size_t size) = 0;
+    };
 
-	void xml_document::save(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+    void xml_document::save(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
 In order to output the document via some custom transport, for example sockets, you should create an object which implements `xml_writer_file` interface and pass it to `save` function. `xml_writer_file::write` function is called with a buffer as an input, where `data` points to buffer start, and `size` is equal to the buffer size in bytes. `write` implementation must write the buffer to the transport; it can not save the passed buffer pointer, as the buffer contents will change after `write` returns. The buffer contains the chunk of document data in the desired encoding.
 
@@ -1215,9 +1215,9 @@ This is a simple example of custom writer for saving document data to STL string
 [#xml_node::print][#xml_node::print_stream]
 While the previously described functions saved the whole document to the destination, it is easy to save a single subtree. The following functions are provided:
 
-	void xml_node::print(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
-	void xml_node::print(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
-	void xml_node::print(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+    void xml_node::print(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+    void xml_node::print(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
+    void xml_node::print(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
 
 These functions have the same arguments with the same meaning as the corresponding `xml_document::save` functions, and allow you to save the subtree to either a C++ IOstream or to any object that implements `xml_writer` interface.
 
@@ -1287,14 +1287,14 @@ Each XPath expression can have one of the following types: boolean, number, stri
 [#xpath_node][#xpath_node::node][#xpath_node::attribute][#xpath_node::parent]
 Because an XPath node can be either a node or an attribute, there is a special type, `xpath_node`, which is a discriminated union of these types. A value of this type contains two node handles, one of `xml_node` type, and another one of `xml_attribute` type; at most one of them can be non-null. The accessors to get these handles are available:
 
-	xml_node xpath_node::node() const;
-	xml_attribute xpath_node::attribute() const;
+    xml_node xpath_node::node() const;
+    xml_attribute xpath_node::attribute() const;
 
 XPath nodes can be null, in which case both accessors return null handles.
 
 Note that as per XPath specification, each XPath node has a parent, which can be retrieved via this function:
 
-	xml_node xpath_node::parent() const;
+    xml_node xpath_node::parent() const;
 
 `parent` function returns the node's parent if the XPath node corresponds to `xml_node` handle (equivalent to `node().parent()`), or the node to which the attribute belongs to, if the XPath node corresponds to `xml_attribute` handle. For null nodes, `parent` returns null handle.
 
@@ -1310,35 +1310,35 @@ XPath expressions operate not on single nodes, but instead on node sets. A node 
 [#xpath_node_set::const_iterator][#xpath_node_set::begin][#xpath_node_set::end]
 Node sets are represented by `xpath_node_set` object, which has an interface that resembles one of sequential random-access containers. It has an iterator type along with usual begin/past-the-end iterator accessors:
 
-	typedef const xpath_node* xpath_node_set::const_iterator;
-	const_iterator xpath_node_set::begin() const;
-	const_iterator xpath_node_set::end() const;
+    typedef const xpath_node* xpath_node_set::const_iterator;
+    const_iterator xpath_node_set::begin() const;
+    const_iterator xpath_node_set::end() const;
 
 [#xpath_node_set::index][#xpath_node_set::size][#xpath_node_set::empty]
 And it also can be iterated via indices, just like `std::vector`:
 
-	const xpath_node& xpath_node_set::operator[](size_t index) const;
-	size_t xpath_node_set::size() const;
-	bool xpath_node_set::empty() const;
+    const xpath_node& xpath_node_set::operator[](size_t index) const;
+    size_t xpath_node_set::size() const;
+    bool xpath_node_set::empty() const;
 
 All of the above operations have the same semantics as that of `std::vector`: the iterators are random-access, all of the above operations are constant time, and accessing the element at index that is greater or equal than the set size results in undefined behavior. You can use both iterator-based and index-based access for iteration, however the iterator-based can be faster.
 
 [#xpath_node_set::type][#xpath_node_set::type_unsorted][#xpath_node_set::type_sorted][#xpath_node_set::type_sorted_reverse][#xpath_node_set::sort]
 The order of iteration depends on the order of nodes inside the set; the order can be queried via the following function:
 
-	enum xpath_node_set::type_t {type_unsorted, type_sorted, type_sorted_reverse};
-	type_t xpath_node_set::type() const;
+    enum xpath_node_set::type_t {type_unsorted, type_sorted, type_sorted_reverse};
+    type_t xpath_node_set::type() const;
 
 `type` function returns the current order of nodes; `type_sorted` means that the nodes are in forward document order, `type_sorted_reverse` means that the nodes are in reverse document order, and `type_unsorted` means that neither order is guaranteed (nodes can accidentally be in a sorted order even if `type()` returns `type_unsorted`). If you require a specific order of iteration, you can change it via `sort` function:
 
-	void xpath_node_set::sort(bool reverse = false);
+    void xpath_node_set::sort(bool reverse = false);
 
 Calling `sort` sorts the nodes in either forward or reverse document order, depending on the argument; after this call `type()` will return `type_sorted` or `type_sorted_reverse`.
 
 [#xpath_node_set::first]
 Often the actual iteration is not needed; instead, only the first element in document order is required. For this, a special accessor is provided:
 
-	xpath_node xpath_node_set::first() const;
+    xpath_node xpath_node_set::first() const;
 
 This function returns the first node in forward document order from the set, or null node if the set is empty. Note that while the result of the node does not depend on the order of nodes in the set (i.e. on the result of `type()`), the complexity does - if the set is sorted, the complexity is constant, otherwise it is linear in the number of elements or worse.
 
@@ -1349,8 +1349,8 @@ This function returns the first node in forward document order from the set, or 
 [#xml_node::select_single_node][#xml_node::select_nodes]
 If you want to select nodes that match some XPath expression, you can do it with the following functions:
 
-	xpath_node xml_node::select_single_node(const char_t* query) const;
-	xpath_node_set xml_node::select_nodes(const char_t* query) const;
+    xpath_node xml_node::select_single_node(const char_t* query) const;
+    xpath_node_set xml_node::select_nodes(const char_t* query) const;
 
 `select_nodes` function compiles the expression and then executes it with the node as a context node, and returns the resulting node set. `select_single_node` returns only the first node in document order from the result, and is equivalent to calling `select_nodes(query).first()`. If the XPath expression does not match anything, or the node handle is null, `select_nodes` returns an empty set, and `select_single_node` returns null XPath node.
 
@@ -1359,8 +1359,8 @@ Both functions throw `xpath_exception` if the query can not be compiled or if it
 [#xml_node::select_single_node_precomp][#xml_node::select_nodes_precomp]
 While compiling expressions is fast, the compilation time can introduce a significant overhead if the same expression is used many times on small subtrees. If you're doing many similar queries, consider compiling them into query objects (see [sref manual.xpath.query] for further reference). Once you get a compiled query object, you can pass it to select functions instead of an expression string:
 
-	xpath_node xml_node::select_single_node(const xpath_query& query) const;
-	xpath_node_set xml_node::select_nodes(const xpath_query& query) const;
+    xpath_node xml_node::select_single_node(const xpath_query& query) const;
+    xpath_node_set xml_node::select_nodes(const xpath_query& query) const;
 
 Both functions throw `xpath_exception` if the query returns a value with type other than node set.
 
@@ -1385,20 +1385,20 @@ Query objects correspond to `xpath_query` type. They are immutable and non-copya
 [#xpath_query::ctor]
 You can create a query object with the constructor that takes XPath expression as an argument:
 
-	explicit xpath_query::xpath_query(const char_t* query);
+    explicit xpath_query::xpath_query(const char_t* query);
 
 [#xpath_query::return_type]
 The expression is compiled and the compiled representation is stored in the new query object. If compilation fails, `xpath_exception` is thrown (see [sref manual.xpath.errors] for details). After the query is created, you can query the type of the evaluation result using the following function:
 
-	xpath_value_type xpath_query::return_type() const;
+    xpath_value_type xpath_query::return_type() const;
 
 [#xpath_query::evaluate_boolean][#xpath_query::evaluate_number][#xpath_query::evaluate_string][#xpath_query::evaluate_node_set]
 You can evaluate the query using one of the following functions:
 
-	bool xpath_query::evaluate_boolean(const xml_node& n) const;
-	double xpath_query::evaluate_number(const xml_node& n) const;
-	string_t xpath_query::evaluate_string(const xml_node& n) const;
-	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const;
+    bool xpath_query::evaluate_boolean(const xml_node& n) const;
+    double xpath_query::evaluate_number(const xml_node& n) const;
+    string_t xpath_query::evaluate_string(const xml_node& n) const;
+    xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const;
 
 All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. By XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` throws an `xpath_exception` if the return type is not node set.
 
@@ -1416,7 +1416,7 @@ This is an example of using query objects ([@samples/xpath_query.cpp]):
 [#xpath_exception][#xpath_exception::what]
 As of version 0.9, all XPath errors result in thrown exceptions. The errors can arise during expression compilation or node set evaluation. In both cases, an `xpath_exception` object is thrown. This is an exception object that implements `std::exception` interface, and thus has a single function `what()`:
 
-	virtual const char* xpath_exception::what() const throw();
+    virtual const char* xpath_exception::what() const throw();
 
 This function returns the error message. Currently it is impossible to get the exact place where query compilation failed. This functionality, along with optional error handling without exceptions, will be available in version 1.0.
 
@@ -1451,165 +1451,165 @@ Some of these incompatibilities will be fixed in version 1.0.
 Major release, featuring extended and improved Unicode support, miscellaneous performance improvements, bug fixes and more.
 
 * Major Unicode improvements:
-	# Introduced encoding support (automatic/manual encoding detection on load, manual encoding selection on save, conversion from/to UTF8, UTF16 LE/BE, UTF32 LE/BE)
-	# Introduced wchar_t mode (you can set PUGIXML_WCHAR_MODE define to switch pugixml internal encoding from UTF8 to wchar_t; all functions are switched to their Unicode variants)
-	# Load/save functions now support wide streams
+    # Introduced encoding support (automatic/manual encoding detection on load, manual encoding selection on save, conversion from/to UTF8, UTF16 LE/BE, UTF32 LE/BE)
+    # Introduced wchar_t mode (you can set PUGIXML_WCHAR_MODE define to switch pugixml internal encoding from UTF8 to wchar_t; all functions are switched to their Unicode variants)
+    # Load/save functions now support wide streams
 
 * Bug fixes:
-	# Fixed document corruption on failed parsing bug
-	# XPath string <-> number conversion improvements (increased precision, fixed crash for huge numbers)
-	# Improved DOCTYPE parsing: now parser recognizes all well-formed DOCTYPE declarations
-	# Fixed xml_attribute::as_uint() for large numbers (i.e. 2^32-1)
-	# Fixed xml_node::first_element_by_path for path components that are prefixes of node names, but are not exactly equal to them.
+    # Fixed document corruption on failed parsing bug
+    # XPath string <-> number conversion improvements (increased precision, fixed crash for huge numbers)
+    # Improved DOCTYPE parsing: now parser recognizes all well-formed DOCTYPE declarations
+    # Fixed xml_attribute::as_uint() for large numbers (i.e. 2^32-1)
+    # Fixed xml_node::first_element_by_path for path components that are prefixes of node names, but are not exactly equal to them.
 
 * Specification changes:
-	# parse() API changed to load_buffer/load_buffer_inplace/load_buffer_inplace_own; load_buffer APIs do not require zero-terminated strings.
-	# Renamed as_utf16 to as_wide
-	# Changed xml_node::offset_debug return type and xml_parse_result::offset type to ptrdiff_t
-	# Nodes/attributes with empty names are now printed as :anonymous
+    # parse() API changed to load_buffer/load_buffer_inplace/load_buffer_inplace_own; load_buffer APIs do not require zero-terminated strings.
+    # Renamed as_utf16 to as_wide
+    # Changed xml_node::offset_debug return type and xml_parse_result::offset type to ptrdiff_t
+    # Nodes/attributes with empty names are now printed as :anonymous
 
 * Performance improvements:
-	# Optimized document parsing and saving
-	# Changed internal memory management: internal allocator is used for both metadata and name/value data; allocated pages are deleted if all allocations from them are deleted
-	# Optimized memory consumption: sizeof(xml_node_struct) reduced from 40 bytes to 32 bytes on x86
-	# Optimized debug mode parsing/saving by order of magnitude
+    # Optimized document parsing and saving
+    # Changed internal memory management: internal allocator is used for both metadata and name/value data; allocated pages are deleted if all allocations from them are deleted
+    # Optimized memory consumption: sizeof(xml_node_struct) reduced from 40 bytes to 32 bytes on x86
+    # Optimized debug mode parsing/saving by order of magnitude
 
 * Miscellaneous:
-	# All STL includes except <exception> in pugixml.hpp are replaced with forward declarations
-	# xml_node::remove_child and xml_node::remove_attribute now return the operation result
+    # All STL includes except <exception> in pugixml.hpp are replaced with forward declarations
+    # xml_node::remove_child and xml_node::remove_attribute now return the operation result
 
 * Compatibility:
-	# parse() and as_utf16 are left for compatibility (these functions are deprecated and will be removed in version 1.0)
-	# Wildcard functions, document_order/precompute_document_order functions, all_elements_by_name function and format_write_bom_utf8 flag are deprecated and will be removed in version 1.0
-	# xpath_type_t enumeration was renamed to xpath_value_type; xpath_type_t is deprecated and will be removed in version 1.0
+    # parse() and as_utf16 are left for compatibility (these functions are deprecated and will be removed in version 1.0)
+    # Wildcard functions, document_order/precompute_document_order functions, all_elements_by_name function and format_write_bom_utf8 flag are deprecated and will be removed in version 1.0
+    # xpath_type_t enumeration was renamed to xpath_value_type; xpath_type_t is deprecated and will be removed in version 1.0
 
 [h5 8.11.2009 - version 0.5]
 
 Major bugfix release. Changes:
 
 * XPath bugfixes:
-	# Fixed translate(), lang() and concat() functions (infinite loops/crashes)
-	# Fixed compilation of queries with empty literal strings ("")
-	# Fixed axis tests: they never add empty nodes/attributes to the resulting node set now
-	# Fixed string-value evaluation for node-set (the result excluded some text descendants)
-	# Fixed self:: axis (it behaved like ancestor-or-self::)
-	# Fixed following:: and preceding:: axes (they included descendent and ancestor nodes, respectively)
-	# Minor fix for namespace-uri() function (namespace declaration scope includes the parent element of namespace declaration attribute)
-	# Some incorrect queries are no longer parsed now (i.e. foo: *)
-	# Fixed text()/etc. node test parsing bug (i.e. foo[text()] failed to compile)
-	# Fixed root step (/) - it now selects empty node set if query is evaluated on empty node
-	# Fixed string to number conversion ("123 " converted to NaN, "123 .456" converted to 123.456 - now the results are 123 and NaN, respectively)
-	# Node set copying now preserves sorted type; leads to better performance on some queries
+    # Fixed translate(), lang() and concat() functions (infinite loops/crashes)
+    # Fixed compilation of queries with empty literal strings ("")
+    # Fixed axis tests: they never add empty nodes/attributes to the resulting node set now
+    # Fixed string-value evaluation for node-set (the result excluded some text descendants)
+    # Fixed self:: axis (it behaved like ancestor-or-self::)
+    # Fixed following:: and preceding:: axes (they included descendent and ancestor nodes, respectively)
+    # Minor fix for namespace-uri() function (namespace declaration scope includes the parent element of namespace declaration attribute)
+    # Some incorrect queries are no longer parsed now (i.e. foo: *)
+    # Fixed text()/etc. node test parsing bug (i.e. foo[text()] failed to compile)
+    # Fixed root step (/) - it now selects empty node set if query is evaluated on empty node
+    # Fixed string to number conversion ("123 " converted to NaN, "123 .456" converted to 123.456 - now the results are 123 and NaN, respectively)
+    # Node set copying now preserves sorted type; leads to better performance on some queries
 
 * Miscellaneous bugfixes:
-	# Fixed xml_node::offset_debug for PI nodes
-	# Added empty attribute checks to xml_node::remove_attribute
-	# Fixed node_pi and node_declaration copying
-	# Const-correctness fixes
+    # Fixed xml_node::offset_debug for PI nodes
+    # Added empty attribute checks to xml_node::remove_attribute
+    # Fixed node_pi and node_declaration copying
+    # Const-correctness fixes
 
 * Specification changes:
-	# xpath_node::select_nodes() and related functions now throw exception if expression return type is not node set (instead of assertion)
-	# xml_node::traverse() now sets depth to -1 for both begin() and end() callbacks (was 0 at begin() and -1 at end())
-	# In case of non-raw node printing a newline is output after PCDATA inside nodes if the PCDATA has siblings
-	# UTF8 -> wchar_t conversion now considers 5-byte UTF8-like sequences as invalid
+    # xpath_node::select_nodes() and related functions now throw exception if expression return type is not node set (instead of assertion)
+    # xml_node::traverse() now sets depth to -1 for both begin() and end() callbacks (was 0 at begin() and -1 at end())
+    # In case of non-raw node printing a newline is output after PCDATA inside nodes if the PCDATA has siblings
+    # UTF8 -> wchar_t conversion now considers 5-byte UTF8-like sequences as invalid
 
 * New features:
-	# Added xpath_node_set::operator[] for index-based iteration
-	# Added xpath_query::return_type()
-	# Added getter accessors for memory-management functions
+    # Added xpath_node_set::operator[] for index-based iteration
+    # Added xpath_query::return_type()
+    # Added getter accessors for memory-management functions
 
 [h5 17.09.2009 - version 0.42]
 
 Maintenance release. Changes:
 
 * Bug fixes:
-	# Fixed deallocation in case of custom allocation functions or if delete[] / free are incompatible
-	# XPath parser fixed for incorrect queries (i.e. incorrect XPath queries should now always fail to compile)
-	# Const-correctness fixes for find_child_by_attribute
-	# Improved compatibility (miscellaneous warning fixes, fixed cstring include dependency for GCC)
-	# Fixed iterator begin/end and print function to work correctly for empty nodes
+    # Fixed deallocation in case of custom allocation functions or if delete[] / free are incompatible
+    # XPath parser fixed for incorrect queries (i.e. incorrect XPath queries should now always fail to compile)
+    # Const-correctness fixes for find_child_by_attribute
+    # Improved compatibility (miscellaneous warning fixes, fixed cstring include dependency for GCC)
+    # Fixed iterator begin/end and print function to work correctly for empty nodes
 
 * New features:
-	# Added PUGIXML_API/PUGIXML_CLASS/PUGIXML_FUNCTION configuration macros to control class/function attributes
-	# Added xml_attribute::set_value overloads for different types
+    # Added PUGIXML_API/PUGIXML_CLASS/PUGIXML_FUNCTION configuration macros to control class/function attributes
+    # Added xml_attribute::set_value overloads for different types
 
 [h5 8.02.2009 - version 0.41]
 
 Maintenance release. Changes:
 
 * Bug fixes:
-	# Fixed bug with node printing (occasionally some content was not written to output stream)
+    # Fixed bug with node printing (occasionally some content was not written to output stream)
 
 [h5 18.01.2009 - version 0.4]
 
 Changes:
 
 * Bug fixes:
-	# Documentation fix in samples for parse() with manual lifetime control
-	# Fixed document order sorting in XPath (it caused wrong order of nodes after xpath_node_set::sort and wrong results of some XPath queries)
+    # Documentation fix in samples for parse() with manual lifetime control
+    # Fixed document order sorting in XPath (it caused wrong order of nodes after xpath_node_set::sort and wrong results of some XPath queries)
 
 * Node printing changes:
-	# Single quotes are no longer escaped when printing nodes
-	# Symbols in second half of ASCII table are no longer escaped when printing nodes; because of this, format_utf8 flag is deleted as it's no longer needed and format_write_bom is renamed to format_write_bom_utf8.
-	# Reworked node printing - now it works via xml_writer interface; implementations for FILE* and std::ostream are available. As a side-effect, xml_document::save_file now works without STL.
+    # Single quotes are no longer escaped when printing nodes
+    # Symbols in second half of ASCII table are no longer escaped when printing nodes; because of this, format_utf8 flag is deleted as it's no longer needed and format_write_bom is renamed to format_write_bom_utf8.
+    # Reworked node printing - now it works via xml_writer interface; implementations for FILE* and std::ostream are available. As a side-effect, xml_document::save_file now works without STL.
 
 * New features:
-	# Added unsigned integer support for attributes (xml_attribute::as_uint, xml_attribute::operator=)
-	# Now document declaration (<?xml ...?>) is parsed as node with type node_declaration when parse_declaration flag is specified (access to encoding/version is performed as if they were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresponding flags for node printing were also added
-	# Added support for custom memory management (see set_memory_management_functions for details)
-	# Implemented node/attribute copying (see xml_node::insert\_copy_* and xml_node::append_copy for details)
-	# Added find_child_by_attribute and find_child_by_attribute_w to simplify parsing code in some cases (i.e. COLLADA files)
-	# Added file offset information querying for debugging purposes (now you're able to determine exact location of any xml_node in parsed file, see xml_node::offset_debug for details)
-	# Improved error handling for parsing - now load(), load_file() and parse() return xml_parse_result, which contains error code and last parsed offset; this does not break old interface as xml_parse_result can be implicitly casted to bool.
+    # Added unsigned integer support for attributes (xml_attribute::as_uint, xml_attribute::operator=)
+    # Now document declaration (<?xml ...?>) is parsed as node with type node_declaration when parse_declaration flag is specified (access to encoding/version is performed as if they were attributes, i.e. doc.child("xml").attribute("version").as_float()); corresponding flags for node printing were also added
+    # Added support for custom memory management (see set_memory_management_functions for details)
+    # Implemented node/attribute copying (see xml_node::insert\_copy_* and xml_node::append_copy for details)
+    # Added find_child_by_attribute and find_child_by_attribute_w to simplify parsing code in some cases (i.e. COLLADA files)
+    # Added file offset information querying for debugging purposes (now you're able to determine exact location of any xml_node in parsed file, see xml_node::offset_debug for details)
+    # Improved error handling for parsing - now load(), load_file() and parse() return xml_parse_result, which contains error code and last parsed offset; this does not break old interface as xml_parse_result can be implicitly casted to bool.
 
 [h5 31.10.2007 - version 0.34]
 
 Maintenance release. Changes:
 
 * Bug fixes:
-	# Fixed bug with loading from text-mode iostreams
-	# Fixed leak when transfer_ownership is true and parsing is failing
-	# Fixed bug in saving (\\r and \\n are now escaped in attribute values)
-	# Renamed free() to destroy() - some macro conflicts were reported
+    # Fixed bug with loading from text-mode iostreams
+    # Fixed leak when transfer_ownership is true and parsing is failing
+    # Fixed bug in saving (\\r and \\n are now escaped in attribute values)
+    # Renamed free() to destroy() - some macro conflicts were reported
 
 * New features:
-	# Improved compatibility (supported Digital Mars C++, MSVC 6, CodeWarrior 8, PGI C++, Comeau, supported PS3 and XBox360)
-	# PUGIXML_NO_EXCEPTION flag for platforms without exception handling
+    # Improved compatibility (supported Digital Mars C++, MSVC 6, CodeWarrior 8, PGI C++, Comeau, supported PS3 and XBox360)
+    # PUGIXML_NO_EXCEPTION flag for platforms without exception handling
 
 [h5 21.02.2007 - version 0.3]
 
 Refactored, reworked and improved version. Changes:
 
 * Interface:
-	# Added XPath
-	# Added tree modification functions
-	# Added no STL compilation mode
-	# Added saving document to file
-	# Refactored parsing flags
-	# Removed xml_parser class in favor of xml_document
-	# Added transfer ownership parsing mode
-	# Modified the way xml_tree_walker works
-	# Iterators are now non-constant
+    # Added XPath
+    # Added tree modification functions
+    # Added no STL compilation mode
+    # Added saving document to file
+    # Refactored parsing flags
+    # Removed xml_parser class in favor of xml_document
+    # Added transfer ownership parsing mode
+    # Modified the way xml_tree_walker works
+    # Iterators are now non-constant
 
 * Implementation:
-	# Support of several compilers and platforms
-	# Refactored and sped up parsing core
-	# Improved standard compliancy
-	# Added XPath implementation
-	# Fixed several bugs
+    # Support of several compilers and platforms
+    # Refactored and sped up parsing core
+    # Improved standard compliancy
+    # Added XPath implementation
+    # Fixed several bugs
 
 [h5 6.11.2006 - version 0.2]
 
 First public release. Changes:
 
 * Bug fixes:
-	# Fixed child_value() (for empty nodes)
-	# Fixed xml_parser_impl warning at W4
+    # Fixed child_value() (for empty nodes)
+    # Fixed xml_parser_impl warning at W4
 
 * New features:
-	# Introduced child_value(name) and child_value_w(name)
-	# parse_eol_pcdata and parse_eol_attribute flags + parse_minimal optimizations
-	# Optimizations of strconv_t
+    # Introduced child_value(name) and child_value_w(name)
+    # parse_eol_pcdata and parse_eol_attribute flags + parse_minimal optimizations
+    # Optimizations of strconv_t
 
 [h5 15.07.2006 - version 0.1]
 
@@ -1641,351 +1641,351 @@ Types:
 Enumerations:
 
 * `enum `[link xml_node_type]
-	* [link node_null]
-	* [link node_document]
-	* [link node_element]
-	* [link node_pcdata]
-	* [link node_cdata]
-	* [link node_comment]
-	* [link node_pi]
-	* [link node_declaration]
-	[lbr]
+    * [link node_null]
+    * [link node_document]
+    * [link node_element]
+    * [link node_pcdata]
+    * [link node_cdata]
+    * [link node_comment]
+    * [link node_pi]
+    * [link node_declaration]
+    [lbr]
 
 * `enum `[link xml_parse_status]
-	* [link status_ok]
-	* [link status_file_not_found]
-	* [link status_io_error]
-	* [link status_out_of_memory]
-	* [link status_internal_error]
-	* [link status_unrecognized_tag]
-	* [link status_bad_pi]
-	* [link status_bad_comment]
-	* [link status_bad_cdata]
-	* [link status_bad_doctype]
-	* [link status_bad_pcdata]
-	* [link status_bad_start_element]
-	* [link status_bad_attribute]
-	* [link status_bad_end_element]
-	* [link status_end_element_mismatch]
-	[lbr]
+    * [link status_ok]
+    * [link status_file_not_found]
+    * [link status_io_error]
+    * [link status_out_of_memory]
+    * [link status_internal_error]
+    * [link status_unrecognized_tag]
+    * [link status_bad_pi]
+    * [link status_bad_comment]
+    * [link status_bad_cdata]
+    * [link status_bad_doctype]
+    * [link status_bad_pcdata]
+    * [link status_bad_start_element]
+    * [link status_bad_attribute]
+    * [link status_bad_end_element]
+    * [link status_end_element_mismatch]
+    [lbr]
 
 * `enum `[link xml_encoding]
-	* [link encoding_auto]
-	* [link encoding_utf8]
-	* [link encoding_utf16_le]
-	* [link encoding_utf16_be]
-	* [link encoding_utf16]
-	* [link encoding_utf32_le]
-	* [link encoding_utf32_be]
-	* [link encoding_utf32]
-	* [link encoding_wchar]
-	[lbr]
+    * [link encoding_auto]
+    * [link encoding_utf8]
+    * [link encoding_utf16_le]
+    * [link encoding_utf16_be]
+    * [link encoding_utf16]
+    * [link encoding_utf32_le]
+    * [link encoding_utf32_be]
+    * [link encoding_utf32]
+    * [link encoding_wchar]
+    [lbr]
 
 * `enum `[link xpath_value_type]
-	* [link xpath_type_none]
-	* [link xpath_type_node_set]
-	* [link xpath_type_number]
-	* [link xpath_type_string]
-	* [link xpath_type_boolean]
+    * [link xpath_type_none]
+    * [link xpath_type_node_set]
+    * [link xpath_type_number]
+    * [link xpath_type_string]
+    * [link xpath_type_boolean]
 
 Constants:
 
 * Formatting options bit flags:
-	* [link format_default]
-	* [link format_indent]
-	* [link format_no_declaration]
-	* [link format_raw]
-	* [link format_write_bom]
-	[lbr]
+    * [link format_default]
+    * [link format_indent]
+    * [link format_no_declaration]
+    * [link format_raw]
+    * [link format_write_bom]
+    [lbr]
 
 * Parsing options bit flags:
-	* [link parse_cdata]
-	* [link parse_comments]
-	* [link parse_declaration]
-	* [link parse_default]
-	* [link parse_eol]
-	* [link parse_escapes]
-	* [link parse_minimal]
-	* [link parse_pi]
-	* [link parse_ws_pcdata]
- 	* [link parse_wconv_attribute]
- 	* [link parse_wnorm_attribute]
-		
+    * [link parse_cdata]
+    * [link parse_comments]
+    * [link parse_declaration]
+    * [link parse_default]
+    * [link parse_eol]
+    * [link parse_escapes]
+    * [link parse_minimal]
+    * [link parse_pi]
+    * [link parse_ws_pcdata]
+    * [link parse_wconv_attribute]
+    * [link parse_wnorm_attribute]
+        
 Classes:
 
 * `class `[link xml_attribute]
-	* [link xml_attribute::ctor xml_attribute]`();`
-	[lbr]
+    * [link xml_attribute::ctor xml_attribute]`();`
+    [lbr]
 
-	* `bool `[link xml_attribute::empty empty]`() const;`
-	* `operator `[link xml_attribute::unspecified_bool_type unspecified_bool_type]`() const;`
-	[lbr]
+    * `bool `[link xml_attribute::empty empty]`() const;`
+    * `operator `[link xml_attribute::unspecified_bool_type unspecified_bool_type]`() const;`
+    [lbr]
 
-	* `bool `[link xml_attribute::comparison operator==]`(const xml_attribute& r) const;`
-	* `bool `[link xml_attribute::comparison operator!=]`(const xml_attribute& r) const;`
-	* `bool `[link xml_attribute::comparison operator<]`(const xml_attribute& r) const;`
-	* `bool `[link xml_attribute::comparison operator>]`(const xml_attribute& r) const;`
-	* `bool `[link xml_attribute::comparison operator<=]`(const xml_attribute& r) const;`
-	* `bool `[link xml_attribute::comparison operator>=]`(const xml_attribute& r) const;`
-	[lbr]
+    * `bool `[link xml_attribute::comparison operator==]`(const xml_attribute& r) const;`
+    * `bool `[link xml_attribute::comparison operator!=]`(const xml_attribute& r) const;`
+    * `bool `[link xml_attribute::comparison operator<]`(const xml_attribute& r) const;`
+    * `bool `[link xml_attribute::comparison operator>]`(const xml_attribute& r) const;`
+    * `bool `[link xml_attribute::comparison operator<=]`(const xml_attribute& r) const;`
+    * `bool `[link xml_attribute::comparison operator>=]`(const xml_attribute& r) const;`
+    [lbr]
 
-	* `xml_attribute `[link xml_attribute::next_attribute next_attribute]`() const;`
-	* `xml_attribute `[link xml_attribute::previous_attribute previous_attribute]`() const;`
-	[lbr]
+    * `xml_attribute `[link xml_attribute::next_attribute next_attribute]`() const;`
+    * `xml_attribute `[link xml_attribute::previous_attribute previous_attribute]`() const;`
+    [lbr]
 
-	* `const char_t* `[link xml_attribute::name name]`() const;`
-	* `const char_t* `[link xml_attribute::value value]`() const;`
-	[lbr]
+    * `const char_t* `[link xml_attribute::name name]`() const;`
+    * `const char_t* `[link xml_attribute::value value]`() const;`
+    [lbr]
 
-	* `int `[link xml_attribute::as_int as_int]`() const;`
-	* `unsigned int `[link xml_attribute::as_uint as_uint]`() const;`
-	* `double `[link xml_attribute::as_double as_double]`() const;`
-	* `float `[link xml_attribute::as_float as_float]`() const;`
-	* `bool `[link xml_attribute::as_bool as_bool]`() const;`
-	[lbr]
+    * `int `[link xml_attribute::as_int as_int]`() const;`
+    * `unsigned int `[link xml_attribute::as_uint as_uint]`() const;`
+    * `double `[link xml_attribute::as_double as_double]`() const;`
+    * `float `[link xml_attribute::as_float as_float]`() const;`
+    * `bool `[link xml_attribute::as_bool as_bool]`() const;`
+    [lbr]
 
-	* `bool `[link xml_attribute::set_name set_name]`(const char_t* rhs);`
-	* `bool `[link xml_attribute::set_value set_value]`(const char_t* rhs);`
-	* `bool `[link xml_attribute::set_value set_value]`(int rhs);`
-	* `bool `[link xml_attribute::set_value set_value]`(unsigned int rhs);`
-	* `bool `[link xml_attribute::set_value set_value]`(double rhs);`
-	* `bool `[link xml_attribute::set_value set_value]`(bool rhs);`
-	[lbr]
+    * `bool `[link xml_attribute::set_name set_name]`(const char_t* rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(const char_t* rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(int rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(unsigned int rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(double rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(bool rhs);`
+    [lbr]
 
-	* `xml_attribute& `[link xml_attribute::assign operator=]`(const char_t* rhs);`
-	* `xml_attribute& `[link xml_attribute::assign operator=]`(int rhs);`
-	* `xml_attribute& `[link xml_attribute::assign operator=]`(unsigned int rhs);`
-	* `xml_attribute& `[link xml_attribute::assign operator=]`(double rhs);`
-	* `xml_attribute& `[link xml_attribute::assign operator=]`(bool rhs);`
-	[lbr]
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(const char_t* rhs);`
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(int rhs);`
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(unsigned int rhs);`
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(double rhs);`
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(bool rhs);`
+    [lbr]
 
 * `class `[link xml_node]
-	* [link xml_node::ctor xml_node]`();`
-	[lbr]
+    * [link xml_node::ctor xml_node]`();`
+    [lbr]
 
-	* `bool `[link xml_node::empty empty]`() const;`
-	* `operator `[link xml_node::unspecified_bool_type unspecified_bool_type]`() const;`
-	[lbr]
+    * `bool `[link xml_node::empty empty]`() const;`
+    * `operator `[link xml_node::unspecified_bool_type unspecified_bool_type]`() const;`
+    [lbr]
 
-	* `bool `[link xml_node::comparison operator==]`(const xml_node& r) const;`
-	* `bool `[link xml_node::comparison operator!=]`(const xml_node& r) const;`
-	* `bool `[link xml_node::comparison operator<]`(const xml_node& r) const;`
-	* `bool `[link xml_node::comparison operator>]`(const xml_node& r) const;`
-	* `bool `[link xml_node::comparison operator<=]`(const xml_node& r) const;`
-	* `bool `[link xml_node::comparison operator>=]`(const xml_node& r) const;`
-	[lbr]
+    * `bool `[link xml_node::comparison operator==]`(const xml_node& r) const;`
+    * `bool `[link xml_node::comparison operator!=]`(const xml_node& r) const;`
+    * `bool `[link xml_node::comparison operator<]`(const xml_node& r) const;`
+    * `bool `[link xml_node::comparison operator>]`(const xml_node& r) const;`
+    * `bool `[link xml_node::comparison operator<=]`(const xml_node& r) const;`
+    * `bool `[link xml_node::comparison operator>=]`(const xml_node& r) const;`
+    [lbr]
 
-	* `xml_node_type `[link xml_node::type type]`() const;`
-	[lbr]
+    * `xml_node_type `[link xml_node::type type]`() const;`
+    [lbr]
 
-	* `const char_t* `[link xml_node::name name]`() const;`
-	* `const char_t* `[link xml_node::value value]`() const;`
-	[lbr]
+    * `const char_t* `[link xml_node::name name]`() const;`
+    * `const char_t* `[link xml_node::value value]`() const;`
+    [lbr]
 
-	* `xml_node `[link xml_node::parent parent]`() const;`
-	* `xml_node `[link xml_node::first_child first_child]`() const;`
-	* `xml_node `[link xml_node::last_child last_child]`() const;`
-	* `xml_node `[link xml_node::next_sibling next_sibling]`() const;`
-	* `xml_node `[link xml_node::previous_sibling previous_sibling]`() const;`
-	[lbr]
+    * `xml_node `[link xml_node::parent parent]`() const;`
+    * `xml_node `[link xml_node::first_child first_child]`() const;`
+    * `xml_node `[link xml_node::last_child last_child]`() const;`
+    * `xml_node `[link xml_node::next_sibling next_sibling]`() const;`
+    * `xml_node `[link xml_node::previous_sibling previous_sibling]`() const;`
+    [lbr]
 
-	* `xml_attribute `[link xml_node::first_attribute first_attribute]`() const;`
-	* `xml_attribute `[link xml_node::last_attribute last_attribute]`() const;`
-	[lbr]
+    * `xml_attribute `[link xml_node::first_attribute first_attribute]`() const;`
+    * `xml_attribute `[link xml_node::last_attribute last_attribute]`() const;`
+    [lbr]
 
-	* `xml_node `[link xml_node::child child]`(const char_t* name) const;`
-	* `xml_attribute `[link xml_node::attribute attribute]`(const char_t* name) const;`
-	* `xml_node `[link xml_node::next_sibling_name next_sibling]`(const char_t* name) const;`
-	* `xml_node `[link xml_node::previous_sibling_name previous_sibling]`(const char_t* name) const;`
-	* `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;`
-	* `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* attr_name, const char_t* attr_value) const;`
-	[lbr]
+    * `xml_node `[link xml_node::child child]`(const char_t* name) const;`
+    * `xml_attribute `[link xml_node::attribute attribute]`(const char_t* name) const;`
+    * `xml_node `[link xml_node::next_sibling_name next_sibling]`(const char_t* name) const;`
+    * `xml_node `[link xml_node::previous_sibling_name previous_sibling]`(const char_t* name) const;`
+    * `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;`
+    * `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* attr_name, const char_t* attr_value) const;`
+    [lbr]
 
-	* `const char_t* `[link xml_node::child_value child_value]`() const;`
-	* `const char_t* `[link xml_node::child_value child_value]`(const char_t* name) const;`
-	[lbr]
+    * `const char_t* `[link xml_node::child_value child_value]`() const;`
+    * `const char_t* `[link xml_node::child_value child_value]`(const char_t* name) const;`
+    [lbr]
 
-	* `typedef xml_node_iterator `[link xml_node_iterator iterator]`;`
-	* `iterator `[link xml_node::begin begin]`() const;`
-	* `iterator `[link xml_node::end end]`() const;`
-	[lbr]
+    * `typedef xml_node_iterator `[link xml_node_iterator iterator]`;`
+    * `iterator `[link xml_node::begin begin]`() const;`
+    * `iterator `[link xml_node::end end]`() const;`
+    [lbr]
 
-	* `typedef xml_attribute_iterator `[link xml_attribute_iterator attribute_iterator]`;`
-	* `attribute_iterator `[link xml_node::attributes_begin attributes_begin]`() const;`
-	* `attribute_iterator `[link xml_node::attributes_end attributes_end]`() const;`
-	[lbr]
+    * `typedef xml_attribute_iterator `[link xml_attribute_iterator attribute_iterator]`;`
+    * `attribute_iterator `[link xml_node::attributes_begin attributes_begin]`() const;`
+    * `attribute_iterator `[link xml_node::attributes_end attributes_end]`() const;`
+    [lbr]
 
-	* `bool `[link xml_node::traverse traverse]`(xml_tree_walker& walker);`
-	[lbr]
+    * `bool `[link xml_node::traverse traverse]`(xml_tree_walker& walker);`
+    [lbr]
 
-	* `template <typename Predicate> xml_attribute `[link xml_node::find_attribute find_attribute]`(Predicate pred) const;`
-	* `template <typename Predicate> xml_node `[link xml_node::find_child find_child]`(Predicate pred) const;`
-	* `template <typename Predicate> xml_node `[link xml_node::find_node find_node]`(Predicate pred) const;`
-	[lbr]
+    * `template <typename Predicate> xml_attribute `[link xml_node::find_attribute find_attribute]`(Predicate pred) const;`
+    * `template <typename Predicate> xml_node `[link xml_node::find_child find_child]`(Predicate pred) const;`
+    * `template <typename Predicate> xml_node `[link xml_node::find_node find_node]`(Predicate pred) const;`
+    [lbr]
 
-	* `string_t `[link xml_node::path path]`(char_t delimiter = '/') const;`
-	* `xml_node `[link xml_node::first_element_by_path]`(const char_t* path, char_t delimiter = '/') const;`
-	* `xml_node `[link xml_node::root root]`() const;`
-	* `ptrdiff_t `[link xml_node::offset_debug offset_debug]`() const;`
-	[lbr]
+    * `string_t `[link xml_node::path path]`(char_t delimiter = '/') const;`
+    * `xml_node `[link xml_node::first_element_by_path]`(const char_t* path, char_t delimiter = '/') const;`
+    * `xml_node `[link xml_node::root root]`() const;`
+    * `ptrdiff_t `[link xml_node::offset_debug offset_debug]`() const;`
+    [lbr]
 
-	* `bool `[link xml_node::set_name set_name]`(const char_t* rhs);`
-	* `bool `[link xml_node::set_value set_value]`(const char_t* rhs);`
-	[lbr]
+    * `bool `[link xml_node::set_name set_name]`(const char_t* rhs);`
+    * `bool `[link xml_node::set_value set_value]`(const char_t* rhs);`
+    [lbr]
 
-	* `xml_attribute `[link xml_node::append_attribute append_attribute]`(const char_t* name);`
-	* `xml_attribute `[link xml_node::insert_attribute_after insert_attribute_after]`(const char_t* name, const xml_attribute& attr);`
-	* `xml_attribute `[link xml_node::insert_attribute_before insert_attribute_before]`(const char_t* name, const xml_attribute& attr);`
-	[lbr]
+    * `xml_attribute `[link xml_node::append_attribute append_attribute]`(const char_t* name);`
+    * `xml_attribute `[link xml_node::insert_attribute_after insert_attribute_after]`(const char_t* name, const xml_attribute& attr);`
+    * `xml_attribute `[link xml_node::insert_attribute_before insert_attribute_before]`(const char_t* name, const xml_attribute& attr);`
+    [lbr]
 
-	* `xml_node `[link xml_node::append_child append_child]`(xml_node_type type = node_element);`
-	* `xml_node `[link xml_node::insert_child_after insert_child_after]`(xml_node_type type, const xml_node& node);`
-	* `xml_node `[link xml_node::insert_child_before insert_child_before]`(xml_node_type type, const xml_node& node);`
-	[lbr]
+    * `xml_node `[link xml_node::append_child append_child]`(xml_node_type type = node_element);`
+    * `xml_node `[link xml_node::insert_child_after insert_child_after]`(xml_node_type type, const xml_node& node);`
+    * `xml_node `[link xml_node::insert_child_before insert_child_before]`(xml_node_type type, const xml_node& node);`
+    [lbr]
 
-	* `xml_attribute `[link xml_node::append_copy append_copy]`(const xml_attribute& proto);`
-	* `xml_attribute `[link xml_node::insert_copy_after insert_copy_after]`(const xml_attribute& proto, const xml_attribute& attr);`
-	* `xml_attribute `[link xml_node::insert_copy_before insert_copy_before]`(const xml_attribute& proto, const xml_attribute& attr);`
-	[lbr]
+    * `xml_attribute `[link xml_node::append_copy append_copy]`(const xml_attribute& proto);`
+    * `xml_attribute `[link xml_node::insert_copy_after insert_copy_after]`(const xml_attribute& proto, const xml_attribute& attr);`
+    * `xml_attribute `[link xml_node::insert_copy_before insert_copy_before]`(const xml_attribute& proto, const xml_attribute& attr);`
+    [lbr]
 
-	* `xml_node `[link xml_node::append_copy append_copy]`(const xml_node& proto);`
-	* `xml_node `[link xml_node::insert_copy_after insert_copy_after]`(const xml_node& proto, const xml_node& node);`
-	* `xml_node `[link xml_node::insert_copy_before insert_copy_before]`(const xml_node& proto, const xml_node& node);`
-	[lbr]
+    * `xml_node `[link xml_node::append_copy append_copy]`(const xml_node& proto);`
+    * `xml_node `[link xml_node::insert_copy_after insert_copy_after]`(const xml_node& proto, const xml_node& node);`
+    * `xml_node `[link xml_node::insert_copy_before insert_copy_before]`(const xml_node& proto, const xml_node& node);`
+    [lbr]
 
-	* `bool `[link xml_node::remove_attribute remove_attribute]`(const xml_attribute& a);`
-	* `bool `[link xml_node::remove_attribute remove_attribute]`(const char_t* name);`
-	* `bool `[link xml_node::remove_child remove_child]`(const xml_node& n);`
-	* `bool `[link xml_node::remove_child remove_child]`(const char_t* name);`
-	[lbr]
+    * `bool `[link xml_node::remove_attribute remove_attribute]`(const xml_attribute& a);`
+    * `bool `[link xml_node::remove_attribute remove_attribute]`(const char_t* name);`
+    * `bool `[link xml_node::remove_child remove_child]`(const xml_node& n);`
+    * `bool `[link xml_node::remove_child remove_child]`(const char_t* name);`
+    [lbr]
 
-	* `void `[link xml_node::print print]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
-	* `void `[link xml_node::print_stream print]`(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
-	* `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
-	[lbr]
+    * `void `[link xml_node::print print]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
+    * `void `[link xml_node::print_stream print]`(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
+    * `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
+    [lbr]
 
-	* `xpath_node `[link xml_node::select_single_node select_single_node]`(const char_t* query) const;`
-	* `xpath_node `[link xml_node::select_single_node_precomp select_single_node]`(const xpath_query& query) const;`
-	* `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query) const;`
-	* `xpath_node_set `[link xml_node::select_nodes_precomp select_nodes]`(const xpath_query& query) const;`
-	[lbr]
+    * `xpath_node `[link xml_node::select_single_node select_single_node]`(const char_t* query) const;`
+    * `xpath_node `[link xml_node::select_single_node_precomp select_single_node]`(const xpath_query& query) const;`
+    * `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query) const;`
+    * `xpath_node_set `[link xml_node::select_nodes_precomp select_nodes]`(const xpath_query& query) const;`
+    [lbr]
 
 * `class `[link xml_document]
-	* [link xml_document::ctor xml_document]`();`
-	* `~`[link xml_document::dtor xml_document]`();`
-	[lbr]
+    * [link xml_document::ctor xml_document]`();`
+    * `~`[link xml_document::dtor xml_document]`();`
+    [lbr]
 
-	* `xml_parse_result `[link xml_document::load_stream load]`(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-	* `xml_parse_result `[link xml_document::load_stream load]`(std::wistream& stream, unsigned int options = parse_default);`
-	[lbr]
+    * `xml_parse_result `[link xml_document::load_stream load]`(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    * `xml_parse_result `[link xml_document::load_stream load]`(std::wistream& stream, unsigned int options = parse_default);`
+    [lbr]
 
-	* `xml_parse_result `[link xml_document::load_string load]`(const char_t* contents, unsigned int options = parse_default);`
-	[lbr]
+    * `xml_parse_result `[link xml_document::load_string load]`(const char_t* contents, unsigned int options = parse_default);`
+    [lbr]
 
-	* `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-	[lbr]
+    * `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    [lbr]
 
-	* `xml_parse_result `[link xml_document::load_buffer load_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-	* `xml_parse_result `[link xml_document::load_buffer_inplace load_buffer_inplace]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-	* `xml_parse_result `[link xml_document::load_buffer_inplace_own load_buffer_inplace_own]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-	[lbr]
+    * `xml_parse_result `[link xml_document::load_buffer load_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    * `xml_parse_result `[link xml_document::load_buffer_inplace load_buffer_inplace]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    * `xml_parse_result `[link xml_document::load_buffer_inplace_own load_buffer_inplace_own]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    [lbr]
 
-	* `bool `[link xml_document::save_file save_file]`(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
-	[lbr]
+    * `bool `[link xml_document::save_file save_file]`(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+    [lbr]
 
-	* `void `[link xml_document::save_stream save]`(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
-	* `void `[link xml_document::save_stream save]`(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;`
-	[lbr]
+    * `void `[link xml_document::save_stream save]`(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+    * `void `[link xml_document::save_stream save]`(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;`
+    [lbr]
 
-	* `void `[link xml_document::save save]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
-	[lbr]
+    * `void `[link xml_document::save save]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+    [lbr]
 
 * `struct `[link xml_parse_result]
-	* `xml_parse_status `[link xml_parse_result::status status]`;`
-	* `ptrdiff_t `[link xml_parse_result::offset offset]`;`
-	* `xml_encoding `[link xml_parse_result::encoding encoding]`;`
-	[lbr]
+    * `xml_parse_status `[link xml_parse_result::status status]`;`
+    * `ptrdiff_t `[link xml_parse_result::offset offset]`;`
+    * `xml_encoding `[link xml_parse_result::encoding encoding]`;`
+    [lbr]
 
-	* `operator `[link xml_parse_result::bool bool]`() const;`
-	* `const char* `[link xml_parse_result::description description]`() const;`
-	[lbr]
+    * `operator `[link xml_parse_result::bool bool]`() const;`
+    * `const char* `[link xml_parse_result::description description]`() const;`
+    [lbr]
 
 * `class `[link xml_node_iterator]
 * `class `[link xml_attribute_iterator]
 [lbr]
 
 * `class `[link xml_tree_walker]
-	* `virtual bool `[link xml_tree_walker::begin begin]`(xml_node& node);`
-	* `virtual bool `[link xml_tree_walker::for_each for_each]`(xml_node& node) = 0;`
-	* `virtual bool `[link xml_tree_walker::end end]`(xml_node& node);`
-	[lbr]
+    * `virtual bool `[link xml_tree_walker::begin begin]`(xml_node& node);`
+    * `virtual bool `[link xml_tree_walker::for_each for_each]`(xml_node& node) = 0;`
+    * `virtual bool `[link xml_tree_walker::end end]`(xml_node& node);`
+    [lbr]
 
-	* `int `[link xml_tree_walker::depth depth]`() const;`
-	[lbr]
+    * `int `[link xml_tree_walker::depth depth]`() const;`
+    [lbr]
 
 * `class `[link xml_writer]
-	* `virtual void `[link xml_writer::write write]`(const void* data, size_t size) = 0;`
-	[lbr]
+    * `virtual void `[link xml_writer::write write]`(const void* data, size_t size) = 0;`
+    [lbr]
 
 * `class `[link xml_writer_file]`: public xml_writer`
-	* [link xml_writer_file]`(void* file);`
-	[lbr]
+    * [link xml_writer_file]`(void* file);`
+    [lbr]
 
 * `class `[link xml_writer_stream]`: public xml_writer`
-	* [link xml_writer_stream]`(std::ostream& stream);`
-	* [link xml_writer_stream]`(std::wostream& stream);`
-	[lbr]
+    * [link xml_writer_stream]`(std::ostream& stream);`
+    * [link xml_writer_stream]`(std::wostream& stream);`
+    [lbr]
 
 * `class `[link xpath_query]
-	* `explicit `[link xpath_query::ctor]`(const char_t* query);`
-	[lbr]
+    * `explicit `[link xpath_query::ctor]`(const char_t* query);`
+    [lbr]
 
-	* `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xml_node& n) const;`
-	* `double `[link xpath_query::evaluate_number evaluate_number]`(const xml_node& n) const;`
-	* `string_t `[link xpath_query::evaluate_string evaluate_string]`(const xml_node& n) const;`
-	* `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xml_node& n) const;`
-	[lbr]
+    * `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xml_node& n) const;`
+    * `double `[link xpath_query::evaluate_number evaluate_number]`(const xml_node& n) const;`
+    * `string_t `[link xpath_query::evaluate_string evaluate_string]`(const xml_node& n) const;`
+    * `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xml_node& n) const;`
+    [lbr]
 
-	* `xpath_value_type `[link xpath_query::return_type return_type]`() const;`
-	[lbr]
+    * `xpath_value_type `[link xpath_query::return_type return_type]`() const;`
+    [lbr]
 
 * `class `[link xpath_exception]`: public std::exception`
-	* `virtual const char* `[link xpath_exception::what what]`() const throw();`
-	[lbr]
+    * `virtual const char* `[link xpath_exception::what what]`() const throw();`
+    [lbr]
 
 * `class `[link xpath_node]
-	* [link xpath_node::ctor xpath_node]`();`
-	* [link xpath_node::ctor xpath_node]`(const xml_node& node);`
-	* [link xpath_node::ctor xpath_node]`(const xml_attribute& attribute, const xml_node& parent);`
-	[lbr]
+    * [link xpath_node::ctor xpath_node]`();`
+    * [link xpath_node::ctor xpath_node]`(const xml_node& node);`
+    * [link xpath_node::ctor xpath_node]`(const xml_attribute& attribute, const xml_node& parent);`
+    [lbr]
 
-	* `xml_node `[link xpath_node::node node]`() const;`
-	* `xml_attribute `[link xpath_node::attribute attribute]`() const;`
-	* `xml_node `[link xpath_node::parent parent]`() const;`
-	[lbr]
+    * `xml_node `[link xpath_node::node node]`() const;`
+    * `xml_attribute `[link xpath_node::attribute attribute]`() const;`
+    * `xml_node `[link xpath_node::parent parent]`() const;`
+    [lbr]
 
-	* `operator `[link xpath_node::unspecified_bool_type unspecified_bool_type]`() const;`
-	* `bool `[link xpath_node::comparison operator==]`(const xpath_node& n) const;`
-	* `bool `[link xpath_node::comparison operator!=]`(const xpath_node& n) const;`
-	[lbr]
+    * `operator `[link xpath_node::unspecified_bool_type unspecified_bool_type]`() const;`
+    * `bool `[link xpath_node::comparison operator==]`(const xpath_node& n) const;`
+    * `bool `[link xpath_node::comparison operator!=]`(const xpath_node& n) const;`
+    [lbr]
 
 * `class `[link xpath_node_set]
-	* `typedef const xpath_node* `[link xpath_node_set::const_iterator const_iterator]`;`
-	* `const_iterator `[link xpath_node_set::begin begin]`() const;`
-	* `const_iterator `[link xpath_node_set::end end]`() const;`
-	[lbr]
+    * `typedef const xpath_node* `[link xpath_node_set::const_iterator const_iterator]`;`
+    * `const_iterator `[link xpath_node_set::begin begin]`() const;`
+    * `const_iterator `[link xpath_node_set::end end]`() const;`
+    [lbr]
 
-	* `const xpath_node& `[link xpath_node_set::index operator\[\]]`(size_t index) const;`
-	* `size_t `[link xpath_node_set::size size]`() const;`
-	* `bool `[link xpath_node_set::empty empty]`() const;`
-	[lbr]
+    * `const xpath_node& `[link xpath_node_set::index operator\[\]]`(size_t index) const;`
+    * `size_t `[link xpath_node_set::size size]`() const;`
+    * `bool `[link xpath_node_set::empty empty]`() const;`
+    [lbr]
 
-	* `xpath_node `[link xpath_node_set::first first]`() const;`
-	[lbr]
+    * `xpath_node `[link xpath_node_set::first first]`() const;`
+    [lbr]
 
-	* `enum type_t {`[link xpath_node_set::type_unsorted type_unsorted], [link xpath_node_set::type_sorted type_sorted], [link xpath_node_set::type_sorted_reverse type_sorted_reverse]`};`
-	* `type_t `[link xpath_node_set::type type]`() const;`
-	* `void `[link xpath_node_set::sort sort]`(bool reverse = false);`
+    * `enum type_t {`[link xpath_node_set::type_unsorted type_unsorted], [link xpath_node_set::type_sorted type_sorted], [link xpath_node_set::type_sorted_reverse type_sorted_reverse]`};`
+    * `type_t `[link xpath_node_set::type type]`() const;`
+    * `void `[link xpath_node_set::sort sort]`(bool reverse = false);`
 
 Functions:
 
@@ -2003,3 +2003,4 @@ toc-placeholder
 
 [endsect] [/toc]
 
+[/ vim:et ]

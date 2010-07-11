@@ -4,25 +4,27 @@
 
 int main()
 {
-	pugi::xml_document doc;
+    pugi::xml_document doc;
 
 //[code_load_options
-	const char* source = "<!--comment--><node>&lt;</node>";
+    const char* source = "<!--comment--><node>&lt;</node>";
 
-	// Parsing with default options; note that comment node is not added to the tree, and entity reference &lt; is expanded
-	doc.load(source);
-	std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
+    // Parsing with default options; note that comment node is not added to the tree, and entity reference &lt; is expanded
+    doc.load(source);
+    std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
 
-	// Parsing with additional parse_comments option; comment node is now added to the tree
-	doc.load(source, pugi::parse_default | pugi::parse_comments);
-	std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
+    // Parsing with additional parse_comments option; comment node is now added to the tree
+    doc.load(source, pugi::parse_default | pugi::parse_comments);
+    std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
 
-	// Parsing with additional parse_comments option and without the (default) parse_escapes option; &lt; is not expanded
-	doc.load(source, (pugi::parse_default | pugi::parse_comments) & ~pugi::parse_escapes);
-	std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
+    // Parsing with additional parse_comments option and without the (default) parse_escapes option; &lt; is not expanded
+    doc.load(source, (pugi::parse_default | pugi::parse_comments) & ~pugi::parse_escapes);
+    std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
 
-	// Parsing with minimal option mask; comment node is not added to the tree, and &lt; is not expanded
-	doc.load(source, pugi::parse_minimal);
-	std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
+    // Parsing with minimal option mask; comment node is not added to the tree, and &lt; is not expanded
+    doc.load(source, pugi::parse_minimal);
+    std::cout << "First node value: [" << doc.first_child().value() << "], node child value: [" << doc.child_value("node") << "]\n";
 //]
 }
+
+// vim:et

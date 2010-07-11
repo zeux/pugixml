@@ -25,7 +25,7 @@ struct allow_remote_predicate
 
 int main()
 {
-	pugi::xml_document doc;
+    pugi::xml_document doc;
     if (!doc.load_file("xgconsole.xml")) return -1;
 
     pugi::xml_node tools = doc.child("Profile").child("Tools");
@@ -44,3 +44,5 @@ int main()
     std::cout << tools.find_child(small_timeout).attribute("Filename").value() << std::endl;
     //]
 }
+
+// vim:et

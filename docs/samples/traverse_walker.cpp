@@ -23,7 +23,7 @@ struct simple_walker: pugi::xml_tree_walker
 
 int main()
 {
-	pugi::xml_document doc;
+    pugi::xml_document doc;
     if (!doc.load_file("tree.xml")) return -1;
 
     //[code_traverse_walker_traverse
@@ -31,3 +31,5 @@ int main()
     doc.traverse(walker);
     //]
 }
+
+// vim:et
