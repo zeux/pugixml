@@ -17,7 +17,9 @@
 				</a>
 			</xsl:when>
 			<xsl:otherwise>
+				<b>
 				<xsl:value-of select="$text" />
+				</b>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -92,7 +94,6 @@
 		</xsl:for-each>
 	</xsl:template>
 
-    <xsl:template name="book.titlepage">
-	</xsl:template>
+    <xsl:template name="book.titlepage" />
 </xsl:stylesheet>  
 
