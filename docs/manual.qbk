@@ -261,7 +261,7 @@ The tree nodes can be of one of the following types (which together form the enu
 
 [:There are two element nodes here; one has name `"node"`, single attribute `"attr"` and single child `"child"`, another has name `"child"` and does not have any attributes or child nodes.]
 
-* Plain character data nodes ([anchor node_pcdata]) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, and element node can have several child PCDATA nodes. The example XML representation of text node is as follows:
+* Plain character data nodes ([anchor node_pcdata]) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, an element node can have several child PCDATA nodes. The example XML representation of text node is as follows:
 
     <node> text1 <child/> text2 </node>
 
@@ -1041,7 +1041,7 @@ This is an example of setting attribute name and value ([@samples/modify_base.cp
 [section:add Adding nodes/attributes]
 
 [#xml_node::append_attribute][#xml_node::insert_attribute_after][#xml_node::insert_attribute_before][#xml_node::append_child][#xml_node::insert_child_after][#xml_node::insert_child_before]
-Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before\/after some after node:
+Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before\/after some other node:
 
     xml_attribute xml_node::append_attribute(const char_t* name);
     xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr);
