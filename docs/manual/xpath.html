@@ -1,0 +1,494 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>XPath</title>
+<link rel="stylesheet" href="../pugixml.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../manual.html" title="pugixml 0.9">
+<link rel="up" href="../manual.html" title="pugixml 0.9">
+<link rel="prev" href="saving.html" title="Saving document">
+<link rel="next" href="changes.html" title="Changelog">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<a href="install.html">Installation</a> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <a href="saving.html">Saving</a> |
+		<b>XPath</b> |
+		<a href="apiref.html">API Reference</a> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="saving.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="changes.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+<hr>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="manual.xpath"></a><a class="link" href="xpath.html" title="XPath"> XPath</a>
+</h2></div></div></div>
+<div class="toc"><dl>
+<dt><span class="section"><a href="xpath.html#manual.xpath.types"> XPath types</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.select"> Selecting nodes via XPath expression</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.query"> Using query objects</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.errors"> Error handling</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.w3c"> Conformance to W3C specification</a></span></dt>
+</dl></div>
+<p>
+      If the task at hand is to select a subset of document nodes that match some
+      criteria, it is possible to code a function using the existing traversal functionality
+      for any practical criteria. However, often either a data-driven approach is
+      desirable, in case the criteria are not predefined and come from a file, or
+      it is inconvenient to use traversal interfaces and a higher-level DSL is required.
+      There is a standard language for XML processing, XPath, that can be useful
+      for these cases. pugixml implements an almost complete subset of XPath 1.0.
+      Because of differences in document object model and some performance implications,
+      there are minor violations of the official specifications, which can be found
+      in <a class="xref" href="xpath.html#manual.xpath.w3c" title="Conformance to W3C specification"> Conformance to W3C specification</a>. The rest of this section describes the interface for XPath
+      functionality. Please note that if you wish to learn to use XPath language,
+      you have to look for other tutorials or manuals; for example, you can read
+      <a href="http://www.w3schools.com/xpath/" target="_top">W3Schools XPath tutorial</a>,
+      <a href="http://www.tizag.com/xmlTutorial/xpathtutorial.php" target="_top">XPath tutorial
+      at tizag.com</a>, and <a href="http://www.w3.org/TR/xpath/" target="_top">the XPath
+      1.0 specification</a>.
+    </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        As of version 0.9, you need both STL and exception support to use XPath;
+        XPath is disabled if either <code class="computeroutput"><span class="identifier">PUGIXML_NO_STL</span></code>
+        or <code class="computeroutput"><span class="identifier">PUGIXML_NO_EXCEPTIONS</span></code>
+        is defined.
+      </p></td></tr>
+</table></div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.xpath.types"></a><a class="link" href="xpath.html#manual.xpath.types" title="XPath types"> XPath types</a>
+</h3></div></div></div>
+<a name="xpath_value_type"></a><a name="xpath_type_number"></a><a name="xpath_type_string"></a><a name="xpath_type_boolean"></a><a name="xpath_type_node_set"></a><a name="xpath_type_none"></a><p>
+        Each XPath expression can have one of the following types: boolean, number,
+        string or node set. Boolean type corresponds to <code class="computeroutput"><span class="keyword">bool</span></code>
+        type, number type corresponds to <code class="computeroutput"><span class="keyword">double</span></code>
+        type, string type corresponds to either <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code>
+        or <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span></code>, depending on whether <a class="link" href="dom.html#manual.dom.unicode" title="Unicode interface">wide
+        character interface is enabled</a>, and node set corresponds to <code class="computeroutput"><span class="identifier">xpath_node_set</span></code> type. There is an enumeration,
+        <code class="computeroutput"><span class="identifier">xpath_value_type</span></code>, which can
+        take the values <code class="computeroutput"><span class="identifier">xpath_type_boolean</span></code>,
+        <code class="computeroutput"><span class="identifier">xpath_type_number</span></code>, <code class="computeroutput"><span class="identifier">xpath_type_string</span></code> or <code class="computeroutput"><span class="identifier">xpath_type_node_set</span></code>,
+        accordingly.
+      </p>
+<a name="xpath_node"></a><a name="xpath_node::node"></a><a name="xpath_node::attribute"></a><a name="xpath_node::parent"></a><p>
+        Because an XPath node can be either a node or an attribute, there is a special
+        type, <code class="computeroutput"><span class="identifier">xpath_node</span></code>, which is
+        a discriminated union of these types. A value of this type contains two node
+        handles, one of <code class="computeroutput"><span class="identifier">xml_node</span></code>
+        type, and another one of <code class="computeroutput"><span class="identifier">xml_attribute</span></code>
+        type; at most one of them can be non-null. The accessors to get these handles
+        are available:
+      </p>
+<pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xpath_node</span><span class="special">::</span><span class="identifier">node</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xml_attribute</span> <span class="identifier">xpath_node</span><span class="special">::</span><span class="identifier">attribute</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        XPath nodes can be null, in which case both accessors return null handles.
+      </p>
+<p>
+        Note that as per XPath specification, each XPath node has a parent, which
+        can be retrieved via this function:
+      </p>
+<pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xpath_node</span><span class="special">::</span><span class="identifier">parent</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        <code class="computeroutput"><span class="identifier">parent</span></code> function returns the
+        node's parent if the XPath node corresponds to <code class="computeroutput"><span class="identifier">xml_node</span></code>
+        handle (equivalent to <code class="computeroutput"><span class="identifier">node</span><span class="special">().</span><span class="identifier">parent</span><span class="special">()</span></code>), or the node to which the attribute belongs
+        to, if the XPath node corresponds to <code class="computeroutput"><span class="identifier">xml_attribute</span></code>
+        handle. For null nodes, <code class="computeroutput"><span class="identifier">parent</span></code>
+        returns null handle.
+      </p>
+<a name="xpath_node::unspecified_bool_type"></a><a name="xpath_node::comparison"></a><p>
+        Like node and attribute handles, XPath node handles can be implicitly cast
+        to boolean-like object to check if it is a null node, and also can be compared
+        for equality with each other.
+      </p>
+<a name="xpath_node::ctor"></a><p>
+        You can also create XPath nodes with one of tree constructors: the default
+        constructor, the constructor that takes node argument, and the constructor
+        that takes attribute and node arguments (in which case the attribute must
+        belong to the attribute list of the node). However, usually you don't need
+        to create your own XPath node objects, since they are returned to you via
+        selection functions.
+      </p>
+<a name="xpath_node_set"></a><p>
+        XPath expressions operate not on single nodes, but instead on node sets.
+        A node set is a collection of nodes, which can be optionally ordered in either
+        a forward document order or a reverse one. Document order is defined in XPath
+        specification; an XPath node is before another node in document order if
+        it appears before it in XML representation of the corresponding document.
+      </p>
+<a name="xpath_node_set::const_iterator"></a><a name="xpath_node_set::begin"></a><a name="xpath_node_set::end"></a><p>
+        Node sets are represented by <code class="computeroutput"><span class="identifier">xpath_node_set</span></code>
+        object, which has an interface that resembles one of sequential random-access
+        containers. It has an iterator type along with usual begin/past-the-end iterator
+        accessors:
+      </p>
+<pre class="programlisting"><span class="keyword">typedef</span> <span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">*</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">const_iterator</span><span class="special">;</span>
+<span class="identifier">const_iterator</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">const_iterator</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<a name="xpath_node_set::index"></a><a name="xpath_node_set::size"></a><a name="xpath_node_set::empty"></a><p>
+        And it also can be iterated via indices, just like <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>:
+      </p>
+<pre class="programlisting"><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="keyword">operator</span><span class="special">[](</span><span class="identifier">size_t</span> <span class="identifier">index</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">size_t</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">size</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">bool</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">empty</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        All of the above operations have the same semantics as that of <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>:
+        the iterators are random-access, all of the above operations are constant
+        time, and accessing the element at index that is greater or equal than the
+        set size results in undefined behavior. You can use both iterator-based and
+        index-based access for iteration, however the iterator-based can be faster.
+      </p>
+<a name="xpath_node_set::type"></a><a name="xpath_node_set::type_unsorted"></a><a name="xpath_node_set::type_sorted"></a><a name="xpath_node_set::type_sorted_reverse"></a><a name="xpath_node_set::sort"></a><p>
+        The order of iteration depends on the order of nodes inside the set; the
+        order can be queried via the following function:
+      </p>
+<pre class="programlisting"><span class="keyword">enum</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">type_t</span> <span class="special">{</span><span class="identifier">type_unsorted</span><span class="special">,</span> <span class="identifier">type_sorted</span><span class="special">,</span> <span class="identifier">type_sorted_reverse</span><span class="special">};</span>
+<span class="identifier">type_t</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">type</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        <code class="computeroutput"><span class="identifier">type</span></code> function returns the
+        current order of nodes; <code class="computeroutput"><span class="identifier">type_sorted</span></code>
+        means that the nodes are in forward document order, <code class="computeroutput"><span class="identifier">type_sorted_reverse</span></code>
+        means that the nodes are in reverse document order, and <code class="computeroutput"><span class="identifier">type_unsorted</span></code>
+        means that neither order is guaranteed (nodes can accidentally be in a sorted
+        order even if <code class="computeroutput"><span class="identifier">type</span><span class="special">()</span></code>
+        returns <code class="computeroutput"><span class="identifier">type_unsorted</span></code>). If
+        you require a specific order of iteration, you can change it via <code class="computeroutput"><span class="identifier">sort</span></code> function:
+      </p>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">sort</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">reverse</span> <span class="special">=</span> <span class="keyword">false</span><span class="special">);</span>
+</pre>
+<p>
+        Calling <code class="computeroutput"><span class="identifier">sort</span></code> sorts the nodes
+        in either forward or reverse document order, depending on the argument; after
+        this call <code class="computeroutput"><span class="identifier">type</span><span class="special">()</span></code>
+        will return <code class="computeroutput"><span class="identifier">type_sorted</span></code> or
+        <code class="computeroutput"><span class="identifier">type_sorted_reverse</span></code>.
+      </p>
+<a name="xpath_node_set::first"></a><p>
+        Often the actual iteration is not needed; instead, only the first element
+        in document order is required. For this, a special accessor is provided:
+      </p>
+<pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">first</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        This function returns the first node in forward document order from the set,
+        or null node if the set is empty. Note that while the result of the node
+        does not depend on the order of nodes in the set (i.e. on the result of
+        <code class="computeroutput"><span class="identifier">type</span><span class="special">()</span></code>),
+        the complexity does - if the set is sorted, the complexity is constant, otherwise
+        it is linear in the number of elements or worse.
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.xpath.select"></a><a class="link" href="xpath.html#manual.xpath.select" title="Selecting nodes via XPath expression"> Selecting nodes via XPath expression</a>
+</h3></div></div></div>
+<a name="xml_node::select_single_node"></a><a name="xml_node::select_nodes"></a><p>
+        If you want to select nodes that match some XPath expression, you can do
+        it with the following functions:
+      </p>
+<pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xpath_node_set</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        <code class="computeroutput"><span class="identifier">select_nodes</span></code> function compiles
+        the expression and then executes it with the node as a context node, and
+        returns the resulting node set. <code class="computeroutput"><span class="identifier">select_single_node</span></code>
+        returns only the first node in document order from the result, and is equivalent
+        to calling <code class="computeroutput"><span class="identifier">select_nodes</span><span class="special">(</span><span class="identifier">query</span><span class="special">).</span><span class="identifier">first</span><span class="special">()</span></code>.
+        If the XPath expression does not match anything, or the node handle is null,
+        <code class="computeroutput"><span class="identifier">select_nodes</span></code> returns an empty
+        set, and <code class="computeroutput"><span class="identifier">select_single_node</span></code>
+        returns null XPath node.
+      </p>
+<p>
+        Both functions throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
+        if the query can not be compiled or if it returns a value with type other
+        than node set; see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a> for details.
+      </p>
+<a name="xml_node::select_single_node_precomp"></a><a name="xml_node::select_nodes_precomp"></a><p>
+        While compiling expressions is fast, the compilation time can introduce a
+        significant overhead if the same expression is used many times on small subtrees.
+        If you're doing many similar queries, consider compiling them into query
+        objects (see <a class="xref" href="xpath.html#manual.xpath.query" title="Using query objects"> Using query objects</a> for further reference). Once you get a compiled
+        query object, you can pass it to select functions instead of an expression
+        string:
+      </p>
+<pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_query</span><span class="special">&amp;</span> <span class="identifier">query</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xpath_node_set</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_query</span><span class="special">&amp;</span> <span class="identifier">query</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        Both functions throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
+        if the query returns a value with type other than node set.
+      </p>
+<p>
+        This is an example of selecting nodes using XPath expressions (<a href="../samples/xpath_select.cpp" target="_top">samples/xpath_select.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote='true' and @DeriveCaptionFrom='lastparam']"</span><span class="special">);</span>
+
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tools:"</span><span class="special">;</span>
+
+<span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">const_iterator</span> <span class="identifier">it</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">begin</span><span class="special">();</span> <span class="identifier">it</span> <span class="special">!=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">end</span><span class="special">();</span> <span class="special">++</span><span class="identifier">it</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="special">*</span><span class="identifier">it</span><span class="special">;</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">();</span>
+<span class="special">}</span>
+
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node</span> <span class="identifier">build_tool</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="string">"//Tool[contains(Description, 'build system')]"</span><span class="special">);</span>
+
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"\nBuild tool: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">build_tool</span><span class="special">.</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.xpath.query"></a><a class="link" href="xpath.html#manual.xpath.query" title="Using query objects"> Using query objects</a>
+</h3></div></div></div>
+<a name="xpath_query"></a><p>
+        When you call <code class="computeroutput"><span class="identifier">select_nodes</span></code>
+        with an expression string as an argument, a query object is created behind
+        the scene. A query object represents a compiled XPath expression. Query objects
+        can be needed in the following circumstances:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+            You can precompile expressions to query objects to save compilation time
+            if it becomes an issue;
+          </li>
+<li class="listitem">
+            You can use query objects to evaluate XPath expressions which result
+            in booleans, numbers or strings;
+          </li>
+<li class="listitem">
+            You can get the type of expression value via query object.
+          </li>
+</ul></div>
+<p>
+        Query objects correspond to <code class="computeroutput"><span class="identifier">xpath_query</span></code>
+        type. They are immutable and non-copyable: they are bound to the expression
+        at creation time and can not be cloned. If you want to put query objects
+        in a container, allocate them on heap via <code class="computeroutput"><span class="keyword">new</span></code>
+        operator and store pointers to <code class="computeroutput"><span class="identifier">xpath_query</span></code>
+        in the container.
+      </p>
+<a name="xpath_query::ctor"></a><p>
+        You can create a query object with the constructor that takes XPath expression
+        as an argument:
+      </p>
+<pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">xpath_query</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">);</span>
+</pre>
+<a name="xpath_query::return_type"></a><p>
+        The expression is compiled and the compiled representation is stored in the
+        new query object. If compilation fails, <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
+        is thrown (see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a> for details). After the query is created,
+        you can query the type of the evaluation result using the following function:
+      </p>
+<pre class="programlisting"><span class="identifier">xpath_value_type</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">return_type</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<a name="xpath_query::evaluate_boolean"></a><a name="xpath_query::evaluate_number"></a><a name="xpath_query::evaluate_string"></a><a name="xpath_query::evaluate_node_set"></a><p>
+        You can evaluate the query using one of the following functions:
+      </p>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_boolean</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">double</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_number</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">string_t</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xpath_node_set</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        All functions take the context node as an argument, compute the expression
+        and return the result, converted to the requested type. By XPath specification,
+        value of any type can be converted to boolean, number or string value, but
+        no type other than node set can be converted to node set. Because of this,
+        <code class="computeroutput"><span class="identifier">evaluate_boolean</span></code>, <code class="computeroutput"><span class="identifier">evaluate_number</span></code> and <code class="computeroutput"><span class="identifier">evaluate_string</span></code>
+        always return a result, but <code class="computeroutput"><span class="identifier">evaluate_node_set</span></code>
+        throws an <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
+        if the return type is not node set.
+      </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          Calling <code class="computeroutput"><span class="identifier">node</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"query"</span><span class="special">)</span></code>
+          is equivalent to calling <code class="computeroutput"><span class="identifier">xpath_query</span><span class="special">(</span><span class="string">"query"</span><span class="special">).</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="identifier">node</span><span class="special">)</span></code>.
+        </p></td></tr>
+</table></div>
+<p>
+        This is an example of using query objects (<a href="../samples/xpath_query.cpp" target="_top">samples/xpath_query.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="comment">// Select nodes via compiled query
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_remote_tools</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote='true']"</span><span class="special">);</span>
+
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools</span> <span class="special">=</span> <span class="identifier">query_remote_tools</span><span class="special">.</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="identifier">doc</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Remote tool: "</span><span class="special">;</span>
+<span class="identifier">tools</span><span class="special">[</span><span class="number">2</span><span class="special">].</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">);</span>
+
+<span class="comment">// Evaluate numbers via compiled query
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_timeouts</span><span class="special">(</span><span class="string">"sum(//Tool/@Timeout)"</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">query_timeouts</span><span class="special">.</span><span class="identifier">evaluate_number</span><span class="special">(</span><span class="identifier">doc</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+<span class="comment">// Evaluate strings via compiled query for different context nodes
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_name_valid</span><span class="special">(</span><span class="string">"string-length(substring-before(@Filename, '_')) &gt; 0 and @OutputFileMasks"</span><span class="special">);</span>
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_name</span><span class="special">(</span><span class="string">"concat(substring-before(@Filename, '_'), ' produces ', @OutputFileMasks)"</span><span class="special">);</span>
+
+<span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_element_by_path</span><span class="special">(</span><span class="string">"Profile/Tools/Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">())</span>
+<span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">s</span> <span class="special">=</span> <span class="identifier">query_name</span><span class="special">.</span><span class="identifier">evaluate_string</span><span class="special">(</span><span class="identifier">tool</span><span class="special">);</span>
+
+    <span class="keyword">if</span> <span class="special">(</span><span class="identifier">query_name_valid</span><span class="special">.</span><span class="identifier">evaluate_boolean</span><span class="special">(</span><span class="identifier">tool</span><span class="special">))</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">s</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="special">}</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.xpath.errors"></a><a class="link" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a>
+</h3></div></div></div>
+<a name="xpath_exception"></a><a name="xpath_exception::what"></a><p>
+        As of version 0.9, all XPath errors result in thrown exceptions. The errors
+        can arise during expression compilation or node set evaluation. In both cases,
+        an <code class="computeroutput"><span class="identifier">xpath_exception</span></code> object
+        is thrown. This is an exception object that implements <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
+        interface, and thus has a single function <code class="computeroutput"><span class="identifier">what</span><span class="special">()</span></code>:
+      </p>
+<pre class="programlisting"><span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">xpath_exception</span><span class="special">::</span><span class="identifier">what</span><span class="special">()</span> <span class="keyword">const</span> <span class="keyword">throw</span><span class="special">();</span>
+</pre>
+<p>
+        This function returns the error message. Currently it is impossible to get
+        the exact place where query compilation failed. This functionality, along
+        with optional error handling without exceptions, will be available in version
+        1.0.
+      </p>
+<p>
+        This is an example of XPath error handling (<a href="../samples/xpath_error.cpp" target="_top">samples/xpath_error.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="comment">// Exception is thrown for incorrect query syntax
+</span><span class="keyword">try</span>
+<span class="special">{</span>
+    <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"//nodes[#true()]"</span><span class="special">);</span>
+<span class="special">}</span>
+<span class="keyword">catch</span> <span class="special">(</span><span class="keyword">const</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_exception</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Select failed: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">e</span><span class="special">.</span><span class="identifier">what</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="special">}</span>
+
+<span class="comment">// Exception is thrown for incorrect query semantics
+</span><span class="keyword">try</span>
+<span class="special">{</span>
+    <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"(123)/next"</span><span class="special">);</span>
+<span class="special">}</span>
+<span class="keyword">catch</span> <span class="special">(</span><span class="keyword">const</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_exception</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Select failed: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">e</span><span class="special">.</span><span class="identifier">what</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="special">}</span>
+
+<span class="comment">// Exception is thrown for query with incorrect return type
+</span><span class="keyword">try</span>
+<span class="special">{</span>
+    <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"123"</span><span class="special">);</span>
+<span class="special">}</span>
+<span class="keyword">catch</span> <span class="special">(</span><span class="keyword">const</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_exception</span><span class="special">&amp;</span> <span class="identifier">e</span><span class="special">)</span>
+<span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Select failed: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">e</span><span class="special">.</span><span class="identifier">what</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="special">}</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.xpath.w3c"></a><a class="link" href="xpath.html#manual.xpath.w3c" title="Conformance to W3C specification"> Conformance to W3C specification</a>
+</h3></div></div></div>
+<p>
+        Because of the differences in document object models, performance considerations
+        and implementation complexity, pugixml does not provide a fully conformant
+        XPath 1.0 implementation. This is the current list of incompatibilities:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+            Consecutive text nodes sharing the same parent are not merged, i.e. in
+            <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;</span><span class="identifier">text1</span>
+            <span class="special">&lt;![</span><span class="identifier">CDATA</span><span class="special">[</span><span class="identifier">data</span><span class="special">]]&gt;</span> <span class="identifier">text2</span><span class="special">&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code> node should have one text node children,
+            but instead has three.
+          </li>
+<li class="listitem">
+            Since document can't have a document type declaration, <code class="computeroutput"><span class="identifier">id</span><span class="special">()</span></code>
+            function always returns an empty node set.
+          </li>
+<li class="listitem">
+            Namespace nodes are not supported (affects namespace:: axis).
+          </li>
+<li class="listitem">
+            Name tests are performed on QNames in XML document instead of expanded
+            names; for <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">foo</span>
+            <span class="identifier">xmlns</span><span class="special">:</span><span class="identifier">ns1</span><span class="special">=</span><span class="char">'uri'</span> <span class="identifier">xmlns</span><span class="special">:</span><span class="identifier">ns2</span><span class="special">=</span><span class="char">'uri'</span><span class="special">&gt;&lt;</span><span class="identifier">ns1</span><span class="special">:</span><span class="identifier">child</span><span class="special">/&gt;&lt;</span><span class="identifier">ns2</span><span class="special">:</span><span class="identifier">child</span><span class="special">/&gt;&lt;/</span><span class="identifier">foo</span><span class="special">&gt;</span></code>,
+            query <code class="computeroutput"><span class="identifier">foo</span><span class="special">/</span><span class="identifier">ns1</span><span class="special">:*</span></code>
+            will return only the first child, not both of them. Compliant XPath implementations
+            can return both nodes if the user provides appropriate namespace declarations.
+          </li>
+<li class="listitem">
+            String functions consider a character to be either a single <code class="computeroutput"><span class="keyword">char</span></code> value or a single <code class="computeroutput"><span class="keyword">wchar_t</span></code>
+            value, depending on the library configuration; this means that some string
+            functions are not fully Unicode-aware. This affects <code class="computeroutput"><span class="identifier">substring</span><span class="special">()</span></code>, <code class="computeroutput"><span class="identifier">string</span><span class="special">-</span><span class="identifier">length</span><span class="special">()</span></code> and <code class="computeroutput"><span class="identifier">translate</span><span class="special">()</span></code> functions.
+          </li>
+<li class="listitem">
+            Variable references are not supported.
+          </li>
+</ul></div>
+<p>
+        Some of these incompatibilities will be fixed in version 1.0.
+      </p>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+        Distributed under the MIT License
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<a href="install.html">Installation</a> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <a href="saving.html">Saving</a> |
+		<b>XPath</b> |
+		<a href="apiref.html">API Reference</a> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="saving.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="changes.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+</body>
+</html>

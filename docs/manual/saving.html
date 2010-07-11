@@ -1,0 +1,473 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Saving document</title>
+<link rel="stylesheet" href="../pugixml.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../manual.html" title="pugixml 0.9">
+<link rel="up" href="../manual.html" title="pugixml 0.9">
+<link rel="prev" href="modify.html" title="Modifying document data">
+<link rel="next" href="xpath.html" title="XPath">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<a href="install.html">Installation</a> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <b>Saving</b> |
+		<a href="xpath.html">XPath</a> |
+		<a href="apiref.html">API Reference</a> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="modify.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="xpath.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+<hr>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="manual.saving"></a><a class="link" href="saving.html" title="Saving document"> Saving document</a>
+</h2></div></div></div>
+<div class="toc"><dl>
+<dt><span class="section"><a href="saving.html#manual.saving.file"> Saving document to a file</a></span></dt>
+<dt><span class="section"><a href="saving.html#manual.saving.stream"> Saving document to C++ IOstreams</a></span></dt>
+<dt><span class="section"><a href="saving.html#manual.saving.writer"> Saving document via writer interface</a></span></dt>
+<dt><span class="section"><a href="saving.html#manual.saving.subtree"> Saving a single subtree</a></span></dt>
+<dt><span class="section"><a href="saving.html#manual.saving.options"> Output options</a></span></dt>
+<dt><span class="section"><a href="saving.html#manual.saving.encoding"> Encodings</a></span></dt>
+</dl></div>
+<p>
+      Often after creating a new document or loading the existing one and processing
+      it, it is necessary to save the result back to file. Also it is occasionally
+      useful to output the whole document or a subtree to some stream; use cases
+      include debug printing, serialization via network or other text-oriented medium,
+      etc. pugixml provides several functions to output any subtree of the document
+      to a file, stream or another generic transport interface; these functions allow
+      to customize the output format (see <a class="xref" href="saving.html#manual.saving.options" title="Output options"> Output options</a>), and also perform
+      necessary encoding conversions (see <a class="xref" href="saving.html#manual.saving.encoding" title="Encodings"> Encodings</a>). This section documents
+      the relevant functionality.
+    </p>
+<p>
+      The node/attribute data is written to the destination properly formatted according
+      to the node type; all special XML symbols, such as &lt; and &amp;, are properly
+      escaped. In order to guard against forgotten node/attribute names, empty node/attribute
+      names are printed as <code class="computeroutput"><span class="string">":anonymous"</span></code>.
+      For proper output, make sure all node and attribute names are set to meaningful
+      values.
+    </p>
+<div class="caution"><table border="0" summary="Caution">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="../images/caution.png"></td>
+<th align="left">Caution</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+        Currently the content of CDATA sections is not escaped, so CDATA sections
+        with values that contain <code class="computeroutput"><span class="string">"]]&gt;"</span></code>
+        will result in malformed document. This will be fixed in version 1.0.
+      </p></td></tr>
+</table></div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.saving.file"></a><a class="link" href="saving.html#manual.saving.file" title="Saving document to a file"> Saving document to a file</a>
+</h3></div></div></div>
+<a name="xml_document::save_file"></a><p>
+        If you want to save the whole document to a file, you can use the following
+        function:
+      </p>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save_file</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        This function accepts file path as its first argument, and also three optional
+        arguments, which specify indentation and other output options (see <a class="xref" href="saving.html#manual.saving.options" title="Output options"> Output options</a>)
+        and output data encoding (see <a class="xref" href="saving.html#manual.saving.encoding" title="Encodings"> Encodings</a>). The path has the target
+        operating system format, so it can be a relative or absolute one, it should
+        have the delimiters of target system, it should have the exact case if target
+        file system is case-sensitive, etc. File path is passed to system file opening
+        function as is.
+      </p>
+<a name="xml_writer_file"></a><p>
+        <code class="computeroutput"><span class="identifier">save_file</span></code> opens the target
+        file for writing, outputs the requested header (by default a document declaration
+        is output, unless the document already has one), and then saves the document
+        contents. If the file could not be opened, the function returns <code class="computeroutput"><span class="keyword">false</span></code>. Calling <code class="computeroutput"><span class="identifier">save_file</span></code>
+        is equivalent to creating an <code class="computeroutput"><span class="identifier">xml_writer_file</span></code>
+        object with <code class="computeroutput"><span class="identifier">FILE</span><span class="special">*</span></code>
+        handle as the only constructor argument and then calling <code class="computeroutput"><span class="identifier">save</span></code>;
+        see <a class="xref" href="saving.html#manual.saving.writer" title="Saving document via writer interface"> Saving document via writer interface</a> for writer interface details.
+      </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          As of version 0.9, there is no function for saving XML document to wide
+          character paths. Unfortunately, there is no portable way to do this; the
+          version 1.0 will provide such function only for platforms with the corresponding
+          functionality. You can use stream-saving functions as a workaround if your
+          STL implementation can open file streams via wchar_t paths.
+        </p></td></tr>
+</table></div>
+<p>
+        This is a simple example of saving XML document to file (<a href="../samples/save_file.cpp" target="_top">samples/save_file.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="comment">// save document to file
+</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Saving result: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">save_file</span><span class="special">(</span><span class="string">"save_file_output.xml"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.saving.stream"></a><a class="link" href="saving.html#manual.saving.stream" title="Saving document to C++ IOstreams"> Saving document to C++ IOstreams</a>
+</h3></div></div></div>
+<a name="xml_document::save_stream"></a><p>
+        For additional interoperability pugixml provides functions for saving document
+        to any object which implements C++ std::ostream interface. This allows you
+        to save documents to any standard C++ stream (i.e. file stream) or any third-party
+        compliant implementation (i.e. Boost Iostreams). Most notably, this allows
+        for easy debug output, since you can use <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span></code>
+        stream as saving target. There are two functions, one works with narrow character
+        streams, another handles wide character ones:
+      </p>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">void</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wostream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        <code class="computeroutput"><span class="identifier">save</span></code> with <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span></code>
+        argument saves the document to the stream in the same way as <code class="computeroutput"><span class="identifier">save_file</span></code> (i.e. with requested header and
+        with encoding conversions). On the other hand, <code class="computeroutput"><span class="identifier">save</span></code>
+        with <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstream</span></code> argument saves the document to
+        the wide stream with <code class="computeroutput"><span class="identifier">encoding_wchar</span></code>
+        encoding. Because of this, using <code class="computeroutput"><span class="identifier">save</span></code>
+        with wide character streams requires careful (usually platform-specific)
+        stream setup (i.e. using the <code class="computeroutput"><span class="identifier">imbue</span></code>
+        function). Generally use of wide streams is discouraged, however it provides
+        you with the ability to save documents to non-Unicode encodings, i.e. you
+        can save Shift-JIS encoded data if you set the correct locale.
+      </p>
+<a name="xml_writer_stream"></a><p>
+        Calling <code class="computeroutput"><span class="identifier">save</span></code> with stream
+        target is equivalent to creating an <code class="computeroutput"><span class="identifier">xml_writer_stream</span></code>
+        object with stream as the only constructor argument and then calling <code class="computeroutput"><span class="identifier">save</span></code>; see <a class="xref" href="saving.html#manual.saving.writer" title="Saving document via writer interface"> Saving document via writer interface</a> for writer
+        interface details.
+      </p>
+<p>
+        This is a simple example of saving XML document to standard output (<a href="../samples/save_stream.cpp" target="_top">samples/save_stream.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="comment">// save document to standard output
+</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Document:\n"</span><span class="special">;</span>
+<span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">);</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.saving.writer"></a><a class="link" href="saving.html#manual.saving.writer" title="Saving document via writer interface"> Saving document via writer interface</a>
+</h3></div></div></div>
+<a name="xml_document::save"></a><a name="xml_writer"></a><a name="xml_writer::write"></a><p>
+        All of the above saving functions are implemented in terms of writer interface.
+        This is a simple interface with a single function, which is called several
+        times during output process with chunks of document data as input:
+      </p>
+<pre class="programlisting"><span class="keyword">class</span> <span class="identifier">xml_writer</span>
+<span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">write</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">void</span><span class="special">*</span> <span class="identifier">data</span><span class="special">,</span> <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">)</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span>
+<span class="special">};</span>
+
+<span class="keyword">void</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">xml_writer</span><span class="special">&amp;</span> <span class="identifier">writer</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        In order to output the document via some custom transport, for example sockets,
+        you should create an object which implements <code class="computeroutput"><span class="identifier">xml_writer_file</span></code>
+        interface and pass it to <code class="computeroutput"><span class="identifier">save</span></code>
+        function. <code class="computeroutput"><span class="identifier">xml_writer_file</span><span class="special">::</span><span class="identifier">write</span></code>
+        function is called with a buffer as an input, where <code class="computeroutput"><span class="identifier">data</span></code>
+        points to buffer start, and <code class="computeroutput"><span class="identifier">size</span></code>
+        is equal to the buffer size in bytes. <code class="computeroutput"><span class="identifier">write</span></code>
+        implementation must write the buffer to the transport; it can not save the
+        passed buffer pointer, as the buffer contents will change after <code class="computeroutput"><span class="identifier">write</span></code> returns. The buffer contains the
+        chunk of document data in the desired encoding.
+      </p>
+<p>
+        <code class="computeroutput"><span class="identifier">write</span></code> function is called
+        with relatively large blocks (size is usually several kilobytes, except for
+        the first block with BOM, which is output only if <code class="computeroutput"><span class="identifier">format_write_bom</span></code>
+        is set, and last block, which may be small), so there is often no need for
+        additional buffering in the implementation.
+      </p>
+<p>
+        This is a simple example of custom writer for saving document data to STL
+        string (<a href="../samples/save_custom_writer.cpp" target="_top">samples/save_custom_writer.cpp</a>);
+        read the sample code for more complex examples:
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="keyword">struct</span> <span class="identifier">xml_string_writer</span><span class="special">:</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_writer</span>
+<span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">result</span><span class="special">;</span>
+
+    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">write</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">void</span><span class="special">*</span> <span class="identifier">data</span><span class="special">,</span> <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">)</span>
+    <span class="special">{</span>
+        <span class="identifier">result</span> <span class="special">+=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">(</span><span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">data</span><span class="special">),</span> <span class="identifier">size</span><span class="special">);</span>
+    <span class="special">}</span>
+<span class="special">};</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.saving.subtree"></a><a class="link" href="saving.html#manual.saving.subtree" title="Saving a single subtree"> Saving a single subtree</a>
+</h3></div></div></div>
+<a name="xml_node::print"></a><a name="xml_node::print_stream"></a><p>
+        While the previously described functions saved the whole document to the
+        destination, it is easy to save a single subtree. The following functions
+        are provided:
+      </p>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span><span class="special">&amp;</span> <span class="identifier">os</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">depth</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">void</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wostream</span><span class="special">&amp;</span> <span class="identifier">os</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">depth</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">void</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">xml_writer</span><span class="special">&amp;</span> <span class="identifier">writer</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">depth</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        These functions have the same arguments with the same meaning as the corresponding
+        <code class="computeroutput"><span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span></code> functions, and allow you to save the
+        subtree to either a C++ IOstream or to any object that implements <code class="computeroutput"><span class="identifier">xml_writer</span></code> interface.
+      </p>
+<p>
+        Saving a subtree differs from saving the whole document: the process behaves
+        as if <code class="computeroutput"><span class="identifier">format_write_bom</span></code> is
+        off, and <code class="computeroutput"><span class="identifier">format_no_declaration</span></code>
+        is on, even if actual values of the flags are different. This means that
+        BOM is not written to the destination, and document declaration is only written
+        if it is the node itself or is one of node's children. Note that this also
+        holds if you're saving a document; this example (<a href="../samples/save_subtree.cpp" target="_top">samples/save_subtree.cpp</a>)
+        illustrates the difference:
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="comment">// get a test document
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
+<span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="string">"&lt;foo bar='baz'&gt;&lt;call&gt;hey&lt;/call&gt;&lt;/foo&gt;"</span><span class="special">);</span>
+
+<span class="comment">// print document to standard output (prints &lt;?xml version="1.0"?&gt;&lt;foo bar="baz"&gt;&lt;call&gt;hey&lt;/call&gt;&lt;/foo&gt;)
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">,</span> <span class="string">""</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_raw</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+<span class="comment">// print document to standard output as a regular node (prints &lt;foo bar="baz"&gt;&lt;call&gt;hey&lt;/call&gt;&lt;/foo&gt;)
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">,</span> <span class="string">""</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_raw</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+<span class="comment">// print a subtree to standard output (prints &lt;call&gt;hey&lt;/call&gt;)
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"foo"</span><span class="special">).</span><span class="identifier">child</span><span class="special">(</span><span class="string">"call"</span><span class="special">).</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">,</span> <span class="string">""</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_raw</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.saving.options"></a><a class="link" href="saving.html#manual.saving.options" title="Output options"> Output options</a>
+</h3></div></div></div>
+<p>
+        All saving functions accept the optional parameter <code class="computeroutput"><span class="identifier">flags</span></code>.
+        This is a bitmask that customizes the output format; you can select the way
+        the document nodes are printed and select the needed additional information
+        that is output before the document contents.
+      </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          You should use the usual bitwise arithmetics to manipulate the bitmask:
+          to enable a flag, use <code class="computeroutput"><span class="identifier">mask</span> <span class="special">|</span> <span class="identifier">flag</span></code>;
+          to disable a flag, use <code class="computeroutput"><span class="identifier">mask</span> <span class="special">&amp;</span> <span class="special">~</span><span class="identifier">flag</span></code>.
+        </p></td></tr>
+</table></div>
+<p>
+        These flags control the resulting tree contents:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+            <a name="format_indent"></a><code class="literal">format_indent</code> determines if all nodes
+            should be indented with the indentation string (this is an additional
+            parameter for all saving functions, and is <code class="computeroutput"><span class="string">"\t"</span></code>
+            by default). If this flag is on, before every node the indentation string
+            is output several times, where the amount of indentation depends on the
+            node's depth relative to the output subtree. This flag has no effect
+            if <code class="computeroutput"><span class="identifier">format_raw</span></code> is enabled.
+            This flag is <span class="bold"><strong>on</strong></span> by default. <br><br>
+
+          </li>
+<li class="listitem">
+            <a name="format_raw"></a><code class="literal">format_raw</code> switches between formatted and
+            raw output. If this flag is on, the nodes are not indented in any way,
+            and also no newlines that are not part of document text are printed.
+            Raw mode can be used for serialization where the result is not intended
+            to be read by humans; also it can be useful if the document was parsed
+            with <code class="computeroutput"><span class="identifier">parse_ws_pcdata</span></code>
+            flag, to preserve the original document formatting as much as possible.
+            This flag is <span class="bold"><strong>off</strong></span> by default.
+          </li>
+</ul></div>
+<p>
+        These flags control the additional output information:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+            <a name="format_no_declaration"></a><code class="literal">format_no_declaration</code> allows
+            to disable default node declaration output. By default, if the document
+            is saved via <code class="computeroutput"><span class="identifier">save</span></code> or
+            <code class="computeroutput"><span class="identifier">save_file</span></code> function, and
+            it does not have any document declaration, a default declaration is output
+            before the document contents. Enabling this flag disables this declaration.
+            This flag has no effect in <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span></code>
+            functions: they never output the default declaration. This flag is <span class="bold"><strong>off</strong></span> by default. <br><br>
+
+          </li>
+<li class="listitem">
+            <a name="format_write_bom"></a><code class="literal">format_write_bom</code> allows to enable
+            Byte Order Mark (BOM) output. By default, no BOM is output, so in case
+            of non UTF-8 encodings the resulting document's encoding may not be recognized
+            by some parsers and text editors, if they do not implement sophisticated
+            encoding detection. Enabling this flag adds an encoding-specific BOM
+            to the output. This flag has no effect in <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span></code>
+            functions: they never output the BOM. This flag is <span class="bold"><strong>off</strong></span>
+            by default.
+          </li>
+</ul></div>
+<p>
+        Additionally, there is one predefined option mask:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+            <a name="format_default"></a><code class="literal">format_default</code> is the default set of
+            flags, i.e. it has all options set to their default values. It sets formatted
+            output with indentation, without BOM and with default node declaration,
+            if necessary.
+          </li></ul></div>
+<p>
+        This is an example that shows the outputs of different output options (<a href="../samples/save_options.cpp" target="_top">samples/save_options.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="comment">// get a test document
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
+<span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="string">"&lt;foo bar='baz'&gt;&lt;call&gt;hey&lt;/call&gt;&lt;/foo&gt;"</span><span class="special">);</span>
+
+<span class="comment">// default options; prints
+</span><span class="comment">// &lt;?xml version="1.0"?&gt;
+</span><span class="comment">// &lt;foo bar="baz"&gt;
+</span><span class="comment">//         &lt;call&gt;hey&lt;/call&gt;
+</span><span class="comment">// &lt;/foo&gt;
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+<span class="comment">// default options with custom indentation string; prints
+</span><span class="comment">// &lt;?xml version="1.0"?&gt;
+</span><span class="comment">// &lt;foo bar="baz"&gt;
+</span><span class="comment">// --&lt;call&gt;hey&lt;/call&gt;
+</span><span class="comment">// &lt;/foo&gt;
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">,</span> <span class="string">"--"</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+<span class="comment">// default options without indentation; prints
+</span><span class="comment">// &lt;?xml version="1.0"?&gt;
+</span><span class="comment">// &lt;foo bar="baz"&gt;
+</span><span class="comment">// &lt;call&gt;hey&lt;/call&gt;
+</span><span class="comment">// &lt;/foo&gt;
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">,</span> <span class="string">"\t"</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_default</span> <span class="special">&amp;</span> <span class="special">~</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_indent</span><span class="special">);</span> <span class="comment">// can also pass "" instead of indentation string for the same effect
+</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+<span class="comment">// raw output; prints
+</span><span class="comment">// &lt;?xml version="1.0"?&gt;&lt;foo bar="baz"&gt;&lt;call&gt;hey&lt;/call&gt;&lt;/foo&gt;
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">,</span> <span class="string">"\t"</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_raw</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+
+<span class="comment">// raw output without declaration; prints
+</span><span class="comment">// &lt;foo bar="baz"&gt;&lt;call&gt;hey&lt;/call&gt;&lt;/foo&gt;
+</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">,</span> <span class="string">"\t"</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_raw</span> <span class="special">|</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">format_no_declaration</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.saving.encoding"></a><a class="link" href="saving.html#manual.saving.encoding" title="Encodings"> Encodings</a>
+</h3></div></div></div>
+<p>
+        pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little
+        endian), UTF-32 (big and little endian); UCS-2 is naturally supported since
+        it's a strict subset of UTF-16) and handles all encoding conversions during
+        output. The output encoding is set via the <code class="computeroutput"><span class="identifier">encoding</span></code>
+        parameter of saving functions, which is of type <code class="computeroutput"><span class="identifier">xml_encoding</span></code>.
+        The possible values for the encoding are documented in <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings"> Encodings</a>;
+        the only flag that has a different meaning is <code class="computeroutput"><span class="identifier">encoding_auto</span></code>.
+      </p>
+<p>
+        While all other flags set the exact encoding, <code class="computeroutput"><span class="identifier">encoding_auto</span></code>
+        is meant for automatic encoding detection. The automatic detection does not
+        make sense for output encoding, since there is usually nothing to infer the
+        actual encoding from, so here <code class="computeroutput"><span class="identifier">encoding_auto</span></code>
+        means UTF-8 encoding, which is the most popular encoding for XML data storage.
+        This is also the default value of output encoding; specify another value
+        if you do not want UTF-8 encoded output.
+      </p>
+<p>
+        Also note that wide stream saving functions do not have <code class="computeroutput"><span class="identifier">encoding</span></code>
+        argument and always assume <code class="computeroutput"><span class="identifier">encoding_wchar</span></code>
+        encoding.
+      </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          The current behavior for Unicode conversion is to skip all invalid UTF
+          sequences during conversion. This behavior should not be relied upon; if
+          your node/attribute names do not contain any valid UTF sequences, they
+          may be output as if they are empty, which will result in malformed XML
+          document.
+        </p></td></tr>
+</table></div>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+        Distributed under the MIT License
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<a href="install.html">Installation</a> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <b>Saving</b> |
+		<a href="xpath.html">XPath</a> |
+		<a href="apiref.html">API Reference</a> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="modify.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="xpath.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+</body>
+</html>

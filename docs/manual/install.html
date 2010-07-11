@@ -1,0 +1,445 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Installation</title>
+<link rel="stylesheet" href="../pugixml.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../manual.html" title="pugixml 0.9">
+<link rel="up" href="../manual.html" title="pugixml 0.9">
+<link rel="prev" href="../manual.html" title="pugixml 0.9">
+<link rel="next" href="dom.html" title="Document object model">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<b>Installation</b> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <a href="saving.html">Saving</a> |
+		<a href="xpath.html">XPath</a> |
+		<a href="apiref.html">API Reference</a> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="../manual.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="dom.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+<hr>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="manual.install"></a><a class="link" href="install.html" title="Installation"> Installation</a>
+</h2></div></div></div>
+<div class="toc"><dl>
+<dt><span class="section"><a href="install.html#manual.install.getting"> Getting pugixml</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="install.html#manual.install.getting.source"> Source distributions</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.getting.subversion"> Subversion repository</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="install.html#manual.install.building"> Building pugixml</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="install.html#manual.install.building.embed"> Building pugixml as
+        a part of another static library/executable</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.building.static"> Building pugixml as
+        a standalone static library</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.building.shared"> Building pugixml as
+        a standalone shared library</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.building.config"> Additional configuration
+        options</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="install.html#manual.install.portability"> Portability</a></span></dt>
+</dl></div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.install.getting"></a><a class="link" href="install.html#manual.install.getting" title="Getting pugixml"> Getting pugixml</a>
+</h3></div></div></div>
+<p>
+        pugixml is distributed in source form. You can either download a source distribution
+        or checkout the Subversion repository.
+      </p>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.getting.source"></a><a class="link" href="install.html#manual.install.getting.source" title="Source distributions"> Source distributions</a>
+</h4></div></div></div>
+<p>
+          You can download the latest source distribution via one of the following
+          links:
+        </p>
+<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-0.9.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-0.9.zip</a>
+<a href="http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz</a>
+</pre>
+<p>
+          The distribution contains library source, documentation (the manual you're
+          reading now and the quick start guide) and some code examples. After downloading
+          the distribution, install pugixml by extracting all files from the compressed
+          archive.
+        </p>
+<p>
+          If you need an older version, you can download it from the <a href="http://code.google.com/p/pugixml/downloads/list" target="_top">version
+          archive</a>.
+        </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.getting.subversion"></a><a class="link" href="install.html#manual.install.getting.subversion" title="Subversion repository"> Subversion repository</a>
+</h4></div></div></div>
+<p>
+          The Subversion repository is located at <a href="http://pugixml.googlecode.com/svn/" target="_top">http://pugixml.googlecode.com/svn/</a>.
+          There is a Subversion tag "release-{version}" for each version;
+          also there is the "latest" tag, which always points to the latest
+          stable release.
+        </p>
+<p>
+          For example, to checkout the current version, you can use this command:
+        </p>
+<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/release-0.9 pugixml</pre>
+<p>
+          To checkout the latest version, you can use this command:
+        </p>
+<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/latest pugixml</pre>
+<p>
+          The repository contains library source, documentation, code examples and
+          full unit test suite.
+        </p>
+<p>
+          Use latest version tag if you want to automatically get new versions via
+          <code class="literal">svn update</code>. Use other tags if you want to switch to
+          new versions only explicitly (for example, using <code class="literal">svn switch</code>
+          command). Also please note that Subversion trunk contains the work-in-progress
+          version of the code; while this means that you can get new features and
+          bug fixes from trunk without waiting for a new release, this also means
+          that occasionally the code can be broken in some configurations.
+        </p>
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.install.building"></a><a class="link" href="install.html#manual.install.building" title="Building pugixml"> Building pugixml</a>
+</h3></div></div></div>
+<p>
+        pugixml is distributed in source form without any pre-built binaries; you
+        have to build them yourself.
+      </p>
+<p>
+        The complete pugixml source consists of four files - two source files, <code class="filename">pugixml.cpp</code> and
+        <code class="filename">pugixpath.cpp</code>, and two header files, <code class="filename">pugixml.hpp</code> and <code class="filename">pugiconfig.hpp</code>. <code class="filename">pugixml.hpp</code> is
+        the primary header which you need to include in order to use pugixml classes/functions;
+        <code class="filename">pugiconfig.hpp</code> is a supplementary configuration file (see <a class="xref" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
+        options</a>).
+        The rest of this guide assumes that <code class="filename">pugixml.hpp</code> is either in the current directory
+        or in one of include directories of your projects, so that <code class="computeroutput"><span class="preprocessor">#include</span> <span class="string">"pugixml.hpp"</span></code>
+        can find the header; however you can also use relative path (i.e. <code class="computeroutput"><span class="preprocessor">#include</span> <span class="string">"../libs/pugixml/src/pugixml.hpp"</span></code>)
+        or include directory-relative path (i.e. <code class="computeroutput"><span class="preprocessor">#include</span>
+        <span class="special">&lt;</span><span class="identifier">xml</span><span class="special">/</span><span class="identifier">thirdparty</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">/</span><span class="identifier">src</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>).
+      </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          You don't need to compile <code class="filename">pugixpath.cpp</code> unless you use XPath.
+        </p></td></tr>
+</table></div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.building.embed"></a><a class="link" href="install.html#manual.install.building.embed" title="Building pugixml as a part of another static library/executable"> Building pugixml as
+        a part of another static library/executable</a>
+</h4></div></div></div>
+<p>
+          The easiest way to build pugixml is to compile two source files, <code class="filename">pugixml.cpp</code> and
+          <code class="filename">pugixpath.cpp</code>, along with the existing library/executable. This process
+          depends on the method of building your application; for example, if you're
+          using Microsoft Visual Studio<sup>[<a name="id1323403" href="#ftn.id1323403" class="footnote">1</a>]</sup>, Apple Xcode, Code::Blocks or any other IDE, just add <code class="filename">pugixml.cpp</code> and
+          <code class="filename">pugixpath.cpp</code> to one of your projects.
+        </p>
+<p>
+          If you're using Microsoft Visual Studio and the project has precompiled
+          headers turned on, you'll see the following error messages:
+        </p>
+<pre class="programlisting">pugixpath.cpp(3477) : fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?</pre>
+<p>
+          The correct way to resolve this is to disable precompiled headers for <code class="filename">pugixml.cpp</code> and
+          <code class="filename">pugixpath.cpp</code>; you have to set "Create/Use Precompiled Header"
+          option (Properties dialog -&gt; C/C++ -&gt; Precompiled Headers -&gt; Create/Use
+          Precompiled Header) to "Not Using Precompiled Headers". You'll
+          have to do it for both <code class="filename">pugixml.cpp</code> and <code class="filename">pugixpath.cpp</code>, for all project configurations/platforms
+          (you can select Configuration "All Configurations" and Platform
+          "All Platforms" before editing the option):
+        </p>
+<div class="informaltable"><table class="table">
+<colgroup><col></colgroup>
+<tbody><tr><td>
+                  <p>
+                    <a href="../images/vs2005_pch1.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2005_pch1_thumb.png" alt="vs2005_pch1_thumb"></span></a> <span class="inlinemediaobject"><img src="../images/next.png" alt="next"></span> <a href="../images/vs2005_pch2.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2005_pch2_thumb.png" alt="vs2005_pch2_thumb"></span></a> <span class="inlinemediaobject"><img src="../images/next.png" alt="next"></span> <a href="../images/vs2005_pch3.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2005_pch3_thumb.png" alt="vs2005_pch3_thumb"></span></a> <span class="inlinemediaobject"><img src="../images/next.png" alt="next"></span> <a href="../images/vs2005_pch4.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2005_pch4_thumb.png" alt="vs2005_pch4_thumb"></span></a>
+                  </p>
+                </td></tr></tbody>
+</table></div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.building.static"></a><a class="link" href="install.html#manual.install.building.static" title="Building pugixml as a standalone static library"> Building pugixml as
+        a standalone static library</a>
+</h4></div></div></div>
+<p>
+          It's possible to compile pugixml as a standalone static library. This process
+          depends on the method of building your application; pugixml distribution
+          comes with project files for several popular IDEs/build systems. There
+          are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual
+          Studio 2005, 2008, 2010, and configuration scripts for CMake and premake4.
+          You're welcome to submit project files/build scripts for other software;
+          see <a class="xref" href="../manual.html#manual.overview.feedback" title="Feedback"> Feedback</a>.
+        </p>
+<p>
+          There are two projects for each version of Microsoft Visual Studio: one
+          for dynamically linked CRT, which has a name like <code class="filename">pugixml_vs2008.vcproj</code>,
+          and another one for statically linked CRT, which has a name like <code class="filename">pugixml_vs2008_static.vcproj</code>.
+          You should select the version that matches the CRT used in your application;
+          the default option for new projects created by Microsoft Visual Studio
+          is dynamically linked CRT, so unless you changed the defaults, you should
+          use the version with dynamic CRT (i.e. <code class="filename">pugixml_vs2008.vcproj</code> for Microsoft
+          Visual Studio 2008).
+        </p>
+<p>
+          In addition to adding pugixml project to your workspace, you'll have to
+          make sure that your application links with pugixml library. If you're using
+          Microsoft Visual Studio 2005/2008, you can add a dependency from your application
+          project to pugixml one. If you're using Microsoft Visual Studio 2010, you'll
+          have to add a reference to your application project instead. For other
+          IDEs/systems, consult the relevant documentation.
+        </p>
+<div class="informaltable"><table class="table">
+<colgroup>
+<col>
+<col>
+</colgroup>
+<thead><tr>
+<th>
+                  <p>
+                    Microsoft Visual Studio 2005/2008
+                  </p>
+                </th>
+<th>
+                  <p>
+                    Microsoft Visual Studio 2010
+                  </p>
+                </th>
+</tr></thead>
+<tbody><tr>
+<td>
+                  <p>
+                    <a href="../images/vs2005_link1.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2005_link1_thumb.png" alt="vs2005_link1_thumb"></span></a> <span class="inlinemediaobject"><img src="../images/next.png" alt="next"></span> <a href="../images/vs2005_link2.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2005_link2_thumb.png" alt="vs2005_link2_thumb"></span></a>
+                  </p>
+                </td>
+<td>
+                  <p>
+                    <a href="../images/vs2010_link1.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2010_link1_thumb.png" alt="vs2010_link1_thumb"></span></a> <span class="inlinemediaobject"><img src="../images/next.png" alt="next"></span> <a href="../images/vs2010_link2.png" target="_top"><span class="inlinemediaobject"><img src="../images/vs2010_link2_thumb.png" alt="vs2010_link2_thumb"></span></a>
+                  </p>
+                </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.building.shared"></a><a class="link" href="install.html#manual.install.building.shared" title="Building pugixml as a standalone shared library"> Building pugixml as
+        a standalone shared library</a>
+</h4></div></div></div>
+<p>
+          It's possible to compile pugixml as a standalone shared library. The process
+          is usually similar to the static library approach; however, no preconfigured
+          projects/scripts are included into pugixml distribution, so you'll have
+          to do it yourself. Generally, if you're using GCC-based toolchain, the
+          process does not differ from building any other library as DLL (adding
+          -shared to compilation flags should suffice); if you're using MSVC-based
+          toolchain, you'll have to explicitly mark exported symbols with a declspec
+          attribute. You can do it by defining <code class="computeroutput"><span class="identifier">PUGIXML_API</span></code>
+          macro, i.e. via <code class="filename">pugiconfig.hpp</code>:
+        </p>
+<pre class="programlisting"><span class="preprocessor">#ifdef</span> <span class="identifier">_DLL</span>
+<span class="preprocessor">#define</span> <span class="identifier">PUGIXML_API</span> <span class="identifier">__declspec</span><span class="special">(</span><span class="identifier">dllexport</span><span class="special">)</span>
+<span class="preprocessor">#else</span>
+<span class="preprocessor">#define</span> <span class="identifier">PUGIXML_API</span> <span class="identifier">__declspec</span><span class="special">(</span><span class="identifier">dllimport</span><span class="special">)</span>
+<span class="preprocessor">#endif</span>
+</pre>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.building.config"></a><a class="link" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
+        options</a>
+</h4></div></div></div>
+<p>
+          pugixml uses several defines to control the compilation process. There
+          are two ways to define them: either put the needed definitions to <code class="filename">pugiconfig.hpp</code> (it
+          has some examples that are commented out) or provide them via compiler
+          command-line. Define consistency is important, i.e. the definitions should
+          match in all source files that include <code class="filename">pugixml.hpp</code> (including pugixml sources)
+          throughout the application. Adding defines to <code class="filename">pugiconfig.hpp</code> lets you guarantee
+          this, unless your macro definition is wrapped in preprocessor <code class="computeroutput"><span class="preprocessor">#if</span></code>/<code class="computeroutput"><span class="preprocessor">#ifdef</span></code>
+          directive and this directive is not consistent. <code class="filename">pugiconfig.hpp</code> will never
+          contain anything but comments, which means that when upgrading to new version,
+          you can safely leave your modified version intact.
+        </p>
+<p>
+          <a name="PUGIXML_WCHAR_MODE"></a><code class="literal">PUGIXML_WCHAR_MODE</code> define toggles
+          between UTF-8 style interface (the in-memory text encoding is assumed to
+          be UTF-8, most functions use <code class="computeroutput"><span class="keyword">char</span></code>
+          as character type) and UTF-16/32 style interface (the in-memory text encoding
+          is assumed to be UTF-16/32, depending on <code class="computeroutput"><span class="keyword">wchar_t</span></code>
+          size, most functions use <code class="computeroutput"><span class="keyword">wchar_t</span></code>
+          as character type). See <a class="xref" href="dom.html#manual.dom.unicode" title="Unicode interface"> Unicode interface</a> for more details.
+        </p>
+<p>
+          <a name="PUGIXML_NO_XPATH"></a><code class="literal">PUGIXML_NO_XPATH</code> define disables XPath.
+          Both XPath interfaces and XPath implementation are excluded from compilation;
+          you can still compile the file <code class="filename">pugixpath.cpp</code> (it will result in an empty
+          translation unit). This option is provided in case you do not need XPath
+          functionality and need to save code space.
+        </p>
+<p>
+          <a name="PUGIXML_NO_STL"></a><code class="literal">PUGIXML_NO_STL</code> define disables use of
+          STL in pugixml. The functions that operate on STL types are no longer present
+          (i.e. load/save via iostream) if this macro is defined. This option is
+          provided in case your target platform does not have a standard-compliant
+          STL implementation.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            As of version 0.9, STL is used in XPath implementation; therefore, XPath
+            is also disabled if this macro is defined. This will change in version
+            1.0.
+          </p></td></tr>
+</table></div>
+<p>
+          <a name="PUGIXML_NO_EXCEPTIONS"></a><code class="literal">PUGIXML_NO_EXCEPTIONS</code> define disables
+          use of exceptions in pugixml. This option is provided in case your target
+          platform does not have exception handling capabilities
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            As of version 0.9, exceptions are <span class="bold"><strong>only</strong></span>
+            used in XPath implementation; therefore, XPath is also disabled if this
+            macro is defined. This will change in version 1.0.
+          </p></td></tr>
+</table></div>
+<p>
+          <a name="PUGIXML_API"></a><code class="literal">PUGIXML_API</code>, <a name="PUGIXML_CLASS"></a><code class="literal">PUGIXML_CLASS</code>
+          and <a name="PUGIXML_FUNCTION"></a><code class="literal">PUGIXML_FUNCTION</code> defines let you
+          specify custom attributes (i.e. declspec or calling conventions) for pugixml
+          classes and non-member functions. In absence of <code class="computeroutput"><span class="identifier">PUGIXML_CLASS</span></code>
+          or <code class="computeroutput"><span class="identifier">PUGIXML_FUNCTION</span></code> definitions,
+          <code class="computeroutput"><span class="identifier">PUGIXML_API</span></code> definition
+          is used instead. For example, to specify fixed calling convention, you
+          can define <code class="computeroutput"><span class="identifier">PUGIXML_FUNCTION</span></code>
+          to i.e. <code class="computeroutput"><span class="identifier">__fastcall</span></code>. Another
+          example is DLL import/export attributes in MSVC (see <a class="xref" href="install.html#manual.install.building.shared" title="Building pugixml as a standalone shared library"> Building pugixml as
+        a standalone shared library</a>).
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            In that example <code class="computeroutput"><span class="identifier">PUGIXML_API</span></code>
+            is inconsistent between several source files; this is an exception to
+            the consistency rule.
+          </p></td></tr>
+</table></div>
+</div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.install.portability"></a><a class="link" href="install.html#manual.install.portability" title="Portability"> Portability</a>
+</h3></div></div></div>
+<p>
+        pugixml is written in standard-compliant C++ with some compiler-specific
+        workarounds where appropriate. pugixml is compatible with the upcoming C++0x
+        standard (verified using GCC 4.5). Each version is tested with a unit test
+        suite (with code coverage about 99%) on the following platforms:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+            Microsoft Windows:
+            <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                  Borland C++ Compiler 5.82
+                </li>
+<li class="listitem">
+                  Digital Mars C++ Compiler 8.51
+                </li>
+<li class="listitem">
+                  Intel C++ Compiler 8.0, 9.0 x86/x64, 10.0 x86/x64, 11.0 x86/x64
+                </li>
+<li class="listitem">
+                  Metrowerks CodeWarrior 8.0
+                </li>
+<li class="listitem">
+                  Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64,
+                  9.0 (2008) x86/x64, 10.0 (2010) x86/x64
+                </li>
+<li class="listitem">
+                  MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
+                </li>
+</ul></div>
+          </li>
+<li class="listitem">
+            Linux (GCC 4.4.3 x86/x64)
+          </li>
+<li class="listitem">
+            FreeBSD (GCC 4.2.1 x86/x64)
+          </li>
+<li class="listitem">
+            Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC)
+          </li>
+<li class="listitem">
+            Microsoft Xbox 360
+          </li>
+<li class="listitem">
+            Nintendo Wii (Metrowerks CodeWarrior 4.1)
+          </li>
+<li class="listitem">
+            Sony Playstation Portable (GCC 3.4.2)
+          </li>
+<li class="listitem">
+            Sony Playstation 3 (GCC 4.1.1, SNC 310.1)
+          </li>
+</ul></div>
+</div>
+<div class="footnotes">
+<br><hr width="100" align="left">
+<div class="footnote"><p><sup>[<a name="ftn.id1323403" href="#id1323403" class="para">1</a>] </sup>
+            All trademarks used are properties of their respective owners.
+          </p></div>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+        Distributed under the MIT License
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<b>Installation</b> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <a href="saving.html">Saving</a> |
+		<a href="xpath.html">XPath</a> |
+		<a href="apiref.html">API Reference</a> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="../manual.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="dom.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+</body>
+</html>

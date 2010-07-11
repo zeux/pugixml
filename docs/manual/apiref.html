@@ -1,0 +1,1151 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>API Reference</title>
+<link rel="stylesheet" href="../pugixml.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="../manual.html" title="pugixml 0.9">
+<link rel="up" href="../manual.html" title="pugixml 0.9">
+<link rel="prev" href="changes.html" title="Changelog">
+<link rel="next" href="toc.html" title="Table of Contents">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<a href="install.html">Installation</a> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <a href="saving.html">Saving</a> |
+		<a href="xpath.html">XPath</a> |
+		<b>API Reference</b> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="changes.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="toc.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+<hr>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="manual.apiref"></a><a class="link" href="apiref.html" title="API Reference"> API Reference</a>
+</h2></div></div></div>
+<p>
+      This is the reference for all macros, types, enumerations, classes and functions
+      in pugixml. Each symbol is a link that leads to the relevant section of the
+      manual.
+    </p>
+<p>
+      Macros:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_WCHAR_MODE">PUGIXML_WCHAR_MODE</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_NO_XPATH">PUGIXML_NO_XPATH</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_NO_STL">PUGIXML_NO_STL</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_NO_EXCEPTIONS">PUGIXML_NO_EXCEPTIONS</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_API">PUGIXML_API</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_CLASS">PUGIXML_CLASS</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_FUNCTION">PUGIXML_FUNCTION</a>
+        </li>
+</ul></div>
+<p>
+      Types:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">typedef</span> </code><span class="emphasis"><em>configuration-defined
+          type</em></span><code class="computeroutput"> </code><a class="link" href="dom.html#char_t">char_t</a><code class="computeroutput"><span class="special">;</span></code>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">typedef</span> </code><span class="emphasis"><em>configuration-defined
+          type</em></span><code class="computeroutput"> </code><a class="link" href="dom.html#string_t">string_t</a><code class="computeroutput"><span class="special">;</span></code>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">typedef</span> <span class="keyword">void</span><span class="special">*</span> <span class="special">(*</span></code><a class="link" href="dom.html#allocation_function">allocation_function</a><code class="computeroutput"><span class="special">)(</span><span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">);</span></code>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">typedef</span> <span class="keyword">void</span>
+          <span class="special">(*</span></code><a class="link" href="dom.html#deallocation_function">deallocation_function</a><code class="computeroutput"><span class="special">)(</span><span class="keyword">void</span><span class="special">*</span>
+          <span class="identifier">ptr</span><span class="special">);</span></code>
+        </li>
+</ul></div>
+<p>
+      Enumerations:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">enum</span> </code><a class="link" href="dom.html#xml_node_type">xml_node_type</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="dom.html#node_null">node_null</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="dom.html#node_document">node_document</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="dom.html#node_element">node_element</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="dom.html#node_pcdata">node_pcdata</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="dom.html#node_cdata">node_cdata</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="dom.html#node_comment">node_comment</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="dom.html#node_pi">node_pi</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="dom.html#node_declaration">node_declaration</a> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">enum</span> </code><a class="link" href="loading.html#xml_parse_status">xml_parse_status</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="loading.html#status_ok">status_ok</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_file_not_found">status_file_not_found</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_io_error">status_io_error</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_out_of_memory">status_out_of_memory</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_internal_error">status_internal_error</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_unrecognized_tag">status_unrecognized_tag</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_pi">status_bad_pi</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_comment">status_bad_comment</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_cdata">status_bad_cdata</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_doctype">status_bad_doctype</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_pcdata">status_bad_pcdata</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_start_element">status_bad_start_element</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_attribute">status_bad_attribute</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_bad_end_element">status_bad_end_element</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#status_end_element_mismatch">status_end_element_mismatch</a>
+                <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">enum</span> </code><a class="link" href="loading.html#xml_encoding">xml_encoding</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_auto">encoding_auto</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_utf8">encoding_utf8</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_utf16_le">encoding_utf16_le</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_utf16_be">encoding_utf16_be</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_utf16">encoding_utf16</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_utf32_le">encoding_utf32_le</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_utf32_be">encoding_utf32_be</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_utf32">encoding_utf32</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_wchar">encoding_wchar</a> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">enum</span> </code><a class="link" href="xpath.html#xpath_value_type">xpath_value_type</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_type_none">xpath_type_none</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_type_node_set">xpath_type_node_set</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_type_number">xpath_type_number</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_type_string">xpath_type_string</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_type_boolean">xpath_type_boolean</a>
+              </li>
+</ul></div>
+        </li>
+</ul></div>
+<p>
+      Constants:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          Formatting options bit flags:
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="saving.html#format_default">format_default</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="saving.html#format_indent">format_indent</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="saving.html#format_no_declaration">format_no_declaration</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="saving.html#format_raw">format_raw</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="saving.html#format_write_bom">format_write_bom</a> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          Parsing options bit flags:
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="loading.html#parse_cdata">parse_cdata</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_comments">parse_comments</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_declaration">parse_declaration</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_default">parse_default</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_eol">parse_eol</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_escapes">parse_escapes</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_minimal">parse_minimal</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_pi">parse_pi</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_ws_pcdata">parse_ws_pcdata</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_wconv_attribute">parse_wconv_attribute</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_wnorm_attribute">parse_wnorm_attribute</a>
+              </li>
+</ul></div>
+        </li>
+</ul></div>
+<p>
+      Classes:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="dom.html#xml_attribute">xml_attribute</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="dom.html#xml_attribute::ctor">xml_attribute</a><code class="computeroutput"><span class="special">();</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_attribute::empty">empty</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">operator</span> </code><a class="link" href="dom.html#xml_attribute::unspecified_bool_type">unspecified_bool_type</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_attribute::comparison">operator==</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_attribute::comparison">operator!=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_attribute::comparison">operator&lt;</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_attribute::comparison">operator&gt;</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_attribute::comparison">operator&lt;=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_attribute::comparison">operator&gt;=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="access.html#xml_attribute::next_attribute">next_attribute</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="access.html#xml_attribute::previous_attribute">previous_attribute</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_attribute::name">name</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_attribute::value">value</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">int</span> </code><a class="link" href="access.html#xml_attribute::as_int">as_int</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">unsigned</span> <span class="keyword">int</span>
+                </code><a class="link" href="access.html#xml_attribute::as_uint">as_uint</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">double</span> </code><a class="link" href="access.html#xml_attribute::as_double">as_double</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">float</span> </code><a class="link" href="access.html#xml_attribute::as_float">as_float</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="access.html#xml_attribute::as_bool">as_bool</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_attribute::set_name">set_name</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_attribute::set_value">set_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_attribute::set_value">set_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_attribute::set_value">set_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_attribute::set_value">set_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">double</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_attribute::set_value">set_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_attribute::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_attribute::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_attribute::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_attribute::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">double</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_attribute::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="dom.html#xml_node">xml_node</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="dom.html#xml_node::ctor">xml_node</a><code class="computeroutput"><span class="special">();</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_node::empty">empty</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">operator</span> </code><a class="link" href="dom.html#xml_node::unspecified_bool_type">unspecified_bool_type</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_node::comparison">operator==</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_node::comparison">operator!=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_node::comparison">operator&lt;</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_node::comparison">operator&gt;</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_node::comparison">operator&lt;=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="dom.html#xml_node::comparison">operator&gt;=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">r</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node_type</span> </code><a class="link" href="dom.html#xml_node::type">type</a><code class="computeroutput"><span class="special">()</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_node::name">name</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_node::value">value</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::parent">parent</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::first_child">first_child</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::last_child">last_child</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::next_sibling">next_sibling</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::previous_sibling">previous_sibling</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="access.html#xml_node::first_attribute">first_attribute</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="access.html#xml_node::last_attribute">last_attribute</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::child">child</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="access.html#xml_node::attribute">attribute</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::next_sibling_name">next_sibling</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::previous_sibling_name">previous_sibling</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::find_child_by_attribute">find_child_by_attribute</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">attr_name</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">attr_value</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::find_child_by_attribute">find_child_by_attribute</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">attr_name</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">attr_value</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_node::child_value">child_value</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_node::child_value">child_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">typedef</span> <span class="identifier">xml_node_iterator</span>
+                </code><a class="link" href="access.html#xml_node_iterator">iterator</a><code class="computeroutput"><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">iterator</span> </code><a class="link" href="access.html#xml_node::begin">begin</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">iterator</span> </code><a class="link" href="access.html#xml_node::end">end</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">typedef</span> <span class="identifier">xml_attribute_iterator</span>
+                </code><a class="link" href="access.html#xml_attribute_iterator">attribute_iterator</a><code class="computeroutput"><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">attribute_iterator</span> </code><a class="link" href="access.html#xml_node::attributes_begin">attributes_begin</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">attribute_iterator</span> </code><a class="link" href="access.html#xml_node::attributes_end">attributes_end</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="access.html#xml_node::traverse">traverse</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_tree_walker</span><span class="special">&amp;</span> <span class="identifier">walker</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">Predicate</span><span class="special">&gt;</span> <span class="identifier">xml_attribute</span>
+                </code><a class="link" href="access.html#xml_node::find_attribute">find_attribute</a><code class="computeroutput"><span class="special">(</span><span class="identifier">Predicate</span>
+                <span class="identifier">pred</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">Predicate</span><span class="special">&gt;</span> <span class="identifier">xml_node</span>
+                </code><a class="link" href="access.html#xml_node::find_child">find_child</a><code class="computeroutput"><span class="special">(</span><span class="identifier">Predicate</span>
+                <span class="identifier">pred</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">Predicate</span><span class="special">&gt;</span> <span class="identifier">xml_node</span>
+                </code><a class="link" href="access.html#xml_node::find_node">find_node</a><code class="computeroutput"><span class="special">(</span><span class="identifier">Predicate</span>
+                <span class="identifier">pred</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">string_t</span> </code><a class="link" href="access.html#xml_node::path">path</a><code class="computeroutput"><span class="special">(</span><span class="identifier">char_t</span>
+                <span class="identifier">delimiter</span> <span class="special">=</span>
+                <span class="char">'/'</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::first_element_by_path">xml_node::first_element_by_path</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">path</span><span class="special">,</span>
+                <span class="identifier">char_t</span> <span class="identifier">delimiter</span>
+                <span class="special">=</span> <span class="char">'/'</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::root">root</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">ptrdiff_t</span> </code><a class="link" href="access.html#xml_node::offset_debug">offset_debug</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_node::set_name">set_name</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_node::set_value">set_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="modify.html#xml_node::append_attribute">append_attribute</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="modify.html#xml_node::insert_attribute_after">insert_attribute_after</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="modify.html#xml_node::insert_attribute_before">insert_attribute_before</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="modify.html#xml_node::append_child">append_child</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_node_type</span>
+                <span class="identifier">type</span> <span class="special">=</span>
+                <span class="identifier">node_element</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="modify.html#xml_node::insert_child_after">insert_child_after</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_node_type</span>
+                <span class="identifier">type</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="modify.html#xml_node::insert_child_before">insert_child_before</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_node_type</span>
+                <span class="identifier">type</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="modify.html#xml_node::append_copy">append_copy</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="modify.html#xml_node::insert_copy_after">insert_copy_after</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">proto</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="modify.html#xml_node::insert_copy_before">insert_copy_before</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">proto</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="modify.html#xml_node::append_copy">append_copy</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">proto</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="modify.html#xml_node::insert_copy_after">insert_copy_after</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">proto</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="modify.html#xml_node::insert_copy_before">insert_copy_before</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">proto</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_node::remove_attribute">remove_attribute</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span>
+                <span class="identifier">a</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_node::remove_attribute">remove_attribute</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_node::remove_child">remove_child</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">n</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_node::remove_child">remove_child</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">void</span> </code><a class="link" href="saving.html#xml_node::print">print</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_writer</span><span class="special">&amp;</span> <span class="identifier">writer</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">indent</span> <span class="special">=</span>
+                <span class="string">"\t"</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">flags</span> <span class="special">=</span>
+                <span class="identifier">format_default</span><span class="special">,</span>
+                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
+                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">,</span> <span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">depth</span>
+                <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">void</span> </code><a class="link" href="saving.html#xml_node::print_stream">print</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span><span class="special">&amp;</span> <span class="identifier">os</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">indent</span> <span class="special">=</span>
+                <span class="string">"\t"</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">flags</span> <span class="special">=</span>
+                <span class="identifier">format_default</span><span class="special">,</span>
+                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
+                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">,</span> <span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">depth</span>
+                <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">void</span> </code><a class="link" href="saving.html#xml_node::print_stream">print</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wostream</span><span class="special">&amp;</span> <span class="identifier">os</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">indent</span> <span class="special">=</span>
+                <span class="string">"\t"</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">flags</span> <span class="special">=</span>
+                <span class="identifier">format_default</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">depth</span> <span class="special">=</span>
+                <span class="number">0</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xpath_node</span> </code><a class="link" href="xpath.html#xml_node::select_single_node">select_single_node</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">query</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xpath_node</span> </code><a class="link" href="xpath.html#xml_node::select_single_node_precomp">select_single_node</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_query</span><span class="special">&amp;</span>
+                <span class="identifier">query</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xpath_node_set</span> </code><a class="link" href="xpath.html#xml_node::select_nodes">select_nodes</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">query</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xpath_node_set</span> </code><a class="link" href="xpath.html#xml_node::select_nodes_precomp">select_nodes</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_query</span><span class="special">&amp;</span>
+                <span class="identifier">query</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="dom.html#xml_document">xml_document</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="dom.html#xml_document::ctor">xml_document</a><code class="computeroutput"><span class="special">();</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="special">~</span></code><a class="link" href="dom.html#xml_document::dtor">xml_document</a><code class="computeroutput"><span class="special">();</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_stream">load</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">istream</span><span class="special">&amp;</span>
+                <span class="identifier">stream</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">options</span> <span class="special">=</span>
+                <span class="identifier">parse_default</span><span class="special">,</span>
+                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
+                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_stream">load</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wistream</span><span class="special">&amp;</span>
+                <span class="identifier">stream</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">options</span> <span class="special">=</span>
+                <span class="identifier">parse_default</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_string">load</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">contents</span><span class="special">,</span> <span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">options</span>
+                <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_file">load_file</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">options</span>
+                <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span>
+                <span class="identifier">encoding</span> <span class="special">=</span>
+                <span class="identifier">encoding_auto</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_buffer">load_buffer</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="keyword">void</span><span class="special">*</span> <span class="identifier">contents</span><span class="special">,</span>
+                <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">,</span> <span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">options</span>
+                <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span>
+                <span class="identifier">encoding</span> <span class="special">=</span>
+                <span class="identifier">encoding_auto</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_buffer_inplace">load_buffer_inplace</a><code class="computeroutput"><span class="special">(</span><span class="keyword">void</span><span class="special">*</span> <span class="identifier">contents</span><span class="special">,</span> <span class="identifier">size_t</span>
+                <span class="identifier">size</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">options</span> <span class="special">=</span>
+                <span class="identifier">parse_default</span><span class="special">,</span>
+                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
+                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_buffer_inplace_own">load_buffer_inplace_own</a><code class="computeroutput"><span class="special">(</span><span class="keyword">void</span><span class="special">*</span> <span class="identifier">contents</span><span class="special">,</span> <span class="identifier">size_t</span>
+                <span class="identifier">size</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">options</span> <span class="special">=</span>
+                <span class="identifier">parse_default</span><span class="special">,</span>
+                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
+                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="saving.html#xml_document::save_file">save_file</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span>
+                <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span>
+                <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">flags</span>
+                <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span>
+                <span class="identifier">encoding</span> <span class="special">=</span>
+                <span class="identifier">encoding_auto</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">void</span> </code><a class="link" href="saving.html#xml_document::save_stream">save</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">indent</span> <span class="special">=</span>
+                <span class="string">"\t"</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">flags</span> <span class="special">=</span>
+                <span class="identifier">format_default</span><span class="special">,</span>
+                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
+                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">void</span> </code><a class="link" href="saving.html#xml_document::save_stream">save</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wostream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">indent</span> <span class="special">=</span>
+                <span class="string">"\t"</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">flags</span> <span class="special">=</span>
+                <span class="identifier">format_default</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">void</span> </code><a class="link" href="saving.html#xml_document::save">save</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_writer</span><span class="special">&amp;</span> <span class="identifier">writer</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">indent</span> <span class="special">=</span>
+                <span class="string">"\t"</span><span class="special">,</span>
+                <span class="keyword">unsigned</span> <span class="keyword">int</span>
+                <span class="identifier">flags</span> <span class="special">=</span>
+                <span class="identifier">format_default</span><span class="special">,</span>
+                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
+                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">struct</span> </code><a class="link" href="loading.html#xml_parse_result">xml_parse_result</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_parse_status</span> </code><a class="link" href="loading.html#xml_parse_result::status">status</a><code class="computeroutput"><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">ptrdiff_t</span> </code><a class="link" href="loading.html#xml_parse_result::offset">offset</a><code class="computeroutput"><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_encoding</span> </code><a class="link" href="loading.html#xml_parse_result::encoding">encoding</a><code class="computeroutput"><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">operator</span> </code><a class="link" href="loading.html#xml_parse_result::bool">bool</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> </code><a class="link" href="loading.html#xml_parse_result::description">description</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="access.html#xml_node_iterator">xml_node_iterator</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="access.html#xml_attribute_iterator">xml_attribute_iterator</a>
+          <br><br>
+
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="access.html#xml_tree_walker">xml_tree_walker</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">virtual</span> <span class="keyword">bool</span>
+                </code><a class="link" href="access.html#xml_tree_walker::begin">begin</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">virtual</span> <span class="keyword">bool</span>
+                </code><a class="link" href="access.html#xml_tree_walker::for_each">for_each</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">)</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">virtual</span> <span class="keyword">bool</span>
+                </code><a class="link" href="access.html#xml_tree_walker::end">end</a><code class="computeroutput"><span class="special">(</span><span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">int</span> </code><a class="link" href="access.html#xml_tree_walker::depth">depth</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="saving.html#xml_writer">xml_writer</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+                <code class="computeroutput"><span class="keyword">virtual</span> <span class="keyword">void</span>
+                </code><a class="link" href="saving.html#xml_writer::write">write</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="keyword">void</span><span class="special">*</span> <span class="identifier">data</span><span class="special">,</span>
+                <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">)</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span></code>
+                <br><br>
+
+              </li></ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="saving.html#xml_writer_file">xml_writer_file</a><code class="computeroutput"><span class="special">:</span> <span class="keyword">public</span> <span class="identifier">xml_writer</span></code>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+                <a class="link" href="saving.html#xml_writer_file">xml_writer_file</a><code class="computeroutput"><span class="special">(</span><span class="keyword">void</span><span class="special">*</span> <span class="identifier">file</span><span class="special">);</span></code> <br><br>
+
+              </li></ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="saving.html#xml_writer_stream">xml_writer_stream</a><code class="computeroutput"><span class="special">:</span> <span class="keyword">public</span> <span class="identifier">xml_writer</span></code>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="saving.html#xml_writer_stream">xml_writer_stream</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <a class="link" href="saving.html#xml_writer_stream">xml_writer_stream</a><code class="computeroutput"><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wostream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">);</span></code> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="xpath.html#xpath_query">xpath_query</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">explicit</span> </code><a class="link" href="xpath.html#xpath_query::ctor">xpath_query::ctor</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">query</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="xpath.html#xpath_query::evaluate_boolean">evaluate_boolean</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">n</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">double</span> </code><a class="link" href="xpath.html#xpath_query::evaluate_number">evaluate_number</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">n</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">string_t</span> </code><a class="link" href="xpath.html#xpath_query::evaluate_string">evaluate_string</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">n</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xpath_node_set</span> </code><a class="link" href="xpath.html#xpath_query::evaluate_node_set">evaluate_node_set</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">n</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xpath_value_type</span> </code><a class="link" href="xpath.html#xpath_query::return_type">return_type</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="xpath.html#xpath_exception">xpath_exception</a><code class="computeroutput"><span class="special">:</span> <span class="keyword">public</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
+                <code class="computeroutput"><span class="keyword">virtual</span> <span class="keyword">const</span>
+                <span class="keyword">char</span><span class="special">*</span>
+                </code><a class="link" href="xpath.html#xpath_exception::what">what</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span>
+                <span class="keyword">throw</span><span class="special">();</span></code>
+                <br><br>
+
+              </li></ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="xpath.html#xpath_node">xpath_node</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_node::ctor">xpath_node</a><code class="computeroutput"><span class="special">();</span></code>
+              </li>
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_node::ctor">xpath_node</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <a class="link" href="xpath.html#xpath_node::ctor">xpath_node</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attribute</span><span class="special">,</span> <span class="keyword">const</span>
+                <span class="identifier">xml_node</span><span class="special">&amp;</span>
+                <span class="identifier">parent</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="xpath.html#xpath_node::node">node</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_attribute</span> </code><a class="link" href="xpath.html#xpath_node::attribute">attribute</a><code class="computeroutput"><span class="special">()</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="xpath.html#xpath_node::parent">parent</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">operator</span> </code><a class="link" href="xpath.html#xpath_node::unspecified_bool_type">unspecified_bool_type</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="xpath.html#xpath_node::comparison">operator==</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span>
+                <span class="identifier">n</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="xpath.html#xpath_node::comparison">operator!=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span>
+                <span class="identifier">n</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="xpath.html#xpath_node_set">xpath_node_set</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">typedef</span> <span class="keyword">const</span>
+                <span class="identifier">xpath_node</span><span class="special">*</span>
+                </code><a class="link" href="xpath.html#xpath_node_set::const_iterator">const_iterator</a><code class="computeroutput"><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">const_iterator</span> </code><a class="link" href="xpath.html#xpath_node_set::begin">begin</a><code class="computeroutput"><span class="special">()</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">const_iterator</span> </code><a class="link" href="xpath.html#xpath_node_set::end">end</a><code class="computeroutput"><span class="special">()</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> </code><a class="link" href="xpath.html#xpath_node_set::index">operator[]</a><code class="computeroutput"><span class="special">(</span><span class="identifier">size_t</span>
+                <span class="identifier">index</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">size_t</span> </code><a class="link" href="xpath.html#xpath_node_set::size">size</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="xpath.html#xpath_node_set::empty">empty</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xpath_node</span> </code><a class="link" href="xpath.html#xpath_node_set::first">first</a><code class="computeroutput"><span class="special">()</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">enum</span> <span class="identifier">type_t</span>
+                <span class="special">{</span></code><a class="link" href="xpath.html#xpath_node_set::type_unsorted">type_unsorted</a>,
+                <a class="link" href="xpath.html#xpath_node_set::type_sorted">type_sorted</a>,
+                <a class="link" href="xpath.html#xpath_node_set::type_sorted_reverse">type_sorted_reverse</a><code class="computeroutput"><span class="special">};</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">type_t</span> </code><a class="link" href="xpath.html#xpath_node_set::type">type</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">void</span> </code><a class="link" href="xpath.html#xpath_node_set::sort">sort</a><code class="computeroutput"><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">reverse</span> <span class="special">=</span>
+                <span class="keyword">false</span><span class="special">);</span></code>
+              </li>
+</ul></div>
+        </li>
+</ul></div>
+<p>
+      Functions:
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <a class="link" href="dom.html#as_utf8">as_utf8</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#as_wide">as_wide</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#get_memory_allocation_function">get_memory_allocation_function</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#get_memory_deallocation_function">get_memory_deallocation_function</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#set_memory_management_functions">set_memory_management_functions</a>
+        </li>
+</ul></div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+        Distributed under the MIT License
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<table width="100%"><tr>
+<td>pugixml 0.9 manual |
+		<a href="../manual.html">Overview</a> |
+		<a href="install.html">Installation</a> |
+		Document:
+		<a href="dom.html">Object model</a> &middot; <a href="loading.html">Loading</a> &middot; <a href="access.html">Accessing</a> &middot; <a href="modify.html">Modifying</a> &middot; <a href="saving.html">Saving</a> |
+		<a href="xpath.html">XPath</a> |
+		<b>API Reference</b> |
+		<a href="toc.html">Table of Contents</a>
+</td>
+<td width="*" align="right"><div class="spirit-nav">
+<a accesskey="p" href="changes.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../manual.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../manual.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="toc.html"><img src="../images/next.png" alt="Next"></a>
+</div></td>
+</tr></table>
+</body>
+</html>
