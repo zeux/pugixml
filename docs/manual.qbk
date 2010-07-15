@@ -12,6 +12,7 @@
 [template file[name]'''<filename>'''[name]'''</filename>''']
 [template sref[name]'''<xref linkend="'''[name]'''" xrefstyle="select:title" />''']
 [template anchor[name]'''<anchor id="'''[name]'''" />'''[^[name]]]
+[template ftnt[id text]'''<footnote id="'''[id]'''"><para>'''[text]'''</para></footnote>''']
 
 [section:overview Overview]
 
@@ -138,7 +139,7 @@ The complete pugixml source consists of four files - two source files, [file pug
 
 [section:embed Building pugixml as a part of another static library/executable]
  
-The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[footnote All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects.
+The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[ftnt trademarks All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects.
 
 If you're using Microsoft Visual Studio and the project has precompiled headers turned on, you'll see the following error messages:
 

@@ -7,11 +7,9 @@
     [license Distributed under the MIT License]
 ]
 
-[template file[name] '''<filename>'''[name]'''</filename>''']
-[template sbr[] '''<sbr/>''']
-[template lbr[] '''<sbr/><sbr/>'''] [/ for empty lines in lists]
-[template sref[name] '''<xref linkend="quickstart.main.'''[name]'''" xrefstyle="select:title" />''']
-[template anchor[name] '''<anchor id="'''[name]'''" />'''[^[name]]]
+[template file[name]'''<filename>'''[name]'''</filename>''']
+[template sref[name]'''<xref linkend="quickstart.main.'''[name]'''" xrefstyle="select:title" />''']
+[template ftnt[id text]'''<footnote id="'''[id]'''"><para>'''[text]'''</para></footnote>''']
 
 [section:main pugixml 0.9 quick start guide]
 
@@ -40,7 +38,7 @@ The distribution contains library source, documentation (the guide you're readin
 
 The complete pugixml source consists of four files - two source files, [file pugixml.cpp] and [file pugixpath.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions. The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
  
-The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[footnote All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects. There are other building methods available, including building pugixml as a standalone static/shared library; read the manual for further information.
+The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[ftnt trademarks All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects. There are other building methods available, including building pugixml as a standalone static/shared library; read the manual for further information.
 
 [endsect] [/install]
 
