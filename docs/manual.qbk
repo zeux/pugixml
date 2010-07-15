@@ -7,11 +7,11 @@
     [license Distributed under the MIT License]
 ]
 
-[template file[name] '''<filename>'''[name]'''</filename>''']
-[template sbr[] '''<sbr/>''']
-[template lbr[] '''<sbr/><sbr/>'''] [/ for empty lines in lists]
-[template sref[name] '''<xref linkend="'''[name]'''" xrefstyle="select:title" />''']
-[template anchor[name] '''<anchor id="'''[name]'''" />'''[^[name]]]
+[template sbr[]'''<sbr/>''']
+[template lbr[]'''<sbr/><sbr/>'''] [/ for empty lines in lists]
+[template file[name]'''<filename>'''[name]'''</filename>''']
+[template sref[name]'''<xref linkend="'''[name]'''" xrefstyle="select:title" />''']
+[template anchor[name]'''<anchor id="'''[name]'''" />'''[^[name]]]
 
 [section:overview Overview]
 
@@ -1937,7 +1937,7 @@ Classes:
     [lbr]
 
 * `class `[link xpath_query]
-    * `explicit `[link xpath_query::ctor]`(const char_t* query);`
+    * `explicit `[link xpath_query::ctor xpath_query]`(const char_t* query);`
     [lbr]
 
     * `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xml_node& n) const;`
