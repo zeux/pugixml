@@ -32,6 +32,7 @@
 #ifdef _MSC_VER
 #	pragma warning(disable: 4127) // conditional expression is constant
 #	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
+#	pragma warning(disable: 4324) // structure was padded due to __declspec(align())
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
@@ -1804,8 +1805,8 @@ namespace
 	struct xml_parser
 	{
 		xml_allocator alloc;
-		jmp_buf error_handler;
 		char_t* error_offset;
+		jmp_buf error_handler;
 		
 		// Parser utilities.
 		#define SKIPWS()			{ while (IS_CHARTYPE(*s, ct_space)) ++s; }
