@@ -110,6 +110,15 @@ static bool run_test(test_runner* test)
 #endif
 }
 
+#if defined(__CELLOS_LV2__) && defined(PUGIXML_NO_EXCEPTIONS) && !defined(__SNC__)
+#include <stdlib.h>
+
+void std::exception::_Raise() const
+{
+	abort();
+}
+#endif
+
 int main()
 {
 #ifdef __BORLANDC__

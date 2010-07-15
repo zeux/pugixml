@@ -9,7 +9,12 @@
 #		pragma cpp_extensions on // enable some extensions to include windows.h
 #	endif
 
-#	include <windows.h>
+#	ifdef _XBOX_VER
+#		define NOD3D
+#		include <xtl.h>
+#	else
+#		include <windows.h>
+#	endif
 
 namespace
 {

@@ -19,6 +19,10 @@
 #	include <io.h> // for unlink in C++0x mode
 #endif
 
+#if defined(__CELLOS_LV2__)
+#	include <unistd.h> // for unlink
+#endif
+
 TEST(document_create_empty)
 {
 	pugi::xml_document doc;
@@ -253,6 +257,8 @@ TEST_XML(document_save_file, "<node/>")
 
 	int fd = mkstemp(path);
 	CHECK(fd != -1);
+#elif defined(__CELLOS_LV2__)
+	const char* path = ""; // no temporary file support
 #else
 	const char* path = tmpnam(0);
 #endif

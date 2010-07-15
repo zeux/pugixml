@@ -411,6 +411,130 @@ else if ( $(toolset:I=^suncc) )
 		sunCC $(>) -o $(<) $(LDFLAGS) 
 	}
 }
+else if ( $(toolset:I=^xbox360) )
+{
+	rule GetCFlags CONFIG : DEFINES
+	{
+		local RESULT = /D$(DEFINES) ;
+
+		if ( $(CONFIG) = "debug" )
+		{
+			RESULT += /D_DEBUG /MTd ;
+		}
+		else
+		{
+			RESULT += /DNDEBUG /Ox /MT ;
+		}
+
+		RESULT += /W4 ;
+
+		if ( ! ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) ) )
+		{
+			RESULT += /EHsc ;
+		}
+		else
+		{
+			RESULT += /D_HAS_EXCEPTIONS=0 ;
+		}
+
+		return $(RESULT) ;
+	}
+
+	actions ObjectAction
+	{
+		"%XEDK%\bin\win32\cl.exe" /WX /I"%XEDK%\include\xbox" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+	}
+	
+	actions LibraryAction
+	{
+		"%XEDK%\bin\win32\lib.exe" /NOLOGO /OUT:$(<) $(>)
+	}
+	
+	actions LinkAction
+	{
+		"%XEDK%\bin\win32\link.exe" /NOLOGO /OUT:$(<) /PDB:$(<:S=.pdb) $(>) /LIBPATH:"%XEDK%\lib\xbox" $(LDFLAGS)
+	}
+}
+else if ( $(toolset:I=^ps3_gcc) )
+{
+	rule GetCFlags CONFIG : DEFINES
+	{
+		local RESULT = -D$(DEFINES) ;
+
+		RESULT += -W -Wall -Wextra -Werror ;
+
+		if ( $(CONFIG) = "debug" )
+		{
+			RESULT += -D_DEBUG ;
+		}
+		else
+		{
+			RESULT += -DNDEBUG -O3 ;
+		}
+
+		if ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) )
+		{
+			RESULT += -fno-exceptions ;
+		}
+
+		return $(RESULT) ;
+	}
+
+	actions ObjectAction
+	{
+		"%SCE_PS3_ROOT%\host-win32\ppu\bin\ppu-lv2-gcc" -c $(>) -o $(<) $(CCFLAGS)
+	}
+	
+	actions LibraryAction
+	{
+		"%SCE_PS3_ROOT%\host-win32\ppu\bin\ppu-lv2-ar" rcs $(<) $(>)
+	}
+	
+	actions LinkAction
+	{
+		"%SCE_PS3_ROOT%\host-win32\ppu\bin\ppu-lv2-g++" $(>) -o $(<) $(LDFLAGS) 
+	}
+}
+else if ( $(toolset:I=^ps3_snc) )
+{
+	rule GetCFlags CONFIG : DEFINES
+	{
+		local RESULT = -D$(DEFINES) ;
+
+		RESULT += -Werror -Xuninitwarn=0 ;
+
+		if ( $(CONFIG) = "debug" )
+		{
+			RESULT += -D_DEBUG ;
+		}
+		else
+		{
+			RESULT += -DNDEBUG -O3 ;
+		}
+
+		if ! ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) )
+		{
+			RESULT += -Xc+=exceptions ;
+		}
+
+		return $(RESULT) ;
+	}
+
+	actions ObjectAction
+	{
+		"%SCE_PS3_ROOT%\host-win32\sn\bin\ps3ppusnc" -c $(>) -o $(<) $(CCFLAGS)
+	}
+	
+	actions LibraryAction
+	{
+		"%SCE_PS3_ROOT%\host-win32\sn\bin\ps3snarl" rcs $(<) $(>)
+	}
+	
+	actions LinkAction
+	{
+		"%SCE_PS3_ROOT%\host-win32\sn\bin\ps3ppuld" $(>) -o $(<) $(LDFLAGS) 
+	}
+}
 else
 {
 	exit "Unknown toolset $(toolset)!" ;
@@ -459,15 +583,28 @@ if ( $(UNIX) )
 }
 else
 {
-	actions screenoutput RunAction
+	if ( $(toolset:I=^(xbox360|ps3)) )
 	{
-		$(>:\\)
-	}
+		actions RunAction
+		{
+		}
 
-	actions RunSampleAction
+		actions RunSampleAction
+		{
+		}
+	}
+	else
 	{
-		cd docs\samples
-		..\..\$(>:\\)
+		actions screenoutput RunAction
+		{
+			$(>:\\)
+		}
+
+		actions RunSampleAction
+		{
+			cd docs\samples
+			..\..\$(>:\\)
+		}
 	}
 
 	actions quietly ignore MakeDirAction

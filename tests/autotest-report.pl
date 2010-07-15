@@ -27,12 +27,16 @@ sub prettytoolset
 	return "Microsoft Visual C++ $1.0" . prettysuffix($2) if ($toolset =~ /^msvc(\d+)(.*)$/);
 	return "GNU C++ Compiler $1" . prettysuffix($2) if ($toolset =~ /^gcc([\d.]*)(.*)$/);
 
+	return "Microsoft Xbox360 Compiler" if ($toolset =~ /^xbox360/);
+	return "Sony PlayStation3 GCC" if ($toolset =~ /^ps3_gcc/);
+	return "Sony PlayStation3 SNC" if ($toolset =~ /^ps3_snc/);
+
 	$toolset;
 }
 
 sub prettyplatform
 {
-	my $platform = shift;
+	my ($platform, $toolset) = @_;
 
 	return "solaris" if ($platform =~ /solaris/);
 
@@ -43,6 +47,9 @@ sub prettyplatform
 
 	return "fbsd64" if ($platform =~ /64-freebsd/);
 	return "fbsd32" if ($platform =~ /86-freebsd/);
+
+	return "x360" if ($toolset =~ /^xbox360/);
+	return "ps3" if ($toolset =~ /^ps3/);
 
 	return "win64" if ($platform =~ /MSWin32-x64/);
 	return "win32" if ($platform =~ /MSWin32/);
@@ -70,7 +77,7 @@ while (<>)
 	{
 		my ($platform, $toolset, $configuration, $defineset, $info) = ($1, $2, $3, $4, $5);
 
-		my $fulltool = &prettyplatform($platform) . ' ' . &prettytoolset($toolset);
+		my $fulltool = &prettyplatform($platform, $toolset) . ' ' . &prettytoolset($toolset);
 		my $fullconf = "$configuration $defineset";
 
 		if ($info =~ /^prepare/)
