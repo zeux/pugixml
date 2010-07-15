@@ -71,7 +71,7 @@
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
 <li class="listitem">
-            Document node ( <a name="node_document"></a><code class="literal">node_document</code>) - this
+            Document node (<a name="node_document"></a><code class="literal">node_document</code>) - this
             is the root of the tree, which consists of several child nodes. This
             node corresponds to <code class="computeroutput"><span class="identifier">xml_document</span></code>
             class; note that <code class="computeroutput"><span class="identifier">xml_document</span></code>
@@ -83,7 +83,7 @@
 
           </li>
 <li class="listitem">
-            Element/tag node ( <a name="node_element"></a><code class="literal">node_element</code>) - this
+            Element/tag node (<a name="node_element"></a><code class="literal">node_element</code>) - this
             is the most common type of node, which represents XML elements. Element
             nodes have a name, a collection of attributes and a collection of child
             nodes (both of which may be empty). The attribute is a simple name/value
@@ -100,7 +100,7 @@
           and does not have any attributes or child nodes.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-            Plain character data nodes ( <a name="node_pcdata"></a><code class="literal">node_pcdata</code>)
+            Plain character data nodes (<a name="node_pcdata"></a><code class="literal">node_pcdata</code>)
             represent plain text in XML. PCDATA nodes have a value, but do not have
             name or children/attributes. Note that plain character data is not a
             part of the element node but instead has its own node; for example, an
@@ -114,7 +114,7 @@
           has three children, two of which are PCDATA nodes with values <code class="computeroutput"><span class="string">"text1"</span></code> and <code class="computeroutput"><span class="string">"text2"</span></code>.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-            Character data nodes ( <a name="node_cdata"></a><code class="literal">node_cdata</code>) represent
+            Character data nodes (<a name="node_cdata"></a><code class="literal">node_cdata</code>) represent
             text in XML that is quoted in a special way. CDATA nodes do not differ
             from PCDATA nodes except in XML representation - the above text example
             looks like this with CDATA:
@@ -127,7 +127,7 @@
           since it is used to determine the end of node contents.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-            Comment nodes ( <a name="node_comment"></a><code class="literal">node_comment</code>) represent
+            Comment nodes (<a name="node_comment"></a><code class="literal">node_comment</code>) represent
             comments in XML. Comment nodes have a value, but do not have name or
             children/attributes. The example XML representation of comment node is
             as follows:
@@ -142,7 +142,7 @@
           flag.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-            Processing instruction node ( <a name="node_pi"></a><code class="literal">node_pi</code>) represent
+            Processing instruction node (<a name="node_pi"></a><code class="literal">node_pi</code>) represent
             processing instructions (PI) in XML. PI nodes have a name and an optional
             value, but do not have children/attributes. The example XML representation
             of PI node is as follows:
@@ -157,7 +157,7 @@
           <code class="computeroutput"><span class="identifier">parse_pi</span></code> flag.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
-            Declaration node ( <a name="node_declaration"></a><code class="literal">node_declaration</code>)
+            Declaration node (<a name="node_declaration"></a><code class="literal">node_declaration</code>)
             represents document declarations in XML. Declaration nodes have a name
             (<code class="computeroutput"><span class="string">"xml"</span></code>) and an
             optional collection of attributes, but does not have value or children.
