@@ -148,18 +148,12 @@ RELEASE_FILES =
 	readme.txt
 	;
 
-actions ZipAction
+actions ArchiveAction
 {
-	zip -q -9 $(<) $(>)
+	perl tests/archive.pl $(<) $(>)
 }
 
-actions TgzAction
-{
-	tar cf $(<:S=) $(>)
-	gzip -9 $(<:S=)
-}
-
-ZipAction pugixml-$(VERSION).zip : $(RELEASE_FILES) ;
-TgzAction pugixml-$(VERSION).tar.gz : $(RELEASE_FILES) ;
+ArchiveAction pugixml-$(VERSION).zip : $(RELEASE_FILES) ;
+ArchiveAction pugixml-$(VERSION).tar.gz : $(RELEASE_FILES) ;
 Depends release : pugixml-$(VERSION).zip pugixml-$(VERSION).tar.gz : $(RELEASE_FILES) ;
 NotFile release ;
