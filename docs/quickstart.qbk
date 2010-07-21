@@ -34,7 +34,7 @@ pugixml is distributed in source form. You can download a source distribution vi
 [@http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz]
 ]
 
-The distribution contains library source, documentation (the guide you're reading now and the manual) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.
+The distribution contains library source, documentation (the guide you're reading now and the manual) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
 
 The complete pugixml source consists of four files - two source files, [file pugixml.cpp] and [file pugixpath.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions. The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
  

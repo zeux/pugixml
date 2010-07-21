@@ -103,7 +103,7 @@ You can download the latest source distribution via one of the following links:
 [@http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz]
 ]
 
-The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.
+The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
 
 If you need an older version, you can download it from the [@http://code.google.com/p/pugixml/downloads/list version archive].
 
