@@ -1343,15 +1343,19 @@ namespace pugi
 		{
 			if (!_root) return xml_node();
 
-			for (xml_node node = first_child(); node; node = node.next_sibling())
+			xml_node cur = first_child();
+			
+			while (cur._root && cur._root != _root)
 			{
-				if (pred(node))
-					return node;
-				
-				if (node.first_child())
+				if (pred(cur)) return cur;
+
+				if (cur.first_child()) cur = cur.first_child();
+				else if (cur.next_sibling()) cur = cur.next_sibling();
+				else
 				{
-					xml_node found = node.find_node(pred);
-					if (found) return found;
+					while (!cur.next_sibling() && cur._root != _root) cur = cur.parent();
+
+					if (cur._root != _root) cur = cur.next_sibling();
 				}
 			}
 
