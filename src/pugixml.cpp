@@ -2968,38 +2968,58 @@ namespace
 	}
 
 #ifndef PUGIXML_NO_STL
-	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T, std::char_traits<T> >& stream, unsigned int options, xml_encoding encoding)
+	struct buffer_holder
 	{
-		if (!stream.good()) return make_parse_result(status_io_error);
+		void* data;
+
+		buffer_holder(void* data): data(data)
+		{
+		}
+
+		~buffer_holder()
+		{
+			if (data) global_deallocate(data);
+		}
+
+		void* release()
+		{
+			void* result = data;
+			data = 0;
+			return result;
+		}
+	};
+
+	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding)
+	{
+		if (stream.fail()) return make_parse_result(status_io_error);
 
 		// get length of remaining data in stream
-		std::streamoff pos = stream.tellg();
+		typename std::basic_istream<T>::pos_type pos = stream.tellg();
 		stream.seekg(0, std::ios::end);
 		std::streamoff length = stream.tellg() - pos;
-		stream.seekg(pos, std::ios::beg);
+		stream.seekg(pos);
 
-		if (!stream.good() || pos < 0 || length < 0) return make_parse_result(status_io_error);
+		if (stream.fail() || pos < 0) return make_parse_result(status_io_error);
 
-		// read stream data into memory
+		// guard against huge files
 		size_t read_length = static_cast<size_t>(length);
 
-		T* s = static_cast<T*>(global_allocate((read_length > 0 ? read_length : 1) * sizeof(T)));
-		if (!s) return make_parse_result(status_out_of_memory);
+		if (static_cast<std::streamsize>(read_length) != length || length < 0) return make_parse_result(status_out_of_memory);
 
-		stream.read(s, static_cast<std::streamsize>(read_length));
+		// read stream data into memory (guard against stream exceptions with buffer holder)
+		buffer_holder buffer = global_allocate((read_length > 0 ? read_length : 1) * sizeof(T));
+		if (!buffer.data) return make_parse_result(status_out_of_memory);
 
-		// check for errors
+		stream.read(static_cast<T*>(buffer.data), static_cast<std::streamsize>(read_length));
+
+		// read may set failbit | eofbit in case gcount() is less than read_length (i.e. line ending conversion), so check for other I/O errors
+		if (stream.bad()) return make_parse_result(status_io_error);
+
+		// load data from buffer
 		size_t actual_length = static_cast<size_t>(stream.gcount());
 		assert(actual_length <= read_length);
 
-		if (read_length > 0 && actual_length == 0)
-		{
-			global_deallocate(s);
-			return make_parse_result(status_io_error);
-		}
-
-		// load data from buffer
-		return doc.load_buffer_inplace_own(s, actual_length * sizeof(T), options, encoding);
+		return doc.load_buffer_inplace_own(buffer.release(), actual_length * sizeof(T), options, encoding);
 	}
 #endif
 }
