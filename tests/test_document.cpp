@@ -114,7 +114,9 @@ TEST(document_load_stream_exceptions)
 	try
 	{
 		doc.load(iss);
-		CHECK((bool)!"exception should be thrown");
+
+		volatile bool exception_should_be_thrown = false; // to avoid 'controlling expression is constant' warning
+		CHECK(exception_should_be_thrown);
 	}
 	catch (const std::ios_base::failure&)
 	{
