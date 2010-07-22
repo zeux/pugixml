@@ -3216,8 +3216,13 @@ namespace pugi
 		return (_attr && _attr->value) ? _attr->value : PUGIXML_TEXT("");
 	}
 
-	unsigned int xml_attribute::document_order() const
+	const void* xml_attribute::document_order() const
 	{
+		if (!_attr) return 0;
+
+		if ((_attr->header & xml_memory_page_name_allocated_mask) == 0) return _attr->name;
+		if ((_attr->header & xml_memory_page_value_allocated_mask) == 0) return _attr->value;
+
 		return 0;
 	}
 
@@ -4014,8 +4019,13 @@ namespace pugi
 		return walker.end(arg_end);
 	}
 
-	unsigned int xml_node::document_order() const
+	const void* xml_node::document_order() const
 	{
+		if (!_root) return 0;
+
+		if (_root->name && (_root->header & xml_memory_page_name_allocated_mask) == 0) return _root->name;
+		if (_root->value && (_root->header & xml_memory_page_value_allocated_mask) == 0) return _root->value;
+
 		return 0;
 	}
 

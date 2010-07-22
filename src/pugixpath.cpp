@@ -143,28 +143,22 @@ namespace
 
 				xml_node cur = n.first_child();
 				
-				if (cur)
+				while (cur && cur != n)
 				{
-					do 
+					if (cur.type() == node_pcdata || cur.type() == node_cdata)
+						result += cur.value();
+
+					if (cur.first_child())
+						cur = cur.first_child();
+					else if (cur.next_sibling())
+						cur = cur.next_sibling();
+					else
 					{
-						if (cur.type() == node_pcdata || cur.type() == node_cdata)
-							result += cur.value();
-						
-						if (cur.first_child())
-							cur = cur.first_child();
-						else if (cur.next_sibling())
-							cur = cur.next_sibling();
-						else
-						{
-							// Borland C++ workaround
-							while (!cur.next_sibling() && cur != n && (bool)cur.parent())
-								cur = cur.parent();
-						
-							if (cur != n)
-								cur = cur.next_sibling();
-						}
+						while (!cur.next_sibling() && cur != n)
+							cur = cur.parent();
+
+						if (cur != n) cur = cur.next_sibling();
 					}
-					while (cur && cur != n);
 				}
 				
 				return result;
@@ -227,6 +221,11 @@ namespace
 		bool operator()(const xpath_node& lhs, const xpath_node& rhs) const
 		{
 			xml_node ln = lhs.node(), rn = rhs.node();
+
+			const void* lo = lhs.attribute() ? lhs.attribute().document_order() : ln.document_order();
+			const void* ro = rhs.attribute() ? rhs.attribute().document_order() : rn.document_order();
+
+			if (lo && ro) return lo < ro;
 
 			if (lhs.attribute() && rhs.attribute())
 			{
@@ -1642,27 +1641,21 @@ namespace pugi
 					
 				xml_node cur = n.first_child();
 				
-				if (cur)
+				while (cur && cur != n)
 				{
-					do 
+					step_push(ns, cur);
+					
+					if (cur.first_child())
+						cur = cur.first_child();
+					else if (cur.next_sibling())
+						cur = cur.next_sibling();
+					else
 					{
-						step_push(ns, cur);
-						
-						if (cur.first_child())
-							cur = cur.first_child();
-						else if (cur.next_sibling())
-							cur = cur.next_sibling();
-						else
-						{
-							// Borland C++ workaround
-							while (!cur.next_sibling() && cur != n && (bool)cur.parent())
-								cur = cur.parent();
-						
-							if (cur != n)
-								cur = cur.next_sibling();
-						}
+						while (!cur.next_sibling() && cur != n)
+							cur = cur.parent();
+					
+						if (cur != n) cur = cur.next_sibling();
 					}
-					while (cur && cur != n);
 				}
 				
 				break;

@@ -646,8 +646,7 @@ namespace pugi
 		bool as_bool() const;
 
 		/// \internal Document order or 0 if not set
-		/// \deprecated This function is deprecated
-		PUGIXML_DEPRECATED unsigned int document_order() const;
+		const void* document_order() const;
 
 	public:
 		/**
@@ -1466,8 +1465,7 @@ namespace pugi
 	#endif
 		
 		/// \internal Document order or 0 if not set
-		/// \deprecated This function is deprecated
-		PUGIXML_DEPRECATED unsigned int document_order() const;
+		const void* document_order() const;
 
 		/**
 		 * Print subtree to writer
