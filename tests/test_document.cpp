@@ -102,6 +102,26 @@ TEST(document_load_stream_wide)
 	CHECK(doc.load(iss));
 	CHECK_NODE(doc, STR("<node />"));
 }
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+TEST(document_load_stream_exceptions)
+{
+	pugi::xml_document doc;
+
+	std::ifstream iss("tests/data/multiline.xml");
+	iss.exceptions(std::ios::eofbit);
+
+	try
+	{
+		doc.load(iss);
+		CHECK((bool)!"exception should be thrown");
+	}
+	catch (const std::ios_base::failure&)
+	{
+		CHECK(!doc.first_child());
+	}
+}
+#endif
 #endif
 
 TEST(document_load_string)
