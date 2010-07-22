@@ -192,12 +192,3 @@ TEST_XML(dom_node_wildcard_star, "<node cd='1'/>")
 	CHECK(node.attribute_w(STR("*?*c*")).as_int() == 0);
 	CHECK(node.attribute_w(STR("*?*d*")).as_int() == 1);
 }
-
-// document order
-TEST_XML(document_order_coverage, "<node id='1'/>")
-{
-	doc.precompute_document_order();
-
-	CHECK(doc.child(STR("node")).document_order() == 0);
-	CHECK(doc.child(STR("node")).attribute(STR("id")).document_order() == 0);
-}

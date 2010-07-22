@@ -8,6 +8,14 @@
 
 #include <string>
 
+static void load_document_copy(xml_document& doc, const char_t* text)
+{
+	xml_document source;
+	CHECK(source.load(text));
+
+	doc.append_copy(source.first_child());
+}
+
 TEST(xpath_allocator_many_pages)
 {
 	pugi::string_t query = STR("0");
@@ -41,8 +49,43 @@ TEST_XML(xpath_sort_complex, "<node><child1 attr1='value1' attr2='value2'/><chil
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 8 % 7 % 6 % 5 % 4 % 3 % 2;
 }
 
+TEST(xpath_sort_complex_copy) // copy the document so that document order optimization does not work
+{
+	xml_document doc;
+	load_document_copy(doc, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>");
+
+	// just some random union order, it should not matter probably?
+	xpath_node_set ns = doc.child(STR("node")).select_nodes(STR("child1 | child2 | child1/@* | . | child2/@* | child2/text()"));
+
+	ns.sort(false);
+	xpath_node_set sorted = ns;
+
+	ns.sort(true);
+	xpath_node_set reverse_sorted = ns;
+
+	xpath_node_set_tester(sorted, "sorted order failed") % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 8 % 7 % 6 % 5 % 4 % 3 % 2;
+}
+
 TEST_XML(xpath_sort_children, "<node><child><subchild id='1'/></child><child><subchild id='2'/></child></node>")
 {
+	xpath_node_set ns = doc.child(STR("node")).select_nodes(STR("child/subchild[@id=1] | child/subchild[@id=2]"));
+
+	ns.sort(false);
+	xpath_node_set sorted = ns;
+
+	ns.sort(true);
+	xpath_node_set reverse_sorted = ns;
+
+	xpath_node_set_tester(sorted, "sorted order failed") % 4 % 7;
+	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 7 % 4;
+}
+
+TEST(xpath_sort_children_copy) // copy the document so that document order optimization does not work
+{
+	xml_document doc;
+	load_document_copy(doc, "<node><child><subchild id='1'/></child><child><subchild id='2'/></child></node>");
+
 	xpath_node_set ns = doc.child(STR("node")).select_nodes(STR("child/subchild[@id=1] | child/subchild[@id=2]"));
 
 	ns.sort(false);
