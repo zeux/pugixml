@@ -108,15 +108,17 @@ TEST(document_load_stream_exceptions)
 {
 	pugi::xml_document doc;
 
+	// Windows has newline translation for text-mode files, so reading from this stream reaches eof and sets fail|eof bits.
+	// This test does not cause stream to throw an exception on Linux - I have no idea how to get read() to fail except
+	// newline translation.
 	std::ifstream iss("tests/data/multiline.xml");
-	iss.exceptions(std::ios::eofbit);
+	iss.exceptions(std::ios::eofbit | std::ios::badbit | std::ios::failbit);
 
 	try
 	{
 		doc.load(iss);
 
-		volatile bool exception_should_be_thrown = false; // to avoid 'controlling expression is constant' warning
-		CHECK(exception_should_be_thrown);
+		CHECK(iss.good()); // if the exception was not thrown, stream reading should succeed without errors
 	}
 	catch (const std::ios_base::failure&)
 	{

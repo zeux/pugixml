@@ -52,7 +52,7 @@ TEST_XML(xpath_sort_complex, "<node><child1 attr1='value1' attr2='value2'/><chil
 TEST(xpath_sort_complex_copy) // copy the document so that document order optimization does not work
 {
 	xml_document doc;
-	load_document_copy(doc, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>");
+	load_document_copy(doc, STR("<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>"));
 
 	// just some random union order, it should not matter probably?
 	xpath_node_set ns = doc.child(STR("node")).select_nodes(STR("child1 | child2 | child1/@* | . | child2/@* | child2/text()"));
@@ -84,7 +84,7 @@ TEST_XML(xpath_sort_children, "<node><child><subchild id='1'/></child><child><su
 TEST(xpath_sort_children_copy) // copy the document so that document order optimization does not work
 {
 	xml_document doc;
-	load_document_copy(doc, "<node><child><subchild id='1'/></child><child><subchild id='2'/></child></node>");
+	load_document_copy(doc, STR("<node><child><subchild id='1'/></child><child><subchild id='2'/></child></node>"));
 
 	xpath_node_set ns = doc.child(STR("node")).select_nodes(STR("child/subchild[@id=1] | child/subchild[@id=2]"));
 
