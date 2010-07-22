@@ -2762,6 +2762,28 @@ namespace
 		}
 	}
 
+	void text_output_cdata(xml_buffered_writer& writer, const char_t* s)
+	{
+		do
+		{
+			writer.write('<', '!', '[', 'C', 'D');
+			writer.write('A', 'T', 'A', '[');
+
+			const char_t* prev = s;
+
+			// look for ]]> sequence - we can't output it as is since it terminates CDATA
+			while (*s && !(s[0] == ']' && s[1] == ']' && s[2] == '>')) ++s;
+
+			// skip ]] if we stopped at ]]>, > will go to the next CDATA section
+			if (*s) s += 2;
+
+			writer.write(prev, static_cast<size_t>(s - prev));
+
+			writer.write(']', ']', '>');
+		}
+		while (*s);
+	}
+
 	void node_output_attributes(xml_buffered_writer& writer, const xml_node& node)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
@@ -2855,10 +2877,7 @@ namespace
 			break;
 
 		case node_cdata:
-			writer.write('<', '!', '[', 'C', 'D');
-			writer.write('A', 'T', 'A', '[');
-			writer.write(node.value());
-			writer.write(']', ']', '>');
+			text_output_cdata(writer, node.value());
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
