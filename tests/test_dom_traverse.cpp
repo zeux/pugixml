@@ -577,6 +577,7 @@ TEST_XML(dom_node_path, "<node><child1>text<child2/></child1></node>")
 TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></node>")
 {
 	CHECK(xml_node().first_element_by_path(STR("/")) == xml_node());
+	CHECK(xml_node().first_element_by_path(STR("a")) == xml_node());
 	
 	CHECK(doc.first_element_by_path(STR("")) == doc);
 	CHECK(doc.first_element_by_path(STR("/")) == doc);
@@ -603,6 +604,8 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 	CHECK(doc.child(STR("node")).first_element_by_path(STR("child1/")) == doc.child(STR("node")).child(STR("child1")));
 	CHECK(doc.child(STR("node")).first_element_by_path(STR("child")) == xml_node());
 	CHECK(doc.child(STR("node")).first_element_by_path(STR("child11")) == xml_node());
+
+	CHECK(doc.first_element_by_path(STR("//node")) == doc.child(STR("node")));
 }
 
 struct test_walker: xml_tree_walker

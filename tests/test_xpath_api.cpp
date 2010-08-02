@@ -146,5 +146,4 @@ TEST(xpath_api_return_type)
 	CHECK(xpath_query(STR("'s'")).return_type() == xpath_type_string);
 	CHECK(xpath_query(STR("true()")).return_type() == xpath_type_boolean);
 }
-
 #endif

@@ -163,6 +163,7 @@ TEST_XML(dom_node_append_copy_attribute, "<node a1='v1'><child a2='v2'/><child/>
 	CHECK(xml_node().append_copy(xml_attribute()) == xml_attribute());
 	CHECK(xml_node().append_copy(doc.child(STR("node")).attribute(STR("a1"))) == xml_attribute());
 	CHECK(doc.append_copy(doc.child(STR("node")).attribute(STR("a1"))) == xml_attribute());
+	CHECK(doc.child(STR("node")).append_copy(xml_attribute()) == xml_attribute());
 	
 	xml_node node = doc.child(STR("node"));
 	xml_node child = node.child(STR("child"));

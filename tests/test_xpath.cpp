@@ -267,4 +267,9 @@ TEST(xpath_miscellaneous)
 	CHECK_XPATH_NODESET(xml_node(), STR("foo/@FOO/@bar"));
 }
 
+TEST(xpath_document_order)
+{
+	CHECK(xml_attribute().document_order() == 0);
+	CHECK(xml_node().document_order() == 0);
+}
 #endif

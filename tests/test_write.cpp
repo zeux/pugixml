@@ -366,3 +366,23 @@ TEST(write_no_name_attribute)
 
 	CHECK_NODE(doc, STR("<root :anonymous=\"\" />"));
 }
+
+TEST(write_print_empty)
+{
+	test_writer writer;
+	xml_node().print(writer);
+}
+
+#ifndef PUGIXML_NO_STL
+TEST(write_print_stream_empty)
+{
+	std::ostringstream oss;
+	xml_node().print(oss);
+}
+
+TEST(write_print_stream_empty_wide)
+{
+	std::basic_ostringstream<wchar_t> oss;
+	xml_node().print(oss);
+}
+#endif
