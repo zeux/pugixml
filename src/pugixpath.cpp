@@ -1209,8 +1209,6 @@ namespace pugi
 
 					m_cur_lexeme_contents.end = cur;
 				
-					while (IS_CHARTYPEX(*cur, ctx_space)) ++cur;
-
 					m_cur_lexeme = lex_string;
 				}
 				else
