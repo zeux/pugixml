@@ -2377,7 +2377,9 @@ namespace pugi
 				
 				for (string_t::iterator it = s.begin(); it != s.end(); )
 				{
-					string_t::size_type pos = from.find(*it);
+					char_t ch = *it; // explicitly store to local to work around DMC bug (it loads 4 bytes from &*it otherwise)
+
+					string_t::size_type pos = from.find(ch);
 					
 					if (pos == string_t::npos)
 						++it;
