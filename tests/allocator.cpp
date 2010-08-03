@@ -20,11 +20,24 @@ namespace
 {
 	const size_t PAGE_SIZE = 4096;
 
+    size_t align_to_page(size_t value)
+    {
+        return (value + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+    }
+
+	void* allocate_page_aligned(size_t size)
+    {
+        // We can't use VirtualAlloc because it has 64Kb granularity so we run out of address space quickly
+        void* result = malloc(size + PAGE_SIZE);
+
+        return (void*)align_to_page((size_t)result);
+    }
+
 	void* allocate(size_t size)
 	{
-		size_t aligned_size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+		size_t aligned_size = align_to_page(size);
 
-		void* ptr = VirtualAlloc(0, aligned_size + PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+		void* ptr = allocate_page_aligned(aligned_size + PAGE_SIZE);
 		if (!ptr) return 0;
 
 		void* end = (char*)ptr + aligned_size;
@@ -37,12 +50,12 @@ namespace
 
 	void deallocate(void* ptr, size_t size)
 	{
-		size_t aligned_size = (size + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+		size_t aligned_size = align_to_page(size);
 
 		void* rptr = (char*)ptr + size - aligned_size;
 
-		DWORD old_flags;
-		VirtualProtect(rptr, aligned_size + PAGE_SIZE, PAGE_NOACCESS, &old_flags);
+        DWORD old_flags;
+        VirtualProtect(rptr, aligned_size + PAGE_SIZE, PAGE_NOACCESS, &old_flags);
 	}
 }
 #else
