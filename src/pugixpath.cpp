@@ -49,6 +49,7 @@ typedef __int32 int32_t;
 #endif
 
 #include <algorithm>
+#include <memory>
 #include <string>
 
 // String utilities prototypes
@@ -3359,22 +3360,17 @@ namespace pugi
 
 	xpath_query::xpath_query(const char_t* query): m_alloc(0), m_root(0)
 	{
-		compile(query);
+		std::auto_ptr<xpath_allocator> alloc(new xpath_allocator);
+
+		xpath_parser p(query, *alloc);
+
+		m_root = p.parse();
+		m_alloc = alloc.release();
 	}
 
 	xpath_query::~xpath_query()
 	{
 		delete m_alloc;
-	}
-
-	void xpath_query::compile(const char_t* query)
-	{
-		delete m_alloc;
-		m_alloc = new xpath_allocator;
-
-		xpath_parser p(query, *m_alloc);
-
-		m_root = p.parse();
 	}
 
 	xpath_value_type xpath_query::return_type() const

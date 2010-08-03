@@ -369,8 +369,6 @@ namespace pugi
 		xpath_allocator* m_alloc;
 		xpath_ast_node* m_root;
 
-		void compile(const char_t* query);
-
 	public:
 		/**
 		 * Constructor from string with XPath expression.
