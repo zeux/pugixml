@@ -613,8 +613,8 @@ TEST(parse_out_of_memory)
 
 TEST(parse_out_of_memory_halfway)
 {
-	unsigned int count = 10000;
-	char_t* text = new char_t[count * 4];
+	const unsigned int count = 10000;
+	static char_t text[count * 4];
 
 	for (unsigned int i = 0; i < count; ++i)
 	{
@@ -629,8 +629,6 @@ TEST(parse_out_of_memory_halfway)
 	xml_document doc;
 	CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory);
 	CHECK_NODE(doc.first_child(), STR("<n />"));
-
-	delete[] text;
 }
 
 static bool test_offset(const char_t* contents, unsigned int options, pugi::xml_parse_status status, ptrdiff_t offset)

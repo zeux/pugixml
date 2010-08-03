@@ -80,8 +80,8 @@ TEST(document_load_stream_error)
 	CHECK(doc.load(fs2).status == status_io_error);
 #endif
 
-	test_runner::_memory_fail_threshold = 1;
 	std::istringstream iss("<node/>");
+	test_runner::_memory_fail_threshold = 1;
 	CHECK(doc.load(iss).status == status_out_of_memory);
 }
 

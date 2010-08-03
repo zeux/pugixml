@@ -584,9 +584,9 @@ TEST(dom_node_declaration_copy)
 
 TEST(dom_string_out_of_memory)
 {
-	unsigned int length = 65536;
+	const unsigned int length = 65536;
+	static char_t string[length + 1];
 
-	char_t* string = new char_t[length + 1];
 	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
 	string[length] = 0;
 
