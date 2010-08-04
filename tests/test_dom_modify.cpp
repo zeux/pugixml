@@ -667,11 +667,11 @@ TEST(dom_node_memory_limit)
 	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
 	string[length] = 0;
 
-	test_runner::_memory_fail_threshold = 32768 * 4;
+	test_runner::_memory_fail_threshold = 32768 * 2 + sizeof(string);
 
 	xml_document doc;
 
-	for (int i = 0; i < 32; ++i)
+	for (int j = 0; j < 32; ++j)
 	{
 		CHECK(doc.append_child().set_name(string));
 		CHECK(doc.remove_child(doc.first_child()));

@@ -75,10 +75,8 @@ TEST(document_load_stream_error)
 	std::ifstream fs1("filedoesnotexist");
 	CHECK(doc.load(fs1).status == status_io_error);
 	
-#ifndef __DMC__ // Digital Mars CRT does not like 'con' pseudo-file
 	std::ifstream fs2("con");
 	CHECK(doc.load(fs2).status == status_io_error);
-#endif
 
 	std::istringstream iss("<node/>");
 	test_runner::_memory_fail_threshold = 1;
@@ -130,7 +128,7 @@ TEST(document_load_stream_exceptions)
 TEST(document_load_stream_error_previous)
 {
 	pugi::xml_document doc;
-	CHECK(doc.load("<node/>"));
+	CHECK(doc.load(STR("<node/>")));
 	CHECK(doc.first_child());
 
 	std::ifstream fs1("filedoesnotexist");
@@ -141,7 +139,7 @@ TEST(document_load_stream_error_previous)
 TEST(document_load_stream_wide_error_previous)
 {
 	pugi::xml_document doc;
-	CHECK(doc.load("<node/>"));
+	CHECK(doc.load(STR("<node/>")));
 	CHECK(doc.first_child());
 
 	std::basic_ifstream<wchar_t> fs1("filedoesnotexist");
@@ -195,9 +193,7 @@ TEST(document_load_file_error)
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
 
 #ifdef _WIN32
-#ifndef __DMC__ // Digital Mars CRT does not like 'con' pseudo-file
 	CHECK(doc.load_file("con").status == status_io_error);
-#endif
 #endif
 
 	test_runner::_memory_fail_threshold = 1;
@@ -207,7 +203,7 @@ TEST(document_load_file_error)
 TEST(document_load_file_error_previous)
 {
 	pugi::xml_document doc;
-	CHECK(doc.load("<node/>"));
+	CHECK(doc.load(STR("<node/>")));
 	CHECK(doc.first_child());
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);

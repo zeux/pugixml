@@ -3,6 +3,7 @@
 
 #include <new>
 #include <exception>
+#include <iostream>
 #include <stdio.h>
 #include <float.h>
 
@@ -52,7 +53,7 @@ static void replace_memory_management()
 	pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
 }
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__INTEL_COMPILER)
 #define DECL_THROW(e) throw(e)
 #define DECL_NOTHROW() throw()
 #else
@@ -178,6 +179,11 @@ int main()
 {
 #ifdef __BORLANDC__
 	_control87(MCW_EM | PC_53, MCW_EM | MCW_PC);
+#endif
+	
+#if defined(_MSC_VER) && !defined(__GNUC__)
+	std::cout.flush();
+	std::wcout.flush();
 #endif
 
 	replace_memory_management();
