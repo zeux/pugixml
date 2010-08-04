@@ -471,7 +471,7 @@ TEST_XML(dom_node_first_last_child, "<node><child1/><child2/></node>")
 	CHECK(doc.last_child() == node);
 }
 
-TEST_XML(dom_node_find_child_by_attribute, "<node><child1 attr='value1'/><child2 attr='value2'/><child2 attr='value3'/></node>")
+TEST_XML(dom_node_find_child_by_attribute, "<node><stub attr='value3' /><child1 attr='value1'/><child2 attr='value2'/><child2 attr='value3'/></node>")
 {
 	CHECK(xml_node().find_child_by_attribute(STR("name"), STR("attr"), STR("value")) == xml_node());
 	CHECK(xml_node().find_child_by_attribute(STR("attr"), STR("value")) == xml_node());

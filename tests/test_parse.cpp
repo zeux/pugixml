@@ -144,6 +144,13 @@ TEST(parse_cdata_skip)
 	CHECK(!doc.first_child());
 }
 
+TEST(parse_cdata_skip_contents)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<node><![CDATA[]]>hello<![CDATA[value]]>, world!</node>"), parse_minimal));
+	CHECK_NODE(doc, STR("<node>hello, world!</node>"));
+}
+
 TEST(parse_cdata_parse)
 {
 	xml_document doc;
@@ -377,6 +384,25 @@ TEST(parse_escapes_code_invalid)
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#;&#x;&;&#x-;&#-;"));
 }
 
+TEST(parse_escapes_attribute)
+{
+	xml_document doc;
+
+	for (int wnorm = 0; wnorm < 2; ++wnorm)
+		for (int eol = 0; eol < 2; ++eol)
+			for (int wconv = 0; wconv < 2; ++wconv)
+			{
+				unsigned int flags = parse_escapes;
+
+				flags |= (wnorm ? parse_wnorm_attribute : 0);
+				flags |= (eol ? parse_eol : 0);
+				flags |= (wconv ? parse_wconv_attribute : 0);
+
+				CHECK(doc.load(STR("<node id='&quot;'/>"), flags));
+				CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("\""));
+			}
+}
+
 TEST(parse_attribute_spaces)
 {
 	xml_document doc;
@@ -447,11 +473,11 @@ TEST(parse_attribute_variations)
 				for (int escapes = 0; escapes < 2; ++escapes)
 				{
 					unsigned int flags = parse_minimal;
-					
-					 flags |= (wnorm ? parse_wnorm_attribute : 0);
-					 flags |= (eol ? parse_eol : 0);
-					 flags |= (wconv ? parse_wconv_attribute : 0);
-					 flags |= (escapes ? parse_escapes : 0);
+
+					flags |= (wnorm ? parse_wnorm_attribute : 0);
+					flags |= (eol ? parse_eol : 0);
+					flags |= (wconv ? parse_wconv_attribute : 0);
+					flags |= (escapes ? parse_escapes : 0);
 
 					CHECK(doc.load(STR("<node id='1'/>"), flags));
 					CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
@@ -480,6 +506,44 @@ TEST(parse_attribute_error)
 	CHECK(doc.load(STR("<node id1='1'id2='2'/>"), parse_minimal).status == status_bad_attribute);
 	CHECK(doc.load(STR("<node id&='1'/>"), parse_minimal).status == status_bad_attribute);
 	CHECK(doc.load(STR("<node &='1'/>"), parse_minimal).status == status_bad_start_element);
+}
+
+TEST(parse_attribute_termination_error)
+{
+	xml_document doc;
+
+	for (int wnorm = 0; wnorm < 2; ++wnorm)
+		for (int eol = 0; eol < 2; ++eol)
+			for (int wconv = 0; wconv < 2; ++wconv)
+			{
+				unsigned int flags = parse_minimal;
+
+				flags |= (wnorm ? parse_wnorm_attribute : 0);
+				flags |= (eol ? parse_eol : 0);
+				flags |= (wconv ? parse_wconv_attribute : 0);
+
+				CHECK(doc.load(STR("<node id='value"), flags).status == status_bad_attribute);
+			}
+}
+
+TEST(parse_attribute_quot_inside)
+{
+	xml_document doc;
+
+	for (int wnorm = 0; wnorm < 2; ++wnorm)
+		for (int eol = 0; eol < 2; ++eol)
+			for (int wconv = 0; wconv < 2; ++wconv)
+			{
+				unsigned int flags = parse_escapes;
+
+				flags |= (wnorm ? parse_wnorm_attribute : 0);
+				flags |= (eol ? parse_eol : 0);
+				flags |= (wconv ? parse_wconv_attribute : 0);
+
+				CHECK(doc.load(STR("<node id1='\"' id2=\"'\"/>"), flags));
+				CHECK_STRING(doc.child(STR("node")).attribute(STR("id1")).value(), STR("\""));
+				CHECK_STRING(doc.child(STR("node")).attribute(STR("id2")).value(), STR("'"));
+			}
 }
 
 TEST(parse_tag_single)

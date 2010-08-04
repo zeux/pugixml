@@ -126,6 +126,28 @@ TEST(document_load_stream_exceptions)
 	}
 }
 #endif
+
+TEST(document_load_stream_error_previous)
+{
+	pugi::xml_document doc;
+	CHECK(doc.load("<node/>"));
+	CHECK(doc.first_child());
+
+	std::ifstream fs1("filedoesnotexist");
+	CHECK(doc.load(fs1).status == status_io_error);
+	CHECK(!doc.first_child());
+}
+
+TEST(document_load_stream_wide_error_previous)
+{
+	pugi::xml_document doc;
+	CHECK(doc.load("<node/>"));
+	CHECK(doc.first_child());
+
+	std::basic_ifstream<wchar_t> fs1("filedoesnotexist");
+	CHECK(doc.load(fs1).status == status_io_error);
+	CHECK(!doc.first_child());
+}
 #endif
 
 TEST(document_load_string)
@@ -180,6 +202,16 @@ TEST(document_load_file_error)
 
 	test_runner::_memory_fail_threshold = 1;
 	CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory);
+}
+
+TEST(document_load_file_error_previous)
+{
+	pugi::xml_document doc;
+	CHECK(doc.load("<node/>"));
+	CHECK(doc.first_child());
+
+	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
+	CHECK(!doc.first_child());
 }
 
 TEST_XML(document_save, "<node/>")
