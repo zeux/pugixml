@@ -272,4 +272,26 @@ TEST(xpath_document_order)
 	CHECK(xml_attribute().document_order() == 0);
 	CHECK(xml_node().document_order() == 0);
 }
+
+TEST_XML(xpath_context_node, "<node>5</node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("node")) % 2;
+	CHECK_XPATH_BOOLEAN(doc, STR("node"), true);
+	CHECK_XPATH_NUMBER(doc, STR("node"), 5);
+	CHECK_XPATH_STRING(doc, STR("node"), STR("5"));
+}
+
+TEST_XML(xpath_context_position, "<node>5</node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("id(position() + last())"));
+	CHECK_XPATH_BOOLEAN(doc, STR("position() + last() = 2"), true);
+	CHECK_XPATH_NUMBER(doc, STR("position() + last()"), 2);
+	CHECK_XPATH_STRING(doc, STR("position() + last()"), STR("2"));
+}
+
+TEST(xpath_lexer_unknown_lexeme)
+{
+	CHECK_XPATH_FAIL(STR("(^3))"));
+	CHECK_XPATH_FAIL(STR("(!3))"));
+}
 #endif

@@ -114,6 +114,32 @@ TEST_XML(xpath_api_nodeset_accessors, "<node><foo/><foo/></node>")
 	xpath_node_set nullcopy = null;
 }
 
+TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
+{
+	xpath_node_set set = doc.select_nodes(STR("node/foo"));
+
+	xpath_node_set copy1 = set;
+	CHECK(copy1.size() == 2);
+	CHECK_STRING(copy1[0].node().name(), STR("foo"));
+
+	xpath_node_set copy2;
+	copy2 = set;
+	CHECK(copy2.size() == 2);
+	CHECK_STRING(copy2[0].node().name(), STR("foo"));
+
+	xpath_node_set copy3;
+	copy3 = set;
+	copy3 = copy3;
+	CHECK(copy3.size() == 2);
+	CHECK_STRING(copy3[0].node().name(), STR("foo"));
+
+	xpath_node_set copy4;
+	copy4 = set;
+	copy4 = copy1;
+	CHECK(copy4.size() == 2);
+	CHECK_STRING(copy4[0].node().name(), STR("foo"));
+}
+
 TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 {
 	xpath_query q(STR("node/@attr"));
