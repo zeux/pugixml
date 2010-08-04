@@ -658,3 +658,22 @@ TEST(dom_node_out_of_memory)
 	CHECK(!n.insert_copy_after(a, a));
 	CHECK(!n.insert_copy_before(a, a));
 }
+
+TEST(dom_node_memory_limit)
+{
+	const unsigned int length = 65536;
+	static char_t string[length + 1];
+
+	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
+	string[length] = 0;
+
+	test_runner::_memory_fail_threshold = 32768 * 4;
+
+	xml_document doc;
+
+	for (int i = 0; i < 32; ++i)
+	{
+		CHECK(doc.append_child().set_name(string));
+		CHECK(doc.remove_child(doc.first_child()));
+	}
+}

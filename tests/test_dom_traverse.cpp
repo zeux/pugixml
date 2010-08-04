@@ -700,7 +700,7 @@ TEST(dom_node_traverse_empty)
 	CHECK(walker.log == STR("|-1 <=|-1 >="));
 }
 
-TEST_XML(dom_node_traverse_child, "<node><child>text</child></node>")
+TEST_XML(dom_node_traverse_child, "<node><child>text</child></node><another>node</another>")
 {
 	test_walker walker;
 

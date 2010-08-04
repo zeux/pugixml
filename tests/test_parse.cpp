@@ -35,6 +35,18 @@ TEST(parse_pi_parse)
 	CHECK_STRING(pi2.value(), STR("value"));
 }
 
+TEST(parse_pi_parse_spaces)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<?target  \r\n\t  value ?>"), parse_minimal | parse_pi));
+
+	xml_node pi = doc.first_child();
+
+	CHECK(pi.type() == node_pi);
+	CHECK_STRING(pi.name(), STR("target"));
+	CHECK_STRING(pi.value(), STR("value "));
+}
+
 TEST(parse_pi_error)
 {
 	xml_document doc;
