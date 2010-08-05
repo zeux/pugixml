@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <wchar.h>
 #include <setjmp.h>
+#include <wchar.h>
 
 #ifndef PUGIXML_NO_STL
 #	include <istream>
@@ -415,7 +415,8 @@ namespace pugi
 		}
 		else
 		{
-			// insert page before the end of linked list
+			// insert page before the end of linked list, so that it is deleted as soon as possible
+			// the last page is not deleted even if it's empty (see deallocate_memory)
 			assert(_root->prev);
 
 			page->prev = _root->prev;
@@ -943,8 +944,6 @@ namespace
 
 namespace
 {	
-	using namespace pugi;
-
 	enum chartype_t
 	{
 		ct_parse_pcdata = 1,	// \0, &, \r, <
@@ -1510,8 +1509,6 @@ namespace
 
 	char_t* strconv_comment(char_t* s, char_t endch)
 	{
-		if (!*s) return 0;
-		
 		gap g;
 		
 		while (true)
@@ -1540,8 +1537,6 @@ namespace
 
 	char_t* strconv_cdata(char_t* s, char_t endch)
 	{
-		if (!*s) return 0;
-			
 		gap g;
 			
 		while (true)
@@ -1962,11 +1957,6 @@ namespace
 
 						s += (s[2] == '>' ? 3 : 2); // Step over the '\0->'.
 					}
-
-					if (OPTSET(parse_comments))
-					{
-						POPNODE(); // Pop since this is a standalone.
-					}
 				}
 				else THROW_ERROR(status_bad_comment, s);
 			}
@@ -1996,8 +1986,6 @@ namespace
 
 							*s++ = 0; // Zero-terminate this segment.
 						}
-
-						POPNODE(); // Pop since this is a standalone.
 					}
 					else // Flagged for discard, but we still have to scan for the terminator.
 					{
@@ -2014,8 +2002,6 @@ namespace
 			}
 			else if (s[0] == 'D' && s[1] == 'O' && s[2] == 'C' && s[3] == 'T' && s[4] == 'Y' && s[5] == 'P' && ENDSWITH(s[6], 'E'))
 			{
-				if (s[6] != 'E') THROW_ERROR(status_bad_doctype, s);
-
 				s -= 2;
 
 				parse_doctype(s, endch, true);
@@ -2165,15 +2151,15 @@ namespace
 									a->name = s; // Save the offset.
 
 									SCANWHILE(IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
-									CHECK_ERROR(status_bad_attribute, s);
+									CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 									ENDSEG(); // Save char in 'ch', terminate & step over.
-									CHECK_ERROR(status_bad_attribute, s);
+									CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 									if (IS_CHARTYPE(ch, ct_space))
 									{
 										SKIPWS(); // Eat any whitespace.
-										CHECK_ERROR(status_bad_attribute, s);
+										CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 										ch = *s;
 										++s;
@@ -3010,8 +2996,6 @@ namespace
 
 	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding)
 	{
-		if (stream.fail()) return make_parse_result(status_io_error);
-
 		// get length of remaining data in stream
 		typename std::basic_istream<T>::pos_type pos = stream.tellg();
 		stream.seekg(0, std::ios::end);
@@ -3639,8 +3623,6 @@ namespace pugi
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
 		xml_attribute a(append_attribute_ll(_root, get_allocator(_root)));
-		if (!a) return xml_attribute();
-
 		a.set_name(name);
 		
 		return a;
@@ -3737,7 +3719,6 @@ namespace pugi
 		if (!allow_insert_child(this->type(), type)) return xml_node();
 		
 		xml_node n(append_node(_root, get_allocator(_root), type));
-		if (!n) return xml_node();
 
 		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
@@ -3952,7 +3933,7 @@ namespace pugi
 		if (path[0] == delimiter)
 		{
 			// Absolute path; e.g. '/foo/bar'
-			while (found.parent()) found = found.parent();
+			found = found.root();
 			++path;
 		}
 
@@ -4060,8 +4041,6 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	void xml_node::print(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent, unsigned int flags, xml_encoding encoding, unsigned int depth) const
 	{
-		if (!_root) return;
-
 		xml_writer_stream writer(stream);
 
 		print(writer, indent, flags, encoding, depth);
@@ -4069,8 +4048,6 @@ namespace pugi
 
 	void xml_node::print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent, unsigned int flags, unsigned int depth) const
 	{
-		if (!_root) return;
-
 		xml_writer_stream writer(stream);
 
 		print(writer, indent, flags, encoding_wchar, depth);
@@ -4280,10 +4257,14 @@ namespace pugi
 		destroy();
 	}
 
-	void xml_document::create()
+	void xml_document::reset()
 	{
 		destroy();
+		create();
+	}
 
+	void xml_document::create()
+	{
 		// initialize sentinel page
 		STATIC_ASSERT(offsetof(xml_memory_page, data) + sizeof(xml_document_struct) + xml_memory_page_alignment <= sizeof(_memory));
 
@@ -4344,14 +4325,14 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	xml_parse_result xml_document::load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options, xml_encoding encoding)
 	{
-		create();
+		reset();
 
 		return load_stream_impl(*this, stream, options, encoding);
 	}
 
 	xml_parse_result xml_document::load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options)
 	{
-		create();
+		reset();
 
 		return load_stream_impl(*this, stream, options, encoding_wchar);
 	}
@@ -4359,8 +4340,6 @@ namespace pugi
 
 	xml_parse_result xml_document::load(const char_t* contents, unsigned int options)
 	{
-		create();
-		
 		// Force native encoding (skip autodetection)
 	#ifdef PUGIXML_WCHAR_MODE
 		xml_encoding encoding = encoding_wchar;
@@ -4383,7 +4362,7 @@ namespace pugi
 
 	xml_parse_result xml_document::load_file(const char* path, unsigned int options, xml_encoding encoding)
 	{
-		create();
+		reset();
 
 		FILE* file = fopen(path, "rb");
 		if (!file) return make_parse_result(status_file_not_found);
@@ -4420,7 +4399,7 @@ namespace pugi
 
 	xml_parse_result xml_document::load_buffer_impl(void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own)
 	{
-		create();
+		reset();
 
 		// get actual encoding
 		xml_encoding buffer_encoding = get_buffer_encoding(encoding, contents, size);
@@ -4535,9 +4514,8 @@ namespace pugi
 				utf_decoder<utf8_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, begin) :
 				utf_decoder<utf8_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, begin);
 	  	
-			// truncate invalid output
-			assert(begin <= end && static_cast<size_t>(end - begin) <= result.size());
-			result.resize(static_cast<size_t>(end - begin));
+			assert(begin + result.size() == end);
+			(void)!end;
 		}
 
 	  	return result;
@@ -4568,9 +4546,8 @@ namespace pugi
 			wchar_writer::value_type begin = reinterpret_cast<wchar_writer::value_type>(&result[0]);
 			wchar_writer::value_type end = utf_decoder<wchar_writer>::decode_utf8_block(data, size, begin);
 
-			// truncate invalid output
-			assert(begin <= end && static_cast<size_t>(end - begin) <= result.size());
-			result.resize(static_cast<size_t>(end - begin));
+			assert(begin + result.size() == end);
+			(void)!end;
 		}
 
 		return result;

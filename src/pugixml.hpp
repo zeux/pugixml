@@ -1842,6 +1842,7 @@ namespace pugi
 		xml_document(const xml_document&);
 		const xml_document& operator=(const xml_document&);
 
+		void reset();
 		void create();
 		void destroy();
 
