@@ -15,14 +15,13 @@
 
 #ifndef PUGIXML_NO_XPATH
 
-#include <assert.h>
-
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
 #include <math.h>
 #include <float.h>
-#include <ctype.h>
-#include <string.h>
 
 #ifdef PUGIXML_WCHAR_MODE
 #	include <wchar.h>
@@ -892,9 +891,12 @@ namespace pugi
 
 	struct xpath_context
 	{
-		xml_node root;
 		xpath_node n;
 		size_t position, size;
+
+		xpath_context(const xpath_node& n, size_t position, size_t size): n(n), position(position), size(size)
+		{
+		}
 	};
 
 	enum lexeme_t
@@ -957,11 +959,6 @@ namespace pugi
 
 		lexeme_t m_cur_lexeme;
 
-		void contents_clear()
-		{
-			m_cur_lexeme_contents = xpath_lexer_string();
-		}
-
 	public:
 		explicit xpath_lexer(const char_t* query): m_cur(query)
 		{
@@ -975,8 +972,6 @@ namespace pugi
 		
 		void next()
 		{
-			contents_clear();
-
 			const char_t* cur = m_cur;
 
 			while (IS_CHARTYPEX(*cur, ctx_space)) ++cur;
@@ -1213,7 +1208,7 @@ namespace pugi
 				}
 				else
 				{
-					throw xpath_exception("Unrecognized token");
+					m_cur_lexeme = lex_none;
 				}
 			}
 
@@ -1227,13 +1222,14 @@ namespace pugi
 
 		const xpath_lexer_string& contents() const
 		{
+			assert(m_cur_lexeme == lex_number || m_cur_lexeme == lex_string || m_cur_lexeme == lex_quoted_string);
+
 			return m_cur_lexeme_contents;
 		}
 	};
 
 	enum ast_type_t
 	{
-		ast_none,
 		ast_op_or,						// left or right
 		ast_op_and,						// left and right
 		ast_op_equal,					// left = right
@@ -1485,11 +1481,10 @@ namespace pugi
 			}
 		}
 
-		void apply_predicate(xpath_node_set& ns, size_t first, xpath_ast_node* expr, const xpath_context& context)
+		void apply_predicate(xpath_node_set& ns, size_t first, xpath_ast_node* expr)
 		{
-			xpath_context c;
-			c.root = context.root;
-			
+			assert(ns.size() >= first);
+
 			size_t i = 1;
 			size_t size = ns.size() - first;
 				
@@ -1498,10 +1493,8 @@ namespace pugi
 			// remove_if... or well, sort of
 			for (xpath_node_set::iterator it = last; it != ns.end(); ++it, ++i)
 			{
-				c.n = *it;
-				c.position = i;
-				c.size = size;
-				
+				xpath_context c(*it, i, size);
+			
 				if (expr->rettype() == xpath_type_number)
 				{
 					if (expr->eval_number(c) == i)
@@ -1514,13 +1507,13 @@ namespace pugi
 			ns.truncate(last);
 		}
 
-		void apply_predicates(xpath_node_set& ns, size_t first, const xpath_context& context)
+		void apply_predicates(xpath_node_set& ns, size_t first)
 		{
-			if (ns.size() <= first) return;
+			if (ns.size() == first) return;
 			
 			for (xpath_ast_node* pred = m_right; pred; pred = pred->m_next)
 			{
-				apply_predicate(ns, first, pred->m_left, context);
+				apply_predicate(ns, first, pred->m_left);
 			}
 		}
 
@@ -1683,30 +1676,27 @@ namespace pugi
 			case axis_following:
 			{
 				ns.m_type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-				
+
 				xml_node cur = n;
-				
+
 				// exit from this node so that we don't include descendants
 				while (cur && !cur.next_sibling()) cur = cur.parent();
 				cur = cur.next_sibling();
 
-				if (cur)
+				for (;;)
 				{
-					for (;;)
+					step_push(ns, cur);
+
+					if (cur.first_child())
+						cur = cur.first_child();
+					else if (cur.next_sibling())
+						cur = cur.next_sibling();
+					else
 					{
-						step_push(ns, cur);
-	
-						if (cur.first_child())
-							cur = cur.first_child();
-						else if (cur.next_sibling())
-							cur = cur.next_sibling();
-						else
-						{
-							while (cur && !cur.next_sibling()) cur = cur.parent();
-							cur = cur.next_sibling();
-							
-							if (!cur) break;
-						}
+						while (cur && !cur.next_sibling()) cur = cur.parent();
+						cur = cur.next_sibling();
+
+						if (!cur) break;
 					}
 				}
 
@@ -1718,42 +1708,39 @@ namespace pugi
 				ns.m_type = ns.empty() ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_unsorted;
 
 				xml_node cur = n;
-				
+
 				while (cur && !cur.previous_sibling()) cur = cur.parent();
 				cur = cur.previous_sibling();
-				
-				if (cur)
+
+				for (;;)
 				{
-					for (;;)
+					if (cur.last_child())
+						cur = cur.last_child();
+					else
 					{
-						if (cur.last_child())
-							cur = cur.last_child();
+						// leaf node, can't be ancestor
+						step_push(ns, cur);
+
+						if (cur.previous_sibling())
+							cur = cur.previous_sibling();
 						else
 						{
-							// leaf node, can't be ancestor
-							step_push(ns, cur);
-							
-							if (cur.previous_sibling())
-								cur = cur.previous_sibling();
-							else
+							do 
 							{
-								do 
-								{
-									cur = cur.parent();
-									if (!cur) break;
-									
-									if (!node_is_ancestor(cur, n)) step_push(ns, cur);
-								}
-								while (!cur.previous_sibling());
-													
-								cur = cur.previous_sibling();
-								
+								cur = cur.parent();
 								if (!cur) break;
+
+								if (!node_is_ancestor(cur, n)) step_push(ns, cur);
 							}
+							while (!cur.previous_sibling());
+
+							cur = cur.previous_sibling();
+
+							if (!cur) break;
 						}
 					}
 				}
-				
+
 				break;
 			}
 			
@@ -1912,7 +1899,7 @@ namespace pugi
 						else
 							step_fill(ns, it->attribute(), it->parent(), v);
 							
-						apply_predicates(ns, size, c);
+						apply_predicates(ns, size);
 					}
 				}
 				else
@@ -1920,7 +1907,7 @@ namespace pugi
 					if (c.n.node()) step_fill(ns, c.n.node(), v);
 					else step_fill(ns, c.n.attribute(), c.n.parent(), v);
 					
-					apply_predicates(ns, 0, c);
+					apply_predicates(ns, 0);
 				}
 				
 				break;
@@ -1941,14 +1928,14 @@ namespace pugi
 						if (it->node())
 							step_fill(ns, it->node(), v);
 						
-						apply_predicates(ns, size, c);
+						apply_predicates(ns, size);
 					}
 				}
 				else if (c.n.node())
 				{
 					step_fill(ns, c.n.node(), v);
 					
-					apply_predicates(ns, 0, c);
+					apply_predicates(ns, 0);
 				}
 				
 				break;
@@ -2228,8 +2215,6 @@ namespace pugi
 			case ast_func_local_name_1:
 			{
 				xpath_node_set ns = m_left->eval_node_set(c);
-				if (ns.empty()) return string_t();
-				
 				xpath_node na = ns.first();
 				
 				if (na.attribute()) return local_name(na.attribute().name());
@@ -2247,8 +2232,6 @@ namespace pugi
 			case ast_func_name_1:
 			{
 				xpath_node_set ns = m_left->eval_node_set(c);
-				if (ns.empty()) return string_t();
-				
 				xpath_node na = ns.first();
 				
 				if (na.attribute()) return na.attribute().name();
@@ -2266,8 +2249,6 @@ namespace pugi
 			case ast_func_namespace_uri_1:
 			{
 				xpath_node_set ns = m_left->eval_node_set(c);
-				if (ns.empty()) return string_t();
-				
 				xpath_node na = ns.first();
 				
 				if (na.attribute()) return namespace_uri(na.attribute(), na.parent());
@@ -2441,7 +2422,7 @@ namespace pugi
 				// either expression is a number or it contains position() call; sort by document order
 				if (m_type == ast_filter) set.sort();
 
-				apply_predicate(set, 0, m_right, c);
+				apply_predicate(set, 0, m_right);
 			
 				return set;
 			}
@@ -2515,14 +2496,12 @@ namespace pugi
 
 			case ast_step_root:
 			{
+				assert(!m_right); // root step can't have any predicates
+
 				xpath_node_set ns;
-			
-				if (c.root)
-				{
-  	            	ns.push_back(c.root);
-				
-					apply_predicates(ns, 0, c);
-				}
+
+				if (c.n.node()) ns.push_back(c.n.node().root());
+				else if (c.n.attribute()) ns.push_back(c.n.parent().root());
 
 				return ns;
 			}
@@ -3384,12 +3363,7 @@ namespace pugi
 	{
 		if (!m_root) return false;
 		
-		xpath_context c;
-		
-		c.root = n.root();
-		c.n = n;
-		c.position = 1;
-		c.size = 1;
+		xpath_context c(n, 1, 1);
 		
 		return m_root->eval_boolean(c);
 	}
@@ -3398,12 +3372,7 @@ namespace pugi
 	{
 		if (!m_root) return gen_nan();
 		
-		xpath_context c;
-		
-		c.root = n.root();
-		c.n = n;
-		c.position = 1;
-		c.size = 1;
+		xpath_context c(n, 1, 1);
 		
 		return m_root->eval_number(c);
 	}
@@ -3412,12 +3381,7 @@ namespace pugi
 	{
 		if (!m_root) return string_t();
 		
-		xpath_context c;
-		
-		c.root = n.root();
-		c.n = n;
-		c.position = 1;
-		c.size = 1;
+		xpath_context c(n, 1, 1);
 		
 		return m_root->eval_string(c);
 	}
@@ -3427,12 +3391,7 @@ namespace pugi
 		if (!m_root) return xpath_node_set();
 		if (m_root->rettype() != xpath_type_node_set) throw xpath_exception("Expression does not evaluate to node set");
 		
-		xpath_context c;
-		
-		c.root = n.root();
-		c.n = n;
-		c.position = 1;
-		c.size = 1;
+		xpath_context c(n, 1, 1);
 		
 		return m_root->eval_node_set(c);
 	}
