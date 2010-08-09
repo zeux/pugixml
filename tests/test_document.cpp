@@ -760,3 +760,37 @@ TEST(document_progressive_truncation)
 
 	delete[] original_data;
 }
+
+TEST(document_load_buffer_short)
+{
+	char* data = new char[4];
+	memcpy(data, "abcd", 4);
+
+	xml_document doc;
+
+	CHECK(doc.load_buffer(data, 4));
+	CHECK(doc.load_buffer(data + 1, 3));
+	CHECK(doc.load_buffer(data + 2, 2));
+	CHECK(doc.load_buffer(data + 3, 1));
+	CHECK(doc.load_buffer(data + 4, 0));
+	CHECK(doc.load_buffer(0, 0));
+
+	delete[] data;
+}
+
+TEST(document_load_buffer_inplace_short)
+{
+	char* data = new char[4];
+	memcpy(data, "abcd", 4);
+
+	xml_document doc;
+
+	CHECK(doc.load_buffer_inplace(data, 4));
+	CHECK(doc.load_buffer_inplace(data + 1, 3));
+	CHECK(doc.load_buffer_inplace(data + 2, 2));
+	CHECK(doc.load_buffer_inplace(data + 3, 1));
+	CHECK(doc.load_buffer_inplace(data + 4, 0));
+	CHECK(doc.load_buffer_inplace(0, 0));
+
+	delete[] data;
+}
