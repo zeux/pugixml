@@ -1034,6 +1034,30 @@ namespace
 			return is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 	}
 
+	xml_encoding guess_buffer_encoding(uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3)
+	{
+		// look for BOM in first few bytes
+		if (d0 == 0 && d1 == 0 && d2 == 0xfe && d3 == 0xff) return encoding_utf32_be;
+		if (d0 == 0xff && d1 == 0xfe && d2 == 0 && d3 == 0) return encoding_utf32_le;
+		if (d0 == 0xfe && d1 == 0xff) return encoding_utf16_be;
+		if (d0 == 0xff && d1 == 0xfe) return encoding_utf16_le;
+		if (d0 == 0xef && d1 == 0xbb && d2 == 0xbf) return encoding_utf8;
+
+		// look for <, <? or <?xm in various encodings
+		if (d0 == 0 && d1 == 0 && d2 == 0 && d3 == 0x3c) return encoding_utf32_be;
+		if (d0 == 0x3c && d1 == 0 && d2 == 0 && d3 == 0) return encoding_utf32_le;
+		if (d0 == 0 && d1 == 0x3c && d2 == 0 && d3 == 0x3f) return encoding_utf16_be;
+		if (d0 == 0x3c && d1 == 0 && d2 == 0x3f && d3 == 0) return encoding_utf16_le;
+		if (d0 == 0x3c && d1 == 0x3f && d2 == 0x78 && d3 == 0x6d) return encoding_utf8;
+
+		// look for utf16 < followed by node name (this may fail, but is better than utf8 since it's zero terminated so early)
+		if (d0 == 0 && d1 == 0x3c) return encoding_utf16_be;
+		if (d0 == 0x3c && d1 == 0) return encoding_utf16_le;
+
+		// no known BOM detected, assume utf8
+		return encoding_utf8;
+	}
+
 	xml_encoding get_buffer_encoding(xml_encoding encoding, const void* contents, size_t size)
 	{
 		// replace wchar encoding with utf implementation
@@ -1048,29 +1072,13 @@ namespace
 		// only do autodetection if no explicit encoding is requested
 		if (encoding != encoding_auto) return encoding;
 
+		// skip encoding autodetection if input buffer is too small
+		if (size < 4) return encoding_utf8;
+
 		// try to guess encoding (based on XML specification, Appendix F.1)
 		const uint8_t* data = static_cast<const uint8_t*>(contents);
 
-		// look for BOM in first few bytes
-		if (size > 4 && data[0] == 0 && data[1] == 0 && data[2] == 0xfe && data[3] == 0xff) return encoding_utf32_be;
-		if (size > 4 && data[0] == 0xff && data[1] == 0xfe && data[2] == 0 && data[3] == 0) return encoding_utf32_le;
-		if (size > 2 && data[0] == 0xfe && data[1] == 0xff) return encoding_utf16_be;
-		if (size > 2 && data[0] == 0xff && data[1] == 0xfe) return encoding_utf16_le;
-		if (size > 3 && data[0] == 0xef && data[1] == 0xbb && data[2] == 0xbf) return encoding_utf8;
-
-		// look for <, <? or <?xm in various encodings
-		if (size > 4 && data[0] == 0 && data[1] == 0 && data[2] == 0 && data[3] == 0x3c) return encoding_utf32_be;
-		if (size > 4 && data[0] == 0x3c && data[1] == 0 && data[2] == 0 && data[3] == 0) return encoding_utf32_le;
-		if (size > 4 && data[0] == 0 && data[1] == 0x3c && data[2] == 0 && data[3] == 0x3f) return encoding_utf16_be;
-		if (size > 4 && data[0] == 0x3c && data[1] == 0 && data[2] == 0x3f && data[3] == 0) return encoding_utf16_le;
-		if (size > 4 && data[0] == 0x3c && data[1] == 0x3f && data[2] == 0x78 && data[3] == 0x6d) return encoding_utf8;
-
-		// look for utf16 < followed by node name (this may fail, but is better than utf8 since it's zero terminated so early)
-		if (size > 2 && data[0] == 0 && data[1] == 0x3c) return encoding_utf16_be;
-		if (size > 2 && data[0] == 0x3c && data[1] == 0) return encoding_utf16_le;
-
-		// no known BOM detected, assume utf8
-		return encoding_utf8;
+		return guess_buffer_encoding(data[0], data[1], data[2], data[3]);
 	}
 
 	bool get_mutable_buffer(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, bool is_mutable)
@@ -4400,6 +4408,9 @@ namespace pugi
 	xml_parse_result xml_document::load_buffer_impl(void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own)
 	{
 		reset();
+
+		// check input buffer
+		assert(contents || size == 0);
 
 		// get actual encoding
 		xml_encoding buffer_encoding = get_buffer_encoding(encoding, contents, size);
