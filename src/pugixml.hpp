@@ -1784,7 +1784,7 @@ namespace pugi
 	/**
 	 * A class that holds XPath variable
 	 */
-	class xpath_variable
+	class PUGIXML_CLASS xpath_variable
 	{
 		friend class xpath_variable_set;
 
@@ -1817,7 +1817,7 @@ namespace pugi
 	/**
 	 * A class that holds XPath variables
 	 */
-	class xpath_variable_set
+	class PUGIXML_CLASS xpath_variable_set
 	{
 	private:
 		// Non-copyable semantics
@@ -2271,8 +2271,8 @@ namespace pugi
 namespace std
 {
 	// Workarounds for (non-standard) iterator category detection for older versions (MSVC7/IC8 and earlier)
-	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_node_iterator&);
-	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_attribute_iterator&);
+	std::bidirectional_iterator_tag PUGIXML_FUNCTION _Iter_cat(const pugi::xml_node_iterator&);
+	std::bidirectional_iterator_tag PUGIXML_FUNCTION _Iter_cat(const pugi::xml_attribute_iterator&);
 }
 #endif
 
@@ -2280,8 +2280,8 @@ namespace std
 namespace std
 {
 	// Workarounds for (non-standard) iterator category detection
-	std::bidirectional_iterator_tag __iterator_category(const pugi::xml_node_iterator&);
-	std::bidirectional_iterator_tag __iterator_category(const pugi::xml_attribute_iterator&);
+	std::bidirectional_iterator_tag PUGIXML_FUNCTION __iterator_category(const pugi::xml_node_iterator&);
+	std::bidirectional_iterator_tag PUGIXML_FUNCTION __iterator_category(const pugi::xml_attribute_iterator&);
 }
 #endif
 

@@ -7541,7 +7541,7 @@ namespace pugi
 			case 'c':
 				if (name == PUGIXML_TEXT("count") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set) throw_error("count() has to be applied to node set");
+					if (args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
@@ -7618,7 +7618,7 @@ namespace pugi
 					return new (alloc_node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("sum") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set) throw_error("sum() has to be applied to node set");
+					if (args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(ast_func_sum, xpath_type_number, args[0]);
 				}
 
