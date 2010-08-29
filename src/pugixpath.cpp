@@ -50,7 +50,6 @@ typedef __int32 int32_t;
 #	pragma diag_suppress=237 // controlling expression is constant
 #endif
 
-#include <algorithm>
 #include <string>
 
 // String utilities prototypes
@@ -61,6 +60,107 @@ namespace pugi
 		size_t strlen(const char_t* s);
 		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count);
 		void widen_ascii(wchar_t* dest, const char* source);
+	}
+}
+
+// STL replacements
+namespace pstd
+{
+	struct equal_to
+	{
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
+		{
+			return lhs == rhs;
+		}
+	};
+
+	struct not_equal_to
+	{
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
+		{
+			return lhs != rhs;
+		}
+	};
+
+	struct less
+	{
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
+		{
+			return lhs < rhs;
+		}
+	};
+
+	struct less_equal
+	{
+		template <typename T> bool operator()(const T& lhs, const T& rhs) const
+		{
+			return lhs <= rhs;
+		}
+	};
+
+	template <typename T> void swap(T& lhs, T& rhs)
+	{
+		T temp = lhs;
+		lhs = rhs;
+		rhs = temp;
+	}
+
+	template <typename I, typename J> void copy(I begin, I end, J target)
+	{
+		while (begin != end) *target++ = *begin++;
+	}
+
+	template <typename I, typename T> I find(I begin, I end, T elem)
+	{
+		for (I it = begin; it != end; ++it)
+			if (*it == elem)
+				return it;
+
+		return end;
+	}
+
+	template <typename I, typename Pred> I min_element(I begin, I end, const Pred& pred)
+	{
+		I result = begin;
+
+		for (I it = begin + 1; it != end; ++it)
+			if (pred(*it, *result))
+				result = it;
+
+		return result;
+	}
+
+	template <typename I> void reverse(I begin, I end)
+	{
+		while (begin + 1 < end) swap(*begin++, *--end);
+	}
+
+	template <typename I> I unique(I begin, I end)
+	{
+		// fast skip head
+		while (begin + 1 < end && *begin != *(begin + 1)) begin++;
+
+		if (begin == end) return begin;
+
+		// last written element
+		I write = begin++; 
+
+		// merge unique elements
+		while (begin != end)
+		{
+			if (*begin != *write)
+				*++write = *begin++;
+			else
+				begin++;
+		}
+
+		// past-the-end (write points to live element)
+		return write + 1;
+	}
+
+	template <typename I, typename Pred> void sort(I begin, I end, const Pred& pred)
+	{
+		while (begin != end) swap(*begin, *min_element(begin, end, pred)), begin++;
 	}
 }
 
@@ -89,6 +189,12 @@ namespace
 			return duplicate_string(string, impl::strlen(string));
 		}
 
+		void _swap(xpath_string& o)
+		{
+			pstd::swap(_buffer, o._buffer);
+			pstd::swap(_uses_heap, o._uses_heap);
+		}
+
 	public:
 		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false)
 		{
@@ -99,18 +205,16 @@ namespace
 			if (_uses_heap) get_memory_deallocation_function()(const_cast<char_t*>(_buffer));
 		}
 
-		explicit xpath_string(const char_t* str, bool use_heap = true)
+		explicit xpath_string(const char_t* str)
 		{
-			if (*str)
-			{
-				_buffer = use_heap ? duplicate_string(str) : str;
-				_uses_heap = use_heap;
-			}
-			else
-			{
-				_buffer = PUGIXML_TEXT("");
-				_uses_heap = false;
-			}
+			bool empty = (*str == 0);
+
+			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(str);
+			_uses_heap = !empty;
+		}
+
+		explicit xpath_string(const char_t* str, bool use_heap): _buffer(str), _uses_heap(use_heap)
+		{
 		}
 
 		xpath_string(const char_t* begin, const char_t* end)
@@ -138,15 +242,9 @@ namespace
 		xpath_string& operator=(const xpath_string& o)
 		{
 			xpath_string temp(o);
-			swap(temp);
+			_swap(temp);
 
 			return *this;
-		}
-
-		void swap(xpath_string& o)
-		{
-			std::swap(_buffer, o._buffer);
-			std::swap(_uses_heap, o._uses_heap);
 		}
 
 		void append(const xpath_string& o)
@@ -176,12 +274,8 @@ namespace
 				memcpy(result + target_length, o._buffer, source_length * sizeof(char_t));
 				result[length] = 0;
 
-				// destroy old buffer
-				if (_uses_heap) get_memory_deallocation_function()(const_cast<char_t*>(_buffer));
-
 				// finalize
-				_buffer = result;
-				_uses_heap = true;
+				xpath_string(result, true)._swap(*this);
 			}
 		}
 
@@ -840,38 +934,6 @@ namespace
 		// zero-terminate
 		*write = 0;
 	}
-
-	struct equal_to
-	{
-		template <typename T> bool operator()(const T& lhs, const T& rhs) const
-		{
-			return lhs == rhs;
-		}
-	};
-
-	struct not_equal_to
-	{
-		template <typename T> bool operator()(const T& lhs, const T& rhs) const
-		{
-			return lhs != rhs;
-		}
-	};
-
-	struct less
-	{
-		template <typename T> bool operator()(const T& lhs, const T& rhs) const
-		{
-			return lhs < rhs;
-		}
-	};
-
-	struct less_equal
-	{
-		template <typename T> bool operator()(const T& lhs, const T& rhs) const
-		{
-			return lhs <= rhs;
-		}
-	};
 }
 
 namespace pugi
@@ -1108,10 +1170,9 @@ namespace pugi
 	
 	void xpath_node_set::sort(bool reverse)
 	{
-		std::sort(_begin, _end, document_order_comparator());
+		pstd::sort(_begin, _end, document_order_comparator());
 		
-		if (reverse)
-			std::reverse(_begin, _end);
+		if (reverse) pstd::reverse(_begin, _end);
 			
 		_type = reverse ? type_sorted_reverse : type_sorted;
 	}
@@ -1142,7 +1203,7 @@ namespace pugi
 			while (capacity < size + count) capacity += capacity / 2;
 			
 			xpath_node* storage = new xpath_node[capacity];
-			std::copy(_begin, _end, storage);
+			pstd::copy(_begin, _end, storage);
 			
 			if (_begin != &_storage) delete[] _begin;
 			
@@ -1151,7 +1212,7 @@ namespace pugi
 			_eos = storage + capacity;
 		}
 		
-		std::copy(begin, end, _end);
+		pstd::copy(begin, end, _end);
 		_end += count;
 	}
 
@@ -1168,7 +1229,7 @@ namespace pugi
 		{
 		case type_sorted: return *_begin;
 		case type_sorted_reverse: return *(_end - 1);
-		case type_unsorted: return *std::min_element(begin(), end(), document_order_comparator());
+		case type_unsorted: return *pstd::min_element(_begin, _end, document_order_comparator());
 		default: return xpath_node();
 		}
 	}
@@ -1177,10 +1238,10 @@ namespace pugi
 	{
 		if (_type == type_unsorted)
 		{
-			std::sort(_begin, _end, duplicate_comparator());
+			pstd::sort(_begin, _end, duplicate_comparator());
 		}
 		
-		truncate(std::unique(_begin, _end));
+		truncate(pstd::unique(_begin, _end));
 	}
 
 	struct xpath_context
@@ -1684,8 +1745,8 @@ namespace pugi
 			{
 				if (lt == xpath_type_node_set)
 				{
-					std::swap(lhs, rhs);
-					std::swap(lt, rt);
+					pstd::swap(lhs, rhs);
+					pstd::swap(lt, rt);
 				}
 
 				if (lt == xpath_type_boolean)
@@ -2295,22 +2356,22 @@ namespace pugi
 				else return _right->eval_boolean(c);
 				
 			case ast_op_equal:
-				return compare_eq(_left, _right, c, equal_to());
+				return compare_eq(_left, _right, c, pstd::equal_to());
 
 			case ast_op_not_equal:
-				return compare_eq(_left, _right, c, not_equal_to());
+				return compare_eq(_left, _right, c, pstd::not_equal_to());
 	
 			case ast_op_less:
-				return compare_rel(_left, _right, c, less());
+				return compare_rel(_left, _right, c, pstd::less());
 			
 			case ast_op_greater:
-				return compare_rel(_right, _left, c, less());
+				return compare_rel(_right, _left, c, pstd::less());
 
 			case ast_op_less_or_equal:
-				return compare_rel(_left, _right, c, less_equal());
+				return compare_rel(_left, _right, c, pstd::less_equal());
 			
 			case ast_op_greater_or_equal:
-				return compare_rel(_right, _left, c, less_equal());
+				return compare_rel(_right, _left, c, pstd::less_equal());
 
 			case ast_func_starts_with:
 				return starts_with(_left->eval_string(c).c_str(), _right->eval_string(c).c_str());
@@ -3300,7 +3361,7 @@ namespace pugi
 					// QName or NCName:*
 					else
 					{
-						const char_t* colon_pos = std::find(nt_name.begin, nt_name.end, ':');
+						const char_t* colon_pos = pstd::find(nt_name.begin, nt_name.end, ':');
 
 						if (colon_pos + 2 == nt_name.end && colon_pos[1] == '*') // NCName:*
 						{
