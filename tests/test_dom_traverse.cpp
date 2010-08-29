@@ -757,3 +757,31 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><?pi?><!--comment--><node>pcdata<![CDAT
 	CHECK((cit++)->offset_debug() == 33);
 	CHECK((cit++)->offset_debug() == 48);
 }
+
+TEST_XML(dom_document_order, "<node attr='value'>value</node>")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_attribute attr = node.first_attribute();
+	xml_node value = node.first_child();
+	
+	CHECK(xml_node().document_order() == 0);
+	CHECK(xml_attribute().document_order() == 0);
+
+	CHECK(doc.document_order() == 0);
+	CHECK(node.document_order() != 0 && attr.document_order() != 0 && value.document_order() != 0);
+
+	CHECK(node.document_order() < attr.document_order() && attr.document_order() < value.document_order());
+
+	attr.set_name(STR("newattr"));
+	CHECK(attr.document_order() != 0);
+	CHECK(node.document_order() < attr.document_order() && attr.document_order() < value.document_order());
+
+	attr.set_value(STR("newvalue"));
+	CHECK(attr.document_order() == 0);
+
+	node.set_name(STR("newnode"));
+	CHECK(node.document_order() == 0);
+
+	value.set_value(STR("newvalue"));
+	CHECK(value.document_order() == 0);
+}

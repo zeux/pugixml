@@ -263,12 +263,6 @@ TEST(xpath_miscellaneous)
 	CHECK_XPATH_NODESET(xml_node(), STR("foo/@FOO/@bar"));
 }
 
-TEST(xpath_document_order)
-{
-	CHECK(xml_attribute().document_order() == 0);
-	CHECK(xml_node().document_order() == 0);
-}
-
 TEST_XML(xpath_context_node, "<node>5</node>")
 {
 	CHECK_XPATH_NODESET(doc, STR("node")) % 2;
