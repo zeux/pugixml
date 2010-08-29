@@ -1,11 +1,8 @@
 #include "test.hpp"
 #include "allocator.hpp"
 
-#include <new>
 #include <exception>
-#include <iostream>
 #include <stdio.h>
-#include <float.h>
 #include <assert.h>
 
 test_runner* test_runner::_tests = 0;
@@ -51,60 +48,6 @@ static void replace_memory_management()
 
 	// replace functions
 	pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
-}
-
-#if defined(__GNUC__) || defined(__INTEL_COMPILER)
-#define DECL_THROW(e) throw(e)
-#define DECL_NOTHROW() throw()
-#else
-#define DECL_THROW(e)
-#define DECL_NOTHROW()
-#endif
-
-void* operator new(size_t size) DECL_THROW(std::bad_alloc)
-{
-    void* result = custom_allocate(size);
-
-#ifndef PUGIXML_NO_EXCEPTIONS
-    if (!result) throw std::bad_alloc();
-#endif
-
-    return result;
-}
-
-void* operator new[](size_t size) DECL_THROW(std::bad_alloc)
-{
-    return operator new(size);
-}
-
-void* operator new(size_t size, const std::nothrow_t&) throw()
-{
-    return custom_allocate(size);
-}
-
-void* operator new[](size_t size, const std::nothrow_t&) throw()
-{
-    return custom_allocate(size);
-}
-
-void operator delete(void* ptr) DECL_NOTHROW()
-{
-    if (ptr) custom_deallocate(ptr);
-}
-
-void operator delete[](void* ptr) DECL_NOTHROW()
-{
-    if (ptr) custom_deallocate(ptr);
-}
-
-void operator delete(void* ptr, const std::nothrow_t&) throw()
-{
-    if (ptr) custom_deallocate(ptr);
-}
-
-void operator delete[](void* ptr, const std::nothrow_t&) throw()
-{
-    if (ptr) custom_deallocate(ptr);
 }
 
 #if defined(_MSC_VER) && _MSC_VER > 1200 && _MSC_VER < 1400 && !defined(__INTEL_COMPILER) && !defined(__DMC__)
@@ -181,11 +124,6 @@ int main()
 	_control87(MCW_EM | PC_53, MCW_EM | MCW_PC);
 #endif
 	
-#if defined(_MSC_VER) && !defined(__GNUC__)
-	std::cout.flush();
-	std::wcout.flush();
-#endif
-
 	replace_memory_management();
 
 	unsigned int total = 0;
