@@ -5562,7 +5562,7 @@ namespace pugi
 	{
 	}
 		
-	xpath_node::xpath_node(const xml_attribute& attribute, const xml_node& parent): _node(parent), _attribute(attribute)
+	xpath_node::xpath_node(const xml_attribute& attribute, const xml_node& parent): _node(attribute ? parent : xml_node()), _attribute(attribute)
 	{
 	}
 
