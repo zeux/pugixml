@@ -43,7 +43,15 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 {
 	CCFLAGS = -fprofile-arcs -ftest-coverage ;
 	LDFLAGS = -fprofile-arcs ;
-	GCOVFLAGS = -n ;
+
+	if $(fullcoverage)
+	{
+		GCOVFLAGS = --branch-probabilities --function-summaries ;
+	}
+	else
+	{
+		GCOVFLAGS = --no-output ;
+	}
 }
 
 # build folder
