@@ -269,4 +269,15 @@ TEST_XML(xpath_parse_absolute, "<div><s/></div>")
 	CHECK_XPATH_NODESET(doc, STR("/*[/]")) % 2;
 }
 
+TEST(xpath_parse_out_of_memory)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	CHECK_XPATH_FAIL(STR("1"));
+
+	test_runner::_memory_fail_threshold = 8192;
+
+	CHECK_XPATH_FAIL(STR("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+}
+
 #endif
