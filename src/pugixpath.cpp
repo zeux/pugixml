@@ -3369,6 +3369,18 @@ namespace pugi
 			
 			return result;
 		}
+
+		static xpath_ast_node* parse(const char_t* query, xpath_allocator& alloc, xpath_parse_result* result)
+		{
+			result->error = 0;
+			result->offset = 0;
+
+			xpath_parser parser(query, alloc, result);
+
+			int error = setjmp(parser.m_error_handler);
+
+			return (error == 0) ? parser.parse() : 0;
+		}
 	};
 
 	const char* xpath_parse_result::description() const
@@ -3379,23 +3391,11 @@ namespace pugi
 	xpath_query::xpath_query(const char_t* query): m_alloc(0), m_root(0)
 	{
 		m_alloc = new xpath_allocator;
+		m_root = xpath_parser::parse(query, *m_alloc, &_result);
 
-		xpath_parser parser(query, *m_alloc, &_result);
-
-		int error = setjmp(parser.m_error_handler);
-
-		if (error == 0)
-		{
-			m_root = parser.parse();
-
-			_result.error = 0;
-			_result.offset = 0;
-		}
-		else
+		if (!m_root)
 		{
 			delete m_alloc;
-
-			m_root = 0;
 			m_alloc = 0;
 
 		#ifndef PUGIXML_NO_EXCEPTIONS
