@@ -5543,9 +5543,9 @@ namespace
 		}
 	}
 
-	template <typename T> void delete_xpath_variable(xpath_variable* var)
+	template <typename T> void delete_xpath_variable(T* var)
 	{
-		static_cast<T*>(var)->~T();
+		var->~T();
 		global_deallocate(var);
 	}
 
@@ -5554,19 +5554,19 @@ namespace
 		switch (type)
 		{
 		case xpath_type_node_set:
-			delete_xpath_variable<xpath_variable_node_set>(var);
+			delete_xpath_variable(static_cast<xpath_variable_node_set*>(var));
 			break;
 
 		case xpath_type_number:
-			delete_xpath_variable<xpath_variable_number>(var);
+			delete_xpath_variable(static_cast<xpath_variable_number*>(var));
 			break;
 
 		case xpath_type_string:
-			delete_xpath_variable<xpath_variable_string>(var);
+			delete_xpath_variable(static_cast<xpath_variable_string*>(var));
 			break;
 
 		case xpath_type_boolean:
-			delete_xpath_variable<xpath_variable_boolean>(var);
+			delete_xpath_variable(static_cast<xpath_variable_boolean*>(var));
 			break;
 
 		default:
