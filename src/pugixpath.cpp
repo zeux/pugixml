@@ -3785,7 +3785,7 @@ namespace pugi
 		size_t size = r.length() + 1;
 		
 		// $$ zero-terminate?
-		if (capacity > 0) memcpy(buffer, r.c_str(), size < capacity ? size : capacity);
+		if (capacity > 0) memcpy(buffer, r.c_str(), (size < capacity ? size : capacity) * sizeof(char_t));
 		
 		return size;
 	}
