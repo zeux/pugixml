@@ -267,6 +267,17 @@ TEST_XML(document_save_declaration, "<node/>")
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n<node />\n"));
 }
 
+TEST(document_save_declaration_empty)
+{
+	xml_document doc;
+
+	xml_writer_string writer;
+
+	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+
+	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n"));
+}
+
 TEST_XML(document_save_declaration_present_first, "<node/>")
 {
 	doc.insert_child_before(node_declaration, doc.first_child()).append_attribute(STR("encoding")) = STR("utf8");

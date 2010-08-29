@@ -440,6 +440,7 @@ TEST_XML(dom_node_child_value, "<node><novalue/><child1>value1</child1><child2>v
 	CHECK_STRING(node.child(STR("child2")).child_value(), STR("value2"));
 	CHECK_STRING(node.child(STR("child3")).child_value(), STR("value3"));
 	CHECK_STRING(node.child_value(STR("child3")), STR("value3"));
+	CHECK_STRING(node.child_value(STR("novalue")), STR(""));
 }
 
 TEST_XML(dom_node_first_last_attribute, "<node attr1='0' attr2='1'/>")

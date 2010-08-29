@@ -25,14 +25,6 @@
 #include <vector>
 #include <iterator>
 
-// format_write_bom_utf8 - it's now format_write_bom!
-TEST_XML(document_save_bom_utf8, "<node/>")
-{
-	xml_writer_string writer;
-
-	CHECK(test_save_narrow(doc, pugi::format_no_declaration | pugi::format_raw | pugi::format_write_bom_utf8, encoding_utf8, "\xef\xbb\xbf<node />", 11));
-}
-
 // parse - it's now load_buffer_inplace
 TEST(document_parse)
 {
