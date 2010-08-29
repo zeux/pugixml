@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <setjmp.h>
 #include <ctype.h>
 #include <math.h>
 #include <float.h>
@@ -36,6 +37,8 @@ typedef __int32 int32_t;
 
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4127) // conditional expression is constant
+#	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
+#	pragma warning(disable: 4324) // structure was padded due to __declspec(align())
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
@@ -48,7 +51,6 @@ typedef __int32 int32_t;
 #endif
 
 #include <algorithm>
-#include <memory>
 #include <string>
 
 // String utilities prototypes
@@ -601,14 +603,22 @@ namespace
 
 namespace pugi
 {
-	xpath_exception::xpath_exception(const char* message): m_message(message)
+#ifndef PUGIXML_NO_EXCEPTIONS
+	xpath_exception::xpath_exception(const xpath_parse_result& result): _result(result)
 	{
+		assert(result.error);
 	}
 	
 	const char* xpath_exception::what() const throw()
 	{
-		return m_message;
+		return _result.error;
 	}
+
+	const xpath_parse_result& xpath_exception::result() const
+	{
+		return _result;
+	}
+#endif
 	
 	const size_t xpath_memory_block_size = 4096;		///< Memory block size, 4 kb
 
@@ -2554,20 +2564,29 @@ namespace pugi
 		return alloc(sizeof(xpath_ast_node));
 	}
 
-	class xpath_parser
+	struct xpath_parser
 	{
-	private:
 	    xpath_allocator& m_alloc;
 	    xpath_lexer m_lexer;
+		xpath_parse_result* m_result;
+		jmp_buf m_error_handler;
 
 		xpath_parser(const xpath_parser&);
 		xpath_parser& operator=(const xpath_parser&);
+
+		void throw_error(const char* message)
+		{
+			m_result->error = message;
+			m_result->offset = 0; // $$$ lexer
+
+			longjmp(m_error_handler, 1);
+		}
 
 		xpath_ast_node* parse_function_helper(ast_type_t type0, ast_type_t type1, size_t argc, xpath_ast_node* args[2])
 		{
 			assert(argc <= 1);
 
-			if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw xpath_exception("Function has to be applied to node set");
+			if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
 
 			return new (m_alloc.node()) xpath_ast_node(argc == 0 ? type0 : type1, xpath_type_string, args[0]);
 		}
@@ -2585,7 +2604,7 @@ namespace pugi
 			case 'c':
 				if (name == PUGIXML_TEXT("count") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set) throw xpath_exception("count() has to be applied to node set");
+					if (args[0]->rettype() != xpath_type_node_set) throw_error("count() has to be applied to node set");
 					return new (m_alloc.node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
@@ -2662,7 +2681,7 @@ namespace pugi
 					return new (m_alloc.node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("sum") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set) throw xpath_exception("sum() has to be applied to node set");
+					if (args[0]->rettype() != xpath_type_node_set) throw_error("sum() has to be applied to node set");
 					return new (m_alloc.node()) xpath_ast_node(ast_func_sum, xpath_type_number, args[0]);
 				}
 
@@ -2677,11 +2696,9 @@ namespace pugi
 				break;
 			}
 
-			throw xpath_exception("Unrecognized function or wrong parameter count");
+			throw_error("Unrecognized function or wrong parameter count");
 
-		#ifdef __DMC__	    	
-			return 0; // Digital Mars C++
-		#endif
+			return 0;
 		}
 
 		axis_t parse_axis_name(const xpath_lexer_string& name, bool& specified)
@@ -2788,11 +2805,9 @@ namespace pugi
 	    	{
 	    	case lex_var_ref:
 	    	{
-				throw xpath_exception("Variables are not supported");
+				throw_error("Variables are not supported");
 
-			#ifdef __DMC__	    	
-	    		return 0; // Digital Mars C++
-			#endif
+	    		return 0;
 			}
 
 			case lex_open_brace:
@@ -2802,7 +2817,7 @@ namespace pugi
 				xpath_ast_node* n = parse_expression();
 
 				if (m_lexer.current() != lex_close_brace)
-					throw xpath_exception("Unmatched braces");
+					throw_error("Unmatched braces");
 
 				m_lexer.next();
 
@@ -2838,7 +2853,7 @@ namespace pugi
 				xpath_ast_node* last_arg = 0;
 				
 				if (m_lexer.current() != lex_open_brace)
-					throw xpath_exception("Unrecognized function call");
+					throw_error("Unrecognized function call");
 				m_lexer.next();
 
 				if (m_lexer.current() != lex_close_brace)
@@ -2847,7 +2862,7 @@ namespace pugi
 				while (m_lexer.current() != lex_close_brace)
 				{
 					if (m_lexer.current() != lex_comma)
-						throw xpath_exception("No comma between function arguments");
+						throw_error("No comma between function arguments");
 					m_lexer.next();
 					
 					xpath_ast_node* n = parse_expression();
@@ -2865,10 +2880,9 @@ namespace pugi
 			}
 
 	    	default:
-	    		throw xpath_exception("Unrecognizable primary expression");
-			#ifdef __DMC__	    	
-	    		return 0; // Digital Mars C++
-			#endif
+	    		throw_error("Unrecognizable primary expression");
+
+	    		return 0;
 	    	}
 	    }
 	    
@@ -2885,14 +2899,14 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_expression();
 
-				if (n->rettype() != xpath_type_node_set) throw xpath_exception("Predicate has to be applied to node set");
+				if (n->rettype() != xpath_type_node_set) throw_error("Predicate has to be applied to node set");
 
 				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv();
 
 	    		n = new (m_alloc.node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, xpath_type_node_set, n, expr);
 
 	    		if (m_lexer.current() != lex_close_square_brace)
-	    			throw xpath_exception("Unmatched square brace");
+	    			throw_error("Unmatched square brace");
 	    	
 	    		m_lexer.next();
 	    	}
@@ -2908,7 +2922,7 @@ namespace pugi
 	    xpath_ast_node* parse_step(xpath_ast_node* set)
 	    {
 			if (set && set->rettype() != xpath_type_node_set)
-				throw xpath_exception("Step has to be applied to node set");
+				throw_error("Step has to be applied to node set");
 
 			bool axis_specified = false;
 			axis_t axis = axis_child; // implied child axis
@@ -2946,11 +2960,11 @@ namespace pugi
 				if (m_lexer.current() == lex_double_colon)
 				{
 					// parse axis name
-					if (axis_specified) throw xpath_exception("Two axis specifiers in one step");
+					if (axis_specified) throw_error("Two axis specifiers in one step");
 
 					axis = parse_axis_name(nt_name, axis_specified);
 
-					if (!axis_specified) throw xpath_exception("Unknown axis");
+					if (!axis_specified) throw_error("Unknown axis");
 
 					// read actual node test
 					m_lexer.next();
@@ -2966,7 +2980,7 @@ namespace pugi
 						nt_name = m_lexer.contents();
 						m_lexer.next();
 					}
-					else throw xpath_exception("Unrecognized node test");
+					else throw_error("Unrecognized node test");
 				}
 				
 				if (nt_type == nodetest_none)
@@ -2982,25 +2996,25 @@ namespace pugi
 
 							nt_type = parse_node_test_type(nt_name);
 
-							if (nt_type == nodetest_none) throw xpath_exception("Unrecognized node type");
+							if (nt_type == nodetest_none) throw_error("Unrecognized node type");
 							
 							nt_name = xpath_lexer_string();
 						}
 						else if (nt_name == PUGIXML_TEXT("processing-instruction"))
 						{
 							if (m_lexer.current() != lex_quoted_string)
-								throw xpath_exception("Only literals are allowed as arguments to processing-instruction()");
+								throw_error("Only literals are allowed as arguments to processing-instruction()");
 						
 							nt_type = nodetest_pi;
 							nt_name = m_lexer.contents();
 							m_lexer.next();
 							
 							if (m_lexer.current() != lex_close_brace)
-								throw xpath_exception("Unmatched brace near processing-instruction()");
+								throw_error("Unmatched brace near processing-instruction()");
 							m_lexer.next();
 						}
 						else
-							throw xpath_exception("Unmatched brace near node type test");
+							throw_error("Unmatched brace near node type test");
 
 					}
 					// QName or NCName:*
@@ -3023,7 +3037,7 @@ namespace pugi
 				nt_type = nodetest_all;
 				m_lexer.next();
 			}
-			else throw xpath_exception("Unrecognized node test");
+			else throw_error("Unrecognized node test");
 			
 			xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_step, set, axis, nt_type, nt_name, m_alloc);
 			
@@ -3038,7 +3052,7 @@ namespace pugi
 				xpath_ast_node* pred = new (m_alloc.node()) xpath_ast_node(ast_predicate, xpath_type_node_set, expr);
 				
 				if (m_lexer.current() != lex_close_square_brace)
-	    			throw xpath_exception("Unmatched square brace");
+	    			throw_error("Unmatched square brace");
 				m_lexer.next();
 				
 				if (last) last->set_next(pred);
@@ -3141,7 +3155,7 @@ namespace pugi
 	    			
 					if (l == lex_double_slash)
 					{
-						if (n->rettype() != xpath_type_node_set) throw xpath_exception("Step has to be applied to node set");
+						if (n->rettype() != xpath_type_node_set) throw_error("Step has to be applied to node set");
 
 						n = new (m_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, xpath_lexer_string(), m_alloc);
 					}
@@ -3167,7 +3181,7 @@ namespace pugi
 				xpath_ast_node* expr = parse_union_expression();
 
 				if (n->rettype() != xpath_type_node_set || expr->rettype() != xpath_type_node_set)
-					throw xpath_exception("Union operator has to be applied to node sets");
+					throw_error("Union operator has to be applied to node sets");
 
 	    		n = new (m_alloc.node()) xpath_ast_node(ast_op_union, xpath_type_node_set, n, expr);
 	    	}
@@ -3318,8 +3332,7 @@ namespace pugi
 			return parse_or_expression();
 		}
 
-	public:
-		explicit xpath_parser(const char_t* query, xpath_allocator& alloc): m_alloc(alloc), m_lexer(query)
+		xpath_parser(const char_t* query, xpath_allocator& alloc, xpath_parse_result* result): m_alloc(alloc), m_lexer(query), m_result(result)
 		{
 		}
 
@@ -3330,21 +3343,44 @@ namespace pugi
 			if (m_lexer.current() != lex_eof)
 			{
 				// there are still unparsed tokens left, error
-				throw xpath_exception("Incorrect query");
+				throw_error("Incorrect query");
 			}
 			
 			return result;
 		}
 	};
 
+	const char* xpath_parse_result::description() const
+	{
+		return error ? error : "Success";
+	}
+
 	xpath_query::xpath_query(const char_t* query): m_alloc(0), m_root(0)
 	{
-		std::auto_ptr<xpath_allocator> alloc(new xpath_allocator);
+		m_alloc = new xpath_allocator;
 
-		xpath_parser p(query, *alloc);
+		xpath_parser parser(query, *m_alloc, &_result);
 
-		m_root = p.parse();
-		m_alloc = alloc.release();
+		int error = setjmp(parser.m_error_handler);
+
+		if (error == 0)
+		{
+			m_root = parser.parse();
+
+			_result.error = 0;
+			_result.offset = 0;
+		}
+		else
+		{
+			delete m_alloc;
+
+			m_root = 0;
+			m_alloc = 0;
+
+		#ifndef PUGIXML_NO_EXCEPTIONS
+			throw xpath_exception(_result);
+		#endif
+		}
 	}
 
 	xpath_query::~xpath_query()
@@ -3389,11 +3425,35 @@ namespace pugi
 	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const
 	{
 		if (!m_root) return xpath_node_set();
-		if (m_root->rettype() != xpath_type_node_set) throw xpath_exception("Expression does not evaluate to node set");
+
+		if (m_root->rettype() != xpath_type_node_set)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return xpath_node_set()
+		#else
+			xpath_parse_result result = {"Expression does not evaluate to node set", 0};
+			throw xpath_exception(result);
+		#endif
+		}
 		
 		xpath_context c(n, 1, 1);
 		
 		return m_root->eval_node_set(c);
+	}
+
+	const xpath_parse_result& xpath_query::result() const
+	{
+		return _result;
+	}
+
+	xpath_query::operator unspecified_bool_type() const
+	{
+		return m_root ? &xpath_query::m_root : 0;
+	}
+
+	bool xpath_query::operator!() const
+	{
+		return !m_root;
 	}
 
 	xpath_node xml_node::select_single_node(const char_t* query) const

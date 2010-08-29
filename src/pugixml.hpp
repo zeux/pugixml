@@ -56,13 +56,13 @@ namespace std
 #	endif
 #endif
 
-// No XPath without STL or exceptions
-#if (defined(PUGIXML_NO_STL) || defined(PUGIXML_NO_EXCEPTIONS)) && !defined(PUGIXML_NO_XPATH)
+// No XPath without STL
+#if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_STL)
 #	define PUGIXML_NO_XPATH
 #endif
 
 // Include exception header for XPath
-#ifndef PUGIXML_NO_XPATH
+#if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
 #	include <exception>
 #endif
 
@@ -339,102 +339,9 @@ namespace pugi
 	#ifndef PUGIXML_NO_XPATH
 	class xpath_node;
 	class xpath_node_set;
-	class xpath_ast_node;
-	class xpath_allocator;
-	
-	/// XPath query return type classification
-	enum xpath_value_type
-	{
-		xpath_type_none,      ///< Unknown type (query failed to compile)
-		xpath_type_node_set,  ///< Node set (xpath_node_set)
-		xpath_type_number,    ///< Number
-		xpath_type_string,    ///< String
-		xpath_type_boolean    ///< Boolean
-	};
-
-	/// XPath query return type classification
-	/// \deprecated This type is deprecated and will be removed in future versions; use xpath_value_type instead
-	typedef xpath_value_type xpath_type_t;
-
-	/**
-	 * A class that holds compiled XPath query and allows to evaluate query result
-	 */
-	class PUGIXML_CLASS xpath_query
-	{
-	private:
-		// Non-copyable semantics
-		xpath_query(const xpath_query&);
-		xpath_query& operator=(const xpath_query&);
-
-		xpath_allocator* m_alloc;
-		xpath_ast_node* m_root;
-
-	public:
-		/**
-		 * Constructor from string with XPath expression.
-		 * Throws xpath_exception on compilation error, std::bad_alloc on out of memory error.
-		 *
-		 * \param query - string with XPath expression
-		 */
-		explicit xpath_query(const char_t* query);
-
-		/**
-		 * Destructor
-		 */
-		~xpath_query();
-
-		/**
-		 * Get query expression return type
-		 *
-		 * \return expression return type
-		 **/
-		xpath_value_type return_type() const;
-		
-		/**
-		 * Evaluate expression as boolean value for the context node \a n.
-		 * If expression does not directly evaluate to boolean, the expression result is converted
-		 * as through boolean() XPath function call.
-		 * Throws std::bad_alloc on out of memory error.
-		 *
-		 * \param n - context node
-		 * \return evaluation result
-		 */
-		bool evaluate_boolean(const xml_node& n) const;
-		
-		/**
-		 * Evaluate expression as double value for the context node \a n.
-		 * If expression does not directly evaluate to double, the expression result is converted
-		 * as through number() XPath function call.
-		 * Throws std::bad_alloc on out of memory error.
-		 *
-		 * \param n - context node
-		 * \return evaluation result
-		 */
-		double evaluate_number(const xml_node& n) const;
-		
-		/**
-		 * Evaluate expression as string value for the context node \a n.
-		 * If expression does not directly evaluate to string, the expression result is converted
-		 * as through string() XPath function call.
-		 * Throws std::bad_alloc on out of memory error.
-		 *
-		 * \param n - context node
-		 * \return evaluation result
-		 */
-		string_t evaluate_string(const xml_node& n) const;
-		
-		/**
-		 * Evaluate expression as node set for the context node \a n.
-		 * If expression does not directly evaluate to node set, throws xpath_exception.
-		 * Throws std::bad_alloc on out of memory error.
-		 *
-		 * \param n - context node
-		 * \return evaluation result
-		 */
-		xpath_node_set evaluate_node_set(const xml_node& n) const;
-	};
+	class xpath_query;
 	#endif
-	
+
 	/**
 	 * Abstract writer class
 	 * \see xml_node::print
@@ -2016,21 +1923,146 @@ namespace pugi
 	};
 
 #ifndef PUGIXML_NO_XPATH
+	class xpath_ast_node;
+	class xpath_allocator;
+	
+	/// XPath query return type classification
+	enum xpath_value_type
+	{
+		xpath_type_none,      ///< Unknown type (query failed to compile)
+		xpath_type_node_set,  ///< Node set (xpath_node_set)
+		xpath_type_number,    ///< Number
+		xpath_type_string,    ///< String
+		xpath_type_boolean    ///< Boolean
+	};
+
+	/// XPath query return type classification
+	/// \deprecated This type is deprecated and will be removed in future versions; use xpath_value_type instead
+	typedef xpath_value_type xpath_type_t;
+
+	struct PUGIXML_CLASS xpath_parse_result
+	{
+		/// Error message (0 if no error)
+		const char* error;
+
+		/// Last parsed offset (in characters from string start)
+		ptrdiff_t offset;
+
+		/// Cast to bool operator
+		operator bool() const
+		{
+			return error == 0;
+		}
+
+		/// Get error description
+		const char* description() const;
+	};
+
+	/**
+	 * A class that holds compiled XPath query and allows to evaluate query result
+	 */
+	class PUGIXML_CLASS xpath_query
+	{
+	private:
+		// Non-copyable semantics
+		xpath_query(const xpath_query&);
+		xpath_query& operator=(const xpath_query&);
+
+		xpath_allocator* m_alloc;
+		xpath_ast_node* m_root;
+		xpath_parse_result _result;
+
+    	typedef xpath_ast_node* xpath_query::*unspecified_bool_type;
+
+	public:
+		/**
+		 * Constructor from string with XPath expression.
+		 * Throws xpath_exception on compilation error, std::bad_alloc on out of memory error.
+		 *
+		 * \param query - string with XPath expression
+		 */
+		explicit xpath_query(const char_t* query);
+
+		/**
+		 * Destructor
+		 */
+		~xpath_query();
+
+		/**
+		 * Get query expression return type
+		 *
+		 * \return expression return type
+		 **/
+		xpath_value_type return_type() const;
+		
+		/**
+		 * Evaluate expression as boolean value for the context node \a n.
+		 * If expression does not directly evaluate to boolean, the expression result is converted
+		 * as through boolean() XPath function call.
+		 * Throws std::bad_alloc on out of memory error.
+		 *
+		 * \param n - context node
+		 * \return evaluation result
+		 */
+		bool evaluate_boolean(const xml_node& n) const;
+		
+		/**
+		 * Evaluate expression as double value for the context node \a n.
+		 * If expression does not directly evaluate to double, the expression result is converted
+		 * as through number() XPath function call.
+		 * Throws std::bad_alloc on out of memory error.
+		 *
+		 * \param n - context node
+		 * \return evaluation result
+		 */
+		double evaluate_number(const xml_node& n) const;
+		
+		/**
+		 * Evaluate expression as string value for the context node \a n.
+		 * If expression does not directly evaluate to string, the expression result is converted
+		 * as through string() XPath function call.
+		 * Throws std::bad_alloc on out of memory error.
+		 *
+		 * \param n - context node
+		 * \return evaluation result
+		 */
+		string_t evaluate_string(const xml_node& n) const;
+		
+		/**
+		 * Evaluate expression as node set for the context node \a n.
+		 * If expression does not directly evaluate to node set, throws xpath_exception.
+		 * Throws std::bad_alloc on out of memory error.
+		 *
+		 * \param n - context node
+		 * \return evaluation result
+		 */
+		xpath_node_set evaluate_node_set(const xml_node& n) const;
+
+		// Get parsing result
+		const xpath_parse_result& result() const;
+
+		// Safe bool conversion
+		operator unspecified_bool_type() const;
+
+    	// Borland C++ workaround
+		bool operator!() const;
+	};
+	
+	#ifndef PUGIXML_NO_EXCEPTIONS
 	/**
 	 * XPath exception class.
 	 */
 	class PUGIXML_CLASS xpath_exception: public std::exception
 	{
 	private:
-		const char* m_message;
+		xpath_parse_result _result;
 
 	public:
 		/**
-		 * Construct exception from static error string
+		 * Construct exception from parse result
 		 *
-		 * \param message - error string
 		 */
-		explicit xpath_exception(const char* message);
+		explicit xpath_exception(const xpath_parse_result& result);
 
 		/**
 		 * Return error message
@@ -2038,7 +2070,10 @@ namespace pugi
 		 * \return error message
 		 */
 		virtual const char* what() const throw();
+
+		const xpath_parse_result& result() const;
 	};
+	#endif
 	
 	/**
 	 * XPath node class.
