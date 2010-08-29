@@ -57,6 +57,14 @@ sub prettyplatform
 	$platform;
 }
 
+sub prettybox
+{
+	my $enabled = shift;
+	my $color = $enabled ? "#cccccc" : "#ffffff";
+
+	"<td bgcolor='$color' align='center'>" . ($enabled ? "+" : "&nbsp;") . "</td>";
+}
+
 # parse build log
 %results = ();
 %toolsets = ();
@@ -135,8 +143,8 @@ print <<END;
 END
 
 # print configuration header (release/debug)
-print "<tr><td align='right' colspan=2>configuration</td>";
-print "<td>".(split /\s+/)[0]."</td>" foreach (@configurationarray);
+print "<tr><td align='right' colspan=2>optimization</td>";
+print &prettybox((split /\s+/)[0] eq 'release') foreach (@configurationarray);
 print "</tr>\n";
 
 # print defines header (one row for each define)
@@ -147,8 +155,8 @@ foreach $define (sort {$a cmp $b} keys %defines)
 	foreach (@configurationarray)
 	{
 		my $present = ($_ =~ /\b$define\b/);
-		my $color = $present ? "#cccccc" : "#ffffff";
-		print "<td bgcolor='$color' align='center'>" . ($present ? "+" : "&nbsp;") . "</td>";
+		
+		print &prettybox($present);
 	}
 	print "</tr>\n";
 }
@@ -157,7 +165,7 @@ foreach $define (sort {$a cmp $b} keys %defines)
 foreach $tool (@toolsetarray)
 {
 	my ($platform, $toolset) = split(/\s+/, $tool, 2);
-	print "<tr><td style='border-right: none' align='center'><small>$platform</small></td><td style='border-left: none'>$toolset</td>";
+	print "<tr><td style='border-right: none' align='center'><small>$platform</small></td><td style='border-left: none'><nobr>$toolset</nobr></td>";
 
 	foreach (@configurationarray)
 	{
