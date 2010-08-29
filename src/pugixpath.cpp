@@ -28,6 +28,12 @@
 #	include <wchar.h>
 #endif
 
+#include <new>
+
+#ifndef PUGIXML_NO_STL
+#	include <string>
+#endif
+
 // int32_t
 #if !defined(_MSC_VER) || _MSC_VER >= 1600
 #	include <stdint.h>
@@ -49,8 +55,6 @@ typedef __int32 int32_t;
 #ifdef __SNC__
 #	pragma diag_suppress=237 // controlling expression is constant
 #endif
-
-#include <string>
 
 // String utilities prototypes
 namespace pugi
@@ -3762,6 +3766,7 @@ namespace pugi
 		return _root->eval_number(c);
 	}
 	
+#ifndef PUGIXML_NO_STL
 	string_t xpath_query::evaluate_string(const xml_node& n) const
 	{
 		if (!_root) return string_t();
@@ -3770,7 +3775,21 @@ namespace pugi
 		
 		return _root->eval_string(c).c_str();
 	}
+#endif
 	
+	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xml_node& n) const
+	{
+		xpath_context c(n, 1, 1);
+		xpath_string r = _root ? _root->eval_string(c) : xpath_string();
+
+		size_t size = r.length() + 1;
+		
+		// $$ zero-terminate?
+		if (capacity > 0) memcpy(buffer, r.c_str(), size < capacity ? size : capacity);
+		
+		return size;
+	}
+
 	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const
 	{
 		if (!_root) return xpath_node_set();

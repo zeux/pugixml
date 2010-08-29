@@ -56,11 +56,6 @@ namespace std
 #	endif
 #endif
 
-// No XPath without STL
-#if !defined(PUGIXML_NO_XPATH) && defined(PUGIXML_NO_STL)
-#	define PUGIXML_NO_XPATH
-#endif
-
 // Include exception header for XPath
 #if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
 #	include <exception>
@@ -2017,6 +2012,7 @@ namespace pugi
 		 */
 		double evaluate_number(const xml_node& n) const;
 		
+	#ifndef PUGIXML_NO_STL
 		/**
 		 * Evaluate expression as string value for the context node \a n.
 		 * If expression does not directly evaluate to string, the expression result is converted
@@ -2027,7 +2023,19 @@ namespace pugi
 		 * \return evaluation result
 		 */
 		string_t evaluate_string(const xml_node& n) const;
+	#endif
 		
+		/**
+		 * Evaluate expression as string value for the context node \a n.
+		 * If expression does not directly evaluate to string, the expression result is converted
+		 * as through string() XPath function call.
+		 * Throws std::bad_alloc on out of memory error.
+		 *
+		 * \param n - context node
+		 * \return evaluation result
+		 */
+		size_t evaluate_string(char_t* buffer, size_t capacity, const xml_node& n) const;
+
 		/**
 		 * Evaluate expression as node set for the context node \a n.
 		 * If expression does not directly evaluate to node set, throws xpath_exception.
