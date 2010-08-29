@@ -658,7 +658,7 @@ namespace pugi
 			}
 		}
 
-		void* alloc(size_t size)
+		void* allocate(size_t size)
 		{
 			// align size so that we're able to store pointers in subsequent blocks
 			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
@@ -686,8 +686,6 @@ namespace pugi
 				return block->data;
 			}
 		}
-
-		void* node();
 	};
 
 	xpath_node::xpath_node()
@@ -2565,11 +2563,6 @@ namespace pugi
 		}
 	};
 
-	void* xpath_allocator::node()
-	{
-		return alloc(sizeof(xpath_ast_node));
-	}
-
 	struct xpath_parser
 	{
 	    xpath_allocator& _alloc;
@@ -2589,13 +2582,18 @@ namespace pugi
 			longjmp(_error_handler, 1);
 		}
 
-		const char_t* duplicate_string(const xpath_lexer_string& value)
+		void* alloc_node()
+		{
+			return _alloc.allocate(sizeof(xpath_ast_node));
+		}
+
+		const char_t* alloc_string(const xpath_lexer_string& value)
 		{
 			if (value.begin)
 			{
 				size_t length = static_cast<size_t>(value.end - value.begin);
 
-				char_t* c = static_cast<char_t*>(_alloc.alloc((length + 1) * sizeof(char_t)));
+				char_t* c = static_cast<char_t*>(_alloc.allocate((length + 1) * sizeof(char_t)));
 				memcpy(c, value.begin, length * sizeof(char_t));
 				c[length] = 0;
 
@@ -2610,7 +2608,7 @@ namespace pugi
 
 			if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
 
-			return new (_alloc.node()) xpath_ast_node(argc == 0 ? type0 : type1, xpath_type_string, args[0]);
+			return new (alloc_node()) xpath_ast_node(argc == 0 ? type0 : type1, xpath_type_string, args[0]);
 		}
 
 		xpath_ast_node* parse_function(const xpath_lexer_string& name, size_t argc, xpath_ast_node* args[2])
@@ -2619,7 +2617,7 @@ namespace pugi
 			{
 			case 'b':
 				if (name == PUGIXML_TEXT("boolean") && argc == 1)
-					return new (_alloc.node()) xpath_ast_node(ast_func_boolean, xpath_type_boolean, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_boolean, xpath_type_boolean, args[0]);
 					
 				break;
 			
@@ -2627,36 +2625,36 @@ namespace pugi
 				if (name == PUGIXML_TEXT("count") && argc == 1)
 				{
 					if (args[0]->rettype() != xpath_type_node_set) throw_error("count() has to be applied to node set");
-					return new (_alloc.node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
-					return new (_alloc.node()) xpath_ast_node(ast_func_contains, xpath_type_string, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(ast_func_contains, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("concat") && argc >= 2)
-					return new (_alloc.node()) xpath_ast_node(ast_func_concat, xpath_type_string, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(ast_func_concat, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("ceiling") && argc == 1)
-					return new (_alloc.node()) xpath_ast_node(ast_func_ceiling, xpath_type_number, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_ceiling, xpath_type_number, args[0]);
 					
 				break;
 			
 			case 'f':
 				if (name == PUGIXML_TEXT("false") && argc == 0)
-					return new (_alloc.node()) xpath_ast_node(ast_func_false, xpath_type_boolean);
+					return new (alloc_node()) xpath_ast_node(ast_func_false, xpath_type_boolean);
 				else if (name == PUGIXML_TEXT("floor") && argc == 1)
-					return new (_alloc.node()) xpath_ast_node(ast_func_floor, xpath_type_number, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_floor, xpath_type_number, args[0]);
 					
 				break;
 			
 			case 'i':
 				if (name == PUGIXML_TEXT("id") && argc == 1)
-					return new (_alloc.node()) xpath_ast_node(ast_func_id, xpath_type_node_set, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_id, xpath_type_node_set, args[0]);
 					
 				break;
 			
 			case 'l':
 				if (name == PUGIXML_TEXT("last") && argc == 0)
-					return new (_alloc.node()) xpath_ast_node(ast_func_last, xpath_type_number);
+					return new (alloc_node()) xpath_ast_node(ast_func_last, xpath_type_number);
 				else if (name == PUGIXML_TEXT("lang") && argc == 1)
-					return new (_alloc.node()) xpath_ast_node(ast_func_lang, xpath_type_boolean, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_lang, xpath_type_boolean, args[0]);
 				else if (name == PUGIXML_TEXT("local-name") && argc <= 1)
 					return parse_function_helper(ast_func_local_name_0, ast_func_local_name_1, argc, args);
 			
@@ -2668,52 +2666,52 @@ namespace pugi
 				else if (name == PUGIXML_TEXT("namespace-uri") && argc <= 1)
 					return parse_function_helper(ast_func_namespace_uri_0, ast_func_namespace_uri_1, argc, args);
 				else if (name == PUGIXML_TEXT("normalize-space") && argc <= 1)
-					return new (_alloc.node()) xpath_ast_node(argc == 0 ? ast_func_normalize_space_0 : ast_func_normalize_space_1, xpath_type_string, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_normalize_space_0 : ast_func_normalize_space_1, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("not") && argc == 1)
-					return new (_alloc.node()) xpath_ast_node(ast_func_not, xpath_type_boolean, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_not, xpath_type_boolean, args[0]);
 				else if (name == PUGIXML_TEXT("number") && argc <= 1)
-					return new (_alloc.node()) xpath_ast_node(argc == 0 ? ast_func_number_0 : ast_func_number_1, xpath_type_number, args[0]);
+					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_number_0 : ast_func_number_1, xpath_type_number, args[0]);
 			
 				break;
 			
 			case 'p':
 				if (name == PUGIXML_TEXT("position") && argc == 0)
-					return new (_alloc.node()) xpath_ast_node(ast_func_position, xpath_type_number);
+					return new (alloc_node()) xpath_ast_node(ast_func_position, xpath_type_number);
 				
 				break;
 			
 			case 'r':
 				if (name == PUGIXML_TEXT("round") && argc == 1)
-					return new (_alloc.node()) xpath_ast_node(ast_func_round, xpath_type_number, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_round, xpath_type_number, args[0]);
 
 				break;
 			
 			case 's':
 				if (name == PUGIXML_TEXT("string") && argc <= 1)
-					return new (_alloc.node()) xpath_ast_node(argc == 0 ? ast_func_string_0 : ast_func_string_1, xpath_type_string, args[0]);
+					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_string_0 : ast_func_string_1, xpath_type_string, args[0]);
 				else if (name == PUGIXML_TEXT("string-length") && argc <= 1)
-					return new (_alloc.node()) xpath_ast_node(argc == 0 ? ast_func_string_length_0 : ast_func_string_length_1, xpath_type_string, args[0]);
+					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_string_length_0 : ast_func_string_length_1, xpath_type_string, args[0]);
 				else if (name == PUGIXML_TEXT("starts-with") && argc == 2)
-					return new (_alloc.node()) xpath_ast_node(ast_func_starts_with, xpath_type_boolean, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(ast_func_starts_with, xpath_type_boolean, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("substring-before") && argc == 2)
-					return new (_alloc.node()) xpath_ast_node(ast_func_substring_before, xpath_type_string, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(ast_func_substring_before, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("substring-after") && argc == 2)
-					return new (_alloc.node()) xpath_ast_node(ast_func_substring_after, xpath_type_string, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(ast_func_substring_after, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("substring") && (argc == 2 || argc == 3))
-					return new (_alloc.node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("sum") && argc == 1)
 				{
 					if (args[0]->rettype() != xpath_type_node_set) throw_error("sum() has to be applied to node set");
-					return new (_alloc.node()) xpath_ast_node(ast_func_sum, xpath_type_number, args[0]);
+					return new (alloc_node()) xpath_ast_node(ast_func_sum, xpath_type_number, args[0]);
 				}
 
 				break;
 			
 			case 't':
 				if (name == PUGIXML_TEXT("translate") && argc == 3)
-					return new (_alloc.node()) xpath_ast_node(ast_func_translate, xpath_type_string, args[0], args[1]);
+					return new (alloc_node()) xpath_ast_node(ast_func_translate, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("true") && argc == 0)
-					return new (_alloc.node()) xpath_ast_node(ast_func_true, xpath_type_boolean);
+					return new (alloc_node()) xpath_ast_node(ast_func_true, xpath_type_boolean);
 					
 				break;
 			}
@@ -2848,9 +2846,9 @@ namespace pugi
 
 			case lex_quoted_string:
 			{
-				const char_t* value = duplicate_string(_lexer.contents());
+				const char_t* value = alloc_string(_lexer.contents());
 
-				xpath_ast_node* n = new (_alloc.node()) xpath_ast_node(ast_string_constant, xpath_type_string, value);
+				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_string_constant, xpath_type_string, value);
 				_lexer.next();
 
 				return n;
@@ -2860,7 +2858,7 @@ namespace pugi
 			{
 				double value = convert_string_to_number(_lexer.contents().begin, _lexer.contents().end);
 
-				xpath_ast_node* n = new (_alloc.node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
+				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
 				_lexer.next();
 
 				return n;
@@ -2927,7 +2925,7 @@ namespace pugi
 
 				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv();
 
-	    		n = new (_alloc.node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, xpath_type_node_set, n, expr);
+	    		n = new (alloc_node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, xpath_type_node_set, n, expr);
 
 	    		if (_lexer.current() != lex_close_square_brace)
 	    			throw_error("Unmatched square brace");
@@ -2962,13 +2960,13 @@ namespace pugi
 			{
 				_lexer.next();
 				
-				return new (_alloc.node()) xpath_ast_node(ast_step, set, axis_self, nodetest_type_node, 0);
+				return new (alloc_node()) xpath_ast_node(ast_step, set, axis_self, nodetest_type_node, 0);
 			}
 			else if (_lexer.current() == lex_double_dot)
 			{
 				_lexer.next();
 				
-				return new (_alloc.node()) xpath_ast_node(ast_step, set, axis_parent, nodetest_type_node, 0);
+				return new (alloc_node()) xpath_ast_node(ast_step, set, axis_parent, nodetest_type_node, 0);
 			}
 	    
 			nodetest_t nt_type = nodetest_none;
@@ -3063,7 +3061,7 @@ namespace pugi
 			}
 			else throw_error("Unrecognized node test");
 			
-			xpath_ast_node* n = new (_alloc.node()) xpath_ast_node(ast_step, set, axis, nt_type, duplicate_string(nt_name));
+			xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step, set, axis, nt_type, alloc_string(nt_name));
 			
 			xpath_ast_node* last = 0;
 			
@@ -3073,7 +3071,7 @@ namespace pugi
 				
 				xpath_ast_node* expr = parse_expression();
 
-				xpath_ast_node* pred = new (_alloc.node()) xpath_ast_node(ast_predicate, xpath_type_node_set, expr);
+				xpath_ast_node* pred = new (alloc_node()) xpath_ast_node(ast_predicate, xpath_type_node_set, expr);
 				
 				if (_lexer.current() != lex_close_square_brace)
 	    			throw_error("Unmatched square brace");
@@ -3099,7 +3097,7 @@ namespace pugi
 				_lexer.next();
 
 				if (l == lex_double_slash)
-					n = new (_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+					n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 				
 				n = parse_step(n);
 			}
@@ -3115,7 +3113,7 @@ namespace pugi
 			{
 				_lexer.next();
 				
-				xpath_ast_node* n = new (_alloc.node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
+				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
 
 				// relative location path can start from axis_attribute, dot, double_dot, multiply and string lexemes; any other lexeme means standalone root path
 				lexeme_t l = _lexer.current();
@@ -3129,8 +3127,8 @@ namespace pugi
 			{
 				_lexer.next();
 				
-				xpath_ast_node* n = new (_alloc.node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
-				n = new (_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
+				n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 				
 				return parse_relative_location_path(n);
 			}
@@ -3181,7 +3179,7 @@ namespace pugi
 					{
 						if (n->rettype() != xpath_type_node_set) throw_error("Step has to be applied to node set");
 
-						n = new (_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+						n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 					}
 	
 	    			// select from location path
@@ -3207,7 +3205,7 @@ namespace pugi
 				if (n->rettype() != xpath_type_node_set || expr->rettype() != xpath_type_node_set)
 					throw_error("Union operator has to be applied to node sets");
 
-	    		n = new (_alloc.node()) xpath_ast_node(ast_op_union, xpath_type_node_set, n, expr);
+	    		n = new (alloc_node()) xpath_ast_node(ast_op_union, xpath_type_node_set, n, expr);
 	    	}
 
 	    	return n;
@@ -3222,7 +3220,7 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_unary_expression();
 
-	    		return new (_alloc.node()) xpath_ast_node(ast_op_negate, xpath_type_number, expr);
+	    		return new (alloc_node()) xpath_ast_node(ast_op_negate, xpath_type_number, expr);
 	    	}
 	    	else return parse_union_expression();
 	    }
@@ -3244,7 +3242,7 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_unary_expression();
 
-	    		n = new (_alloc.node()) xpath_ast_node(op, xpath_type_number, n, expr);
+	    		n = new (alloc_node()) xpath_ast_node(op, xpath_type_number, n, expr);
 	    	}
 
 	    	return n;
@@ -3265,7 +3263,7 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_multiplicative_expression();
 
-	    		n = new (_alloc.node()) xpath_ast_node(l == lex_plus ? ast_op_add : ast_op_subtract, xpath_type_number, n, expr);
+	    		n = new (alloc_node()) xpath_ast_node(l == lex_plus ? ast_op_add : ast_op_subtract, xpath_type_number, n, expr);
 	    	}
 
 	    	return n;
@@ -3288,7 +3286,7 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_additive_expression();
 
-	    		n = new (_alloc.node()) xpath_ast_node(l == lex_less ? ast_op_less : l == lex_greater ? ast_op_greater :
+	    		n = new (alloc_node()) xpath_ast_node(l == lex_less ? ast_op_less : l == lex_greater ? ast_op_greater :
 	    						l == lex_less_or_equal ? ast_op_less_or_equal : ast_op_greater_or_equal, xpath_type_boolean, n, expr);
 	    	}
 
@@ -3310,7 +3308,7 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_relational_expression();
 
-	    		n = new (_alloc.node()) xpath_ast_node(l == lex_equal ? ast_op_equal : ast_op_not_equal, xpath_type_boolean, n, expr);
+	    		n = new (alloc_node()) xpath_ast_node(l == lex_equal ? ast_op_equal : ast_op_not_equal, xpath_type_boolean, n, expr);
 	    	}
 
 	    	return n;
@@ -3327,7 +3325,7 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_equality_expression();
 
-	    		n = new (_alloc.node()) xpath_ast_node(ast_op_and, xpath_type_boolean, n, expr);
+	    		n = new (alloc_node()) xpath_ast_node(ast_op_and, xpath_type_boolean, n, expr);
 	    	}
 
 	    	return n;
@@ -3344,7 +3342,7 @@ namespace pugi
 
 				xpath_ast_node* expr = parse_and_expression();
 
-	    		n = new (_alloc.node()) xpath_ast_node(ast_op_or, xpath_type_boolean, n, expr);
+	    		n = new (alloc_node()) xpath_ast_node(ast_op_or, xpath_type_boolean, n, expr);
 	    	}
 
 	    	return n;
