@@ -2293,18 +2293,18 @@ namespace
 			if (cursor != xmldoc) THROW_ERROR(status_end_element_mismatch, s);
 		}
 
-		static xml_parse_result parse(char_t* buffer, size_t length, xml_node_struct* xmldoc, unsigned int optmsk)
+		static xml_parse_result parse(char_t* buffer, size_t length, xml_node_struct* root, unsigned int optmsk)
 		{
+			xml_document_struct* xmldoc = static_cast<xml_document_struct*>(root);
+
 			// store buffer for offset_debug
-			static_cast<xml_document_struct*>(xmldoc)->buffer = buffer;
+			xmldoc->buffer = buffer;
 
 			// early-out for empty documents
 			if (length == 0) return make_parse_result(status_ok);
 
 			// create parser on stack
-			xml_allocator& alloc = *static_cast<xml_document_struct*>(xmldoc);
-			
-			xml_parser parser(alloc);
+			xml_parser parser(*xmldoc);
 
 			// save last character and make buffer zero-terminated (speeds up parsing)
 			char_t endch = buffer[length - 1];
@@ -2321,7 +2321,7 @@ namespace
 			xml_parse_result result = make_parse_result(static_cast<xml_parse_status>(error), parser.error_offset ? parser.error_offset - buffer : 0);
 
 			// update allocator state
-			alloc = parser.alloc;
+			*static_cast<xml_allocator*>(xmldoc) = parser.alloc;
 
 			// since we removed last character, we have to handle the only possible false positive
 			if (result && endch == '<')
