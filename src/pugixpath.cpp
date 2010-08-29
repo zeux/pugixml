@@ -337,11 +337,35 @@ namespace
 		return (value != 0 && !is_nan(value));
 	}
 	
+	void truncate_zeros(char* begin, char* end)
+	{
+		while (begin != end && end[-1] == '0') end--;
+
+		*end = 0;
+	}
+
 	// gets mantissa digits in the form of 0.xxxxx with 0. implied and the exponent
-	void convert_number_to_mantissa_exponent(double value, char* buffer, char** out_mantissa, int* out_exponent)
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+	void convert_number_to_mantissa_exponent(double value, char* buffer, size_t buffer_size, char** out_mantissa, int* out_exponent)
+	{
+		// get base values
+		int sign, exponent;
+		_ecvt_s(buffer, buffer_size, value, DBL_DIG + 1, &exponent, &sign);
+
+		// truncate redundant zeros
+		truncate_zeros(buffer, buffer + strlen(buffer));
+
+		// fill results
+		*out_mantissa = buffer;
+		*out_exponent = exponent;
+	}
+#else
+	void convert_number_to_mantissa_exponent(double value, char* buffer, size_t buffer_size, char** out_mantissa, int* out_exponent)
 	{
 		// get a scientific notation value with IEEE DBL_DIG decimals
-		sprintf(buffer, "%.15e", value);
+		sprintf(buffer, "%.*e", DBL_DIG, value);
+		assert(strlen(buffer) < buffer_size);
+		(void)!buffer_size;
 
 		// get the exponent (possibly negative)
 		char* exponent_string = strchr(buffer, 'e');
@@ -359,16 +383,13 @@ namespace
 		exponent++;
 
 		// remove extra mantissa digits and zero-terminate mantissa
-		char* mantissa_end = exponent_string;
-
-		while (mantissa != mantissa_end && *(mantissa_end - 1) == '0') --mantissa_end;
-
-		*mantissa_end = 0;
+		truncate_zeros(mantissa, exponent_string);
 
 		// fill results
 		*out_mantissa = mantissa;
 		*out_exponent = exponent;
 	}
+#endif
 
 	string_t convert_number_to_string(double value)
 	{
@@ -381,7 +402,7 @@ namespace
 
 		char* mantissa;
 		int exponent;
-		convert_number_to_mantissa_exponent(value, mantissa_buffer, &mantissa, &exponent);
+		convert_number_to_mantissa_exponent(value, mantissa_buffer, sizeof(mantissa_buffer), &mantissa, &exponent);
 
 		// make the number!
 		char_t result[512];
