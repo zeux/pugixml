@@ -5,6 +5,7 @@
 #include "common.hpp"
 
 #include <string>
+#include <algorithm>
 
 TEST_XML(xpath_xalan_string_1, "<doc a='test'>ENCYCLOPEDIA</doc>")
 {
@@ -129,38 +130,53 @@ TEST_XML(xpath_xalan_string_4, "<doc><a>a</a><b>b</b><c>c</c><d>d</d><e>ef</e><f
 	CHECK_XPATH_STRING(c, STR("translate('quan+ti-ty', 'AQU-+EOS', concat(\"aqu'\", '\"eos'))"), STR("quan\"ti'ty"));
 }
 
-static std::basic_string<char_t> number_to_string(int number)
+static const char_t* number_to_string_unsafe(int number)
 {
-	std::basic_string<char_t> result;
+	static char_t buffer[16];
+
+	// construct number in reverse
+	char_t* it = buffer;
 
 	while (number)
 	{
-		result = static_cast<char_t>('0' + number % 10) + result;
+		*it++ = static_cast<char_t>('0' + number % 10);
 		number /= 10;
 	}
 
-	return result;
+	// zero terminate
+	*it = 0;
+
+	// reverse to get final result
+	std::reverse(buffer, it);
+
+	return buffer;
 }
 
 TEST(xpath_xalan_string_5)
 {
-	std::basic_string<char_t> query = STR("concat(");
+	const int count = 1000;
 
-	for (int i = 1; i < 1000; ++i)
+	std::basic_string<char_t> query;
+	query.reserve(17 * count);
+
+	query += STR("concat(");
+
+	for (int i = 1; i < count; ++i)
 	{
 		query += STR("concat('t',");
-		query += number_to_string(i);
+		query += number_to_string_unsafe(i);
 		query += STR("), ");
 	}
 
 	query += STR("'')");
 
 	std::basic_string<char_t> expected;
+	expected.reserve(4 * count);
 
-	for (int j = 1; j < 1000; ++j)
+	for (int j = 1; j < count; ++j)
 	{
 		expected += STR("t");
-		expected += number_to_string(j);
+		expected += number_to_string_unsafe(j);
 	}
 
 	CHECK_XPATH_STRING(xml_node(), query.c_str(), expected.c_str());

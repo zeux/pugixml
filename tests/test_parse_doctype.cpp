@@ -1,42 +1,63 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "common.hpp"
 
+#include <string.h>
+#include <wchar.h>
 #include <string>
 
-static bool test_doctype_wf(const std::basic_string<char_t>& decl)
+static xml_parse_result load_concat(xml_document& doc, const char_t* a, const char_t* b = STR(""), const char_t* c = STR(""))
+{
+	char_t buffer[768];
+
+#ifdef PUGIXML_WCHAR_MODE
+	wcscpy(buffer, a);
+	wcscat(buffer, b);
+	wcscat(buffer, c);
+#else
+	strcpy(buffer, a);
+	strcat(buffer, b);
+	strcat(buffer, c);
+#endif
+
+	return doc.load(buffer);
+}
+
+static bool test_doctype_wf(const char_t* decl)
 {
 	xml_document doc;
 
 	// standalone
-	if (!doc.load(decl.c_str()) || (bool)doc.first_child()) return false;
+	if (!load_concat(doc, decl) || (bool)doc.first_child()) return false;
 
 	// pcdata pre/postfix
-	if (!doc.load((STR("a") + decl).c_str()) || (bool)doc.first_child()) return false;
-	if (!doc.load((decl + STR("b")).c_str()) || (bool)doc.first_child()) return false;
-	if (!doc.load((STR("a") + decl + STR("b")).c_str()) || (bool)doc.first_child()) return false;
+	if (!load_concat(doc, STR("a"), decl) || (bool)doc.first_child()) return false;
+	if (!load_concat(doc, decl, STR("b")) || (bool)doc.first_child()) return false;
+	if (!load_concat(doc, STR("a"), decl, STR("b")) || (bool)doc.first_child()) return false;
 
 	// node pre/postfix
-	if (!doc.load((STR("<nodea/>") + decl).c_str()) || !test_node(doc, STR("<nodea />"), STR(""), format_raw)) return false;
-	if (!doc.load((decl + STR("<nodeb/>")).c_str()) || !test_node(doc, STR("<nodeb />"), STR(""), format_raw)) return false;
-	if (!doc.load((STR("<nodea/>") + decl + STR("<nodeb/>")).c_str()) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("<nodea/>"), decl) || !test_node(doc, STR("<nodea />"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodeb />"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
 
 	// wrap in node to check that doctype is parsed fully (does not leave any "pcdata")
-	if (!doc.load((STR("<node>") + decl + STR("</node>")).c_str()) || !test_node(doc, STR("<node />"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("<node>"), decl, STR("</node>")) || !test_node(doc, STR("<node />"), STR(""), format_raw)) return false;
 
 	return true;
 }
 
-static bool test_doctype_nwf(const std::basic_string<char_t>& decl)
+static bool test_doctype_nwf(const char_t* decl)
 {
 	xml_document doc;
 
 	// standalone
-	if (doc.load(decl.c_str()).status != status_bad_doctype) return false;
+	if (load_concat(doc, decl).status != status_bad_doctype) return false;
 
 	// pcdata postfix
-	if (doc.load((decl + STR("b")).c_str()).status != status_bad_doctype) return false;
+	if (load_concat(doc, decl, STR("b")).status != status_bad_doctype) return false;
 
 	// node postfix
-	if (doc.load((decl + STR("<nodeb/>")).c_str()).status != status_bad_doctype) return false;
+	if (load_concat(doc, decl, STR("<nodeb/>")).status != status_bad_doctype) return false;
 
 	return true;
 }

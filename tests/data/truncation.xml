@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE é_+å + SYSTEM "weekly-utf-8.dtd">
+<!-- é_+å +ã'÷ã__ã_-ã_< -->
+<mesh name="mesh_root">
+	<!-- here is a mesh node -->
+	some text
+	<![CDATA[someothertext]]>
+	some more text
+	<node attr1="value1" attr2="value2" />
+	<node attr1="value2">
+		<æ+%è¯- å__å--="name" ä>·å__="value">ä¸-ç_æ_%å__å¤_è¯-è¨_ð¤-¢</æ+%è¯->
+		<innernode/>
+	</node>
+	<æ°_å__>
+		<æ°_>å++ç"°</æ°_>
+		<å__>å¤ªé__</å__>
+	</æ°_å__>
+	<?include somedata?>
+</mesh>
