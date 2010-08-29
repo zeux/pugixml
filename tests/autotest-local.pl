@@ -101,14 +101,10 @@ foreach $toolset (@toolsets)
 		{
 			my $configuration = $1;
 			my $defineset = ($2 eq $stddefine) ? '' : $2;
-			my $file;
 
-			$file = "pugixml $1" if (/pugixml\.cpp' executed:([^%]+)%/);
-			$file = "pugixpath $1" if (/pugixpath\.cpp' executed:([^%]+)%/);
-
-			if (defined($file))
+			if (/pugixml\.cpp' executed:([^%]+)%/)
 			{
-				print "### autotest $Config{archname} $toolset $configuration [$defineset] coverage $file\n";
+				print "### autotest $Config{archname} $toolset $configuration [$defineset] coverage $1\n";
 			}
 			else
 			{

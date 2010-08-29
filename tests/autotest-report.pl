@@ -88,9 +88,9 @@ while (<>)
 		{
 			$results{$fulltool}{$fullconf}{result} = 0;
 		}
-		elsif ($info =~ /^coverage (\S+) (\S+)/)
+		elsif ($info =~ /^coverage (\S+)/)
 		{
-			$results{$fulltool}{$fullconf}{"coverage_$1"} = $2;
+			$results{$fulltool}{$fullconf}{coverage} = $1;
 		}
 		else
 		{
@@ -169,13 +169,13 @@ foreach $tool (@toolsetarray)
 		}
 		elsif ($$info{result} == 0)
 		{
-			my ($coverage_pugixml, $coverage_pugixpath) = ($$info{coverage_pugixml}, $$info{coverage_pugixpath});
+			my $coverage = $$info{coverage};
 
 			print "<td bgcolor='#00ff00' align='center'>pass";
 				
-			if ($coverage_pugixml > 0 || $coverage_pugixpath > 0)
+			if ($coverage > 0)
 			{
-				print "<br><font size='-2'>" . ($coverage_pugixml + 0) . "%<br>" . ($coverage_pugixpath + 0) . "%</font>";
+				print "<br><font size='-2'>" . ($coverage + 0) . "%</font>";
 			}
 
 			print "</td>";
