@@ -474,13 +474,12 @@ namespace pugi
 		xml_attribute_struct*	first_attribute;		///< First attribute
 	};
 
-	struct xml_document_struct: public xml_node_struct
+	struct xml_document_struct: public xml_node_struct, public xml_allocator
 	{
-		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), allocator(0), buffer(0)
+		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0)
 		{
 		}
 
-		xml_allocator allocator;
 		const char_t* buffer;
 	};
 
@@ -2340,7 +2339,7 @@ namespace
 			if (length == 0) return make_parse_result(status_ok);
 
 			// create parser on stack
-			xml_allocator& alloc = static_cast<xml_document_struct*>(xmldoc)->allocator;
+			xml_allocator& alloc = *static_cast<xml_document_struct*>(xmldoc);
 			
 			xml_parser parser(alloc);
 
@@ -3540,11 +3539,11 @@ namespace pugi
 
 	xml_node xml_node::root() const
 	{
-		xml_node_struct* r = _root;
+		if (!_root) return xml_node();
 
-		while (r && r->parent) r = r->parent;
+		xml_memory_page* page = reinterpret_cast<xml_memory_page*>(_root->header & xml_memory_page_pointer_mask);
 
-		return xml_node(r);
+		return xml_node(static_cast<xml_document_struct*>(page->allocator));
 	}
 
 	const char_t* xml_node::child_value() const
@@ -4288,12 +4287,8 @@ namespace pugi
 		_root = new (page->data) xml_document_struct(page);
 		_root->prev_sibling_c = _root;
 
-		// setup allocator
-		xml_allocator& a = static_cast<xml_document_struct*>(_root)->allocator;
-		a = xml_allocator(page);
-
 		// setup sentinel page
-		page->allocator = &a;
+		page->allocator = static_cast<xml_document_struct*>(_root);
 	}
 
 	void xml_document::destroy()
