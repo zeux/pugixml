@@ -20,6 +20,12 @@
 #include <setjmp.h>
 #include <wchar.h>
 
+#ifndef PUGIXML_NO_XPATH
+#	include <ctype.h>
+#	include <math.h>
+#	include <float.h>
+#endif
+
 #ifndef PUGIXML_NO_STL
 #	include <istream>
 #	include <ostream>
@@ -31,8 +37,9 @@
 
 #ifdef _MSC_VER
 #	pragma warning(disable: 4127) // conditional expression is constant
-#	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
 #	pragma warning(disable: 4324) // structure was padded due to __declspec(align())
+#	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
+#	pragma warning(disable: 4702) // unreachable code
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
@@ -48,6 +55,7 @@
 
 #ifdef __SNC__
 #	pragma diag_suppress=178 // function was declared but never referenced
+#	pragma diag_suppress=237 // controlling expression is constant
 #endif
 
 // uintptr_t
@@ -61,6 +69,7 @@ typedef size_t uintptr_t;
 typedef unsigned __int8 uint8_t;
 typedef unsigned __int16 uint16_t;
 typedef unsigned __int32 uint32_t;
+typedef __int32 int32_t;
 #endif
 
 // Inlining controls
@@ -74,6 +83,13 @@ typedef unsigned __int32 uint32_t;
 
 // Simple static assertion
 #define STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
+
+// Digital Mars C++ bug workaround for passing char loaded from memory via stack
+#ifdef __DMC__
+#	define DMC_VOLATILE volatile
+#else
+#	define DMC_VOLATILE
+#endif
 
 // Memory allocation
 namespace
@@ -92,62 +108,49 @@ namespace
 	pugi::deallocation_function global_deallocate = default_deallocate;
 }
 
-// String utilities prototypes
-namespace pugi
-{
-	namespace impl
-	{
-		size_t strlen(const char_t* s);
-		bool strequal(const char_t* src, const char_t* dst);
-		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count);
-		void widen_ascii(wchar_t* dest, const char* source);
-	}
-}
-
 // String utilities
-namespace pugi
+namespace
 {
-	namespace impl
+	using namespace pugi;
+
+	// Get string length
+	size_t strlength(const char_t* s)
 	{
-		// Get string length
-		size_t strlen(const char_t* s)
-		{
-		#ifdef PUGIXML_WCHAR_MODE
-			return wcslen(s);
-		#else
-			return ::strlen(s);
-		#endif
-		}
-
-		// Compare two strings
-		bool PUGIXML_FUNCTION strequal(const char_t* src, const char_t* dst)
-		{
-		#ifdef PUGIXML_WCHAR_MODE
-			return wcscmp(src, dst) == 0;
-		#else
-			return strcmp(src, dst) == 0;
-		#endif
-		}
-
-		// Compare lhs with [rhs_begin, rhs_end)
-		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count)
-		{
-			for (size_t i = 0; i < count; ++i)
-				if (lhs[i] != rhs[i])
-					return false;
-		
-			return lhs[count] == 0;
-		}
-		
-#ifdef PUGIXML_WCHAR_MODE
-		// Convert string to wide string, assuming all symbols are ASCII
-		void widen_ascii(wchar_t* dest, const char* source)
-		{
-			for (const char* i = source; *i; ++i) *dest++ = *i;
-			*dest = 0;
-		}
-#endif
+	#ifdef PUGIXML_WCHAR_MODE
+		return wcslen(s);
+	#else
+		return strlen(s);
+	#endif
 	}
+
+	// Compare two strings
+	bool strequal(const char_t* src, const char_t* dst)
+	{
+	#ifdef PUGIXML_WCHAR_MODE
+		return wcscmp(src, dst) == 0;
+	#else
+		return strcmp(src, dst) == 0;
+	#endif
+	}
+
+	// Compare lhs with [rhs_begin, rhs_end)
+	bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count)
+	{
+		for (size_t i = 0; i < count; ++i)
+			if (lhs[i] != rhs[i])
+				return false;
+	
+		return lhs[count] == 0;
+	}
+	
+#ifdef PUGIXML_WCHAR_MODE
+	// Convert string to wide string, assuming all symbols are ASCII
+	void widen_ascii(wchar_t* dest, const char* source)
+	{
+		for (const char* i = source; *i; ++i) *dest++ = *i;
+		*dest = 0;
+	}
+#endif
 }
 
 namespace pugi
@@ -906,12 +909,35 @@ namespace
 		192, 192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 192, 192, 192, 192, 192
 	};
 
-#ifdef PUGIXML_WCHAR_MODE
-	#define IS_CHARTYPE(c, ct) ((static_cast<unsigned int>(c) < 128 ? chartype_table[static_cast<unsigned int>(c)] : chartype_table[128]) & (ct))
-#else
-	#define IS_CHARTYPE(c, ct) (chartype_table[static_cast<unsigned char>(c)] & (ct))
-#endif
+	enum chartypex
+	{
+		ctx_space = 1,			// \r, \n, space, tab
+		ctx_start_symbol = 2,	// Any symbol > 127, a-z, A-Z, _
+		ctx_digit = 4,			// 0-9
+		ctx_symbol = 8			// Any symbol > 127, a-z, A-Z, 0-9, _, -, .
+	};
+	
+	const unsigned char chartypex_table[256] =
+	{
+		0,  0,  0,  0,  0,  0,  0,  0,     0,  1,  1,  0,  0,  1,  0,  0,     // 0-15
+		0,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  0,  0,  0,     // 16-31
+		1,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  8,  8,  0,     // 32-47
+		12, 12, 12, 12, 12, 12, 12, 12,    12, 12, 0,  0,  0,  0,  0,  0,     // 48-63
+		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 64-79
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 0,  0,  0,  0,  10,    // 80-95
+		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 96-111
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 0,  0,  0,  0,  0,     // 112-127
 
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 128+
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
+		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10
+	};
+	
 	enum output_chartype_t
 	{
 		oct_special_pcdata = 1,   // Any symbol >= 0 and < 32 (except \t, \r, \n), &, <, >
@@ -941,10 +967,14 @@ namespace
 	};
 	
 #ifdef PUGIXML_WCHAR_MODE
-	#define IS_OUTPUT_CHARTYPE(c, ct) ((static_cast<unsigned int>(c) < 128 ? output_chartype_table[static_cast<unsigned int>(c)] : output_chartype_table[128]) & (ct))
+	#define IS_CHARTYPE_IMPL(c, ct, table) ((static_cast<unsigned int>(c) < 128 ? table[static_cast<unsigned int>(c)] : table[128]) & (ct))
 #else
-	#define IS_OUTPUT_CHARTYPE(c, ct) (output_chartype_table[static_cast<unsigned char>(c)] & (ct))
+	#define IS_CHARTYPE_IMPL(c, ct, table) (table[static_cast<unsigned char>(c)] & (ct))
 #endif
+
+	#define IS_CHARTYPE(c, ct) IS_CHARTYPE_IMPL(c, ct, chartype_table)
+	#define IS_CHARTYPEX(c, ct) IS_CHARTYPE_IMPL(c, ct, chartypex_table)
+	#define IS_OUTPUT_CHARTYPE(c, ct) IS_CHARTYPE_IMPL(c, ct, output_chartype_table)
 
 	bool is_little_endian()
 	{
@@ -1007,10 +1037,7 @@ namespace
 		// try to guess encoding (based on XML specification, Appendix F.1)
 		const uint8_t* data = static_cast<const uint8_t*>(contents);
 
-	#ifdef __DMC__
-		volatile // explicitly store to local to work around DMC bug (it loads 4 bytes from data[3] otherwise)
-	#endif
-		uint8_t d0 = data[0], d1 = data[1], d2 = data[2], d3 = data[3];
+		DMC_VOLATILE uint8_t d0 = data[0], d1 = data[1], d2 = data[2], d3 = data[3];
 
 		return guess_buffer_encoding(d0, d1, d2, d3);
 	}
@@ -1248,7 +1275,7 @@ namespace
 	inline bool strcpy_insitu_allow(size_t length, uintptr_t allocated, char_t* target)
 	{
 		assert(target);
-		size_t target_length = impl::strlen(target);
+		size_t target_length = strlength(target);
 
 		// always reuse document buffer memory if possible
 		if (!allocated) return target_length >= length;
@@ -1261,7 +1288,7 @@ namespace
 
 	bool strcpy_insitu(char_t*& dest, uintptr_t& header, uintptr_t header_mask, const char_t* source)
 	{
-		size_t source_length = impl::strlen(source);
+		size_t source_length = strlength(source);
 
 		if (source_length == 0)
 		{
@@ -2572,7 +2599,7 @@ namespace
 
 		void write(const char_t* data)
 		{
-			write(data, impl::strlen(data));
+			write(data, strlength(data));
 		}
 
 		void write(char_t d0)
@@ -3254,7 +3281,7 @@ namespace pugi
 	
 	#ifdef PUGIXML_WCHAR_MODE
 		char_t wbuf[128];
-		impl::widen_ascii(wbuf, buf);
+		widen_ascii(wbuf, buf);
 
 		return set_value(wbuf);
 	#else
@@ -3269,7 +3296,7 @@ namespace pugi
 
 	#ifdef PUGIXML_WCHAR_MODE
 		char_t wbuf[128];
-		impl::widen_ascii(wbuf, buf);
+		widen_ascii(wbuf, buf);
 
 		return set_value(wbuf);
 	#else
@@ -3284,7 +3311,7 @@ namespace pugi
 
 	#ifdef PUGIXML_WCHAR_MODE
 		char_t wbuf[128];
-		impl::widen_ascii(wbuf, buf);
+		widen_ascii(wbuf, buf);
 
 		return set_value(wbuf);
 	#else
@@ -3406,7 +3433,7 @@ namespace pugi
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
+			if (i->name && strequal(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -3416,7 +3443,7 @@ namespace pugi
 		if (!_root) return xml_attribute();
 
 		for (xml_attribute_struct* i = _root->first_attribute; i; i = i->next_attribute)
-			if (i->name && impl::strequal(name, i->name))
+			if (i->name && strequal(name, i->name))
 				return xml_attribute(i);
 		
 		return xml_attribute();
@@ -3427,7 +3454,7 @@ namespace pugi
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
-			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
+			if (i->name && strequal(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -3445,7 +3472,7 @@ namespace pugi
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->prev_sibling_c; i->next_sibling; i = i->prev_sibling_c)
-			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
+			if (i->name && strequal(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -3775,10 +3802,10 @@ namespace pugi
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && impl::strequal(name, i->name))
+			if (i->name && strequal(name, i->name))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value))
+					if (strequal(attr_name, a->name) && strequal(attr_value, a->value))
 						return xml_node(i);
 			}
 
@@ -3791,7 +3818,7 @@ namespace pugi
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value))
+				if (strequal(attr_name, a->name) && strequal(attr_value, a->value))
 					return xml_node(i);
 
 		return xml_node();
@@ -3855,7 +3882,7 @@ namespace pugi
 		{
 			for (xml_node_struct* j = found._root->first_child; j; j = j->next_sibling)
 			{
-				if (j->name && impl::strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
+				if (j->name && strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
 				{
 					xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
 
@@ -4237,7 +4264,7 @@ namespace pugi
 		xml_encoding encoding = encoding_utf8;
 	#endif
 
-		return load_buffer(contents, impl::strlen(contents) * sizeof(char_t), options, encoding);
+		return load_buffer(contents, strlength(contents) * sizeof(char_t), options, encoding);
 	}
 
 	xml_parse_result xml_document::parse(char* xmlstr, unsigned int options)
@@ -4498,60 +4525,6 @@ namespace std
 
 #ifndef PUGIXML_NO_XPATH
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <setjmp.h>
-#include <ctype.h>
-#include <math.h>
-#include <float.h>
-
-#ifdef PUGIXML_WCHAR_MODE
-#	include <wchar.h>
-#endif
-
-#include <new>
-
-#ifndef PUGIXML_NO_STL
-#	include <string>
-#endif
-
-// int32_t
-#if !defined(_MSC_VER) || _MSC_VER >= 1600
-#	include <stdint.h>
-#else
-typedef __int32 int32_t;
-#endif
-
-#if defined(_MSC_VER)
-#	pragma warning(disable: 4127) // conditional expression is constant
-#	pragma warning(disable: 4324) // structure was padded due to __declspec(align())
-#	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
-#	pragma warning(disable: 4702) // unreachable code
-#	pragma warning(disable: 4996) // this function or variable may be unsafe
-#endif
-
-#ifdef __INTEL_COMPILER
-#	pragma warning(disable: 1478 1786) // function was declared "deprecated"
-#endif
-
-#ifdef __SNC__
-#	pragma diag_suppress=237 // controlling expression is constant
-#endif
-
-// String utilities prototypes
-namespace pugi
-{
-	namespace impl
-	{
-		size_t strlen(const char_t* s);
-		bool strequal(const char_t* src, const char_t* dst);
-		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count);
-		void widen_ascii(wchar_t* dest, const char* source);
-	}
-}
-
 // STL replacements
 namespace pstd
 {
@@ -4675,7 +4648,7 @@ namespace
 
 		static char_t* duplicate_string(const char_t* string)
 		{
-			return duplicate_string(string, impl::strlen(string));
+			return duplicate_string(string, strlength(string));
 		}
 
 	public:
@@ -4750,8 +4723,8 @@ namespace
 			else
 			{
 				// need to make heap copy
-				size_t target_length = impl::strlen(_buffer);
-				size_t source_length = impl::strlen(o._buffer);
+				size_t target_length = strlength(_buffer);
+				size_t source_length = strlength(o._buffer);
 				size_t length = target_length + source_length;
 
 				// allocate new buffer
@@ -4775,7 +4748,7 @@ namespace
 
 		size_t length() const
 		{
-			return impl::strlen(_buffer);
+			return strlength(_buffer);
 		}
 		
 		char_t* data()
@@ -4797,12 +4770,12 @@ namespace
 
 		bool operator==(const xpath_string& o) const
 		{
-			return impl::strequal(_buffer, o._buffer);
+			return strequal(_buffer, o._buffer);
 		}
 
 		bool operator!=(const xpath_string& o) const
 		{
-			return !impl::strequal(_buffer, o._buffer);
+			return !strequal(_buffer, o._buffer);
 		}
 	};
 
@@ -4815,41 +4788,6 @@ namespace
 namespace
 {
 	using namespace pugi;
-		
-	enum chartypex
-	{
-		ctx_space = 1,			// \r, \n, space, tab
-		ctx_start_symbol = 2,	// Any symbol > 127, a-z, A-Z, _
-		ctx_digit = 4,			// 0-9
-		ctx_symbol = 8			// Any symbol > 127, a-z, A-Z, 0-9, _, -, .
-	};
-	
-	const unsigned char chartypex_table[256] =
-	{
-		0,  0,  0,  0,  0,  0,  0,  0,     0,  1,  1,  0,  0,  1,  0,  0,     // 0-15
-		0,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  0,  0,  0,     // 16-31
-		1,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  8,  8,  0,     // 32-47
-		12, 12, 12, 12, 12, 12, 12, 12,    12, 12, 0,  0,  0,  0,  0,  0,     // 48-63
-		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 64-79
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 0,  0,  0,  0,  10,    // 80-95
-		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 96-111
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 0,  0,  0,  0,  0,     // 112-127
-
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 128+
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10
-	};
-	
-#ifdef PUGIXML_WCHAR_MODE
-	#define IS_CHARTYPEX(c, ct) ((static_cast<unsigned int>(c) < 128 ? chartypex_table[static_cast<unsigned int>(c)] : chartypex_table[128]) & (ct))
-#else
-	#define IS_CHARTYPEX(c, ct) (chartypex_table[static_cast<unsigned char>(c)] & (ct))
-#endif
 
 	bool starts_with(const char_t* string, const char_t* pattern)
 	{
@@ -5325,7 +5263,7 @@ namespace
 
 			if (!starts_with(name, PUGIXML_TEXT("xmlns"))) return false;
 
-			return prefix ? name[5] == ':' && impl::strequalrange(name + 6, prefix, prefix_length) : name[5] == 0;
+			return prefix ? name[5] == ':' && strequalrange(name + 6, prefix, prefix_length) : name[5] == 0;
 		}
 	};
 
@@ -5401,16 +5339,13 @@ namespace
 
 	void translate(char_t* buffer, const char_t* from, const char_t* to)
 	{
-		size_t to_length = impl::strlen(to);
+		size_t to_length = strlength(to);
 
 		char_t* write = buffer;
 
 		while (*buffer)
 		{
-		#ifdef __DMC__
-			volatile // explicitly store to local to work around DMC bug (it loads 4 bytes from buffer otherwise)
-		#endif
-			char_t ch = *buffer++;
+			DMC_VOLATILE char_t ch = *buffer++;
 
 			const char_t* pos = find_char(from, ch);
 
@@ -5798,7 +5733,7 @@ namespace pugi
 		{
 			size_t length = static_cast<size_t>(end - begin);
 
-			return impl::strequalrange(other, begin, length);
+			return strequalrange(other, begin, length);
 		}
 	};
 
@@ -6389,7 +6324,7 @@ namespace pugi
 			switch (_test)
 			{
 			case nodetest_name:
-				if (impl::strequal(name, _data.nodetest)) ns.push_back(xpath_node(a, parent));
+				if (strequal(name, _data.nodetest)) ns.push_back(xpath_node(a, parent));
 				break;
 				
 			case nodetest_type_node:
@@ -6414,7 +6349,7 @@ namespace pugi
 			switch (_test)
 			{
 			case nodetest_name:
-				if (n.type() == node_element && impl::strequal(n.name(), _data.nodetest)) ns.push_back(n);
+				if (n.type() == node_element && strequal(n.name(), _data.nodetest)) ns.push_back(n);
 				break;
 				
 			case nodetest_type_node:
@@ -6437,7 +6372,7 @@ namespace pugi
 				break;
 									
 			case nodetest_pi:
-				if (n.type() == node_pi && impl::strequal(n.name(), _data.nodetest))
+				if (n.type() == node_pi && strequal(n.name(), _data.nodetest))
 					ns.push_back(n);
 				break;
 				
