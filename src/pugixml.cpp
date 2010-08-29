@@ -4153,8 +4153,7 @@ namespace pugi
 
 	const xml_node_iterator& xml_node_iterator::operator--()
 	{
-		if (_wrap._root) _wrap = _wrap.previous_sibling();
-		else _wrap = _parent.last_child();
+		_wrap = _wrap._root ? _wrap.previous_sibling() : _parent.last_child();
 		return *this;
 	}
 
@@ -4215,8 +4214,7 @@ namespace pugi
 
 	const xml_attribute_iterator& xml_attribute_iterator::operator--()
 	{
-		if (_wrap._attr) _wrap = _wrap.previous_attribute();
-		else _wrap = _parent.last_attribute();
+		_wrap = _wrap._attr ? _wrap.previous_attribute() : _parent.last_attribute();
 		return *this;
 	}
 
