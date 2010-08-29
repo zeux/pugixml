@@ -2,6 +2,8 @@
 
 #include "common.hpp"
 
+#include <string>
+
 TEST(xpath_variables_type_none)
 {
 	xpath_variable_set set;
@@ -323,17 +325,22 @@ TEST(xpath_variables_qname)
 	CHECK_XPATH_BOOLEAN(xml_node(), xpath_query(STR("$foo:bar"), &set), true);
 }
 
-TEST(xpath_variables_qname_error)
+TEST(xpath_variables_name_error)
 {
 	xpath_variable_set set;
 	set.set(STR("foo:"), true);
 	set.set(STR(":bar"), true);
 	set.set(STR("foo:*"), true);
+	set.set(STR("foo"), true);
+	set.set(STR("3"), true);
 
 	CHECK_XPATH_FAIL_VAR(STR("$foo:"), &set);
 	CHECK_XPATH_FAIL_VAR(STR("$:bar"), &set);
 	CHECK_XPATH_FAIL_VAR(STR("$foo:*"), &set);
 	CHECK_XPATH_FAIL_VAR(STR("$foo:bar:baz"), &set);
+	CHECK_XPATH_FAIL_VAR(STR("$ foo"), &set);
+
+	CHECK_XPATH_FAIL_VAR(STR("$3"), &set);
 }
 
 TEST(xpath_variables_empty_string)
@@ -359,6 +366,27 @@ TEST(xpath_variables_name_case)
 	set.set(STR("I"), 2.0);
 
 	CHECK_XPATH_NUMBER(xml_node(), xpath_query(STR("$i div $I"), &set), 2.5);
+}
+
+TEST(xpath_variables_name_unicode)
+{
+#ifdef PUGIXML_WCHAR_MODE
+	#ifdef U_LITERALS
+		const char_t* name = L"\u0400\u203D";
+	#else
+		const char_t* name = L"\x0400\x203D";
+	#endif
+#else
+	const char_t* name = "\xd0\x80\xe2\x80\xbd";
+#endif
+
+	xpath_variable_set set;
+	set.set(name, STR("value"));
+
+	std::basic_string<char_t> var = STR("$");
+	var += name;
+
+	CHECK_XPATH_STRING(xml_node(), xpath_query(var.c_str(), &set), STR("value"));
 }
 
 TEST_XML(xpath_variables_count_sum, "<node><c1>12</c1><c2>23</c2><c3>34</c3></node>")
