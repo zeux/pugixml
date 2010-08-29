@@ -1805,6 +1805,68 @@ namespace pugi
 	};
 
 	/**
+	 * A class that holds XPath variable
+	 */
+	class xpath_variable
+	{
+		friend class xpath_variable_set;
+
+	protected:
+		// Non-copyable semantics
+		xpath_variable(const xpath_variable&);
+		xpath_variable& operator=(const xpath_variable&);
+		
+		xpath_value_type _type;
+		xpath_variable* _next;
+
+		xpath_variable() {}
+		~xpath_variable() {}
+
+	public:
+		const char_t* name() const;
+		xpath_value_type type() const;
+
+		bool get_boolean() const;
+		double get_number() const;
+		const char_t* get_string() const;
+		const xpath_node_set& get_node_set() const;
+
+		bool set(bool value);
+		bool set(double value);
+		bool set(const char_t* value);
+		bool set(const xpath_node_set& value);
+	};
+
+	/**
+	 * A class that holds XPath variables
+	 */
+	class xpath_variable_set
+	{
+	private:
+		// Non-copyable semantics
+		xpath_variable_set(const xpath_variable_set&);
+		xpath_variable_set& operator=(const xpath_variable_set&);
+
+		xpath_variable* _data[64];
+
+		xpath_variable* find(const char_t* name) const;
+
+	public:
+		xpath_variable_set();
+		~xpath_variable_set();
+
+		xpath_variable* add(const char_t* name, xpath_value_type type);
+
+		bool set(const char_t* name, bool value);
+		bool set(const char_t* name, double value);
+		bool set(const char_t* name, const char_t* value);
+		bool set(const char_t* name, const xpath_node_set& value);
+
+		xpath_variable* get(const char_t* name);
+		const xpath_variable* get(const char_t* name) const;
+	};
+
+	/**
 	 * A class that holds compiled XPath query and allows to evaluate query result
 	 */
 	class PUGIXML_CLASS xpath_query

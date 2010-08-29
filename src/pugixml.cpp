@@ -4603,28 +4603,28 @@ namespace
 {
 	using namespace pugi;
 
+	char_t* duplicate_string(const char_t* string, size_t length)
+	{
+		char_t* result = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
+		if (!result) return 0; // $$ out of memory
+
+		memcpy(result, string, length * sizeof(char_t));
+		result[length] = 0;
+
+		return result;
+	}
+
+	char_t* duplicate_string(const char_t* string)
+	{
+		return duplicate_string(string, strlength(string));
+	}
+
 	class xpath_string
 	{
 		const char_t* _buffer;
 		bool _uses_heap;
-
-		static char_t* duplicate_string(const char_t* string, size_t length)
-		{
-			char_t* result = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
-			if (!result) return 0; // $$ out of memory
-
-			memcpy(result, string, length * sizeof(char_t));
-			result[length] = 0;
-
-			return result;
-		}
-
-		static char_t* duplicate_string(const char_t* string)
-		{
-			return duplicate_string(string, strlength(string));
-		}
-
 	public:
+
 		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false)
 		{
 		}
@@ -5330,6 +5330,119 @@ namespace
 
 		// zero-terminate
 		*write = 0;
+	}
+
+	struct xpath_variable_boolean: xpath_variable
+	{
+		bool value;
+		char_t name[1];
+	};
+
+	struct xpath_variable_number: xpath_variable
+	{
+		double value;
+		char_t name[1];
+	};
+
+	struct xpath_variable_string: xpath_variable
+	{
+		char_t* value;
+		char_t name[1];
+	};
+
+	struct xpath_variable_node_set: xpath_variable
+	{
+		xpath_node_set value;
+		char_t name[1];
+	};
+
+	const xpath_node_set dummy_node_set;
+
+	unsigned int hash_string(const char_t* str)
+	{
+		// Jenkins one-at-a-time hash (http://en.wikipedia.org/wiki/Jenkins_hash_function#one-at-a-time)
+		unsigned int result = 0;
+
+		while (*str)
+		{
+			result += static_cast<unsigned int>(*str++);
+			result += result << 10;
+			result ^= result >> 6;
+		}
+	
+		result += result << 3;
+		result ^= result >> 11;
+		result += result << 15;
+	
+		return result;
+	}
+
+	template <typename T> T* new_xpath_variable(const char_t* name)
+	{
+		size_t length = strlength(name);
+
+		// we can't use offsetof(T, name) because T is non-POD, so we just allocate additional length characters
+		void* memory = get_memory_allocation_function()(sizeof(T) + length * sizeof(char_t));
+		if (!memory) return 0;
+
+		T* result = new (memory) T();
+
+		memcpy(result->name, name, (length + 1) * sizeof(char_t));
+
+		return result;
+	}
+
+	xpath_variable* new_xpath_variable(xpath_value_type type, const char_t* name)
+	{
+		switch (type)
+		{
+		case xpath_type_node_set:
+			return new_xpath_variable<xpath_variable_node_set>(name);
+
+		case xpath_type_number:
+			return new_xpath_variable<xpath_variable_number>(name);
+
+		case xpath_type_string:
+			return new_xpath_variable<xpath_variable_string>(name);
+
+		case xpath_type_boolean:
+			return new_xpath_variable<xpath_variable_boolean>(name);
+
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+	template <typename T> void delete_xpath_variable(xpath_variable* var)
+	{
+		static_cast<T*>(var)->~T();
+		get_memory_deallocation_function()(var);
+	}
+
+	void delete_xpath_variable(xpath_value_type type, xpath_variable* var)
+	{
+		switch (type)
+		{
+		case xpath_type_node_set:
+			delete_xpath_variable<xpath_variable_node_set>(var);
+			break;
+
+		case xpath_type_number:
+			delete_xpath_variable<xpath_variable_number>(var);
+			break;
+
+		case xpath_type_string:
+			delete_xpath_variable<xpath_variable_string>(var);
+			break;
+
+		case xpath_type_boolean:
+			delete_xpath_variable<xpath_variable_boolean>(var);
+			break;
+
+		default:
+			assert(false);
+		}
 	}
 }
 
@@ -8103,6 +8216,188 @@ namespace pugi
 	const char* xpath_parse_result::description() const
 	{
 		return error ? error : "No error";
+	}
+
+	const char_t* xpath_variable::name() const
+	{
+		switch (_type)
+		{
+		case xpath_type_node_set:
+			return static_cast<const xpath_variable_node_set*>(this)->name;
+
+		case xpath_type_number:
+			return static_cast<const xpath_variable_number*>(this)->name;
+
+		case xpath_type_string:
+			return static_cast<const xpath_variable_string*>(this)->name;
+
+		case xpath_type_boolean:
+			return static_cast<const xpath_variable_boolean*>(this)->name;
+
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+	xpath_value_type xpath_variable::type() const
+	{
+		return _type;
+	}
+
+	bool xpath_variable::get_boolean() const
+	{
+		return (_type == xpath_type_boolean) ? static_cast<const xpath_variable_boolean*>(this)->value : false;
+	}
+
+	double xpath_variable::get_number() const
+	{
+		return (_type == xpath_type_number) ? static_cast<const xpath_variable_number*>(this)->value : gen_nan();
+	}
+
+	const char_t* xpath_variable::get_string() const
+	{
+		const char_t* value = (_type == xpath_type_string) ? static_cast<const xpath_variable_string*>(this)->value : 0;
+		return value ? value : PUGIXML_TEXT("");
+	}
+
+	const xpath_node_set& xpath_variable::get_node_set() const
+	{
+		return (_type == xpath_type_node_set) ? static_cast<const xpath_variable_node_set*>(this)->value : dummy_node_set;
+	}
+
+	bool xpath_variable::set(bool value)
+	{
+		if (_type != xpath_type_boolean) return false;
+
+		static_cast<xpath_variable_boolean*>(this)->value = value;
+		return true;
+	}
+
+	bool xpath_variable::set(double value)
+	{
+		if (_type != xpath_type_number) return false;
+
+		static_cast<xpath_variable_number*>(this)->value = value;
+		return true;
+	}
+
+	bool xpath_variable::set(const char_t* value)
+	{
+		if (_type != xpath_type_string) return false;
+
+		xpath_variable_string* var = static_cast<xpath_variable_string*>(this);
+
+		// duplicate string
+		char_t* copy = duplicate_string(value);
+		if (!copy) return false;
+
+		// replace old string
+		if (var->value) get_memory_deallocation_function()(var->value);
+		var->value = copy;
+
+		return true;
+	}
+
+	bool xpath_variable::set(const xpath_node_set& value)
+	{
+		if (_type != xpath_type_node_set) return false;
+
+		static_cast<xpath_variable_node_set*>(this)->value = value;
+		return true;
+	}
+
+	xpath_variable_set::xpath_variable_set()
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i) _data[i] = 0;
+	}
+
+	xpath_variable_set::~xpath_variable_set()
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+		{
+			xpath_variable* var = _data[i];
+
+			while (var)
+			{
+				xpath_variable* next = var->_next;
+
+				delete_xpath_variable(var->_type, var);
+
+				var = next;
+			}
+		}
+	}
+
+	xpath_variable* xpath_variable_set::find(const char_t* name) const
+	{
+		const size_t hash_size = sizeof(_data) / sizeof(_data[0]);
+		size_t hash = hash_string(name) % hash_size;
+
+		// look for existing variable
+		for (xpath_variable* var = _data[hash]; var; var = var->_next)
+			if (strequal(var->name(), name))
+				return var;
+
+		return 0;
+	}
+
+	xpath_variable* xpath_variable_set::add(const char_t* name, xpath_value_type type)
+	{
+		const size_t hash_size = sizeof(_data) / sizeof(_data[0]);
+		size_t hash = hash_string(name) % hash_size;
+
+		// look for existing variable
+		for (xpath_variable* var = _data[hash]; var; var = var->_next)
+			if (strequal(var->name(), name))
+				return var->type() == type ? var : 0;
+
+		// add new variable
+		xpath_variable* result = new_xpath_variable(type, name);
+
+		if (result)
+		{
+			result->_type = type;
+			result->_next = _data[hash];
+
+			_data[hash] = result;
+		}
+
+		return result;
+	}
+
+	bool xpath_variable_set::set(const char_t* name, bool value)
+	{
+		xpath_variable* var = add(name, xpath_type_boolean);
+		return var ? var->set(value) : false;
+	}
+
+	bool xpath_variable_set::set(const char_t* name, double value)
+	{
+		xpath_variable* var = add(name, xpath_type_number);
+		return var ? var->set(value) : false;
+	}
+
+	bool xpath_variable_set::set(const char_t* name, const char_t* value)
+	{
+		xpath_variable* var = add(name, xpath_type_string);
+		return var ? var->set(value) : false;
+	}
+
+	bool xpath_variable_set::set(const char_t* name, const xpath_node_set& value)
+	{
+		xpath_variable* var = add(name, xpath_type_node_set);
+		return var ? var->set(value) : false;
+	}
+
+	xpath_variable* xpath_variable_set::get(const char_t* name)
+	{
+		return find(name);
+	}
+
+	const xpath_variable* xpath_variable_set::get(const char_t* name) const
+	{
+		return find(name);
 	}
 
 	xpath_query::xpath_query(const char_t* query): _alloc(0), _root(0)
