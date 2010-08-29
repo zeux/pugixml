@@ -4464,7 +4464,7 @@ namespace pugi
 		if (!convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return make_parse_result(status_out_of_memory);
 		
 		// delete original buffer if we performed a conversion
-		if (own && buffer != contents) global_deallocate(contents);
+		if (own && buffer != contents && contents) global_deallocate(contents);
 
 		// parse
 		xml_parse_result res = xml_parser::parse(buffer, length, _root, options);
