@@ -105,6 +105,7 @@ struct dummy_fixture {};
 #define CHECK_JOIN(text, file, line) text file #line
 #define CHECK_JOIN2(text, file, line) CHECK_JOIN(text, file, line)
 #define CHECK_TEXT(condition, text) if (condition) ; else test_runner::_failure_message = CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__), longjmp(test_runner::_failure_buffer, 1)
+#define CHECK_FORCE_FAIL(text) test_runner::_failure_message = CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__), longjmp(test_runner::_failure_buffer, 1)
 
 #if (defined(_MSC_VER) && _MSC_VER == 1200) || defined(__MWERKS__)
 #	define STRINGIZE(value) "??" // MSVC 6.0 and CodeWarrior have troubles stringizing stuff with strings w/escaping inside

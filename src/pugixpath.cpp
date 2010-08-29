@@ -3352,7 +3352,7 @@ namespace pugi
 
 	const char* xpath_parse_result::description() const
 	{
-		return error ? error : "Success";
+		return error ? error : "No error";
 	}
 
 	xpath_query::xpath_query(const char_t* query): m_alloc(0), m_root(0)

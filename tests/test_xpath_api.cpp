@@ -38,22 +38,6 @@ TEST_XML(xpath_api_select_single_node, "<node><head/><foo id='1'/><foo/><tail/><
 	CHECK(n5.node().attribute(STR("id")).as_int() == 1);
 }
 
-#ifndef PUGIXML_NO_EXCEPTIONS
-TEST(xpath_api_exception_what)
-{
-	try
-	{
-		xpath_query q(STR(""));
-
-		CHECK(!"Expected exception");
-	}
-	catch (const xpath_exception& e)
-	{
-		CHECK(e.what()[0] != 0);
-	}
-}
-#endif
-
 TEST_XML(xpath_api_node_bool_ops, "<node attr='value'/>")
 {
 	generic_bool_ops_test(doc.select_single_node(STR("node")));
@@ -157,38 +141,116 @@ TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 }
 
 #ifdef PUGIXML_NO_EXCEPTIONS
-TEST(xpath_api_evaluate_node_set)
+TEST_XML(xpath_api_evaluate_fail, "<node attr='3'/>")
 {
-	CHECK_XPATH_NODESET(xml_node(), STR("1"));
+	CHECK_XPATH_BOOLEAN(doc, STR(""), false);
+	CHECK_XPATH_NUMBER_NAN(doc, STR(""));
+	CHECK_XPATH_STRING(doc, STR(""), STR(""));
+	CHECK_XPATH_NODESET(doc, STR(""));
 }
-#else
-TEST(xpath_api_evaluate_node_set)
+#endif
+
+TEST(xpath_api_evaluate_node_set_fail)
 {
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK_XPATH_NODESET(xml_node(), STR("1"));
+#else
 	try
 	{
 		xpath_query q(STR("1"));
 
 		q.evaluate_node_set(xml_node());
 
-		CHECK(!"Expected exception");
+		CHECK_FORCE_FAIL("Expected exception");
 	}
 	catch (const xpath_exception&)
 	{
 	}
-}
 #endif
+}
 
 TEST(xpath_api_return_type)
 {
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(xpath_query(STR("")).return_type() == xpath_type_none);
+#endif
+
 	CHECK(xpath_query(STR("node")).return_type() == xpath_type_node_set);
 	CHECK(xpath_query(STR("1")).return_type() == xpath_type_number);
 	CHECK(xpath_query(STR("'s'")).return_type() == xpath_type_string);
 	CHECK(xpath_query(STR("true()")).return_type() == xpath_type_boolean);
 }
 
+TEST(xpath_api_query_bool)
+{
+	xpath_query q(STR("node"));
+	
+	CHECK(q);
+	CHECK((!q) == false);
+}
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+TEST(xpath_api_query_bool_fail)
+{
+	xpath_query q(STR(""));
+	
+	CHECK((q ? true : false) == false);
+	CHECK((!q) == true);
+}
+#endif
+
+TEST(xpath_api_query_result)
+{
+	xpath_query q(STR("node"));
+
+	CHECK(q.result());
+	CHECK(q.result().error == 0);
+	CHECK(q.result().offset == 0);
+	CHECK(strcmp(q.result().description(), "No error") == 0);
+}
+
+TEST(xpath_api_query_result_fail)
+{
+#ifndef PUGIXML_NO_EXCEPTIONS
+	try
+	{
+#endif
+		xpath_query q(STR("string-length(1, 2, 3)"));
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (const xpath_exception& q)
+	{
+#endif
+		xpath_parse_result result = q.result();
+
+		CHECK(!result);
+		CHECK(result.error != 0 && result.error[0] != 0);
+		CHECK(result.description() == result.error);
+		CHECK(result.offset == 0); // $$$
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+	}
+#endif
+}
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+TEST(xpath_api_exception_what)
+{
+	try
+	{
+		xpath_query q(STR(""));
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (const xpath_exception& e)
+	{
+		CHECK(e.what()[0] != 0);
+	}
+}
+#endif
+
 // $$$
-// xpath_query bool conversion
-// xpath_query::result / xpath_exception::result
-// result offset
-// xpath_query::rettype for no root
+// out of memory during parsing/execution (?)
 #endif
