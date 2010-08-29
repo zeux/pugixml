@@ -514,9 +514,17 @@ namespace
 		else
 		{
 			// need to make dummy on-heap copy
-			string_t copy(begin, end);
+			char_t* copy = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
+			if (!copy) return gen_nan(); // $$ out of memory
 
-			return convert_string_to_number(copy.c_str());
+			memcpy(copy, begin, length * sizeof(char_t));
+			copy[length] = 0;
+
+			double result = convert_string_to_number(copy);
+
+			get_memory_deallocation_function()(copy);
+
+			return result;
 		}
 	}
 	
