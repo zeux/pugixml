@@ -41,8 +41,9 @@ TEST(xpath_number_error)
 
 TEST(xpath_variables)
 {
-	CHECK_XPATH_FAIL(STR("$var")); // not implemented
+	CHECK_XPATH_FAIL(STR("$var")); // no variable var
 	CHECK_XPATH_FAIL(STR("$1"));
+	CHECK_XPATH_FAIL(STR("$"));
 }
 
 TEST(xpath_empty_expression)

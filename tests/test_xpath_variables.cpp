@@ -176,7 +176,7 @@ TEST(xpath_variables_set_out_of_memory)
 	CHECK(!var);
 }
 
-TEST(xpath_variable_out_of_memory)
+TEST(xpath_variables_out_of_memory)
 {
 	test_runner::_memory_fail_threshold = 64;
 
@@ -188,4 +188,186 @@ TEST(xpath_variable_out_of_memory)
 	CHECK(!var->set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")));
 }
 
+TEST_XML(xpath_variables_evaluate, "<node/>")
+{
+	xpath_variable_set set;
+	set.set(STR("var1"), true);
+	set.set(STR("var2"), 0.5);
+	set.set(STR("var3"), STR("value"));
+	set.set(STR("var4"), doc.select_nodes(STR("*")));
+
+	CHECK_XPATH_BOOLEAN(doc, xpath_query(STR("$var1"), &set), true);
+	CHECK_XPATH_NUMBER(doc, xpath_query(STR("$var2"), &set), 0.5);
+	CHECK_XPATH_STRING(doc, xpath_query(STR("$var3"), &set), STR("value"));
+	CHECK_XPATH_NODESET_Q(doc, xpath_query(STR("$var4"), &set)) % 2;
+}
+
+TEST_XML(xpath_variables_evaluate_conversion, "<node>3</node>")
+{
+	xpath_variable_set set;
+	set.set(STR("var"), doc.select_nodes(STR("*")));
+
+	xpath_query query(STR("$var"), &set);
+
+	CHECK_XPATH_BOOLEAN(doc, query, true);
+	CHECK_XPATH_NUMBER(doc, query, 3);
+	CHECK_XPATH_STRING(doc, query, STR("3"));
+	CHECK_XPATH_NODESET_Q(doc, query) % 2;
+}
+
+TEST(xpath_variables_evaluate_node_set_fail)
+{
+	xpath_variable_set set;
+	set.set(STR("var"), false);
+
+	xpath_query q(STR("$var"), &set);
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK_XPATH_NODESET_Q(xml_node(), q);
+#else
+	try
+	{
+		q.evaluate_node_set(xml_node());
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (const xpath_exception&)
+	{
+	}
+#endif
+}
+
+TEST_XML(xpath_variables_multiple_documents, "<node/>")
+{
+	xml_document doc1;
+	CHECK(doc1.load(STR("<node/>")));
+
+	xml_document doc2;
+	CHECK(doc2.load(STR("<node/>")));
+
+	xpath_variable_set set;
+	set.set(STR("var1"), doc1.select_nodes(STR("*")));
+	set.set(STR("var2"), doc2.select_nodes(STR("*")));
+
+	xpath_node_set ns = doc.select_nodes(STR("$var1 | $var2 | node"), &set);
+	ns.sort();
+
+	CHECK(ns.size() == 3);
+	CHECK(ns[0] != ns[1] && ns[0] != ns[2]);
+	
+	xml_node n0 = doc.child(STR("node")), n1 = doc1.child(STR("node")), n2 = doc2.child(STR("node"));
+
+	CHECK(n0 == ns[0].node() || n0 == ns[1].node() || n0 == ns[2].node());
+	CHECK(n1 == ns[0].node() || n1 == ns[1].node() || n1 == ns[2].node());
+	CHECK(n2 == ns[0].node() || n2 == ns[1].node() || n2 == ns[2].node());
+}
+
+TEST(xpath_variables_long_name)
+{
+	xpath_variable_set set;
+	set.set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), true);
+
+	CHECK_XPATH_BOOLEAN(xml_node(), xpath_query(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set), true);
+}
+
+TEST_XML(xpath_variables_select, "<node attr='1'/><node attr='2'/>")
+{
+	xpath_variable_set set;
+	set.set(STR("one"), 1.0);
+
+	xpath_node_set ns = doc.select_nodes(STR("node[@attr=$one+1]"), &set);
+	CHECK(ns.size() == 1 && ns[0].node() == doc.last_child());
+
+	xpath_node n = doc.select_single_node(STR("node[@attr=$one+1]"), &set);
+	CHECK(n == ns[0]);
+}
+
+TEST(xpath_variables_empty_name)
+{
+	xpath_variable_set set;
+	CHECK(!set.add(STR(""), xpath_type_number));
+}
+
+TEST_XML(xpath_variables_inside_filter, "<node key='1' value='2'/><node key='2' value='1'/><node key='1' value='1'/>")
+{
+	xpath_variable_set set;
+	set.set(STR("one"), 1.0);
+
+	xpath_node_set ns = doc.select_nodes(STR("(node[@key = $one])[@value = $one]"), &set);
+	CHECK(ns.size() == 1 && ns[0].node() == doc.last_child());
+}
+
+TEST_XML(xpath_variables_step, "<node><child/><child/><child><child/></child></node>")
+{
+	xpath_variable_set set;
+	set.set(STR("root"), doc.select_nodes(STR("node")));
+
+	CHECK_XPATH_NODESET_Q(xml_node(), xpath_query(STR("$root/child"), &set)) % 3 % 4 % 5;
+	CHECK_XPATH_NODESET_Q(xml_node(), xpath_query(STR("$root//child"), &set)) % 3 % 4 % 5 % 6;
+}
+
+TEST_XML(xpath_variables_index, "<node><child/><child/><child><child/></child></node>")
+{
+	xpath_variable_set set;
+	set.set(STR("index"), 2.0);
+
+	CHECK_XPATH_NODESET_Q(doc, xpath_query(STR("node/child[$index]"), &set)) % 4;
+	CHECK_XPATH_NODESET_Q(doc, xpath_query(STR("node/child[position()=$index]"), &set)) % 4;
+}
+
+TEST(xpath_variables_qname)
+{
+	xpath_variable_set set;
+	set.set(STR("foo:bar"), true);
+
+	CHECK_XPATH_BOOLEAN(xml_node(), xpath_query(STR("$foo:bar"), &set), true);
+}
+
+TEST(xpath_variables_qname_error)
+{
+	xpath_variable_set set;
+	set.set(STR("foo:"), true);
+	set.set(STR(":bar"), true);
+	set.set(STR("foo:*"), true);
+
+	CHECK_XPATH_FAIL_VAR(STR("$foo:"), &set);
+	CHECK_XPATH_FAIL_VAR(STR("$:bar"), &set);
+	CHECK_XPATH_FAIL_VAR(STR("$foo:*"), &set);
+	CHECK_XPATH_FAIL_VAR(STR("$foo:bar:baz"), &set);
+}
+
+TEST(xpath_variables_empty_string)
+{
+	xpath_variable_set set;
+	set.add(STR("empty"), xpath_type_string);
+
+	CHECK_XPATH_BOOLEAN(xml_node(), xpath_query(STR("$empty = substring-before('a', 'z')"), &set), true);
+}
+
+TEST(xpath_variables_name_underscore)
+{
+	xpath_variable_set set;
+	set.set(STR("_foo_bar"), true);
+
+	CHECK_XPATH_BOOLEAN(xml_node(), xpath_query(STR("$_foo_bar"), &set), true);
+}
+
+TEST(xpath_variables_name_case)
+{
+	xpath_variable_set set;
+	set.set(STR("i"), 5.0);
+	set.set(STR("I"), 2.0);
+
+	CHECK_XPATH_NUMBER(xml_node(), xpath_query(STR("$i div $I"), &set), 2.5);
+}
+
+TEST_XML(xpath_variables_count_sum, "<node><c1>12</c1><c2>23</c2><c3>34</c3></node>")
+{
+	xpath_variable_set set;
+	set.set(STR("c12"), doc.select_nodes(STR("node/c1 | node/c2")));
+	set.set(STR("c3"), doc.select_nodes(STR("node/c3")));
+	set.set(STR("c"), doc.select_nodes(STR("node/*")));
+
+	CHECK_XPATH_NUMBER(xml_node(), xpath_query(STR("sum($c12) * count($c) - sum($c3)"), &set), 71);
+}
 #endif
