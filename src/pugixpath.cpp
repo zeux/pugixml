@@ -43,8 +43,9 @@ typedef __int32 int32_t;
 
 #if defined(_MSC_VER)
 #	pragma warning(disable: 4127) // conditional expression is constant
-#	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
 #	pragma warning(disable: 4324) // structure was padded due to __declspec(align())
+#	pragma warning(disable: 4611) // interaction between '_setjmp' and C++ object destruction is non-portable
+#	pragma warning(disable: 4702) // unreachable code
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
@@ -965,17 +966,14 @@ namespace pugi
 	{
 		struct memory_block
 		{	
-			memory_block(): next(0), size(0)
-			{
-			}
-	
 			memory_block* next;
-			size_t size;
 	
 			char data[xpath_memory_block_size];
 		};
 		
 		memory_block* _root;
+		size_t _root_size;
+
 		memory_block _first;
 		
 	public:
@@ -1007,8 +1005,11 @@ namespace pugi
 			get_memory_deallocation_function()(alloc);
 		}
 
-		xpath_allocator(): _root(&_first)
+		xpath_allocator()
 		{
+			_root = &_first;
+			_root_size = 0;
+			_first.next = 0;
 		}
 		
 		void* allocate(size_t size)
@@ -1016,10 +1017,10 @@ namespace pugi
 			// align size so that we're able to store pointers in subsequent blocks
 			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
 
-			if (_root->size + size <= xpath_memory_block_size)
+			if (_root_size + size <= xpath_memory_block_size)
 			{
-				void* buf = _root->data + _root->size;
-				_root->size += size;
+				void* buf = _root->data + _root_size;
+				_root_size += size;
 				return buf;
 			}
 			else
@@ -1031,9 +1032,9 @@ namespace pugi
 				if (!block) return 0;
 				
 				block->next = _root;
-				block->size = size;
 				
 				_root = block;
+				_root_size = size;
 				
 				return block->data;
 			}
