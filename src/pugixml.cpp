@@ -4819,25 +4819,26 @@ namespace
 	    return result;
 	}
 	
-	// precondition: node_height of ln is <= node_height of rn, ln != rn
 	bool node_is_before(xml_node ln, unsigned int lh, xml_node rn, unsigned int rh)
 	{
-	    assert(lh <= rh);
+		// normalize heights
+		for (unsigned int h = rh; h < lh; h++) ln = ln.parent();
+		for (unsigned int h = lh; h < rh; h++) rn = rn.parent();
 	    
-	    while (lh < rh)
-	    {
-	        --rh;
-	        rn = rn.parent();
-	    }
+		// one node is the ancestor of the other
+	    if (ln == rn) return lh < rh;
 	    
-	    if (ln == rn) return true;
-	    
+		// find common ancestor
 	    while (ln.parent() != rn.parent())
 	    {
 	        ln = ln.parent();
 	        rn = rn.parent();
 	    }
-	    
+
+		// there is no common ancestor (the shared parent is null), nodes are from different documents
+		if (!ln.parent()) return ln < rn;
+
+		// determine sibling order
         for (; ln; ln = ln.next_sibling())
             if (ln == rn)
                 return true;
@@ -4858,15 +4859,19 @@ namespace
 		{
 			xml_node ln = lhs.node(), rn = rhs.node();
 
+			// optimized document order based check
 			const void* lo = lhs.attribute() ? lhs.attribute().document_order() : ln.document_order();
 			const void* ro = rhs.attribute() ? rhs.attribute().document_order() : rn.document_order();
 
 			if (lo && ro) return lo < ro;
 
+			// compare attributes
 			if (lhs.attribute() && rhs.attribute())
 			{
+				// shared parent
 				if (lhs.parent() == rhs.parent())
 				{
+					// determine sibling order
 				    for (xml_attribute a = lhs.attribute(); a; a = a.next_attribute())
 				        if (a == rhs.attribute())
 				            return true;
@@ -4874,17 +4879,20 @@ namespace
 				    return false;
 				}
 				
+				// compare attribute parents
 				ln = lhs.parent();
 				rn = rhs.parent();
 			}
 			else if (lhs.attribute())
 			{
+				// attributes go after the parent element
 				if (lhs.parent() == rhs.node()) return false;
 				
 				ln = lhs.parent();
 			}
 			else if (rhs.attribute())
 			{
+				// attributes go after the parent element
 				if (rhs.parent() == lhs.node()) return true;
 				
 				rn = rhs.parent();
@@ -4895,7 +4903,7 @@ namespace
 			unsigned int lh = node_height(ln);
 			unsigned int rh = node_height(rn);
 			
-			return (lh <= rh) ? node_is_before(ln, lh, rn, rh) : !node_is_before(rn, rh, ln, lh);
+			return node_is_before(ln, lh, rn, rh);
 		}
 	};
 
