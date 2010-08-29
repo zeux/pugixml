@@ -3429,7 +3429,7 @@ namespace pugi
 		if (m_root->rettype() != xpath_type_node_set)
 		{
 		#ifdef PUGIXML_NO_EXCEPTIONS
-			return xpath_node_set()
+			return xpath_node_set();
 		#else
 			xpath_parse_result result = {"Expression does not evaluate to node set", 0};
 			throw xpath_exception(result);

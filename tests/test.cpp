@@ -96,6 +96,9 @@ bool test_xpath_number_nan(const pugi::xml_node& node, const pugi::char_t* query
 
 bool test_xpath_fail_compile(const pugi::char_t* query)
 {
+#ifdef PUGIXML_NO_EXCEPTIONS
+	return !pugi::xpath_query(query);
+#else
 	try
 	{
 		pugi::xpath_query q(query);
@@ -105,6 +108,7 @@ bool test_xpath_fail_compile(const pugi::char_t* query)
 	{
 		return true;
 	}
+#endif
 }
 
 void xpath_node_set_tester::check(bool condition)

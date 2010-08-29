@@ -38,17 +38,21 @@ TEST_XML(xpath_api_select_single_node, "<node><head/><foo id='1'/><foo/><tail/><
 	CHECK(n5.node().attribute(STR("id")).as_int() == 1);
 }
 
+#ifndef PUGIXML_NO_EXCEPTIONS
 TEST(xpath_api_exception_what)
 {
 	try
 	{
 		xpath_query q(STR(""));
+
+		CHECK(!"Expected exception");
 	}
 	catch (const xpath_exception& e)
 	{
 		CHECK(e.what()[0] != 0);
 	}
 }
+#endif
 
 TEST_XML(xpath_api_node_bool_ops, "<node attr='value'/>")
 {
@@ -152,6 +156,12 @@ TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 	CHECK(ns.size() == 1 && ns[0].attribute() == doc.child(STR("node")).attribute(STR("attr")));
 }
 
+#ifdef PUGIXML_NO_EXCEPTIONS
+TEST(xpath_api_evaluate_node_set)
+{
+	CHECK_XPATH_NODESET(xml_node(), STR("1"));
+}
+#else
 TEST(xpath_api_evaluate_node_set)
 {
 	try
@@ -159,11 +169,14 @@ TEST(xpath_api_evaluate_node_set)
 		xpath_query q(STR("1"));
 
 		q.evaluate_node_set(xml_node());
+
+		CHECK(!"Expected exception");
 	}
 	catch (const xpath_exception&)
 	{
 	}
 }
+#endif
 
 TEST(xpath_api_return_type)
 {
@@ -172,4 +185,10 @@ TEST(xpath_api_return_type)
 	CHECK(xpath_query(STR("'s'")).return_type() == xpath_type_string);
 	CHECK(xpath_query(STR("true()")).return_type() == xpath_type_boolean);
 }
+
+// $$$
+// xpath_query bool conversion
+// xpath_query::result / xpath_exception::result
+// result offset
+// xpath_query::rettype for no root
 #endif
