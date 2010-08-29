@@ -3748,7 +3748,7 @@ namespace pugi
 		return _root->rettype();
 	}
 
-	bool xpath_query::evaluate_boolean(const xml_node& n) const
+	bool xpath_query::evaluate_boolean(const xpath_node& n) const
 	{
 		if (!_root) return false;
 		
@@ -3757,7 +3757,7 @@ namespace pugi
 		return _root->eval_boolean(c);
 	}
 	
-	double xpath_query::evaluate_number(const xml_node& n) const
+	double xpath_query::evaluate_number(const xpath_node& n) const
 	{
 		if (!_root) return gen_nan();
 		
@@ -3767,7 +3767,7 @@ namespace pugi
 	}
 	
 #ifndef PUGIXML_NO_STL
-	string_t xpath_query::evaluate_string(const xml_node& n) const
+	string_t xpath_query::evaluate_string(const xpath_node& n) const
 	{
 		if (!_root) return string_t();
 		
@@ -3777,7 +3777,7 @@ namespace pugi
 	}
 #endif
 	
-	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xml_node& n) const
+	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const
 	{
 		xpath_context c(n, 1, 1);
 		xpath_string r = _root ? _root->eval_string(c) : xpath_string();
@@ -3790,7 +3790,7 @@ namespace pugi
 		return size;
 	}
 
-	xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const
+	xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const
 	{
 		if (!_root) return xpath_node_set();
 

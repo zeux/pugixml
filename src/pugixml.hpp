@@ -1999,7 +1999,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		bool evaluate_boolean(const xml_node& n) const;
+		bool evaluate_boolean(const xpath_node& n) const;
 		
 		/**
 		 * Evaluate expression as double value for the context node \a n.
@@ -2010,7 +2010,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		double evaluate_number(const xml_node& n) const;
+		double evaluate_number(const xpath_node& n) const;
 		
 	#ifndef PUGIXML_NO_STL
 		/**
@@ -2022,7 +2022,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		string_t evaluate_string(const xml_node& n) const;
+		string_t evaluate_string(const xpath_node& n) const;
 	#endif
 		
 		/**
@@ -2034,7 +2034,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		size_t evaluate_string(char_t* buffer, size_t capacity, const xml_node& n) const;
+		size_t evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const;
 
 		/**
 		 * Evaluate expression as node set for the context node \a n.
@@ -2044,7 +2044,7 @@ namespace pugi
 		 * \param n - context node
 		 * \return evaluation result
 		 */
-		xpath_node_set evaluate_node_set(const xml_node& n) const;
+		xpath_node_set evaluate_node_set(const xpath_node& n) const;
 
 		// Get parsing result
 		const xpath_parse_result& result() const;
