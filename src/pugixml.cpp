@@ -169,7 +169,7 @@ namespace pugi
 	{
 		static xml_memory_page* construct(void* memory)
 		{
-			if (!memory) return 0;
+			if (!memory) return 0; //$ redundant, left for performance
 
 			xml_memory_page* result = static_cast<xml_memory_page*>(memory);
 
@@ -204,7 +204,7 @@ namespace pugi
 
 	struct xml_allocator
 	{
-		xml_allocator(xml_memory_page* root): _root(root), _busy_size(root ? root->busy_size : 0)
+		xml_allocator(xml_memory_page* root): _root(root), _busy_size(root->busy_size)
 		{
 		}
 
@@ -1163,9 +1163,7 @@ namespace
 				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_true());
 		}
 
-		// invalid encoding combination (this can't happen)
-		assert(false);
-
+		assert(!"Invalid encoding");
 		return false;
 	}
 #else
@@ -1238,9 +1236,7 @@ namespace
 				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_true());
 		}
 
-		// invalid encoding combination (this can't happen)
-		assert(false);
-
+		assert(!"Invalid encoding");
 		return false;
 	}
 #endif
@@ -2429,9 +2425,7 @@ namespace
 			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
 		}
 
-		// invalid encoding combination (this can't happen)
-		assert(false);
-
+		assert(!"Invalid encoding");
 		return 0;
 	}
 #else
@@ -2483,9 +2477,7 @@ namespace
 			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
 		}
 
-		// invalid encoding combination (this can't happen)
-		assert(false);
-
+		assert(!"Invalid encoding");
 		return 0;
 	}
 #endif
@@ -2676,8 +2668,7 @@ namespace
 			break;
 
 		default:
-			// invalid encoding (this should not happen)
-			assert(false);
+			assert(!"Invalid encoding");
 		}
 	}
 
@@ -2868,7 +2859,7 @@ namespace
 			break;
 
 		default:
-			assert(false);
+			assert(!"Invalid node type");
 		}
 	}
 
@@ -2942,7 +2933,7 @@ namespace
 		}
 
 		default:
-			assert(false);
+			assert(!"Invalid node type");
 		}
 	}
 
@@ -5432,7 +5423,7 @@ namespace
 			break;
 
 		default:
-			assert(false);
+			assert(!"Invalid variable type");
 		}
 	}
 
@@ -5754,10 +5745,18 @@ namespace pugi
 
 		switch (_type)
 		{
-		case type_sorted: return *_begin;
-		case type_sorted_reverse: return *(_end - 1);
-		case type_unsorted: return *pstd::min_element(_begin, _end, document_order_comparator());
-		default: return xpath_node();
+		case type_sorted:
+			return *_begin;
+
+		case type_sorted_reverse:
+			return *(_end - 1);
+
+		case type_unsorted:
+			return *pstd::min_element(_begin, _end, document_order_comparator());
+
+		default:
+			assert(!"Invalid node set type");
+			return xpath_node();
 		}
 	}
 
@@ -8332,7 +8331,7 @@ namespace pugi
 			return static_cast<const xpath_variable_boolean*>(this)->name;
 
 		default:
-			assert(false);
+			assert(!"Invalid variable type");
 			return 0;
 		}
 	}
