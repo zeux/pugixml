@@ -3,9 +3,8 @@
 
 #include "common.hpp"
 
-#include <stdio.h>
-
 #include <string.h>
+#include <stdio.h>
 #include <wchar.h>
 
 #include <utility>

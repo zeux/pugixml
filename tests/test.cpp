@@ -68,8 +68,6 @@ bool test_xpath_boolean(const pugi::xml_node& node, const pugi::char_t* query, b
 	return q.evaluate_boolean(node) == expected;
 }
 
-#include <stdio.h>
-
 bool test_xpath_number(const pugi::xml_node& node, const pugi::char_t* query, double expected)
 {
 	pugi::xpath_query q(query);

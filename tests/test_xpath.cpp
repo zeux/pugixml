@@ -168,8 +168,6 @@ TEST(xpath_long_numbers_stringize)
 	CHECK(test_xpath_string_prefix(c, str_dbl_max_dec, str_dbl_max, 15));
 }
 
-#include <stdio.h>
-
 TEST(xpath_denorm_numbers)
 {
 	pugi::string_t query;
