@@ -75,7 +75,7 @@ for CONFIG in $(CONFIGURATIONS)
 
 		# build library
 		local PUGIXML = $(CFGBUILD)/pugixml.lib ;
-		Library $(PUGIXML) : src/pugixml.cpp src/pugixpath.cpp : $(CFGFLAGS) ;
+		Library $(PUGIXML) : src/pugixml.cpp : $(CFGFLAGS) ;
 		Alias pugixml : $(PUGIXML) ;
 
 		# build tests
