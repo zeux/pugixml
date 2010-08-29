@@ -411,11 +411,7 @@ namespace pugi
 		xml_attribute_struct* _attr;
 	
     	/// \internal Safe bool type
-#ifdef __MWERKS__
-    	typedef bool (xml_attribute::*unspecified_bool_type)() const;
-#else
     	typedef xml_attribute_struct* xml_attribute::*unspecified_bool_type;
-#endif
 
 		/// \internal Initializing constructor
 		explicit xml_attribute(xml_attribute_struct* attr);
@@ -672,11 +668,7 @@ namespace pugi
 		xml_node_struct* _root;
 
     	/// \internal Safe bool type
-#ifdef __MWERKS__
-    	typedef bool (xml_node::*unspecified_bool_type)() const;
-#else
     	typedef xml_node_struct* xml_node::*unspecified_bool_type;
-#endif
 
 		/// \internal Initializing constructor
 		explicit xml_node(xml_node_struct* p);
@@ -1881,6 +1873,7 @@ namespace pugi
 		xpath_ast_node* _root;
 		xpath_parse_result _result;
 
+    	/// \internal Safe bool type
     	typedef xpath_ast_node* xpath_query::*unspecified_bool_type;
 
 	public:
