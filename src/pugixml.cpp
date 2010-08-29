@@ -4558,9 +4558,145 @@ namespace pstd
 		return write + 1;
 	}
 
+	template <typename I> void copy_backwards(I begin, I end, I target)
+	{
+		while (begin != end) *--target = *--end;
+	}
+
+	template <typename I, typename Pred, typename T> void insertion_sort(I begin, I end, const Pred& pred, T*)
+	{
+		assert(begin != end);
+
+		for (I it = begin + 1; it != end; ++it)
+		{
+			T val = *it;
+
+			if (pred(val, *begin))
+			{
+				// move to front
+				copy_backwards(begin, it, it + 1);
+				*begin = val;
+			}
+			else
+			{
+				I hole = it;
+
+				// move hole backwards
+				while (!pred(*(hole - 1), val))
+				{
+					*hole = *(hole - 1);
+					hole--;
+				}
+
+				// fill hole with element
+				*hole = val;
+			}
+		}
+	}
+
+	// std variant for elements with ==
+	template <typename I, typename Pred> void partition(I begin, I middle, I end, const Pred& pred, I* out_eqbeg, I* out_eqend)
+	{
+		I eqbeg = middle, eqend = middle + 1;
+
+		// expand equal range
+		while (eqbeg != begin && *(eqbeg - 1) == *eqbeg) --eqbeg;
+		while (eqend != end && *eqend == *eqbeg) ++eqend;
+
+		// process outer elements
+		I ltend = eqbeg, gtbeg = eqend;
+
+		for (;;)
+		{
+			// find the element from the right side that belongs to the left one
+			for (; gtbeg != end; ++gtbeg)
+				if (!pred(*eqbeg, *gtbeg))
+				{
+					if (*gtbeg == *eqbeg) swap(*gtbeg, *eqend++);
+					else break;
+				}
+
+			// find the element from the left side that belongs to the right one
+			for (; ltend != begin; --ltend)
+				if (!pred(*(ltend - 1), *eqbeg))
+				{
+					if (*eqbeg == *(ltend - 1)) swap(*(ltend - 1), *--eqbeg);
+					else break;
+				}
+
+			// scanned all elements
+			if (gtbeg == end && ltend == begin)
+			{
+				*out_eqbeg = eqbeg;
+				*out_eqend = eqend;
+				return;
+			}
+
+			// make room for elements by moving equal area
+			if (gtbeg == end)
+			{
+				if (--ltend != --eqbeg) swap(*ltend, *eqbeg);
+				swap(*eqbeg, *--eqend);
+			}
+			else if (ltend == begin)
+			{
+				if (eqend != gtbeg) swap(*eqbeg, *eqend);
+				++eqend;
+				swap(*gtbeg++, *eqbeg++);
+			}
+			else swap(*gtbeg++, *--ltend);
+		}
+	}
+
+	template <typename I, typename Pred> void median3(I first, I middle, I last, const Pred& pred)
+	{
+		if (pred(*middle, *first)) swap(*middle, *first);
+		if (pred(*last, *middle)) swap(*last, *middle);
+		if (pred(*middle, *first)) swap(*middle, *first);
+	}
+
+	template <typename I, typename Pred> void median(I first, I middle, I last, const Pred& pred)
+	{
+		// median of three for small chunks
+		if (last - first <= 40) return median3(first, middle, last, pred);
+
+		// median of nine
+		size_t step = (last - first + 1) / 8;
+
+		median3(first, first + step, first + 2 * step, pred);
+		median3(middle - step, middle, middle + step, pred);
+		median3(last - 2 * step, last - step, last, pred);
+		median3(first + step, middle, last - step, pred);
+	}
+
 	template <typename I, typename Pred> void sort(I begin, I end, const Pred& pred)
 	{
-		while (begin != end) swap(*begin, *min_element(begin, end, pred)), begin++;
+		// sort large chunks
+		while (end - begin > 32)
+		{
+			// find median element
+			I middle = begin + (end - begin) / 2;
+			median(begin, middle, end - 1, pred);
+
+			// partition in three chunks (< = >)
+			I eqbeg, eqend;
+			partition(begin, middle, end, pred, &eqbeg, &eqend);
+
+			// loop on larger half
+			if (eqbeg - begin > end - eqend)
+			{
+				sort(eqend, end, pred);
+				end = eqbeg;
+			}
+			else
+			{
+				sort(begin, eqbeg, pred);
+				begin = eqend;
+			}
+		}
+
+		// insertion sort small chunk
+		if (begin != end) insertion_sort(begin, end, pred, &*begin);
 	}
 }
 
