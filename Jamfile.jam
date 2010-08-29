@@ -124,7 +124,7 @@ for SAMPLE in [ Glob docs/samples : *.cpp ]
 	CFGFLAGS += -I src ;
 
 	# build and run sample
-	local EXECUTABLE = $(CFGBUILD)/samples/$(SAMPLE:S=.exe) ;
+	local EXECUTABLE = $(CFGBUILD)/samples/$(SAMPLE:B).exe ;
 	local PUGIXML = $(CFGBUILD)/pugixml.lib ;
 
 	Application $(EXECUTABLE) : $(SAMPLE) : $(CFGFLAGS) : $(PUGIXML) ;
