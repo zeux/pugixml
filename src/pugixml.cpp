@@ -909,61 +909,35 @@ namespace
 		192, 192, 192, 192, 192, 192, 192, 192,    192, 192, 192, 192, 192, 192, 192, 192
 	};
 
-	enum chartypex
+	enum chartypex_t
 	{
-		ctx_space = 1,			// \r, \n, space, tab
-		ctx_start_symbol = 2,	// Any symbol > 127, a-z, A-Z, _
-		ctx_digit = 4,			// 0-9
-		ctx_symbol = 8			// Any symbol > 127, a-z, A-Z, 0-9, _, -, .
+		ctx_special_pcdata = 1,   // Any symbol >= 0 and < 32 (except \t, \r, \n), &, <, >
+		ctx_special_attr = 2,     // Any symbol >= 0 and < 32 (except \t), &, <, >, "
+		ctx_start_symbol = 4,	  // Any symbol > 127, a-z, A-Z, _
+		ctx_digit = 8,			  // 0-9
+		ctx_symbol = 16			  // Any symbol > 127, a-z, A-Z, 0-9, _, -, .
 	};
 	
 	const unsigned char chartypex_table[256] =
 	{
-		0,  0,  0,  0,  0,  0,  0,  0,     0,  1,  1,  0,  0,  1,  0,  0,     // 0-15
-		0,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  0,  0,  0,     // 16-31
-		1,  0,  0,  0,  0,  0,  0,  0,     0,  0,  0,  0,  0,  8,  8,  0,     // 32-47
-		12, 12, 12, 12, 12, 12, 12, 12,    12, 12, 0,  0,  0,  0,  0,  0,     // 48-63
-		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 64-79
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 0,  0,  0,  0,  10,    // 80-95
-		0,  10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 96-111
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 0,  0,  0,  0,  0,     // 112-127
+		3,  3,  3,  3,  3,  3,  3,  3,     3,  0,  2,  3,  3,  2,  3,  3,     // 0-15
+		3,  3,  3,  3,  3,  3,  3,  3,     3,  3,  3,  3,  3,  3,  3,  3,     // 16-31
+		0,  0,  2,  0,  0,  0,  3,  0,     0,  0,  0,  0,  0, 16, 16,  0,     // 32-47
+		24, 24, 24, 24, 24, 24, 24, 24,    24, 24, 0,  0,  3,  0,  3,  0,     // 48-63
 
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,    // 128+
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10,
-		10, 10, 10, 10, 10, 10, 10, 10,    10, 10, 10, 10, 10, 10, 10, 10
-	};
-	
-	enum output_chartype_t
-	{
-		oct_special_pcdata = 1,   // Any symbol >= 0 and < 32 (except \t, \r, \n), &, <, >
-		oct_special_attr = 2      // Any symbol >= 0 and < 32 (except \t), &, <, >, "
-	};
+		0,  20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,    // 64-79
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 0,  0,  0,  0,  20,    // 80-95
+		0,  20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,    // 96-111
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 0,  0,  0,  0,  0,     // 112-127
 
-	const unsigned char output_chartype_table[256] =
-	{
-		3, 3, 3, 3, 3, 3, 3, 3,    3, 0, 2, 3, 3, 2, 3, 3,  // 0-15
-		3, 3, 3, 3, 3, 3, 3, 3,    3, 3, 3, 3, 3, 3, 3, 3,  // 16-31
-		0, 0, 2, 0, 0, 0, 3, 0,    0, 0, 0, 0, 0, 0, 0, 0,  // 32-47
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 3, 0, 3, 0,  // 48-63
-
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,  // 64-128
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,  // 128+
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0, 0, 0, 0, 0,
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,    // 128+
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,
+		20, 20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20
 	};
 	
 #ifdef PUGIXML_WCHAR_MODE
@@ -974,7 +948,6 @@ namespace
 
 	#define IS_CHARTYPE(c, ct) IS_CHARTYPE_IMPL(c, ct, chartype_table)
 	#define IS_CHARTYPEX(c, ct) IS_CHARTYPE_IMPL(c, ct, chartypex_table)
-	#define IS_OUTPUT_CHARTYPE(c, ct) IS_CHARTYPE_IMPL(c, ct, output_chartype_table)
 
 	bool is_little_endian()
 	{
@@ -2708,14 +2681,14 @@ namespace
 		}
 	}
 
-	void text_output_escaped(xml_buffered_writer& writer, const char_t* s, output_chartype_t type)
+	void text_output_escaped(xml_buffered_writer& writer, const char_t* s, chartypex_t type)
 	{
 		while (*s)
 		{
 			const char_t* prev = s;
 			
 			// While *s is a usual symbol
-			while (!IS_OUTPUT_CHARTYPE(*s, type)) ++s;
+			while (!IS_CHARTYPEX(*s, type)) ++s;
 		
 			writer.write(prev, static_cast<size_t>(s - prev));
 
@@ -2781,7 +2754,7 @@ namespace
 			writer.write(a.name()[0] ? a.name() : default_name);
 			writer.write('=', '"');
 
-			text_output_escaped(writer, a.value(), oct_special_attr);
+			text_output_escaped(writer, a.value(), ctx_special_attr);
 
 			writer.write('"');
 		}
@@ -2834,7 +2807,7 @@ namespace
 			{
 				writer.write('>');
 
-				text_output_escaped(writer, node.first_child().value(), oct_special_pcdata);
+				text_output_escaped(writer, node.first_child().value(), ctx_special_pcdata);
 
 				writer.write('<', '/');
 				writer.write(name);
@@ -2859,7 +2832,7 @@ namespace
 		}
 		
 		case node_pcdata:
-			text_output_escaped(writer, node.value(), oct_special_pcdata);
+			text_output_escaped(writer, node.value(), ctx_special_pcdata);
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
@@ -5153,7 +5126,7 @@ namespace
 	bool check_string_to_number_format(const char_t* string)
 	{
 		// parse leading whitespace
-		while (IS_CHARTYPEX(*string, ctx_space)) ++string;
+		while (IS_CHARTYPE(*string, ct_space)) ++string;
 
 		// parse sign
 		if (*string == '-') ++string;
@@ -5175,7 +5148,7 @@ namespace
 		}
 
 		// parse trailing whitespace
-		while (IS_CHARTYPEX(*string, ctx_space)) ++string;
+		while (IS_CHARTYPE(*string, ct_space)) ++string;
 
 		return *string == 0;
 	}
@@ -5319,10 +5292,10 @@ namespace
 		{
 			char_t ch = *it++;
 
-			if (IS_CHARTYPEX(ch, ctx_space))
+			if (IS_CHARTYPE(ch, ct_space))
 			{
 				// replace whitespace sequence with single space
-				while (IS_CHARTYPEX(*it, ctx_space)) it++;
+				while (IS_CHARTYPE(*it, ct_space)) it++;
 
 				// avoid leading spaces
 				if (write != buffer) *write++ = ' ';
@@ -5331,7 +5304,7 @@ namespace
 		}
 
 		// remove trailing space
-		if (write != buffer && IS_CHARTYPEX(write[-1], ctx_space)) write--;
+		if (write != buffer && IS_CHARTYPE(write[-1], ct_space)) write--;
 
 		// zero-terminate
 		*write = 0;
@@ -5760,7 +5733,7 @@ namespace pugi
 		{
 			const char_t* cur = _cur;
 
-			while (IS_CHARTYPEX(*cur, ctx_space)) ++cur;
+			while (IS_CHARTYPE(*cur, ct_space)) ++cur;
 
 			// save lexeme position for error reporting
 			_cur_lexeme_pos = cur;
@@ -7915,7 +7888,7 @@ namespace pugi
 	    			// This is either a function call, or not - if not, we shall proceed with location path
 	    			const char_t* state = _lexer.state();
 	    			
-					while (IS_CHARTYPEX(*state, ctx_space)) ++state;
+					while (IS_CHARTYPE(*state, ct_space)) ++state;
 	    			
 	    			if (*state != '(') return parse_location_path();
 
