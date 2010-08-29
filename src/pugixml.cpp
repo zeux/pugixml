@@ -47,7 +47,7 @@
 #endif
 
 #ifdef __SNC__
-#	pragma diag_suppress=178 // function waS declared but never referenced
+#	pragma diag_suppress=178 // function was declared but never referenced
 #endif
 
 // uintptr_t
