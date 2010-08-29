@@ -4751,16 +4751,10 @@ namespace
 		{
 			assert(begin <= end);
 
-			if (begin != end)
-			{
-				_buffer = duplicate_string(begin, static_cast<size_t>(end - begin));
-				_uses_heap = true;
-			}
-			else
-			{
-				_buffer = PUGIXML_TEXT("");
-				_uses_heap = false;
-			}
+			bool empty = (begin == end);
+
+			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(begin, static_cast<size_t>(end - begin));
+			_uses_heap = !empty;
 		}
 
 		xpath_string(const xpath_string& o)
@@ -4788,11 +4782,10 @@ namespace
 			// skip empty sources
 			if (!*o._buffer) return;
 
-			// fast append for empty target and constant source
-			if (!*_buffer && !o._uses_heap)
+			// fast append for constant empty target and constant source
+			if (!*_buffer && !_uses_heap && !o._uses_heap)
 			{
 				_buffer = o._buffer;
-				_uses_heap = false;
 			}
 			else
 			{
