@@ -194,12 +194,6 @@ namespace
 			return duplicate_string(string, impl::strlen(string));
 		}
 
-		void _swap(xpath_string& o)
-		{
-			pstd::swap(_buffer, o._buffer);
-			pstd::swap(_uses_heap, o._uses_heap);
-		}
-
 	public:
 		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false)
 		{
@@ -247,9 +241,15 @@ namespace
 		xpath_string& operator=(const xpath_string& o)
 		{
 			xpath_string temp(o);
-			_swap(temp);
+			swap(temp);
 
 			return *this;
+		}
+
+		void swap(xpath_string& o)
+		{
+			pstd::swap(_buffer, o._buffer);
+			pstd::swap(_uses_heap, o._uses_heap);
 		}
 
 		void append(const xpath_string& o)
@@ -280,7 +280,7 @@ namespace
 				result[length] = 0;
 
 				// finalize
-				xpath_string(result, true)._swap(*this);
+				xpath_string(result, true).swap(*this);
 			}
 		}
 
@@ -1106,36 +1106,43 @@ namespace pugi
 
 	xpath_node_set::~xpath_node_set()
 	{
-		if (_begin != &_storage) delete[] _begin;
+		if (_begin != &_storage) get_memory_deallocation_function()(_begin);
 	}
 		
-	xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(type_unsorted), _begin(&_storage), _end(&_storage), _eos(&_storage + 1)
+	xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage), _eos(&_storage + 1)
 	{
-		*this = ns;
-	}
-	
-	xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
-	{
-		if (&ns == this) return *this;
-
-		if (_begin != &_storage) delete[] _begin;
-		
-		_begin = _end = _eos = 0;
-		_type = ns._type;
-		
 		if (ns.size() == 1)
 		{
 			_storage = *ns._begin;
-			_begin = &_storage;
-			_end = _eos = &_storage + 1;
+			_end = _eos;
 		}
 		else
 		{
 			append(ns.begin(), ns.end());
 		}
+	}
+	
+	xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
+	{
+		if (this == &ns) return *this;
+		
+		// clear & append
+		_type = ns._type;
+		_end = _begin;
+		
+		append(ns.begin(), ns.end());
 		
 		return *this;
-	}	
+	}
+
+	void xpath_node_set::swap(xpath_node_set& ns)
+	{
+		pstd::swap(_type, ns._type);
+		pstd::swap(_storage, ns._storage);
+		pstd::swap(_begin, ns._begin);
+		pstd::swap(_end, ns._end);
+		pstd::swap(_eos, ns._eos);
+	}
 
 	xpath_node_set::type_t xpath_node_set::type() const
 	{
@@ -1207,10 +1214,13 @@ namespace pugi
 			
 			while (capacity < size + count) capacity += capacity / 2;
 			
-			xpath_node* storage = new xpath_node[capacity];
+			xpath_node* storage = static_cast<xpath_node*>(get_memory_allocation_function()(capacity * sizeof(xpath_node)));
+			if (!storage) return; // $$ out of memory
+
 			pstd::copy(_begin, _end, storage);
+			// memcpy(storage, _begin, size * sizeof(xpath_node));
 			
-			if (_begin != &_storage) delete[] _begin;
+			if (_begin != &_storage) get_memory_deallocation_function()(_begin);
 			
 			_begin = storage;
 			_end = storage + size;
@@ -1218,6 +1228,7 @@ namespace pugi
 		}
 		
 		pstd::copy(begin, end, _end);
+		// memcpy(_end, begin, count * sizeof(xpath_node));
 		_end += count;
 	}
 
@@ -2828,6 +2839,7 @@ namespace pugi
 				assert(!_right); // root step can't have any predicates
 
 				xpath_node_set ns;
+				ns._type = xpath_node_set::type_sorted;
 
 				if (c.n.node()) ns.push_back(c.n.node().root());
 				else if (c.n.attribute()) ns.push_back(c.n.parent().root());

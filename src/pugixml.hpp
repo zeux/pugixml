@@ -2212,6 +2212,8 @@ namespace pugi
 
 		void remove_duplicates();
 
+		void swap(xpath_node_set& ns);
+		
 	public:
 		/**
 		 * Default constructor
@@ -2238,7 +2240,7 @@ namespace pugi
 		 * \return self
 		 */
 		xpath_node_set& operator=(const xpath_node_set& ns);
-		
+
 		/**
 		 * Get collection type
 		 *
