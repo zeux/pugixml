@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <stdio.h>
+#include <float.h>
 #include <assert.h>
 
 test_runner* test_runner::_tests = 0;

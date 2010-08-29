@@ -164,7 +164,7 @@ TEST(memory_string_allocate_decreasing)
 
 	for (int i = 0; i < 17; ++i) s += s;
 
-	for (int i = 0; i < 17; ++i)
+	for (int j = 0; j < 17; ++j)
 	{
 		s.resize(s.size() / 2);
 
@@ -178,9 +178,9 @@ TEST(memory_string_allocate_decreasing)
 	CHECK(result.size() == 262143);
 	CHECK(result[result.size() - 1] == 'x');
 
-	for (size_t j = 0; j + 1 < result.size(); ++j)
+	for (size_t k = 0; k + 1 < result.size(); ++k)
 	{
-		CHECK(result[j] == (j % 2 ? 'b' : 'a'));
+		CHECK(result[k] == (k % 2 ? 'b' : 'a'));
 	}
 }
 
@@ -221,7 +221,7 @@ TEST(memory_string_allocate_decreasing_inplace)
 
 	for (int i = 0; i < 17; ++i) s += s;
 
-	for (int i = 0; i < 17; ++i)
+	for (int j = 0; j < 17; ++j)
 	{
 		s.resize(s.size() / 2);
 
