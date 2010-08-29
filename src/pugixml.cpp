@@ -7263,6 +7263,66 @@ namespace pugi
 			}
 		}
 		
+		xpath_string eval_string_concat(const xpath_context& c)
+		{
+			assert(_type == ast_func_concat);
+
+			// count the string number
+			unsigned int count = 1;
+			for (xpath_ast_node* n = _right; n; n = n->_next) count++;
+
+			// gather all strings
+			xpath_string static_buffer[4];
+			xpath_string* buffer = static_buffer;
+
+			// allocate on-heap for large concats
+			if (count > sizeof(static_buffer) / sizeof(static_buffer[0]))
+			{
+				buffer = static_cast<xpath_string*>(global_allocate(count * sizeof(xpath_string)));
+				if (!buffer) return xpath_string(); // $$ out of memory
+
+				for (unsigned int i = 0; i < count; ++i) new (&buffer[i]) xpath_string();
+			}
+
+			// compute all strings
+			_left->eval_string(c).swap(buffer[0]);
+
+			size_t pos = 1;
+			for (xpath_ast_node* n = _right; n; n = n->_next, ++pos) n->eval_string(c).swap(buffer[pos]);
+			assert(pos == count);
+
+			// get total length
+			size_t length = 0;
+			for (unsigned int i = 0; i < count; ++i) length += buffer[i].length();
+
+			// create final string
+			char_t* result = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
+
+			if (result)
+			{
+				char_t* ri = result;
+
+				for (unsigned int i = 0; i < count; ++i)
+					for (const char_t* bi = buffer[i].c_str(); *bi; ++bi)
+						*ri++ = *bi;
+
+				*ri = 0;
+			}
+
+			// deallocate strings
+			if (buffer != static_buffer)
+			{
+				for (unsigned int i = 0; i < count; ++i) buffer[i].~xpath_string();
+
+				global_deallocate(buffer);
+			}
+
+			// return result
+			if (!result) return xpath_string(); // $$ out of memory
+
+			return xpath_string(result, true);
+		}
+
 		xpath_string eval_string(const xpath_context& c)
 		{
 			switch (_type)
@@ -7322,14 +7382,7 @@ namespace pugi
 				return _left->eval_string(c);
 
 			case ast_func_concat:
-			{
-				xpath_string r = _left->eval_string(c);
-				
-				for (xpath_ast_node* n = _right; n; n = n->_next)
-					r.append(n->eval_string(c));
-			
-				return r;
-			}
+				return eval_string_concat(c);
 
 			case ast_func_substring_before:
 			{
