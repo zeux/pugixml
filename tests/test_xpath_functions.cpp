@@ -446,7 +446,14 @@ TEST(xpath_string_substring)
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 1, 0.5)"), STR("a"));
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 10, -5)"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 0, -1)"), STR(""));
-	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 100)"), STR("abcd"));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 100)"), STR(""));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 101)"), STR(""));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 102)"), STR("a"));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 103)"), STR("ab"));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 104)"), STR("abc"));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 105)"), STR("abcd"));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 106)"), STR("abcd"));
+	CHECK_XPATH_STRING(c, STR("substring('abcd', -100, 1 div 0)"), STR("abcd"));
 	CHECK_XPATH_STRING(c, STR("substring('abcd', -1 div 0, 4)"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 1 div 0, 0 div 0)"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 0 div 0, 1)"), STR(""));
