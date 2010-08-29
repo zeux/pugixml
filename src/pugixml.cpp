@@ -1327,12 +1327,40 @@ namespace
 	}
 #endif
 
+	inline bool strcpy_insitu_allow(size_t length, uintptr_t allocated, char_t* target)
+	{
+		assert(target);
+		size_t target_length = impl::strlen(target);
+
+		// always reuse document buffer memory if possible
+		if (!allocated) return target_length >= length;
+
+		// reuse heap memory if waste is not too great
+		const size_t reuse_threshold = 32;
+
+		return target_length >= length && (target_length < reuse_threshold || target_length - length < target_length / 2);
+	}
+
 	bool strcpy_insitu(char_t*& dest, uintptr_t& header, uintptr_t header_mask, const char_t* source)
 	{
 		size_t source_length = impl::strlen(source);
 
-		if (dest && impl::strlen(dest) >= source_length)
+		if (source_length == 0)
 		{
+			// empty string and null pointer are equivalent, so just deallocate old memory
+			xml_allocator* alloc = reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask)->allocator;
+
+			if (header & header_mask) alloc->deallocate_string(dest);
+			
+			// mark the string as not allocated
+			dest = 0;
+			header &= ~header_mask;
+
+			return true;
+		}
+		else if (dest && strcpy_insitu_allow(source_length, header & header_mask, dest))
+		{
+			// we can reuse old buffer, so just copy the new data (including zero terminator)
 			memcpy(dest, source, (source_length + 1) * sizeof(char_t));
 			
 			return true;
@@ -1341,13 +1369,17 @@ namespace
 		{
 			xml_allocator* alloc = reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask)->allocator;
 
+			// allocate new buffer
 			char_t* buf = alloc->allocate_string(source_length + 1);
 			if (!buf) return false;
 
+			// copy the string (including zero terminator)
 			memcpy(buf, source, (source_length + 1) * sizeof(char_t));
 
+			// deallocate old buffer (*after* the above to protect against overlapping memory and/or allocation failures)
 			if (header & header_mask) alloc->deallocate_string(dest);
 			
+			// the string is now allocated, so set the flag
 			dest = buf;
 			header |= header_mask;
 
