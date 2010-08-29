@@ -620,14 +620,10 @@ namespace pugi
 	}
 #endif
 	
-	const size_t xpath_memory_block_size = 4096;		///< Memory block size, 4 kb
+	const size_t xpath_memory_block_size = 4096;
 
 	class xpath_allocator
 	{
-		// disable copy ctor and assignment
-		xpath_allocator(const xpath_allocator&);
-		xpath_allocator& operator=(const xpath_allocator&);
-
 		struct memory_block
 		{	
 			memory_block(): next(0), size(0)
@@ -641,23 +637,41 @@ namespace pugi
 		};
 		
 		memory_block* _root;
+		memory_block _first;
 		
 	public:
-		xpath_allocator(): _root(0)
+		static xpath_allocator* create()
 		{
-			_root = new memory_block;
-		}
-		
-		~xpath_allocator()
-		{
-			while (_root)
-			{
-				memory_block* cur = _root->next;
-				delete _root;
-				_root = cur;
-			}
+			void* memory = get_memory_allocation_function()(sizeof(xpath_allocator));
+
+			return new (memory) xpath_allocator();
 		}
 
+		static void destroy(xpath_allocator* alloc)
+		{
+			if (!alloc) return;
+			
+			// free all allocated pages
+			memory_block* cur = alloc->_root;
+			memory_block* first = &alloc->_first;
+
+			while (cur != first)
+			{
+				memory_block* next = cur->next;
+
+				get_memory_deallocation_function()(cur);
+
+				cur = next;
+			}
+
+			// free allocator memory (with the first page)
+			get_memory_deallocation_function()(alloc);
+		}
+
+		xpath_allocator(): _root(&_first)
+		{
+		}
+		
 		void* allocate(size_t size)
 		{
 			// align size so that we're able to store pointers in subsequent blocks
@@ -671,13 +685,12 @@ namespace pugi
 			}
 			else
 			{
-				memory_block* block;
+				size_t block_data_size = (size > xpath_memory_block_size) ? size : xpath_memory_block_size;
+				size_t block_size = block_data_size + offsetof(memory_block, data);
+
+				memory_block* block = static_cast<memory_block*>(get_memory_allocation_function()(block_size));
+				if (!block) return 0;
 				
-				if (size > xpath_memory_block_size)
-					block = static_cast<memory_block*>(operator new(size + sizeof(memory_block) - xpath_memory_block_size));
-				else
-					block = new memory_block;
-					
 				block->next = _root;
 				block->size = size;
 				
@@ -957,11 +970,6 @@ namespace pugi
 
 	class xpath_lexer
 	{
-		// disable copy ctor and assignment
-		xpath_lexer(const xpath_lexer&);
-		xpath_lexer& operator=(const xpath_lexer&);
-
-	private:
 		const char_t* _cur;
 		const char_t* _cur_lexeme_pos;
 		xpath_lexer_string _cur_lexeme_contents;
@@ -2584,7 +2592,11 @@ namespace pugi
 
 		void* alloc_node()
 		{
-			return _alloc.allocate(sizeof(xpath_ast_node));
+			void* result = _alloc.allocate(sizeof(xpath_ast_node));
+
+			if (!result) throw_error("Out of memory");
+
+			return result;
 		}
 
 		const char_t* alloc_string(const xpath_lexer_string& value)
@@ -2594,6 +2606,8 @@ namespace pugi
 				size_t length = static_cast<size_t>(value.end - value.begin);
 
 				char_t* c = static_cast<char_t*>(_alloc.allocate((length + 1) * sizeof(char_t)));
+				if (!c) throw_error("Out of memory");
+
 				memcpy(c, value.begin, length * sizeof(char_t));
 				c[length] = 0;
 
@@ -3373,9 +3387,6 @@ namespace pugi
 
 		static xpath_ast_node* parse(const char_t* query, xpath_allocator& alloc, xpath_parse_result* result)
 		{
-			result->error = 0;
-			result->offset = 0;
-
 			xpath_parser parser(query, alloc, result);
 
 			int error = setjmp(parser._error_handler);
@@ -3391,12 +3402,23 @@ namespace pugi
 
 	xpath_query::xpath_query(const char_t* query): _alloc(0), _root(0)
 	{
-		_alloc = new xpath_allocator;
-		_root = xpath_parser::parse(query, *_alloc, &_result);
+		_result.error = 0;
+		_result.offset = 0;
+
+		_alloc = xpath_allocator::create();
+
+		if (!_alloc)
+		{
+			_result.error = "Out of memory";
+		}
+		else
+		{
+			_root = xpath_parser::parse(query, *_alloc, &_result);
+		}
 
 		if (!_root)
 		{
-			delete _alloc;
+			xpath_allocator::destroy(_alloc);
 			_alloc = 0;
 
 		#ifndef PUGIXML_NO_EXCEPTIONS
@@ -3407,7 +3429,7 @@ namespace pugi
 
 	xpath_query::~xpath_query()
 	{
-		delete _alloc;
+		xpath_allocator::destroy(_alloc);
 	}
 
 	xpath_value_type xpath_query::return_type() const
