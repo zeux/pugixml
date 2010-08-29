@@ -35,6 +35,7 @@ template <typename Node> inline bool test_node_name_value(const Node& node, cons
 }
 
 bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const pugi::char_t* indent, unsigned int flags);
+bool test_double_nan(double value);
 
 #ifndef PUGIXML_NO_XPATH
 bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, const pugi::char_t* expected);
@@ -116,6 +117,7 @@ struct dummy_fixture {};
 #define CHECK(condition) CHECK_TEXT(condition, STRINGIZE(condition) " is false")
 #define CHECK_STRING(value, expected) CHECK_TEXT(test_string_equal(value, expected), STRINGIZE(value) " is not equal to " STRINGIZE(expected))
 #define CHECK_DOUBLE(value, expected) CHECK_TEXT((value > expected ? value - expected : expected - value) < 1e-6, STRINGIZE(value) " is not equal to " STRINGIZE(expected))
+#define CHECK_DOUBLE_NAN(value) CHECK_TEXT(test_double_nan(value), STRINGIZE(value) " is not equal to NaN")
 #define CHECK_NAME_VALUE(node, name, value) CHECK_TEXT(test_node_name_value(node, name, value), STRINGIZE(node) " name/value do not match " STRINGIZE(name) " and " STRINGIZE(value))
 #define CHECK_NODE_EX(node, expected, indent, flags) CHECK_TEXT(test_node(node, expected, indent, flags), STRINGIZE(node) " contents does not match " STRINGIZE(expected))
 #define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, PUGIXML_TEXT(""), pugi::format_raw)

@@ -60,6 +60,15 @@ bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const p
 	return writer.as_string() == contents;
 }
 
+bool test_double_nan(double value)
+{
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+	return _isnan(value) != 0;
+#else
+	return value != value;
+#endif
+}
+
 #ifndef PUGIXML_NO_XPATH
 bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, const pugi::char_t* expected)
 {
@@ -99,13 +108,7 @@ bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* que
 {
 	pugi::xpath_query q(query);
 
-	double r = q.evaluate_number(node);
-
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-	return _isnan(r) != 0;
-#else
-	return r != r;
-#endif
+	return test_double_nan(q.evaluate_number(node));
 }
 
 bool test_xpath_fail_compile(const pugi::char_t* query)
