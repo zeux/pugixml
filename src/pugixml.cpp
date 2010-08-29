@@ -4605,7 +4605,7 @@ namespace
 
 	char_t* duplicate_string(const char_t* string, size_t length)
 	{
-		char_t* result = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
+		char_t* result = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
 		if (!result) return 0; // $$ out of memory
 
 		memcpy(result, string, length * sizeof(char_t));
@@ -4631,7 +4631,7 @@ namespace
 
 		~xpath_string()
 		{
-			if (_uses_heap) get_memory_deallocation_function()(const_cast<char_t*>(_buffer));
+			if (_uses_heap) global_deallocate(const_cast<char_t*>(_buffer));
 		}
 
 		explicit xpath_string(const char_t* str)
@@ -4701,7 +4701,7 @@ namespace
 				size_t length = target_length + source_length;
 
 				// allocate new buffer
-				char_t* result = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
+				char_t* result = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
 				if (!result) return; // $$ out of memory
 
 				// append both strings in the new buffer
@@ -5176,7 +5176,7 @@ namespace
 		if (length >= sizeof(buffer) / sizeof(buffer[0]))
 		{
 			// need to make dummy on-heap copy
-			scratch = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
+			scratch = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
 			if (!scratch) return false;
 		}
 
@@ -5187,7 +5187,7 @@ namespace
 		*out_result = convert_string_to_number(scratch);
 
 		// free dummy buffer
-		if (scratch != buffer) get_memory_deallocation_function()(scratch);
+		if (scratch != buffer) global_deallocate(scratch);
 
 		return true;
 	}
@@ -5382,7 +5382,7 @@ namespace
 		size_t length = strlength(name);
 
 		// we can't use offsetof(T, name) because T is non-POD, so we just allocate additional length characters
-		void* memory = get_memory_allocation_function()(sizeof(T) + length * sizeof(char_t));
+		void* memory = global_allocate(sizeof(T) + length * sizeof(char_t));
 		if (!memory) return 0;
 
 		T* result = new (memory) T();
@@ -5417,7 +5417,7 @@ namespace
 	template <typename T> void delete_xpath_variable(xpath_variable* var)
 	{
 		static_cast<T*>(var)->~T();
-		get_memory_deallocation_function()(var);
+		global_deallocate(var);
 	}
 
 	void delete_xpath_variable(xpath_value_type type, xpath_variable* var)
@@ -5484,7 +5484,7 @@ namespace pugi
 	public:
 		static xpath_allocator* create()
 		{
-			void* memory = get_memory_allocation_function()(sizeof(xpath_allocator));
+			void* memory = global_allocate(sizeof(xpath_allocator));
 
 			return new (memory) xpath_allocator();
 		}
@@ -5501,13 +5501,13 @@ namespace pugi
 			{
 				memory_block* next = cur->next;
 
-				get_memory_deallocation_function()(cur);
+				global_deallocate(cur);
 
 				cur = next;
 			}
 
 			// free allocator memory (with the first page)
-			get_memory_deallocation_function()(alloc);
+			global_deallocate(alloc);
 		}
 
 		xpath_allocator()
@@ -5533,7 +5533,7 @@ namespace pugi
 				size_t block_data_size = (size > xpath_memory_block_size) ? size : xpath_memory_block_size;
 				size_t block_size = block_data_size + offsetof(memory_block, data);
 
-				memory_block* block = static_cast<memory_block*>(get_memory_allocation_function()(block_size));
+				memory_block* block = static_cast<memory_block*>(global_allocate(block_size));
 				if (!block) return 0;
 				
 				block->next = _root;
@@ -5611,7 +5611,7 @@ namespace pugi
 
 	xpath_node_set::~xpath_node_set()
 	{
-		if (_begin != &_storage) get_memory_deallocation_function()(_begin);
+		if (_begin != &_storage) global_deallocate(_begin);
 	}
 		
 	xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage), _eos(&_storage + 1)
@@ -5710,13 +5710,13 @@ namespace pugi
 			
 			while (capacity < size + count) capacity += capacity / 2;
 			
-			xpath_node* storage = static_cast<xpath_node*>(get_memory_allocation_function()(capacity * sizeof(xpath_node)));
+			xpath_node* storage = static_cast<xpath_node*>(global_allocate(capacity * sizeof(xpath_node)));
 			if (!storage) return; // $$ out of memory
 
 			pstd::copy(_begin, _end, storage);
 			// memcpy(storage, _begin, size * sizeof(xpath_node));
 			
-			if (_begin != &_storage) get_memory_deallocation_function()(_begin);
+			if (_begin != &_storage) global_deallocate(_begin);
 			
 			_begin = storage;
 			_end = storage + size;
@@ -8293,7 +8293,7 @@ namespace pugi
 		if (!copy) return false;
 
 		// replace old string
-		if (var->value) get_memory_deallocation_function()(var->value);
+		if (var->value) global_deallocate(var->value);
 		var->value = copy;
 
 		return true;
