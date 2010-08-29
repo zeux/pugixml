@@ -6,6 +6,8 @@
 
 #include <math.h>
 #include <float.h>
+#include <string.h>
+#include <wchar.h>
 
 #include <algorithm>
 #include <vector>
@@ -41,7 +43,12 @@ static void build_document_order(std::vector<pugi::xpath_node>& result, pugi::xm
 
 bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs)
 {
-	return (!lhs || !rhs) ? lhs == rhs : pugi::impl::strequal(lhs, rhs);
+	return (!lhs || !rhs) ? lhs == rhs :
+	#ifdef PUGIXML_WCHAR_MODE
+		wcscmp(lhs, rhs) == 0;
+	#else
+		strcmp(lhs, rhs) == 0;
+	#endif
 }
 
 bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const pugi::char_t* indent, unsigned int flags)

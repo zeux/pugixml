@@ -108,16 +108,6 @@ namespace pugi
 }
 #endif
 
-// Helpers for inline implementation
-namespace pugi
-{
-	namespace impl
-	{
-		bool PUGIXML_FUNCTION strequal(const char_t*, const char_t*);
-		bool PUGIXML_FUNCTION strequalwild(const char_t*, const char_t*);
-	}
-}
-
 /// The PugiXML Parser namespace.
 namespace pugi
 {
@@ -690,45 +680,6 @@ namespace pugi
 		/// \internal Initializing constructor
 		explicit xml_node(xml_node_struct* p);
 
-	private:
-		template <typename OutputIterator> void all_elements_by_name_helper(const char_t* name, OutputIterator it) const
-		{
-			if (!_root) return;
-			
-			for (xml_node node = first_child(); node; node = node.next_sibling())
-			{
-				if (node.type() == node_element)
-				{
-					if (impl::strequal(name, node.name()))
-					{
-						*it = node;
-						++it;
-					}
-					
-					if (node.first_child()) node.all_elements_by_name_helper(name, it);
-				}
-			}
-		}
-
-		template <typename OutputIterator> void all_elements_by_name_w_helper(const char_t* name, OutputIterator it) const
-		{
-			if (!_root) return;
-			
-			for (xml_node node = first_child(); node; node = node.next_sibling())
-			{
-				if (node.type() == node_element)
-				{
-					if (impl::strequalwild(name, node.name()))
-					{
-						*it = node;
-						++it;
-					}
-					
-					if (node.first_child()) node.all_elements_by_name_w_helper(name, it);
-				}
-			}
-		}
-
 	public:
 		/**
 		 * Default constructor. Constructs an empty node.
@@ -873,16 +824,6 @@ namespace pugi
 		xml_node child(const char_t* name) const;
 
 		/**
-		 * Get child with the name that matches specified pattern
-		 *
-		 * \param name - child name pattern
-		 * \return child with the name that matches pattern, if any; empty node otherwise
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		PUGIXML_DEPRECATED xml_node child_w(const char_t* name) const;
-
-		/**
 		 * Get attribute with the specified name
 		 *
 		 * \param name - attribute name
@@ -891,32 +832,12 @@ namespace pugi
 		xml_attribute attribute(const char_t* name) const;
 
 		/**
-		 * Get attribute with the name that matches specified pattern
-		 *
-		 * \param name - attribute name pattern
-		 * \return attribute with the name that matches pattern, if any; empty attribute otherwise
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		PUGIXML_DEPRECATED xml_attribute attribute_w(const char_t* name) const;
-
-		/**
 		 * Get first of following sibling nodes with the specified name
 		 *
 		 * \param name - sibling name
 		 * \return node with the specified name, if any; empty node otherwise
 		 */
 		xml_node next_sibling(const char_t* name) const;
-
-		/**
-		 * Get first of the following sibling nodes with the name that matches specified pattern
-		 *
-		 * \param name - sibling name pattern
-		 * \return node with the name that matches pattern, if any; empty node otherwise
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		PUGIXML_DEPRECATED xml_node next_sibling_w(const char_t* name) const;
 
 		/**
 		 * Get following sibling
@@ -932,16 +853,6 @@ namespace pugi
 		 * \return node with the specified name, if any; empty node otherwise
 		 */
 		xml_node previous_sibling(const char_t* name) const;
-
-		/**
-		 * Get first of the preceding sibling nodes with the name that matches specified pattern
-		 *
-		 * \param name - sibling name pattern
-		 * \return node with the name that matches pattern, if any; empty node otherwise
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		PUGIXML_DEPRECATED xml_node previous_sibling_w(const char_t* name) const;
 
 		/**
 		 * Get preceding sibling
@@ -979,17 +890,6 @@ namespace pugi
 		 * \return child value of specified child node, if any; "" otherwise
 		 */
 		const char_t* child_value(const char_t* name) const;
-
-		/**
-		 * Get child value of child with name that matches the specified pattern. \see child_value
-		 * node.child_value_w(name) is equivalent to node.child_w(name).child_value()
-		 *
-		 * \param name - child name pattern
-		 * \return child value of specified child node, if any; "" otherwise
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		PUGIXML_DEPRECATED const char_t* child_value_w(const char_t* name) const;
 
 	public:	
 		/**
@@ -1160,32 +1060,6 @@ namespace pugi
         xml_attribute last_attribute() const;
 
 		/**
-		 * Get all elements from subtree with given name
-		 *
-		 * \param name - node name
-		 * \param it - output iterator (for example, std::back_insert_iterator (result of std::back_inserter))
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		template <typename OutputIterator> PUGIXML_DEPRECATED void all_elements_by_name(const char_t* name, OutputIterator it) const
-		{
-			all_elements_by_name_helper(name, it);
-		}
-
-		/**
-		 * Get all elements from subtree with name that matches given pattern
-		 *
-		 * \param name - node name pattern
-		 * \param it - output iterator (for example, std::back_insert_iterator (result of std::back_inserter))
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		template <typename OutputIterator> PUGIXML_DEPRECATED void all_elements_by_name_w(const char_t* name, OutputIterator it) const
-		{
-			all_elements_by_name_w_helper(name, it);
-		}
-
-		/**
 		 * Get first child
 		 *
 		 * \return first child, if any; empty node otherwise
@@ -1273,18 +1147,6 @@ namespace pugi
 		xml_node find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
 
 		/**
-		 * Find child node with the specified name that has specified attribute (use pattern matching for node name and attribute name/value)
-		 *
-		 * \param name - pattern for child node name
-		 * \param attr_name - pattern for attribute name of child node
-		 * \param attr_value - pattern for attribute value of child node
-		 * \return first matching child node, or empty node
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		PUGIXML_DEPRECATED xml_node find_child_by_attribute_w(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
-
-		/**
 		 * Find child node that has specified attribute
 		 *
 		 * \param attr_name - attribute name of child node
@@ -1292,17 +1154,6 @@ namespace pugi
 		 * \return first matching child node, or empty node
 		 */
 		xml_node find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
-
-		/**
-		 * Find child node that has specified attribute (use pattern matching for attribute name/value)
-		 *
-		 * \param attr_name - pattern for attribute name of child node
-		 * \param attr_value - pattern for attribute value of child node
-		 * \return first matching child node, or empty node
-		 *
-		 * \deprecated This function is deprecated
-		 */
-		PUGIXML_DEPRECATED xml_node find_child_by_attribute_w(const char_t* attr_name, const char_t* attr_value) const;
 
 	#ifndef PUGIXML_NO_STL
 		/**

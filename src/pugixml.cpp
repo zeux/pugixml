@@ -98,6 +98,7 @@ namespace pugi
 	namespace impl
 	{
 		size_t strlen(const char_t* s);
+		bool strequal(const char_t* src, const char_t* dst);
 		bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count);
 		void widen_ascii(wchar_t* dest, const char* source);
 	}
@@ -138,89 +139,6 @@ namespace pugi
 			return lhs[count] == 0;
 		}
 		
-		// Character set pattern match.
-		static bool strequalwild_cset(const char_t** src, const char_t** dst)
-		{
-			int find = 0, excl = 0, star = 0;
-			
-			if (**src == '!')
-			{
-				excl = 1;
-				++(*src);
-			}
-			
-			while (**src != ']' || star == 1)
-			{
-				if (find == 0)
-				{
-					if (**src == '-' && *(*src-1) < *(*src+1) && *(*src+1) != ']' && star == 0)
-					{
-						if (**dst >= *(*src-1) && **dst <= *(*src+1))
-						{
-							find = 1;
-							++(*src);
-						}
-					}
-					else if (**src == **dst) find = 1;
-				}
-				++(*src);
-				star = 0;
-			}
-
-			if (excl == 1) find = (1 - find);
-			if (find == 1) ++(*dst);
-		
-			return find == 0;
-		}
-
-		// Wildcard pattern match.
-		static bool strequalwild_astr(const char_t** src, const char_t** dst)
-		{
-			int find = 1;
-			++(*src);
-			while ((**dst != 0 && **src == '?') || **src == '*')
-			{
-				if(**src == '?') ++(*dst);
-				++(*src);
-			}
-			while (**src == '*') ++(*src);
-			if (**dst == 0 && **src != 0) return 0;
-			if (**dst == 0 && **src == 0) return 1;
-			else
-			{
-				if (!impl::strequalwild(*src,*dst))
-				{
-					do
-					{
-						++(*dst);
-						while(**src != **dst && **src != '[' && **dst != 0) 
-							++(*dst);
-					}
-					while ((**dst != 0) ? !impl::strequalwild(*src,*dst) : 0 != (find=0));
-				}
-				if (**dst == 0 && **src == 0) find = 1;
-				return find == 0;
-			}
-		}
-
-		// Compare two strings, with globbing, and character sets.
-		bool PUGIXML_FUNCTION strequalwild(const char_t* src, const char_t* dst)
-		{
-			int find = 1;
-			for(; *src != 0 && find == 1 && *dst != 0; ++src)
-			{
-				switch (*src)
-				{
-					case '?': ++dst; break;
-					case '[': ++src; find = !strequalwild_cset(&src,&dst); break;
-					case '*': find = !strequalwild_astr(&src,&dst); --src; break;
-					default : find = (int) (*src == *dst); ++dst;
-				}
-			}
-			while (*src == '*' && find == 1) ++src;
-			return (find == 1 && *dst == 0 && *src == 0);
-		}
-
 #ifdef PUGIXML_WCHAR_MODE
 		// Convert string to wide string, assuming all symbols are ASCII
 		void widen_ascii(wchar_t* dest, const char* source)
@@ -3493,16 +3411,6 @@ namespace pugi
 		return xml_node();
 	}
 
-	xml_node xml_node::child_w(const char_t* name) const
-	{
-		if (!_root) return xml_node();
-
-		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i);
-
-		return xml_node();
-	}
-
 	xml_attribute xml_node::attribute(const char_t* name) const
 	{
 		if (!_root) return xml_attribute();
@@ -3514,33 +3422,12 @@ namespace pugi
 		return xml_attribute();
 	}
 	
-	xml_attribute xml_node::attribute_w(const char_t* name) const
-	{
-		if (!_root) return xml_attribute();
-
-		for (xml_attribute_struct* i = _root->first_attribute; i; i = i->next_attribute)
-			if (i->name && impl::strequalwild(name, i->name))
-				return xml_attribute(i);
-		
-		return xml_attribute();
-	}
-
 	xml_node xml_node::next_sibling(const char_t* name) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
 			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
-
-		return xml_node();
-	}
-
-	xml_node xml_node::next_sibling_w(const char_t* name) const
-	{
-		if (!_root) return xml_node();
-		
-		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
-			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -3559,16 +3446,6 @@ namespace pugi
 		
 		for (xml_node_struct* i = _root->prev_sibling_c; i->next_sibling; i = i->prev_sibling_c)
 			if (i->name && impl::strequal(name, i->name)) return xml_node(i);
-
-		return xml_node();
-	}
-
-	xml_node xml_node::previous_sibling_w(const char_t* name) const
-	{
-		if (!_root) return xml_node();
-		
-		for (xml_node_struct* i = _root->prev_sibling_c; i->next_sibling; i = i->prev_sibling_c)
-			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -3613,16 +3490,6 @@ namespace pugi
 	const char_t* xml_node::child_value(const char_t* name) const
 	{
 		return child(name).child_value();
-	}
-
-	const char_t* xml_node::child_value_w(const char_t* name) const
-	{
-		if (!_root) return PUGIXML_TEXT("");
-
-		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && impl::strequalwild(name, i->name)) return xml_node(i).child_value();
-
-		return PUGIXML_TEXT("");
 	}
 
 	xml_attribute xml_node::first_attribute() const
@@ -3918,21 +3785,6 @@ namespace pugi
 		return xml_node();
 	}
 
-	xml_node xml_node::find_child_by_attribute_w(const char_t* name, const char_t* attr_name, const char_t* attr_value) const
-	{
-		if (!_root) return xml_node();
-		
-		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && impl::strequalwild(name, i->name))
-			{
-				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (impl::strequalwild(attr_name, a->name) && impl::strequalwild(attr_value, a->value))
-						return xml_node(i);
-			}
-
-		return xml_node();
-	}
-
 	xml_node xml_node::find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const
 	{
 		if (!_root) return xml_node();
@@ -3940,18 +3792,6 @@ namespace pugi
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
 				if (impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value))
-					return xml_node(i);
-
-		return xml_node();
-	}
-
-	xml_node xml_node::find_child_by_attribute_w(const char_t* attr_name, const char_t* attr_value) const
-	{
-		if (!_root) return xml_node();
-		
-		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (impl::strequalwild(attr_name, a->name) && impl::strequalwild(attr_value, a->value))
 					return xml_node(i);
 
 		return xml_node();
