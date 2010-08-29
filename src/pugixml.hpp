@@ -325,6 +325,7 @@ namespace pugi
 	class xpath_node;
 	class xpath_node_set;
 	class xpath_query;
+	class xpath_variable_set;
 	#endif
 
 	/**
@@ -1192,7 +1193,7 @@ namespace pugi
 		 * \param query - query string
 		 * \return first node from the resulting node set by document order, or empty node if none found
 		 */
-		xpath_node select_single_node(const char_t* query) const;
+		xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
 
 		/**
 		 * Select single node by evaluating XPath query
@@ -1208,7 +1209,7 @@ namespace pugi
 		 * \param query - query string
 		 * \return resulting node set
 		 */
-		xpath_node_set select_nodes(const char_t* query) const;
+		xpath_node_set select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
 
 		/**
 		 * Select node set by evaluating XPath query
@@ -1889,7 +1890,7 @@ namespace pugi
 		 *
 		 * \param query - string with XPath expression
 		 */
-		explicit xpath_query(const char_t* query);
+		explicit xpath_query(const char_t* query, xpath_variable_set* variables = 0);
 
 		/**
 		 * Destructor

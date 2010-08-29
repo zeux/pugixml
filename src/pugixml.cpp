@@ -5385,6 +5385,7 @@ namespace
 	template <typename T> T* new_xpath_variable(const char_t* name)
 	{
 		size_t length = strlength(name);
+		if (length == 0) return 0; // empty variable names are invalid
 
 		// $$ we can't use offsetof(T, name) because T is non-POD, so we just allocate additional length characters
 		void* memory = global_allocate(sizeof(T) + length * sizeof(char_t));
@@ -5447,6 +5448,32 @@ namespace
 		default:
 			assert(false);
 		}
+	}
+
+	xpath_variable* get_variable(xpath_variable_set* set, const char_t* begin, const char_t* end)
+	{
+		char_t buffer[32];
+
+		size_t length = static_cast<size_t>(end - begin);
+		char_t* scratch = buffer;
+
+		if (length >= sizeof(buffer) / sizeof(buffer[0]))
+		{
+			// need to make dummy on-heap copy
+			scratch = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
+			if (!scratch) return 0;
+		}
+
+		// copy string to zero-terminated buffer and perform lookup
+		memcpy(scratch, begin, length * sizeof(char_t));
+		scratch[length] = 0;
+
+		xpath_variable* result = set->get(scratch);
+
+		// free dummy buffer
+		if (scratch != buffer) global_deallocate(scratch);
+
+		return result;
 	}
 }
 
@@ -6125,6 +6152,7 @@ namespace pugi
 		ast_filter_posinv,				// select * from left where right; proximity position invariant
 		ast_string_constant,			// string constant
 		ast_number_constant,			// number constant
+		ast_variable,					// variable
 		ast_func_last,					// last()
 		ast_func_position,				// position()
 		ast_func_count,					// count(left)
@@ -6223,6 +6251,8 @@ namespace pugi
 			const char_t* string;
 			// value for ast_number_constant
 			double number;
+			// variable for ast_variable
+			xpath_variable* variable;
 			// node test for ast_step (node name/namespace/node type/pi target)
 			const char_t* nodetest;
 		} _data;
@@ -6838,6 +6868,13 @@ namespace pugi
 			_data.number = value;
 		}
 		
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype, xpath_variable* value):
+			_type((char)type), _rettype((char)rettype), _axis(0), _test(0), _left(0), _right(0), _next(0)
+		{
+			assert(type == ast_variable);
+			_data.variable = value;
+		}
+		
 		xpath_ast_node(ast_type_t type, xpath_value_type rettype, xpath_ast_node* left = 0, xpath_ast_node* right = 0):
 			_type((char)type), _rettype((char)rettype), _axis(0), _test(0), _left(left), _right(right), _next(0)
 		{
@@ -6940,6 +6977,16 @@ namespace pugi
 				return false;
 			}
 
+			case ast_variable:
+			{
+				assert(_rettype == _data.variable->type());
+
+				if (_rettype == xpath_type_boolean)
+					return _data.variable->get_boolean();
+
+				// fallthrough to type conversion
+			}
+
 			default:
 			{
 				switch (_rettype)
@@ -7036,6 +7083,16 @@ namespace pugi
 			case ast_func_round:
 				return round_nearest_nzero(_left->eval_number(c));
 			
+			case ast_variable:
+			{
+				assert(_rettype == _data.variable->type());
+
+				if (_rettype == xpath_type_number)
+					return _data.variable->get_number();
+
+				// fallthrough to type conversion
+			}
+
 			default:
 			{
 				switch (_rettype)
@@ -7211,6 +7268,16 @@ namespace pugi
 				return s;
 			}
 
+			case ast_variable:
+			{
+				assert(_rettype == _data.variable->type());
+
+				if (_rettype == xpath_type_string)
+					return xpath_string_const(_data.variable->get_string());
+
+				// fallthrough to type conversion
+			}
+
 			default:
 			{
 				switch (_rettype)
@@ -7347,6 +7414,16 @@ namespace pugi
 				return ns;
 			}
 
+			case ast_variable:
+			{
+				assert(_rettype == _data.variable->type());
+
+				if (_rettype == xpath_type_node_set)
+					return _data.variable->get_node_set();
+
+				// fallthrough to type conversion
+			}
+
 			default:
 				assert(!"Wrong expression for return type node set");
 				return xpath_node_set();
@@ -7362,7 +7439,7 @@ namespace pugi
 
 			case ast_string_constant:
 			case ast_number_constant:
-			// $$ case ast_variable:
+			case ast_variable:
 				return true;
 
 			case ast_step:
@@ -7394,7 +7471,10 @@ namespace pugi
 	{
 	    xpath_allocator& _alloc;
 	    xpath_lexer _lexer;
+
 		const char_t* _query;
+		xpath_variable_set* _variables;
+
 		xpath_parse_result* _result;
 		jmp_buf _error_handler;
 
@@ -7658,9 +7738,24 @@ namespace pugi
 	    	{
 	    	case lex_var_ref:
 	    	{
-				throw_error("Variables are not supported");
+				_lexer.next();
 
-	    		return 0;
+				if (_lexer.current() != lex_string)
+					throw_error("Variable name expected");
+
+				if (!_variables)
+					throw_error("Unknown variable: variable set is not provided");
+
+				xpath_lexer_string name = _lexer.contents();
+
+				xpath_variable* var = get_variable(_variables, name.begin, name.end);
+
+				if (!var)
+					throw_error("Unknown variable: variable set does not contain the given name");
+
+				_lexer.next();
+
+	    		return new (alloc_node()) xpath_ast_node(ast_variable, var->type(), var);
 			}
 
 			case lex_open_brace:
@@ -8190,7 +8285,7 @@ namespace pugi
 			return parse_or_expression();
 		}
 
-		xpath_parser(const char_t* query, xpath_allocator& alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _result(result)
+		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator& alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result)
 		{
 		}
 
@@ -8207,9 +8302,9 @@ namespace pugi
 			return result;
 		}
 
-		static xpath_ast_node* parse(const char_t* query, xpath_allocator& alloc, xpath_parse_result* result)
+		static xpath_ast_node* parse(const char_t* query, xpath_variable_set* variables, xpath_allocator& alloc, xpath_parse_result* result)
 		{
-			xpath_parser parser(query, alloc, result);
+			xpath_parser parser(query, variables, alloc, result);
 
 			int error = setjmp(parser._error_handler);
 
@@ -8404,7 +8499,7 @@ namespace pugi
 		return find(name);
 	}
 
-	xpath_query::xpath_query(const char_t* query): _alloc(0), _root(0)
+	xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _alloc(0), _root(0)
 	{
 		_result.error = 0;
 		_result.offset = 0;
@@ -8417,7 +8512,7 @@ namespace pugi
 		}
 		else
 		{
-			_root = xpath_parser::parse(query, *_alloc, &_result);
+			_root = xpath_parser::parse(query, variables, *_alloc, &_result);
 		}
 
 		if (!_root)
@@ -8519,9 +8614,9 @@ namespace pugi
 		return !_root;
 	}
 
-	xpath_node xml_node::select_single_node(const char_t* query) const
+	xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables) const
 	{
-		xpath_query q(query);
+		xpath_query q(query, variables);
 		return select_single_node(q);
 	}
 
@@ -8531,9 +8626,9 @@ namespace pugi
 		return s.empty() ? xpath_node() : s.first();
 	}
 
-	xpath_node_set xml_node::select_nodes(const char_t* query) const
+	xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables) const
 	{
-		xpath_query q(query);
+		xpath_query q(query, variables);
 		return select_nodes(q);
 	}
 
