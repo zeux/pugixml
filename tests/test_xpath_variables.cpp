@@ -237,13 +237,16 @@ TEST(xpath_variables_evaluate_node_set_fail)
 #endif
 }
 
-TEST_XML(xpath_variables_multiple_documents, "<node/>")
+TEST(xpath_variables_multiple_documents)
 {
+	xml_document doc;
+	doc.append_child().set_name(STR("node"));
+
 	xml_document doc1;
-	CHECK(doc1.load(STR("<node/>")));
+	doc1.append_child().set_name(STR("node"));
 
 	xml_document doc2;
-	CHECK(doc2.load(STR("<node/>")));
+	doc2.append_child().set_name(STR("node"));
 
 	xpath_variable_set set;
 	set.set(STR("var1"), doc1.select_nodes(STR("*")));
