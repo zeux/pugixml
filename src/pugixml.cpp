@@ -5346,6 +5346,11 @@ namespace
 
 	struct xpath_variable_string: xpath_variable
 	{
+		~xpath_variable_string()
+		{
+			if (value) global_deallocate(value);
+		}
+
 		char_t* value;
 		char_t name[1];
 	};
@@ -5381,7 +5386,7 @@ namespace
 	{
 		size_t length = strlength(name);
 
-		// we can't use offsetof(T, name) because T is non-POD, so we just allocate additional length characters
+		// $$ we can't use offsetof(T, name) because T is non-POD, so we just allocate additional length characters
 		void* memory = global_allocate(sizeof(T) + length * sizeof(char_t));
 		if (!memory) return 0;
 
@@ -5409,7 +5414,6 @@ namespace
 			return new_xpath_variable<xpath_variable_boolean>(name);
 
 		default:
-			assert(false);
 			return 0;
 		}
 	}
