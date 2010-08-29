@@ -180,6 +180,7 @@ TEST(xpath_parse_paths_valid)
 	}
 }
 
+#if defined(PUGIXML_WCHAR_MODE) || !defined(PUGIXML_NO_STL)
 TEST(xpath_parse_paths_valid_unicode)
 {
     // From ajaxslt
@@ -226,6 +227,7 @@ TEST(xpath_parse_paths_valid_unicode)
 	#endif
 	}
 }
+#endif
 
 TEST(xpath_parse_invalid)
 {

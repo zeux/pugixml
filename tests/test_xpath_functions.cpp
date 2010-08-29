@@ -377,6 +377,7 @@ TEST(xpath_string_substring_before)
 	CHECK_XPATH_STRING(c, STR("substring-before('abc', 'cd')"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring-before('abc', 'b')"), STR("a"));
 	CHECK_XPATH_STRING(c, STR("substring-before('abc', 'c')"), STR("ab"));
+	CHECK_XPATH_STRING(c, STR("substring-before('abc', '')"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring-before('', '')"), STR(""));
 	
 	// substring-before with 2 arguments, from W3C standard
@@ -402,6 +403,7 @@ TEST(xpath_string_substring_after)
 	CHECK_XPATH_STRING(c, STR("substring-after('abc', 'cd')"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring-after('abc', 'b')"), STR("c"));
 	CHECK_XPATH_STRING(c, STR("substring-after('abc', 'c')"), STR(""));
+	CHECK_XPATH_STRING(c, STR("substring-after('abc', '')"), STR("abc"));
 	CHECK_XPATH_STRING(c, STR("substring-after('', '')"), STR(""));
 
 	// substring-before with 2 arguments, from W3C standard
