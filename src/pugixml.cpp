@@ -277,8 +277,8 @@ namespace pugi
 
 	struct xml_memory_string_header
 	{
-		xml_memory_page* page;
-		size_t full_size;
+		uint16_t page_offset; // offset from page->data
+		uint16_t full_size; // 0 if string occupies whole page
 	};
 
 	struct xml_allocator
@@ -364,11 +364,11 @@ namespace pugi
 
 		char_t* allocate_string(size_t length)
 		{
-			// get actual size, rounded up to pointer alignment boundary
-			size_t size = ((length * sizeof(char_t)) + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1);
-
 			// allocate memory for string and header block
-			size_t full_size = sizeof(xml_memory_string_header) + size;
+			size_t size = sizeof(xml_memory_string_header) + length * sizeof(char_t);
+			
+			// round size up to pointer alignment boundary
+			size_t full_size = (size + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1);
 
 			xml_memory_page* page;
 			xml_memory_string_header* header = static_cast<xml_memory_string_header*>(allocate_memory(full_size, page));
@@ -376,8 +376,14 @@ namespace pugi
 			if (!header) return 0;
 
 			// setup header
-			header->page = page;
-			header->full_size = full_size;
+			ptrdiff_t page_offset = reinterpret_cast<char*>(header) - page->data;
+
+			assert(page_offset >= 0 && page_offset < (1 << 16));
+			header->page_offset = static_cast<uint16_t>(page_offset);
+
+			// full_size == 0 for large strings that occupy the whole page
+			assert(full_size < (1 << 16) || (page->busy_size == full_size && page_offset == 0));
+			header->full_size = full_size < (1 << 16) ? static_cast<uint16_t>(full_size) : 0;
 
 			return reinterpret_cast<char_t*>(header + 1);
 		}
@@ -388,7 +394,13 @@ namespace pugi
 			xml_memory_string_header* header = reinterpret_cast<xml_memory_string_header*>(string) - 1;
 
 			// deallocate
-			deallocate_memory(header, header->full_size, header->page);
+			size_t page_offset = offsetof(xml_memory_page, data) + header->page_offset;
+			xml_memory_page* page = reinterpret_cast<xml_memory_page*>(reinterpret_cast<char*>(header) - page_offset);
+
+			// if full_size == 0 then this string occupies the whole page
+			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size;
+
+			deallocate_memory(header, full_size, page);
 		}
 
 		xml_memory_page* _root;
