@@ -5527,15 +5527,6 @@ namespace pugi
 		return *this;
 	}
 
-	void xpath_node_set::swap(xpath_node_set& ns)
-	{
-		pstd::swap(_type, ns._type);
-		pstd::swap(_storage, ns._storage);
-		pstd::swap(_begin, ns._begin);
-		pstd::swap(_end, ns._end);
-		pstd::swap(_eos, ns._eos);
-	}
-
 	xpath_node_set::type_t xpath_node_set::type() const
 	{
 		return _type;

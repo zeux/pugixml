@@ -2063,8 +2063,6 @@ namespace pugi
 
 		void remove_duplicates();
 
-		void swap(xpath_node_set& ns);
-		
 	public:
 		/**
 		 * Default constructor
