@@ -358,7 +358,7 @@ TEST_XML_FLAGS(xpath_paths_nodetest_principal, "<node attr='value'>pcdata<child/
 	CHECK_XPATH_NODESET(doc, STR("child::abra:*/attribute::abra:*/descendant-or-self::abra:*")); // attribute is not of element type
 }
 
-TEST_XML(xpath_paths_absolute, "<node><foo><foo/><foo/></foo></node>")
+TEST_XML(xpath_paths_absolute, "<node attr='value'><foo><foo/><foo/></foo></node>")
 {
 	xml_node c;
 	xml_node n = doc.child(STR("node"));
@@ -366,9 +366,9 @@ TEST_XML(xpath_paths_absolute, "<node><foo><foo/><foo/></foo></node>")
 
 	CHECK_XPATH_NODESET(c, STR("/foo"));
 	CHECK_XPATH_NODESET(n, STR("/foo"));
-	CHECK_XPATH_NODESET(n, STR("/node/foo")) % 3;
-	CHECK_XPATH_NODESET(n.child(STR("foo")), STR("/node/foo")) % 3;
-	CHECK_XPATH_NODESET(na, STR("/node/foo")) % 3;
+	CHECK_XPATH_NODESET(n, STR("/node/foo")) % 4;
+	CHECK_XPATH_NODESET(n.child(STR("foo")), STR("/node/foo")) % 4;
+	CHECK_XPATH_NODESET(na, STR("/node/foo")) % 4;
 
 	CHECK_XPATH_NODESET(c, STR("/"));
 	CHECK_XPATH_NODESET(n, STR("/")) % 1;
