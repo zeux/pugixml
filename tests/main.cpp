@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <float.h>
+#include <assert.h>
 
 test_runner* test_runner::_tests = 0;
 size_t test_runner::_memory_fail_threshold = 0;
@@ -32,13 +33,12 @@ static void* custom_allocate(size_t size)
 
 static void custom_deallocate(void* ptr)
 {
-	if (ptr)
-	{
-		g_memory_total_size -= memory_size(ptr);
-		g_memory_total_count--;
-		
-		memory_deallocate(ptr);
-	}
+	assert(ptr);
+
+	g_memory_total_size -= memory_size(ptr);
+	g_memory_total_count--;
+	
+	memory_deallocate(ptr);
 }
 
 static void replace_memory_management()
@@ -89,22 +89,22 @@ void* operator new[](size_t size, const std::nothrow_t&) throw()
 
 void operator delete(void* ptr) DECL_NOTHROW()
 {
-    custom_deallocate(ptr);
+    if (ptr) custom_deallocate(ptr);
 }
 
 void operator delete[](void* ptr) DECL_NOTHROW()
 {
-    custom_deallocate(ptr);
+    if (ptr) custom_deallocate(ptr);
 }
 
 void operator delete(void* ptr, const std::nothrow_t&) throw()
 {
-    custom_deallocate(ptr);
+    if (ptr) custom_deallocate(ptr);
 }
 
 void operator delete[](void* ptr, const std::nothrow_t&) throw()
 {
-    custom_deallocate(ptr);
+    if (ptr) custom_deallocate(ptr);
 }
 
 #if defined(_MSC_VER) && _MSC_VER > 1200 && _MSC_VER < 1400 && !defined(__INTEL_COMPILER) && !defined(__DMC__)
