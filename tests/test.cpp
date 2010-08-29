@@ -70,65 +70,49 @@ bool test_double_nan(double value)
 }
 
 #ifndef PUGIXML_NO_XPATH
-bool test_xpath_string(const pugi::xpath_node& node, const pugi::xpath_query& query, const pugi::char_t* expected)
+bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, const pugi::char_t* expected)
 {
+	pugi::xpath_query q(query, variables);
+	if (!q) return false;
+
 	const size_t capacity = 64;
 	pugi::char_t result[capacity];
 
-	size_t size = query.evaluate_string(result, capacity, node);
+	size_t size = q.evaluate_string(result, capacity, node);
 
 	if (size <= capacity) return test_string_equal(result, expected);
 
 	std::basic_string<pugi::char_t> buffer(size, ' ');
 
-	return query.evaluate_string(&buffer[0], size, node) == size && test_string_equal(buffer.c_str(), expected);
+	return q.evaluate_string(&buffer[0], size, node) == size && test_string_equal(buffer.c_str(), expected);
 }
 
-bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::xpath_query& query, bool expected)
+bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, bool expected)
 {
-	return query.evaluate_boolean(node) == expected;
+	pugi::xpath_query q(query, variables);
+	if (!q) return false;
+
+	return q.evaluate_boolean(node) == expected;
 }
 
-bool test_xpath_number(const pugi::xpath_node& node, const pugi::xpath_query& query, double expected)
+bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, double expected)
 {
-	double value = query.evaluate_number(node);
+	pugi::xpath_query q(query, variables);
+	if (!q) return false;
+
+	double value = q.evaluate_number(node);
 	double absolute_error = fabs(value - expected);
 
 	const double tolerance = 1e-15f;
 	return absolute_error < tolerance || absolute_error < fabs(expected) * tolerance;
 }
 
-bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::xpath_query& query)
+bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables)
 {
-	return test_double_nan(query.evaluate_number(node));
-}
+	pugi::xpath_query q(query, variables);
+	if (!q) return false;
 
-bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, const pugi::char_t* expected)
-{
-	pugi::xpath_query q(query);
-
-	return q && test_xpath_string(node, q, expected);
-}
-
-bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query, bool expected)
-{
-	pugi::xpath_query q(query);
-
-	return q && test_xpath_boolean(node, q, expected);
-}
-
-bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, double expected)
-{
-	pugi::xpath_query q(query);
-
-	return q && test_xpath_number(node, q, expected);
-}
-
-bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* query)
-{
-	pugi::xpath_query q(query);
-
-	return q && test_xpath_number_nan(node, q);
+	return test_double_nan(q.evaluate_number(node));
 }
 
 bool test_xpath_fail_compile(const pugi::char_t* query, pugi::xpath_variable_set* variables)

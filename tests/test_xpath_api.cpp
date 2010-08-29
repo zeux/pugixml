@@ -169,10 +169,18 @@ TEST_XML(xpath_api_evaluate_attr, "<node attr='3'/>")
 #ifdef PUGIXML_NO_EXCEPTIONS
 TEST_XML(xpath_api_evaluate_fail, "<node attr='3'/>")
 {
-	CHECK_XPATH_BOOLEAN(doc, STR(""), false);
-	CHECK_XPATH_NUMBER_NAN(doc, STR(""));
-	CHECK_XPATH_STRING(doc, STR(""), STR(""));
-	CHECK_XPATH_NODESET(doc, STR(""));
+	xpath_query q(STR(""));
+
+	CHECK(q.evaluate_boolean(doc) == false);
+	CHECK_DOUBLE_NAN(q.evaluate_number(doc));
+
+	CHECK(q.evaluate_string(0, 0, doc) == 1); // null terminator
+
+#ifndef PUGIXML_NO_STL
+	CHECK(q.evaluate_string(doc).empty());
+#endif
+
+	CHECK(q.evaluate_node_set(doc).empty());
 }
 #endif
 

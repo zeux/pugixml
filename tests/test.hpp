@@ -38,17 +38,12 @@ bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const p
 bool test_double_nan(double value);
 
 #ifndef PUGIXML_NO_XPATH
-bool test_xpath_string(const pugi::xpath_node& node, const pugi::xpath_query& query, const pugi::char_t* expected);
-bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::xpath_query& query, bool expected);
-bool test_xpath_number(const pugi::xpath_node& node, const pugi::xpath_query& query, double expected);
-bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::xpath_query& query);
+bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, const pugi::char_t* expected);
+bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, bool expected);
+bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, double expected);
+bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables);
 
-bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, const pugi::char_t* expected);
-bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query, bool expected);
-bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, double expected);
-bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* query);
-
-bool test_xpath_fail_compile(const pugi::char_t* query, pugi::xpath_variable_set* variables = 0);
+bool test_xpath_fail_compile(const pugi::char_t* query, pugi::xpath_variable_set* variables);
 
 struct xpath_node_set_tester
 {
@@ -129,14 +124,19 @@ struct dummy_fixture {};
 #define CHECK_NODE(node, expected) CHECK_NODE_EX(node, expected, PUGIXML_TEXT(""), pugi::format_raw)
 
 #ifndef PUGIXML_NO_XPATH
-#define CHECK_XPATH_STRING(node, query, expected) CHECK_TEXT(test_xpath_string(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
-#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_TEXT(test_xpath_boolean(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
-#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
-#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STRINGIZE(query) " does not evaluate to NaN in context " STRINGIZE(node))
-#define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STRINGIZE(query) " should not compile")
+#define CHECK_XPATH_STRING_VAR(node, query, variables, expected) CHECK_TEXT(test_xpath_string(node, query, variables, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
+#define CHECK_XPATH_BOOLEAN_VAR(node, query, variables, expected) CHECK_TEXT(test_xpath_boolean(node, query, variables, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
+#define CHECK_XPATH_NUMBER_VAR(node, query, variables, expected) CHECK_TEXT(test_xpath_number(node, query, variables, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
+#define CHECK_XPATH_NUMBER_NAN_VAR(node, query, variables) CHECK_TEXT(test_xpath_number_nan(node, query, variables), STRINGIZE(query) " does not evaluate to NaN in context " STRINGIZE(node))
+#define CHECK_XPATH_NODESET_VAR(node, query, variables) xpath_node_set_tester(pugi::xpath_query(query, variables).evaluate_node_set(node), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
 #define CHECK_XPATH_FAIL_VAR(query, variables) CHECK_TEXT(test_xpath_fail_compile(query, variables), STRINGIZE(query) " should not compile")
-#define CHECK_XPATH_NODESET_Q(node, query) xpath_node_set_tester(query.evaluate_node_set(node), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
-#define CHECK_XPATH_NODESET(node, query) CHECK_XPATH_NODESET_Q(node, pugi::xpath_query(query))
+
+#define CHECK_XPATH_STRING(node, query, expected) CHECK_XPATH_STRING_VAR(node, query, 0, expected)
+#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_XPATH_BOOLEAN_VAR(node, query, 0, expected)
+#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_XPATH_NUMBER_VAR(node, query, 0, expected)
+#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_XPATH_NUMBER_NAN_VAR(node, query, 0)
+#define CHECK_XPATH_NODESET(node, query) CHECK_XPATH_NODESET_VAR(node, query, 0)
+#define CHECK_XPATH_FAIL(query) CHECK_XPATH_FAIL_VAR(query, 0)
 #endif
 
 #define STR(text) PUGIXML_TEXT(text)
