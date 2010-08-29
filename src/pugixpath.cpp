@@ -1967,26 +1967,12 @@ namespace pugi
 			}
 		}
 		
-		static const char_t* duplicate_string(const xpath_lexer_string& value, xpath_allocator& a)
-		{
-			if (value.begin)
-			{
-				size_t length = static_cast<size_t>(value.end - value.begin);
-
-				char_t* c = static_cast<char_t*>(a.alloc((length + 1) * sizeof(char_t)));
-				memcpy(c, value.begin, length * sizeof(char_t));
-				c[length] = 0;
-
-				return c;
-			}
-			else return 0;
-		}
 	public:
-		xpath_ast_node(ast_type_t type, xpath_value_type rettype, const xpath_lexer_string& value, xpath_allocator& a):
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype, const char_t* value):
 			m_type((char)type), m_rettype((char)rettype), m_axis(0), m_test(0), m_left(0), m_right(0), m_next(0)
 		{
 			assert(type == ast_string_constant);
-			m_data.string = duplicate_string(value, a);
+			m_data.string = value;
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_value_type rettype, double value):
@@ -2001,10 +1987,10 @@ namespace pugi
 		{
 		}
 
-		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const xpath_lexer_string& contents, xpath_allocator& a):
+		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const char_t* contents):
 			m_type((char)type), m_rettype(xpath_type_node_set), m_axis((char)axis), m_test((char)test), m_left(left), m_right(0), m_next(0)
 		{
-			m_data.nodetest = duplicate_string(contents, a);
+			m_data.nodetest = contents;
 		}
 
 		void set_next(xpath_ast_node* value)
@@ -2603,6 +2589,21 @@ namespace pugi
 			longjmp(m_error_handler, 1);
 		}
 
+		const char_t* duplicate_string(const xpath_lexer_string& value)
+		{
+			if (value.begin)
+			{
+				size_t length = static_cast<size_t>(value.end - value.begin);
+
+				char_t* c = static_cast<char_t*>(m_alloc.alloc((length + 1) * sizeof(char_t)));
+				memcpy(c, value.begin, length * sizeof(char_t));
+				c[length] = 0;
+
+				return c;
+			}
+			else return 0;
+		}
+
 		xpath_ast_node* parse_function_helper(ast_type_t type0, ast_type_t type1, size_t argc, xpath_ast_node* args[2])
 		{
 			assert(argc <= 1);
@@ -2847,7 +2848,9 @@ namespace pugi
 
 			case lex_quoted_string:
 			{
-				xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_string_constant, xpath_type_string, m_lexer.contents(), m_alloc);
+				const char_t* value = duplicate_string(m_lexer.contents());
+
+				xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_string_constant, xpath_type_string, value);
 				m_lexer.next();
 
 				return n;
@@ -2959,13 +2962,13 @@ namespace pugi
 			{
 				m_lexer.next();
 				
-				return new (m_alloc.node()) xpath_ast_node(ast_step, set, axis_self, nodetest_type_node, xpath_lexer_string(), m_alloc);
+				return new (m_alloc.node()) xpath_ast_node(ast_step, set, axis_self, nodetest_type_node, 0);
 			}
 			else if (m_lexer.current() == lex_double_dot)
 			{
 				m_lexer.next();
 				
-				return new (m_alloc.node()) xpath_ast_node(ast_step, set, axis_parent, nodetest_type_node, xpath_lexer_string(), m_alloc);
+				return new (m_alloc.node()) xpath_ast_node(ast_step, set, axis_parent, nodetest_type_node, 0);
 			}
 	    
 			nodetest_t nt_type = nodetest_none;
@@ -3060,7 +3063,7 @@ namespace pugi
 			}
 			else throw_error("Unrecognized node test");
 			
-			xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_step, set, axis, nt_type, nt_name, m_alloc);
+			xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_step, set, axis, nt_type, duplicate_string(nt_name));
 			
 			xpath_ast_node* last = 0;
 			
@@ -3096,7 +3099,7 @@ namespace pugi
 				m_lexer.next();
 
 				if (l == lex_double_slash)
-					n = new (m_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, xpath_lexer_string(), m_alloc);
+					n = new (m_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 				
 				n = parse_step(n);
 			}
@@ -3127,7 +3130,7 @@ namespace pugi
 				m_lexer.next();
 				
 				xpath_ast_node* n = new (m_alloc.node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
-				n = new (m_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, xpath_lexer_string(), m_alloc);
+				n = new (m_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 				
 				return parse_relative_location_path(n);
 			}
@@ -3178,7 +3181,7 @@ namespace pugi
 					{
 						if (n->rettype() != xpath_type_node_set) throw_error("Step has to be applied to node set");
 
-						n = new (m_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, xpath_lexer_string(), m_alloc);
+						n = new (m_alloc.node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 					}
 	
 	    			// select from location path
