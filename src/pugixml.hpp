@@ -1968,8 +1968,8 @@ namespace pugi
 		xpath_query(const xpath_query&);
 		xpath_query& operator=(const xpath_query&);
 
-		xpath_allocator* m_alloc;
-		xpath_ast_node* m_root;
+		xpath_allocator* _alloc;
+		xpath_ast_node* _root;
 		xpath_parse_result _result;
 
     	typedef xpath_ast_node* xpath_query::*unspecified_bool_type;
@@ -2084,8 +2084,8 @@ namespace pugi
 	class PUGIXML_CLASS xpath_node
 	{
 	private:
-		xml_node m_node;
-		xml_attribute m_attribute;
+		xml_node _node;
+		xml_attribute _attribute;
 	
     	/// \internal Safe bool type
     	typedef xml_node xpath_node::*unspecified_bool_type;
@@ -2184,13 +2184,13 @@ namespace pugi
 		typedef const xpath_node* const_iterator;
 	
 	private:
-		type_t m_type;
+		type_t _type;
 		
-		xpath_node m_storage;
+		xpath_node _storage;
 		
-		xpath_node* m_begin;
-		xpath_node* m_end;
-		xpath_node* m_eos;
+		xpath_node* _begin;
+		xpath_node* _end;
+		xpath_node* _eos;
 		
 		typedef xpath_node* iterator;
 
