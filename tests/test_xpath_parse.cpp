@@ -269,15 +269,25 @@ TEST_XML(xpath_parse_absolute, "<div><s/></div>")
 	CHECK_XPATH_NODESET(doc, STR("/*[/]")) % 2;
 }
 
-TEST(xpath_parse_out_of_memory)
+TEST(xpath_parse_out_of_memory_first_page)
 {
 	test_runner::_memory_fail_threshold = 1;
 
 	CHECK_XPATH_FAIL(STR("1"));
+}
 
+TEST(xpath_parse_out_of_memory_second_page_node)
+{
 	test_runner::_memory_fail_threshold = 8192;
 
 	CHECK_XPATH_FAIL(STR("1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1+1"));
+}
+
+TEST(xpath_parse_out_of_memory_string_to_number)
+{
+	test_runner::_memory_fail_threshold = 4096 + 128;
+
+	CHECK_XPATH_FAIL(STR("0.11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"));
 }
 
 #endif

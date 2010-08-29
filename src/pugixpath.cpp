@@ -497,35 +497,30 @@ namespace
 	#endif
 	}
 
-	double convert_string_to_number(const char_t* begin, const char_t* end)
+	bool convert_string_to_number(const char_t* begin, const char_t* end, double* out_result)
 	{
 		char_t buffer[32];
 
 		size_t length = static_cast<size_t>(end - begin);
+		char_t* scratch = buffer;
 
-		if (length < sizeof(buffer) / sizeof(buffer[0]))
-		{
-			// optimized on-stack conversion
-			memcpy(buffer, begin, length * sizeof(char_t));
-			buffer[length] = 0;
-
-			return convert_string_to_number(buffer);
-		}
-		else
+		if (length >= sizeof(buffer) / sizeof(buffer[0]))
 		{
 			// need to make dummy on-heap copy
-			char_t* copy = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
-			if (!copy) return gen_nan(); // $$ out of memory
-
-			memcpy(copy, begin, length * sizeof(char_t));
-			copy[length] = 0;
-
-			double result = convert_string_to_number(copy);
-
-			get_memory_deallocation_function()(copy);
-
-			return result;
+			scratch = static_cast<char_t*>(get_memory_allocation_function()((length + 1) * sizeof(char_t)));
+			if (!scratch) return false;
 		}
+
+		// copy string to zero-terminated buffer and perform conversion
+		memcpy(scratch, begin, length * sizeof(char_t));
+		scratch[length] = 0;
+
+		*out_result = convert_string_to_number(scratch);
+
+		// free dummy buffer
+		if (scratch != buffer) get_memory_deallocation_function()(scratch);
+
+		return true;
 	}
 	
 	double round_nearest(double value)
@@ -2899,7 +2894,10 @@ namespace pugi
 
 			case lex_number:
 			{
-				double value = convert_string_to_number(_lexer.contents().begin, _lexer.contents().end);
+				double value = 0;
+
+				if (!convert_string_to_number(_lexer.contents().begin, _lexer.contents().end, &value))
+					throw_error("Out of memory");
 
 				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
 				_lexer.next();
