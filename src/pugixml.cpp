@@ -4889,7 +4889,8 @@ namespace
 	const char_t* find_substring(const char_t* s, const char_t* p)
 	{
 	#ifdef PUGIXML_WCHAR_MODE
-		return wcsstr(s, p);
+		// MSVC6 wcsstr bug workaround (if s is empty it always returns 0)
+		return (*p == 0) ? s : wcsstr(s, p);
 	#else
 		return strstr(s, p);
 	#endif
