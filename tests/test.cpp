@@ -58,7 +58,16 @@ bool test_xpath_string(const pugi::xml_node& node, const pugi::char_t* query, co
 {
 	pugi::xpath_query q(query);
 
-	return q.evaluate_string(node) == expected;
+	const size_t capacity = 64;
+	pugi::char_t result[capacity];
+
+	size_t size = q.evaluate_string(result, capacity, node);
+
+	if (size <= capacity) return test_string_equal(result, expected);
+
+	std::basic_string<pugi::char_t> buffer(size, ' ');
+
+	return q.evaluate_string(&buffer[0], size, node) == size && test_string_equal(buffer.c_str(), expected);
 }
 
 bool test_xpath_boolean(const pugi::xml_node& node, const pugi::char_t* query, bool expected)

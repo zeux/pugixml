@@ -135,7 +135,13 @@ TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 
 	CHECK(q.evaluate_boolean(doc));
 	CHECK(q.evaluate_number(doc) == 3);
+
+	char_t string[3];
+	CHECK(q.evaluate_string(string, 3, doc) == 2 && string[0] == '3' && string[1] == 0);
+
+#ifndef PUGIXML_NO_STL
 	CHECK(q.evaluate_string(doc) == STR("3"));
+#endif
 
 	xpath_node_set ns = q.evaluate_node_set(doc);
 	CHECK(ns.size() == 1 && ns[0].attribute() == doc.child(STR("node")).attribute(STR("attr")));
@@ -168,6 +174,36 @@ TEST(xpath_api_evaluate_node_set_fail)
 	{
 	}
 #endif
+}
+
+TEST(xpath_api_evaluate_string)
+{
+	xpath_query q(STR("\"0123456789\""));
+
+	std::basic_string<char_t> base = STR("xxxxxxxxxxxxxxxx");
+
+	// test for enough space
+	std::basic_string<char_t> s0 = base;
+	CHECK(q.evaluate_string(&s0[0], 16, xml_node()) == 11 && memcmp(&s0[0], STR("0123456789\0xxxxx"), 16 * sizeof(char_t)) == 0);
+
+	// test for just enough space
+	std::basic_string<char_t> s1 = base;
+	CHECK(q.evaluate_string(&s1[0], 11, xml_node()) == 11 && memcmp(&s1[0], STR("0123456789\0xxxxx"), 16 * sizeof(char_t)) == 0);
+	
+	// test for just not enough space
+	std::basic_string<char_t> s2 = base;
+	CHECK(q.evaluate_string(&s2[0], 10, xml_node()) == 11 && memcmp(&s2[0], STR("0123456789xxxxxx"), 16 * sizeof(char_t)) == 0);
+
+	// test for not enough space
+	std::basic_string<char_t> s3 = base;
+	CHECK(q.evaluate_string(&s3[0], 5, xml_node()) == 11 && memcmp(&s3[0], STR("01234xxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
+
+	// test for single character buffer
+	std::basic_string<char_t> s4 = base;
+	CHECK(q.evaluate_string(&s4[0], 1, xml_node()) == 11 && memcmp(&s4[0], STR("0xxxxxxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
+
+	// test for empty buffer
+	CHECK(q.evaluate_string(0, 0, xml_node()) == 11);
 }
 
 TEST(xpath_api_return_type)

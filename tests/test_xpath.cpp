@@ -18,7 +18,7 @@ static void load_document_copy(xml_document& doc, const char_t* text)
 
 TEST(xpath_allocator_many_pages)
 {
-	pugi::string_t query = STR("0");
+	std::basic_string<char_t> query = STR("0");
 
 	for (int i = 0; i < 128; ++i) query += STR("+string-length('abcdefgh')");
 
@@ -27,7 +27,7 @@ TEST(xpath_allocator_many_pages)
 
 TEST(xpath_allocator_large_page)
 {
-	pugi::string_t query;
+	std::basic_string<char_t> query;
 
 	for (int i = 0; i < 1024; ++i) query += STR("abcdefgh");
 
@@ -139,16 +139,14 @@ TEST(xpath_long_numbers_parse)
 
 static bool test_xpath_string_prefix(const pugi::xml_node& node, const pugi::char_t* query, const pugi::char_t* expected, size_t match_length)
 {
-#ifdef PUGIXML_WCHAR_MODE
-	size_t expected_length = wcslen(expected);
-#else
-	size_t expected_length = strlen(expected);
-#endif
-
 	pugi::xpath_query q(query);
-	pugi::string_t value = q.evaluate_string(node);
 
-	return value.length() == expected_length && value.compare(0, match_length, expected, match_length) == 0;
+	pugi::char_t result[32];
+	size_t size = q.evaluate_string(result, sizeof(result) / sizeof(result[0]), node);
+
+	size_t expected_length = std::char_traits<pugi::char_t>::length(expected);
+
+	return size == expected_length + 1 && std::char_traits<pugi::char_t>::compare(result, expected, match_length) == 0;
 }
 
 TEST(xpath_long_numbers_stringize)
@@ -170,7 +168,7 @@ TEST(xpath_long_numbers_stringize)
 
 TEST(xpath_denorm_numbers)
 {
-	pugi::string_t query;
+	std::basic_string<pugi::char_t> query;
 
 	// 10^-318 - double denormal
 	for (int i = 0; i < 106; ++i)
