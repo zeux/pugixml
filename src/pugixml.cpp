@@ -5946,13 +5946,34 @@ namespace pugi
 				_cur_lexeme = lex_union;
 
 				break;
-
+			
 			case '$':
 				cur += 1;
-				_cur_lexeme = lex_var_ref;
+
+				if (IS_CHARTYPEX(*cur, ctx_start_symbol))
+				{
+					_cur_lexeme_contents.begin = cur;
+
+					while (IS_CHARTYPEX(*cur, ctx_symbol)) cur++;
+
+					if (cur[0] == ':' && IS_CHARTYPEX(cur[1], ctx_symbol)) // qname
+					{
+						cur++; // :
+
+						while (IS_CHARTYPEX(*cur, ctx_symbol)) cur++;
+					}
+
+					_cur_lexeme_contents.end = cur;
+				
+					_cur_lexeme = lex_var_ref;
+				}
+				else
+				{
+					_cur_lexeme = lex_none;
+				}
 
 				break;
-			
+
 			case '(':
 				cur += 1;
 				_cur_lexeme = lex_open_brace;
@@ -6124,7 +6145,7 @@ namespace pugi
 
 		const xpath_lexer_string& contents() const
 		{
-			assert(_cur_lexeme == lex_number || _cur_lexeme == lex_string || _cur_lexeme == lex_quoted_string);
+			assert(_cur_lexeme == lex_var_ref || _cur_lexeme == lex_number || _cur_lexeme == lex_string || _cur_lexeme == lex_quoted_string);
 
 			return _cur_lexeme_contents;
 		}
@@ -7738,15 +7759,10 @@ namespace pugi
 	    	{
 	    	case lex_var_ref:
 	    	{
-				_lexer.next();
-
-				if (_lexer.current() != lex_string)
-					throw_error("Variable name expected");
+				xpath_lexer_string name = _lexer.contents();
 
 				if (!_variables)
 					throw_error("Unknown variable: variable set is not provided");
-
-				xpath_lexer_string name = _lexer.contents();
 
 				xpath_variable* var = get_variable(_variables, name.begin, name.end);
 
