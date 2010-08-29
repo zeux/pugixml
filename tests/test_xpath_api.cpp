@@ -147,6 +147,25 @@ TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 	CHECK(ns.size() == 1 && ns[0].attribute() == doc.child(STR("node")).attribute(STR("attr")));
 }
 
+TEST_XML(xpath_api_evaluate_attr, "<node attr='3'/>")
+{
+	xpath_query q(STR("."));
+	xpath_node n(doc.child(STR("node")).attribute(STR("attr")), doc.child(STR("node")));
+
+	CHECK(q.evaluate_boolean(n));
+	CHECK(q.evaluate_number(n) == 3);
+
+	char_t string[3];
+	CHECK(q.evaluate_string(string, 3, n) == 2 && string[0] == '3' && string[1] == 0);
+
+#ifndef PUGIXML_NO_STL
+	CHECK(q.evaluate_string(n) == STR("3"));
+#endif
+
+	xpath_node_set ns = q.evaluate_node_set(n);
+	CHECK(ns.size() == 1 && ns[0] == n);
+}
+
 #ifdef PUGIXML_NO_EXCEPTIONS
 TEST_XML(xpath_api_evaluate_fail, "<node attr='3'/>")
 {
@@ -288,6 +307,4 @@ TEST(xpath_api_exception_what)
 }
 #endif
 
-// $$$
-// out of memory during parsing/execution (?)
 #endif

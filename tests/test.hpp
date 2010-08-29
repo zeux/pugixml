@@ -37,10 +37,10 @@ template <typename Node> inline bool test_node_name_value(const Node& node, cons
 bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const pugi::char_t* indent, unsigned int flags);
 
 #ifndef PUGIXML_NO_XPATH
-bool test_xpath_string(const pugi::xml_node& node, const pugi::char_t* query, const pugi::char_t* expected);
-bool test_xpath_boolean(const pugi::xml_node& node, const pugi::char_t* query, bool expected);
-bool test_xpath_number(const pugi::xml_node& node, const pugi::char_t* query, double expected);
-bool test_xpath_number_nan(const pugi::xml_node& node, const pugi::char_t* query);
+bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, const pugi::char_t* expected);
+bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query, bool expected);
+bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, double expected);
+bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* query);
 bool test_xpath_fail_compile(const pugi::char_t* query);
 
 struct xpath_node_set_tester
@@ -126,7 +126,7 @@ struct dummy_fixture {};
 #define CHECK_XPATH_NUMBER(node, query, expected) CHECK_TEXT(test_xpath_number(node, query, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
 #define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_TEXT(test_xpath_number_nan(node, query), STRINGIZE(query) " does not evaluate to NaN in context " STRINGIZE(node))
 #define CHECK_XPATH_FAIL(query) CHECK_TEXT(test_xpath_fail_compile(query), STRINGIZE(query) " should not compile")
-#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(node.select_nodes(query), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
+#define CHECK_XPATH_NODESET(node, query) xpath_node_set_tester(xpath_query(query).evaluate_node_set(node), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
 #endif
 
 #define STR(text) PUGIXML_TEXT(text)

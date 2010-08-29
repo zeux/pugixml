@@ -54,7 +54,7 @@ bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const p
 }
 
 #ifndef PUGIXML_NO_XPATH
-bool test_xpath_string(const pugi::xml_node& node, const pugi::char_t* query, const pugi::char_t* expected)
+bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, const pugi::char_t* expected)
 {
 	pugi::xpath_query q(query);
 
@@ -70,14 +70,14 @@ bool test_xpath_string(const pugi::xml_node& node, const pugi::char_t* query, co
 	return q.evaluate_string(&buffer[0], size, node) == size && test_string_equal(buffer.c_str(), expected);
 }
 
-bool test_xpath_boolean(const pugi::xml_node& node, const pugi::char_t* query, bool expected)
+bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query, bool expected)
 {
 	pugi::xpath_query q(query);
 
 	return q.evaluate_boolean(node) == expected;
 }
 
-bool test_xpath_number(const pugi::xml_node& node, const pugi::char_t* query, double expected)
+bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, double expected)
 {
 	pugi::xpath_query q(query);
 
@@ -88,7 +88,7 @@ bool test_xpath_number(const pugi::xml_node& node, const pugi::char_t* query, do
 	return absolute_error < tolerance || absolute_error < fabs(expected) * tolerance;
 }
 
-bool test_xpath_number_nan(const pugi::xml_node& node, const pugi::char_t* query)
+bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* query)
 {
 	pugi::xpath_query q(query);
 
