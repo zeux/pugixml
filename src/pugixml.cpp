@@ -304,7 +304,7 @@ namespace pugi
 
 			// full_size == 0 for large strings that occupy the whole page
 			assert(full_size < (1 << 16) || (page->busy_size == full_size && page_offset == 0));
-			header->full_size = full_size < (1 << 16) ? static_cast<uint16_t>(full_size) : 0;
+			header->full_size = static_cast<uint16_t>(full_size < (1 << 16) ? full_size : 0);
 
 			return reinterpret_cast<char_t*>(header + 1);
 		}
@@ -4657,16 +4657,21 @@ namespace pstd
 
 	template <typename I, typename Pred> void median(I first, I middle, I last, const Pred& pred)
 	{
-		// median of three for small chunks
-		if (last - first <= 40) return median3(first, middle, last, pred);
+		if (last - first <= 40)
+		{
+			// median of three for small chunks
+			median3(first, middle, last, pred);
+		}
+		else
+		{
+			// median of nine
+			size_t step = (last - first + 1) / 8;
 
-		// median of nine
-		size_t step = (last - first + 1) / 8;
-
-		median3(first, first + step, first + 2 * step, pred);
-		median3(middle - step, middle, middle + step, pred);
-		median3(last - 2 * step, last - step, last, pred);
-		median3(first + step, middle, last - step, pred);
+			median3(first, first + step, first + 2 * step, pred);
+			median3(middle - step, middle, middle + step, pred);
+			median3(last - 2 * step, last - step, last, pred);
+			median3(first + step, middle, last - step, pred);
+		}
 	}
 
 	template <typename I, typename Pred> void sort(I begin, I end, const Pred& pred)
@@ -4956,8 +4961,8 @@ namespace
 	bool node_is_before(xml_node ln, unsigned int lh, xml_node rn, unsigned int rh)
 	{
 		// normalize heights
-		for (unsigned int h = rh; h < lh; h++) ln = ln.parent();
-		for (unsigned int h = lh; h < rh; h++) rn = rn.parent();
+		for (unsigned int i = rh; i < lh; i++) ln = ln.parent();
+		for (unsigned int j = lh; j < rh; j++) rn = rn.parent();
 	    
 		// one node is the ancestor of the other
 	    if (ln == rn) return lh < rh;
@@ -5894,7 +5899,7 @@ namespace pugi
 			return *(_end - 1);
 
 		case type_unsorted:
-			return *pstd::min_element(_begin, _end, document_order_comparator());
+			return *pstd::min_element<iterator>(_begin, _end, document_order_comparator());
 
 		default:
 			assert(!"Invalid node set type");
@@ -7267,7 +7272,7 @@ namespace pugi
 
 			// count the string number
 			unsigned int count = 1;
-			for (xpath_ast_node* n = _right; n; n = n->_next) count++;
+			for (xpath_ast_node* nc = _right; nc; nc = nc->_next) count++;
 
 			// gather all strings
 			xpath_string static_buffer[4];
@@ -8797,7 +8802,7 @@ namespace pugi
 		return _result;
 	}
 
-	xpath_query::operator unspecified_bool_type() const
+	xpath_query::operator xpath_query::unspecified_bool_type() const
 	{
 		return _root ? &xpath_query::_root : 0;
 	}
