@@ -4851,6 +4851,11 @@ namespace
 		{
 			return !strequal(_buffer, o._buffer);
 		}
+
+		bool uses_heap() const
+		{
+			return _uses_heap;
+		}
 	};
 
 	xpath_string xpath_string_const(const char_t* str)
@@ -7401,7 +7406,7 @@ namespace pugi
 				
 				const char_t* pos = find_substring(s.c_str(), p.c_str());
 				
-				return pos ? xpath_string(pos + p.length()) : xpath_string();
+				return pos ? xpath_string(pos + p.length(), s.uses_heap()) : xpath_string();
 			}
 
 			case ast_func_substring_2:
@@ -7414,7 +7419,7 @@ namespace pugi
 				
 				size_t pos = first < 1 ? 1 : (size_t)first;
 				
-				return xpath_string(s.c_str() + (pos - 1));
+				return xpath_string(s.c_str() + (pos - 1), s.uses_heap());
 			}
 			
 			case ast_func_substring_3:
@@ -7428,16 +7433,17 @@ namespace pugi
 				if (is_nan(first) || is_nan(last)) return xpath_string();
 				else if (first >= s_length + 1) return xpath_string();
 				else if (first >= last) return xpath_string();
+				else if (last < 1) return xpath_string();
 				
 				size_t pos = first < 1 ? 1 : (size_t)first;
 				size_t end = last >= s_length + 1 ? s_length + 1 : (size_t)last;
 
-				size_t size_requested = end - pos;
-				size_t size_to_end = s_length - pos + 1;
+				assert(1 <= pos && pos <= end && end <= s_length + 1);
 
-				size_t size = size_requested < size_to_end ? size_requested : size_to_end;
-				
-				return xpath_string(s.c_str() + pos - 1, s.c_str() + pos - 1 + size);
+				if (end == s_length + 1)
+					return xpath_string(s.c_str() + (pos - 1), s.uses_heap());
+				else
+					return xpath_string(s.c_str() + (pos - 1), s.c_str() + (end - 1));
 			}
 
 			case ast_func_normalize_space_0:
