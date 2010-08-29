@@ -4540,20 +4540,6 @@ namespace pstd
 		rhs = temp;
 	}
 
-	template <typename I, typename J> void copy(I begin, I end, J target)
-	{
-		while (begin != end) *target++ = *begin++;
-	}
-
-	template <typename I, typename T> I find(I begin, I end, T elem)
-	{
-		for (I it = begin; it != end; ++it)
-			if (*it == elem)
-				return it;
-
-		return end;
-	}
-
 	template <typename I, typename Pred> I min_element(I begin, I end, const Pred& pred)
 	{
 		I result = begin;
@@ -5334,18 +5320,30 @@ namespace
 
 	struct xpath_variable_boolean: xpath_variable
 	{
+		xpath_variable_boolean(): value(false)
+		{
+		}
+
 		bool value;
 		char_t name[1];
 	};
 
 	struct xpath_variable_number: xpath_variable
 	{
+		xpath_variable_number(): value(0)
+		{
+		}
+
 		double value;
 		char_t name[1];
 	};
 
 	struct xpath_variable_string: xpath_variable
 	{
+		xpath_variable_string(): value(0)
+		{
+		}
+
 		~xpath_variable_string()
 		{
 			if (value) global_deallocate(value);
@@ -5744,8 +5742,7 @@ namespace pugi
 			xpath_node* storage = static_cast<xpath_node*>(global_allocate(capacity * sizeof(xpath_node)));
 			if (!storage) return; // $$ out of memory
 
-			pstd::copy(_begin, _end, storage);
-			// memcpy(storage, _begin, size * sizeof(xpath_node));
+			memcpy(storage, _begin, size * sizeof(xpath_node));
 			
 			if (_begin != &_storage) global_deallocate(_begin);
 			
@@ -5754,8 +5751,7 @@ namespace pugi
 			_eos = storage + capacity;
 		}
 		
-		pstd::copy(begin, end, _end);
-		// memcpy(_end, begin, count * sizeof(xpath_node));
+		memcpy(_end, begin, count * sizeof(xpath_node));
 		_end += count;
 	}
 
@@ -7989,9 +7985,7 @@ namespace pugi
 					// QName or NCName:*
 					else
 					{
-						const char_t* colon_pos = pstd::find(nt_name.begin, nt_name.end, ':');
-
-						if (colon_pos + 2 == nt_name.end && colon_pos[1] == '*') // NCName:*
+						if (nt_name.end - nt_name.begin > 2 && nt_name.end[-2] == ':' && nt_name.end[-1] == '*') // NCName:*
 						{
 							nt_name.end--; // erase *
 							
