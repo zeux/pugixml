@@ -281,12 +281,6 @@ namespace pugi
 	 */
 	const unsigned int format_write_bom = 0x02;
 
-	/// \deprecated This constant is deprecated and will be removed in future versions; use format_write_bom instead
-#if !defined(__INTEL_COMPILER) || __INTEL_COMPILER > 800
-	PUGIXML_DEPRECATED
-#endif
-	const unsigned int format_write_bom_utf8 = format_write_bom;
-	
 	/**
 	 * If this flag is on, no indentation is performed and no line breaks are written to output file.
 	 * This means that the data is written to output stream as is.
@@ -1753,12 +1747,6 @@ namespace pugi
 		 * \return success flag
 		 */
 		bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
-
-		/**
-		 * Compute document order for the whole tree
-		 * Sometimes this makes evaluation of XPath queries faster.
-		 */
-		PUGIXML_DEPRECATED void precompute_document_order();
 	};
 
 #ifndef PUGIXML_NO_XPATH
@@ -1774,10 +1762,6 @@ namespace pugi
 		xpath_type_string,    ///< String
 		xpath_type_boolean    ///< Boolean
 	};
-
-	/// XPath query return type classification
-	/// \deprecated This type is deprecated and will be removed in future versions; use xpath_value_type instead
-	typedef xpath_value_type xpath_type_t;
 
 	struct PUGIXML_CLASS xpath_parse_result
 	{

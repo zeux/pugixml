@@ -4369,10 +4369,6 @@ namespace pugi
 		return true;
 	}
 
-	void xml_document::precompute_document_order()
-	{
-	}
-
 #ifndef PUGIXML_NO_STL
 	std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str)
 	{
