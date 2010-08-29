@@ -965,6 +965,7 @@ namespace pugi
 
 	private:
 		const char_t* m_cur;
+		const char_t* m_cur_lexeme_pos;
 		xpath_lexer_string m_cur_lexeme_contents;
 
 		lexeme_t m_cur_lexeme;
@@ -985,6 +986,9 @@ namespace pugi
 			const char_t* cur = m_cur;
 
 			while (IS_CHARTYPEX(*cur, ctx_space)) ++cur;
+
+			// save lexeme position for error reporting
+			m_cur_lexeme_pos = cur;
 
 			switch (*cur)
 			{
@@ -1228,6 +1232,11 @@ namespace pugi
 		lexeme_t current() const
 		{
 			return m_cur_lexeme;
+		}
+
+		const char_t* current_pos() const
+		{
+			return m_cur_lexeme_pos;
 		}
 
 		const xpath_lexer_string& contents() const
@@ -2568,6 +2577,7 @@ namespace pugi
 	{
 	    xpath_allocator& m_alloc;
 	    xpath_lexer m_lexer;
+		const char_t* m_query;
 		xpath_parse_result* m_result;
 		jmp_buf m_error_handler;
 
@@ -2577,7 +2587,7 @@ namespace pugi
 		void throw_error(const char* message)
 		{
 			m_result->error = message;
-			m_result->offset = 0; // $$$ lexer
+			m_result->offset = m_lexer.current_pos() - m_query;
 
 			longjmp(m_error_handler, 1);
 		}
@@ -3332,7 +3342,7 @@ namespace pugi
 			return parse_or_expression();
 		}
 
-		xpath_parser(const char_t* query, xpath_allocator& alloc, xpath_parse_result* result): m_alloc(alloc), m_lexer(query), m_result(result)
+		xpath_parser(const char_t* query, xpath_allocator& alloc, xpath_parse_result* result): m_alloc(alloc), m_lexer(query), m_query(query), m_result(result)
 		{
 		}
 

@@ -4,6 +4,7 @@
 
 #include "helpers.hpp"
 
+#include <string.h>
 #include <string>
 
 TEST_XML(xpath_api_select_nodes, "<node><head/><foo/><foo/><tail/></node>")
@@ -215,7 +216,7 @@ TEST(xpath_api_query_result_fail)
 	try
 	{
 #endif
-		xpath_query q(STR("string-length(1, 2, 3)"));
+		xpath_query q(STR("//foo/child::/bar"));
 
 #ifndef PUGIXML_NO_EXCEPTIONS
 		CHECK_FORCE_FAIL("Expected exception");
@@ -228,7 +229,7 @@ TEST(xpath_api_query_result_fail)
 		CHECK(!result);
 		CHECK(result.error != 0 && result.error[0] != 0);
 		CHECK(result.description() == result.error);
-		CHECK(result.offset == 0); // $$$
+		CHECK(result.offset == 13);
 
 #ifndef PUGIXML_NO_EXCEPTIONS
 	}
