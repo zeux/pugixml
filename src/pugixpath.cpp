@@ -2357,7 +2357,15 @@ namespace pugi
 						if (!r.empty() && r[r.size() - 1] != ' ')
 							r += ' ';
 					}
-					else r += *it;
+					else
+					{
+					#ifdef __DMC__
+						volatile // explicitly store to local to work around DMC bug (it loads 4 bytes from &*it otherwise)
+					#endif
+						char_t ch = *it;
+
+						r += ch;
+					}
 				}
 				
 				string_t::size_type pos = r.find_last_not_of(' ');
@@ -2375,7 +2383,10 @@ namespace pugi
 				
 				for (string_t::iterator it = s.begin(); it != s.end(); )
 				{
-					char_t ch = *it; // explicitly store to local to work around DMC bug (it loads 4 bytes from &*it otherwise)
+				#ifdef __DMC__
+					volatile // explicitly store to local to work around DMC bug (it loads 4 bytes from &*it otherwise)
+				#endif
+					char_t ch = *it;
 
 					string_t::size_type pos = from.find(ch);
 					

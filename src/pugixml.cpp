@@ -1077,7 +1077,12 @@ namespace
 		// try to guess encoding (based on XML specification, Appendix F.1)
 		const uint8_t* data = static_cast<const uint8_t*>(contents);
 
-		return guess_buffer_encoding(data[0], data[1], data[2], data[3]);
+	#ifdef __DMC__
+		volatile // explicitly store to local to work around DMC bug (it loads 4 bytes from data[3] otherwise)
+	#endif
+		uint8_t d0 = data[0], d1 = data[1], d2 = data[2], d3 = data[3];
+
+		return guess_buffer_encoding(d0, d1, d2, d3);
 	}
 
 	bool get_mutable_buffer(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, bool is_mutable)
