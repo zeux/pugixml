@@ -8262,10 +8262,9 @@ namespace pugi
 				
 				return parse_relative_location_path(n);
 			}
-			else
-			{
-				return parse_relative_location_path(0);
-			}
+
+			// else clause moved outside of if because of bogus warning 'control may reach end of non-void function being inlined' in gcc 4.0.1
+			return parse_relative_location_path(0);
 	    }
 	    
 	    // PathExpr ::= LocationPath
