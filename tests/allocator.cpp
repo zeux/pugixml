@@ -28,7 +28,10 @@ namespace
 	void* allocate_page_aligned(size_t size)
     {
         // We can't use VirtualAlloc because it has 64Kb granularity so we run out of address space quickly
-        void* result = malloc(size + PAGE_SIZE);
+		// We can't use malloc because of occasional problems with CW on CRT termination
+		static HANDLE heap = HeapCreate(0, 0, 0);
+
+        void* result = HeapAlloc(heap, 0, size + PAGE_SIZE);
 
         return (void*)align_to_page((size_t)result);
     }
