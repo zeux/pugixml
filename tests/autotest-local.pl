@@ -25,6 +25,15 @@ sub gcctoolset
 	return ($^O =~ /darwin/) ? ($gcc, "${gcc}_x64", "${gcc}_ppc") : (`uname -m` =~ /64/) ? ("${gcc}_x64") : ($gcc);
 }
 
+sub getcpucount
+{
+	return $1 if ($^O =~ /linux/ && `cat /proc/cpuinfo` =~ /cpu cores\s*:\s*(\d+)/);
+	return $1 if ($^O =~ /freebsd|darwin/ && `sysctl -a` =~ /hw\.ncpu\s*:\s*(\d+)/);
+	return $1 - 1 if ($^O =~ /solaris/ && `mpstat | wc -l` =~ /(\d+)/);
+
+	undef;
+}
+
 @alltoolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw45_0x, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64, xbox360, ps3_gcc, ps3_snc) : ($^O =~ /solaris/) ? (suncc, suncc_x64) : &gcctoolset();
 
 $fast = scalar grep(/^fast$/, @ARGV);
@@ -48,6 +57,11 @@ print "### autotest begin " . scalar localtime() . "\n";
 # print SVN revision info
 print "### autotest revision $1\n" if (`svn info` =~ /Revision:\s+(\d+)/);
 
+# print CPU info
+$cpucount = &getcpucount();
+
+print "### autotest cpu $cpucount\n" if (defined $cpucount);
+
 # build all configurations
 %results = ();
 
@@ -56,7 +70,7 @@ foreach $toolset (@toolsets)
 	my $cmdline = "jam";
 
 	# parallel build on non-windows platforms (since jam can't detect processor count)
-	$cmdline .= " -j6" if ($^O !~ /MSWin/);
+	$cmdline .= " -j$cpucount" if (defined $cpucount);
 	
 	# add toolset
 	$cmdline .= " toolset=$toolset";
