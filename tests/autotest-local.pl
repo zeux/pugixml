@@ -57,10 +57,8 @@ print "### autotest begin " . scalar localtime() . "\n";
 # print SVN revision info
 print "### autotest revision $1\n" if (`svn info` =~ /Revision:\s+(\d+)/);
 
-# print CPU info
+# get CPU info
 $cpucount = &getcpucount();
-
-print "### autotest cpu $cpucount\n" if (defined $cpucount);
 
 # build all configurations
 %results = ();
