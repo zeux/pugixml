@@ -153,6 +153,34 @@ namespace
 #endif
 }
 
+#if !defined(PUGIXML_NO_STL) || !defined(PUGIXML_NO_XPATH)
+// auto_ptr-like buffer holder for exception recovery
+namespace
+{
+	struct buffer_holder
+	{
+		void* data;
+		void (*deleter)(void*);
+
+		buffer_holder(void* data, void (*deleter)(void*)): data(data), deleter(deleter)
+		{
+		}
+
+		~buffer_holder()
+		{
+			if (data) deleter(data);
+		}
+
+		void* release()
+		{
+			void* result = data;
+			data = 0;
+			return result;
+		}
+	};
+}
+#endif
+
 namespace pugi
 {
 	static const size_t xml_memory_page_size = 32768;
@@ -2938,27 +2966,6 @@ namespace
 	}
 
 #ifndef PUGIXML_NO_STL
-	struct buffer_holder
-	{
-		void* data;
-
-		buffer_holder(void* data): data(data)
-		{
-		}
-
-		~buffer_holder()
-		{
-			if (data) global_deallocate(data);
-		}
-
-		void* release()
-		{
-			void* result = data;
-			data = 0;
-			return result;
-		}
-	};
-
 	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding)
 	{
 		// get length of remaining data in stream
@@ -2975,7 +2982,7 @@ namespace
 		if (static_cast<std::streamsize>(read_length) != length || length < 0) return make_parse_result(status_out_of_memory);
 
 		// read stream data into memory (guard against stream exceptions with buffer holder)
-		buffer_holder buffer = global_allocate((read_length > 0 ? read_length : 1) * sizeof(T));
+		buffer_holder buffer(global_allocate((read_length > 0 ? read_length : 1) * sizeof(T)), global_deallocate);
 		if (!buffer.data) return make_parse_result(status_out_of_memory);
 
 		stream.read(static_cast<T*>(buffer.data), static_cast<std::streamsize>(read_length));
@@ -5645,11 +5652,13 @@ namespace pugi
 			return new (memory) xpath_allocator();
 		}
 
-		static void destroy(xpath_allocator* alloc)
+		static void destroy(void* ptr)
 		{
-			if (!alloc) return;
+			if (!ptr) return;
 			
 			// free all allocated pages
+			xpath_allocator* alloc = static_cast<xpath_allocator*>(ptr);
+
 			memory_block* cur = alloc->_root;
 			memory_block* first = &alloc->_first;
 
@@ -7682,7 +7691,10 @@ namespace pugi
 		xpath_variable_set* _variables;
 
 		xpath_parse_result* _result;
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
 		jmp_buf _error_handler;
+	#endif
 
 		xpath_parser(const xpath_parser&);
 		xpath_parser& operator=(const xpath_parser&);
@@ -7692,7 +7704,11 @@ namespace pugi
 			_result->error = message;
 			_result->offset = _lexer.current_pos() - _query;
 
+		#ifdef PUGIXML_NO_EXCEPTIONS
 			longjmp(_error_handler, 1);
+		#else
+			throw xpath_exception(*_result);
+		#endif
 		}
 
 		void* alloc_node()
@@ -8504,9 +8520,13 @@ namespace pugi
 		{
 			xpath_parser parser(query, variables, alloc, result);
 
+		#ifdef PUGIXML_NO_EXCEPTIONS
 			int error = setjmp(parser._error_handler);
 
 			return (error == 0) ? parser.parse() : 0;
+		#else
+			return parser.parse();
+		#endif
 		}
 	};
 
@@ -8702,25 +8722,26 @@ namespace pugi
 		_result.error = 0;
 		_result.offset = 0;
 
-		_alloc = xpath_allocator::create();
+		xpath_allocator* alloc = xpath_allocator::create();
 
-		if (!_alloc)
+		if (!alloc)
 		{
 			_result.error = "Out of memory";
-		}
-		else
-		{
-			_root = xpath_parser::parse(query, variables, *_alloc, &_result);
-		}
-
-		if (!_root)
-		{
-			xpath_allocator::destroy(_alloc);
-			_alloc = 0;
 
 		#ifndef PUGIXML_NO_EXCEPTIONS
 			throw xpath_exception(_result);
 		#endif
+		}
+		else
+		{
+			buffer_holder alloc_holder(alloc, xpath_allocator::destroy);
+
+			_root = xpath_parser::parse(query, variables, *alloc, &_result);
+
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			if (_root) // only store allocator if parsing was a success
+		#endif
+			_alloc = static_cast<xpath_allocator*>(alloc_holder.release());
 		}
 	}
 
