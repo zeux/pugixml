@@ -7684,7 +7684,7 @@ namespace pugi
 
 	struct xpath_parser
 	{
-	    xpath_allocator& _alloc;
+	    xpath_allocator* _alloc;
 	    xpath_lexer _lexer;
 
 		const char_t* _query;
@@ -7695,9 +7695,6 @@ namespace pugi
 	#ifdef PUGIXML_NO_EXCEPTIONS
 		jmp_buf _error_handler;
 	#endif
-
-		xpath_parser(const xpath_parser&);
-		xpath_parser& operator=(const xpath_parser&);
 
 		void throw_error(const char* message)
 		{
@@ -7713,7 +7710,7 @@ namespace pugi
 
 		void* alloc_node()
 		{
-			void* result = _alloc.allocate(sizeof(xpath_ast_node));
+			void* result = _alloc->allocate(sizeof(xpath_ast_node));
 
 			if (!result) throw_error("Out of memory");
 
@@ -7726,7 +7723,7 @@ namespace pugi
 			{
 				size_t length = static_cast<size_t>(value.end - value.begin);
 
-				char_t* c = static_cast<char_t*>(_alloc.allocate((length + 1) * sizeof(char_t)));
+				char_t* c = static_cast<char_t*>(_alloc->allocate((length + 1) * sizeof(char_t)));
 				if (!c) throw_error("Out of memory");
 
 				memcpy(c, value.begin, length * sizeof(char_t));
@@ -8499,7 +8496,7 @@ namespace pugi
 			return parse_or_expression();
 		}
 
-		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator& alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result)
+		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result)
 		{
 		}
 
@@ -8516,7 +8513,7 @@ namespace pugi
 			return result;
 		}
 
-		static xpath_ast_node* parse(const char_t* query, xpath_variable_set* variables, xpath_allocator& alloc, xpath_parse_result* result)
+		static xpath_ast_node* parse(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result)
 		{
 			xpath_parser parser(query, variables, alloc, result);
 
@@ -8736,7 +8733,7 @@ namespace pugi
 		{
 			buffer_holder alloc_holder(alloc, xpath_allocator::destroy);
 
-			_root = xpath_parser::parse(query, variables, *alloc, &_result);
+			_root = xpath_parser::parse(query, variables, alloc, &_result);
 
 		#ifdef PUGIXML_NO_EXCEPTIONS
 			if (_root) // only store allocator if parsing was a success
