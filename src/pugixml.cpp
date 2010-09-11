@@ -21,7 +21,6 @@
 #include <wchar.h>
 
 #ifndef PUGIXML_NO_XPATH
-#	include <ctype.h>
 #	include <math.h>
 #	include <float.h>
 #endif
@@ -4903,6 +4902,12 @@ namespace
 	#endif
 	}
 
+	// Converts symbol to lower case, if it is an ASCII one
+	char_t tolower_ascii(char_t ch)
+	{
+		return static_cast<unsigned int>(ch - 'A') < 26 ? (ch | ' ') : ch;
+	}
+
 	xpath_string string_value(const xpath_node& na)
 	{
 		if (na.attribute())
@@ -7127,7 +7132,7 @@ namespace pugi
 						// strnicmp / strncasecmp is not portable
 						for (const char_t* lit = lang.c_str(); *lit; ++lit)
 						{
-							if (tolower(*lit) != tolower(*value)) return false;
+							if (tolower_ascii(*lit) != tolower_ascii(*value)) return false;
 							++value;
 						}
 						

@@ -216,7 +216,7 @@ TEST(xpath_boolean_false)
 	CHECK_XPATH_FAIL(STR("false(1)"));
 }
 
-TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-UK'><subchild/></child></node><foo><bar/></foo>")
+TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='zh-UK'><subchild/></child></node><foo><bar/></foo>")
 {
 	xml_node c;
 	
@@ -231,16 +231,16 @@ TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='ru-UK'><subch
 	
 	// lang with 1 argument, same language/prefix
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")), STR("lang('en')"), true);
-	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('ru-uk')"), true);
-	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('ru')"), true);
-	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")).child(STR("subchild")), STR("lang('ru')"), true);
-	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")).child(STR("subchild")), STR("lang('RU')"), true);
+	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('zh-uk')"), true);
+	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('zh')"), true);
+	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")).child(STR("subchild")), STR("lang('zh')"), true);
+	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")).child(STR("subchild")), STR("lang('ZH')"), true);
 
 	// lang with 1 argument, different language/prefix
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")), STR("lang('')"), false);
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")), STR("lang('e')"), false);
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('en')"), false);
-	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('ru-gb')"), false);
+	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('zh-gb')"), false);
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('r')"), false);
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")).child(STR("subchild")), STR("lang('en')"), false);
 
