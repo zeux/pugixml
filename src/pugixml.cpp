@@ -6942,81 +6942,42 @@ namespace pugi
 			}
 		}
 		
-		template <class T> void step_do(xpath_node_set& ns, const xpath_context& c, T v)
+		template <class T> xpath_node_set step_do(const xpath_context& c, T v)
 		{
 			const axis_t axis = T::axis;
+			const bool attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
 
-			assert(ns.empty());
+			xpath_node_set ns;
 
-			switch (axis)
+			if (_left)
 			{
-			case axis_ancestor:
-			case axis_ancestor_or_self:
-			case axis_descendant_or_self:
-			case axis_following:
-			case axis_parent:
-			case axis_preceding:
-			case axis_self:
-				if (_left)
-				{
-					xpath_node_set s = _left->eval_node_set(c);
-							
-					for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
-					{
-						size_t size = ns.size();
+				xpath_node_set s = _left->eval_node_set(c);
 						
-						if (it->node())
-							step_fill(ns, it->node(), v);
-						else
-							step_fill(ns, it->attribute(), it->parent(), v);
-							
-						apply_predicates(ns, size);
-					}
-				}
-				else
+				for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
 				{
-					if (c.n.node()) step_fill(ns, c.n.node(), v);
-					else step_fill(ns, c.n.attribute(), c.n.parent(), v);
+					size_t size = ns.size();
 					
-					apply_predicates(ns, 0);
-				}
-				
-				break;
-		
-			case axis_following_sibling:
-			case axis_preceding_sibling:
-			case axis_attribute:
-			case axis_child:
-			case axis_descendant:
-				if (_left)
-				{
-					xpath_node_set s = _left->eval_node_set(c);
-					
-					for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
-					{
-						size_t size = ns.size();
+					if (it->node())
+						step_fill(ns, it->node(), v);
+					else if (attributes)
+						step_fill(ns, it->attribute(), it->parent(), v);
 						
-						if (it->node())
-							step_fill(ns, it->node(), v);
-						
-						apply_predicates(ns, size);
-					}
+					apply_predicates(ns, size);
 				}
-				else if (c.n.node())
-				{
-					step_fill(ns, c.n.node(), v);
-					
-					apply_predicates(ns, 0);
-				}
-				
-				break;
-			
-			case axis_namespace:
-				break;
-				
-			default:
-				assert(!"Unimplemented axis");
 			}
+			else
+			{
+				if (c.n.node())
+					step_fill(ns, c.n.node(), v);
+				else if (attributes)
+					step_fill(ns, c.n.attribute(), c.n.parent(), v);
+				
+				apply_predicates(ns, 0);
+			}
+
+			ns.remove_duplicates();
+
+			return ns;
 		}
 		
 	public:
@@ -7559,66 +7520,48 @@ namespace pugi
 			
 			case ast_step:
 			{
-				xpath_node_set ns;
-				
 				switch (_axis)
 				{
 				case axis_ancestor:
-					step_do(ns, c, axis_to_type<axis_ancestor>());
-					break;
+					return step_do(c, axis_to_type<axis_ancestor>());
 					
 				case axis_ancestor_or_self:
-					step_do(ns, c, axis_to_type<axis_ancestor_or_self>());
-					break;
+					return step_do(c, axis_to_type<axis_ancestor_or_self>());
 
 				case axis_attribute:
-					step_do(ns, c, axis_to_type<axis_attribute>());
-					break;
+					return step_do(c, axis_to_type<axis_attribute>());
 
 				case axis_child:
-					step_do(ns, c, axis_to_type<axis_child>());
-					break;
+					return step_do(c, axis_to_type<axis_child>());
 				
 				case axis_descendant:
-					step_do(ns, c, axis_to_type<axis_descendant>());
-					break;
+					return step_do(c, axis_to_type<axis_descendant>());
 
 				case axis_descendant_or_self:
-					step_do(ns, c, axis_to_type<axis_descendant_or_self>());
-					break;
+					return step_do(c, axis_to_type<axis_descendant_or_self>());
 
 				case axis_following:
-					step_do(ns, c, axis_to_type<axis_following>());
-					break;
+					return step_do(c, axis_to_type<axis_following>());
 				
 				case axis_following_sibling:
-					step_do(ns, c, axis_to_type<axis_following_sibling>());
-					break;
+					return step_do(c, axis_to_type<axis_following_sibling>());
 				
 				case axis_namespace:
-					step_do(ns, c, axis_to_type<axis_namespace>());
-					break;
+					// namespaced axis is not supported
+					return xpath_node_set();
 				
 				case axis_parent:
-					step_do(ns, c, axis_to_type<axis_parent>());
-					break;
+					return step_do(c, axis_to_type<axis_parent>());
 				
 				case axis_preceding:
-					step_do(ns, c, axis_to_type<axis_preceding>());
-					break;
+					return step_do(c, axis_to_type<axis_preceding>());
 
 				case axis_preceding_sibling:
-					step_do(ns, c, axis_to_type<axis_preceding_sibling>());
-					break;
+					return step_do(c, axis_to_type<axis_preceding_sibling>());
 				
 				case axis_self:
-					step_do(ns, c, axis_to_type<axis_self>());
-					break;
+					return step_do(c, axis_to_type<axis_self>());
 				}
-				
-				ns.remove_duplicates();
-				
-				return ns;
 			}
 
 			case ast_step_root:
