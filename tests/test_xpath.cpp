@@ -290,7 +290,7 @@ TEST(xpath_large_node_set)
 	xml_document doc;
 	CHECK(doc.load_file("tests/data/large.xml"));
 
-	xpath_node_set ns = doc.select_nodes("//*");
+	xpath_node_set ns = doc.select_nodes(STR("//*"));
 
 	CHECK(ns.size() == 10001);
 }
