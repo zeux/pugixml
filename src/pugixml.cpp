@@ -4711,46 +4711,208 @@ namespace pstd
 	}
 }
 
+// Allocator used for AST and evaluation stacks
+namespace pugi
+{
+	struct xpath_memory_block
+	{	
+		xpath_memory_block* next;
+
+		char data[4096];
+	};
+		
+	class xpath_allocator
+	{
+		xpath_memory_block* _root;
+		size_t _root_size;
+		
+	public:
+		static xpath_allocator* create()
+		{
+			void* memory = global_allocate(sizeof(xpath_allocator) + sizeof(xpath_memory_block));
+			if (!memory) return 0;
+
+			xpath_memory_block* root = reinterpret_cast<xpath_memory_block*>(static_cast<xpath_allocator*>(memory) + 1);
+			root->next = 0;
+
+			return new (memory) xpath_allocator(root);
+		}
+
+		static void destroy(void* ptr)
+		{
+			if (!ptr) return;
+			
+			// free all allocated pages
+			xpath_allocator* alloc = static_cast<xpath_allocator*>(ptr);
+
+			xpath_memory_block* cur = alloc->_root;
+			assert(cur);
+
+			while (cur->next)
+			{
+				xpath_memory_block* next = cur->next;
+
+				global_deallocate(cur);
+
+				cur = next;
+			}
+
+			// free allocator memory (with the first page)
+			global_deallocate(alloc);
+		}
+
+		xpath_allocator(xpath_memory_block* root, size_t root_size = 0): _root(root), _root_size(root_size)
+		{
+		}
+		
+		void* allocate(size_t size)
+		{
+			const size_t block_capacity = sizeof(_root->data);
+
+			// align size so that we're able to store pointers in subsequent blocks
+			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+
+			if (_root_size + size <= block_capacity)
+			{
+				void* buf = _root->data + _root_size;
+				_root_size += size;
+				return buf;
+			}
+			else
+			{
+				size_t block_data_size = (size > block_capacity) ? size : block_capacity;
+				size_t block_size = block_data_size + offsetof(xpath_memory_block, data);
+
+				xpath_memory_block* block = static_cast<xpath_memory_block*>(global_allocate(block_size));
+				if (!block) return 0; // $$ out of memory
+				
+				block->next = _root;
+				
+				_root = block;
+				_root_size = size;
+				
+				return block->data;
+			}
+		}
+
+		void* reallocate(void* ptr, size_t old_size, size_t new_size)
+		{
+			// we can only reallocate the last object
+			assert(static_cast<char*>(ptr) + old_size == _root->data + _root_size);
+
+			// adjust root size so that we have not allocated the object at all
+			_root_size -= old_size;
+			bool only_object = (_root_size == 0);
+
+			// allocate a new version (this will obviously reuse the memory if possible)
+			void* result = allocate(new_size);
+			if (!result) return 0; // $$ out of memory
+
+			// we have a new block
+			if (result != ptr)
+			{
+				// copy old data
+				assert(new_size > old_size);
+				memcpy(result, ptr, old_size);
+
+				// free the previous page if it had no other objects
+				if (only_object)
+				{
+					assert(_root->data == result);
+					assert(_root->next);
+
+					xpath_memory_block* next = _root->next->next;
+
+					if (next)
+					{
+						// deallocate the whole page, unless it was the first one
+						global_deallocate(_root->next);
+						_root->next = next;
+					}
+				}
+			}
+
+			return result;
+		}
+
+		void revert(xpath_allocator& state)
+		{
+			// free all new pages
+			xpath_memory_block* cur = _root;
+
+			while (cur != state._root)
+			{
+				xpath_memory_block* next = cur->next;
+
+				global_deallocate(cur);
+
+				cur = next;
+			}
+
+			// restore state
+			_root = state._root;
+			_root_size = state._root_size;
+		}
+	};
+
+	struct xpath_allocator_capture
+	{
+		xpath_allocator_capture(xpath_allocator* alloc): _target(alloc), _state(*alloc)
+		{
+		}
+
+		~xpath_allocator_capture()
+		{
+			_target->revert(_state);
+		}
+
+		xpath_allocator* _target;
+		xpath_allocator _state;
+	};
+
+	struct xpath_stack
+	{
+		xpath_allocator* result;
+		xpath_allocator* temp;
+	};
+}
+
+// String class
 namespace
 {
 	using namespace pugi;
-
-	char_t* duplicate_string(const char_t* string, size_t length)
-	{
-		char_t* result = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
-		if (!result) return 0; // $$ out of memory
-
-		memcpy(result, string, length * sizeof(char_t));
-		result[length] = 0;
-
-		return result;
-	}
-
-	char_t* duplicate_string(const char_t* string)
-	{
-		return duplicate_string(string, strlength(string));
-	}
 
 	class xpath_string
 	{
 		const char_t* _buffer;
 		bool _uses_heap;
-	public:
 
+		static char_t* duplicate_string(const char_t* string, size_t length, xpath_allocator* alloc)
+		{
+			char_t* result = static_cast<char_t*>(alloc->allocate((length + 1) * sizeof(char_t)));
+			if (!result) return 0; // $$ out of memory
+
+			memcpy(result, string, length * sizeof(char_t));
+			result[length] = 0;
+
+			return result;
+		}
+
+		static char_t* duplicate_string(const char_t* string, xpath_allocator* alloc)
+		{
+			return duplicate_string(string, strlength(string), alloc);
+		}
+
+	public:
 		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false)
 		{
 		}
 
-		~xpath_string()
-		{
-			if (_uses_heap) global_deallocate(const_cast<char_t*>(_buffer));
-		}
-
-		explicit xpath_string(const char_t* str)
+		explicit xpath_string(const char_t* str, xpath_allocator* alloc)
 		{
 			bool empty = (*str == 0);
 
-			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(str);
+			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(str, alloc);
 			_uses_heap = !empty;
 		}
 
@@ -4758,37 +4920,17 @@ namespace
 		{
 		}
 
-		xpath_string(const char_t* begin, const char_t* end)
+		xpath_string(const char_t* begin, const char_t* end, xpath_allocator* alloc)
 		{
 			assert(begin <= end);
 
 			bool empty = (begin == end);
 
-			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(begin, static_cast<size_t>(end - begin));
+			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(begin, static_cast<size_t>(end - begin), alloc);
 			_uses_heap = !empty;
 		}
 
-		xpath_string(const xpath_string& o)
-		{
-			_buffer = o._uses_heap ? duplicate_string(o._buffer) : o._buffer;
-			_uses_heap = o._uses_heap;
-		}
-
-		xpath_string& operator=(const xpath_string& o)
-		{
-			xpath_string temp(o);
-			swap(temp);
-
-			return *this;
-		}
-
-		void swap(xpath_string& o)
-		{
-			pstd::swap(_buffer, o._buffer);
-			pstd::swap(_uses_heap, o._uses_heap);
-		}
-
-		void append(const xpath_string& o)
+		void append(const xpath_string& o, xpath_allocator* alloc)
 		{
 			// skip empty sources
 			if (!*o._buffer) return;
@@ -4806,8 +4948,9 @@ namespace
 				size_t length = target_length + source_length;
 
 				// allocate new buffer
-				char_t* result = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
+				char_t* result = static_cast<char_t*>(alloc->allocate((length + 1) * sizeof(char_t)));
 				if (!result) return; // $$ out of memory
+				// $$ reallocate
 
 				// append both strings in the new buffer
 				memcpy(result, _buffer, target_length * sizeof(char_t));
@@ -4815,7 +4958,8 @@ namespace
 				result[length] = 0;
 
 				// finalize
-				xpath_string(result, true).swap(*this);
+				_buffer = result;
+				_uses_heap = true;
 			}
 		}
 
@@ -4829,12 +4973,12 @@ namespace
 			return strlength(_buffer);
 		}
 		
-		char_t* data()
+		char_t* data(xpath_allocator* alloc)
 		{
 			// make private heap copy
 			if (!_uses_heap)
 			{
-				_buffer = duplicate_string(_buffer);
+				_buffer = duplicate_string(_buffer, alloc);
 				_uses_heap = true;
 			}
 
@@ -4908,7 +5052,7 @@ namespace
 		return static_cast<unsigned int>(ch - 'A') < 26 ? (ch | ' ') : ch;
 	}
 
-	xpath_string string_value(const xpath_node& na)
+	xpath_string string_value(const xpath_node& na, xpath_allocator* alloc)
 	{
 		if (na.attribute())
 			return xpath_string_const(na.attribute().value());
@@ -4934,7 +5078,7 @@ namespace
 				while (cur && cur != n)
 				{
 					if (cur.type() == node_pcdata || cur.type() == node_cdata)
-						result.append(xpath_string_const(cur.value()));
+						result.append(xpath_string_const(cur.value()), alloc);
 
 					if (cur.first_child())
 						cur = cur.first_child();
@@ -5185,7 +5329,7 @@ namespace
 	}
 #endif
 
-	xpath_string convert_number_to_string(double value)
+	xpath_string convert_number_to_string(double value, xpath_allocator* alloc)
 	{
 		// try special number conversion
 		const char_t* special = convert_number_to_string_special(value);
@@ -5245,7 +5389,7 @@ namespace
 		assert(s < result + sizeof(result) / sizeof(result[0]));
 		*s = 0;
 
-		return xpath_string(result);
+		return xpath_string(result, alloc);
 	}
 	
 	bool check_string_to_number_format(const char_t* string)
@@ -5614,6 +5758,154 @@ namespace
 	}
 }
 
+// Internal node set class
+#include <algorithm>
+
+namespace
+{
+	using namespace pugi;
+
+	xpath_node_set::type_t xpath_sort(xpath_node* begin, xpath_node* end, xpath_node_set::type_t type, bool reverse)
+	{
+		xpath_node_set::type_t order = reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
+
+		if (type == xpath_node_set::type_unsorted)
+		{
+			pstd::sort(begin, end, document_order_comparator());
+
+			type = xpath_node_set::type_sorted;
+		}
+		
+		if (type != order) pstd::reverse(begin, end);
+			
+		return order;
+	}
+
+	xpath_node xpath_first(const xpath_node* begin, const xpath_node* end, xpath_node_set::type_t type)
+	{
+		if (begin == end) return xpath_node();
+
+		switch (type)
+		{
+		case xpath_node_set::type_sorted:
+			return *begin;
+
+		case xpath_node_set::type_sorted_reverse:
+			return *(end - 1);
+
+		case xpath_node_set::type_unsorted:
+			return *pstd::min_element(begin, end, document_order_comparator());
+
+		default:
+			assert(!"Invalid node set type");
+			return xpath_node();
+		}
+	}
+	class xpath_node_set_raw
+	{
+		xpath_node_set::type_t _type;
+
+		xpath_node* _begin;
+		xpath_node* _end;
+		xpath_node* _eos;
+
+	public:
+		xpath_node_set_raw(): _type(xpath_node_set::type_unsorted), _begin(0), _end(0), _eos(0)
+		{
+		}
+
+		xpath_node* begin() const
+		{
+			return _begin;
+		}
+
+		xpath_node* end() const
+		{
+			return _end;
+		}
+
+		bool empty() const
+		{
+			return _begin == _end;
+		}
+
+		size_t size() const
+		{
+			return static_cast<size_t>(_end - _begin);
+		}
+
+		xpath_node first() const
+		{
+			return xpath_first(_begin, _end, _type);
+		}
+
+		void push_back(const xpath_node& node, xpath_allocator* alloc)
+		{
+			if (_end == _eos)
+			{
+				size_t capacity = static_cast<size_t>(_eos - _begin);
+
+				// get new capacity (1.5x rule)
+				size_t new_capacity = capacity + capacity / 2 + 1;
+
+				// reallocate the old array or allocate a new one
+				xpath_node* data = 0;
+
+				if (_begin)
+				{
+					data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
+					if (!data) return; // $$ out of memory
+				}
+				else
+				{
+					data = static_cast<xpath_node*>(alloc->allocate(new_capacity * sizeof(xpath_node)));
+					if (!data) return; // $$ out of memory
+
+					memcpy(data, _begin, capacity * sizeof(xpath_node));
+				}
+
+
+				// finalize
+				_begin = data;
+				_end = data + capacity;
+				_eos = data + new_capacity;
+			}
+
+			*_end++ = node;
+		}
+
+		void sort()
+		{
+			_type = xpath_sort(_begin, _end, _type, false);
+		}
+
+		void truncate(xpath_node* pos)
+		{
+			assert(_begin <= pos && pos <= _end);
+
+			_end = pos;
+		}
+
+		void remove_duplicates()
+		{
+			if (_type == xpath_node_set::type_unsorted)
+				pstd::sort(_begin, _end, duplicate_comparator());
+		
+			_end = pstd::unique(_begin, _end);
+		}
+
+		xpath_node_set::type_t type() const
+		{
+			return _type;
+		}
+
+		void set_type(xpath_node_set::type_t type)
+		{
+			_type = type;
+		}
+	};
+}
+
 namespace pugi
 {
 #ifndef PUGIXML_NO_EXCEPTIONS
@@ -5633,88 +5925,6 @@ namespace pugi
 	}
 #endif
 	
-	class xpath_allocator
-	{
-		struct memory_block
-		{	
-			memory_block* next;
-	
-			char data[4096];
-		};
-		
-		memory_block* _root;
-		size_t _root_size;
-		
-	public:
-		static xpath_allocator* create()
-		{
-			void* memory = global_allocate(sizeof(xpath_allocator) + sizeof(memory_block));
-			if (!memory) return 0;
-
-			memory_block* root = reinterpret_cast<memory_block*>(static_cast<xpath_allocator*>(memory) + 1);
-			root->next = 0;
-
-			return new (memory) xpath_allocator(root);
-		}
-
-		static void destroy(void* ptr)
-		{
-			if (!ptr) return;
-			
-			// free all allocated pages
-			xpath_allocator* alloc = static_cast<xpath_allocator*>(ptr);
-
-			memory_block* cur = alloc->_root;
-			assert(cur);
-
-			while (cur->next)
-			{
-				memory_block* next = cur->next;
-
-				global_deallocate(cur);
-
-				cur = next;
-			}
-
-			// free allocator memory (with the first page)
-			global_deallocate(alloc);
-		}
-
-		xpath_allocator(memory_block* root, size_t root_size = 0): _root(root), _root_size(root_size)
-		{
-		}
-		
-		void* allocate(size_t size)
-		{
-			const size_t block_capacity = sizeof(_root->data);
-
-			// align size so that we're able to store pointers in subsequent blocks
-			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
-
-			if (_root_size + size <= block_capacity)
-			{
-				void* buf = _root->data + _root_size;
-				_root_size += size;
-				return buf;
-			}
-			else
-			{
-				size_t block_data_size = (size > block_capacity) ? size : block_capacity;
-				size_t block_size = block_data_size + offsetof(memory_block, data);
-
-				memory_block* block = static_cast<memory_block*>(global_allocate(block_size));
-				if (!block) return 0;
-				
-				block->next = _root;
-				
-				_root = block;
-				_root_size = size;
-				
-				return block->data;
-			}
-		}
-	};
-
 	xpath_node::xpath_node()
 	{
 	}
@@ -5774,8 +5984,47 @@ namespace pugi
 	}
 #endif
 
-	xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(&_storage), _end(&_storage), _eos(&_storage + 1)
+	void xpath_node_set::_assign(const_iterator begin, const_iterator end)
 	{
+		assert(begin <= end);
+
+		size_t size = static_cast<size_t>(end - begin);
+
+		if (size <= 1)
+		{
+			// deallocate old buffer
+			if (_begin != &_storage) global_deallocate(_begin);
+
+			// use internal buffer
+			if (begin != end) _storage = *begin;
+
+			_begin = &_storage;
+			_end = &_storage + size;
+		}
+		else
+		{
+			// make heap copy
+			xpath_node* storage = static_cast<xpath_node*>(global_allocate(size * sizeof(xpath_node)));
+			if (!storage) return; // $$ out of memory
+
+			memcpy(storage, begin, size * sizeof(xpath_node));
+			
+			// deallocate old buffer
+			if (_begin != &_storage) global_deallocate(_begin);
+
+			// finalize
+			_begin = storage;
+			_end = storage + size;
+		}
+	}
+
+	xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	{
+	}
+
+	xpath_node_set::xpath_node_set(const_iterator begin, const_iterator end, type_t type): _type(type), _begin(&_storage), _end(&_storage)
+	{
+		_assign(begin, end);
 	}
 
 	xpath_node_set::~xpath_node_set()
@@ -5783,29 +6032,18 @@ namespace pugi
 		if (_begin != &_storage) global_deallocate(_begin);
 	}
 		
-	xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage), _eos(&_storage + 1)
+	xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage)
 	{
-		if (ns.size() == 1)
-		{
-			_storage = *ns._begin;
-			_end = _eos;
-		}
-		else
-		{
-			append(ns.begin(), ns.end());
-		}
+		_assign(ns._begin, ns._end);
 	}
 	
 	xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
 	{
 		if (this == &ns) return *this;
 		
-		// clear & append
 		_type = ns._type;
-		_end = _begin;
-		
-		append(ns.begin(), ns.end());
-		
+		_assign(ns._begin, ns._end);
+
 		return *this;
 	}
 
@@ -5821,7 +6059,7 @@ namespace pugi
 		
 	bool xpath_node_set::empty() const
 	{
-		return size() == 0;
+		return _begin == _end;
 	}
 		
 	const xpath_node& xpath_node_set::operator[](size_t index) const
@@ -5830,11 +6068,6 @@ namespace pugi
 		return _begin[index];
 	}
 
-	xpath_node_set::iterator xpath_node_set::mut_begin()
-	{
-		return _begin;
-	}
-	
 	xpath_node_set::const_iterator xpath_node_set::begin() const
 	{
 		return _begin;
@@ -5847,88 +6080,12 @@ namespace pugi
 	
 	void xpath_node_set::sort(bool reverse)
 	{
-		pstd::sort(_begin, _end, document_order_comparator());
-		
-		if (reverse) pstd::reverse(_begin, _end);
-			
-		_type = reverse ? type_sorted_reverse : type_sorted;
-	}
-
-	void xpath_node_set::push_back(const xpath_node& n)
-	{
-		if (_end == _eos)
-			append(&n, &n + 1);
-		else
-		{
-			*_end = n;
-			++_end;
-		}
-	}
-
-	void xpath_node_set::append(const_iterator begin, const_iterator end)
-	{
-		if (begin == end) return;
-
-		size_t count = end - begin;
-		size_t size = _end - _begin;
-		size_t capacity = _eos - _begin;
-		
-		if (capacity < size + count)
-		{
-			if (capacity < 2) capacity = 2;
-			
-			while (capacity < size + count) capacity += capacity / 2;
-			
-			xpath_node* storage = static_cast<xpath_node*>(global_allocate(capacity * sizeof(xpath_node)));
-			if (!storage) return; // $$ out of memory
-
-			memcpy(storage, _begin, size * sizeof(xpath_node));
-			
-			if (_begin != &_storage) global_deallocate(_begin);
-			
-			_begin = storage;
-			_end = storage + size;
-			_eos = storage + capacity;
-		}
-		
-		memcpy(_end, begin, count * sizeof(xpath_node));
-		_end += count;
-	}
-
-	void xpath_node_set::truncate(iterator it)
-	{
-		_end = it;
+		_type = xpath_sort(_begin, _end, _type, reverse);
 	}
 
 	xpath_node xpath_node_set::first() const
 	{
-		if (empty()) return xpath_node();
-
-		switch (_type)
-		{
-		case type_sorted:
-			return *_begin;
-
-		case type_sorted_reverse:
-			return *(_end - 1);
-
-		case type_unsorted:
-			return *pstd::min_element<iterator>(_begin, _end, document_order_comparator());
-
-		default:
-			assert(!"Invalid node set type");
-			return xpath_node();
-		}
-	}
-
-	void xpath_node_set::remove_duplicates()
-	{
-		if (_type == type_unsorted)
-		{
-			pstd::sort(_begin, _end, duplicate_comparator());
-		}
-		
-		truncate(pstd::unique(_begin, _end));
+		return xpath_first(_begin, _end, _type);
 	}
 
 	struct xpath_context
@@ -6425,28 +6582,39 @@ namespace pugi
 		xpath_ast_node(const xpath_ast_node&);
 		xpath_ast_node& operator=(const xpath_ast_node&);
 
-		template <class Comp> static bool compare_eq(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const Comp& comp)
+		template <class Comp> static bool compare_eq(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const xpath_stack& stack, const Comp& comp)
 		{
 			xpath_value_type lt = lhs->rettype(), rt = rhs->rettype();
 
 			if (lt != xpath_type_node_set && rt != xpath_type_node_set)
 			{
 				if (lt == xpath_type_boolean || rt == xpath_type_boolean)
-					return comp(lhs->eval_boolean(c), rhs->eval_boolean(c));
+					return comp(lhs->eval_boolean(c, stack), rhs->eval_boolean(c, stack));
 				else if (lt == xpath_type_number || rt == xpath_type_number)
-					return comp(lhs->eval_number(c), rhs->eval_number(c));
+					return comp(lhs->eval_number(c, stack), rhs->eval_number(c, stack));
 				else if (lt == xpath_type_string || rt == xpath_type_string)
-					return comp(lhs->eval_string(c), rhs->eval_string(c));
+				{
+					xpath_allocator_capture cr(stack.result);
+
+					xpath_string ls = lhs->eval_string(c, stack);
+					xpath_string rs = rhs->eval_string(c, stack);
+
+					return comp(ls, rs);
+				}
 			}
 			else if (lt == xpath_type_node_set && rt == xpath_type_node_set)
 			{
-				xpath_node_set ls = lhs->eval_node_set(c);
-				xpath_node_set rs = rhs->eval_node_set(c);
+				xpath_allocator_capture cr(stack.result);
 
-				for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
-					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+				xpath_node_set_raw ls = lhs->eval_node_set(c, stack);
+				xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+
+				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
+					for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 					{
-						if (comp(string_value(*li), string_value(*ri)))
+						xpath_allocator_capture cri(stack.result);
+
+						if (comp(string_value(*li, stack.result), string_value(*ri, stack.result)))
 							return true;
 					}
 
@@ -6461,15 +6629,19 @@ namespace pugi
 				}
 
 				if (lt == xpath_type_boolean)
-					return comp(lhs->eval_boolean(c), rhs->eval_boolean(c));
+					return comp(lhs->eval_boolean(c, stack), rhs->eval_boolean(c, stack));
 				else if (lt == xpath_type_number)
 				{
-					double l = lhs->eval_number(c);
-					xpath_node_set rs = rhs->eval_node_set(c);
+					xpath_allocator_capture cr(stack.result);
 
-					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+					double l = lhs->eval_number(c, stack);
+					xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+
+					for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 					{
-						if (comp(l, convert_string_to_number(string_value(*ri).c_str())))
+						xpath_allocator_capture cri(stack.result);
+
+						if (comp(l, convert_string_to_number(string_value(*ri, stack.result).c_str())))
 							return true;
 					}
 
@@ -6477,12 +6649,16 @@ namespace pugi
 				}
 				else if (lt == xpath_type_string)
 				{
-					xpath_string l = lhs->eval_string(c);
-					xpath_node_set rs = rhs->eval_node_set(c);
+					xpath_allocator_capture cr(stack.result);
 
-					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+					xpath_string l = lhs->eval_string(c, stack);
+					xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+
+					for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 					{
-						if (comp(l, string_value(*ri)))
+						xpath_allocator_capture cri(stack.result);
+
+						if (comp(l, string_value(*ri, stack.result)))
 							return true;
 					}
 
@@ -6494,24 +6670,30 @@ namespace pugi
 			return false;
 		}
 
-		template <class Comp> static bool compare_rel(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const Comp& comp)
+		template <class Comp> static bool compare_rel(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const xpath_stack& stack, const Comp& comp)
 		{
 			xpath_value_type lt = lhs->rettype(), rt = rhs->rettype();
 
 			if (lt != xpath_type_node_set && rt != xpath_type_node_set)
-				return comp(lhs->eval_number(c), rhs->eval_number(c));
+				return comp(lhs->eval_number(c, stack), rhs->eval_number(c, stack));
 			else if (lt == xpath_type_node_set && rt == xpath_type_node_set)
 			{
-				xpath_node_set ls = lhs->eval_node_set(c);
-				xpath_node_set rs = rhs->eval_node_set(c);
+				xpath_allocator_capture cr(stack.result);
 
-				for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
+				xpath_node_set_raw ls = lhs->eval_node_set(c, stack);
+				xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+
+				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
 				{
-					double l = convert_string_to_number(string_value(*li).c_str());
+					xpath_allocator_capture cri(stack.result);
 
-					for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+					double l = convert_string_to_number(string_value(*li, stack.result).c_str());
+
+					for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 					{
-						if (comp(l, convert_string_to_number(string_value(*ri).c_str())))
+						xpath_allocator_capture crii(stack.result);
+
+						if (comp(l, convert_string_to_number(string_value(*ri, stack.result).c_str())))
 							return true;
 					}
 				}
@@ -6520,12 +6702,16 @@ namespace pugi
 			}
 			else if (lt != xpath_type_node_set && rt == xpath_type_node_set)
 			{
-				double l = lhs->eval_number(c);
-				xpath_node_set rs = rhs->eval_node_set(c);
+				xpath_allocator_capture cr(stack.result);
 
-				for (xpath_node_set::const_iterator ri = rs.begin(); ri != rs.end(); ++ri)
+				double l = lhs->eval_number(c, stack);
+				xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+
+				for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 				{
-					if (comp(l, convert_string_to_number(string_value(*ri).c_str())))
+					xpath_allocator_capture cri(stack.result);
+
+					if (comp(l, convert_string_to_number(string_value(*ri, stack.result).c_str())))
 						return true;
 				}
 
@@ -6533,12 +6719,16 @@ namespace pugi
 			}
 			else if (lt == xpath_type_node_set && rt != xpath_type_node_set)
 			{
-				xpath_node_set ls = lhs->eval_node_set(c);
-				double r = rhs->eval_number(c);
+				xpath_allocator_capture cr(stack.result);
 
-				for (xpath_node_set::const_iterator li = ls.begin(); li != ls.end(); ++li)
+				xpath_node_set_raw ls = lhs->eval_node_set(c, stack);
+				double r = rhs->eval_number(c, stack);
+
+				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
 				{
-					if (comp(convert_string_to_number(string_value(*li).c_str()), r))
+					xpath_allocator_capture cri(stack.result);
+
+					if (comp(convert_string_to_number(string_value(*li, stack.result).c_str()), r))
 						return true;
 				}
 
@@ -6551,43 +6741,43 @@ namespace pugi
 			}
 		}
 
-		void apply_predicate(xpath_node_set& ns, size_t first, xpath_ast_node* expr)
+		void apply_predicate(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
 		{
 			assert(ns.size() >= first);
 
 			size_t i = 1;
 			size_t size = ns.size() - first;
 				
-			xpath_node_set::iterator last = ns.mut_begin() + first;
+			xpath_node* last = ns.begin() + first;
 				
 			// remove_if... or well, sort of
-			for (xpath_node_set::iterator it = last; it != ns.end(); ++it, ++i)
+			for (xpath_node* it = last; it != ns.end(); ++it, ++i)
 			{
 				xpath_context c(*it, i, size);
 			
 				if (expr->rettype() == xpath_type_number)
 				{
-					if (expr->eval_number(c) == i)
+					if (expr->eval_number(c, stack) == i)
 						*last++ = *it;
 				}
-				else if (expr->eval_boolean(c))
+				else if (expr->eval_boolean(c, stack))
 					*last++ = *it;
 			}
 			
 			ns.truncate(last);
 		}
 
-		void apply_predicates(xpath_node_set& ns, size_t first)
+		void apply_predicates(xpath_node_set_raw& ns, size_t first, const xpath_stack& stack)
 		{
 			if (ns.size() == first) return;
 			
 			for (xpath_ast_node* pred = _right; pred; pred = pred->_next)
 			{
-				apply_predicate(ns, first, pred->_left);
+				apply_predicate(ns, first, pred->_left, stack);
 			}
 		}
 
-		void step_push(xpath_node_set& ns, const xml_attribute& a, const xml_node& parent)
+		void step_push(xpath_node_set_raw& ns, const xml_attribute& a, const xml_node& parent, xpath_allocator* alloc)
 		{
 			if (!a) return;
 
@@ -6600,17 +6790,17 @@ namespace pugi
 			switch (_test)
 			{
 			case nodetest_name:
-				if (strequal(name, _data.nodetest)) ns.push_back(xpath_node(a, parent));
+				if (strequal(name, _data.nodetest)) ns.push_back(xpath_node(a, parent), alloc);
 				break;
 				
 			case nodetest_type_node:
 			case nodetest_all:
-				ns.push_back(xpath_node(a, parent));
+				ns.push_back(xpath_node(a, parent), alloc);
 				break;
 				
 			case nodetest_all_in_namespace:
 				if (starts_with(name, _data.nodetest))
-					ns.push_back(xpath_node(a, parent));
+					ns.push_back(xpath_node(a, parent), alloc);
 				break;
 			
 			default:
@@ -6618,48 +6808,48 @@ namespace pugi
 			}
 		}
 		
-		void step_push(xpath_node_set& ns, const xml_node& n)
+		void step_push(xpath_node_set_raw& ns, const xml_node& n, xpath_allocator* alloc)
 		{
 			if (!n) return;
 
 			switch (_test)
 			{
 			case nodetest_name:
-				if (n.type() == node_element && strequal(n.name(), _data.nodetest)) ns.push_back(n);
+				if (n.type() == node_element && strequal(n.name(), _data.nodetest)) ns.push_back(n, alloc);
 				break;
 				
 			case nodetest_type_node:
-				ns.push_back(n);
+				ns.push_back(n, alloc);
 				break;
 				
 			case nodetest_type_comment:
 				if (n.type() == node_comment)
-					ns.push_back(n);
+					ns.push_back(n, alloc);
 				break;
 				
 			case nodetest_type_text:
 				if (n.type() == node_pcdata || n.type() == node_cdata)
-					ns.push_back(n);
+					ns.push_back(n, alloc);
 				break;
 				
 			case nodetest_type_pi:
 				if (n.type() == node_pi)
-					ns.push_back(n);
+					ns.push_back(n, alloc);
 				break;
 									
 			case nodetest_pi:
 				if (n.type() == node_pi && strequal(n.name(), _data.nodetest))
-					ns.push_back(n);
+					ns.push_back(n, alloc);
 				break;
 				
 			case nodetest_all:
 				if (n.type() == node_element)
-					ns.push_back(n);
+					ns.push_back(n, alloc);
 				break;
 				
 			case nodetest_all_in_namespace:
 				if (n.type() == node_element && starts_with(n.name(), _data.nodetest))
-					ns.push_back(n);
+					ns.push_back(n, alloc);
 				break;
 
 			default:
@@ -6667,7 +6857,7 @@ namespace pugi
 			} 
 		}
 
-		template <class T> void step_fill(xpath_node_set& ns, const xml_node& n, T)
+		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_node& n, xpath_allocator* alloc, T)
 		{
 			const axis_t axis = T::axis;
 
@@ -6676,7 +6866,7 @@ namespace pugi
 			case axis_attribute:
 			{
 				for (xml_attribute a = n.first_attribute(); a; a = a.next_attribute())
-					step_push(ns, a, n);
+					step_push(ns, a, n, alloc);
 				
 				break;
 			}
@@ -6684,7 +6874,7 @@ namespace pugi
 			case axis_child:
 			{
 				for (xml_node c = n.first_child(); c; c = c.next_sibling())
-					step_push(ns, c);
+					step_push(ns, c, alloc);
 					
 				break;
 			}
@@ -6693,13 +6883,13 @@ namespace pugi
 			case axis_descendant_or_self:
 			{
 				if (axis == axis_descendant_or_self)
-					step_push(ns, n);
+					step_push(ns, n, alloc);
 					
 				xml_node cur = n.first_child();
 				
 				while (cur && cur != n)
 				{
-					step_push(ns, cur);
+					step_push(ns, cur, alloc);
 					
 					if (cur.first_child())
 						cur = cur.first_child();
@@ -6720,7 +6910,7 @@ namespace pugi
 			case axis_following_sibling:
 			{
 				for (xml_node c = n.next_sibling(); c; c = c.next_sibling())
-					step_push(ns, c);
+					step_push(ns, c, alloc);
 				
 				break;
 			}
@@ -6728,7 +6918,7 @@ namespace pugi
 			case axis_preceding_sibling:
 			{
 				for (xml_node c = n.previous_sibling(); c; c = c.previous_sibling())
-					step_push(ns, c);
+					step_push(ns, c, alloc);
 				
 				break;
 			}
@@ -6743,7 +6933,7 @@ namespace pugi
 
 				for (;;)
 				{
-					step_push(ns, cur);
+					step_push(ns, cur, alloc);
 
 					if (cur.first_child())
 						cur = cur.first_child();
@@ -6775,7 +6965,7 @@ namespace pugi
 					else
 					{
 						// leaf node, can't be ancestor
-						step_push(ns, cur);
+						step_push(ns, cur, alloc);
 
 						if (cur.previous_sibling())
 							cur = cur.previous_sibling();
@@ -6786,7 +6976,7 @@ namespace pugi
 								cur = cur.parent();
 								if (!cur) break;
 
-								if (!node_is_ancestor(cur, n)) step_push(ns, cur);
+								if (!node_is_ancestor(cur, n)) step_push(ns, cur, alloc);
 							}
 							while (!cur.previous_sibling());
 
@@ -6804,13 +6994,13 @@ namespace pugi
 			case axis_ancestor_or_self:
 			{
 				if (axis == axis_ancestor_or_self)
-					step_push(ns, n);
+					step_push(ns, n, alloc);
 
 				xml_node cur = n.parent();
 				
 				while (cur)
 				{
-					step_push(ns, cur);
+					step_push(ns, cur, alloc);
 					
 					cur = cur.parent();
 				}
@@ -6820,14 +7010,14 @@ namespace pugi
 
 			case axis_self:
 			{
-				step_push(ns, n);
+				step_push(ns, n, alloc);
 
 				break;
 			}
 
 			case axis_parent:
 			{
-				if (n.parent()) step_push(ns, n.parent());
+				if (n.parent()) step_push(ns, n.parent(), alloc);
 
 				break;
 			}
@@ -6837,7 +7027,7 @@ namespace pugi
 			}
 		}
 		
-		template <class T> void step_fill(xpath_node_set& ns, const xml_attribute& a, const xml_node& p, T v)
+		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_attribute& a, const xml_node& p, xpath_allocator* alloc, T v)
 		{
 			const axis_t axis = T::axis;
 
@@ -6847,13 +7037,13 @@ namespace pugi
 			case axis_ancestor_or_self:
 			{
 				if (axis == axis_ancestor_or_self && _test == nodetest_type_node) // reject attributes based on principal node type test
-					step_push(ns, a, p);
+					step_push(ns, a, p, alloc);
 
 				xml_node cur = p;
 				
 				while (cur)
 				{
-					step_push(ns, cur);
+					step_push(ns, cur, alloc);
 					
 					cur = cur.parent();
 				}
@@ -6865,7 +7055,7 @@ namespace pugi
 			case axis_self:
 			{
 				if (_test == nodetest_type_node) // reject attributes based on principal node type test
-					step_push(ns, a, p);
+					step_push(ns, a, p, alloc);
 
 				break;
 			}
@@ -6888,7 +7078,7 @@ namespace pugi
 						if (!cur) break;
 					}
 
-					step_push(ns, cur);
+					step_push(ns, cur, alloc);
 				}
 
 				break;
@@ -6896,7 +7086,7 @@ namespace pugi
 
 			case axis_parent:
 			{
-				step_push(ns, p);
+				step_push(ns, p, alloc);
 
 				break;
 			}
@@ -6904,7 +7094,7 @@ namespace pugi
 			case axis_preceding:
 			{
 				// preceding:: axis does not include attribute nodes and attribute ancestors (they are the same as parent's ancestors), so we can reuse node preceding
-				step_fill(ns, p, v);
+				step_fill(ns, p, alloc, v);
 				break;
 			}
 			
@@ -6913,44 +7103,44 @@ namespace pugi
 			}
 		}
 		
-		template <class T> xpath_node_set step_do(const xpath_context& c, T v)
+		template <class T> xpath_node_set_raw step_do(const xpath_context& c, const xpath_stack& stack, T v)
 		{
 			const axis_t axis = T::axis;
 			bool attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
 
-			xpath_node_set ns;
-			ns._type = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling) ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
+			xpath_node_set_raw ns;
+			ns.set_type((axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling) ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted);
 
 			if (_left)
 			{
-				xpath_node_set s = _left->eval_node_set(c);
+				xpath_node_set_raw s = _left->eval_node_set(c, stack);
 
 				// self axis preserves the original order
-				if (axis == axis_self) ns._type = s._type;
+				if (axis == axis_self) ns.set_type(s.type());
 
-				for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
+				for (const xpath_node* it = s.begin(); it != s.end(); ++it)
 				{
 					size_t size = ns.size();
 
 					// in general, all axes generate elements in a particular order, but there is no order guarantee if axis is applied to two nodes
-					if (axis != axis_self && size != 0) ns._type = xpath_node_set::type_unsorted;
+					if (axis != axis_self && size != 0) ns.set_type(xpath_node_set::type_unsorted);
 					
 					if (it->node())
-						step_fill(ns, it->node(), v);
+						step_fill(ns, it->node(), stack.result, v);
 					else if (attributes)
-						step_fill(ns, it->attribute(), it->parent(), v);
+						step_fill(ns, it->attribute(), it->parent(), stack.result, v);
 						
-					apply_predicates(ns, size);
+					apply_predicates(ns, size, stack);
 				}
 			}
 			else
 			{
 				if (c.n.node())
-					step_fill(ns, c.n.node(), v);
+					step_fill(ns, c.n.node(), stack.result, v);
 				else if (attributes)
-					step_fill(ns, c.n.attribute(), c.n.parent(), v);
+					step_fill(ns, c.n.attribute(), c.n.parent(), stack.result, v);
 				
-				apply_predicates(ns, 0);
+				apply_predicates(ns, 0, stack);
 			}
 
 			// child, attribute and self axes always generate unique set of nodes
@@ -7004,52 +7194,59 @@ namespace pugi
 			_right = value;
 		}
 
-		bool eval_boolean(const xpath_context& c)
+		bool eval_boolean(const xpath_context& c, const xpath_stack& stack)
 		{
 			switch (_type)
 			{
 			case ast_op_or:
-				if (_left->eval_boolean(c)) return true;
-				else return _right->eval_boolean(c);
+				return _left->eval_boolean(c, stack) || _right->eval_boolean(c, stack);
 				
 			case ast_op_and:
-				if (!_left->eval_boolean(c)) return false;
-				else return _right->eval_boolean(c);
+				return _left->eval_boolean(c, stack) && _right->eval_boolean(c, stack);
 				
 			case ast_op_equal:
-				return compare_eq(_left, _right, c, pstd::equal_to());
+				return compare_eq(_left, _right, c, stack, pstd::equal_to());
 
 			case ast_op_not_equal:
-				return compare_eq(_left, _right, c, pstd::not_equal_to());
+				return compare_eq(_left, _right, c, stack, pstd::not_equal_to());
 	
 			case ast_op_less:
-				return compare_rel(_left, _right, c, pstd::less());
+				return compare_rel(_left, _right, c, stack, pstd::less());
 			
 			case ast_op_greater:
-				return compare_rel(_right, _left, c, pstd::less());
+				return compare_rel(_right, _left, c, stack, pstd::less());
 
 			case ast_op_less_or_equal:
-				return compare_rel(_left, _right, c, pstd::less_equal());
+				return compare_rel(_left, _right, c, stack, pstd::less_equal());
 			
 			case ast_op_greater_or_equal:
-				return compare_rel(_right, _left, c, pstd::less_equal());
+				return compare_rel(_right, _left, c, stack, pstd::less_equal());
 
 			case ast_func_starts_with:
-				return starts_with(_left->eval_string(c).c_str(), _right->eval_string(c).c_str());
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				xpath_string lr = _left->eval_string(c, stack);
+				xpath_string rr = _right->eval_string(c, stack);
+
+				return starts_with(lr.c_str(), rr.c_str());
+			}
 
 			case ast_func_contains:
 			{
-				xpath_string lr = _left->eval_string(c);
-				xpath_string rr = _right->eval_string(c);
+				xpath_allocator_capture cr(stack.result);
+
+				xpath_string lr = _left->eval_string(c, stack);
+				xpath_string rr = _right->eval_string(c, stack);
 
 				return find_substring(lr.c_str(), rr.c_str()) != 0;
 			}
 
 			case ast_func_boolean:
-				return _left->eval_boolean(c);
+				return _left->eval_boolean(c, stack);
 				
 			case ast_func_not:
-				return !_left->eval_boolean(c);
+				return !_left->eval_boolean(c, stack);
 				
 			case ast_func_true:
 				return true;
@@ -7061,7 +7258,9 @@ namespace pugi
 			{
 				if (c.n.attribute()) return false;
 				
-				xpath_string lang = _left->eval_string(c);
+				xpath_allocator_capture cr(stack.result);
+
+				xpath_string lang = _left->eval_string(c, stack);
 				
 				for (xml_node n = c.n.node(); n; n = n.parent())
 				{
@@ -7100,14 +7299,22 @@ namespace pugi
 				switch (_rettype)
 				{
 				case xpath_type_number:
-					return convert_number_to_boolean(eval_number(c));
+					return convert_number_to_boolean(eval_number(c, stack));
 					
 				case xpath_type_string:
-					return !eval_string(c).empty();
+				{
+					xpath_allocator_capture cr(stack.result);
+
+					return !eval_string(c, stack).empty();
+				}
 					
 				case xpath_type_node_set:				
-					return !eval_node_set(c).empty();
-					
+				{
+					xpath_allocator_capture cr(stack.result);
+
+					return !eval_node_set(c, stack).empty();
+				}
+
 				default:
 					assert(!"Wrong expression for return type boolean");
 					return false;
@@ -7116,27 +7323,27 @@ namespace pugi
 			}
 		}
 
-		double eval_number(const xpath_context& c)
+		double eval_number(const xpath_context& c, const xpath_stack& stack)
 		{
 			switch (_type)
 			{
 			case ast_op_add:
-				return _left->eval_number(c) + _right->eval_number(c);
+				return _left->eval_number(c, stack) + _right->eval_number(c, stack);
 				
 			case ast_op_subtract:
-				return _left->eval_number(c) - _right->eval_number(c);
+				return _left->eval_number(c, stack) - _right->eval_number(c, stack);
 
 			case ast_op_multiply:
-				return _left->eval_number(c) * _right->eval_number(c);
+				return _left->eval_number(c, stack) * _right->eval_number(c, stack);
 
 			case ast_op_divide:
-				return _left->eval_number(c) / _right->eval_number(c);
+				return _left->eval_number(c, stack) / _right->eval_number(c, stack);
 
 			case ast_op_mod:
-				return fmod(_left->eval_number(c), _right->eval_number(c));
+				return fmod(_left->eval_number(c, stack), _right->eval_number(c, stack));
 
 			case ast_op_negate:
-				return -_left->eval_number(c);
+				return -_left->eval_number(c, stack);
 
 			case ast_number_constant:
 				return _data.number;
@@ -7148,48 +7355,66 @@ namespace pugi
 				return (double)c.position;
 
 			case ast_func_count:
-				return (double)_left->eval_node_set(c).size();
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return (double)_left->eval_node_set(c, stack).size();
+			}
 			
 			case ast_func_string_length_0:
-				return (double)string_value(c.n).length();
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return (double)string_value(c.n, stack.result).length();
+			}
 			
 			case ast_func_string_length_1:
-				return (double)_left->eval_string(c).length();
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return (double)_left->eval_string(c, stack).length();
+			}
 			
 			case ast_func_number_0:
-				return convert_string_to_number(string_value(c.n).c_str());
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return convert_string_to_number(string_value(c.n, stack.result).c_str());
+			}
 			
 			case ast_func_number_1:
-				return _left->eval_number(c);
+				return _left->eval_number(c, stack);
 
 			case ast_func_sum:
 			{
+				xpath_allocator_capture cr(stack.result);
+
 				double r = 0;
 				
-				xpath_node_set ns = _left->eval_node_set(c);
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				
-				for (xpath_node_set::const_iterator it = ns.begin(); it != ns.end(); ++it)
-					r += convert_string_to_number(string_value(*it).c_str());
+				for (const xpath_node* it = ns.begin(); it != ns.end(); ++it)
+					r += convert_string_to_number(string_value(*it, stack.result).c_str());
 			
 				return r;
 			}
 
 			case ast_func_floor:
 			{
-				double r = _left->eval_number(c);
+				double r = _left->eval_number(c, stack);
 				
 				return r == r ? floor(r) : r;
 			}
 
 			case ast_func_ceiling:
 			{
-				double r = _left->eval_number(c);
+				double r = _left->eval_number(c, stack);
 				
 				return r == r ? ceil(r) : r;
 			}
 
 			case ast_func_round:
-				return round_nearest_nzero(_left->eval_number(c));
+				return round_nearest_nzero(_left->eval_number(c, stack));
 			
 			case ast_variable:
 			{
@@ -7206,13 +7431,21 @@ namespace pugi
 				switch (_rettype)
 				{
 				case xpath_type_boolean:
-					return eval_boolean(c) ? 1 : 0;
+					return eval_boolean(c, stack) ? 1 : 0;
 					
 				case xpath_type_string:
-					return convert_string_to_number(eval_string(c).c_str());
+				{
+					xpath_allocator_capture cr(stack.result);
+
+					return convert_string_to_number(eval_string(c, stack).c_str());
+				}
 					
 				case xpath_type_node_set:
-					return convert_string_to_number(eval_string(c).c_str());
+				{
+					xpath_allocator_capture cr(stack.result);
+
+					return convert_string_to_number(eval_string(c, stack).c_str());
+				}
 					
 				default:
 					assert(!"Wrong expression for return type number");
@@ -7223,9 +7456,11 @@ namespace pugi
 			}
 		}
 		
-		xpath_string eval_string_concat(const xpath_context& c)
+		xpath_string eval_string_concat(const xpath_context& c, const xpath_stack& stack)
 		{
 			assert(_type == ast_func_concat);
+
+			xpath_allocator_capture ct(stack.temp);
 
 			// count the string number
 			unsigned int count = 1;
@@ -7238,17 +7473,17 @@ namespace pugi
 			// allocate on-heap for large concats
 			if (count > sizeof(static_buffer) / sizeof(static_buffer[0]))
 			{
-				buffer = static_cast<xpath_string*>(global_allocate(count * sizeof(xpath_string)));
+				buffer = static_cast<xpath_string*>(stack.temp->allocate(count * sizeof(xpath_string)));
 				if (!buffer) return xpath_string(); // $$ out of memory
-
-				for (unsigned int i = 0; i < count; ++i) new (&buffer[i]) xpath_string();
 			}
 
-			// compute all strings
-			_left->eval_string(c).swap(buffer[0]);
+			// evaluate all strings to temporary stack
+			xpath_stack swapped_stack = {stack.temp, stack.result};
+
+			buffer[0] = _left->eval_string(c, swapped_stack);
 
 			size_t pos = 1;
-			for (xpath_ast_node* n = _right; n; n = n->_next, ++pos) n->eval_string(c).swap(buffer[pos]);
+			for (xpath_ast_node* n = _right; n; n = n->_next, ++pos) buffer[pos] = n->eval_string(c, swapped_stack);
 			assert(pos == count);
 
 			// get total length
@@ -7256,7 +7491,7 @@ namespace pugi
 			for (unsigned int i = 0; i < count; ++i) length += buffer[i].length();
 
 			// create final string
-			char_t* result = static_cast<char_t*>(global_allocate((length + 1) * sizeof(char_t)));
+			char_t* result = static_cast<char_t*>(stack.result->allocate((length + 1) * sizeof(char_t)));
 
 			if (result)
 			{
@@ -7269,21 +7504,13 @@ namespace pugi
 				*ri = 0;
 			}
 
-			// deallocate strings
-			if (buffer != static_buffer)
-			{
-				for (unsigned int i = 0; i < count; ++i) buffer[i].~xpath_string();
-
-				global_deallocate(buffer);
-			}
-
 			// return result
 			if (!result) return xpath_string(); // $$ out of memory
 
 			return xpath_string(result, true);
 		}
 
-		xpath_string eval_string(const xpath_context& c)
+		xpath_string eval_string(const xpath_context& c, const xpath_stack& stack)
 		{
 			switch (_type)
 			{
@@ -7299,7 +7526,9 @@ namespace pugi
 
 			case ast_func_local_name_1:
 			{
-				xpath_node_set ns = _left->eval_node_set(c);
+				xpath_allocator_capture cr(stack.result);
+
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				xpath_node na = ns.first();
 				
 				return xpath_string_const(local_name(na));
@@ -7314,7 +7543,9 @@ namespace pugi
 
 			case ast_func_name_1:
 			{
-				xpath_node_set ns = _left->eval_node_set(c);
+				xpath_allocator_capture cr(stack.result);
+
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				xpath_node na = ns.first();
 				
 				return xpath_string_const(qualified_name(na));
@@ -7329,61 +7560,87 @@ namespace pugi
 
 			case ast_func_namespace_uri_1:
 			{
-				xpath_node_set ns = _left->eval_node_set(c);
+				xpath_allocator_capture cr(stack.result);
+
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				xpath_node na = ns.first();
 				
 				return xpath_string_const(namespace_uri(na));
 			}
 
 			case ast_func_string_0:
-				return string_value(c.n);
+				return string_value(c.n, stack.result);
 
 			case ast_func_string_1:
-				return _left->eval_string(c);
+				return _left->eval_string(c, stack);
 
 			case ast_func_concat:
-				return eval_string_concat(c);
+				return eval_string_concat(c, stack);
 
 			case ast_func_substring_before:
 			{
-				xpath_string s = _left->eval_string(c);
-				xpath_string p = _right->eval_string(c);
+				xpath_allocator_capture cr(stack.temp);
+
+				xpath_stack swapped_stack = {stack.temp, stack.result};
+
+				xpath_string s = _left->eval_string(c, swapped_stack);
+				xpath_string p = _right->eval_string(c, swapped_stack);
 
 				const char_t* pos = find_substring(s.c_str(), p.c_str());
 				
-				return pos ? xpath_string(s.c_str(), pos) : xpath_string();
+				return pos ? xpath_string(s.c_str(), pos, stack.result) : xpath_string();
 			}
 			
 			case ast_func_substring_after:
 			{
-				xpath_string s = _left->eval_string(c);
-				xpath_string p = _right->eval_string(c);
+				xpath_allocator_capture cr(stack.temp);
+
+				xpath_stack swapped_stack = {stack.temp, stack.result};
+
+				xpath_string s = _left->eval_string(c, swapped_stack);
+				xpath_string p = _right->eval_string(c, swapped_stack);
 				
 				const char_t* pos = find_substring(s.c_str(), p.c_str());
-				
-				return pos ? xpath_string(pos + p.length(), s.uses_heap()) : xpath_string();
+				if (!pos) return xpath_string();
+
+				const char_t* result = pos + p.length();
+
+				return s.uses_heap() ? xpath_string(result, stack.result) : xpath_string_const(result);
 			}
 
 			case ast_func_substring_2:
 			{
-				xpath_string s = _left->eval_string(c);
-				double first = round_nearest(_right->eval_number(c));
+				xpath_allocator_capture cr(stack.temp);
+
+				xpath_stack swapped_stack = {stack.temp, stack.result};
+
+				xpath_string s = _left->eval_string(c, swapped_stack);
+				size_t s_length = s.length();
+
+				double first = round_nearest(_right->eval_number(c, stack));
 				
 				if (is_nan(first)) return xpath_string(); // NaN
-				else if (first >= s.length() + 1) return xpath_string();
+				else if (first >= s_length + 1) return xpath_string();
 				
 				size_t pos = first < 1 ? 1 : (size_t)first;
+				assert(1 <= pos && pos <= s_length + 1);
+
+				const char_t* rbegin = s.c_str() + (pos - 1);
 				
-				return xpath_string(s.c_str() + (pos - 1), s.uses_heap());
+				return s.uses_heap() ? xpath_string(rbegin, stack.result) : xpath_string_const(rbegin);
 			}
 			
 			case ast_func_substring_3:
 			{
-				xpath_string s = _left->eval_string(c);
+				xpath_allocator_capture cr(stack.temp);
+
+				xpath_stack swapped_stack = {stack.temp, stack.result};
+
+				xpath_string s = _left->eval_string(c, swapped_stack);
 				size_t s_length = s.length();
 
-				double first = round_nearest(_right->eval_number(c));
-				double last = first + round_nearest(_right->_next->eval_number(c));
+				double first = round_nearest(_right->eval_number(c, stack));
+				double last = first + round_nearest(_right->_next->eval_number(c, stack));
 				
 				if (is_nan(first) || is_nan(last)) return xpath_string();
 				else if (first >= s_length + 1) return xpath_string();
@@ -7394,38 +7651,43 @@ namespace pugi
 				size_t end = last >= s_length + 1 ? s_length + 1 : (size_t)last;
 
 				assert(1 <= pos && pos <= end && end <= s_length + 1);
+				const char_t* rbegin = s.c_str() + (pos - 1);
 
 				if (end == s_length + 1)
-					return xpath_string(s.c_str() + (pos - 1), s.uses_heap());
+					return s.uses_heap() ? xpath_string(rbegin, stack.result) : xpath_string_const(rbegin);
 				else
-					return xpath_string(s.c_str() + (pos - 1), s.c_str() + (end - 1));
+					return xpath_string(s.c_str() + (pos - 1), s.c_str() + (end - 1), stack.result);
 			}
 
 			case ast_func_normalize_space_0:
 			{
-				xpath_string s = string_value(c.n);
+				xpath_string s = string_value(c.n, stack.result);
 
-				normalize_space(s.data());
+				normalize_space(s.data(stack.result));
 
 				return s;
 			}
 
 			case ast_func_normalize_space_1:
 			{
-				xpath_string s = _left->eval_string(c);
+				xpath_string s = _left->eval_string(c, stack);
 
-				normalize_space(s.data());
+				normalize_space(s.data(stack.result));
 			
 				return s;
 			}
 
 			case ast_func_translate:
 			{
-				xpath_string s = _left->eval_string(c);
-				xpath_string from = _right->eval_string(c);
-				xpath_string to = _right->_next->eval_string(c);
+				xpath_allocator_capture cr(stack.temp);
 
-				translate(s.data(), from.c_str(), to.c_str());
+				xpath_stack swapped_stack = {stack.temp, stack.result};
+
+				xpath_string s = _left->eval_string(c, stack);
+				xpath_string from = _right->eval_string(c, swapped_stack);
+				xpath_string to = _right->_next->eval_string(c, swapped_stack);
+
+				translate(s.data(stack.result), from.c_str(), to.c_str());
 
 				return s;
 			}
@@ -7445,15 +7707,19 @@ namespace pugi
 				switch (_rettype)
 				{
 				case xpath_type_boolean:
-					return xpath_string_const(eval_boolean(c) ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
+					return xpath_string_const(eval_boolean(c, stack) ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
 					
 				case xpath_type_number:
-					return convert_number_to_string(eval_number(c));
+					return convert_number_to_string(eval_number(c, stack), stack.result);
 					
 				case xpath_type_node_set:
 				{
-					xpath_node_set ns = eval_node_set(c);
-					return ns.empty() ? xpath_string() : string_value(ns.first());
+					xpath_allocator_capture cr(stack.temp);
+
+					xpath_stack swapped_stack = {stack.temp, stack.result};
+
+					xpath_node_set_raw ns = eval_node_set(c, swapped_stack);
+					return ns.empty() ? xpath_string() : string_value(ns.first(), stack.result);
 				}
 				
 				default:
@@ -7464,84 +7730,89 @@ namespace pugi
 			}
 		}
 
-		xpath_node_set eval_node_set(const xpath_context& c)
+		xpath_node_set_raw eval_node_set(const xpath_context& c, const xpath_stack& stack)
 		{
 			switch (_type)
 			{
 			case ast_op_union:
 			{
-				xpath_node_set ls = _left->eval_node_set(c);
-				xpath_node_set rs = _right->eval_node_set(c);
+				xpath_allocator_capture cr(stack.temp);
+
+				xpath_stack swapped_stack = {stack.temp, stack.result};
+
+				xpath_node_set_raw ls = _left->eval_node_set(c, swapped_stack);
+				xpath_node_set_raw rs = _right->eval_node_set(c, stack);
 				
 				// we can optimize merging two sorted sets, but this is a very rare operation, so don't bother
-  		        ls._type = xpath_node_set::type_unsorted;
+  		        rs.set_type(xpath_node_set::type_unsorted);
 
-				ls.append(rs.begin(), rs.end());
+				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
+					rs.push_back(*li, stack.result);
 				
-				ls.remove_duplicates();
+				rs.remove_duplicates();
 				
-				return ls;
+				return rs;
 			}
 
 			case ast_filter:
 			case ast_filter_posinv:
 			{
-				xpath_node_set set = _left->eval_node_set(c);
+				xpath_node_set_raw set = _left->eval_node_set(c, stack);
 
 				// either expression is a number or it contains position() call; sort by document order
 				if (_type == ast_filter) set.sort();
 
-				apply_predicate(set, 0, _right);
+				apply_predicate(set, 0, _right, stack);
 			
 				return set;
 			}
 			
 			case ast_func_id:
-				return xpath_node_set();
+				return xpath_node_set_raw();
 			
 			case ast_step:
 			{
 				switch (_axis)
 				{
 				case axis_ancestor:
-					return step_do(c, axis_to_type<axis_ancestor>());
+					return step_do(c, stack, axis_to_type<axis_ancestor>());
 					
 				case axis_ancestor_or_self:
-					return step_do(c, axis_to_type<axis_ancestor_or_self>());
+					return step_do(c, stack, axis_to_type<axis_ancestor_or_self>());
 
 				case axis_attribute:
-					return step_do(c, axis_to_type<axis_attribute>());
+					return step_do(c, stack, axis_to_type<axis_attribute>());
 
 				case axis_child:
-					return step_do(c, axis_to_type<axis_child>());
+					return step_do(c, stack, axis_to_type<axis_child>());
 				
 				case axis_descendant:
-					return step_do(c, axis_to_type<axis_descendant>());
+					return step_do(c, stack, axis_to_type<axis_descendant>());
 
 				case axis_descendant_or_self:
-					return step_do(c, axis_to_type<axis_descendant_or_self>());
+					return step_do(c, stack, axis_to_type<axis_descendant_or_self>());
 
 				case axis_following:
-					return step_do(c, axis_to_type<axis_following>());
+					return step_do(c, stack, axis_to_type<axis_following>());
 				
 				case axis_following_sibling:
-					return step_do(c, axis_to_type<axis_following_sibling>());
+					return step_do(c, stack, axis_to_type<axis_following_sibling>());
 				
 				case axis_namespace:
 					// namespaced axis is not supported
-					return xpath_node_set();
+					return xpath_node_set_raw();
 				
 				case axis_parent:
-					return step_do(c, axis_to_type<axis_parent>());
+					return step_do(c, stack, axis_to_type<axis_parent>());
 				
 				case axis_preceding:
-					return step_do(c, axis_to_type<axis_preceding>());
+					return step_do(c, stack, axis_to_type<axis_preceding>());
 
 				case axis_preceding_sibling:
-					return step_do(c, axis_to_type<axis_preceding_sibling>());
+					return step_do(c, stack, axis_to_type<axis_preceding_sibling>());
 				
 				case axis_self:
-					return step_do(c, axis_to_type<axis_self>());
+					return step_do(c, stack, axis_to_type<axis_self>());
 				}
 			}
 
@@ -7549,11 +7820,12 @@ namespace pugi
 			{
 				assert(!_right); // root step can't have any predicates
 
-				xpath_node_set ns;
-				ns._type = xpath_node_set::type_sorted;
+				xpath_node_set_raw ns;
 
-				if (c.n.node()) ns.push_back(c.n.node().root());
-				else if (c.n.attribute()) ns.push_back(c.n.parent().root());
+				ns.set_type(xpath_node_set::type_sorted);
+
+				if (c.n.node()) ns.push_back(c.n.node().root(), stack.result);
+				else if (c.n.attribute()) ns.push_back(c.n.parent().root(), stack.result);
 
 				return ns;
 			}
@@ -7563,14 +7835,25 @@ namespace pugi
 				assert(_rettype == _data.variable->type());
 
 				if (_rettype == xpath_type_node_set)
-					return _data.variable->get_node_set();
+				{
+					const xpath_node_set& s = _data.variable->get_node_set();
+
+					xpath_node_set_raw ns;
+
+					ns.set_type(s.type());
+
+					for (xpath_node_set::const_iterator i = s.begin(); i != s.end(); ++i)
+						ns.push_back(*i, stack.result);
+
+					return ns;
+				}
 
 				// fallthrough to type conversion
 			}
 
 			default:
 				assert(!"Wrong expression for return type node set");
-				return xpath_node_set();
+				return xpath_node_set_raw();
 			}
 		}
 		
@@ -8532,8 +8815,12 @@ namespace pugi
 		xpath_variable_string* var = static_cast<xpath_variable_string*>(this);
 
 		// duplicate string
-		char_t* copy = duplicate_string(value);
+		size_t size = (strlength(value) + 1) * sizeof(char_t);
+
+		char_t* copy = static_cast<char_t*>(global_allocate(size));
 		if (!copy) return false;
+
+		memcpy(copy, value, size);
 
 		// replace old string
 		if (var->value) global_deallocate(var->value);
@@ -8689,7 +8976,12 @@ namespace pugi
 		
 		xpath_context c(n, 1, 1);
 		
-		return _root->eval_boolean(c);
+		xpath_memory_block resultblock, tempblock;
+		xpath_allocator result(&resultblock), temp(&tempblock);
+		xpath_allocator_capture cr(&result), ct(&temp);
+		xpath_stack stack = {&result, &temp};
+
+		return _root->eval_boolean(c, stack);
 	}
 	
 	double xpath_query::evaluate_number(const xpath_node& n) const
@@ -8698,7 +8990,12 @@ namespace pugi
 		
 		xpath_context c(n, 1, 1);
 		
-		return _root->eval_number(c);
+		xpath_memory_block resultblock, tempblock;
+		xpath_allocator result(&resultblock), temp(&tempblock);
+		xpath_allocator_capture cr(&result), ct(&temp);
+		xpath_stack stack = {&result, &temp};
+
+		return _root->eval_number(c, stack);
 	}
 	
 #ifndef PUGIXML_NO_STL
@@ -8708,14 +9005,25 @@ namespace pugi
 		
 		xpath_context c(n, 1, 1);
 		
-		return _root->eval_string(c).c_str();
+		xpath_memory_block resultblock, tempblock;
+		xpath_allocator result(&resultblock), temp(&tempblock);
+		xpath_allocator_capture cr(&result), ct(&temp);
+		xpath_stack stack = {&result, &temp};
+
+		return _root->eval_string(c, stack).c_str();
 	}
 #endif
 	
 	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const
 	{
 		xpath_context c(n, 1, 1);
-		xpath_string r = _root ? _root->eval_string(c) : xpath_string();
+
+		xpath_memory_block resultblock, tempblock;
+		xpath_allocator result(&resultblock), temp(&tempblock);
+		xpath_allocator_capture cr(&result), ct(&temp);
+		xpath_stack stack = {&result, &temp};
+
+		xpath_string r = _root ? _root->eval_string(c, stack) : xpath_string();
 
 		size_t size = r.length() + 1;
 		
@@ -8741,7 +9049,14 @@ namespace pugi
 		
 		xpath_context c(n, 1, 1);
 		
-		return _root->eval_node_set(c);
+		xpath_memory_block resultblock, tempblock;
+		xpath_allocator result(&resultblock), temp(&tempblock);
+		xpath_allocator_capture cr(&result), ct(&temp);
+		xpath_stack stack = {&result, &temp};
+
+		xpath_node_set_raw r = _root->eval_node_set(c, stack);
+
+		return xpath_node_set(r.begin(), r.end(), r.type());
 	}
 
 	const xpath_parse_result& xpath_query::result() const

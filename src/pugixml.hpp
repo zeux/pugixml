@@ -2068,8 +2068,6 @@ namespace pugi
 	 */
 	class PUGIXML_CLASS xpath_node_set
 	{
-		friend class xpath_ast_node;
-		
 	public:
 		/// Collection type
 		enum type_t
@@ -2089,26 +2087,20 @@ namespace pugi
 		
 		xpath_node* _begin;
 		xpath_node* _end;
-		xpath_node* _eos;
-		
-		typedef xpath_node* iterator;
 
-		iterator mut_begin();
+		void _assign(const_iterator begin, const_iterator end);
 		
-		void push_back(const xpath_node& n);
-		
-		void append(const_iterator begin, const_iterator end);
-		
-		void truncate(iterator it);
-
-		void remove_duplicates();
-
 	public:
 		/**
 		 * Default constructor
 		 * Constructs empty set
 		 */
 		xpath_node_set();
+
+		/**
+		 * Constructor from contents
+		 */
+		xpath_node_set(const_iterator begin, const_iterator end, type_t type = type_unsorted);
 
 		/**
          * Destructor
