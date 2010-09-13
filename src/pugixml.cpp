@@ -4787,19 +4787,24 @@ namespace pugi
 
 		void* reallocate(void* ptr, size_t old_size, size_t new_size)
 		{
+			// align size so that we're able to store pointers in subsequent blocks
+			old_size = (old_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+			new_size = (new_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+
 			// we can only reallocate the last object
-			assert(static_cast<char*>(ptr) + old_size == _root->data + _root_size);
+			assert(ptr == 0 || static_cast<char*>(ptr) + old_size == _root->data + _root_size);
 
 			// adjust root size so that we have not allocated the object at all
-			_root_size -= old_size;
-			bool only_object = (_root_size == 0);
+			bool only_object = (_root_size == old_size);
+
+			if (ptr) _root_size -= old_size;
 
 			// allocate a new version (this will obviously reuse the memory if possible)
 			void* result = allocate(new_size);
 			if (!result) return 0; // $$ out of memory
 
 			// we have a new block
-			if (result != ptr)
+			if (result != ptr && ptr)
 			{
 				// copy old data
 				assert(new_size > old_size);
@@ -4975,12 +4980,13 @@ namespace
 				size_t length = target_length + source_length;
 
 				// allocate new buffer
-				char_t* result = static_cast<char_t*>(alloc->allocate((length + 1) * sizeof(char_t)));
+				char_t* result = static_cast<char_t*>(alloc->reallocate(_uses_heap ? const_cast<char_t*>(_buffer) : 0, (target_length + 1) * sizeof(char_t), (length + 1) * sizeof(char_t)));
 				if (!result) return; // $$ out of memory
-				// $$ reallocate
 
-				// append both strings in the new buffer
-				memcpy(result, _buffer, target_length * sizeof(char_t));
+				// append first string to the new buffer in case there was no reallocation
+				if (!_uses_heap) memcpy(result, _buffer, target_length * sizeof(char_t));
+
+				// append second string to the new buffer
 				memcpy(result + target_length, o._buffer, source_length * sizeof(char_t));
 				result[length] = 0;
 
@@ -5874,21 +5880,8 @@ namespace
 				size_t new_capacity = capacity + capacity / 2 + 1;
 
 				// reallocate the old array or allocate a new one
-				xpath_node* data = 0;
-
-				if (_begin)
-				{
-					data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
-					if (!data) return; // $$ out of memory
-				}
-				else
-				{
-					data = static_cast<xpath_node*>(alloc->allocate(new_capacity * sizeof(xpath_node)));
-					if (!data) return; // $$ out of memory
-
-					memcpy(data, _begin, capacity * sizeof(xpath_node));
-				}
-
+				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
+				if (!data) return; // $$ out of memory
 
 				// finalize
 				_begin = data;
@@ -5897,6 +5890,28 @@ namespace
 			}
 
 			*_end++ = node;
+		}
+
+		void append(const xpath_node* begin, const xpath_node* end, xpath_allocator* alloc)
+		{
+			size_t size = static_cast<size_t>(_end - _begin);
+			size_t capacity = static_cast<size_t>(_eos - _begin);
+			size_t count = static_cast<size_t>(end - begin);
+
+			if (size + count > capacity)
+			{
+				// reallocate the old array or allocate a new one
+				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), (size + count) * sizeof(xpath_node)));
+				if (!data) return; // $$ out of memory
+
+				// finalize
+				_begin = data;
+				_end = data + size;
+				_eos = data + size + count;
+			}
+
+			memcpy(_end, begin, count * sizeof(xpath_node));
+			_end += count;
 		}
 
 		void sort()
@@ -7419,7 +7434,11 @@ namespace pugi
 				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				
 				for (const xpath_node* it = ns.begin(); it != ns.end(); ++it)
+				{
+					xpath_allocator_capture cri(stack.result);
+
 					r += convert_string_to_number(string_value(*it, stack.result).c_str());
+				}
 			
 				return r;
 			}
@@ -7488,7 +7507,7 @@ namespace pugi
 			xpath_allocator_capture ct(stack.temp);
 
 			// count the string number
-			unsigned int count = 1;
+			size_t count = 1;
 			for (xpath_ast_node* nc = _right; nc; nc = nc->_next) count++;
 
 			// gather all strings
@@ -7513,7 +7532,7 @@ namespace pugi
 
 			// get total length
 			size_t length = 0;
-			for (unsigned int i = 0; i < count; ++i) length += buffer[i].length();
+			for (size_t i = 0; i < count; ++i) length += buffer[i].length();
 
 			// create final string
 			char_t* result = static_cast<char_t*>(stack.result->allocate((length + 1) * sizeof(char_t)));
@@ -7522,7 +7541,7 @@ namespace pugi
 			{
 				char_t* ri = result;
 
-				for (unsigned int i = 0; i < count; ++i)
+				for (size_t i = 0; i < count; ++i)
 					for (const char_t* bi = buffer[i].c_str(); *bi; ++bi)
 						*ri++ = *bi;
 
@@ -7677,11 +7696,9 @@ namespace pugi
 
 				assert(1 <= pos && pos <= end && end <= s_length + 1);
 				const char_t* rbegin = s.c_str() + (pos - 1);
+				const char_t* rend = s.c_str() + (end - 1);
 
-				if (end == s_length + 1)
-					return s.uses_heap() ? xpath_string(rbegin, stack.result) : xpath_string_const(rbegin);
-				else
-					return xpath_string(s.c_str() + (pos - 1), s.c_str() + (end - 1), stack.result);
+				return (end == s_length + 1 && !s.uses_heap()) ? xpath_string_const(rbegin) : xpath_string(rbegin, rend, stack.result);
 			}
 
 			case ast_func_normalize_space_0:
@@ -7771,9 +7788,7 @@ namespace pugi
 				// we can optimize merging two sorted sets, but this is a very rare operation, so don't bother
   		        rs.set_type(xpath_node_set::type_unsorted);
 
-				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
-					rs.push_back(*li, stack.result);
-				
+				rs.append(ls.begin(), ls.end(), stack.result);
 				rs.remove_duplicates();
 				
 				return rs;
@@ -7866,9 +7881,7 @@ namespace pugi
 					xpath_node_set_raw ns;
 
 					ns.set_type(s.type());
-
-					for (xpath_node_set::const_iterator i = s.begin(); i != s.end(); ++i)
-						ns.push_back(*i, stack.result);
+					ns.append(s.begin(), s.end(), stack.result);
 
 					return ns;
 				}
