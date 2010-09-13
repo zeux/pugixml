@@ -4588,7 +4588,7 @@ namespace pstd
 				I hole = it;
 
 				// move hole backwards
-				while (!pred(*(hole - 1), val))
+				while (pred(val, *(hole - 1)))
 				{
 					*hole = *(hole - 1);
 					hole--;
