@@ -5049,7 +5049,7 @@ namespace
 	// Converts symbol to lower case, if it is an ASCII one
 	char_t tolower_ascii(char_t ch)
 	{
-		return static_cast<unsigned int>(ch - 'A') < 26 ? (ch | ' ') : ch;
+		return static_cast<unsigned int>(ch - 'A') < 26 ? static_cast<char_t>(ch | ' ') : ch;
 	}
 
 	xpath_string string_value(const xpath_node& na, xpath_allocator* alloc)
@@ -5759,8 +5759,6 @@ namespace
 }
 
 // Internal node set class
-#include <algorithm>
-
 namespace
 {
 	using namespace pugi;
