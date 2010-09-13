@@ -5633,28 +5633,28 @@ namespace pugi
 	}
 #endif
 	
-	const size_t xpath_memory_block_size = 4096;
-
 	class xpath_allocator
 	{
 		struct memory_block
 		{	
 			memory_block* next;
 	
-			char data[xpath_memory_block_size];
+			char data[4096];
 		};
 		
 		memory_block* _root;
 		size_t _root_size;
-
-		memory_block _first;
 		
 	public:
 		static xpath_allocator* create()
 		{
-			void* memory = global_allocate(sizeof(xpath_allocator));
+			void* memory = global_allocate(sizeof(xpath_allocator) + sizeof(memory_block));
+			if (!memory) return 0;
 
-			return new (memory) xpath_allocator();
+			memory_block* root = reinterpret_cast<memory_block*>(static_cast<xpath_allocator*>(memory) + 1);
+			root->next = 0;
+
+			return new (memory) xpath_allocator(root);
 		}
 
 		static void destroy(void* ptr)
@@ -5665,9 +5665,9 @@ namespace pugi
 			xpath_allocator* alloc = static_cast<xpath_allocator*>(ptr);
 
 			memory_block* cur = alloc->_root;
-			memory_block* first = &alloc->_first;
+			assert(cur);
 
-			while (cur != first)
+			while (cur->next)
 			{
 				memory_block* next = cur->next;
 
@@ -5680,19 +5680,18 @@ namespace pugi
 			global_deallocate(alloc);
 		}
 
-		xpath_allocator()
+		xpath_allocator(memory_block* root, size_t root_size = 0): _root(root), _root_size(root_size)
 		{
-			_root = &_first;
-			_root_size = 0;
-			_first.next = 0;
 		}
 		
 		void* allocate(size_t size)
 		{
+			const size_t block_capacity = sizeof(_root->data);
+
 			// align size so that we're able to store pointers in subsequent blocks
 			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
 
-			if (_root_size + size <= xpath_memory_block_size)
+			if (_root_size + size <= block_capacity)
 			{
 				void* buf = _root->data + _root_size;
 				_root_size += size;
@@ -5700,7 +5699,7 @@ namespace pugi
 			}
 			else
 			{
-				size_t block_data_size = (size > xpath_memory_block_size) ? size : xpath_memory_block_size;
+				size_t block_data_size = (size > block_capacity) ? size : block_capacity;
 				size_t block_size = block_data_size + offsetof(memory_block, data);
 
 				memory_block* block = static_cast<memory_block*>(global_allocate(block_size));
