@@ -4745,17 +4745,7 @@ namespace pugi
 			// free all allocated pages
 			xpath_allocator* alloc = static_cast<xpath_allocator*>(ptr);
 
-			xpath_memory_block* cur = alloc->_root;
-			assert(cur);
-
-			while (cur->next)
-			{
-				xpath_memory_block* next = cur->next;
-
-				global_deallocate(cur);
-
-				cur = next;
-			}
+			alloc->release();
 
 			// free allocator memory (with the first page)
 			global_deallocate(alloc);
@@ -4835,7 +4825,7 @@ namespace pugi
 			return result;
 		}
 
-		void revert(xpath_allocator& state)
+		void revert(const xpath_allocator& state)
 		{
 			// free all new pages
 			xpath_memory_block* cur = _root;
@@ -4852,6 +4842,21 @@ namespace pugi
 			// restore state
 			_root = state._root;
 			_root_size = state._root_size;
+		}
+
+		void release()
+		{
+			xpath_memory_block* cur = _root;
+			assert(cur);
+
+			while (cur->next)
+			{
+				xpath_memory_block* next = cur->next;
+
+				global_deallocate(cur);
+
+				cur = next;
+			}
 		}
 	};
 
@@ -4874,6 +4879,28 @@ namespace pugi
 	{
 		xpath_allocator* result;
 		xpath_allocator* temp;
+	};
+
+	struct xpath_stack_data
+	{
+		xpath_memory_block blocks[2];
+		xpath_allocator result;
+		xpath_allocator temp;
+		xpath_stack stack;
+
+		xpath_stack_data(): result(blocks + 0), temp(blocks + 1)
+		{
+			blocks[0].next = blocks[1].next = 0;
+
+			stack.result = &result;
+			stack.temp = &temp;
+		}
+
+		~xpath_stack_data()
+		{
+			result.release();
+			temp.release();
+		}
 	};
 }
 
@@ -8973,13 +9000,9 @@ namespace pugi
 		if (!_root) return false;
 		
 		xpath_context c(n, 1, 1);
+		xpath_stack_data sd;
 		
-		xpath_memory_block resultblock, tempblock;
-		xpath_allocator result(&resultblock), temp(&tempblock);
-		xpath_allocator_capture cr(&result), ct(&temp);
-		xpath_stack stack = {&result, &temp};
-
-		return _root->eval_boolean(c, stack);
+		return _root->eval_boolean(c, sd.stack);
 	}
 	
 	double xpath_query::evaluate_number(const xpath_node& n) const
@@ -8987,13 +9010,9 @@ namespace pugi
 		if (!_root) return gen_nan();
 		
 		xpath_context c(n, 1, 1);
-		
-		xpath_memory_block resultblock, tempblock;
-		xpath_allocator result(&resultblock), temp(&tempblock);
-		xpath_allocator_capture cr(&result), ct(&temp);
-		xpath_stack stack = {&result, &temp};
+		xpath_stack_data sd;
 
-		return _root->eval_number(c, stack);
+		return _root->eval_number(c, sd.stack);
 	}
 	
 #ifndef PUGIXML_NO_STL
@@ -9002,26 +9021,18 @@ namespace pugi
 		if (!_root) return string_t();
 		
 		xpath_context c(n, 1, 1);
-		
-		xpath_memory_block resultblock, tempblock;
-		xpath_allocator result(&resultblock), temp(&tempblock);
-		xpath_allocator_capture cr(&result), ct(&temp);
-		xpath_stack stack = {&result, &temp};
+		xpath_stack_data sd;
 
-		return _root->eval_string(c, stack).c_str();
+		return _root->eval_string(c, sd.stack).c_str();
 	}
 #endif
 	
 	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const
 	{
 		xpath_context c(n, 1, 1);
+		xpath_stack_data sd;
 
-		xpath_memory_block resultblock, tempblock;
-		xpath_allocator result(&resultblock), temp(&tempblock);
-		xpath_allocator_capture cr(&result), ct(&temp);
-		xpath_stack stack = {&result, &temp};
-
-		xpath_string r = _root ? _root->eval_string(c, stack) : xpath_string();
+		xpath_string r = _root ? _root->eval_string(c, sd.stack) : xpath_string();
 
 		size_t size = r.length() + 1;
 		
@@ -9046,13 +9057,9 @@ namespace pugi
 		}
 		
 		xpath_context c(n, 1, 1);
-		
-		xpath_memory_block resultblock, tempblock;
-		xpath_allocator result(&resultblock), temp(&tempblock);
-		xpath_allocator_capture cr(&result), ct(&temp);
-		xpath_stack stack = {&result, &temp};
+		xpath_stack_data sd;
 
-		xpath_node_set_raw r = _root->eval_node_set(c, stack);
+		xpath_node_set_raw r = _root->eval_node_set(c, sd.stack);
 
 		return xpath_node_set(r.begin(), r.end(), r.type());
 	}
