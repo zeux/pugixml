@@ -6676,8 +6676,6 @@ namespace pugi
 			{
 			case axis_attribute:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-				
 				for (xml_attribute a = n.first_attribute(); a; a = a.next_attribute())
 					step_push(ns, a, n);
 				
@@ -6686,8 +6684,6 @@ namespace pugi
 			
 			case axis_child:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-
 				for (xml_node c = n.first_child(); c; c = c.next_sibling())
 					step_push(ns, c);
 					
@@ -6697,8 +6693,6 @@ namespace pugi
 			case axis_descendant:
 			case axis_descendant_or_self:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-				
 				if (axis == axis_descendant_or_self)
 					step_push(ns, n);
 					
@@ -6726,8 +6720,6 @@ namespace pugi
 			
 			case axis_following_sibling:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-
 				for (xml_node c = n.next_sibling(); c; c = c.next_sibling())
 					step_push(ns, c);
 				
@@ -6736,8 +6728,6 @@ namespace pugi
 			
 			case axis_preceding_sibling:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_unsorted;
-
 				for (xml_node c = n.previous_sibling(); c; c = c.previous_sibling())
 					step_push(ns, c);
 				
@@ -6746,8 +6736,6 @@ namespace pugi
 			
 			case axis_following:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-
 				xml_node cur = n;
 
 				// exit from this node so that we don't include descendants
@@ -6776,8 +6764,6 @@ namespace pugi
 
 			case axis_preceding:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_unsorted;
-
 				xml_node cur = n;
 
 				while (cur && !cur.previous_sibling()) cur = cur.parent();
@@ -6818,8 +6804,6 @@ namespace pugi
 			case axis_ancestor:
 			case axis_ancestor_or_self:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_unsorted;
-
 				if (axis == axis_ancestor_or_self)
 					step_push(ns, n);
 
@@ -6837,8 +6821,6 @@ namespace pugi
 
 			case axis_self:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-
 				step_push(ns, n);
 
 				break;
@@ -6846,8 +6828,6 @@ namespace pugi
 
 			case axis_parent:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-
 				if (n.parent()) step_push(ns, n.parent());
 
 				break;
@@ -6867,8 +6847,6 @@ namespace pugi
 			case axis_ancestor:
 			case axis_ancestor_or_self:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_unsorted;
-
 				if (axis == axis_ancestor_or_self && _test == nodetest_type_node) // reject attributes based on principal node type test
 					step_push(ns, a, p);
 
@@ -6887,8 +6865,6 @@ namespace pugi
 			case axis_descendant_or_self:
 			case axis_self:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-
 				if (_test == nodetest_type_node) // reject attributes based on principal node type test
 					step_push(ns, a, p);
 
@@ -6897,8 +6873,6 @@ namespace pugi
 
 			case axis_following:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-				
 				xml_node cur = p;
 				
 				for (;;)
@@ -6923,8 +6897,6 @@ namespace pugi
 
 			case axis_parent:
 			{
-				ns._type = ns.empty() ? xpath_node_set::type_sorted : xpath_node_set::type_unsorted;
-
 				step_push(ns, p);
 
 				break;
@@ -6945,17 +6917,24 @@ namespace pugi
 		template <class T> xpath_node_set step_do(const xpath_context& c, T v)
 		{
 			const axis_t axis = T::axis;
-			const bool attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
+			bool attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
 
 			xpath_node_set ns;
+			ns._type = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling) ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
 
 			if (_left)
 			{
 				xpath_node_set s = _left->eval_node_set(c);
-						
+
+				// self axis preserves the original order
+				if (axis == axis_self) ns._type = s._type;
+
 				for (xpath_node_set::const_iterator it = s.begin(); it != s.end(); ++it)
 				{
 					size_t size = ns.size();
+
+					// in general, all axes generate elements in a particular order, but there is no order guarantee if axis is applied to two nodes
+					if (axis != axis_self && size != 0) ns._type = xpath_node_set::type_unsorted;
 					
 					if (it->node())
 						step_fill(ns, it->node(), v);
@@ -6975,7 +6954,10 @@ namespace pugi
 				apply_predicates(ns, 0);
 			}
 
-			ns.remove_duplicates();
+			// child, attribute and self axes always generate unique set of nodes
+			// for other axis, if the set stayed sorted, it stayed unique because the traversal algorithms do not visit the same node twice
+			if (axis != axis_child && axis != axis_attribute && axis != axis_self && ns.type() == xpath_node_set::type_unsorted)
+				ns.remove_duplicates();
 
 			return ns;
 		}
