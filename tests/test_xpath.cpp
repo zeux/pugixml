@@ -294,4 +294,99 @@ TEST(xpath_large_node_set)
 
 	CHECK(ns.size() == 10001);
 }
+
+TEST(xpath_out_of_memory_evaluate_concat)
+{
+	test_runner::_memory_fail_threshold = 4096 * 2 * sizeof(char_t) + 4096 * 2;
+
+	std::basic_string<char_t> query = STR("concat(\"a\", \"");
+
+	query.resize(4196, 'a');
+	query += STR("\")");
+
+	pugi::xpath_query q(query.c_str());
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(q.evaluate_string(0, 0, xml_node()) == 1);
+#else
+	try
+	{
+		q.evaluate_string(0, 0, xml_node());
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+#endif
+}
+
+TEST(xpath_out_of_memory_evaluate_substring)
+{
+	test_runner::_memory_fail_threshold = 4096 * 2 * sizeof(char_t) + 4096 * 2;
+
+	std::basic_string<char_t> query = STR("substring(\"");
+
+	query.resize(4196, 'a');
+	query += STR("\", 1, 4097)");
+
+	pugi::xpath_query q(query.c_str());
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(q.evaluate_string(0, 0, xml_node()) == 1);
+#else
+	try
+	{
+		q.evaluate_string(0, 0, xml_node());
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+#endif
+}
+
+TEST_XML(xpath_out_of_memory_evaluate_union, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	pugi::xpath_query q(STR("a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a"));
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(q.evaluate_node_set(doc.child(STR("node"))).empty());
+#else
+	try
+	{
+		q.evaluate_node_set(doc.child(STR("node")));
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+#endif
+}
+
+TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	pugi::xpath_query q(STR("//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[true()]]]]]]]]]]]]]]"));
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(q.evaluate_node_set(doc).empty());
+#else
+	try
+	{
+		q.evaluate_node_set(doc);
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+#endif
+}
+
 #endif

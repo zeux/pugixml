@@ -314,6 +314,64 @@ TEST(xpath_api_exception_what)
 		CHECK(e.what()[0] != 0);
 	}
 }
+
+TEST(xpath_api_node_set_ctor_out_of_memory)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	xpath_node data[2];
+
+	try
+	{
+		xpath_node_set ns(data, data + 2);
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+}
+
+TEST(xpath_api_node_set_copy_ctor_out_of_memory)
+{
+	xpath_node data[2];
+	xpath_node_set ns(data, data + 2);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	try
+	{
+		xpath_node_set copy = ns;
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+}
+
+TEST_XML(xpath_api_node_set_assign_out_of_memory_preserve, "<node><a/><b/></node>")
+{
+	xpath_node_set ns = doc.select_nodes(STR("node/*"));
+	CHECK(ns.size() == 2);
+
+	xpath_node_set nsall = doc.select_nodes(STR("//*"));
+	CHECK(nsall.size() == 3);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	try
+	{
+		ns = nsall;
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+
+	CHECK(ns.size() == 2 && ns[0] == doc.child(STR("node")).child(STR("a")) && ns[1] == doc.child(STR("node")).child(STR("b")));
+}
 #endif
 
 #endif
