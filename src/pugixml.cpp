@@ -9070,37 +9070,34 @@ namespace pugi
 
 		return _root->eval_number(c, sd.stack);
 	}
+
+	static xpath_string evaluate_string_impl(xpath_ast_node* root, const xpath_node& n, xpath_stack_data& sd)
+	{
+		if (!root) return xpath_string();
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return xpath_string();
+	#endif
+
+		xpath_context c(n, 1, 1);
+
+		return root->eval_string(c, sd.stack);
+	}
 	
 #ifndef PUGIXML_NO_STL
 	string_t xpath_query::evaluate_string(const xpath_node& n) const
 	{
-		if (!_root) return string_t();
-		
-		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
 
-	#ifdef PUGIXML_NO_EXCEPTIONS
-		if (setjmp(sd.error_handler)) return string_t();
-	#endif
-
-		return _root->eval_string(c, sd.stack).c_str();
+		return evaluate_string_impl(_root, n, sd).c_str();
 	}
 #endif
-	
-	size_t xpath_query::evaluate_string(char_t* buffer, volatile size_t capacity, const xpath_node& n) const
+
+	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const
 	{
-		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
 
-	#ifdef PUGIXML_NO_EXCEPTIONS
-		if (setjmp(sd.error_handler))
-		{
-			if (capacity > 0) *buffer = 0;
-			return 1;
-		}
-	#endif
-
-		xpath_string r = _root ? _root->eval_string(c, sd.stack) : xpath_string();
+		xpath_string r = evaluate_string_impl(_root, n, sd);
 
 		size_t size = r.length() + 1;
 		
