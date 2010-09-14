@@ -7,6 +7,8 @@
 #include <wchar.h>
 
 #include <string>
+#include <vector>
+#include <algorithm>
 
 static void load_document_copy(xml_document& doc, const char_t* text)
 {
@@ -118,6 +120,24 @@ TEST_XML(xpath_sort_attributes, "<node/>")
 
 	xpath_node_set_tester(sorted, "sorted order failed") % 3 % 4 % 5;
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 5 % 4 % 3;
+}
+
+TEST(xpath_sort_random_large)
+{
+	xml_document doc;
+	load_document_copy(doc, STR("<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>"));
+
+	xpath_node_set ns = doc.select_nodes(STR("//node() | //@*"));
+
+	std::vector<xpath_node> nsv(ns.begin(), ns.end());
+	std::random_shuffle(nsv.begin(), nsv.end());
+
+	xpath_node_set copy(&nsv[0], &nsv[0] + nsv.size());
+	copy.sort();
+
+	xpath_node_set_tester tester(copy, "sorted order failed");
+
+	for (unsigned int i = 2; i < 129; ++i) tester % i;
 }
 
 TEST(xpath_long_numbers_parse)
