@@ -7580,8 +7580,8 @@ namespace pugi
 
 			char_t* ri = result;
 
-			for (size_t i = 0; i < count; ++i)
-				for (const char_t* bi = buffer[i].c_str(); *bi; ++bi)
+			for (size_t j = 0; j < count; ++j)
+				for (const char_t* bi = buffer[j].c_str(); *bi; ++bi)
 					*ri++ = *bi;
 
 			*ri = 0;
