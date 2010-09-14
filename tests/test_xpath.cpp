@@ -125,7 +125,18 @@ TEST_XML(xpath_sort_attributes, "<node/>")
 TEST(xpath_sort_random_large)
 {
 	xml_document doc;
-	load_document_copy(doc, STR("<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>"));
+	load_document_copy(doc, STR("<node>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>"));
 
 	xpath_node_set ns = doc.select_nodes(STR("//node() | //@*"));
 
