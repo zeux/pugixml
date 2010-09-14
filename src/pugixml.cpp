@@ -4725,7 +4725,7 @@ namespace pugi
 	{
 		xpath_memory_block* _root;
 		size_t _root_size;
-		
+
 	public:
 		static xpath_allocator* create()
 		{
@@ -4753,9 +4753,12 @@ namespace pugi
 
 		xpath_allocator(xpath_memory_block* root, size_t root_size = 0): _root(root), _root_size(root_size)
 		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			error_handler = 0;
+		#endif
 		}
 		
-		void* allocate(size_t size)
+		void* allocate_nothrow(size_t size)
 		{
 			const size_t block_capacity = sizeof(_root->data);
 
@@ -4774,7 +4777,7 @@ namespace pugi
 				size_t block_size = block_data_size + offsetof(xpath_memory_block, data);
 
 				xpath_memory_block* block = static_cast<xpath_memory_block*>(global_allocate(block_size));
-				if (!block) return 0; // $$ out of memory
+				if (!block) return 0;
 				
 				block->next = _root;
 				
@@ -4783,6 +4786,23 @@ namespace pugi
 				
 				return block->data;
 			}
+		}
+
+		void* allocate(size_t size)
+		{
+			void* result = allocate_nothrow(size);
+
+			if (!result)
+			{
+			#ifdef PUGIXML_NO_EXCEPTIONS
+				assert(error_handler);
+				longjmp(*error_handler, 1);
+			#else
+				throw std::bad_alloc();
+			#endif
+			}
+
+			return result;
 		}
 
 		void* reallocate(void* ptr, size_t old_size, size_t new_size)
@@ -4801,7 +4821,7 @@ namespace pugi
 
 			// allocate a new version (this will obviously reuse the memory if possible)
 			void* result = allocate(new_size);
-			if (!result) return 0; // $$ out of memory
+			assert(result);
 
 			// we have a new block
 			if (result != ptr && ptr)
@@ -4863,6 +4883,10 @@ namespace pugi
 				cur = next;
 			}
 		}
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		jmp_buf* error_handler;
+	#endif
 	};
 
 	struct xpath_allocator_capture
@@ -4893,12 +4917,20 @@ namespace pugi
 		xpath_allocator temp;
 		xpath_stack stack;
 
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		jmp_buf error_handler;
+	#endif
+
 		xpath_stack_data(): result(blocks + 0), temp(blocks + 1)
 		{
 			blocks[0].next = blocks[1].next = 0;
 
 			stack.result = &result;
 			stack.temp = &temp;
+
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			result.error_handler = temp.error_handler = &error_handler;
+		#endif
 		}
 
 		~xpath_stack_data()
@@ -4922,7 +4954,7 @@ namespace
 		static char_t* duplicate_string(const char_t* string, size_t length, xpath_allocator* alloc)
 		{
 			char_t* result = static_cast<char_t*>(alloc->allocate((length + 1) * sizeof(char_t)));
-			if (!result) return 0; // $$ out of memory
+			assert(result);
 
 			memcpy(result, string, length * sizeof(char_t));
 			result[length] = 0;
@@ -4981,7 +5013,7 @@ namespace
 
 				// allocate new buffer
 				char_t* result = static_cast<char_t*>(alloc->reallocate(_uses_heap ? const_cast<char_t*>(_buffer) : 0, (target_length + 1) * sizeof(char_t), (length + 1) * sizeof(char_t)));
-				if (!result) return; // $$ out of memory
+				assert(result);
 
 				// append first string to the new buffer in case there was no reallocation
 				if (!_uses_heap) memcpy(result, _buffer, target_length * sizeof(char_t));
@@ -5881,7 +5913,7 @@ namespace
 
 				// reallocate the old array or allocate a new one
 				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
-				if (!data) return; // $$ out of memory
+				assert(data);
 
 				// finalize
 				_begin = data;
@@ -5902,7 +5934,7 @@ namespace
 			{
 				// reallocate the old array or allocate a new one
 				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), (size + count) * sizeof(xpath_node)));
-				if (!data) return; // $$ out of memory
+				assert(data);
 
 				// finalize
 				_begin = data;
@@ -6045,7 +6077,15 @@ namespace pugi
 		{
 			// make heap copy
 			xpath_node* storage = static_cast<xpath_node*>(global_allocate(size * sizeof(xpath_node)));
-			if (!storage) return; // $$ out of memory
+
+			if (!storage)
+			{
+			#ifdef PUGIXML_NO_EXCEPTIONS
+				return;
+			#else
+				throw std::bad_alloc();
+			#endif
+			}
 
 			memcpy(storage, begin, size * sizeof(xpath_node));
 			
@@ -7518,7 +7558,7 @@ namespace pugi
 			if (count > sizeof(static_buffer) / sizeof(static_buffer[0]))
 			{
 				buffer = static_cast<xpath_string*>(stack.temp->allocate(count * sizeof(xpath_string)));
-				if (!buffer) return xpath_string(); // $$ out of memory
+				assert(buffer);
 			}
 
 			// evaluate all strings to temporary stack
@@ -7536,20 +7576,15 @@ namespace pugi
 
 			// create final string
 			char_t* result = static_cast<char_t*>(stack.result->allocate((length + 1) * sizeof(char_t)));
+			assert(result);
 
-			if (result)
-			{
-				char_t* ri = result;
+			char_t* ri = result;
 
-				for (size_t i = 0; i < count; ++i)
-					for (const char_t* bi = buffer[i].c_str(); *bi; ++bi)
-						*ri++ = *bi;
+			for (size_t i = 0; i < count; ++i)
+				for (const char_t* bi = buffer[i].c_str(); *bi; ++bi)
+					*ri++ = *bi;
 
-				*ri = 0;
-			}
-
-			// return result
-			if (!result) return xpath_string(); // $$ out of memory
+			*ri = 0;
 
 			return xpath_string(result, true);
 		}
@@ -7960,7 +7995,7 @@ namespace pugi
 
 		void* alloc_node()
 		{
-			void* result = _alloc->allocate(sizeof(xpath_ast_node));
+			void* result = _alloc->allocate_nothrow(sizeof(xpath_ast_node));
 
 			if (!result) throw_error("Out of memory");
 
@@ -7973,7 +8008,7 @@ namespace pugi
 			{
 				size_t length = static_cast<size_t>(value.end - value.begin);
 
-				char_t* c = static_cast<char_t*>(_alloc->allocate((length + 1) * sizeof(char_t)));
+				char_t* c = static_cast<char_t*>(_alloc->allocate_nothrow((length + 1) * sizeof(char_t)));
 				if (!c) throw_error("Out of memory");
 
 				memcpy(c, value.begin, length * sizeof(char_t));
@@ -9014,6 +9049,10 @@ namespace pugi
 		
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return false;
+	#endif
 		
 		return _root->eval_boolean(c, sd.stack);
 	}
@@ -9024,6 +9063,10 @@ namespace pugi
 		
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return gen_nan();
+	#endif
 
 		return _root->eval_number(c, sd.stack);
 	}
@@ -9036,6 +9079,10 @@ namespace pugi
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
 
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return string_t();
+	#endif
+
 		return _root->eval_string(c, sd.stack).c_str();
 	}
 #endif
@@ -9044,6 +9091,14 @@ namespace pugi
 	{
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler))
+		{
+			if (capacity > 0) *buffer = 0;
+			return 1;
+		}
+	#endif
 
 		xpath_string r = _root ? _root->eval_string(c, sd.stack) : xpath_string();
 
@@ -9071,6 +9126,10 @@ namespace pugi
 		
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return xpath_node_set();
+	#endif
 
 		xpath_node_set_raw r = _root->eval_node_set(c, sd.stack);
 
