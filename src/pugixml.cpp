@@ -9087,7 +9087,7 @@ namespace pugi
 	}
 #endif
 	
-	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const
+	size_t xpath_query::evaluate_string(char_t* buffer, volatile size_t capacity, const xpath_node& n) const
 	{
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
