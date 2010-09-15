@@ -115,6 +115,8 @@ namespace
 	// Get string length
 	size_t strlength(const char_t* s)
 	{
+		assert(s);
+
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcslen(s);
 	#else
@@ -125,6 +127,8 @@ namespace
 	// Compare two strings
 	bool strequal(const char_t* src, const char_t* dst)
 	{
+		assert(src && dst);
+
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcscmp(src, dst) == 0;
 	#else
@@ -277,10 +281,10 @@ namespace pugi
 
 		void deallocate_memory(void* ptr, size_t size, xml_memory_page* page)
 		{
-			assert(ptr >= page->data && ptr < page->data + xml_memory_page_size);
-			(void)!ptr;
-
 			if (page == _root) page->busy_size = _busy_size;
+
+			assert(ptr >= page->data && ptr < page->data + page->busy_size);
+			(void)!ptr;
 
 			page->freed_size += size;
 			assert(page->freed_size <= page->busy_size);
@@ -1344,6 +1348,7 @@ namespace
 			if (end) // there was a gap already; collapse it
 			{
 				// Move [old_gap_end, new_gap_start) to [old_gap_start, ...)
+				assert(s >= end);
 				memmove(end - size, end, reinterpret_cast<char*>(s) - reinterpret_cast<char*>(end));
 			}
 				
@@ -1360,6 +1365,7 @@ namespace
 			if (end)
 			{
 				// Move [old_gap_end, current_pos) to [old_gap_start, ...)
+				assert(s >= end);
 				memmove(end - size, end, reinterpret_cast<char*>(s) - reinterpret_cast<char*>(end));
 
 				return s - size;
@@ -2346,6 +2352,7 @@ namespace
 			}
 
 			xml_parse_result result = make_parse_result(static_cast<xml_parse_status>(error), parser.error_offset ? parser.error_offset - buffer : 0);
+			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
 
 			// update allocator state
 			*static_cast<xml_allocator*>(xmldoc) = parser.alloc;
