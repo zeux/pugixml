@@ -2981,34 +2981,58 @@ namespace
 	{
 		if (!file) return make_parse_result(status_file_not_found);
 
-		fseek(file, 0, SEEK_END);
-		long length = ftell(file);
-		fseek(file, 0, SEEK_SET);
+		// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
+	#if defined(_MSC_VER) && _MSC_VER >= 1400
+		// there are 64-bit versions of fseek/ftell, let's use them
+		typedef __int64 length_type;
 
+		_fseeki64(file, 0, SEEK_END);
+		length_type length = _ftelli64(file);
+		_fseeki64(file, 0, SEEK_SET);
+	#else
+		// if this is a 32-bit OS, long is enough; if this is a unix system, long is 64-bit, which is enough; otherwise we can't do anything anyway.
+		typedef long length_type;
+
+		fseek(file, 0, SEEK_END);
+		length_type length = ftell(file);
+		fseek(file, 0, SEEK_SET);
+	#endif
+
+		// check for I/O errors
 		if (length < 0)
 		{
 			fclose(file);
 			return make_parse_result(status_io_error);
 		}
 		
-		char* s = static_cast<char*>(global_allocate(length > 0 ? length : 1));
-
-		if (!s)
+		// check for overflow
+		if (static_cast<length_type>(static_cast<size_t>(length)) != length)
 		{
 			fclose(file);
 			return make_parse_result(status_out_of_memory);
 		}
 
-		size_t read = fread(s, 1, (size_t)length, file);
+		// allocate buffer for the whole file
+		size_t size = static_cast<size_t>(length);
+		char* contents = static_cast<char*>(global_allocate(length > 0 ? size : 1));
+
+		if (!contents)
+		{
+			fclose(file);
+			return make_parse_result(status_out_of_memory);
+		}
+
+		// read file in memory
+		size_t read_size = fread(contents, 1, size, file);
 		fclose(file);
 
-		if (read != (size_t)length)
+		if (read_size != size)
 		{
-			global_deallocate(s);
+			global_deallocate(contents);
 			return make_parse_result(status_io_error);
 		}
 		
-		return doc.load_buffer_inplace_own(s, length, options, encoding);
+		return doc.load_buffer_inplace_own(contents, size, options, encoding);
 	}
 
 #ifndef PUGIXML_NO_STL
