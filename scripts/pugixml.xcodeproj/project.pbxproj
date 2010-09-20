@@ -8,14 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		5314084032B5001276189718 /* pugixml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E0405306C15001276189718 /* pugixml.cpp */; };
-		6ED63AE23641001276189718 /* pugixpath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19E0517F3CF2001276189718 /* pugixpath.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0A4C28F55399001276189718 /* pugiconfig.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pugiconfig.hpp"; path = "pugiconfig.hpp"; sourceTree = "<group>"; };
 		0E0405306C15001276189718 /* pugixml.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "pugixml.cpp"; path = "pugixml.cpp"; sourceTree = "<group>"; };
 		7C1A11945858001276189718 /* pugixml.hpp */ = {isa = PBXFileReference; lastKnownFileType = text; name = "pugixml.hpp"; path = "pugixml.hpp"; sourceTree = "<group>"; };
-		19E0517F3CF2001276189718 /* pugixpath.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "pugixpath.cpp"; path = "pugixpath.cpp"; sourceTree = "<group>"; };
 		1DA04ADC64C3001276189718 /* libpugixml_d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libpugixml_d.a"; path = "libpugixml_d.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -45,7 +43,6 @@
 				0A4C28F55399001276189718 /* pugiconfig.hpp */,
 				0E0405306C15001276189718 /* pugixml.cpp */,
 				7C1A11945858001276189718 /* pugixml.hpp */,
-				19E0517F3CF2001276189718 /* pugixpath.cpp */,
 			);
 			name = src;
 			path = ../src;
@@ -112,7 +109,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5314084032B5001276189718 /* pugixml.cpp in Sources */,
-				6ED63AE23641001276189718 /* pugixpath.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

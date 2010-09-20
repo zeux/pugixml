@@ -154,7 +154,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\pugixml.cpp" />
-    <ClCompile Include="..\src\pugixpath.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

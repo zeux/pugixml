@@ -332,10 +332,6 @@
 				RelativePath="..\src\pugixml.cpp"
 				>
 			</File>
-			<File
-				RelativePath="..\src\pugixpath.cpp"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -68,7 +68,7 @@ end
 project "pugixml"
 	kind "StaticLib"
 	language "C++"
-	files { "../src/pugixml.hpp", "../src/pugiconfig.hpp", "../src/pugixml.cpp", "../src/pugixpath.cpp" }
+	files { "../src/pugixml.hpp", "../src/pugiconfig.hpp", "../src/pugixml.cpp" }
 	flags { "NoPCH", "NoMinimalRebuild" }
 	uuid "89A1E353-E2DC-495C-B403-742BE206ACED"
 

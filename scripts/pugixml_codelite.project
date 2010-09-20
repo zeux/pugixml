@@ -4,7 +4,6 @@
     <File Name="../src/pugixml.hpp"/>
     <File Name="../src/pugiconfig.hpp"/>
     <File Name="../src/pugixml.cpp"/>
-    <File Name="../src/pugixpath.cpp"/>
   </VirtualDirectory>
   <Settings Type="Static Library">
     <Configuration Name="Debug" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Static Library">

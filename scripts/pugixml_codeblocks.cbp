@@ -38,8 +38,6 @@
 		</Unit>
 		<Unit filename="../src/pugixml.cpp">
 		</Unit>
-		<Unit filename="../src/pugixpath.cpp">
-		</Unit>
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
