@@ -1809,7 +1809,7 @@ namespace
 		// Parser utilities.
 		#define SKIPWS()			{ while (IS_CHARTYPE(*s, ct_space)) ++s; }
 		#define OPTSET(OPT)			( optmsk & OPT )
-		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); if (!cursor) longjmp(error_handler, status_out_of_memory); }
+		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); if (!cursor) THROW_ERROR(status_out_of_memory, s); }
 		#define POPNODE()			{ cursor = cursor->parent; }
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define SCANWHILE(X)		{ while ((X)) ++s; }
@@ -1828,7 +1828,7 @@ namespace
 		// First group can not contain nested groups
 		// Second group can contain nested groups of the same type
 		// Third group can contain all other groups
-		void parse_doctype_primitive(char_t*& s)
+		char_t* parse_doctype_primitive(char_t* s)
 		{
 			if (*s == '"' || *s == '\'')
 			{
@@ -1857,9 +1857,11 @@ namespace
 				s += 4;
 			}
 			else THROW_ERROR(status_bad_doctype, s);
+
+			return s;
 		}
 
-		void parse_doctype_ignore(char_t*& s)
+		char_t* parse_doctype_ignore(char_t* s)
 		{
 			assert(s[0] == '<' && s[1] == '!' && s[2] == '[');
 			s++;
@@ -1869,14 +1871,14 @@ namespace
 				if (s[0] == '<' && s[1] == '!' && s[2] == '[')
 				{
 					// nested ignore section
-					parse_doctype_ignore(s);
+					s = parse_doctype_ignore(s);
 				}
 				else if (s[0] == ']' && s[1] == ']' && s[2] == '>')
 				{
 					// ignore section end
 					s += 3;
 
-					return;
+					return s;
 				}
 				else s++;
 			}
@@ -1884,7 +1886,7 @@ namespace
 			THROW_ERROR(status_bad_doctype, s);
 		}
 
-		void parse_doctype(char_t*& s, char_t endch, bool toplevel)
+		char_t* parse_doctype_group(char_t* s, char_t endch, bool toplevel)
 		{
 			assert(s[0] == '<' && s[1] == '!');
 			s++;
@@ -1896,36 +1898,35 @@ namespace
 					if (s[2] == '[')
 					{
 						// ignore
-						parse_doctype_ignore(s);
+						s = parse_doctype_ignore(s);
 					}
 					else
 					{
 						// some control group
-						parse_doctype(s, endch, false);
+						s = parse_doctype_group(s, endch, false);
 					}
 				}
 				else if (s[0] == '<' || s[0] == '"' || s[0] == '\'')
 				{
 					// unknown tag (forbidden), or some primitive group
-					parse_doctype_primitive(s);
+					s = parse_doctype_primitive(s);
 				}
 				else if (*s == '>')
 				{
 					s++;
 
-					return;
+					return s;
 				}
 				else s++;
 			}
 
 			if (!toplevel || endch != '>') THROW_ERROR(status_bad_doctype, s);
+
+			return s;
 		}
 
-		void parse_exclamation(char_t*& ref_s, xml_node_struct* cursor, unsigned int optmsk, char_t endch)
+		char_t* parse_exclamation(char_t* s, xml_node_struct* cursor, unsigned int optmsk, char_t endch)
 		{
-			// load into registers
-			char_t* s = ref_s;
-
 			// parse node contents, starting with exclamation mark
 			++s;
 
@@ -2007,20 +2008,18 @@ namespace
 			{
 				s -= 2;
 
-				parse_doctype(s, endch, true);
+				s = parse_doctype_group(s, endch, true);
 			}
 			else if (*s == 0 && endch == '-') THROW_ERROR(status_bad_comment, s);
 			else if (*s == 0 && endch == '[') THROW_ERROR(status_bad_cdata, s);
 			else THROW_ERROR(status_unrecognized_tag, s);
 
-			// store from registers
-			ref_s = s;
+			return s;
 		}
 
-		void parse_question(char_t*& ref_s, xml_node_struct*& ref_cursor, unsigned int optmsk, char_t endch)
+		char_t* parse_question(char_t* s, xml_node_struct*& ref_cursor, unsigned int optmsk, char_t endch)
 		{
 			// load into registers
-			char_t* s = ref_s;
 			xml_node_struct* cursor = ref_cursor;
 			char_t ch = 0;
 
@@ -2106,8 +2105,9 @@ namespace
 			}
 
 			// store from registers
-			ref_s = s;
 			ref_cursor = cursor;
+
+			return s;
 		}
 
 		void parse(char_t* s, xml_node_struct* xmldoc, unsigned int optmsk, char_t endch)
@@ -2149,7 +2149,7 @@ namespace
 								if (IS_CHARTYPE(*s, ct_start_symbol)) // <... #...
 								{
 									xml_attribute_struct* a = append_attribute_ll(cursor, alloc); // Make space for this attribute.
-									if (!a) THROW_ERROR(status_out_of_memory, 0);
+									if (!a) THROW_ERROR(status_out_of_memory, s);
 
 									a->name = s; // Save the offset.
 
@@ -2274,13 +2274,13 @@ namespace
 					}
 					else if (*s == '?') // '<?...'
 					{
-						parse_question(s, cursor, optmsk, endch);
+						s = parse_question(s, cursor, optmsk, endch);
 
 						if (cursor && (cursor->header & xml_memory_page_type_mask) == node_declaration) goto LOC_ATTRIBUTES;
 					}
 					else if (*s == '!') // '<!...'
 					{
-						parse_exclamation(s, cursor, optmsk, endch);
+						s = parse_exclamation(s, cursor, optmsk, endch);
 					}
 					else if (*s == 0 && endch == '?') THROW_ERROR(status_bad_pi, s);
 					else THROW_ERROR(status_unrecognized_tag, s);
