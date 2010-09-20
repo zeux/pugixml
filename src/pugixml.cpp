@@ -2989,6 +2989,13 @@ namespace
 		_fseeki64(file, 0, SEEK_END);
 		length_type length = _ftelli64(file);
 		_fseeki64(file, 0, SEEK_SET);
+	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS)
+		// there are 64-bit versions of fseek/ftell, let's use them
+		typedef off64_t length_type;
+
+		fseeko64(file, 0, SEEK_END);
+		length_type length = ftello64(file);
+		fseeko64(file, 0, SEEK_SET);
 	#else
 		// if this is a 32-bit OS, long is enough; if this is a unix system, long is 64-bit, which is enough; otherwise we can't do anything anyway.
 		typedef long length_type;
