@@ -1887,6 +1887,8 @@ namespace
 			}
 
 			THROW_ERROR(status_bad_doctype, s);
+
+			return s;
 		}
 
 		char_t* parse_doctype_group(char_t* s, char_t endch, bool toplevel)
@@ -2975,6 +2977,40 @@ namespace
 		}
 	}
 
+	xml_parse_result load_file_impl(xml_document& doc, FILE* file, unsigned int options, xml_encoding encoding)
+	{
+		if (!file) return make_parse_result(status_file_not_found);
+
+		fseek(file, 0, SEEK_END);
+		long length = ftell(file);
+		fseek(file, 0, SEEK_SET);
+
+		if (length < 0)
+		{
+			fclose(file);
+			return make_parse_result(status_io_error);
+		}
+		
+		char* s = static_cast<char*>(global_allocate(length > 0 ? length : 1));
+
+		if (!s)
+		{
+			fclose(file);
+			return make_parse_result(status_out_of_memory);
+		}
+
+		size_t read = fread(s, 1, (size_t)length, file);
+		fclose(file);
+
+		if (read != (size_t)length)
+		{
+			global_deallocate(s);
+			return make_parse_result(status_io_error);
+		}
+		
+		return doc.load_buffer_inplace_own(s, length, options, encoding);
+	}
+
 #ifndef PUGIXML_NO_STL
 	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding)
 	{
@@ -3005,6 +3041,67 @@ namespace
 		assert(actual_length <= read_length);
 
 		return doc.load_buffer_inplace_own(buffer.release(), actual_length * sizeof(T), options, encoding);
+	}
+#endif
+
+#if defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__)
+	FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
+	{
+		return _wfopen(path, mode);
+	}
+#else
+	char* convert_path_heap(const wchar_t* str)
+	{
+		assert(str);
+
+		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+
+		size_t length = wcslen(str);
+
+		// first pass: get length in utf8 characters
+		size_t size = sizeof(wchar_t) == 2 ?
+			utf_decoder<utf8_counter>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, 0) :
+			utf_decoder<utf8_counter>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, 0);
+
+		// allocate resulting string
+		char* result = static_cast<char*>(global_allocate(size + 1));
+		if (!result) return 0;
+
+		// second pass: convert to utf8
+		if (size > 0)
+		{
+			uint8_t* begin = reinterpret_cast<uint8_t*>(result);
+			uint8_t* end = sizeof(wchar_t) == 2 ?
+				utf_decoder<utf8_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, begin) :
+				utf_decoder<utf8_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, begin);
+	  	
+			assert(begin + size == end);
+			(void)!end;
+		}
+
+		// zero-terminate
+		result[size] = 0;
+
+	  	return result;
+	}
+
+	FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
+	{
+		// there is no standard function to open wide paths, so our best bet is to try utf8 path
+		char* path_utf8 = convert_path_heap(path);
+		if (!path_utf8) return 0;
+
+		// convert mode to ASCII (we mirror _wfopen interface)
+		char mode_ascii[4] = {0};
+		for (size_t i = 0; mode[i]; ++i) mode_ascii[i] = static_cast<char>(mode[i]);
+
+		// try to open the utf8 path
+		FILE* result = fopen(path_utf8, mode_ascii);
+
+		// free dummy buffer
+		global_deallocate(path_utf8);
+
+		return result;
 	}
 #endif
 }
@@ -4255,36 +4352,17 @@ namespace pugi
 		reset();
 
 		FILE* file = fopen(path, "rb");
-		if (!file) return make_parse_result(status_file_not_found);
 
-		fseek(file, 0, SEEK_END);
-		long length = ftell(file);
-		fseek(file, 0, SEEK_SET);
+		return load_file_impl(*this, file, options, encoding);
+	}
 
-		if (length < 0)
-		{
-			fclose(file);
-			return make_parse_result(status_io_error);
-		}
-		
-		char* s = static_cast<char*>(global_allocate(length > 0 ? length : 1));
+	xml_parse_result xml_document::load_file(const wchar_t* path, unsigned int options, xml_encoding encoding)
+	{
+		reset();
 
-		if (!s)
-		{
-			fclose(file);
-			return make_parse_result(status_out_of_memory);
-		}
+		FILE* file = open_file_wide(path, L"rb");
 
-		size_t read = fread(s, 1, (size_t)length, file);
-		fclose(file);
-
-		if (read != (size_t)length)
-		{
-			global_deallocate(s);
-			return make_parse_result(status_io_error);
-		}
-		
-		return load_buffer_inplace_own(s, length, options, encoding);
+		return load_file_impl(*this, file, options, encoding);
 	}
 
 	xml_parse_result xml_document::load_buffer_impl(void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own)
@@ -4367,6 +4445,19 @@ namespace pugi
 	bool xml_document::save_file(const char* path, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = fopen(path, "wb");
+		if (!file) return false;
+
+		xml_writer_file writer(file);
+		save(writer, indent, flags, encoding);
+
+		fclose(file);
+
+		return true;
+	}
+
+	bool xml_document::save_file(const wchar_t* path, const char_t* indent, unsigned int flags, xml_encoding encoding) const
+	{
+		FILE* file = open_file_wide(path, L"wb");
 		if (!file) return false;
 
 		xml_writer_file writer(file);

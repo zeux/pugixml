@@ -1673,6 +1673,16 @@ namespace pugi
 		xml_parse_result load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
 		/**
+		 * Load document from file
+		 *
+		 * \param path - file path
+		 * \param options - parsing options
+		 * \param encoding - source data encoding
+		 * \return parsing result
+		 */
+		xml_parse_result load_file(const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+
+		/**
 		 * Load document from buffer
 		 *
 		 * \param contents - buffer contents
@@ -1751,6 +1761,17 @@ namespace pugi
 		 * \return success flag
 		 */
 		bool save_file(const char* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+
+		/**
+		 * Save XML to file
+		 *
+		 * \param path - file path
+		 * \param indent - indentation string
+		 * \param flags - formatting flags
+		 * \param encoding - encoding used for writing
+		 * \return success flag
+		 */
+		bool save_file(const wchar_t* path, const char_t* indent = PUGIXML_TEXT("\t"), unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 	};
 
 #ifndef PUGIXML_NO_XPATH
