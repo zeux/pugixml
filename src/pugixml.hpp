@@ -1775,6 +1775,10 @@ namespace pugi
 		/// Last parsed offset (in characters from string start)
 		ptrdiff_t offset;
 
+		xpath_parse_result(): error("Internal error"), offset(0)
+		{
+		}
+
 		/// Cast to bool operator
 		operator bool() const
 		{

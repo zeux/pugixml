@@ -9016,9 +9016,6 @@ namespace pugi
 
 	xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _alloc(0), _root(0)
 	{
-		_result.error = 0;
-		_result.offset = 0;
-
 		xpath_allocator* alloc = xpath_allocator::create();
 
 		if (!alloc)
@@ -9035,10 +9032,11 @@ namespace pugi
 
 			_root = xpath_parser::parse(query, variables, alloc, &_result);
 
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			if (_root) // only store allocator if parsing was a success
-		#endif
-			_alloc = static_cast<xpath_allocator*>(alloc_holder.release());
+			if (_root)
+			{
+				_alloc = static_cast<xpath_allocator*>(alloc_holder.release());
+				_result.error = 0;
+			}
 		}
 	}
 
@@ -9127,7 +9125,9 @@ namespace pugi
 		#ifdef PUGIXML_NO_EXCEPTIONS
 			return xpath_node_set();
 		#else
-			xpath_parse_result result = {"Expression does not evaluate to node set", 0};
+			xpath_parse_result result;
+			result.error = "Expression does not evaluate to node set";
+
 			throw xpath_exception(result);
 		#endif
 		}
