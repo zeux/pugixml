@@ -1558,6 +1558,10 @@ namespace pugi
 		/// Source document encoding
 		xml_encoding encoding;
 
+		xml_parse_result(): status(status_internal_error), offset(0), encoding(encoding_auto)
+		{
+		}
+
 		/// Cast to bool operator
 		operator bool() const
 		{
