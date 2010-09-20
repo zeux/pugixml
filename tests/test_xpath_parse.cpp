@@ -304,4 +304,13 @@ TEST(xpath_parse_qname_error)
 	CHECK_XPATH_FAIL(STR(":"));
 }
 
+TEST(xpath_parse_result_default)
+{
+	xpath_parse_result result;
+
+	CHECK(!result);
+	CHECK(result.error != 0);
+	CHECK(result.offset == 0);
+}
+
 #endif

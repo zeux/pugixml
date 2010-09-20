@@ -762,4 +762,6 @@ TEST(parse_result_default)
 
 	CHECK(!result);
 	CHECK(result.status == status_internal_error);
+	CHECK(result.offset == 0);
+	CHECK(result.encoding == encoding_auto);
 }
