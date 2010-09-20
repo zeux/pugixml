@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define _SCL_SECURE_NO_WARNINGS
 #define _CRT_NONSTDC_NO_DEPRECATE 0
 
 #include <string.h> // because Borland's STL is braindead, we have to include <string.h> _before_ <string> in order to get memcpy
@@ -14,6 +15,7 @@
 #include <sstream>
 
 #include <string>
+#include <algorithm>
 
 #ifdef __MINGW32__
 #	include <io.h> // for unlink in C++0x mode
@@ -210,6 +212,14 @@ TEST(document_load_file_error_previous)
 	CHECK(!doc.first_child());
 }
 
+TEST(document_load_file_wide_ascii)
+{
+	pugi::xml_document doc;
+
+	CHECK(doc.load_file(L"tests/data/small.xml"));
+	CHECK_NODE(doc, STR("<node />"));
+}
+
 TEST_XML(document_save, "<node/>")
 {
 	xml_writer_string writer;
@@ -313,29 +323,57 @@ TEST_XML(document_save_declaration_present_last, "<node/>")
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n<node />\n<?xml encoding=\"utf8\"?>\n"));
 }
 
+struct temp_file
+{
+	char path[512];
+	int fd;
+	
+	temp_file(): fd(0)
+	{
+	#ifdef __unix
+		strcpy(path, "/tmp/pugiXXXXXX");
+
+		fd = mkstemp(path);
+		CHECK(fd != -1);
+	#elif defined(__CELLOS_LV2__)
+		path[0] = 0; // no temporary file support
+	#else
+		tmpnam(path);
+	#endif
+	}
+
+	~temp_file()
+	{
+		CHECK(unlink(path) == 0);
+
+	#ifdef __unix
+		CHECK(close(fd) == 0);
+	#endif
+	}
+};
+
 TEST_XML(document_save_file, "<node/>")
 {
-#ifdef __unix
-	char path[] = "/tmp/pugiXXXXXX";
+	temp_file f;
 
-	int fd = mkstemp(path);
-	CHECK(fd != -1);
-#elif defined(__CELLOS_LV2__)
-	const char* path = ""; // no temporary file support
-#else
-	const char* path = tmpnam(0);
-#endif
+	CHECK(doc.save_file(f.path));
 
-	CHECK(doc.save_file(path));
-
-	CHECK(doc.load_file(path, pugi::parse_default | pugi::parse_declaration));
+	CHECK(doc.load_file(f.path, pugi::parse_default | pugi::parse_declaration));
 	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node />"));
+}
 
-	CHECK(unlink(path) == 0);
+TEST_XML(document_save_file_wide, "<node/>")
+{
+	temp_file f;
 
-#ifdef __unix
-	CHECK(close(fd) == 0);
-#endif
+	// widen the path
+	wchar_t wpath[32];
+	std::copy(f.path, f.path + strlen(f.path) + 1, wpath + 0);
+
+	CHECK(doc.save_file(wpath));
+
+	CHECK(doc.load_file(f.path, pugi::parse_default | pugi::parse_declaration));
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node />"));
 }
 
 TEST_XML(document_save_file_error, "<node/>")
