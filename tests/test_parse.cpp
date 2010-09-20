@@ -755,3 +755,11 @@ TEST(parse_error_offset)
 	CHECK_OFFSET("<no></na>", parse_default, status_end_element_mismatch, 8);
 	CHECK_OFFSET("<no></nod>", parse_default, status_end_element_mismatch, 9);
 }
+
+TEST(parse_result_default)
+{
+	xml_parse_result result;
+
+	CHECK(!result);
+	CHECK(result.status == status_internal_error);
+}
