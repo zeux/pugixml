@@ -2977,11 +2977,9 @@ namespace
 		}
 	}
 
-	xml_parse_result load_file_impl(xml_document& doc, FILE* file, unsigned int options, xml_encoding encoding)
+	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
+	xml_parse_status get_file_size(FILE* file, size_t& out_result)
 	{
-		if (!file) return make_parse_result(status_file_not_found);
-
-		// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	#if defined(_MSC_VER) && _MSC_VER >= 1400
 		// there are 64-bit versions of fseek/ftell, let's use them
 		typedef __int64 length_type;
@@ -3006,22 +3004,35 @@ namespace
 	#endif
 
 		// check for I/O errors
-		if (length < 0)
-		{
-			fclose(file);
-			return make_parse_result(status_io_error);
-		}
+		if (length < 0) return status_io_error;
 		
 		// check for overflow
-		if (static_cast<length_type>(static_cast<size_t>(length)) != length)
+		size_t result = static_cast<size_t>(length);
+
+		if (static_cast<length_type>(result) != length) return status_out_of_memory;
+
+		// finalize
+		out_result = result;
+
+		return status_ok;
+	}
+
+	xml_parse_result load_file_impl(xml_document& doc, FILE* file, unsigned int options, xml_encoding encoding)
+	{
+		if (!file) return make_parse_result(status_file_not_found);
+
+		// get file size (can result in I/O errors)
+		size_t size = 0;
+		xml_parse_status size_status = get_file_size(file, size);
+
+		if (size_status != status_ok)
 		{
 			fclose(file);
-			return make_parse_result(status_out_of_memory);
+			return make_parse_result(size_status);
 		}
-
+		
 		// allocate buffer for the whole file
-		size_t size = static_cast<size_t>(length);
-		char* contents = static_cast<char*>(global_allocate(length > 0 ? size : 1));
+		char* contents = static_cast<char*>(global_allocate(size > 0 ? size : 1));
 
 		if (!contents)
 		{
