@@ -4253,6 +4253,15 @@ namespace pugi
 		return temp;
 	}
 
+    xml_parse_result::xml_parse_result(): status(status_internal_error), offset(0), encoding(encoding_auto)
+    {
+    }
+
+    xml_parse_result::operator bool() const
+    {
+        return status == status_ok;
+    }
+
 	const char* xml_parse_result::description() const
 	{
 		switch (status)
@@ -4377,16 +4386,6 @@ namespace pugi
 	#endif
 
 		return load_buffer(contents, strlength(contents) * sizeof(char_t), options, encoding);
-	}
-
-	xml_parse_result xml_document::parse(char* xmlstr, unsigned int options)
-	{
-		return load_buffer_inplace(xmlstr, strlen(xmlstr), options, encoding_utf8);
-	}
-		
-	xml_parse_result xml_document::parse(const transfer_ownership_tag&, char* xmlstr, unsigned int options)
-	{
-		return load_buffer_inplace_own(xmlstr, strlen(xmlstr), options, encoding_utf8);
 	}
 
 	xml_parse_result xml_document::load_file(const char* path, unsigned int options, xml_encoding encoding)
@@ -4543,11 +4542,6 @@ namespace pugi
 	  	return result;
 	}
 	
-	std::wstring PUGIXML_FUNCTION as_utf16(const char* str)
-	{
-		return as_wide(str);
-	}
-
 	std::wstring PUGIXML_FUNCTION as_wide(const char* str)
 	{
 		assert(str);
@@ -8956,10 +8950,22 @@ namespace pugi
 		}
 	};
 
+    xpath_parse_result::xpath_parse_result(): error("Internal error"), offset(0)
+    {
+    }
+
+    xpath_parse_result::operator bool() const
+    {
+        return error == 0;
+    }
 	const char* xpath_parse_result::description() const
 	{
 		return error ? error : "No error";
 	}
+
+	xpath_variable::xpath_variable()
+    {
+    }
 
 	const char_t* xpath_variable::name() const
 	{
