@@ -3336,14 +3336,9 @@ namespace pugi
 		return (_attr && _attr->value) ? _attr->value : PUGIXML_TEXT("");
 	}
 
-	const void* xml_attribute::document_order() const
+	xml_attribute_struct* xml_attribute::internal_object()
 	{
-		if (!_attr) return 0;
-
-		if ((_attr->header & xml_memory_page_name_allocated_mask) == 0) return _attr->name;
-		if ((_attr->header & xml_memory_page_value_allocated_mask) == 0) return _attr->value;
-
-		return 0;
+        return _attr;
 	}
 
 	xml_attribute& xml_attribute::operator=(const char_t* rhs)
@@ -4054,14 +4049,9 @@ namespace pugi
 		return walker.end(arg_end);
 	}
 
-	const void* xml_node::document_order() const
+	xml_node_struct* xml_node::internal_object()
 	{
-		if (!_root) return 0;
-
-		if (_root->name && (_root->header & xml_memory_page_name_allocated_mask) == 0) return _root->name;
-		if (_root->value && (_root->header & xml_memory_page_value_allocated_mask) == 0) return _root->value;
-
-		return 0;
+        return _root;
 	}
 
 	void xml_node::print(xml_writer& writer, const char_t* indent, unsigned int flags, xml_encoding encoding, unsigned int depth) const
@@ -5351,18 +5341,42 @@ namespace
 
     	return parent && node == parent;
     }
+
+    const void* document_order(const xpath_node& xnode)
+    {
+        xml_node_struct* node = xnode.node().internal_object();
+
+        if (node)
+        {
+            if (node->name && (node->header & xml_memory_page_name_allocated_mask) == 0) return node->name;
+            if (node->value && (node->header & xml_memory_page_value_allocated_mask) == 0) return node->value;
+            return 0;
+        }
+
+        xml_attribute_struct* attr = xnode.attribute().internal_object();
+
+        if (attr)
+        {
+            if ((attr->header & xml_memory_page_name_allocated_mask) == 0) return attr->name;
+            if ((attr->header & xml_memory_page_value_allocated_mask) == 0) return attr->value;
+            return 0;
+        }
+
+		return 0;
+    }
     
 	struct document_order_comparator
 	{
 		bool operator()(const xpath_node& lhs, const xpath_node& rhs) const
 		{
-			xml_node ln = lhs.node(), rn = rhs.node();
-
 			// optimized document order based check
-			const void* lo = lhs.attribute() ? lhs.attribute().document_order() : ln.document_order();
-			const void* ro = rhs.attribute() ? rhs.attribute().document_order() : rn.document_order();
+			const void* lo = document_order(lhs);
+			const void* ro = document_order(rhs);
 
 			if (lo && ro) return lo < ro;
+
+            // slow comparison
+			xml_node ln = lhs.node(), rn = rhs.node();
 
 			// compare attributes
 			if (lhs.attribute() && rhs.attribute())

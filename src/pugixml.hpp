@@ -254,12 +254,13 @@ namespace pugi
 	
     	typedef xml_attribute_struct* xml_attribute::*unspecified_bool_type;
 
-		explicit xml_attribute(xml_attribute_struct* attr);
-
 	public:
         // Default constructor. Constructs an empty attribute.
 		xml_attribute();
 		
+        // Constructs attribute from internal pointer
+		explicit xml_attribute(xml_attribute_struct* attr);
+
     	// Safe bool conversion operator
     	operator unspecified_bool_type() const;
 
@@ -311,8 +312,8 @@ namespace pugi
     	xml_attribute next_attribute() const;
     	xml_attribute previous_attribute() const;
 
-		// This function is for internal use
-		const void* document_order() const;
+		// Get internal pointer
+		xml_attribute_struct* internal_object();
 	};
 
 #ifdef __BORLANDC__
@@ -332,11 +333,12 @@ namespace pugi
 
     	typedef xml_node_struct* xml_node::*unspecified_bool_type;
 
-		explicit xml_node(xml_node_struct* p);
-
 	public:
 		// Default constructor. Constructs an empty node.
 		xml_node();
+
+        // Constructs node from internal pointer
+		explicit xml_node(xml_node_struct* p);
 
     	// Safe bool conversion operator
 		operator unspecified_bool_type() const;
@@ -521,8 +523,8 @@ namespace pugi
 		// Get node offset in parsed file/string (in char_t units) for debugging purposes
 		ptrdiff_t offset_debug() const;
 
-		// This function is for internal use
-		const void* document_order() const;
+		// Get internal pointer
+		xml_node_struct* internal_object();
 	};
 
 #ifdef __BORLANDC__
