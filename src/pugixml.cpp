@@ -1272,6 +1272,74 @@ namespace
 	}
 #endif
 
+	size_t as_utf8_begin(const wchar_t* str, size_t length)
+	{
+		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+
+		// get length in utf8 characters
+		return sizeof(wchar_t) == 2 ?
+			utf_decoder<utf8_counter>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, 0) :
+			utf_decoder<utf8_counter>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, 0);
+    }
+
+    void as_utf8_end(char* buffer, size_t size, const wchar_t* str, size_t length)
+    {
+		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+
+        // convert to utf8
+        uint8_t* begin = reinterpret_cast<uint8_t*>(buffer);
+        uint8_t* end = sizeof(wchar_t) == 2 ?
+            utf_decoder<utf8_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, begin) :
+            utf_decoder<utf8_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, begin);
+    
+        assert(begin + size == end);
+        (void)!end;
+
+		// zero-terminate
+		buffer[size] = 0;
+	}
+    
+#ifndef PUGIXML_NO_STL
+    std::string as_utf8_impl(const wchar_t* str, size_t length)
+    {
+		// first pass: get length in utf8 characters
+        size_t size = as_utf8_begin(str, length);
+
+		// allocate resulting string
+		std::string result;
+		result.resize(size);
+
+		// second pass: convert to utf8
+		if (size > 0) as_utf8_end(&result[0], size, str, length);
+
+	  	return result;
+    }
+
+	std::wstring as_wide_impl(const char* str, size_t size)
+	{
+		const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
+
+		// first pass: get length in wchar_t units
+		size_t length = utf_decoder<wchar_counter>::decode_utf8_block(data, size, 0);
+
+		// allocate resulting string
+		std::wstring result;
+		result.resize(length);
+
+		// second pass: convert to wchar_t
+		if (length > 0)
+		{
+			wchar_writer::value_type begin = reinterpret_cast<wchar_writer::value_type>(&result[0]);
+			wchar_writer::value_type end = utf_decoder<wchar_writer>::decode_utf8_block(data, size, begin);
+
+			assert(begin + length == end);
+			(void)!end;
+		}
+
+		return result;
+	}
+#endif
+
 	inline bool strcpy_insitu_allow(size_t length, uintptr_t allocated, char_t* target)
 	{
 		assert(target);
@@ -3096,33 +3164,16 @@ namespace
 	{
 		assert(str);
 
-		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
-
-		size_t length = wcslen(str);
-
 		// first pass: get length in utf8 characters
-		size_t size = sizeof(wchar_t) == 2 ?
-			utf_decoder<utf8_counter>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, 0) :
-			utf_decoder<utf8_counter>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, 0);
+		size_t length = wcslen(str);
+        size_t size = as_utf8_begin(str, length);
 
 		// allocate resulting string
 		char* result = static_cast<char*>(global_allocate(size + 1));
 		if (!result) return 0;
 
 		// second pass: convert to utf8
-		if (size > 0)
-		{
-			uint8_t* begin = reinterpret_cast<uint8_t*>(result);
-			uint8_t* end = sizeof(wchar_t) == 2 ?
-				utf_decoder<utf8_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, begin) :
-				utf_decoder<utf8_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, begin);
-	  	
-			assert(begin + size == end);
-			(void)!end;
-		}
-
-		// zero-terminate
-		result[size] = 0;
+        as_utf8_end(result, size, str, length);
 
 	  	return result;
 	}
@@ -4504,59 +4555,24 @@ namespace pugi
 	{
 		assert(str);
 
-		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
+        return as_utf8_impl(str, wcslen(str));
+	}
 
-		size_t length = wcslen(str);
-
-		// first pass: get length in utf8 characters
-		size_t size = sizeof(wchar_t) == 2 ?
-			utf_decoder<utf8_counter>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, 0) :
-			utf_decoder<utf8_counter>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, 0);
-
-		// allocate resulting string
-		std::string result;
-		result.resize(size);
-
-		// second pass: convert to utf8
-		if (size > 0)
-		{
-			uint8_t* begin = reinterpret_cast<uint8_t*>(&result[0]);
-			uint8_t* end = sizeof(wchar_t) == 2 ?
-				utf_decoder<utf8_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, begin) :
-				utf_decoder<utf8_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, begin);
-	  	
-			assert(begin + result.size() == end);
-			(void)!end;
-		}
-
-	  	return result;
+	std::string PUGIXML_FUNCTION as_utf8(const std::wstring& str)
+	{
+        return as_utf8_impl(str.c_str(), str.size());
 	}
 	
 	std::wstring PUGIXML_FUNCTION as_wide(const char* str)
 	{
 		assert(str);
 
-		const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
-		size_t size = strlen(str);
-
-		// first pass: get length in wchar_t
-		size_t length = utf_decoder<wchar_counter>::decode_utf8_block(data, size, 0);
-
-		// allocate resulting string
-		std::wstring result;
-		result.resize(length);
-
-		// second pass: convert to wchar_t
-		if (length > 0)
-		{
-			wchar_writer::value_type begin = reinterpret_cast<wchar_writer::value_type>(&result[0]);
-			wchar_writer::value_type end = utf_decoder<wchar_writer>::decode_utf8_block(data, size, begin);
-
-			assert(begin + result.size() == end);
-			(void)!end;
-		}
-
-		return result;
+        return as_wide_impl(str, strlen(str));
+	}
+	
+	std::wstring PUGIXML_FUNCTION as_wide(const std::string& str)
+	{
+        return as_wide_impl(str.c_str(), str.size());
 	}
 #endif
 

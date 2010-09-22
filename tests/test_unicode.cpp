@@ -69,6 +69,13 @@ TEST(as_wide_invalid)
 	CHECK(b5 == L"\nbcd");
 }
 
+TEST(as_wide_string)
+{
+    std::string s = "abcd";
+
+    CHECK(as_wide(s) == L"abcd");
+}
+
 TEST(as_utf8_empty)
 {
 	CHECK(as_utf8(L"") == "");
@@ -133,5 +140,12 @@ TEST(as_utf8_invalid)
 		CHECK(as_utf8(L"a\xde24_") == "a_");
 	#endif
 	}
+}
+
+TEST(as_utf8_string)
+{
+    std::wstring s = L"abcd";
+
+    CHECK(as_utf8(s) == "abcd");
 }
 #endif
