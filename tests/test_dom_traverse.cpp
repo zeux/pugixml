@@ -758,30 +758,24 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><?pi?><!--comment--><node>pcdata<![CDAT
 	CHECK((cit++)->offset_debug() == 48);
 }
 
-TEST_XML(dom_document_order, "<node attr='value'>value</node>")
+TEST_XML(dom_internal_object, "<node attr='value'>value</node>")
 {
 	xml_node node = doc.child(STR("node"));
 	xml_attribute attr = node.first_attribute();
 	xml_node value = node.first_child();
 	
-	CHECK(xml_node().document_order() == 0);
-	CHECK(xml_attribute().document_order() == 0);
+	CHECK(xml_node().internal_object() == 0);
+	CHECK(xml_attribute().internal_object() == 0);
 
-	CHECK(doc.document_order() == 0);
-	CHECK(node.document_order() != 0 && attr.document_order() != 0 && value.document_order() != 0);
+    CHECK(node.internal_object() != 0);
+    CHECK(value.internal_object() != 0);
+    CHECK(node.internal_object() != value.internal_object());
 
-	CHECK(node.document_order() < attr.document_order() && attr.document_order() < value.document_order());
+    CHECK(attr.internal_object() != 0);
 
-	attr.set_name(STR("newattr"));
-	CHECK(attr.document_order() != 0);
-	CHECK(node.document_order() < attr.document_order() && attr.document_order() < value.document_order());
+    xml_node node_copy = node;
+    CHECK(node_copy.internal_object() == node.internal_object());
 
-	attr.set_value(STR("newvalue"));
-	CHECK(attr.document_order() == 0);
-
-	node.set_name(STR("newnode"));
-	CHECK(node.document_order() == 0);
-
-	value.set_value(STR("newvalue"));
-	CHECK(value.document_order() == 0);
+    xml_attribute attr_copy = attr;
+    CHECK(attr_copy.internal_object() == attr.internal_object());
 }
