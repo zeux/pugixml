@@ -7,6 +7,24 @@
     [license Distributed under the MIT License]
 ]
 
+[/ documentation todo
+cpp file merge (look for pugixpath.cpp, update screenshots)
+PUGIXML_NO_EXCEPTIONS support (+ xpath_parse_result, + xpath_query bool cast, + xpath_parse_result in xpath_exception for better error handling, + std::bad_alloc throwing in evaluate + xpath exception throwing in evaluate_node_set (always throw xpath_exception?))
+PUGIXML_NO_STL support
+variables support (+ select_nodes/select_single_node additional arg)
+Introduced new xpath_query::evaluate_string, which works without STL
+Introduced new xpath_node_set constructor (from an iterator range)
+Evaluation function now accept attribute context nodes
+All internal allocations use custom allocation functions
+Improved error reporting; now a last parsed offset is returned together with the parsing error
+Fixed custom deallocation function calling with null pointer in one case (state explicitly that custom dealloc is never called with NULL)
+CDATA nodes containing ]]> are printed as several nodes; while this changes the internal structure, this is the only way to escape CDATA contents
+Added xml_parse_result default constructor
+Added xml_document::load_file and xml_document::save_file with wide character paths
+Added as_utf8 and as_wide overloads for std::wstring/std::string arguments
+xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
+]
+
 [template sbr[]'''<sbr/>''']
 [template lbr[]'''<sbr/><sbr/>'''] [/ for empty lines in lists]
 [template file[name]'''<filename>'''[name]'''</filename>''']
@@ -1446,6 +1464,59 @@ Some of these incompatibilities will be fixed in version 1.0.
 [endsect] [/xpath]
 
 [section:changes Changelog]
+
+[h5 1.11.2010 - version 1.0]
+
+Major release, featuring many XPath enhancements, wide character filename support, miscellaneous performance improvements, bug fixes and more.
+
+* XPath:
+    # XPath implementation is moved to pugixml.cpp (which is the only source file now); use PUGIXML_NO_XPATH if you want to disable XPath to reduce code size
+    # XPath is now supported without exceptions (PUGIXML_NO_EXCEPTIONS); the error handling mechanism depends on the presence of exception support
+    # XPath is now supported without STL (PUGIXML_NO_STL)
+    # Introduced variable support
+    # Introduced new xpath_query::evaluate_string, which works without STL
+    # Introduced new xpath_node_set constructor (from an iterator range)
+    # Evaluation function now accept attribute context nodes
+    # All internal allocations use custom allocation functions
+    # Improved error reporting; now a last parsed offset is returned together with the parsing error
+
+* Bug fixes:
+    # Fixed memory leak for loading from streams with stream exceptions turned on
+    # Fixed custom deallocation function calling with null pointer in one case
+    # Fixed missing attributes for iterator category functions; all functions/classes can now be DLL-exported
+    # Worked around Digital Mars compiler bug, which lead to minor read overfetches in several functions
+    # load_file now works with 2+ Gb files in MSVC/MinGW
+    # XPath: fixed memory leaks for incorrect queries
+    # XPath: fixed xpath_node() attribute constructor with empty attribute argument
+    # XPath: fixed lang() function for non-ASCII arguments
+
+* Specification changes:
+    # CDATA nodes containing ]]> are printed as several nodes; while this changes the internal structure, this is the only way to escape CDATA contents
+    # Memory allocation errors during parsing now preserve last parsed offset (to give an idea about parsing progress)
+    # Added xml_parse_result default constructor
+    # Added xml_document::load_file and xml_document::save_file with wide character paths
+    # Added as_utf8 and as_wide overloads for std::wstring/std::string arguments
+
+* Performance improvements:
+    # xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
+    # Minor parsing optimizations
+    # Minor memory optimization for strings in DOM tree (set_name/set_value)
+    # Memory optimization for string memory reclaiming in DOM tree (set_name/set_value now reallocate the buffer if memory waste is too big)
+    # XPath: optimized document order sorting
+    # XPath: optimized child/attribute axis step
+    # XPath: optimized number-to-string conversions in MSVC
+    # XPath: optimized concat for many arguments
+    # XPath: optimized evaluation allocation mechanism: constant and document strings are not heap-allocated
+    # XPath: optimized evaluation allocation mechanism: all temporaries' allocations use fast stack-like allocator
+
+* Compatibility:
+    # Removed wildcard functions (xml_node::child_w, xml_node::attribute_w, etc.)
+    # Removed xml_node::all_elements_by_name
+    # Removed xpath_type_t enumeration; use xpath_value_type instead
+    # Removed format_write_bom_utf8 enumeration; use format_write_bom instead
+    # Removed xml_document::precompute_document_order, xml_attribute::document_order and xml_node::document_order functions; document order sort optimization is now automatic
+    # Removed xml_document::parse functions and transfer_ownership struct; use xml_document::load_buffer_inplace and xml_document::load_buffer_inplace_own instead
+    # Removed as_utf16 function; use as_wide instead
 
 [h5 1.07.2010 - version 0.9]
 
