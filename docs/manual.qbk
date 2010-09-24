@@ -577,7 +577,6 @@ Stream loading requires working seek/tell functions and therefore may fail when 
 [section:errors Handling parsing errors]
 
 [#xml_parse_result]
-[#xml_parse_result::ctor]
 All document loading functions return the parsing result via `xml_parse_result` object. It contains parsing status, the offset of last successfully parsed character from the beginning of the source stream, and the encoding of the source stream:
 
     struct xml_parse_result
@@ -1321,7 +1320,7 @@ Note that as per XPath specification, each XPath node has a parent, which can be
 Like node and attribute handles, XPath node handles can be implicitly cast to boolean-like object to check if it is a null node, and also can be compared for equality with each other.
 
 [#xpath_node::ctor]
-You can also create XPath nodes with one of tree constructors: the default constructor, the constructor that takes node argument, and the constructor that takes attribute and node arguments (in which case the attribute must belong to the attribute list of the node). The constructor from `xml_node` is implicit, so you can usually pass `xml_node` to functions that expect `xpath_node`. Apart from that you usually don't need to create your own XPath node objects, since they are returned to you via selection functions.
+You can also create XPath nodes with one of the three constructors: the default constructor, the constructor that takes node argument, and the constructor that takes attribute and node arguments (in which case the attribute must belong to the attribute list of the node). The constructor from `xml_node` is implicit, so you can usually pass `xml_node` to functions that expect `xpath_node`. Apart from that you usually don't need to create your own XPath node objects, since they are returned to you via selection functions.
 
 [#xpath_node_set]
 XPath expressions operate not on single nodes, but instead on node sets. A node set is a collection of nodes, which can be optionally ordered in either a forward document order or a reverse one. Document order is defined in XPath specification; an XPath node is before another node in document order if it appears before it in XML representation of the corresponding document.
@@ -1368,8 +1367,8 @@ This function returns the first node in forward document order from the set, or 
 [#xml_node::select_single_node][#xml_node::select_nodes]
 If you want to select nodes that match some XPath expression, you can do it with the following functions:
 
-    xpath_node xml_node::select_single_node(const char_t* query) const;
-    xpath_node_set xml_node::select_nodes(const char_t* query) const;
+    xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+    xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
 
 `select_nodes` function compiles the expression and then executes it with the node as a context node, and returns the resulting node set. `select_single_node` returns only the first node in document order from the result, and is equivalent to calling `select_nodes(query).first()`. If the XPath expression does not match anything, or the node handle is null, `select_nodes` returns an empty set, and `select_single_node` returns null XPath node.
 
@@ -1404,7 +1403,7 @@ Query objects correspond to `xpath_query` type. They are immutable and non-copya
 [#xpath_query::ctor]
 You can create a query object with the constructor that takes XPath expression as an argument:
 
-    explicit xpath_query::xpath_query(const char_t* query);
+    explicit xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables = 0);
 
 [#xpath_query::return_type]
 The expression is compiled and the compiled representation is stored in the new query object. If compilation fails, `xpath_exception` is thrown (see [sref manual.xpath.errors] for details). After the query is created, you can query the type of the evaluation result using the following function:
@@ -1940,9 +1939,9 @@ Classes:
     * `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
     [lbr]
 
-    * `xpath_node `[link xml_node::select_single_node select_single_node]`(const char_t* query) const;`
+    * `xpath_node `[link xml_node::select_single_node select_single_node]`(const char_t* query, xpath_variable_set* variables = 0) const;`
     * `xpath_node `[link xml_node::select_single_node_precomp select_single_node]`(const xpath_query& query) const;`
-    * `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query) const;`
+    * `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query, xpath_variable_set* variables = 0) const;`
     * `xpath_node_set `[link xml_node::select_nodes_precomp select_nodes]`(const xpath_query& query) const;`
     [lbr]
 
@@ -1984,7 +1983,6 @@ Classes:
     * `xml_encoding `[link xml_parse_result::encoding encoding]`;`
     [lbr]
 
-    * [link xml_parse_result::ctor xml_parse_result]`();`
     * `operator `[link xml_parse_result::bool bool]`() const;`
     * `const char* `[link xml_parse_result::description description]`() const;`
     [lbr]
@@ -2015,21 +2013,37 @@ Classes:
     * [link xml_writer_stream]`(std::wostream& stream);`
     [lbr]
 
+* `struct `[link xpath_parse_result]
+    * `const char* `[link xpath_parse_result::error error]`;`
+    * `ptrdiff_t `[link xpath_parse_result::offset offset]`;`
+
+    * `operator `[link xpath_parse_result::bool bool]`() const;`
+    * `const char* `[link xpath_parse_result::description description]`() const;`
+	[lbr]
+
 * `class `[link xpath_query]
-    * `explicit `[link xpath_query::ctor xpath_query]`(const char_t* query);`
+    * `explicit `[link xpath_query::ctor xpath_query]`(const char_t* query, xpath_variable_set* variables = 0);`
     [lbr]
 
-    * `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xml_node& n) const;`
-    * `double `[link xpath_query::evaluate_number evaluate_number]`(const xml_node& n) const;`
-    * `string_t `[link xpath_query::evaluate_string evaluate_string]`(const xml_node& n) const;`
-    * `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xml_node& n) const;`
+    * `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xpath_node& n) const;`
+    * `double `[link xpath_query::evaluate_number evaluate_number]`(const xpath_node& n) const;`
+    * `string_t `[link xpath_query::evaluate_string evaluate_string]`(const xpath_node& n) const;`
+	* `size_t `[link xpath_query::evaluate_string_buffer evaluate_string]`(char_t* buffer, size_t capacity, const xpath_node& n) const;`
+    * `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xpath_node& n) const;`
     [lbr]
 
     * `xpath_value_type `[link xpath_query::return_type return_type]`() const;`
     [lbr]
 
+    * `const xpath_parse_result& `[link xpath_query::result result]`() const;`
+	* `operator `[link xpath_query::unspecified_bool_type unspecified_bool_type]`() const;`
+    [lbr]
+
 * `class `[link xpath_exception]`: public std::exception`
     * `virtual const char* `[link xpath_exception::what what]`() const throw();`
+    [lbr]
+
+	* `const xpath_parse_result& `[link xpath_exception::result result]`() const;`
     [lbr]
 
 * `class `[link xpath_node]
@@ -2049,6 +2063,10 @@ Classes:
     [lbr]
 
 * `class `[link xpath_node_set]
+	* [link xpath_node_set::ctor xpath_node_set]`();`
+	* [link xpath_node_set::ctor xpath_node_set]`(const_iterator begin, const_iterator end, type_t type = type_unsorted);`
+    [lbr]
+
     * `typedef const xpath_node* `[link xpath_node_set::const_iterator const_iterator]`;`
     * `const_iterator `[link xpath_node_set::begin begin]`() const;`
     * `const_iterator `[link xpath_node_set::end end]`() const;`
@@ -2065,15 +2083,48 @@ Classes:
     * `enum type_t {`[link xpath_node_set::type_unsorted type_unsorted], [link xpath_node_set::type_sorted type_sorted], [link xpath_node_set::type_sorted_reverse type_sorted_reverse]`};`
     * `type_t `[link xpath_node_set::type type]`() const;`
     * `void `[link xpath_node_set::sort sort]`(bool reverse = false);`
+    [lbr]
+
+* `class `[link xpath_variable]
+    * `const char_t* `[link xpath_variable::name name]`() const;`
+    * `xpath_value_type `[link xpath_variable::type type]`() const;`
+    [lbr]
+
+    * `bool `[link xpath_variable::get_boolean get_boolean]`() const;`
+    * `double `[link xpath_variable::get_number get_number]`() const;`
+    * `const char_t* `[link xpath_variable::get_string get_string]`() const;`
+    * `const xpath_node_set& `[link xpath_variable::get_node_set get_node_set]`() const;`
+    [lbr]
+
+    * `bool `[link xpath_variable::set set]`(bool value);`
+    * `bool `[link xpath_variable::set set]`(double value);`
+    * `bool `[link xpath_variable::set set]`(const char_t* value);`
+    * `bool `[link xpath_variable::set set]`(const xpath_node_set& value);`
+    [lbr]
+
+* `class `[link xpath_variable_set]
+    * `xpath_variable* `[link xpath_variable_set::add add]`(const char_t* name, xpath_value_type type);`
+    [lbr]
+
+    * `bool `[link xpath_variable_set::set set]`(const char_t* name, bool value);`
+    * `bool `[link xpath_variable_set::set set]`(const char_t* name, double value);`
+    * `bool `[link xpath_variable_set::set set]`(const char_t* name, const char_t* value);`
+    * `bool `[link xpath_variable_set::set set]`(const char_t* name, const xpath_node_set& value);`
+    [lbr]
+
+    * `xpath_variable* `[link xpath_variable_set::get get]`(const char_t* name);`
+    * `const xpath_variable* `[link xpath_variable_set::get get]`(const char_t* name) const;`
+    [lbr]
 
 Functions:
 
-$$ overloads, types
-* [link as_utf8]
-* [link as_wide]
-* [link get_memory_allocation_function]
-* [link get_memory_deallocation_function]
-* [link set_memory_management_functions]
+* `std::string `[link as_utf8]`(const wchar_t* str);`
+* `std::string `[link as_utf8]`(const std::wstring& str);`
+* `std::wstring `[link as_wide]`(const char* str);`
+* `std::wstring `[link as_wide]`(const std::string& str);`
+* `void `[link set_memory_management_functions]`(allocation_function allocate, deallocation_function deallocate);`
+* `allocation_function `[link get_memory_allocation_function]`();`
+* `deallocation_function `[link get_memory_deallocation_function]`();`
 
 [endsect] [/apiref]
 
