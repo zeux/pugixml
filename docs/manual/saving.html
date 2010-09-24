@@ -56,35 +56,38 @@
       For proper output, make sure all node and attribute names are set to meaningful
       values.
     </p>
-<div class="caution"><table border="0" summary="Caution">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="../images/caution.png"></td>
-<th align="left">Caution</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-        Currently the content of CDATA sections is not escaped, so CDATA sections
-        with values that contain <code class="computeroutput"><span class="string">"]]&gt;"</span></code>
-        will result in malformed document. This will be fixed in version 1.0.
-      </p></td></tr>
-</table></div>
+<p>
+      CDATA sections with values that contain <code class="computeroutput"><span class="string">"]]&gt;"</span></code>
+      are split into several sections as follows: section with value <code class="computeroutput"><span class="string">"pre]]&gt;post"</span></code> is written as <code class="computeroutput"><span class="special">&lt;![</span><span class="identifier">CDATA</span><span class="special">[</span><span class="identifier">pre</span><span class="special">]]]]&gt;&lt;![</span><span class="identifier">CDATA</span><span class="special">[&gt;</span><span class="identifier">post</span><span class="special">]]&gt;</span></code>.
+      While this alters the structure of the document (if you load the document after
+      saving it, there will be two CDATA sections instead of one), this is the only
+      way to escape CDATA contents.
+    </p>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
 <a name="manual.saving.file"></a><a class="link" href="saving.html#manual.saving.file" title="Saving document to a file"> Saving document to a file</a>
 </h3></div></div></div>
-<a name="xml_document::save_file"></a><p>
-        If you want to save the whole document to a file, you can use the following
-        function:
+<a name="xml_document::save_file"></a><a name="xml_document::save_file_wide"></a><p>
+        If you want to save the whole document to a file, you can use one of the
+        following functions:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save_file</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">bool</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save_file</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">wchar_t</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span> <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">flags</span> <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
-        This function accepts file path as its first argument, and also three optional
+        These functions accept file path as its first argument, and also three optional
         arguments, which specify indentation and other output options (see <a class="xref" href="saving.html#manual.saving.options" title="Output options"> Output options</a>)
         and output data encoding (see <a class="xref" href="saving.html#manual.saving.encoding" title="Encodings"> Encodings</a>). The path has the target
         operating system format, so it can be a relative or absolute one, it should
         have the delimiters of target system, it should have the exact case if target
-        file system is case-sensitive, etc. File path is passed to system file opening
-        function as is.
+        file system is case-sensitive, etc.
+      </p>
+<p>
+        File path is passed to system file opening function as is in case of the
+        first function (which accepts <code class="computeroutput"><span class="keyword">const</span>
+        <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span></code>); the second function either uses
+        a special file opening function if it is provided by the runtime library
+        or converts the path to UTF-8 and uses the system file opening function.
       </p>
 <a name="xml_writer_file"></a><p>
         <code class="computeroutput"><span class="identifier">save_file</span></code> opens the target
@@ -96,19 +99,6 @@
         handle as the only constructor argument and then calling <code class="computeroutput"><span class="identifier">save</span></code>;
         see <a class="xref" href="saving.html#manual.saving.writer" title="Saving document via writer interface"> Saving document via writer interface</a> for writer interface details.
       </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-          As of version 0.9, there is no function for saving XML document to wide
-          character paths. Unfortunately, there is no portable way to do this; the
-          version 1.0 will provide such function only for platforms with the corresponding
-          functionality. You can use stream-saving functions as a workaround if your
-          STL implementation can open file streams via wchar_t paths.
-        </p></td></tr>
-</table></div>
 <p>
         This is a simple example of saving XML document to file (<a href="../samples/save_file.cpp" target="_top">samples/save_file.cpp</a>):
       </p>

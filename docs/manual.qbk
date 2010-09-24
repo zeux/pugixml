@@ -8,21 +8,12 @@
 ]
 
 [/ documentation todo
-cpp file merge (look for pugixpath.cpp, update screenshots)
 PUGIXML_NO_EXCEPTIONS support (+ xpath_parse_result, + xpath_query bool cast, + xpath_parse_result in xpath_exception for better error handling, + std::bad_alloc throwing in evaluate + xpath exception throwing in evaluate_node_set (always throw xpath_exception?))
 PUGIXML_NO_STL support
 variables support (+ select_nodes/select_single_node additional arg)
 Introduced new xpath_query::evaluate_string, which works without STL
 Introduced new xpath_node_set constructor (from an iterator range)
-Evaluation function now accept attribute context nodes
-All internal allocations use custom allocation functions
 Improved error reporting; now a last parsed offset is returned together with the parsing error
-Fixed custom deallocation function calling with null pointer in one case (state explicitly that custom dealloc is never called with NULL)
-CDATA nodes containing ]]> are printed as several nodes; while this changes the internal structure, this is the only way to escape CDATA contents
-Added xml_parse_result default constructor
-Added xml_document::load_file and xml_document::save_file with wide character paths
-Added as_utf8 and as_wide overloads for std::wstring/std::string arguments
-xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
 ]
 
 [template sbr[]'''<sbr/>''']
@@ -151,19 +142,17 @@ Use latest version tag if you want to automatically get new versions via =svn up
 
 pugixml is distributed in source form without any pre-built binaries; you have to build them yourself.
  
-The complete pugixml source consists of four files - two source files, [file pugixml.cpp] and [file pugixpath.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions; [file pugiconfig.hpp] is a supplementary configuration file (see [sref manual.install.building.config]). The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
+The complete pugixml source consists of three files - one source file, [file pugixml.cpp], and two header files, [file pugixml.hpp] and [file pugiconfig.hpp]. [file pugixml.hpp] is the primary header which you need to include in order to use pugixml classes/functions; [file pugiconfig.hpp] is a supplementary configuration file (see [sref manual.install.building.config]). The rest of this guide assumes that [file pugixml.hpp] is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
  
-[note You don't need to compile [file pugixpath.cpp] unless you use XPath.]
-
 [section:embed Building pugixml as a part of another static library/executable]
  
-The easiest way to build pugixml is to compile two source files, [file pugixml.cpp] and [file pugixpath.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[ftnt trademarks All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] and [file pugixpath.cpp] to one of your projects.
+The easiest way to build pugixml is to compile the source file, [file pugixml.cpp], along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[ftnt trademarks All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add [file pugixml.cpp] to one of your projects.
 
 If you're using Microsoft Visual Studio and the project has precompiled headers turned on, you'll see the following error messages:
 
-[pre pugixpath.cpp(3477) : fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?]
+[pre pugixml.cpp(3477) : fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?]
 
-The correct way to resolve this is to disable precompiled headers for [file pugixml.cpp] and [file pugixpath.cpp]; you have to set "Create/Use Precompiled Header" option (Properties dialog -> C/C++ -> Precompiled Headers -> Create/Use Precompiled Header) to "Not Using Precompiled Headers". You'll have to do it for both [file pugixml.cpp] and [file pugixpath.cpp], for all project configurations/platforms (you can select Configuration "All Configurations" and Platform "All Platforms" before editing the option):
+The correct way to resolve this is to disable precompiled headers for [file pugixml.cpp]; you have to set "Create/Use Precompiled Header" option (Properties dialog -> C/C++ -> Precompiled Headers -> Create/Use Precompiled Header) to "Not Using Precompiled Headers". You'll have to do it for all project configurations/platforms (you can select Configuration "All Configurations" and Platform "All Platforms" before editing the option):
 
 [table
 [[
@@ -218,14 +207,13 @@ pugixml uses several defines to control the compilation process. There are two w
 
 [anchor PUGIXML_WCHAR_MODE] define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See [sref manual.dom.unicode] for more details.
 
-[anchor PUGIXML_NO_XPATH] define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation; you can still compile the file [file pugixpath.cpp] (it will result in an empty translation unit). This option is provided in case you do not need XPath functionality and need to save code space.
+[anchor PUGIXML_NO_XPATH] define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation. This option is provided in case you do not need XPath functionality and need to save code space.
 
 [anchor PUGIXML_NO_STL] define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
 
-[note As of version 0.9, STL is used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
-
 [anchor PUGIXML_NO_EXCEPTIONS] define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities
 
+$$
 [note As of version 0.9, exceptions are *only* used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
 
 [anchor PUGIXML_API], [anchor PUGIXML_CLASS] and [anchor PUGIXML_FUNCTION] defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [sref manual.install.building.shared]).
@@ -388,6 +376,7 @@ There are two choices of interface and internal representation when configuring 
 
 [note If size of `wchar_t` is 2, pugixml assumes UTF-16 encoding instead of UCS-2, which means that some characters are represented as two code points.]
 
+$$ wording - one may think that child() has a string overload
 All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. For example, node name accessors look like this in char mode:
 
     const char* xml_node::name() const;
@@ -411,7 +400,10 @@ There are cases when you'll have to convert string data between UTF-8 and wchar_
     std::string as_utf8(const wchar_t* str);
     std::wstring as_wide(const char* str);
 
-Both functions accept null-terminated string as an argument `str`, and return the converted string. `as_utf8` performs conversion from UTF-16/32 to UTF-8; `as_wide` performs conversion from UTF-8 to UTF-16/32. Invalid UTF sequences are silently discarded upon conversion. `str` has to be a valid string; passing null pointer results in undefined behavior.
+Both functions accept null-terminated string as an argument `str`, and return the converted string. `as_utf8` performs conversion from UTF-16/32 to UTF-8; `as_wide` performs conversion from UTF-8 to UTF-16/32. Invalid UTF sequences are silently discarded upon conversion. `str` has to be a valid string; passing null pointer results in undefined behavior. There are also two overloads with the same semantics which accept a string as an argument:
+
+    std::string as_utf8(const std::wstring& str);
+    std::wstring as_wide(const std::string& str);
 
 [note Most examples in this documentation assume char interface and therefore will not compile with `PUGIXML_WCHAR_MODE`. This is to simplify the documentation; usually the only changes you'll have to make is to pass `wchar_t` string literals, i.e. instead of
 
@@ -443,6 +435,7 @@ With the exception of XPath, pugixml itself does not throw any exceptions. Addit
 
 This is not applicable to functions that operate on STL strings or IOstreams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::find_node`) do not provide any exception guarantees beyond the ones provided by callback.
 
+$$
 XPath functions may throw `xpath_exception` on parsing error; also, XPath implementation uses STL, and thus may throw i.e. `std::bad_alloc` in low memory conditions. Still, XPath functions provide strong exception guarantee.
 
 [endsect] [/exception]
@@ -455,7 +448,7 @@ pugixml requests the memory needed for document storage in big chunks, and alloc
 
 [#allocation_function]
 [#deallocation_function]
-All memory for tree structure/data is allocated via globally specified functions, which default to malloc/free. You can set your own allocation functions with set_memory_management functions. The function interfaces are the same as that of malloc/free:
+All memory for tree structure, tree data and XPath objects is allocated via globally specified functions, which default to malloc/free. You can set your own allocation functions with set_memory_management functions. The function interfaces are the same as that of malloc/free:
 
     typedef void* (*allocation_function)(size_t size);
     typedef void (*deallocation_function)(void* ptr);
@@ -469,7 +462,9 @@ You can use the following accessor functions to change or get current memory man
     allocation_function get_memory_allocation_function();
     deallocation_function get_memory_deallocation_function();
 
-Allocation function is called with the size (in bytes) as an argument and should return a pointer to memory block with alignment that is suitable for pointer storage and size that is greater or equal to the requested one. If the allocation fails, the function has to return null pointer (throwing an exception from allocation function results in undefined behavior). Deallocation function is called with the pointer that was returned by the previous call or with a null pointer; null pointer deallocation should be handled as a no-op. If memory management functions are not thread-safe, library thread safety is not guaranteed.
+Allocation function is called with the size (in bytes) as an argument and should return a pointer to memory block with alignment that is suitable for storage of primitive types (usually a maximum of pointer and `double` types alignment is sufficient) and size that is greater or equal to the requested one. If the allocation fails, the function has to return null pointer (throwing an exception from allocation function results in undefined behavior).
+
+Deallocation function is called with the pointer that was returned by the previous call; it is never called with a null pointer. If memory management functions are not thread-safe, library thread safety is not guaranteed.
 
 This is a simple example of custom memory management ([@samples/custom_memory_management.cpp]):
 
@@ -478,8 +473,6 @@ This is a simple example of custom memory management ([@samples/custom_memory_ma
 [code_custom_memory_management_call]
 
 When setting new memory management functions, care must be taken to make sure that there are no live pugixml objects. Otherwise when the objects are destroyed, the new deallocation function will be called with the memory obtained by the old allocation function, resulting in undefined behavior.
-
-[note Currently memory for XPath objects is allocated using default operators new/delete; this will change in the next version.]
 
 [endsect] [/custom]
 
@@ -506,15 +499,17 @@ XML data is always converted to internal character format (see [sref manual.dom.
 [section:file Loading document from file]
 
 [#xml_document::load_file]
-The most common source of XML data is files; pugixml provides a separate function for loading XML document from file:
+[#xml_document::load_file_wide]
+The most common source of XML data is files; pugixml provides dedicated functions for loading XML document from file:
 
     xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result xml_document::load_file(const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
     
-This function accepts file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
+These functions accept file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc.
+
+File path is passed to system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
 
 `load_file` destroys the existing document tree and then tries to load the new tree from the specified file. The result of the operation is returned in an `xml_parse_result` object; this object contains the operation status, and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [sref manual.loading.errors] for error handling details.
-
-[note As of version 0.9, there is no function for loading XML document from wide character path. Unfortunately, there is no portable way to do this; the version 1.0 will provide such function only for platforms with the corresponding functionality. You can use stream-loading functions as a workaround if your STL implementation can open file streams via `wchar_t` paths.]
 
 This is an example of loading XML document from file ([@samples/load_file.cpp]):
 
@@ -582,6 +577,7 @@ Stream loading requires working seek/tell functions and therefore may fail when 
 [section:errors Handling parsing errors]
 
 [#xml_parse_result]
+[#xml_parse_result::ctor]
 All document loading functions return the parsing result via `xml_parse_result` object. It contains parsing status, the offset of last successfully parsed character from the beginning of the source stream, and the encoding of the source stream:
 
     struct xml_parse_result
@@ -590,6 +586,7 @@ All document loading functions return the parsing result via `xml_parse_result` 
         ptrdiff_t offset;
         xml_encoding encoding;
 
+        xml_parse_result();
         operator bool() const;
         const char* description() const;
     };
@@ -964,7 +961,7 @@ If you need to get the document root of some node, you can use the following fun
 
     xml_node xml_node::root() const;
 
-This function returns the node with type `node_document`, which is the root node of the document the node belongs to (unless the node is null, in which case null node is returned). Currently this function has logarithmic complexity, since it simply finds such ancestor of the given node which itself has no parent.
+This function returns the node with type `node_document`, which is the root node of the document the node belongs to (unless the node is null, in which case null node is returned).
 
 [#xml_node::path]
 [#xml_node::first_element_by_path]
@@ -1162,21 +1159,23 @@ Often after creating a new document or loading the existing one and processing i
 
 The node/attribute data is written to the destination properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped. In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For proper output, make sure all node and attribute names are set to meaningful values.
 
-[caution Currently the content of CDATA sections is not escaped, so CDATA sections with values that contain `"]]>"` will result in malformed document. This will be fixed in version 1.0.]
+CDATA sections with values that contain `"]]>"` are split into several sections as follows: section with value `"pre]]>post"` is written as `<![CDATA[pre]]]]><![CDATA[>post]]>`. While this alters the structure of the document (if you load the document after saving it, there will be two CDATA sections instead of one), this is the only way to escape CDATA contents.
 
 [section:file Saving document to a file]
 
 [#xml_document::save_file]
-If you want to save the whole document to a file, you can use the following function:
+[#xml_document::save_file_wide]
+If you want to save the whole document to a file, you can use one of the following functions:
 
     bool xml_document::save_file(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+    bool xml_document::save_file(const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
-This function accepts file path as its first argument, and also three optional arguments, which specify indentation and other output options (see [sref manual.saving.options]) and output data encoding (see [sref manual.saving.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc. File path is passed to system file opening function as is.
+These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see [sref manual.saving.options]) and output data encoding (see [sref manual.saving.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc.
+
+File path is passed to system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
 
 [#xml_writer_file]
 `save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns `false`. Calling `save_file` is equivalent to creating an `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
-
-[note As of version 0.9, there is no function for saving XML document to wide character paths. Unfortunately, there is no portable way to do this; the version 1.0 will provide such function only for platforms with the corresponding functionality. You can use stream-saving functions as a workaround if your STL implementation can open file streams via wchar_t paths.]
 
 This is a simple example of saving XML document to file ([@samples/save_file.cpp]):
 
@@ -1296,6 +1295,7 @@ Also note that wide stream saving functions do not have `encoding` argument and 
 
 If the task at hand is to select a subset of document nodes that match some criteria, it is possible to code a function using the existing traversal functionality for any practical criteria. However, often either a data-driven approach is desirable, in case the criteria are not predefined and come from a file, or it is inconvenient to use traversal interfaces and a higher-level DSL is required. There is a standard language for XML processing, XPath, that can be useful for these cases. pugixml implements an almost complete subset of XPath 1.0. Because of differences in document object model and some performance implications, there are minor violations of the official specifications, which can be found in [sref manual.xpath.w3c]. The rest of this section describes the interface for XPath functionality. Please note that if you wish to learn to use XPath language, you have to look for other tutorials or manuals; for example, you can read [@http://www.w3schools.com/xpath/ W3Schools XPath tutorial], [@http://www.tizag.com/xmlTutorial/xpathtutorial.php XPath tutorial at tizag.com], and [@http://www.w3.org/TR/xpath/ the XPath 1.0 specification].
 
+$$
 [note As of version 0.9, you need both STL and exception support to use XPath; XPath is disabled if either `PUGIXML_NO_STL` or `PUGIXML_NO_EXCEPTIONS` is defined.]
 
 [section:types XPath types]
@@ -1321,7 +1321,7 @@ Note that as per XPath specification, each XPath node has a parent, which can be
 Like node and attribute handles, XPath node handles can be implicitly cast to boolean-like object to check if it is a null node, and also can be compared for equality with each other.
 
 [#xpath_node::ctor]
-You can also create XPath nodes with one of tree constructors: the default constructor, the constructor that takes node argument, and the constructor that takes attribute and node arguments (in which case the attribute must belong to the attribute list of the node). However, usually you don't need to create your own XPath node objects, since they are returned to you via selection functions.
+You can also create XPath nodes with one of tree constructors: the default constructor, the constructor that takes node argument, and the constructor that takes attribute and node arguments (in which case the attribute must belong to the attribute list of the node). The constructor from `xml_node` is implicit, so you can usually pass `xml_node` to functions that expect `xpath_node`. Apart from that you usually don't need to create your own XPath node objects, since they are returned to you via selection functions.
 
 [#xpath_node_set]
 XPath expressions operate not on single nodes, but instead on node sets. A node set is a collection of nodes, which can be optionally ordered in either a forward document order or a reverse one. Document order is defined in XPath specification; an XPath node is before another node in document order if it appears before it in XML representation of the corresponding document.
@@ -1414,11 +1414,12 @@ The expression is compiled and the compiled representation is stored in the new 
 [#xpath_query::evaluate_boolean][#xpath_query::evaluate_number][#xpath_query::evaluate_string][#xpath_query::evaluate_node_set]
 You can evaluate the query using one of the following functions:
 
-    bool xpath_query::evaluate_boolean(const xml_node& n) const;
-    double xpath_query::evaluate_number(const xml_node& n) const;
-    string_t xpath_query::evaluate_string(const xml_node& n) const;
-    xpath_node_set xpath_query::evaluate_node_set(const xml_node& n) const;
+    bool xpath_query::evaluate_boolean(const xpath_node& n) const;
+    double xpath_query::evaluate_number(const xpath_node& n) const;
+    string_t xpath_query::evaluate_string(const xpath_node& n) const;
+    xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const;
 
+$$ exception, evaluate_string nostl
 All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. By XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` throws an `xpath_exception` if the return type is not node set.
 
 [note Calling `node.select_nodes("query")` is equivalent to calling `xpath_query("query").evaluate_node_set(node)`.]
@@ -1432,11 +1433,13 @@ This is an example of using query objects ([@samples/xpath_query.cpp]):
 
 [section:errors Error handling]
 
+$$
 [#xpath_exception][#xpath_exception::what]
 As of version 0.9, all XPath errors result in thrown exceptions. The errors can arise during expression compilation or node set evaluation. In both cases, an `xpath_exception` object is thrown. This is an exception object that implements `std::exception` interface, and thus has a single function `what()`:
 
     virtual const char* xpath_exception::what() const throw();
 
+$$
 This function returns the error message. Currently it is impossible to get the exact place where query compilation failed. This functionality, along with optional error handling without exceptions, will be available in version 1.0.
 
 This is an example of XPath error handling ([@samples/xpath_error.cpp]):
@@ -1457,6 +1460,7 @@ Because of the differences in document object models, performance considerations
 * String functions consider a character to be either a single `char` value or a single `wchar_t` value, depending on the library configuration; this means that some string functions are not fully Unicode-aware. This affects `substring()`, `string-length()` and `translate()` functions.
 * Variable references are not supported.
 
+$$
 Some of these incompatibilities will be fixed in version 1.0.
 
 [endsect] [/w3c]
@@ -1955,6 +1959,7 @@ Classes:
     [lbr]
 
     * `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    * `xml_parse_result `[link xml_document::load_file_wide load_file]`(const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
     [lbr]
 
     * `xml_parse_result `[link xml_document::load_buffer load_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
@@ -1963,6 +1968,7 @@ Classes:
     [lbr]
 
     * `bool `[link xml_document::save_file save_file]`(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+    * `bool `[link xml_document::save_file_wide save_file]`(const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
     [lbr]
 
     * `void `[link xml_document::save_stream save]`(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
@@ -1978,6 +1984,7 @@ Classes:
     * `xml_encoding `[link xml_parse_result::encoding encoding]`;`
     [lbr]
 
+    * [link xml_parse_result::ctor xml_parse_result]`();`
     * `operator `[link xml_parse_result::bool bool]`() const;`
     * `const char* `[link xml_parse_result::description description]`() const;`
     [lbr]
@@ -2061,6 +2068,7 @@ Classes:
 
 Functions:
 
+$$ overloads, types
 * [link as_utf8]
 * [link as_wide]
 * [link get_memory_allocation_function]

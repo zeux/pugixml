@@ -54,6 +54,9 @@
       at tizag.com</a>, and <a href="http://www.w3.org/TR/xpath/" target="_top">the XPath
       1.0 specification</a>.
     </p>
+<p>
+      $$
+    </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
@@ -120,9 +123,11 @@
         You can also create XPath nodes with one of tree constructors: the default
         constructor, the constructor that takes node argument, and the constructor
         that takes attribute and node arguments (in which case the attribute must
-        belong to the attribute list of the node). However, usually you don't need
-        to create your own XPath node objects, since they are returned to you via
-        selection functions.
+        belong to the attribute list of the node). The constructor from <code class="computeroutput"><span class="identifier">xml_node</span></code> is implicit, so you can usually
+        pass <code class="computeroutput"><span class="identifier">xml_node</span></code> to functions
+        that expect <code class="computeroutput"><span class="identifier">xpath_node</span></code>. Apart
+        from that you usually don't need to create your own XPath node objects, since
+        they are returned to you via selection functions.
       </p>
 <a name="xpath_node_set"></a><p>
         XPath expressions operate not on single nodes, but instead on node sets.
@@ -309,20 +314,21 @@
 <a name="xpath_query::evaluate_boolean"></a><a name="xpath_query::evaluate_number"></a><a name="xpath_query::evaluate_string"></a><a name="xpath_query::evaluate_node_set"></a><p>
         You can evaluate the query using one of the following functions:
       </p>
-<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_boolean</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-<span class="keyword">double</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_number</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-<span class="identifier">string_t</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-<span class="identifier">xpath_node_set</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_boolean</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">double</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_number</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">string_t</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xpath_node_set</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
-        All functions take the context node as an argument, compute the expression
-        and return the result, converted to the requested type. By XPath specification,
-        value of any type can be converted to boolean, number or string value, but
-        no type other than node set can be converted to node set. Because of this,
-        <code class="computeroutput"><span class="identifier">evaluate_boolean</span></code>, <code class="computeroutput"><span class="identifier">evaluate_number</span></code> and <code class="computeroutput"><span class="identifier">evaluate_string</span></code>
-        always return a result, but <code class="computeroutput"><span class="identifier">evaluate_node_set</span></code>
-        throws an <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
-        if the return type is not node set.
+        $$ exception, evaluate_string nostl All functions take the context node as
+        an argument, compute the expression and return the result, converted to the
+        requested type. By XPath specification, value of any type can be converted
+        to boolean, number or string value, but no type other than node set can be
+        converted to node set. Because of this, <code class="computeroutput"><span class="identifier">evaluate_boolean</span></code>,
+        <code class="computeroutput"><span class="identifier">evaluate_number</span></code> and <code class="computeroutput"><span class="identifier">evaluate_string</span></code> always return a result,
+        but <code class="computeroutput"><span class="identifier">evaluate_node_set</span></code> throws
+        an <code class="computeroutput"><span class="identifier">xpath_exception</span></code> if the
+        return type is not node set.
       </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
@@ -370,7 +376,7 @@
 <a name="manual.xpath.errors"></a><a class="link" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a>
 </h3></div></div></div>
 <a name="xpath_exception"></a><a name="xpath_exception::what"></a><p>
-        As of version 0.9, all XPath errors result in thrown exceptions. The errors
+        $$ As of version 0.9, all XPath errors result in thrown exceptions. The errors
         can arise during expression compilation or node set evaluation. In both cases,
         an <code class="computeroutput"><span class="identifier">xpath_exception</span></code> object
         is thrown. This is an exception object that implements <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">exception</span></code>
@@ -379,8 +385,8 @@
 <pre class="programlisting"><span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">xpath_exception</span><span class="special">::</span><span class="identifier">what</span><span class="special">()</span> <span class="keyword">const</span> <span class="keyword">throw</span><span class="special">();</span>
 </pre>
 <p>
-        This function returns the error message. Currently it is impossible to get
-        the exact place where query compilation failed. This functionality, along
+        $$ This function returns the error message. Currently it is impossible to
+        get the exact place where query compilation failed. This functionality, along
         with optional error handling without exceptions, will be available in version
         1.0.
       </p>
@@ -464,7 +470,7 @@
           </li>
 </ul></div>
 <p>
-        Some of these incompatibilities will be fixed in version 1.0.
+        $$ Some of these incompatibilities will be fixed in version 1.0.
       </p>
 </div>
 </div>
