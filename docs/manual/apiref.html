@@ -800,15 +800,7 @@
                 <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span>
                 <span class="identifier">encoding</span> <span class="special">=</span>
                 <span class="identifier">encoding_auto</span><span class="special">);</span></code>
-              </li>
-<li class="listitem">
-                <code class="computeroutput"><span class="identifier">xml_parse_result</span> </code><a class="link" href="loading.html#xml_document::load_file_wide">load_file</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="keyword">wchar_t</span><span class="special">*</span>
-                <span class="identifier">path</span><span class="special">,</span>
-                <span class="keyword">unsigned</span> <span class="keyword">int</span>
-                <span class="identifier">options</span> <span class="special">=</span>
-                <span class="identifier">parse_default</span><span class="special">,</span>
-                <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span>
-                <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span></code> <br><br>
+                <br><br>
 
               </li>
 <li class="listitem">
@@ -840,17 +832,6 @@
               </li>
 <li class="listitem">
                 <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="saving.html#xml_document::save_file">save_file</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span>
-                <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span>
-                <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span>
-                <span class="keyword">int</span> <span class="identifier">flags</span>
-                <span class="special">=</span> <span class="identifier">format_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span>
-                <span class="identifier">encoding</span> <span class="special">=</span>
-                <span class="identifier">encoding_auto</span><span class="special">)</span>
-                <span class="keyword">const</span><span class="special">;</span></code>
-              </li>
-<li class="listitem">
-                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="saving.html#xml_document::save_file_wide">save_file</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="keyword">wchar_t</span><span class="special">*</span>
-                <span class="identifier">path</span><span class="special">,</span>
                 <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">indent</span>
                 <span class="special">=</span> <span class="string">"\t"</span><span class="special">,</span> <span class="keyword">unsigned</span>
                 <span class="keyword">int</span> <span class="identifier">flags</span>
@@ -910,9 +891,6 @@
 <li class="listitem">
                 <code class="computeroutput"><span class="identifier">xml_encoding</span> </code><a class="link" href="loading.html#xml_parse_result::encoding">encoding</a><code class="computeroutput"><span class="special">;</span></code> <br><br>
 
-              </li>
-<li class="listitem">
-                <a class="link" href="loading.html#xml_parse_result::ctor">xml_parse_result</a><code class="computeroutput"><span class="special">();</span></code>
               </li>
 <li class="listitem">
                 <code class="computeroutput"><span class="keyword">operator</span> </code><a class="link" href="loading.html#xml_parse_result::bool">bool</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
@@ -1129,12 +1107,23 @@
 <p>
       Functions:
     </p>
-<p>
-      $$ overloads, types * <a class="link" href="dom.html#as_utf8">as_utf8</a> * <a class="link" href="dom.html#as_wide">as_wide</a>
-      * <a class="link" href="dom.html#get_memory_allocation_function">get_memory_allocation_function</a>
-      * <a class="link" href="dom.html#get_memory_deallocation_function">get_memory_deallocation_function</a>
-      * <a class="link" href="dom.html#set_memory_management_functions">set_memory_management_functions</a>
-    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          <a class="link" href="dom.html#as_utf8">as_utf8</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#as_wide">as_wide</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#get_memory_allocation_function">get_memory_allocation_function</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#get_memory_deallocation_function">get_memory_deallocation_function</a>
+        </li>
+<li class="listitem">
+          <a class="link" href="dom.html#set_memory_management_functions">set_memory_management_functions</a>
+        </li>
+</ul></div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>

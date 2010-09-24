@@ -65,27 +65,20 @@
 <div class="titlepage"><div><div><h3 class="title">
 <a name="manual.loading.file"></a><a class="link" href="loading.html#manual.loading.file" title="Loading document from file"> Loading document from file</a>
 </h3></div></div></div>
-<a name="xml_document::load_file"></a><a name="xml_document::load_file_wide"></a><p>
-        The most common source of XML data is files; pugixml provides dedicated functions
-        for loading XML document from file:
+<a name="xml_document::load_file"></a><p>
+        The most common source of XML data is files; pugixml provides a separate
+        function for loading XML document from file:
       </p>
 <pre class="programlisting"><span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load_file</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span>
-<span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load_file</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">wchar_t</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span>
 </pre>
 <p>
-        These functions accept file path as its first argument, and also two optional
+        This function accepts file path as its first argument, and also two optional
         arguments, which specify parsing options (see <a class="xref" href="loading.html#manual.loading.options" title="Parsing options"> Parsing options</a>) and
         input data encoding (see <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings"> Encodings</a>). The path has the target
         operating system format, so it can be a relative or absolute one, it should
         have the delimiters of target system, it should have the exact case if target
-        file system is case-sensitive, etc.
-      </p>
-<p>
-        File path is passed to system file opening function as is in case of the
-        first function (which accepts <code class="computeroutput"><span class="keyword">const</span>
-        <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span></code>); the second function either uses
-        a special file opening function if it is provided by the runtime library
-        or converts the path to UTF-8 and uses the system file opening function.
+        file system is case-sensitive, etc. File path is passed to system file opening
+        function as is.
       </p>
 <p>
         <code class="computeroutput"><span class="identifier">load_file</span></code> destroys the existing
@@ -95,6 +88,20 @@
         (i.e. last successfully parsed position in the input file, if parsing fails).
         See <a class="xref" href="loading.html#manual.loading.errors" title="Handling parsing errors"> Handling parsing errors</a> for error handling details.
       </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          As of version 0.9, there is no function for loading XML document from wide
+          character path. Unfortunately, there is no portable way to do this; the
+          version 1.0 will provide such function only for platforms with the corresponding
+          functionality. You can use stream-loading functions as a workaround if
+          your STL implementation can open file streams via <code class="computeroutput"><span class="keyword">wchar_t</span></code>
+          paths.
+        </p></td></tr>
+</table></div>
 <p>
         This is an example of loading XML document from file (<a href="../samples/load_file.cpp" target="_top">samples/load_file.cpp</a>):
       </p>
@@ -290,7 +297,7 @@
 <div class="titlepage"><div><div><h3 class="title">
 <a name="manual.loading.errors"></a><a class="link" href="loading.html#manual.loading.errors" title="Handling parsing errors"> Handling parsing errors</a>
 </h3></div></div></div>
-<a name="xml_parse_result"></a><a name="xml_parse_result::ctor"></a><p>
+<a name="xml_parse_result"></a><p>
         All document loading functions return the parsing result via <code class="computeroutput"><span class="identifier">xml_parse_result</span></code> object. It contains parsing
         status, the offset of last successfully parsed character from the beginning
         of the source stream, and the encoding of the source stream:
@@ -301,7 +308,6 @@
     <span class="identifier">ptrdiff_t</span> <span class="identifier">offset</span><span class="special">;</span>
     <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span><span class="special">;</span>
 
-    <span class="identifier">xml_parse_result</span><span class="special">();</span>
     <span class="keyword">operator</span> <span class="keyword">bool</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
     <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">description</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>

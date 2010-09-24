@@ -371,10 +371,9 @@
         </p></td></tr>
 </table></div>
 <p>
-        $$ wording - one may think that child() has a string overload All tree functions
-        that work with strings work with either C-style null terminated strings or
-        STL strings of the selected character type. For example, node name accessors
-        look like this in char mode:
+        All tree functions that work with strings work with either C-style null terminated
+        strings or STL strings of the selected character type. For example, node
+        name accessors look like this in char mode:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">name</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">bool</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">set_name</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">value</span><span class="special">);</span>
@@ -417,12 +416,7 @@
         performs conversion from UTF-8 to UTF-16/32. Invalid UTF sequences are silently
         discarded upon conversion. <code class="computeroutput"><span class="identifier">str</span></code>
         has to be a valid string; passing null pointer results in undefined behavior.
-        There are also two overloads with the same semantics which accept a string
-        as an argument:
       </p>
-<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">as_utf8</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&amp;</span> <span class="identifier">str</span><span class="special">);</span>
-<span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">as_wide</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&amp;</span> <span class="identifier">str</span><span class="special">);</span>
-</pre>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
@@ -499,7 +493,7 @@
         guarantees beyond the ones provided by callback.
       </p>
 <p>
-        $$ XPath functions may throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
+        XPath functions may throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
         on parsing error; also, XPath implementation uses STL, and thus may throw
         i.e. <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">bad_alloc</span></code> in low memory conditions. Still,
         XPath functions provide strong exception guarantee.
@@ -520,10 +514,10 @@
         functions</a>
 </h4></div></div></div>
 <a name="allocation_function"></a><a name="deallocation_function"></a><p>
-          All memory for tree structure, tree data and XPath objects is allocated
-          via globally specified functions, which default to malloc/free. You can
-          set your own allocation functions with set_memory_management functions.
-          The function interfaces are the same as that of malloc/free:
+          All memory for tree structure/data is allocated via globally specified
+          functions, which default to malloc/free. You can set your own allocation
+          functions with set_memory_management functions. The function interfaces
+          are the same as that of malloc/free:
         </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="keyword">void</span><span class="special">*</span> <span class="special">(*</span><span class="identifier">allocation_function</span><span class="special">)(</span><span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">);</span>
 <span class="keyword">typedef</span> <span class="keyword">void</span> <span class="special">(*</span><span class="identifier">deallocation_function</span><span class="special">)(</span><span class="keyword">void</span><span class="special">*</span> <span class="identifier">ptr</span><span class="special">);</span>
@@ -539,15 +533,13 @@
 <p>
           Allocation function is called with the size (in bytes) as an argument and
           should return a pointer to memory block with alignment that is suitable
-          for storage of primitive types (usually a maximum of pointer and <code class="computeroutput"><span class="keyword">double</span></code> types alignment is sufficient) and
-          size that is greater or equal to the requested one. If the allocation fails,
-          the function has to return null pointer (throwing an exception from allocation
-          function results in undefined behavior).
-        </p>
-<p>
-          Deallocation function is called with the pointer that was returned by the
-          previous call; it is never called with a null pointer. If memory management
-          functions are not thread-safe, library thread safety is not guaranteed.
+          for pointer storage and size that is greater or equal to the requested
+          one. If the allocation fails, the function has to return null pointer (throwing
+          an exception from allocation function results in undefined behavior). Deallocation
+          function is called with the pointer that was returned by the previous call
+          or with a null pointer; null pointer deallocation should be handled as
+          a no-op. If memory management functions are not thread-safe, library thread
+          safety is not guaranteed.
         </p>
 <p>
           This is a simple example of custom memory management (<a href="../samples/custom_memory_management.cpp" target="_top">samples/custom_memory_management.cpp</a>):
@@ -580,6 +572,16 @@
           are destroyed, the new deallocation function will be called with the memory
           obtained by the old allocation function, resulting in undefined behavior.
         </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            Currently memory for XPath objects is allocated using default operators
+            new/delete; this will change in the next version.
+          </p></td></tr>
+</table></div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
