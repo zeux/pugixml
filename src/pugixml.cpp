@@ -3055,7 +3055,7 @@ namespace
 		_fseeki64(file, 0, SEEK_END);
 		length_type length = _ftelli64(file);
 		_fseeki64(file, 0, SEEK_SET);
-	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS)
+	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS) && !defined(__STRICT_ANSI__)
 		// there are 64-bit versions of fseek/ftell, let's use them
 		typedef off64_t length_type;
 
