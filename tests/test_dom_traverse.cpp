@@ -347,7 +347,7 @@ TEST_XML(dom_node_root, "<node><child/></node>")
 	CHECK(doc.child(STR("node")).root() == doc);
 }
 
-TEST_XML_FLAGS(dom_node_type, "<?xml?><?pi?><!--comment--><node>pcdata<![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments | parse_declaration)
+TEST_XML_FLAGS(dom_node_type, "<?xml?><!DOCTYPE><?pi?><!--comment--><node>pcdata<![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments | parse_declaration | parse_doctype)
 {
 	CHECK(xml_node().type() == node_null);
 	CHECK(doc.type() == node_document);
@@ -355,6 +355,7 @@ TEST_XML_FLAGS(dom_node_type, "<?xml?><?pi?><!--comment--><node>pcdata<![CDATA[c
 	xml_node_iterator it = doc.begin();
 
 	CHECK((it++)->type() == node_declaration);
+	CHECK((it++)->type() == node_doctype);
 	CHECK((it++)->type() == node_pi);
 	CHECK((it++)->type() == node_comment);
 	CHECK((it++)->type() == node_element);
@@ -365,7 +366,7 @@ TEST_XML_FLAGS(dom_node_type, "<?xml?><?pi?><!--comment--><node>pcdata<![CDATA[c
 	CHECK((cit++)->type() == node_cdata);
 }
 
-TEST_XML_FLAGS(dom_node_name_value, "<?xml?><?pi?><!--comment--><node>pcdata<![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments | parse_declaration)
+TEST_XML_FLAGS(dom_node_name_value, "<?xml?><!DOCTYPE id><?pi?><!--comment--><node>pcdata<![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments | parse_declaration | parse_doctype)
 {
 	CHECK_NAME_VALUE(xml_node(), STR(""), STR(""));
 	CHECK_NAME_VALUE(doc, STR(""), STR(""));
@@ -373,6 +374,7 @@ TEST_XML_FLAGS(dom_node_name_value, "<?xml?><?pi?><!--comment--><node>pcdata<![C
 	xml_node_iterator it = doc.begin();
 
 	CHECK_NAME_VALUE(*it++, STR("xml"), STR(""));
+	CHECK_NAME_VALUE(*it++, STR(""), STR("id"));
 	CHECK_NAME_VALUE(*it++, STR("pi"), STR(""));
 	CHECK_NAME_VALUE(*it++, STR(""), STR("comment"));
 	CHECK_NAME_VALUE(*it++, STR("node"), STR(""));
@@ -740,7 +742,7 @@ TEST_XML(dom_node_traverse_stop_end, "<node><child>text</child></node>")
 	CHECK(walker.log == STR("|-1 <=|0 !node=|1 !child=|2 !=text|-1 >="));
 }
 
-TEST_XML_FLAGS(dom_offset_debug, "<?xml?><?pi?><!--comment--><node>pcdata<![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments | parse_declaration)
+TEST_XML_FLAGS(dom_offset_debug, "<?xml?><!DOCTYPE><?pi?><!--comment--><node>pcdata<![CDATA[cdata]]></node>", parse_default | parse_pi | parse_comments | parse_declaration | parse_doctype)
 {
 	CHECK(xml_node().offset_debug() == -1);
 	CHECK(doc.offset_debug() == 0);
@@ -748,14 +750,15 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><?pi?><!--comment--><node>pcdata<![CDAT
 	xml_node_iterator it = doc.begin();
 
 	CHECK((it++)->offset_debug() == 2);
-	CHECK((it++)->offset_debug() == 9);
-	CHECK((it++)->offset_debug() == 17);
-	CHECK((it++)->offset_debug() == 28);
+	CHECK((it++)->offset_debug() == 16);
+	CHECK((it++)->offset_debug() == 19);
+	CHECK((it++)->offset_debug() == 27);
+	CHECK((it++)->offset_debug() == 38);
 
 	xml_node_iterator cit = doc.child(STR("node")).begin();
 	
-	CHECK((cit++)->offset_debug() == 33);
-	CHECK((cit++)->offset_debug() == 48);
+	CHECK((cit++)->offset_debug() == 43);
+	CHECK((cit++)->offset_debug() == 58);
 }
 
 TEST_XML(dom_internal_object, "<node attr='value'>value</node>")

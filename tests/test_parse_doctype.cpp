@@ -40,8 +40,9 @@ static bool test_doctype_wf(const char_t* decl)
 	if (!load_concat(doc, decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodeb />"), STR(""), format_raw)) return false;
 	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
 
-	// wrap in node to check that doctype is parsed fully (does not leave any "pcdata")
-	if (!load_concat(doc, STR("<node>"), decl, STR("</node>")) || !test_node(doc, STR("<node />"), STR(""), format_raw)) return false;
+    // check load-store contents preservation
+    CHECK(doc.load(decl, parse_doctype));
+    CHECK_NODE(doc, decl);
 
 	return true;
 }
@@ -276,9 +277,12 @@ TEST(parse_doctype_xmlconf_oasis_1)
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc EMPTY> <!NOTATION not1 SYSTEM \"a%a&b&#0<!ELEMENT<!--<?</>?>/\''\"> <!NOTATION not2 SYSTEM 'a b\"\"\"'> <!NOTATION not3 SYSTEM \"\"> <!NOTATION not4 SYSTEM ''> ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc EMPTY> <!NOTATION not1 PUBLIC \"<\"> ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc EMPTY> <!NOTATION not1 PUBLIC \"a b cdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\"> <!NOTATION not2 PUBLIC '0123456789-()+,./:=?;!*#@$_%'> <!NOTATION not3 PUBLIC \"0123456789-()+,.'/:=?;!*#@$_%\"> ]>");
-	TEST_DOCTYPE_WF("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"); // not actually a doctype :)
-	TEST_DOCTYPE_WF("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"); // not actually a doctype :)
 	TEST_DOCTYPE_WF("<!DOCTYPE doc SYSTEM \"p31pass1.dtd\" [<!ELEMENT doc EMPTY>]>");
+
+    // not actually a doctype :)
+    xml_document doc;
+    CHECK(doc.load(STR("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"), parse_full) && doc.first_child().type() == node_comment && doc.last_child().type() == node_comment && doc.first_child().next_sibling() == doc.last_child());
+	CHECK(doc.load(STR("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"), parse_full) && doc.first_child().type() == node_pi && doc.first_child() == doc.last_child());
 }
 
 TEST(parse_doctype_xmlconf_xmltest_1)
@@ -293,4 +297,19 @@ TEST(parse_doctype_xmlconf_xmltest_1)
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ATTLIST doc a CDATA #IMPLIED> <!ENTITY e '\"'> ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ENTITY e \"<foo a='&#38;'></foo>\"> ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]>");
+}
+
+TEST_XML_FLAGS(parse_doctype_value, "<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]>", parse_minimal | parse_doctype)
+{
+    xml_node n = doc.first_child();
+
+    CHECK(n.type() == node_doctype);
+    CHECK_STRING(n.value(), STR("doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]"));
+}
+
+TEST(parse_doctype_error_toplevel)
+{
+    xml_document doc;
+    CHECK(doc.load(STR("<node><!DOCTYPE></node>")).status == status_bad_doctype);
+    CHECK(doc.load(STR("<node><!DOCTYPE></node>"), parse_doctype).status == status_bad_doctype);
 }

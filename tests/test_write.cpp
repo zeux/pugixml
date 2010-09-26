@@ -63,6 +63,12 @@ TEST_XML_FLAGS(write_declaration, "<?xml version='2.0'?>", parse_default | parse
 	CHECK_NODE_EX(doc, STR("<?xml version=\"2.0\"?>\n"), STR(""), 0);
 }
 
+TEST_XML_FLAGS(write_doctype, "<!DOCTYPE id [ foo ]>", parse_default | parse_doctype)
+{
+	CHECK_NODE(doc, STR("<!DOCTYPE id [ foo ]>"));
+	CHECK_NODE_EX(doc, STR("<!DOCTYPE id [ foo ]>\n"), STR(""), 0);
+}
+
 TEST_XML(write_escape, "<node attr=''>text</node>")
 {
 	doc.child(STR("node")).attribute(STR("attr")) = STR("<>'\"&\x04\r\n\t");

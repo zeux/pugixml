@@ -514,13 +514,16 @@ TEST_XML(dom_node_copy_crossdoc, "<node/>")
 	CHECK_NODE(newdoc, STR("<node />"));
 }
 
-TEST_XML_FLAGS(dom_node_copy_types, "<?xml version='1.0'?><root><?pi value?><!--comment--><node id='1'>pcdata<![CDATA[cdata]]></node></root>", parse_default | parse_pi | parse_comments | parse_declaration)
+TEST_XML_FLAGS(dom_node_copy_types, "<?xml version='1.0'?><!DOCTYPE id><root><?pi value?><!--comment--><node id='1'>pcdata<![CDATA[cdata]]></node></root>", parse_full)
 {
 	doc.append_copy(doc.child(STR("root")));
-	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><!DOCTYPE id><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
 
 	doc.insert_copy_before(doc.first_child(), doc.first_child());
-	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><?xml version=\"1.0\"?><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><?xml version=\"1.0\"?><!DOCTYPE id><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
+
+	doc.insert_copy_after(doc.first_child().next_sibling().next_sibling(), doc.first_child());
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><!DOCTYPE id><?xml version=\"1.0\"?><!DOCTYPE id><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
 }
 
 TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
@@ -547,6 +550,16 @@ TEST(dom_node_declaration_name)
 	doc.insert_child_before(node_declaration, doc.first_child());
 
 	CHECK_NODE(doc, STR("<?xml?><?xml?><?xml?>"));
+}
+
+TEST(dom_node_declaration_attributes)
+{
+    xml_document doc;
+    xml_node node = doc.append_child(node_declaration);
+    node.append_attribute(STR("version")) = STR("1.0");
+    node.append_attribute(STR("encoding")) = STR("utf-8");
+
+    CHECK_NODE(doc, STR("<?xml version=\"1.0\" encoding=\"utf-8\"?>"));
 }
 
 TEST(dom_node_declaration_top_level)
@@ -676,4 +689,50 @@ TEST(dom_node_memory_limit)
 		CHECK(doc.append_child().set_name(string));
 		CHECK(doc.remove_child(doc.first_child()));
 	}
+}
+
+TEST(dom_node_doctype_top_level)
+{
+	xml_document doc;
+	doc.append_child().set_name(STR("node"));
+
+	xml_node node = doc.first_child();
+	node.append_child(node_pcdata).set_value(STR("text"));
+
+	CHECK(node.insert_child_before(node_doctype, node.first_child()) == xml_node());
+	CHECK(node.insert_child_after(node_doctype, node.first_child()) == xml_node());
+	CHECK(node.append_child(node_doctype) == xml_node());
+
+	CHECK_NODE(doc, STR("<node>text</node>"));
+
+	CHECK(doc.insert_child_before(node_doctype, node));
+	CHECK(doc.insert_child_after(node_doctype, node));
+	CHECK(doc.append_child(node_doctype));
+
+	CHECK_NODE(doc, STR("<!DOCTYPE><node>text</node><!DOCTYPE><!DOCTYPE>"));
+}
+
+TEST(dom_node_doctype_copy)
+{
+	xml_document doc;
+	doc.append_child(node_doctype);
+
+	doc.append_child().set_name(STR("node"));
+
+	doc.last_child().append_copy(doc.first_child());
+
+	CHECK_NODE(doc, STR("<!DOCTYPE><node />"));
+}
+
+TEST(dom_node_doctype_value)
+{
+    xml_document doc;
+    xml_node node = doc.append_child(node_doctype);
+
+    CHECK(node.type() == node_doctype);
+    CHECK_STRING(node.value(), STR(""));
+    CHECK_NODE(node, STR("<!DOCTYPE>"));
+
+    CHECK(node.set_value(STR("id [ foo ]")));
+    CHECK_NODE(node, STR("<!DOCTYPE id [ foo ]>"));
 }
