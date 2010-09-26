@@ -292,11 +292,17 @@ The tree nodes can be of one of the following types (which together form the enu
 
 [:Here the name (also called PI target) is `"name"`, and the value is `"value"`. By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_pi` flag.]
 
-* Declaration node ([anchor node_declaration]) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but does not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (its parent should be the document). The example XML representation of declaration node is as follows:
+* Declaration node ([anchor node_declaration]) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but do not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (its parent should be the document). The example XML representation of declaration node is as follows:
 
     <?xml version="1.0"?>
 
 [:Here the node has name `"xml"` and a single attribute with name `"version"` and value `"1.0"`. By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_declaration` flag. Also, by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this by adding `format_no_declaration` flag.]
+
+* Document type declaration node ([anchor node_doctype]) represents document type declarations in XML. Document type declaration nodes have a value, which corresponds to the entire document type contents; no additional nodes are created for inner elements like `<!ENTITY>`. There can be only one document type declaration node in a document; moreover, it should be the topmost node (its parent should be the document). The example XML representation of document type declaration node is as follows:
+
+	<!DOCTYPE greeting [ <!ELEMENT greeting (#PCDATA)> ]>
+
+[:Here the node has value `"greeting [ <!ELEMENT greeting (#PCDATA)> ]"`. By default document type declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior by adding `parse_doctype` flag.]
 
 Finally, here is a complete example of XML document and the corresponding tree representation ([@samples/tree.xml]):
 
@@ -642,7 +648,10 @@ All document loading functions accept the optional parameter `options`. This is 
 
 These flags control the resulting tree contents:
 
-* [anchor parse_declaration] determines if XML document declaration (node with type [link node_declaration]) are to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness. This flag is *off* by default.
+* [anchor parse_declaration] determines if XML document declaration (node with type [link node_declaration]) is to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness. This flag is *off* by default.
+[lbr]
+
+* [anchor parse_doctype] determines if XML document type declaration (node with type [link node_doctype]) is to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness. This flag is *off* by default.
 [lbr]
 
 * [anchor parse_pi] determines if processing instructions (nodes with type [link node_pi]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. Note that `<?xml ...?>` (document declaration) is not considered to be a PI. This flag is *off* by default.
@@ -671,12 +680,15 @@ These flags control the transformation of tree element contents:
 
 [note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; `parse_wnorm_attribute` performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes behave as if they are declared as [^CDATA], thus `parse_wconv_attribute` is the default option.]
 
-Additionally there are two predefined option masks:
+Additionally there are three predefined option masks:
 
-* [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as discussed above, in practice `parse_default` is usually equally fast.
+* [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, document type declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as discussed above, in practice `parse_default` is usually equally fast.
 [lbr]
 
 * [anchor parse_default] is the default set of flags, i.e. it has all options set to their default values. It includes parsing CDATA sections (comments/PIs are not parsed), performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed (by default) for performance reasons.
+[lbr]
+
+* [anchor parse_full] is the set of flags which adds nodes of all types to the resulting tree and performs default conversions for input data. It includes parsing CDATA sections, comments, PI nodes, document declaration node and document type declaration node, performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed in this mode.
 
 This is an example of using different parsing options ([@samples/load_options.cpp]):
 
@@ -1499,6 +1511,8 @@ Major release, featuring many XPath enhancements, wide character filename suppor
     # Added xml_parse_result default constructor
     # Added xml_document::load_file and xml_document::save_file with wide character paths
     # Added as_utf8 and as_wide overloads for std::wstring/std::string arguments
+    # Added DOCTYPE node type (node_doctype) and a special parse flag, parse_doctype, to add such nodes to the document during parsing
+    # Added parse_full parse flag mask, which extends parse_default with all node type parsing flags except parse_ws_pcdata
 
 * Performance improvements:
     # xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
@@ -1724,6 +1738,7 @@ Enumerations:
     * [link node_comment]
     * [link node_pi]
     * [link node_declaration]
+    * [link node_doctype]
     [lbr]
 
 * `enum `[link xml_parse_status]
@@ -1778,8 +1793,10 @@ Constants:
     * [link parse_comments]
     * [link parse_declaration]
     * [link parse_default]
+    * [link parse_doctype]
     * [link parse_eol]
     * [link parse_escapes]
+    * [link parse_full]
     * [link parse_minimal]
     * [link parse_pi]
     * [link parse_ws_pcdata]
