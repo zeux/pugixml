@@ -419,7 +419,7 @@ namespace pugi
 	{
 		/// Default ctor
 		/// \param type - node type
-		xml_node_struct(xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | type), parent(0), name(0), value(0), first_child(0), prev_sibling_c(0), next_sibling(0), first_attribute(0)
+		xml_node_struct(xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | (type - 1)), parent(0), name(0), value(0), first_child(0), prev_sibling_c(0), next_sibling(0), first_attribute(0)
 		{
 		}
 
@@ -2081,7 +2081,25 @@ namespace
 			{
 				s -= 2;
 
+                if (cursor->parent) THROW_ERROR(status_bad_doctype, s);
+
+                char_t* mark = s + 9;
+
 				s = parse_doctype_group(s, endch, true);
+
+                if (OPTSET(parse_doctype))
+                {
+                    while (IS_CHARTYPE(*mark, ct_space)) ++mark;
+
+                    PUSHNODE(node_doctype);
+
+                    cursor->value = mark;
+
+                    assert((s[0] == 0 && endch == '>') || s[-1] == '>');
+                    s[*s == 0 ? 0 : -1] = 0;
+
+                    POPNODE();
+                }
 			}
 			else if (*s == 0 && endch == '-') THROW_ERROR(status_bad_comment, s);
 			else if (*s == 0 && endch == '[') THROW_ERROR(status_bad_cdata, s);
@@ -2115,7 +2133,7 @@ namespace
 				if (declaration)
 				{
 					// disallow non top-level declarations
-					if ((cursor->header & xml_memory_page_type_mask) != node_document) THROW_ERROR(status_bad_pi, s);
+					if (cursor->parent) THROW_ERROR(status_bad_pi, s);
 
 					PUSHNODE(node_declaration);
 				}
@@ -2350,7 +2368,7 @@ namespace
 						s = parse_question(s, cursor, optmsk, endch);
 
 						assert(cursor);
-						if ((cursor->header & xml_memory_page_type_mask) == node_declaration) goto LOC_ATTRIBUTES;
+						if ((cursor->header & xml_memory_page_type_mask) + 1 == node_declaration) goto LOC_ATTRIBUTES;
 					}
 					else if (*s == '!') // '<!...'
 					{
@@ -2966,6 +2984,20 @@ namespace
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
+		case node_doctype:
+			writer.write('<', '!', 'D', 'O', 'C');
+			writer.write('T', 'Y', 'P', 'E');
+
+            if (node.value()[0])
+            {
+                writer.write(' ');
+                writer.write(node.value());
+            }
+
+            writer.write('>');
+			if ((flags & format_raw) == 0) writer.write('\n');
+			break;
+
 		default:
 			assert(!"Invalid node type");
 		}
@@ -2988,7 +3020,7 @@ namespace
 	{
 		if (parent != node_document && parent != node_element) return false;
 		if (child == node_document || child == node_null) return false;
-		if (parent != node_document && child == node_declaration) return false;
+		if (parent != node_document && (child == node_declaration || child == node_doctype)) return false;
 
 		return true;
 	}
@@ -3022,6 +3054,7 @@ namespace
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
+        case node_doctype:
 			dest.set_value(source.value());
 			break;
 
@@ -3578,7 +3611,7 @@ namespace pugi
 
 	xml_node_type xml_node::type() const
 	{
-		return _root ? static_cast<xml_node_type>(_root->header & xml_memory_page_type_mask) : node_null;
+		return _root ? static_cast<xml_node_type>((_root->header & xml_memory_page_type_mask) + 1) : node_null;
 	}
 	
 	const char_t* xml_node::value() const
@@ -3663,7 +3696,7 @@ namespace pugi
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 		{
-			xml_node_type type = static_cast<xml_node_type>(i->header & xml_memory_page_type_mask);
+			xml_node_type type = static_cast<xml_node_type>((i->header & xml_memory_page_type_mask) + 1);
 
 			if (i->value && (type == node_pcdata || type == node_cdata))
 				return i->value;
@@ -3719,6 +3752,7 @@ namespace pugi
 		case node_cdata:
 		case node_pcdata:
 		case node_comment:
+        case node_doctype:
 			return strcpy_insitu(_root->value, _root->header, xml_memory_page_value_allocated_mask, rhs);
 
 		default:
@@ -4153,6 +4187,7 @@ namespace pugi
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
+		case node_doctype:
 			return (_root->header & xml_memory_page_value_allocated_mask) ? -1 : _root->value - buffer;
 
 		default:

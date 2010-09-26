@@ -111,7 +111,8 @@ namespace pugi
 		node_cdata,			// Character data, i.e. '<![CDATA[text]]>'
 		node_comment,		// Comment tag, i.e. '<!-- text -->'
 		node_pi,			// Processing instruction, i.e. '<?name?>'
-		node_declaration	// Document declaration, i.e. '<?xml version="1.0"?>'
+		node_declaration,	// Document declaration, i.e. '<?xml version="1.0"?>'
+        node_doctype        // Document type declaration, i.e. '<!DOCTYPE doc>'
 	};
 
 	// Parsing options
@@ -148,10 +149,18 @@ namespace pugi
     // This flag determines if document declaration (node_declaration) is added to the DOM tree. This flag is off by default.
 	const unsigned int parse_declaration = 0x0100;
 
+    // This flag determines if document type declaration (node_doctype) is added to the DOM tree. This flag is off by default.
+	const unsigned int parse_doctype = 0x0200;
+
 	// The default parsing mode.
     // Elements, PCDATA and CDATA sections are added to the DOM tree, character/reference entities are expanded,
     // End-of-Line characters are normalized, attribute values are normalized using CDATA normalization rules.
 	const unsigned int parse_default = parse_cdata | parse_escapes | parse_wconv_attribute | parse_eol;
+
+    // The full parsing mode.
+    // Nodes of all types are added to the DOM tree, character/reference entities are expanded,
+    // End-of-Line characters are normalized, attribute values are normalized using CDATA normalization rules.
+    const unsigned int parse_full = parse_default | parse_pi | parse_comments | parse_declaration | parse_doctype;
 
 	// These flags determine the encoding of input data for XML document
 	enum xml_encoding
