@@ -8196,11 +8196,20 @@ namespace pugi
 		#endif
 		}
 
+		void throw_error_oom()
+        {
+        #ifdef PUGIXML_NO_EXCEPTIONS
+            throw_error("Out of memory");
+        #else
+            throw std::bad_alloc();
+        #endif
+        }
+
 		void* alloc_node()
 		{
 			void* result = _alloc->allocate_nothrow(sizeof(xpath_ast_node));
 
-			if (!result) throw_error("Out of memory");
+			if (!result) throw_error_oom();
 
 			return result;
 		}
@@ -8212,7 +8221,7 @@ namespace pugi
 				size_t length = static_cast<size_t>(value.end - value.begin);
 
 				char_t* c = static_cast<char_t*>(_alloc->allocate_nothrow((length + 1) * sizeof(char_t)));
-				if (!c) throw_error("Out of memory");
+				if (!c) throw_error_oom();
 
 				memcpy(c, value.begin, length * sizeof(char_t));
 				c[length] = 0;
@@ -8489,7 +8498,7 @@ namespace pugi
 				double value = 0;
 
 				if (!convert_string_to_number(_lexer.contents().begin, _lexer.contents().end, &value))
-					throw_error("Out of memory");
+					throw_error_oom();
 
 				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
 				_lexer.next();
@@ -9224,10 +9233,10 @@ namespace pugi
 
 		if (!alloc)
 		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
 			_result.error = "Out of memory";
-
-		#ifndef PUGIXML_NO_EXCEPTIONS
-			throw xpath_exception(_result);
+        #else
+			throw std::bad_alloc();
 		#endif
 		}
 		else
