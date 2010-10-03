@@ -190,6 +190,8 @@ It's possible to compile pugixml as a standalone shared library. The process is 
     #define PUGIXML_API __declspec(dllimport)
     #endif
 
+[caution If you're using STL-related functions, you should use the shared runtime library to ensure that a single heap is used for STL allocations in your application and in pugixml; in MSVC, this means selecting the 'Multithreaded DLL' or 'Multithreaded Debug DLL' to 'Runtime library' property (/MD or /MDd linker switch). You should also make sure that your runtime library choice is consistent between projects.]
+
 [endsect] [/shared]
  
 [section:config Additional configuration options]
