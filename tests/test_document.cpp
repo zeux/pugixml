@@ -845,3 +845,24 @@ TEST(document_load_buffer_inplace_short)
 
 	delete[] data;
 }
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+TEST(document_load_exceptions)
+{
+    bool thrown = false;
+
+    try
+    {
+        pugi::xml_document doc;
+        if (!doc.load("<node attribute='value")) throw std::bad_alloc();
+
+        CHECK_FORCE_FAIL("Expected parsing failure");
+    }
+    catch (const std::bad_alloc&)
+    {
+        thrown = true;
+    }
+
+    CHECK(thrown);
+}
+#endif
