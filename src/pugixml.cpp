@@ -9321,12 +9321,18 @@ namespace pugi
 
 		xpath_string r = evaluate_string_impl(_root, n, sd);
 
-		size_t size = r.length() + 1;
+		size_t full_size = r.length() + 1;
 		
-		// $$ zero-terminate?
-		if (capacity > 0) memcpy(buffer, r.c_str(), (size < capacity ? size : capacity) * sizeof(char_t));
+		if (capacity > 0)
+        {
+            size_t size = (full_size < capacity) ? full_size : capacity;
+            assert(size > 0);
+
+            memcpy(buffer, r.c_str(), (size - 1) * sizeof(char_t));
+            buffer[size - 1] = 0;
+        }
 		
-		return size;
+		return full_size;
 	}
 
 	xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const

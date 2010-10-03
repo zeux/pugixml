@@ -220,17 +220,19 @@ TEST(xpath_api_evaluate_string)
 	
 	// test for just not enough space
 	std::basic_string<char_t> s2 = base;
-	CHECK(q.evaluate_string(&s2[0], 10, xml_node()) == 11 && memcmp(&s2[0], STR("0123456789xxxxxx"), 16 * sizeof(char_t)) == 0);
+	CHECK(q.evaluate_string(&s2[0], 10, xml_node()) == 11 && memcmp(&s2[0], STR("012345678\0xxxxxx"), 16 * sizeof(char_t)) == 0);
 
 	// test for not enough space
 	std::basic_string<char_t> s3 = base;
-	CHECK(q.evaluate_string(&s3[0], 5, xml_node()) == 11 && memcmp(&s3[0], STR("01234xxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
+	CHECK(q.evaluate_string(&s3[0], 5, xml_node()) == 11 && memcmp(&s3[0], STR("0123\0xxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
 
 	// test for single character buffer
 	std::basic_string<char_t> s4 = base;
-	CHECK(q.evaluate_string(&s4[0], 1, xml_node()) == 11 && memcmp(&s4[0], STR("0xxxxxxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
+	CHECK(q.evaluate_string(&s4[0], 1, xml_node()) == 11 && memcmp(&s4[0], STR("\0xxxxxxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
 
 	// test for empty buffer
+	std::basic_string<char_t> s5 = base;
+	CHECK(q.evaluate_string(&s5[0], 0, xml_node()) == 11 && memcmp(&s5[0], STR("xxxxxxxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
 	CHECK(q.evaluate_string(0, 0, xml_node()) == 11);
 }
 
