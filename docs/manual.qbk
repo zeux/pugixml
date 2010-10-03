@@ -7,15 +7,6 @@
     [license Distributed under the MIT License]
 ]
 
-[/ documentation todo
-PUGIXML_NO_EXCEPTIONS support (+ xpath_parse_result, + xpath_query bool cast, + xpath_parse_result in xpath_exception for better error handling, + std::bad_alloc throwing in evaluate + xpath exception throwing in evaluate_node_set (always throw xpath_exception?))
-PUGIXML_NO_STL support
-variables support (+ select_nodes/select_single_node additional arg)
-Introduced new xpath_query::evaluate_string, which works without STL
-Introduced new xpath_node_set constructor (from an iterator range)
-Improved error reporting; now a last parsed offset is returned together with the parsing error
-]
-
 [template sbr[]'''<sbr/>''']
 [template lbr[]'''<sbr/><sbr/>'''] [/ for empty lines in lists]
 [template file[name]'''<filename>'''[name]'''</filename>''']
@@ -1382,7 +1373,7 @@ If you want to select nodes that match some XPath expression, you can do it with
 
 `select_nodes` function compiles the expression and then executes it with the node as a context node, and returns the resulting node set. `select_single_node` returns only the first node in document order from the result, and is equivalent to calling `select_nodes(query).first()`. If the XPath expression does not match anything, or the node handle is null, `select_nodes` returns an empty set, and `select_single_node` returns null XPath node.
 
-Both functions throw `xpath_exception` if the query can not be compiled or if it returns a value with type other than node set; see [sref manual.xpath.errors] for details.
+If exception handling is not disabled, both functions throw `xpath_exception` if the query can not be compiled or if it returns a value with type other than node set; see [sref manual.xpath.errors] for details.
 
 [#xml_node::select_single_node_precomp][#xml_node::select_nodes_precomp]
 While compiling expressions is fast, the compilation time can introduce a significant overhead if the same expression is used many times on small subtrees. If you're doing many similar queries, consider compiling them into query objects (see [sref manual.xpath.query] for further reference). Once you get a compiled query object, you can pass it to select functions instead of an expression string:
@@ -1390,7 +1381,7 @@ While compiling expressions is fast, the compilation time can introduce a signif
     xpath_node xml_node::select_single_node(const xpath_query& query) const;
     xpath_node_set xml_node::select_nodes(const xpath_query& query) const;
 
-Both functions throw `xpath_exception` if the query returns a value with type other than node set.
+If exception handling is not disabled, both functions throw `xpath_exception` if the query returns a value with type other than node set.
 
 This is an example of selecting nodes using XPath expressions ([@samples/xpath_select.cpp]):
 
@@ -1416,7 +1407,7 @@ You can create a query object with the constructor that takes XPath expression a
     explicit xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables = 0);
 
 [#xpath_query::return_type]
-The expression is compiled and the compiled representation is stored in the new query object. If compilation fails, `xpath_exception` is thrown (see [sref manual.xpath.errors] for details). After the query is created, you can query the type of the evaluation result using the following function:
+The expression is compiled and the compiled representation is stored in the new query object. If compilation fails, `xpath_exception` is thrown if exception handling is not disabled (see [sref manual.xpath.errors] for details). After the query is created, you can query the type of the evaluation result using the following function:
 
     xpath_value_type xpath_query::return_type() const;
 
@@ -1448,6 +1439,88 @@ This is an example of using query objects ([@samples/xpath_query.cpp]):
 [code_xpath_query]
 
 [endsect] [/query]
+
+[section:variables Using variables]
+
+XPath queries may contain references to variables; this is useful if you want to use queries that depend on some dynamic parameter without manually preparing the complete query string, or if you want to reuse the same query object for similar queries.
+
+Variable references have the form '''<code><phrase role="identifier">$name</phrase></code>'''; in order to use them, you have to provide a variable set, which includes all variables present in the query with correct types. This set is passed to `xpath_query` constructor or to `select_nodes`/`select_single_node` functions:
+
+    explicit xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables = 0);
+    xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+    xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
+
+If you're using query objects, you can change the variable values before `evaluate`/`select` calls to change the query behavior.
+
+[note The variable set pointer is stored in the query object; you have to ensure that the lifetime of the set exceeds that of query object.]
+
+[#xpath_variable_set]
+Variable sets correspond to `xpath_variable_set` type, which is essentially a variable container.
+
+[#xpath_variable_set::add]
+You can add new variables with the following function:
+
+    xpath_variable* xpath_variable_set::add(const char_t* name, xpath_value_type type);
+
+The function tries to add a new variable with the specified name and type; if the variable with such name does not exist in the set, the function adds a new variable and returns the variable handle; if there is already a variable with the specified name, the function returns the variable handle if variable has the specified type. Otherwise the function returns null pointer; it also returns null pointer on allocation failure.
+
+New variables are assigned the default value which depends on the type: `0` for numbers, `false` for booleans, empty string for strings and empty set for node sets.
+
+[#xpath_variable_set::get]
+You can get the existing variables with the following functions:
+
+    xpath_variable* xpath_variable_set::get(const char_t* name);
+    const xpath_variable* xpath_variable_set::get(const char_t* name) const;
+
+The functions return the variable handle, or null pointer if the variable with the specified name is not found.
+
+[#xpath_variable_set::set]
+Additionally, there are the helper functions for setting the variable value by name; they try to add the variable with the corresponding type, if it does not exist, and to set the value. If the variable with the same name but with different type is already present, they return `false`; they also return `false` on allocation failure. Note that these functions do not perform any type conversions.
+
+    bool xpath_variable_set::set(const char_t* name, bool value);
+    bool xpath_variable_set::set(const char_t* name, double value);
+    bool xpath_variable_set::set(const char_t* name, const char_t* value);
+    bool xpath_variable_set::set(const char_t* name, const xpath_node_set& value);
+
+The variable values are copied to the internal variable storage, so you can modify or destroy them after the functions return.
+
+[#xpath_variable]
+If setting variables by name is not efficient enough, or if you have to inspect variable information or get variable values, you can use variable handles. A variable corresponds to the `xpath_variable` type, and a variable handle is simply a pointer to `xpath_variable`.
+
+[#xpath_variable::type][#xpath_variable::name]
+In order to get variable information, you can use one of the following functions:
+
+    const char_t* xpath_variable::name() const;
+    xpath_value_type xpath_variable::type() const;
+
+Note that each variable has a distinct type which is specified upon variable creation and can not be changed later.
+
+[#xpath_variable::get_boolean][#xpath_variable::get_number][#xpath_variable::get_string][#xpath_variable::get_node_set]
+In order to get variable value, you should use one of the following functions, depending on the variable type:
+
+    bool xpath_variable::get_boolean() const;
+    double xpath_variable::get_number() const;
+    const char_t* xpath_variable::get_string() const;
+    const xpath_node_set& xpath_variable::get_node_set() const;
+
+These functions return the value of the variable. Note that no type conversions are performed; if the type mismatch occurs, a dummy value is returned (`false` for booleans, `NaN` for numbers, empty string for strings and empty set for node sets).
+
+[#xpath_variable::set]
+In order to set variable value, you should use one of the following functions, depending on the variable type:
+
+    bool xpath_variable::set(bool value);
+    bool xpath_variable::set(double value);
+    bool xpath_variable::set(const char_t* value);
+    bool xpath_variable::set(const xpath_node_set& value);
+
+These function modify the variable value. Note that no type conversions are performed; if the type mismatch occurs, the functions return `false`; they also return `false` on allocation failure. The variable values are copied to the internal variable storage, so you can modify or destroy them after the functions return.
+
+This is an example of using variables in XPath queries ([@samples/xpath_variables.cpp]):
+
+[import samples/xpath_variables.cpp]
+[code_xpath_variables]
+
+[endsect] [/variables]
 
 [section:errors Error handling]
 
