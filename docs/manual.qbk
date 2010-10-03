@@ -211,10 +211,7 @@ pugixml uses several defines to control the compilation process. There are two w
 
 [anchor PUGIXML_NO_STL] define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
 
-[anchor PUGIXML_NO_EXCEPTIONS] define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities
-
-$$
-[note As of version 0.9, exceptions are *only* used in XPath implementation; therefore, XPath is also disabled if this macro is defined. This will change in version 1.0.]
+[anchor PUGIXML_NO_EXCEPTIONS] define disables use of exceptions in pugixml. This option is provided in case your target platform does not have exception handling capabilities.
 
 [anchor PUGIXML_API], [anchor PUGIXML_CLASS] and [anchor PUGIXML_FUNCTION] defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [sref manual.install.building.shared]).
 
@@ -382,7 +379,6 @@ There are two choices of interface and internal representation when configuring 
 
 [note If size of `wchar_t` is 2, pugixml assumes UTF-16 encoding instead of UCS-2, which means that some characters are represented as two code points.]
 
-$$ wording - one may think that child() has a string overload
 All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. For example, node name accessors look like this in char mode:
 
     const char* xml_node::name() const;
@@ -441,8 +437,7 @@ With the exception of XPath, pugixml itself does not throw any exceptions. Addit
 
 This is not applicable to functions that operate on STL strings or IOstreams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::find_node`) do not provide any exception guarantees beyond the ones provided by callback.
 
-$$
-XPath functions may throw `xpath_exception` on parsing error; also, XPath implementation uses STL, and thus may throw i.e. `std::bad_alloc` in low memory conditions. Still, XPath functions provide strong exception guarantee.
+If exception handling is not disabled with `PUGIXML_NO_EXCEPTIONS` define, XPath functions may throw `xpath_exception` on parsing error; also, XPath functions may throw `std::bad_alloc` in low memory conditions. Still, XPath functions provide strong exception guarantee.
 
 [endsect] [/exception]
 
@@ -591,7 +586,6 @@ All document loading functions return the parsing result via `xml_parse_result` 
         ptrdiff_t offset;
         xml_encoding encoding;
 
-        xml_parse_result();
         operator bool() const;
         const char* description() const;
     };
@@ -1306,9 +1300,6 @@ Also note that wide stream saving functions do not have `encoding` argument and 
 
 If the task at hand is to select a subset of document nodes that match some criteria, it is possible to code a function using the existing traversal functionality for any practical criteria. However, often either a data-driven approach is desirable, in case the criteria are not predefined and come from a file, or it is inconvenient to use traversal interfaces and a higher-level DSL is required. There is a standard language for XML processing, XPath, that can be useful for these cases. pugixml implements an almost complete subset of XPath 1.0. Because of differences in document object model and some performance implications, there are minor violations of the official specifications, which can be found in [sref manual.xpath.w3c]. The rest of this section describes the interface for XPath functionality. Please note that if you wish to learn to use XPath language, you have to look for other tutorials or manuals; for example, you can read [@http://www.w3schools.com/xpath/ W3Schools XPath tutorial], [@http://www.tizag.com/xmlTutorial/xpathtutorial.php XPath tutorial at tizag.com], and [@http://www.w3.org/TR/xpath/ the XPath 1.0 specification].
 
-$$
-[note As of version 0.9, you need both STL and exception support to use XPath; XPath is disabled if either `PUGIXML_NO_STL` or `PUGIXML_NO_EXCEPTIONS` is defined.]
-
 [section:types XPath types]
 
 [#xpath_value_type][#xpath_type_number][#xpath_type_string][#xpath_type_boolean][#xpath_type_node_set][#xpath_type_none]
@@ -1372,6 +1363,13 @@ Often the actual iteration is not needed; instead, only the first element in doc
 
 This function returns the first node in forward document order from the set, or null node if the set is empty. Note that while the result of the node does not depend on the order of nodes in the set (i.e. on the result of `type()`), the complexity does - if the set is sorted, the complexity is constant, otherwise it is linear in the number of elements or worse.
 
+[#xpath_node_set::ctor]
+While in the majority of cases the node set is returned by XPath functions, sometimes there is a need to manually construct a node set. For such cases, a constructor is provided which takes an iterator range (`const_iterator` is a typedef for `const xpath_node*`), and an optional type:
+
+	xpath_node_set::xpath_node_set(const_iterator begin, const_iterator end, type_t type = type_unsorted);
+
+The constructor copies the specified range and sets the specified type. The objects in the range are not checked in any way; you'll have to ensure that the range contains no duplicates, and that the objects are sorted according to the `type` parameter. Otherwise XPath operations with this set may produce unexpected results.
+
 [endsect] [/types]
 
 [section:select Selecting nodes via XPath expression]
@@ -1430,8 +1428,8 @@ You can evaluate the query using one of the following functions:
     string_t xpath_query::evaluate_string(const xpath_node& n) const;
     xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const;
 
-$$ exception, evaluate_string nostl
-All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. By XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` throws an `xpath_exception` if the return type is not node set.
+$$ evaluate_string nostl
+All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. By XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` results in an error if the return type is not node set (see [sref manual.xpath.errors]).
 
 [note Calling `node.select_nodes("query")` is equivalent to calling `xpath_query("query").evaluate_node_set(node)`.]
 
@@ -1444,14 +1442,47 @@ This is an example of using query objects ([@samples/xpath_query.cpp]):
 
 [section:errors Error handling]
 
-$$
-[#xpath_exception][#xpath_exception::what]
-As of version 0.9, all XPath errors result in thrown exceptions. The errors can arise during expression compilation or node set evaluation. In both cases, an `xpath_exception` object is thrown. This is an exception object that implements `std::exception` interface, and thus has a single function `what()`:
+There are two different mechanisms for error handling in XPath implementation; the mechanism used depends on whether exception support is disabled (this is controlled with `PUGIXML_NO_EXCEPTIONS` define).
+
+[#xpath_exception]
+[#xpath_exception::result]
+[#xpath_exception::what]
+By default, XPath functions throw `xpath_exception` object in case of errors; additionally, in the event any memory allocation fails, an `std::bad_alloc` exception is thrown. Also `xpath_exception` is thrown if the query is evaluated to a node set, but the return type is not node set. If the query constructor succeeds (i.e. no exception is thrown), the query object is valid. Otherwise you can get the error details via one of the following functions:
 
     virtual const char* xpath_exception::what() const throw();
+    const xpath_parse_result& xpath_exception::result() const;
 
-$$
-This function returns the error message. Currently it is impossible to get the exact place where query compilation failed. This functionality, along with optional error handling without exceptions, will be available in version 1.0.
+[#xpath_query::unspecified_bool_type]
+[#xpath_query::result]
+If exceptions are disabled, then in the event of parsing failure the query is initialized to invalid state; you can test if the query object is valid by using it in a boolean expression: `if (query) { ... }`. Additionally, you can get parsing result via the result() accessor:
+
+    const xpath_parse_result& xpath_query::result() const;
+    
+Without exceptions, evaluating invalid query results in `false`, empty string, NaN or an empty node set, depending on the type; evaluating a query as a node set results in an empty node set if the return type is not node set.
+
+[#xpath_parse_result]
+The information about parsing result is returned via `xpath_parse_result` object. It contains parsing status and the offset of last successfully parsed character from the beginning of the source stream:
+
+    struct xpath_parse_result
+    {
+		const char* error;
+		ptrdiff_t offset;
+
+		operator bool() const;
+		const char* description() const;
+    };
+
+[#xpath_parse_result::error]
+Parsing result is represented as the error message; it is either a null pointer, in case there is no error, or the error message in the form of ASCII zero-terminated string.
+
+[#xpath_parse_result::description]
+`description()` member function can be used to get the error message; it never returns the null pointer, so you can safely use description() even if query parsing succeeded.
+
+[#xpath_parse_result::offset]
+In addition to the error message, parsing result has an `offset` member, which contains the offset of last successfully parsed character. This offset is in units of `pugi::char_t` (bytes for character mode, wide characters for wide character mode).
+
+[#xpath_parse_result::bool]
+Parsing result object can be implicitly converted to `bool` like this: `if (result) { ... } else { ... }`.
 
 This is an example of XPath error handling ([@samples/xpath_error.cpp]):
 
@@ -1469,10 +1500,6 @@ Because of the differences in document object models, performance considerations
 * Namespace nodes are not supported (affects namespace:: axis).
 * Name tests are performed on QNames in XML document instead of expanded names; for `<foo xmlns:ns1='uri' xmlns:ns2='uri'><ns1:child/><ns2:child/></foo>`, query `foo/ns1:*` will return only the first child, not both of them. Compliant XPath implementations can return both nodes if the user provides appropriate namespace declarations.
 * String functions consider a character to be either a single `char` value or a single `wchar_t` value, depending on the library configuration; this means that some string functions are not fully Unicode-aware. This affects `substring()`, `string-length()` and `translate()` functions.
-* Variable references are not supported.
-
-$$
-Some of these incompatibilities will be fixed in version 1.0.
 
 [endsect] [/w3c]
 
