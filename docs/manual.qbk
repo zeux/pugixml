@@ -1428,10 +1428,19 @@ You can evaluate the query using one of the following functions:
     string_t xpath_query::evaluate_string(const xpath_node& n) const;
     xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const;
 
-$$ evaluate_string nostl
 All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. By XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` results in an error if the return type is not node set (see [sref manual.xpath.errors]).
 
 [note Calling `node.select_nodes("query")` is equivalent to calling `xpath_query("query").evaluate_node_set(node)`.]
+
+[#xpath_query::evaluate_string_buffer]
+Note that `evaluate_string` function returns the STL string; as such, it's not available in `PUGIXML_NO_STL` mode and also usually allocates memory. There is another string evaluation function:
+
+	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const;
+
+This function evaluates the string, and then writes the result to `buffer` (but at most `capacity` characters); then it returns the full size of the result in characters, including the terminating zero. If `capacity` is not 0, the resulting buffer is always zero-terminated. You can use this function as follows: 
+
+* First call the function with `buffer = 0` and `capacity = 0`; then allocate the returned amount of characters, and call the function again, passing the allocated storage and the amount of characters;
+* First call the function with small buffer and buffer capacity; then, if the result is larger than the capacity, the output has been trimmed, so allocate a larger buffer and call the function again.
 
 This is an example of using query objects ([@samples/xpath_query.cpp]):
 
