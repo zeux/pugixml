@@ -4595,6 +4595,15 @@ namespace pugi
 		return true;
 	}
 
+    xml_node xml_document::document_element() const
+    {
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if ((i->header & xml_memory_page_type_mask) + 1 == node_element)
+                return xml_node(i);
+
+        return xml_node();
+    }
+
 #ifndef PUGIXML_NO_STL
 	std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str)
 	{

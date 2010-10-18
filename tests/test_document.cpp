@@ -866,3 +866,13 @@ TEST(document_load_exceptions)
     CHECK(thrown);
 }
 #endif
+
+TEST_XML_FLAGS(document_element, "<?xml version='1.0'?><node><child/></node><!---->", parse_default | parse_declaration | parse_comments)
+{
+    CHECK(doc.document_element() == doc.child(STR("node")));
+}
+
+TEST_XML_FLAGS(document_element_absent, "<!---->", parse_comments)
+{
+    CHECK(doc.document_element() == xml_node());
+}

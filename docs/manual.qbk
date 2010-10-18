@@ -327,7 +327,8 @@ Finally, here is a complete example of XML document and the corresponding tree r
 Despite the fact that there are several node types, there are only three C++ types representing the tree (`xml_document`, `xml_node`, `xml_attribute`); some operations on `xml_node` are only valid for certain node types. They are described below.
 
 [#xml_document]
-`xml_document` is the owner of the entire document structure; it is a non-copyable class. The interface of `xml_document` consists of loading functions (see [sref manual.loading]), saving functions (see [sref manual.saving]) and the interface of `xml_node`, which allows for document inspection and/or modification. Note that while `xml_document` is a sub-class of `xml_node`, `xml_node` is not a polymorphic type; the inheritance is only used to simplify usage.
+[#xml_document::document_element]
+`xml_document` is the owner of the entire document structure; it is a non-copyable class. The interface of `xml_document` consists of loading functions (see [sref manual.loading]), saving functions (see [sref manual.saving]) and the interface of `xml_node`, which allows for document inspection and/or modification. Note that while `xml_document` is a sub-class of `xml_node`, `xml_node` is not a polymorphic type; the inheritance is only used to simplify usage. You can also use the `document_element` function to get the element node that's the immediate child of the document.
 
 [#xml_document::ctor]
 [#xml_document::dtor]
@@ -1630,6 +1631,7 @@ Major release, featuring many XPath enhancements, wide character filename suppor
     # Added parse_full parse flag mask, which extends parse_default with all node type parsing flags except parse_ws_pcdata
     # Added xml_node::hash_value() and xml_attribute::hash_value() functions for use in hash-based containers
     # Added internal_object() and additional constructor for both xml_node and xml_attribute for easier marshalling (useful for language bindings)
+    # Added xml_document::document_element() function
 
 * Performance improvements:
     # xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
@@ -2115,6 +2117,9 @@ Classes:
     [lbr]
 
     * `void `[link xml_document::save save]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+    [lbr]
+
+    * `xml_node `[link xml_document::document_element document_element]`() const;`
     [lbr]
 
 * `struct `[link xml_parse_result]
