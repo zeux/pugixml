@@ -321,8 +321,11 @@ namespace pugi
     	xml_attribute next_attribute() const;
     	xml_attribute previous_attribute() const;
 
+        // Get hash value (unique for handles to the same object)
+        size_t hash_value() const;
+
 		// Get internal pointer
-		xml_attribute_struct* internal_object();
+		xml_attribute_struct* internal_object() const;
 	};
 
 #ifdef __BORLANDC__
@@ -532,8 +535,11 @@ namespace pugi
 		// Get node offset in parsed file/string (in char_t units) for debugging purposes
 		ptrdiff_t offset_debug() const;
 
+        // Get hash value (unique for handles to the same object)
+        size_t hash_value() const;
+
 		// Get internal pointer
-		xml_node_struct* internal_object();
+		xml_node_struct* internal_object() const;
 	};
 
 #ifdef __BORLANDC__

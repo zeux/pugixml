@@ -3420,7 +3420,12 @@ namespace pugi
 		return (_attr && _attr->value) ? _attr->value : PUGIXML_TEXT("");
 	}
 
-	xml_attribute_struct* xml_attribute::internal_object()
+    size_t xml_attribute::hash_value() const
+    {
+        return static_cast<size_t>(reinterpret_cast<uintptr_t>(_attr) / sizeof(xml_attribute_struct));
+    }
+
+	xml_attribute_struct* xml_attribute::internal_object() const
 	{
         return _attr;
 	}
@@ -4134,7 +4139,12 @@ namespace pugi
 		return walker.end(arg_end);
 	}
 
-	xml_node_struct* xml_node::internal_object()
+    size_t xml_node::hash_value() const
+    {
+        return static_cast<size_t>(reinterpret_cast<uintptr_t>(_root) / sizeof(xml_node_struct));
+    }
+
+	xml_node_struct* xml_node::internal_object() const
 	{
         return _root;
 	}

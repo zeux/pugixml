@@ -782,3 +782,25 @@ TEST_XML(dom_internal_object, "<node attr='value'>value</node>")
     xml_attribute attr_copy = attr;
     CHECK(attr_copy.internal_object() == attr.internal_object());
 }
+
+TEST_XML(dom_hash_value, "<node attr='value'>value</node>")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_attribute attr = node.first_attribute();
+	xml_node value = node.first_child();
+	
+	CHECK(xml_node().hash_value() == 0);
+	CHECK(xml_attribute().hash_value() == 0);
+
+    CHECK(node.hash_value() != 0);
+    CHECK(value.hash_value() != 0);
+    CHECK(node.hash_value() != value.hash_value());
+
+    CHECK(attr.hash_value() != 0);
+
+    xml_node node_copy = node;
+    CHECK(node_copy.hash_value() == node.hash_value());
+
+    xml_attribute attr_copy = attr;
+    CHECK(attr_copy.hash_value() == attr.hash_value());
+}

@@ -353,6 +353,10 @@ Both `xml_node` and `xml_attribute` have the default constructor which initializ
 [#xml_node::comparison]
 `xml_node` and `xml_attribute` try to behave like pointers, that is, they can be compared with other objects of the same type, making it possible to use them as keys of associative containers. All handles to the same underlying object are equal, and any two handles to different underlying objects are not equal. Null handles only compare as equal to themselves. The result of relational comparison can not be reliably determined from the order of nodes in file or other ways. Do not use relational comparison operators except for search optimization (i.e. associative container keys).
 
+[#xml_attribute::hash_value]
+[#xml_node::hash_value]
+If you want to use `xml_node` or `xml_attribute` objects as keys in hash-based associative containers, you can use the `hash_value` member functions. They return the hash values that are guaranteed to be the same for all handles to the same underlying object. The hash value for null handles is 0.
+
 [#xml_attribute::unspecified_bool_type]
 [#xml_node::unspecified_bool_type]
 [#xml_attribute::empty]
@@ -1624,6 +1628,8 @@ Major release, featuring many XPath enhancements, wide character filename suppor
     # Added as_utf8 and as_wide overloads for std::wstring/std::string arguments
     # Added DOCTYPE node type (node_doctype) and a special parse flag, parse_doctype, to add such nodes to the document during parsing
     # Added parse_full parse flag mask, which extends parse_default with all node type parsing flags except parse_ws_pcdata
+    # Added xml_node::hash_value() and xml_attribute::hash_value() functions for use in hash-based containers
+    # Added internal_object() and additional constructor for both xml_node and xml_attribute for easier marshalling (useful for language bindings)
 
 * Performance improvements:
     # xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
@@ -1932,6 +1938,9 @@ Classes:
     * `bool `[link xml_attribute::comparison operator>=]`(const xml_attribute& r) const;`
     [lbr]
 
+    * `size_t `[link xml_attribute::hash_value hash_value]`() const;`
+    [lbr]
+
     * `xml_attribute `[link xml_attribute::next_attribute next_attribute]`() const;`
     * `xml_attribute `[link xml_attribute::previous_attribute previous_attribute]`() const;`
     [lbr]
@@ -1976,6 +1985,9 @@ Classes:
     * `bool `[link xml_node::comparison operator>]`(const xml_node& r) const;`
     * `bool `[link xml_node::comparison operator<=]`(const xml_node& r) const;`
     * `bool `[link xml_node::comparison operator>=]`(const xml_node& r) const;`
+    [lbr]
+
+    * `size_t `[link xml_node::hash_value hash_value]`() const;`
     [lbr]
 
     * `xml_node_type `[link xml_node::type type]`() const;`
