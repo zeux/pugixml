@@ -2920,11 +2920,14 @@ namespace
 			}
 			else if (!node.first_child())
 				writer.write(' ', '/', '>', '\n');
-			else if (node.first_child() == node.last_child() && node.first_child().type() == node_pcdata)
+			else if (node.first_child() == node.last_child() && (node.first_child().type() == node_pcdata || node.first_child().type() == node_cdata))
 			{
 				writer.write('>');
 
-				text_output_escaped(writer, node.first_child().value(), ctx_special_pcdata);
+                if (node.first_child().type() == node_pcdata)
+                    text_output_escaped(writer, node.first_child().value(), ctx_special_pcdata);
+                else
+                    text_output_cdata(writer, node.first_child().value());
 
 				writer.write('<', '/');
 				writer.write(name);

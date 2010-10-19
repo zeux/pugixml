@@ -45,6 +45,13 @@ TEST_XML(write_cdata_escape, "<![CDATA[value]]>")
 	CHECK_NODE(doc, STR("<![CDATA[1]]]]><![CDATA[>2]]]]><![CDATA[>3]]>"));
 }
 
+TEST_XML(write_cdata_inner, "<node><![CDATA[value]]></node>")
+{
+	CHECK_NODE(doc, STR("<node><![CDATA[value]]></node>"));
+	CHECK_NODE_EX(doc, STR("<node><![CDATA[value]]></node>\n"), STR(""), 0);
+}
+
+
 TEST_XML_FLAGS(write_comment, "<!--text-->", parse_default | parse_comments)
 {
 	CHECK_NODE(doc, STR("<!--text-->"));
