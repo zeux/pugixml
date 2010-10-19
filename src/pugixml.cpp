@@ -3775,6 +3775,31 @@ namespace pugi
 		return a;
 	}
 
+	xml_attribute xml_node::prepend_attribute(const char_t* name)
+	{
+		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		
+		xml_attribute a(allocate_attribute(get_allocator(_root)));
+		if (!a) return xml_attribute();
+
+		a.set_name(name);
+		
+        xml_attribute_struct* head = _root->first_attribute;
+
+		if (head)
+        {
+            a._attr->prev_attribute_c = head->prev_attribute_c;
+            head->prev_attribute_c = a._attr;
+        }
+        else
+            a._attr->prev_attribute_c = a._attr;
+		
+		a._attr->next_attribute = head;
+        _root->first_attribute = a._attr;
+				
+		return a;
+	}
+
 	xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr)
 	{
 		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
@@ -3841,6 +3866,16 @@ namespace pugi
 		return result;
 	}
 
+	xml_attribute xml_node::prepend_copy(const xml_attribute& proto)
+	{
+		if (!proto) return xml_attribute();
+
+		xml_attribute result = prepend_attribute(proto.name());
+		result.set_value(proto.value());
+
+		return result;
+	}
+
 	xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr)
 	{
 		if (!proto) return xml_attribute();
@@ -3867,6 +3902,33 @@ namespace pugi
 		
 		xml_node n(append_node(_root, get_allocator(_root), type));
 
+		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+
+		return n;
+	}
+
+	xml_node xml_node::prepend_child(xml_node_type type)
+	{
+		if (!allow_insert_child(this->type(), type)) return xml_node();
+		
+		xml_node n(allocate_node(get_allocator(_root), type));
+		if (!n) return xml_node();
+
+        n._root->parent = _root;
+
+        xml_node_struct* head = _root->first_child;
+
+		if (head)
+        {
+            n._root->prev_sibling_c = head->prev_sibling_c;
+            head->prev_sibling_c = n._root;
+        }
+        else
+            n._root->prev_sibling_c = n._root;
+		
+		n._root->next_sibling = head;
+        _root->first_child = n._root;
+				
 		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
 		return n;
@@ -3923,6 +3985,15 @@ namespace pugi
 	xml_node xml_node::append_copy(const xml_node& proto)
 	{
 		xml_node result = append_child(proto.type());
+
+		if (result) recursive_copy_skip(result, proto, result);
+
+		return result;
+	}
+
+	xml_node xml_node::prepend_copy(const xml_node& proto)
+	{
+		xml_node result = prepend_child(proto.type());
 
 		if (result) recursive_copy_skip(result, proto, result);
 

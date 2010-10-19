@@ -1059,18 +1059,20 @@ This is an example of setting attribute name and value ([@samples/modify_base.cp
 
 [section:add Adding nodes/attributes]
 
-[#xml_node::append_attribute][#xml_node::insert_attribute_after][#xml_node::insert_attribute_before][#xml_node::append_child][#xml_node::insert_child_after][#xml_node::insert_child_before]
+[#xml_node::prepend_attribute][#xml_node::append_attribute][#xml_node::insert_attribute_after][#xml_node::insert_attribute_before][#xml_node::prepend_child][#xml_node::append_child][#xml_node::insert_child_after][#xml_node::insert_child_before]
 Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before\/after some other node:
 
     xml_attribute xml_node::append_attribute(const char_t* name);
+    xml_attribute xml_node::prepend_attribute(const char_t* name);
     xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr);
     xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr);
 
     xml_node xml_node::append_child(xml_node_type type = node_element);
+    xml_node xml_node::prepend_child(xml_node_type type = node_element);
     xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node);
     xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node);
 
-`append_attribute` and `append_child` create a new node/attribute at the end of the corresponding list of the node the method is called on; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node\/attribute before or after specified node\/attribute.
+`append_attribute` and `append_child` create a new node\/attribute at the end of the corresponding list of the node the method is called on; `prepend_attribute` and `prepend_child` create a new node\/attribute at the beginning of the list; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node\/attribute before or after specified node\/attribute.
 
 Attribute functions create an attribute with the specified name; you can specify the empty name and change the name later if you want to. Node functions create the node with the specified type; since node type can't be changed, you have to know the desired type beforehand. Also note that not all types can be added as children; see below for clarification.
 
@@ -1127,17 +1129,19 @@ This is an example of removing attributes\/nodes from the document ([@samples/mo
 
 [section:clone Cloning nodes/attributes]
 
-[#xml_node::append_copy][#xml_node::insert_copy_after][#xml_node::insert_copy_before]
+[#xml_node::prepend_copy][#xml_node::append_copy][#xml_node::insert_copy_after][#xml_node::insert_copy_before]
 With the help of previously described functions, it is possible to create trees with any contents and structure, including cloning the existing data. However since this is an often needed operation, pugixml provides built-in node/attribute cloning facilities. Since nodes and attributes do not exist outside of document tree, you can't create a standalone copy - you have to immediately insert it somewhere in the tree. For this, you can use one of the following functions:
 
     xml_attribute xml_node::append_copy(const xml_attribute& proto);
+    xml_attribute xml_node::prepend_copy(const xml_attribute& proto);
     xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
     xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
     xml_node xml_node::append_copy(const xml_node& proto);
+    xml_node xml_node::prepend_copy(const xml_node& proto);
     xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node);
     xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node);
 
-These functions mirror the structure of `append_child`, `insert_child_before` and related functions - they take the handle to the prototype object, which is to be cloned, insert a new attribute\/node at the appropriate place, and then copy the attribute data or the whole node subtree to the new object. The functions return the handle to the resulting duplicate object, or null handle on failure.
+These functions mirror the structure of `append_child`, `prepend_child`, `insert_child_before` and related functions - they take the handle to the prototype object, which is to be cloned, insert a new attribute\/node at the appropriate place, and then copy the attribute data or the whole node subtree to the new object. The functions return the handle to the resulting duplicate object, or null handle on failure.
 
 The attribute is copied along with the name and value; the node is copied along with its type, name and value; additionally attribute list and all children are recursively cloned, resulting in the deep subtree clone. The prototype object can be a part of the same document, or a part of any other document.
 
@@ -2051,21 +2055,25 @@ Classes:
     [lbr]
 
     * `xml_attribute `[link xml_node::append_attribute append_attribute]`(const char_t* name);`
+    * `xml_attribute `[link xml_node::prepend_attribute prepend_attribute]`(const char_t* name);`
     * `xml_attribute `[link xml_node::insert_attribute_after insert_attribute_after]`(const char_t* name, const xml_attribute& attr);`
     * `xml_attribute `[link xml_node::insert_attribute_before insert_attribute_before]`(const char_t* name, const xml_attribute& attr);`
     [lbr]
 
     * `xml_node `[link xml_node::append_child append_child]`(xml_node_type type = node_element);`
+    * `xml_node `[link xml_node::prepend_child prepend_child]`(xml_node_type type = node_element);`
     * `xml_node `[link xml_node::insert_child_after insert_child_after]`(xml_node_type type, const xml_node& node);`
     * `xml_node `[link xml_node::insert_child_before insert_child_before]`(xml_node_type type, const xml_node& node);`
     [lbr]
 
     * `xml_attribute `[link xml_node::append_copy append_copy]`(const xml_attribute& proto);`
+    * `xml_attribute `[link xml_node::prepend_copy prepend_copy]`(const xml_attribute& proto);`
     * `xml_attribute `[link xml_node::insert_copy_after insert_copy_after]`(const xml_attribute& proto, const xml_attribute& attr);`
     * `xml_attribute `[link xml_node::insert_copy_before insert_copy_before]`(const xml_attribute& proto, const xml_attribute& attr);`
     [lbr]
 
     * `xml_node `[link xml_node::append_copy append_copy]`(const xml_node& proto);`
+    * `xml_node `[link xml_node::prepend_copy prepend_copy]`(const xml_node& proto);`
     * `xml_node `[link xml_node::insert_copy_after insert_copy_after]`(const xml_node& proto, const xml_node& node);`
     * `xml_node `[link xml_node::insert_copy_before insert_copy_before]`(const xml_node& proto, const xml_node& node);`
     [lbr]
