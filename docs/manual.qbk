@@ -84,7 +84,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ]
 
-This means that you can freely use pugixml in your applications, both open-source and proprietary. If you use pugixml in a product, it is sufficient, but not strictly necessary, to add an acknowledgment like this to the product distribution:
+This means that you can freely use pugixml in your applications, both open-source and proprietary. If you use pugixml in a product, it is sufficient to add an acknowledgment like this to the product distribution:
  
 [:
 This software is based on pugixml library (http://pugixml.org).'''<sbr />'''
