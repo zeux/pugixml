@@ -84,6 +84,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 ]
 
+This means that you can freely use pugixml in your applications, both open-source and proprietary. If you use pugixml in a product, it is sufficient, but not strictly necessary, to add an acknowledgment like this to the product distribution:
+ 
+[:
+This software is based on pugixml library (http://pugixml.org).'''<sbr />'''
+pugixml is Copyright (C) 2006-2010 Arseny Kapoulkine.
+]
+
 [endsect] [/license]
 
 [endsect] [/overview]
@@ -1628,6 +1635,9 @@ Major release, featuring many XPath enhancements, wide character filename suppor
 * Specification changes:
     # CDATA nodes containing ]]> are printed as several nodes; while this changes the internal structure, this is the only way to escape CDATA contents
     # Memory allocation errors during parsing now preserve last parsed offset (to give an idea about parsing progress)
+    # If an element node has the only child, and it is of CDATA type, then the extra indentation is omitted (previously this behavior only held for PCDATA children)
+
+* Additional functionality:
     # Added xml_parse_result default constructor
     # Added xml_document::load_file and xml_document::save_file with wide character paths
     # Added as_utf8 and as_wide overloads for std::wstring/std::string arguments
@@ -1636,6 +1646,7 @@ Major release, featuring many XPath enhancements, wide character filename suppor
     # Added xml_node::hash_value() and xml_attribute::hash_value() functions for use in hash-based containers
     # Added internal_object() and additional constructor for both xml_node and xml_attribute for easier marshalling (useful for language bindings)
     # Added xml_document::document_element() function
+    # Added xml_node::prepend_attribute, xml_node::prepend_child and xml_node::prepend_copy functions
 
 * Performance improvements:
     # xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
