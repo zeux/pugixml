@@ -774,8 +774,6 @@ namespace pugi
 	};
 
 #ifndef PUGIXML_NO_XPATH
-	struct xpath_query_impl;
-	
 	// XPath query return type
 	enum xpath_value_type
 	{
@@ -875,10 +873,10 @@ namespace pugi
 	class PUGIXML_CLASS xpath_query
 	{
 	private:
-		xpath_query_impl* _impl;
+		void* _impl;
 		xpath_parse_result _result;
 
-    	typedef xpath_query_impl* xpath_query::*unspecified_bool_type;
+    	typedef void* xpath_query::*unspecified_bool_type;
 
 		// Non-copyable semantics
 		xpath_query(const xpath_query&);

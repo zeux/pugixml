@@ -440,7 +440,10 @@ namespace pugi
 		
 		xml_attribute_struct*	first_attribute;		///< First attribute
 	};
+}
 
+namespace
+{
 	struct xml_document_struct: public xml_node_struct, public xml_allocator
 	{
 		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0)
@@ -8899,6 +8902,49 @@ namespace
 		#endif
 		}
 	};
+
+    struct xpath_query_impl
+    {
+		static xpath_query_impl* create()
+		{
+			void* memory = global_allocate(sizeof(xpath_query_impl));
+
+            return new (memory) xpath_query_impl();
+		}
+
+		static void destroy(void* ptr)
+		{
+			if (!ptr) return;
+			
+			// free all allocated pages
+			static_cast<xpath_query_impl*>(ptr)->alloc.release();
+
+			// free allocator memory (with the first page)
+			global_deallocate(ptr);
+		}
+
+        xpath_query_impl(): root(0), alloc(&block)
+        {
+            block.next = 0;
+        }
+
+        xpath_ast_node* root;
+        xpath_allocator alloc;
+        xpath_memory_block block;
+    };
+
+	xpath_string evaluate_string_impl(xpath_query_impl* impl, const xpath_node& n, xpath_stack_data& sd)
+	{
+		if (!impl) return xpath_string();
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return xpath_string();
+	#endif
+
+		xpath_context c(n, 1, 1);
+
+		return impl->root->eval_string(c, sd.stack);
+	}
 }
 
 namespace pugi
@@ -9294,36 +9340,6 @@ namespace pugi
 		return find(name);
 	}
 
-    struct xpath_query_impl
-    {
-		static xpath_query_impl* create()
-		{
-			void* memory = global_allocate(sizeof(xpath_query_impl));
-
-            return new (memory) xpath_query_impl();
-		}
-
-		static void destroy(void* ptr)
-		{
-			if (!ptr) return;
-			
-			// free all allocated pages
-			static_cast<xpath_query_impl*>(ptr)->alloc.release();
-
-			// free allocator memory (with the first page)
-			global_deallocate(ptr);
-		}
-
-        xpath_query_impl(): root(0), alloc(&block)
-        {
-            block.next = 0;
-        }
-
-        xpath_ast_node* root;
-        xpath_allocator alloc;
-        xpath_memory_block block;
-    };
-
 	xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _impl(0)
 	{
 		xpath_query_impl* impl = xpath_query_impl::create();
@@ -9359,7 +9375,7 @@ namespace pugi
 	{
 		if (!_impl) return xpath_type_none;
 
-		return _impl->root->rettype();
+		return static_cast<xpath_query_impl*>(_impl)->root->rettype();
 	}
 
 	bool xpath_query::evaluate_boolean(const xpath_node& n) const
@@ -9373,7 +9389,7 @@ namespace pugi
 		if (setjmp(sd.error_handler)) return false;
 	#endif
 		
-		return _impl->root->eval_boolean(c, sd.stack);
+		return static_cast<xpath_query_impl*>(_impl)->root->eval_boolean(c, sd.stack);
 	}
 	
 	double xpath_query::evaluate_number(const xpath_node& n) const
@@ -9387,28 +9403,15 @@ namespace pugi
 		if (setjmp(sd.error_handler)) return gen_nan();
 	#endif
 
-		return _impl->root->eval_number(c, sd.stack);
+		return static_cast<xpath_query_impl*>(_impl)->root->eval_number(c, sd.stack);
 	}
 
-	static xpath_string evaluate_string_impl(xpath_query_impl* impl, const xpath_node& n, xpath_stack_data& sd)
-	{
-		if (!impl) return xpath_string();
-
-	#ifdef PUGIXML_NO_EXCEPTIONS
-		if (setjmp(sd.error_handler)) return xpath_string();
-	#endif
-
-		xpath_context c(n, 1, 1);
-
-		return impl->root->eval_string(c, sd.stack);
-	}
-	
 #ifndef PUGIXML_NO_STL
 	string_t xpath_query::evaluate_string(const xpath_node& n) const
 	{
 		xpath_stack_data sd;
 
-		return evaluate_string_impl(_impl, n, sd).c_str();
+		return evaluate_string_impl(static_cast<xpath_query_impl*>(_impl), n, sd).c_str();
 	}
 #endif
 
@@ -9416,7 +9419,7 @@ namespace pugi
 	{
 		xpath_stack_data sd;
 
-		xpath_string r = evaluate_string_impl(_impl, n, sd);
+		xpath_string r = evaluate_string_impl(static_cast<xpath_query_impl*>(_impl), n, sd);
 
 		size_t full_size = r.length() + 1;
 		
@@ -9436,7 +9439,9 @@ namespace pugi
 	{
 		if (!_impl) return xpath_node_set();
 
-		if (_impl->root->rettype() != xpath_type_node_set)
+        xpath_ast_node* root = static_cast<xpath_query_impl*>(_impl)->root;
+
+		if (root->rettype() != xpath_type_node_set)
 		{
 		#ifdef PUGIXML_NO_EXCEPTIONS
 			return xpath_node_set();
@@ -9455,7 +9460,7 @@ namespace pugi
 		if (setjmp(sd.error_handler)) return xpath_node_set();
 	#endif
 
-		xpath_node_set_raw r = _impl->root->eval_node_set(c, sd.stack);
+		xpath_node_set_raw r = root->eval_node_set(c, sd.stack);
 
 		return xpath_node_set(r.begin(), r.end(), r.type());
 	}
