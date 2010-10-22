@@ -5000,6 +5000,10 @@ namespace
 		size_t _root_size;
 
 	public:
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		jmp_buf* error_handler;
+	#endif
+
 		xpath_allocator(xpath_memory_block* root, size_t root_size = 0): _root(root), _root_size(root_size)
 		{
 		#ifdef PUGIXML_NO_EXCEPTIONS
@@ -5132,10 +5136,6 @@ namespace
 				cur = next;
 			}
 		}
-
-	#ifdef PUGIXML_NO_EXCEPTIONS
-		jmp_buf* error_handler;
-	#endif
 	};
 
 	struct xpath_allocator_capture
@@ -9298,13 +9298,9 @@ namespace pugi
     {
 		static xpath_query_impl* create()
 		{
-			void* memory = global_allocate(sizeof(xpath_query_impl) + sizeof(xpath_memory_block));
-			if (!memory) return 0;
+			void* memory = global_allocate(sizeof(xpath_query_impl));
 
-			xpath_memory_block* root = reinterpret_cast<xpath_memory_block*>(static_cast<xpath_query_impl*>(memory) + 1);
-			root->next = 0;
-
-			return new (memory) xpath_query_impl(root);
+            return new (memory) xpath_query_impl();
 		}
 
 		static void destroy(void* ptr)
@@ -9318,12 +9314,14 @@ namespace pugi
 			global_deallocate(ptr);
 		}
 
-        xpath_query_impl(xpath_memory_block* block): root(0), alloc(block)
+        xpath_query_impl(): root(0), alloc(&block)
         {
+            block.next = 0;
         }
 
         xpath_ast_node* root;
         xpath_allocator alloc;
+        xpath_memory_block block;
     };
 
 	xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _impl(0)
