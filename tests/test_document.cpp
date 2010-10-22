@@ -854,7 +854,7 @@ TEST(document_load_exceptions)
     try
     {
         pugi::xml_document doc;
-        if (!doc.load("<node attribute='value")) throw std::bad_alloc();
+        if (!doc.load(STR("<node attribute='value"))) throw std::bad_alloc();
 
         CHECK_FORCE_FAIL("Expected parsing failure");
     }
