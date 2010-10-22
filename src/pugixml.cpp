@@ -4757,7 +4757,7 @@ namespace std
 #ifndef PUGIXML_NO_XPATH
 
 // STL replacements
-namespace pstd
+namespace
 {
 	struct equal_to
 	{
@@ -6095,18 +6095,18 @@ namespace
 // Internal node set class
 namespace
 {
-	xpath_node_set::type_t xpath_sort(xpath_node* begin, xpath_node* end, xpath_node_set::type_t type, bool reverse)
+	xpath_node_set::type_t xpath_sort(xpath_node* begin, xpath_node* end, xpath_node_set::type_t type, bool rev)
 	{
-		xpath_node_set::type_t order = reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
+		xpath_node_set::type_t order = rev ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
 
 		if (type == xpath_node_set::type_unsorted)
 		{
-			pstd::sort(begin, end, document_order_comparator());
+			sort(begin, end, document_order_comparator());
 
 			type = xpath_node_set::type_sorted;
 		}
 		
-		if (type != order) pstd::reverse(begin, end);
+		if (type != order) reverse(begin, end);
 			
 		return order;
 	}
@@ -6124,7 +6124,7 @@ namespace
 			return *(end - 1);
 
 		case xpath_node_set::type_unsorted:
-			return *pstd::min_element(begin, end, document_order_comparator());
+			return *min_element(begin, end, document_order_comparator());
 
 		default:
 			assert(!"Invalid node set type");
@@ -6213,7 +6213,7 @@ namespace
 			_end += count;
 		}
 
-		void sort()
+		void sort_do()
 		{
 			_type = xpath_sort(_begin, _end, _type, false);
 		}
@@ -6228,9 +6228,9 @@ namespace
 		void remove_duplicates()
 		{
 			if (_type == xpath_node_set::type_unsorted)
-				pstd::sort(_begin, _end, duplicate_comparator());
+				sort(_begin, _end, duplicate_comparator());
 		
-			_end = pstd::unique(_begin, _end);
+			_end = unique(_begin, _end);
 		}
 
 		xpath_node_set::type_t type() const
@@ -6783,8 +6783,8 @@ namespace
 			{
 				if (lt == xpath_type_node_set)
 				{
-					pstd::swap(lhs, rhs);
-					pstd::swap(lt, rt);
+					swap(lhs, rhs);
+					swap(lt, rt);
 				}
 
 				if (lt == xpath_type_boolean)
@@ -7364,22 +7364,22 @@ namespace
 				return _left->eval_boolean(c, stack) && _right->eval_boolean(c, stack);
 				
 			case ast_op_equal:
-				return compare_eq(_left, _right, c, stack, pstd::equal_to());
+				return compare_eq(_left, _right, c, stack, equal_to());
 
 			case ast_op_not_equal:
-				return compare_eq(_left, _right, c, stack, pstd::not_equal_to());
+				return compare_eq(_left, _right, c, stack, not_equal_to());
 	
 			case ast_op_less:
-				return compare_rel(_left, _right, c, stack, pstd::less());
+				return compare_rel(_left, _right, c, stack, less());
 			
 			case ast_op_greater:
-				return compare_rel(_right, _left, c, stack, pstd::less());
+				return compare_rel(_right, _left, c, stack, less());
 
 			case ast_op_less_or_equal:
-				return compare_rel(_left, _right, c, stack, pstd::less_equal());
+				return compare_rel(_left, _right, c, stack, less_equal());
 			
 			case ast_op_greater_or_equal:
-				return compare_rel(_right, _left, c, stack, pstd::less_equal());
+				return compare_rel(_right, _left, c, stack, less_equal());
 
 			case ast_func_starts_with:
 			{
@@ -7914,7 +7914,7 @@ namespace
 				xpath_node_set_raw set = _left->eval_node_set(c, stack);
 
 				// either expression is a number or it contains position() call; sort by document order
-				if (_type == ast_filter) set.sort();
+				if (_type == ast_filter) set.sort_do();
 
 				apply_predicate(set, 0, _right, stack);
 			
