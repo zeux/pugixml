@@ -90,6 +90,8 @@ typedef __int32 int32_t;
 #	define DMC_VOLATILE
 #endif
 
+using namespace pugi;
+
 // Memory allocation
 namespace
 {
@@ -103,15 +105,13 @@ namespace
 		free(ptr);
 	}
 
-	pugi::allocation_function global_allocate = default_allocate;
-	pugi::deallocation_function global_deallocate = default_deallocate;
+	allocation_function global_allocate = default_allocate;
+	deallocation_function global_deallocate = default_deallocate;
 }
 
 // String utilities
 namespace
 {
-	using namespace pugi;
-
 	// Get string length
 	size_t strlength(const char_t* s)
 	{
@@ -184,7 +184,7 @@ namespace
 }
 #endif
 
-namespace pugi
+namespace
 {
 	static const size_t xml_memory_page_size = 32768;
 
@@ -396,7 +396,10 @@ namespace pugi
 		out_page = page;
 		return page->data;
 	}
+}
 
+namespace pugi
+{
 	/// A 'name=value' XML attribute structure.
 	struct xml_attribute_struct
 	{
@@ -447,7 +450,7 @@ namespace pugi
 		const char_t* buffer;
 	};
 
-	inline xml_allocator& get_allocator(const xml_node_struct* node)
+	static inline xml_allocator& get_allocator(const xml_node_struct* node)
 	{
 		assert(node);
 
@@ -458,8 +461,6 @@ namespace pugi
 // Low-level DOM operations
 namespace
 {
-	using namespace pugi;
-
 	inline xml_attribute_struct* allocate_attribute(xml_allocator& alloc)
 	{
 		xml_memory_page* page;
@@ -4725,12 +4726,12 @@ namespace pugi
 namespace std
 {
 	// Workarounds for (non-standard) iterator category detection for older versions (MSVC7/IC8 and earlier)
-	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_node_iterator&)
+	std::bidirectional_iterator_tag _Iter_cat(const xml_node_iterator&)
 	{
 		return std::bidirectional_iterator_tag();
 	}
 
-	std::bidirectional_iterator_tag _Iter_cat(const pugi::xml_attribute_iterator&)
+	std::bidirectional_iterator_tag _Iter_cat(const xml_attribute_iterator&)
 	{
 		return std::bidirectional_iterator_tag();
 	}
@@ -4741,12 +4742,12 @@ namespace std
 namespace std
 {
 	// Workarounds for (non-standard) iterator category detection
-	std::bidirectional_iterator_tag __iterator_category(const pugi::xml_node_iterator&)
+	std::bidirectional_iterator_tag __iterator_category(const xml_node_iterator&)
 	{
 		return std::bidirectional_iterator_tag();
 	}
 
-	std::bidirectional_iterator_tag __iterator_category(const pugi::xml_attribute_iterator&)
+	std::bidirectional_iterator_tag __iterator_category(const xml_attribute_iterator&)
 	{
 		return std::bidirectional_iterator_tag();
 	}
@@ -4984,7 +4985,7 @@ namespace pstd
 }
 
 // Allocator used for AST and evaluation stacks
-namespace pugi
+namespace
 {
 	struct xpath_memory_block
 	{	
@@ -4999,30 +5000,6 @@ namespace pugi
 		size_t _root_size;
 
 	public:
-		static xpath_allocator* create()
-		{
-			void* memory = global_allocate(sizeof(xpath_allocator) + sizeof(xpath_memory_block));
-			if (!memory) return 0;
-
-			xpath_memory_block* root = reinterpret_cast<xpath_memory_block*>(static_cast<xpath_allocator*>(memory) + 1);
-			root->next = 0;
-
-			return new (memory) xpath_allocator(root);
-		}
-
-		static void destroy(void* ptr)
-		{
-			if (!ptr) return;
-			
-			// free all allocated pages
-			xpath_allocator* alloc = static_cast<xpath_allocator*>(ptr);
-
-			alloc->release();
-
-			// free allocator memory (with the first page)
-			global_deallocate(alloc);
-		}
-
 		xpath_allocator(xpath_memory_block* root, size_t root_size = 0): _root(root), _root_size(root_size)
 		{
 		#ifdef PUGIXML_NO_EXCEPTIONS
@@ -5216,8 +5193,6 @@ namespace pugi
 // String class
 namespace
 {
-	using namespace pugi;
-
 	class xpath_string
 	{
 		const char_t* _buffer;
@@ -5351,8 +5326,6 @@ namespace
 
 namespace
 {
-	using namespace pugi;
-
 	bool starts_with(const char_t* string, const char_t* pattern)
 	{
 		while (*pattern && *string == *pattern)
@@ -6122,8 +6095,6 @@ namespace
 // Internal node set class
 namespace
 {
-	using namespace pugi;
-
 	xpath_node_set::type_t xpath_sort(xpath_node* begin, xpath_node* end, xpath_node_set::type_t type, bool reverse)
 	{
 		xpath_node_set::type_t order = reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
@@ -6274,196 +6245,8 @@ namespace
 	};
 }
 
-namespace pugi
+namespace
 {
-#ifndef PUGIXML_NO_EXCEPTIONS
-	xpath_exception::xpath_exception(const xpath_parse_result& result): _result(result)
-	{
-		assert(result.error);
-	}
-	
-	const char* xpath_exception::what() const throw()
-	{
-		return _result.error;
-	}
-
-	const xpath_parse_result& xpath_exception::result() const
-	{
-		return _result;
-	}
-#endif
-	
-	xpath_node::xpath_node()
-	{
-	}
-		
-	xpath_node::xpath_node(const xml_node& node): _node(node)
-	{
-	}
-		
-	xpath_node::xpath_node(const xml_attribute& attribute, const xml_node& parent): _node(attribute ? parent : xml_node()), _attribute(attribute)
-	{
-	}
-
-	xml_node xpath_node::node() const
-	{
-		return _attribute ? xml_node() : _node;
-	}
-		
-	xml_attribute xpath_node::attribute() const
-	{
-		return _attribute;
-	}
-	
-	xml_node xpath_node::parent() const
-	{
-		return _attribute ? _node : _node.parent();
-	}
-
-	xpath_node::operator xpath_node::unspecified_bool_type() const
-	{
-		return (_node || _attribute) ? &xpath_node::_node : 0;
-	}
-	
-	bool xpath_node::operator!() const
-	{
-		return !(_node || _attribute);
-	}
-
-	bool xpath_node::operator==(const xpath_node& n) const
-	{
-		return _node == n._node && _attribute == n._attribute;
-	}
-	
-	bool xpath_node::operator!=(const xpath_node& n) const
-	{
-		return _node != n._node || _attribute != n._attribute;
-	}
-
-#ifdef __BORLANDC__
-	bool operator&&(const xpath_node& lhs, bool rhs)
-	{
-		return (bool)lhs && rhs;
-	}
-
-	bool operator||(const xpath_node& lhs, bool rhs)
-	{
-		return (bool)lhs || rhs;
-	}
-#endif
-
-	void xpath_node_set::_assign(const_iterator begin, const_iterator end)
-	{
-		assert(begin <= end);
-
-		size_t size = static_cast<size_t>(end - begin);
-
-		if (size <= 1)
-		{
-			// deallocate old buffer
-			if (_begin != &_storage) global_deallocate(_begin);
-
-			// use internal buffer
-			if (begin != end) _storage = *begin;
-
-			_begin = &_storage;
-			_end = &_storage + size;
-		}
-		else
-		{
-			// make heap copy
-			xpath_node* storage = static_cast<xpath_node*>(global_allocate(size * sizeof(xpath_node)));
-
-			if (!storage)
-			{
-			#ifdef PUGIXML_NO_EXCEPTIONS
-				return;
-			#else
-				throw std::bad_alloc();
-			#endif
-			}
-
-			memcpy(storage, begin, size * sizeof(xpath_node));
-			
-			// deallocate old buffer
-			if (_begin != &_storage) global_deallocate(_begin);
-
-			// finalize
-			_begin = storage;
-			_end = storage + size;
-		}
-	}
-
-	xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(&_storage), _end(&_storage)
-	{
-	}
-
-	xpath_node_set::xpath_node_set(const_iterator begin, const_iterator end, type_t type): _type(type), _begin(&_storage), _end(&_storage)
-	{
-		_assign(begin, end);
-	}
-
-	xpath_node_set::~xpath_node_set()
-	{
-		if (_begin != &_storage) global_deallocate(_begin);
-	}
-		
-	xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage)
-	{
-		_assign(ns._begin, ns._end);
-	}
-	
-	xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
-	{
-		if (this == &ns) return *this;
-		
-		_type = ns._type;
-		_assign(ns._begin, ns._end);
-
-		return *this;
-	}
-
-	xpath_node_set::type_t xpath_node_set::type() const
-	{
-		return _type;
-	}
-		
-	size_t xpath_node_set::size() const
-	{
-		return _end - _begin;
-	}
-		
-	bool xpath_node_set::empty() const
-	{
-		return _begin == _end;
-	}
-		
-	const xpath_node& xpath_node_set::operator[](size_t index) const
-	{
-		assert(index < size());
-		return _begin[index];
-	}
-
-	xpath_node_set::const_iterator xpath_node_set::begin() const
-	{
-		return _begin;
-	}
-		
-	xpath_node_set::const_iterator xpath_node_set::end() const
-	{
-		return _end;
-	}
-	
-	void xpath_node_set::sort(bool reverse)
-	{
-		_type = xpath_sort(_begin, _end, _type, reverse);
-	}
-
-	xpath_node xpath_node_set::first() const
-	{
-		return xpath_first(_begin, _end, _type);
-	}
-
 	struct xpath_context
 	{
 		xpath_node n;
@@ -9116,6 +8899,197 @@ namespace pugi
 		#endif
 		}
 	};
+}
+
+namespace pugi
+{
+#ifndef PUGIXML_NO_EXCEPTIONS
+	xpath_exception::xpath_exception(const xpath_parse_result& result): _result(result)
+	{
+		assert(result.error);
+	}
+	
+	const char* xpath_exception::what() const throw()
+	{
+		return _result.error;
+	}
+
+	const xpath_parse_result& xpath_exception::result() const
+	{
+		return _result;
+	}
+#endif
+	
+	xpath_node::xpath_node()
+	{
+	}
+		
+	xpath_node::xpath_node(const xml_node& node): _node(node)
+	{
+	}
+		
+	xpath_node::xpath_node(const xml_attribute& attribute, const xml_node& parent): _node(attribute ? parent : xml_node()), _attribute(attribute)
+	{
+	}
+
+	xml_node xpath_node::node() const
+	{
+		return _attribute ? xml_node() : _node;
+	}
+		
+	xml_attribute xpath_node::attribute() const
+	{
+		return _attribute;
+	}
+	
+	xml_node xpath_node::parent() const
+	{
+		return _attribute ? _node : _node.parent();
+	}
+
+	xpath_node::operator xpath_node::unspecified_bool_type() const
+	{
+		return (_node || _attribute) ? &xpath_node::_node : 0;
+	}
+	
+	bool xpath_node::operator!() const
+	{
+		return !(_node || _attribute);
+	}
+
+	bool xpath_node::operator==(const xpath_node& n) const
+	{
+		return _node == n._node && _attribute == n._attribute;
+	}
+	
+	bool xpath_node::operator!=(const xpath_node& n) const
+	{
+		return _node != n._node || _attribute != n._attribute;
+	}
+
+#ifdef __BORLANDC__
+	bool operator&&(const xpath_node& lhs, bool rhs)
+	{
+		return (bool)lhs && rhs;
+	}
+
+	bool operator||(const xpath_node& lhs, bool rhs)
+	{
+		return (bool)lhs || rhs;
+	}
+#endif
+
+	void xpath_node_set::_assign(const_iterator begin, const_iterator end)
+	{
+		assert(begin <= end);
+
+		size_t size = static_cast<size_t>(end - begin);
+
+		if (size <= 1)
+		{
+			// deallocate old buffer
+			if (_begin != &_storage) global_deallocate(_begin);
+
+			// use internal buffer
+			if (begin != end) _storage = *begin;
+
+			_begin = &_storage;
+			_end = &_storage + size;
+		}
+		else
+		{
+			// make heap copy
+			xpath_node* storage = static_cast<xpath_node*>(global_allocate(size * sizeof(xpath_node)));
+
+			if (!storage)
+			{
+			#ifdef PUGIXML_NO_EXCEPTIONS
+				return;
+			#else
+				throw std::bad_alloc();
+			#endif
+			}
+
+			memcpy(storage, begin, size * sizeof(xpath_node));
+			
+			// deallocate old buffer
+			if (_begin != &_storage) global_deallocate(_begin);
+
+			// finalize
+			_begin = storage;
+			_end = storage + size;
+		}
+	}
+
+	xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	{
+	}
+
+	xpath_node_set::xpath_node_set(const_iterator begin, const_iterator end, type_t type): _type(type), _begin(&_storage), _end(&_storage)
+	{
+		_assign(begin, end);
+	}
+
+	xpath_node_set::~xpath_node_set()
+	{
+		if (_begin != &_storage) global_deallocate(_begin);
+	}
+		
+	xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage)
+	{
+		_assign(ns._begin, ns._end);
+	}
+	
+	xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
+	{
+		if (this == &ns) return *this;
+		
+		_type = ns._type;
+		_assign(ns._begin, ns._end);
+
+		return *this;
+	}
+
+	xpath_node_set::type_t xpath_node_set::type() const
+	{
+		return _type;
+	}
+		
+	size_t xpath_node_set::size() const
+	{
+		return _end - _begin;
+	}
+		
+	bool xpath_node_set::empty() const
+	{
+		return _begin == _end;
+	}
+		
+	const xpath_node& xpath_node_set::operator[](size_t index) const
+	{
+		assert(index < size());
+		return _begin[index];
+	}
+
+	xpath_node_set::const_iterator xpath_node_set::begin() const
+	{
+		return _begin;
+	}
+		
+	xpath_node_set::const_iterator xpath_node_set::end() const
+	{
+		return _end;
+	}
+	
+	void xpath_node_set::sort(bool reverse)
+	{
+		_type = xpath_sort(_begin, _end, _type, reverse);
+	}
+
+	xpath_node xpath_node_set::first() const
+	{
+		return xpath_first(_begin, _end, _type);
+	}
 
     xpath_parse_result::xpath_parse_result(): error("Internal error"), offset(0)
     {
@@ -9320,11 +9294,43 @@ namespace pugi
 		return find(name);
 	}
 
-	xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _alloc(0), _root(0)
-	{
-		xpath_allocator* alloc = xpath_allocator::create();
+    struct xpath_query_impl
+    {
+		static xpath_query_impl* create()
+		{
+			void* memory = global_allocate(sizeof(xpath_query_impl) + sizeof(xpath_memory_block));
+			if (!memory) return 0;
 
-		if (!alloc)
+			xpath_memory_block* root = reinterpret_cast<xpath_memory_block*>(static_cast<xpath_query_impl*>(memory) + 1);
+			root->next = 0;
+
+			return new (memory) xpath_query_impl(root);
+		}
+
+		static void destroy(void* ptr)
+		{
+			if (!ptr) return;
+			
+			// free all allocated pages
+			static_cast<xpath_query_impl*>(ptr)->alloc.release();
+
+			// free allocator memory (with the first page)
+			global_deallocate(ptr);
+		}
+
+        xpath_query_impl(xpath_memory_block* block): root(0), alloc(block)
+        {
+        }
+
+        xpath_ast_node* root;
+        xpath_allocator alloc;
+    };
+
+	xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _impl(0)
+	{
+		xpath_query_impl* impl = xpath_query_impl::create();
+
+		if (!impl)
 		{
 		#ifdef PUGIXML_NO_EXCEPTIONS
 			_result.error = "Out of memory";
@@ -9334,13 +9340,13 @@ namespace pugi
 		}
 		else
 		{
-			buffer_holder alloc_holder(alloc, xpath_allocator::destroy);
+			buffer_holder impl_holder(impl, xpath_query_impl::destroy);
 
-			_root = xpath_parser::parse(query, variables, alloc, &_result);
+			impl->root = xpath_parser::parse(query, variables, &impl->alloc, &_result);
 
-			if (_root)
+			if (impl->root)
 			{
-				_alloc = static_cast<xpath_allocator*>(alloc_holder.release());
+                _impl = static_cast<xpath_query_impl*>(impl_holder.release());
 				_result.error = 0;
 			}
 		}
@@ -9348,19 +9354,19 @@ namespace pugi
 
 	xpath_query::~xpath_query()
 	{
-		xpath_allocator::destroy(_alloc);
+		xpath_query_impl::destroy(_impl);
 	}
 
 	xpath_value_type xpath_query::return_type() const
 	{
-		if (!_root) return xpath_type_none;
+		if (!_impl) return xpath_type_none;
 
-		return _root->rettype();
+		return _impl->root->rettype();
 	}
 
 	bool xpath_query::evaluate_boolean(const xpath_node& n) const
 	{
-		if (!_root) return false;
+		if (!_impl) return false;
 		
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
@@ -9369,12 +9375,12 @@ namespace pugi
 		if (setjmp(sd.error_handler)) return false;
 	#endif
 		
-		return _root->eval_boolean(c, sd.stack);
+		return _impl->root->eval_boolean(c, sd.stack);
 	}
 	
 	double xpath_query::evaluate_number(const xpath_node& n) const
 	{
-		if (!_root) return gen_nan();
+		if (!_impl) return gen_nan();
 		
 		xpath_context c(n, 1, 1);
 		xpath_stack_data sd;
@@ -9383,12 +9389,12 @@ namespace pugi
 		if (setjmp(sd.error_handler)) return gen_nan();
 	#endif
 
-		return _root->eval_number(c, sd.stack);
+		return _impl->root->eval_number(c, sd.stack);
 	}
 
-	static xpath_string evaluate_string_impl(xpath_ast_node* root, const xpath_node& n, xpath_stack_data& sd)
+	static xpath_string evaluate_string_impl(xpath_query_impl* impl, const xpath_node& n, xpath_stack_data& sd)
 	{
-		if (!root) return xpath_string();
+		if (!impl) return xpath_string();
 
 	#ifdef PUGIXML_NO_EXCEPTIONS
 		if (setjmp(sd.error_handler)) return xpath_string();
@@ -9396,7 +9402,7 @@ namespace pugi
 
 		xpath_context c(n, 1, 1);
 
-		return root->eval_string(c, sd.stack);
+		return impl->root->eval_string(c, sd.stack);
 	}
 	
 #ifndef PUGIXML_NO_STL
@@ -9404,7 +9410,7 @@ namespace pugi
 	{
 		xpath_stack_data sd;
 
-		return evaluate_string_impl(_root, n, sd).c_str();
+		return evaluate_string_impl(_impl, n, sd).c_str();
 	}
 #endif
 
@@ -9412,7 +9418,7 @@ namespace pugi
 	{
 		xpath_stack_data sd;
 
-		xpath_string r = evaluate_string_impl(_root, n, sd);
+		xpath_string r = evaluate_string_impl(_impl, n, sd);
 
 		size_t full_size = r.length() + 1;
 		
@@ -9430,9 +9436,9 @@ namespace pugi
 
 	xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const
 	{
-		if (!_root) return xpath_node_set();
+		if (!_impl) return xpath_node_set();
 
-		if (_root->rettype() != xpath_type_node_set)
+		if (_impl->root->rettype() != xpath_type_node_set)
 		{
 		#ifdef PUGIXML_NO_EXCEPTIONS
 			return xpath_node_set();
@@ -9451,7 +9457,7 @@ namespace pugi
 		if (setjmp(sd.error_handler)) return xpath_node_set();
 	#endif
 
-		xpath_node_set_raw r = _root->eval_node_set(c, sd.stack);
+		xpath_node_set_raw r = _impl->root->eval_node_set(c, sd.stack);
 
 		return xpath_node_set(r.begin(), r.end(), r.type());
 	}
@@ -9463,12 +9469,12 @@ namespace pugi
 
 	xpath_query::operator xpath_query::unspecified_bool_type() const
 	{
-		return _root ? &xpath_query::_root : 0;
+		return _impl ? &xpath_query::_impl : 0;
 	}
 
 	bool xpath_query::operator!() const
 	{
-		return !_root;
+		return !_impl;
 	}
 
 	xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables) const
