@@ -275,7 +275,7 @@ TEST_XML(xpath_parse_absolute, "<div><s/></div>")
 #ifdef PUGIXML_NO_EXCEPTIONS
 #   define CHECK_XPATH_FAIL_OOM(query) CHECK_XPATH_FAIL(query)
 #else
-void test_xpath_fail_oom(const char_t* query)
+static void test_xpath_fail_oom(const char_t* query)
 {
     try
     {
