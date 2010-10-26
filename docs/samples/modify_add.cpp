@@ -8,17 +8,14 @@ int main()
 
     //[code_modify_add
     // add node with some name
-    pugi::xml_node node = doc.append_child();
-    node.set_name("node");
+    pugi::xml_node node = doc.append_child("node");
 
     // add description node with text child
-    pugi::xml_node descr = node.append_child();
-    descr.set_name("description");
+    pugi::xml_node descr = node.append_child("description");
     descr.append_child(pugi::node_pcdata).set_value("Simple node");
 
     // add param node before the description
-    pugi::xml_node param = node.insert_child_before(pugi::node_element, descr);
-    param.set_name("param");
+    pugi::xml_node param = node.insert_child_before("param", descr);
 
     // add attributes to param node
     param.append_attribute("name") = "version";

@@ -339,7 +339,8 @@ Despite the fact that there are several node types, there are only three C++ typ
 
 [#xml_document::ctor]
 [#xml_document::dtor]
-Default constructor of `xml_document` initializes the document to the tree with only a root node (document node). You can then populate it with data using either tree modification functions or loading functions; all loading functions destroy the previous tree with all occupied memory, which puts existing nodes/attributes from this document to invalid state. Destructor of `xml_document` also destroys the tree, thus the lifetime of the document object should exceed the lifetimes of any node/attribute handles that point to the tree.
+[#xml_document::reset]
+Default constructor of `xml_document` initializes the document to the tree with only a root node (document node). You can then populate it with data using either tree modification functions or loading functions; all loading functions destroy the previous tree with all occupied memory, which puts existing nodes/attributes from this document to invalid state. If you want to destroy the previous tree, you can use the `xml_document::reset` function; it destroys the tree and replaces it with an empty one. Destructor of `xml_document` also destroys the tree, thus the lifetime of the document object should exceed the lifetimes of any node/attribute handles that point to the tree.
 
 [caution While technically node/attribute handles can be alive when the tree they're referring to is destroyed, calling any member function of these handles results in undefined behavior. Thus it is recommended to make sure that the document is destroyed only after all references to its nodes/attributes are destroyed.]
 
@@ -1079,9 +1080,14 @@ Nodes and attributes do not exist outside of document tree, so you can't create 
     xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node);
     xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node);
 
+    xml_node xml_node::append_child(const char_t* name);
+    xml_node xml_node::prepend_child(const char_t* name);
+    xml_node xml_node::insert_child_after(const char_t* name, const xml_node& node);
+    xml_node xml_node::insert_child_before(const char_t* name, const xml_node& node);
+
 `append_attribute` and `append_child` create a new node\/attribute at the end of the corresponding list of the node the method is called on; `prepend_attribute` and `prepend_child` create a new node\/attribute at the beginning of the list; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node\/attribute before or after specified node\/attribute.
 
-Attribute functions create an attribute with the specified name; you can specify the empty name and change the name later if you want to. Node functions create the node with the specified type; since node type can't be changed, you have to know the desired type beforehand. Also note that not all types can be added as children; see below for clarification.
+Attribute functions create an attribute with the specified name; you can specify the empty name and change the name later if you want to. Node functions with the `type` argument create the node with the specified type; since node type can't be changed, you have to know the desired type beforehand. Also note that not all types can be added as children; see below for clarification. Node function with the `name` argument create the element node (`node_element`) with the specified name.
 
 All functions return the handle to newly created object on success, and null handle on failure. There are several reasons for failure:
 
@@ -2077,6 +2083,12 @@ Classes:
     * `xml_node `[link xml_node::insert_child_before insert_child_before]`(xml_node_type type, const xml_node& node);`
     [lbr]
 
+    * `xml_node `[link xml_node::append_child append_child]`(const char_t* name);`
+    * `xml_node `[link xml_node::prepend_child prepend_child]`(const char_t* name);`
+    * `xml_node `[link xml_node::insert_child_after insert_child_after]`(const char_t* name, const xml_node& node);`
+    * `xml_node `[link xml_node::insert_child_before insert_child_before]`(const char_t* name, const xml_node& node);`
+    [lbr]
+
     * `xml_attribute `[link xml_node::append_copy append_copy]`(const xml_attribute& proto);`
     * `xml_attribute `[link xml_node::prepend_copy prepend_copy]`(const xml_attribute& proto);`
     * `xml_attribute `[link xml_node::insert_copy_after insert_copy_after]`(const xml_attribute& proto, const xml_attribute& attr);`
@@ -2109,6 +2121,9 @@ Classes:
 * `class `[link xml_document]
     * [link xml_document::ctor xml_document]`();`
     * `~`[link xml_document::dtor xml_document]`();`
+    [lbr]
+
+    * `void `[link xml_document::reset reset]`();`
     [lbr]
 
     * `xml_parse_result `[link xml_document::load_stream load]`(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
