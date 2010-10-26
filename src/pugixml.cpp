@@ -3989,6 +3989,42 @@ namespace pugi
 		return n;
 	}
 
+    xml_node xml_node::append_child(const char_t* name)
+    {
+        xml_node result = append_child(node_element);
+
+        result.set_name(name);
+
+        return result;
+    }
+
+    xml_node xml_node::prepend_child(const char_t* name)
+    {
+        xml_node result = prepend_child(node_element);
+
+        result.set_name(name);
+
+        return result;
+    }
+
+    xml_node xml_node::insert_child_after(const char_t* name, const xml_node& node)
+    {
+        xml_node result = insert_child_after(node_element, node);
+
+        result.set_name(name);
+
+        return result;
+    }
+
+    xml_node xml_node::insert_child_before(const char_t* name, const xml_node& node)
+    {
+        xml_node result = insert_child_before(node_element, node);
+
+        result.set_name(name);
+
+        return result;
+    }
+
 	xml_node xml_node::append_copy(const xml_node& proto)
 	{
 		xml_node result = append_child(proto.type());

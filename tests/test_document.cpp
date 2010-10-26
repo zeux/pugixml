@@ -876,3 +876,33 @@ TEST_XML_FLAGS(document_element_absent, "<!---->", parse_comments)
 {
     CHECK(doc.document_element() == xml_node());
 }
+
+TEST_XML(document_reset, "<node><child/></node>")
+{
+    CHECK(doc.first_child());
+
+    doc.reset();
+    CHECK(!doc.first_child());
+    CHECK_NODE(doc, STR(""));
+
+    doc.reset();
+    CHECK(!doc.first_child());
+    CHECK_NODE(doc, STR(""));
+
+    CHECK(doc.load(STR("<node/>")));
+    CHECK(doc.first_child());
+    CHECK_NODE(doc, STR("<node />"));
+
+    doc.reset();
+    CHECK(!doc.first_child());
+    CHECK_NODE(doc, STR(""));
+}
+
+TEST(document_reset_empty)
+{
+    xml_document doc;
+
+    doc.reset();
+    CHECK(!doc.first_child());
+    CHECK_NODE(doc, STR(""));
+}

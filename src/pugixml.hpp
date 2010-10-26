@@ -428,6 +428,12 @@ namespace pugi
 		xml_node insert_child_after(xml_node_type type, const xml_node& node);
 		xml_node insert_child_before(xml_node_type type, const xml_node& node);
 
+		// Add child element with specified name. Returns added node, or empty node on errors.
+		xml_node append_child(const char_t* name);
+		xml_node prepend_child(const char_t* name);
+		xml_node insert_child_after(const char_t* name, const xml_node& node);
+		xml_node insert_child_before(const char_t* name, const xml_node& node);
+
 		// Add a copy of the specified node as a child. Returns added node, or empty node on errors.
 		xml_node append_copy(const xml_node& proto);
 		xml_node prepend_copy(const xml_node& proto);
@@ -719,7 +725,6 @@ namespace pugi
 		xml_document(const xml_document&);
 		const xml_document& operator=(const xml_document&);
 
-		void reset();
 		void create();
 		void destroy();
 
@@ -731,6 +736,9 @@ namespace pugi
 
 		// Destructor, invalidates all node/attribute handles to this document
 		~xml_document();
+
+        // Removes all nodes, leaving the empty document
+		void reset();
 
 	#ifndef PUGIXML_NO_STL
 		// Load document from stream.
