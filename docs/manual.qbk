@@ -499,7 +499,7 @@ All additional memory, such as memory for document structure (node/attribute obj
 
 [section:loading Loading document]
 
-pugixml provides several functions for loading XML data from various places - files, C++ iostreams, memory buffers. All functions use an extremely fast non-validating parser. This parser is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed because of performance reasons. Also some XML transformations (i.e. EOL handling or attribute value normalization) can impact parsing speed and thus can be disabled. However for vast majority of XML documents there is no performance difference between different parsing options. Parsing options also control whether certain XML nodes are parsed; see [sref manual.loading.options] for more information.
+pugixml provides several functions for loading XML data from various places - files, C++ iostreams, memory buffers. All functions use an extremely fast non-validating parser. This parser is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed for performance reasons. Also some XML transformations (i.e. EOL handling or attribute value normalization) can impact parsing speed and thus can be disabled. However for vast majority of XML documents there is no performance difference between different parsing options. Parsing options also control whether certain XML nodes are parsed; see [sref manual.loading.options] for more information.
 
 XML data is always converted to internal character format (see [sref manual.dom.unicode]) before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions automatically. Unless explicit encoding is specified, loading functions perform automatic encoding detection based on first few characters of XML data, so in almost all cases you do not have to specify document encoding. Encoding conversion is described in more detail in [sref manual.loading.encoding].
 
@@ -507,16 +507,16 @@ XML data is always converted to internal character format (see [sref manual.dom.
 
 [#xml_document::load_file]
 [#xml_document::load_file_wide]
-The most common source of XML data is files; pugixml provides dedicated functions for loading XML document from file:
+The most common source of XML data is files; pugixml provides dedicated functions for loading an XML document from file:
 
     xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
     xml_parse_result xml_document::load_file(const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
     
-These functions accept file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc.
+These functions accept the file path as its first argument, and also two optional arguments, which specify parsing options (see [sref manual.loading.options]) and input data encoding (see [sref manual.loading.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc.
 
-File path is passed to system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
+File path is passed to the system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
 
-`load_file` destroys the existing document tree and then tries to load the new tree from the specified file. The result of the operation is returned in an `xml_parse_result` object; this object contains the operation status, and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [sref manual.loading.errors] for error handling details.
+`load_file` destroys the existing document tree and then tries to load the new tree from the specified file. The result of the operation is returned in an [link xml_parse_result] object; this object contains the operation status and the related information (i.e. last successfully parsed position in the input file, if parsing fails). See [sref manual.loading.errors] for error handling details.
 
 This is an example of loading XML document from file ([@samples/load_file.cpp]):
 
@@ -530,7 +530,7 @@ This is an example of loading XML document from file ([@samples/load_file.cpp]):
 [#xml_document::load_buffer]
 [#xml_document::load_buffer_inplace]
 [#xml_document::load_buffer_inplace_own]
-Sometimes XML data should be loaded from some other source than file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from gzip-compressed files. All these scenarios require loading document from memory. First you should prepare a contiguous memory block with all XML data; then you have to invoke one of buffer loading functions. These functions will handle the necessary encoding conversions, if any, and then will parse the data into the corresponding XML tree. There are several buffer loading functions, which differ in the behavior and thus in performance/memory usage:
+Sometimes XML data should be loaded from some other source than a file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from gzip-compressed files. All these scenarios require loading document from memory. First you should prepare a contiguous memory block with all XML data; then you have to invoke one of buffer loading functions. These functions will handle the necessary encoding conversions, if any, and then will parse the data into the corresponding XML tree. There are several buffer loading functions, which differ in the behavior and thus in performance/memory usage:
 
     xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
     xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
@@ -547,7 +547,7 @@ There is also a simple helper function for cases when you want to load the XML d
 
     xml_parse_result xml_document::load(const char_t* contents, unsigned int options = parse_default);
 
-It is equivalent to calling `load_buffer` with `size = strlen(contents)`. This function assumes native encoding for input data, so it does not do any encoding conversion. In general, this function is fine for loading small documents from string literals, but has more overhead and less functionality than buffer loading functions.
+It is equivalent to calling `load_buffer` with `size` being either `strlen(contents)` or `wcslen(contents) * sizeof(wchar_t)`, depending on the character type. This function assumes native encoding for input data, so it does not do any encoding conversion. In general, this function is fine for loading small documents from string literals, but has more overhead and less functionality than the buffer loading functions.
 
 This is an example of loading XML document from memory using different functions ([@samples/load_memory.cpp]):
 
@@ -563,7 +563,7 @@ This is an example of loading XML document from memory using different functions
 [section:stream Loading document from C++ IOstreams]
 
 [#xml_document::load_stream]
-For additional interoperability pugixml provides functions for loading document from any object which implements C++ `std::istream` interface. This allows you to load documents from any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). There are two functions, one works with narrow character streams, another handles wide character ones:
+To enhance interoperability, pugixml provides functions for loading document from any object which implements C++ `std::istream` interface. This allows you to load documents from any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). There are two functions, one works with narrow character streams, another handles wide character ones:
 
     xml_parse_result xml_document::load(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
     xml_parse_result xml_document::load(std::wistream& stream, unsigned int options = parse_default);
@@ -623,7 +623,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 If parsing failed because the source data was not a valid XML, the resulting tree is not destroyed - despite the fact that load function returns error, you can use the part of the tree that was successfully parsed. Obviously, the last element may have an unexpected name/value; for example, if the attribute value does not end with the necessary quotation mark, like in [^<node attr="value>some data</node>] example, the value of attribute `attr` will contain the string `value>some data</node>`.
 
 [#xml_parse_result::offset]
-In addition to the status code, parsing result has an `offset` member, which contains the offset of last successfully parsed character if parsing failed because of an error in source data; otherwise `offset` is 0. For parsing efficiency reasons, pugixml does not track the current line during parsing; this offset is in units of `pugi::char_t` (bytes for character mode, wide characters for wide character mode). Many text editors support 'Go To Position' feature - you can use it to locate the exact error position. Alternatively, if you're loading the document from memory, you can display the error chunk along with the error description (see the example code below).
+In addition to the status code, parsing result has an `offset` member, which contains the offset of last successfully parsed character if parsing failed because of an error in source data; otherwise `offset` is 0. For parsing efficiency reasons, pugixml does not track the current line during parsing; this offset is in units of [link char_t pugi::char_t] (bytes for character mode, wide characters for wide character mode). Many text editors support 'Go To Position' feature - you can use it to locate the exact error position. Alternatively, if you're loading the document from memory, you can display the error chunk along with the error description (see the example code below).
 
 [caution Offset is calculated in the XML buffer in native encoding; if encoding conversion is performed during parsing, offset can not be used to reliably track the error position.]
 
@@ -667,22 +667,22 @@ These flags control the resulting tree contents:
 
 These flags control the transformation of tree element contents:
 
-* [anchor parse_escapes] determines if character and entity references are to be expanded during the parsing process. Character references have the form [^&#...;] or [^&#x...;] ([^...] is Unicode numeric representation of character in either decimal ([^&#...;]) or hexadecimal ([^&#x...;]) form), entity references are [^&lt;], [^&gt;], [^&amp;], [^&apos;] and [^&quot;] (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed in attribute values and PCDATA content. This flag is *on* by default.
+* [anchor parse_escapes] determines if character and entity references are to be expanded during the parsing process. Character references have the form [^&#...;] or [^&#x...;] ([^...] is Unicode numeric representation of character in either decimal ([^&#...;]) or hexadecimal ([^&#x...;]) form), entity references are [^&lt;], [^&gt;], [^&amp;], [^&apos;] and [^&quot;] (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed on attribute values and PCDATA content. This flag is *on* by default.
 [lbr]
 
 * [anchor parse_eol] determines if EOL handling (that is, replacing sequences `0x0d 0x0a` by a single `0x0a` character, and replacing all standalone `0x0d` characters by `0x0a`) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values). This flag is *on* by default.
 [lbr]
 
-* [anchor parse_wconv_attribute] determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if `parse_eol` is set, i.e. `\r\n` is converted to single space.  This flag is *on* by default.
+* [anchor parse_wconv_attribute] determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if `parse_eol` is set, i.e. `\r\n` is converted to a single space.  This flag is *on* by default.
 [lbr]
 
 * [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if `parse_wconv_attribute` was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. The value of `parse_wconv_attribute` has no effect if this flag is on. This flag is *off* by default.
 
-[note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; `parse_wnorm_attribute` performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes behave as if they are declared as [^CDATA], thus `parse_wconv_attribute` is the default option.]
+[note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; `parse_wnorm_attribute` performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes should behave as if they are declared as [^CDATA], thus `parse_wconv_attribute` is the default option.]
 
 Additionally there are three predefined option masks:
 
-* [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, document type declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as discussed above, in practice `parse_default` is usually equally fast.
+* [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, document type declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as mentioned above, in practice `parse_default` is usually equally fast.
 [lbr]
 
 * [anchor parse_default] is the default set of flags, i.e. it has all options set to their default values. It includes parsing CDATA sections (comments/PIs are not parsed), performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed (by default) for performance reasons.
@@ -713,13 +713,13 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
     * Otherwise encoding is assumed to be UTF-8.
     [lbr]
 
-* [anchor encoding_utf8] corresponds to UTF-8 encoding as defined in Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
-* [anchor encoding_utf16_le] corresponds to little-endian UTF-16 encoding as defined in Unicode standard; surrogate pairs are supported.
-* [anchor encoding_utf16_be] corresponds to big-endian UTF-16 encoding as defined in Unicode standard; surrogate pairs are supported.
-* [anchor encoding_utf16] corresponds to UTF-16 encoding as defined in Unicode standard; the endianness is assumed to be that of target platform.
-* [anchor encoding_utf32_le] corresponds to little-endian UTF-32 encoding as defined in Unicode standard.
-* [anchor encoding_utf32_be] corresponds to big-endian UTF-32 encoding as defined in Unicode standard.
-* [anchor encoding_utf32] corresponds to UTF-32 encoding as defined in Unicode standard; the endianness is assumed to be that of target platform.
+* [anchor encoding_utf8] corresponds to UTF-8 encoding as defined in the Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
+* [anchor encoding_utf16_le] corresponds to little-endian UTF-16 encoding as defined in the Unicode standard; surrogate pairs are supported.
+* [anchor encoding_utf16_be] corresponds to big-endian UTF-16 encoding as defined in the Unicode standard; surrogate pairs are supported.
+* [anchor encoding_utf16] corresponds to UTF-16 encoding as defined in the Unicode standard; the endianness is assumed to be that of the target platform.
+* [anchor encoding_utf32_le] corresponds to little-endian UTF-32 encoding as defined in the Unicode standard.
+* [anchor encoding_utf32_be] corresponds to big-endian UTF-32 encoding as defined in the Unicode standard.
+* [anchor encoding_utf32] corresponds to UTF-32 encoding as defined in the Unicode standard; the endianness is assumed to be that of the target platform.
 * [anchor encoding_wchar] corresponds to the encoding of `wchar_t` type; it has the same meaning as either `encoding_utf16` or `encoding_utf32`, depending on `wchar_t` size.
 
 The algorithm used for `encoding_auto` correctly detects any supported Unicode encoding for all well-formed XML documents (since they start with document declaration) and for all other XML documents that start with [^<]; if your XML document does not start with [^<] and has encoding that is different from UTF-8, use the specific encoding.
@@ -770,11 +770,11 @@ The internal representation of the document is a tree, where each node has a lis
     xml_attribute xml_attribute::next_attribute() const;
     xml_attribute xml_attribute::previous_attribute() const;
 
-`parent` function returns the node's parent; all nodes except the document have non-null parent. `first_child` and `last_child` return the first and last child of the node, respectively; note that only document nodes and element nodes can have non-empty child node list. If node has no children, both functions return null nodes. `next_sibling` and `previous_sibling` return the node that's immediately to the right\/left of this node in the children list, respectively - for example, in `<a/><b/><c/>`, calling `next_sibling` for a handle that points to `<b/>` results in a handle pointing to `<c/>`, and calling `previous_sibling` results in handle pointing to `<a/>`. If node does not have next/previous sibling (this happens if it is the last/first node in the list, respectively), the functions return null nodes. `first_attribute`, `last_attribute`, `next_attribute` and `previous_attribute` functions behave the same way as corresponding child node functions and allow to iterate through attribute list in the same way.
+`parent` function returns the node's parent; all non-null nodes except the document have non-null parent. `first_child` and `last_child` return the first and last child of the node, respectively; note that only document nodes and element nodes can have non-empty child node list. If node has no children, both functions return null nodes. `next_sibling` and `previous_sibling` return the node that's immediately to the right\/left of this node in the children list, respectively - for example, in `<a/><b/><c/>`, calling `next_sibling` for a handle that points to `<b/>` results in a handle pointing to `<c/>`, and calling `previous_sibling` results in handle pointing to `<a/>`. If node does not have next/previous sibling (this happens if it is the last/first node in the list, respectively), the functions return null nodes. `first_attribute`, `last_attribute`, `next_attribute` and `previous_attribute` functions behave similarly to the corresponding child node functions and allow to iterate through attribute list in the same way.
 
 [note Because of memory consumption reasons, attributes do not have a link to their parent nodes. Thus there is no `xml_attribute::parent()` function.]
 
-Calling any of the functions above on the null handle results in a null handle - i.e. `node.first_child().next_sibling()` returns the second child of `node`, and null handle if there is no children at all or if there is only one.
+Calling any of the functions above on the null handle results in a null handle - i.e. `node.first_child().next_sibling()` returns the second child of `node`, and null handle if `node` is null, has no children at all or if it has only one child node.
 
 With these functions, you can iterate through all child nodes and display all attributes like this ([@samples/traverse_base.cpp]):
 
@@ -785,7 +785,7 @@ With these functions, you can iterate through all child nodes and display all at
 [section:nodedata Getting node data]
 
 [#xml_node::name][#xml_node::value]
-Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. `node_document` nodes do not have a name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
+Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. [link node_document] nodes do not have a name or value, [link node_element] and [link node_declaration] nodes always have a name but never have a value, [link node_pcdata], [link node_cdata], [link node_comment] and [link node_doctype] nodes never have a name but always have a value (it may be empty though), [link node_pi] nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
 
     const char_t* xml_node::name() const;
     const char_t* xml_node::value() const;
@@ -793,12 +793,12 @@ Apart from structural information (parent, child nodes, attributes), nodes can h
 In case node does not have a name or value or if the node handle is null, both functions return empty strings - they never return null pointers.
 
 [#xml_node::child_value]
-It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type `node_pcdata` with value `"This is a node"`. pugixml provides two helper functions to parse such data:
+It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type [link node_pcdata] with value `"This is a node"`. pugixml provides two helper functions to parse such data:
 
     const char_t* xml_node::child_value() const;
     const char_t* xml_node::child_value(const char_t* name) const;
 
-`child_value()` returns the value of the first child with type `node_pcdata` or `node_cdata`; `child_value(name)` is a simple wrapper for `child(name).child_value()`. For the above example, calling `node.child_value("description")` and `description.child_value()` will both produce string `"This is a node"`. If there is no child with relevant type, or if the handle is null, `child_value` functions return empty string.
+`child_value()` returns the value of the first child with type [link node_pcdata] or [link node_cdata]; `child_value(name)` is a simple wrapper for `child(name).child_value()`. For the above example, calling `node.child_value("description")` and `description.child_value()` will both produce string `"This is a node"`. If there is no child with relevant type, or if the handle is null, `child_value` functions return empty string.
 
 There is an example of using some of these functions [link code_traverse_base_data at the end of the next section].
 
@@ -812,7 +812,7 @@ All attributes have name and value, both of which are strings (value may be empt
     const char_t* xml_attribute::name() const;
     const char_t* xml_attribute::value() const;
 
-In case attribute handle is null, both functions return empty strings - they never return null pointers.
+In case the attribute handle is null, both functions return empty strings - they never return null pointers.
 
 [#xml_attribute::as_int][#xml_attribute::as_uint][#xml_attribute::as_double][#xml_attribute::as_float][#xml_attribute::as_bool]
 In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type. The accessors are as follows:
@@ -829,7 +829,7 @@ In case the input string contains a number that is out of the target numeric ran
 
 [caution Number conversion functions depend on current C locale as set with `setlocale`, so may return unexpected results if the locale is different from `"C"`.]
 
-`as_bool` converts attribute value to boolean as follows: if attribute handle is null or attribute value is empty, `false` is returned. Otherwise, `true` is returned if first character is one of `'1', 't', 'T', 'y', 'Y'`. This means that strings like `"true"` and `"yes"` are recognized as `true`, while strings like `"false"` and `"no"` are recognized as `false`. For more complex matching you'll have to write your own function.
+`as_bool` converts attribute value to boolean as follows: if attribute handle is null or attribute value is empty, `false` is returned. Otherwise, `true` is returned if the first character is one of `'1', 't', 'T', 'y', 'Y'`. This means that strings like `"true"` and `"yes"` are recognized as `true`, while strings like `"false"` and `"no"` are recognized as `false`. For more complex matching you'll have to write your own function.
 
 [note There are no portable 64-bit types in C++, so there is no corresponding conversion function. If your platform has a 64-bit integer, you can easily write a conversion function yourself.]
 
@@ -888,7 +888,7 @@ Child node lists and attribute lists are simply double-linked lists; while you c
     attribute_iterator xml_node::attributes_begin() const;
     attribute_iterator xml_node::attributes_end() const;
 
-`begin` and `attributes_begin` return iterators that point to the first node\/attribute, respectively; `end` and `attributes_end` return past-the-end iterator for node\/attribute list, respectively - this iterator can't be dereferenced, but decrementing it results in an iterator pointing to the last element in the list (except for empty lists, where decrementing past-the-end iterator is not defined). Past-the-end iterator is commonly used as a termination value for iteration loops (see sample below). If you want to get an iterator that points to an existing handle, you can construct the iterator with the handle as a single constructor argument, like so: `xml_node_iterator(node)`. For `xml_attribute_iterator`, you'll have to provide both an attribute and its parent node.
+`begin` and `attributes_begin` return iterators that point to the first node\/attribute, respectively; `end` and `attributes_end` return past-the-end iterator for node\/attribute list, respectively - this iterator can't be dereferenced, but decrementing it results in an iterator pointing to the last element in the list (except for empty lists, where decrementing past-the-end iterator results in undefined behavior). Past-the-end iterator is commonly used as a termination value for iteration loops (see sample below). If you want to get an iterator that points to an existing handle, you can construct the iterator with the handle as a single constructor argument, like so: `xml_node_iterator(node)`. For `xml_attribute_iterator`, you'll have to provide both an attribute and its parent node.
 
 `begin` and `end` return equal iterators if called on null node; such iterators can't be dereferenced. `attributes_begin` and `attributes_end` behave the same way. For correct iterator usage this means that child node\/attribute collections of null nodes appear to be empty.
 
@@ -943,7 +943,7 @@ This is an example of traversing tree hierarchy with xml_tree_walker ([@samples/
 [section:predicate Searching for nodes/attributes with predicates]
 
 [#xml_node::find_attribute][#xml_node::find_child][#xml_node::find_node]
-While there are existing functions for getting a node/attribute with known contents, they are often not sufficient for simple queries. As an alternative to iterating manually through nodes/attributes until the needed one is found, you can make a predicate and call one of `find_` functions:
+While there are existing functions for getting a node/attribute with known contents, they are often not sufficient for simple queries. As an alternative for manual iteration through nodes/attributes until the needed one is found, you can make a predicate and call one of `find_` functions:
 
     template <typename Predicate> xml_attribute xml_node::find_attribute(Predicate pred) const;
     template <typename Predicate> xml_node xml_node::find_child(Predicate pred) const;
@@ -951,11 +951,11 @@ While there are existing functions for getting a node/attribute with known conte
 
 The predicate should be either a plain function or a function object which accepts one argument of type `xml_attribute` (for `find_attribute`) or `xml_node` (for `find_child` and `find_node`), and returns `bool`. The predicate is never called with null handle as an argument.
 
-`find_attribute` function iterates through all attributes of the specified node, and returns the first attribute for which predicate returned `true`. If predicate returned `false` for all attributes or if there were no attributes (including the case where the node is null), null attribute is returned.
+`find_attribute` function iterates through all attributes of the specified node, and returns the first attribute for which the predicate returned `true`. If the predicate returned `false` for all attributes or if there were no attributes (including the case where the node is null), null attribute is returned.
 
-`find_child` function iterates through all child nodes of the specified node, and returns the first node for which predicate returned `true`. If predicate returned `false` for all nodes or if there were no child nodes (including the case where the node is null), null node is returned.
+`find_child` function iterates through all child nodes of the specified node, and returns the first node for which the predicate returned `true`. If the predicate returned `false` for all nodes or if there were no child nodes (including the case where the node is null), null node is returned.
 
-`find_node` function performs a depth-first traversal through the subtree of the specified node (excluding the node itself), and returns the first node for which predicate returned `true`. If predicate returned `false` for all nodes or if subtree was empty, null node is returned.
+`find_node` function performs a depth-first traversal through the subtree of the specified node (excluding the node itself), and returns the first node for which the predicate returned `true`. If the predicate returned `false` for all nodes or if subtree was empty, null node is returned.
 
 This is an example of using predicate-based functions ([@samples/traverse_predicate.cpp]):
 
@@ -972,7 +972,7 @@ If you need to get the document root of some node, you can use the following fun
 
     xml_node xml_node::root() const;
 
-This function returns the node with type `node_document`, which is the root node of the document the node belongs to (unless the node is null, in which case null node is returned).
+This function returns the node with type [link node_document], which is the root node of the document the node belongs to (unless the node is null, in which case null node is returned).
 
 [#xml_node::path]
 [#xml_node::first_element_by_path]
@@ -981,18 +981,18 @@ While pugixml supports complex XPath expressions, sometimes a simple path handli
     string_t xml_node::path(char_t delimiter = '/') const;
     xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter = '/') const;
 
-Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, node `<c/>` has path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<a/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
+Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with the delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, node `<c/>` has path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<a/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
 
 In case path component is ambiguous (if there are two nodes with given name), the first one is selected; paths are not guaranteed to uniquely identify nodes in a document. If any component of a path is not found, the result of `first_element_by_path` is null node; also `first_element_by_path` returns null node for null nodes, in which case the path does not matter. `path` returns an empty string for null nodes. 
 
-[note `path` function returns the result as STL string, and thus is not available if `PUGIXML_NO_STL` is defined.]
+[note `path` function returns the result as STL string, and thus is not available if [link PUGIXML_NO_STL] is defined.]
 
 [#xml_node::offset_debug]
 pugixml does not record row/column information for nodes upon parsing for efficiency reasons. However, if the node has not changed in a significant way since parsing (the name/value are not changed, and the node itself is the original one, i.e. it was not deleted from the tree and re-added later), it is possible to get the offset from the beginning of XML buffer:
 
     ptrdiff_t xml_node::offset_debug() const;
 
-If the offset is not available (this happens if the node is null, was not originally parsed from a stream, or has changed in a significant way), the function returns -1. Otherwise it returns the offset to node's data from the beginning of XML buffer in `pugi::char_t` units. For more information on parsing offsets, see [link xml_parse_result::offset parsing error handling documentation].
+If the offset is not available (this happens if the node is null, was not originally parsed from a stream, or has changed in a significant way), the function returns -1. Otherwise it returns the offset to node's data from the beginning of XML buffer in [link char_t pugi::char_t] units. For more information on parsing offsets, see [link xml_parse_result::offset parsing error handling documentation].
 
 [endsect] [/misc]
 
@@ -1009,12 +1009,12 @@ All member functions that change node/attribute data or structure are non-consta
 [section:nodedata Setting node data]
 
 [#xml_node::set_name][#xml_node::set_value]
-As discussed before, nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. `node_document` nodes do not have a name or value, `node_element` and `node_declaration` nodes always have a name but never have a value, `node_pcdata`, `node_cdata` and `node_comment` nodes never have a name but always have a value (it may be empty though), `node_pi` nodes always have a name and a value (again, value may be empty). In order to set node's name or value, you can use the following functions:
+As discussed before, nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. [link node_document] nodes do not have a name or value, [link node_element] and [link node_declaration] nodes always have a name but never have a value, [link node_pcdata], [link node_cdata], [link node_comment] and [link node_doctype] nodes never have a name but always have a value (it may be empty though), [link node_pi] nodes always have a name and a value (again, value may be empty). In order to set node's name or value, you can use the following functions:
 
     bool xml_node::set_name(const char_t* rhs);
     bool xml_node::set_value(const char_t* rhs);
 
-Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a `node_pcdata` node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
+Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a [link node_pcdata] node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
 
 There is no equivalent of `child_value` function for modifying text children of the node.
 
@@ -1093,7 +1093,7 @@ All functions return the handle to newly created object on success, and null han
 
 * Adding fails if the target node is null;
 * Only `node_element` nodes can contain attributes, so attribute adding fails if node is not an element;
-* Only `node_document` and `node_element` nodes can contain children, so child node adding fails if target node is not an element or a document;
+* Only `node_document` and `node_element` nodes can contain children, so child node adding fails if the target node is not an element or a document;
 * `node_document` and `node_null` nodes can not be inserted as children, so passing `node_document` or `node_null` value as type results in operation failure;
 * `node_declaration` nodes can only be added as children of the document node; attempt to insert declaration node as a child of an element node fails;
 * Adding node/attribute results in memory allocation, which may fail;
@@ -1190,9 +1190,9 @@ If you want to save the whole document to a file, you can use one of the followi
     bool xml_document::save_file(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
     bool xml_document::save_file(const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
-These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see [sref manual.saving.options]) and output data encoding (see [sref manual.saving.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of target system, it should have the exact case if target file system is case-sensitive, etc.
+These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see [sref manual.saving.options]) and output data encoding (see [sref manual.saving.encoding]). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc.
 
-File path is passed to system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
+File path is passed to the system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
 
 [#xml_writer_file]
 `save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns `false`. Calling `save_file` is equivalent to creating an `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
