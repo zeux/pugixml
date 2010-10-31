@@ -4505,6 +4505,14 @@ namespace pugi
 		create();
 	}
 
+    void xml_document::reset(const xml_document& proto)
+    {
+        reset();
+
+        for (xml_node cur = proto.first_child(); cur; cur = cur.next_sibling())
+            append_copy(cur);
+    }
+
 	void xml_document::create()
 	{
 		// initialize sentinel page

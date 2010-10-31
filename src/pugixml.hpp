@@ -740,6 +740,9 @@ namespace pugi
         // Removes all nodes, leaving the empty document
 		void reset();
 
+        // Removes all nodes, then copies the entire contents of the specified document
+		void reset(const xml_document& proto);
+
 	#ifndef PUGIXML_NO_STL
 		// Load document from stream.
 		xml_parse_result load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);

@@ -906,3 +906,22 @@ TEST(document_reset_empty)
     CHECK(!doc.first_child());
     CHECK_NODE(doc, STR(""));
 }
+
+TEST_XML(document_reset_copy, "<node><child/></node>")
+{
+    xml_document doc2;
+
+    CHECK_NODE(doc2, STR(""));
+
+    doc2.reset(doc);
+
+    CHECK_NODE(doc2, STR("<node><child /></node>"));
+    CHECK(doc.first_child() != doc2.first_child());
+
+    doc.reset(doc2);
+
+    CHECK_NODE(doc, STR("<node><child /></node>"));
+    CHECK(doc.first_child() != doc2.first_child());
+
+    CHECK(doc.first_child().offset_debug() == -1);
+}
