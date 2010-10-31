@@ -4,14 +4,15 @@
 <title>Changelog</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 0.9">
-<link rel="up" href="../manual.html" title="pugixml 0.9">
+<link rel="home" href="../manual.html" title="pugixml 1.0">
+<link rel="up" href="../manual.html" title="pugixml 1.0">
 <link rel="prev" href="xpath.html" title="XPath">
 <link rel="next" href="apiref.html" title="API Reference">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -29,6 +30,224 @@
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="manual.changes"></a><a class="link" href="changes.html" title="Changelog"> Changelog</a>
 </h2></div></div></div>
+<a name="manual.changes.1_11_2010___version_1_0"></a><h6>
+      <a class="link" href="changes.html#manual.changes.1_11_2010___version_1_0">1.11.2010 - version
+      1.0</a>
+    </h6>
+<p>
+      Major release, featuring many XPath enhancements, wide character filename support,
+      miscellaneous performance improvements, bug fixes and more.
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          XPath:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                XPath implementation is moved to pugixml.cpp (which is the only source
+                file now); use PUGIXML_NO_XPATH if you want to disable XPath to reduce
+                code size
+              </li>
+<li class="listitem">
+                XPath is now supported without exceptions (PUGIXML_NO_EXCEPTIONS);
+                the error handling mechanism depends on the presence of exception
+                support
+              </li>
+<li class="listitem">
+                XPath is now supported without STL (PUGIXML_NO_STL)
+              </li>
+<li class="listitem">
+                Introduced variable support
+              </li>
+<li class="listitem">
+                Introduced new xpath_query::evaluate_string, which works without
+                STL
+              </li>
+<li class="listitem">
+                Introduced new xpath_node_set constructor (from an iterator range)
+              </li>
+<li class="listitem">
+                Evaluation function now accept attribute context nodes
+              </li>
+<li class="listitem">
+                All internal allocations use custom allocation functions
+              </li>
+<li class="listitem">
+                Improved error reporting; now a last parsed offset is returned together
+                with the parsing error
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Bug fixes:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Fixed memory leak for loading from streams with stream exceptions
+                turned on
+              </li>
+<li class="listitem">
+                Fixed custom deallocation function calling with null pointer in one
+                case
+              </li>
+<li class="listitem">
+                Fixed missing attributes for iterator category functions; all functions/classes
+                can now be DLL-exported
+              </li>
+<li class="listitem">
+                Worked around Digital Mars compiler bug, which lead to minor read
+                overfetches in several functions
+              </li>
+<li class="listitem">
+                load_file now works with 2+ Gb files in MSVC/MinGW
+              </li>
+<li class="listitem">
+                XPath: fixed memory leaks for incorrect queries
+              </li>
+<li class="listitem">
+                XPath: fixed xpath_node() attribute constructor with empty attribute
+                argument
+              </li>
+<li class="listitem">
+                XPath: fixed lang() function for non-ASCII arguments
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Specification changes:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                CDATA nodes containing ]]&gt; are printed as several nodes; while
+                this changes the internal structure, this is the only way to escape
+                CDATA contents
+              </li>
+<li class="listitem">
+                Memory allocation errors during parsing now preserve last parsed
+                offset (to give an idea about parsing progress)
+              </li>
+<li class="listitem">
+                If an element node has the only child, and it is of CDATA type, then
+                the extra indentation is omitted (previously this behavior only held
+                for PCDATA children)
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Additional functionality:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Added xml_parse_result default constructor
+              </li>
+<li class="listitem">
+                Added xml_document::load_file and xml_document::save_file with wide
+                character paths
+              </li>
+<li class="listitem">
+                Added as_utf8 and as_wide overloads for std::wstring/std::string
+                arguments
+              </li>
+<li class="listitem">
+                Added DOCTYPE node type (node_doctype) and a special parse flag,
+                parse_doctype, to add such nodes to the document during parsing
+              </li>
+<li class="listitem">
+                Added parse_full parse flag mask, which extends parse_default with
+                all node type parsing flags except parse_ws_pcdata
+              </li>
+<li class="listitem">
+                Added xml_node::hash_value() and xml_attribute::hash_value() functions
+                for use in hash-based containers
+              </li>
+<li class="listitem">
+                Added internal_object() and additional constructor for both xml_node
+                and xml_attribute for easier marshalling (useful for language bindings)
+              </li>
+<li class="listitem">
+                Added xml_document::document_element() function
+              </li>
+<li class="listitem">
+                Added xml_node::prepend_attribute, xml_node::prepend_child and xml_node::prepend_copy
+                functions
+              </li>
+<li class="listitem">
+                Added xml_node::append_child, xml_node::prepend_child, xml_node::insert_child_before
+                and xml_node::insert_child_after overloads for element nodes (with
+                name instead of type)
+              </li>
+<li class="listitem">
+                Added xml_document::reset() function
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Performance improvements:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                xml_node::root() and xml_node::offset_debug() are now O(1) instead
+                of O(logN)
+              </li>
+<li class="listitem">
+                Minor parsing optimizations
+              </li>
+<li class="listitem">
+                Minor memory optimization for strings in DOM tree (set_name/set_value)
+              </li>
+<li class="listitem">
+                Memory optimization for string memory reclaiming in DOM tree (set_name/set_value
+                now reallocate the buffer if memory waste is too big)
+              </li>
+<li class="listitem">
+                XPath: optimized document order sorting
+              </li>
+<li class="listitem">
+                XPath: optimized child/attribute axis step
+              </li>
+<li class="listitem">
+                XPath: optimized number-to-string conversions in MSVC
+              </li>
+<li class="listitem">
+                XPath: optimized concat for many arguments
+              </li>
+<li class="listitem">
+                XPath: optimized evaluation allocation mechanism: constant and document
+                strings are not heap-allocated
+              </li>
+<li class="listitem">
+                XPath: optimized evaluation allocation mechanism: all temporaries'
+                allocations use fast stack-like allocator
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Compatibility:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Removed wildcard functions (xml_node::child_w, xml_node::attribute_w,
+                etc.)
+              </li>
+<li class="listitem">
+                Removed xml_node::all_elements_by_name
+              </li>
+<li class="listitem">
+                Removed xpath_type_t enumeration; use xpath_value_type instead
+              </li>
+<li class="listitem">
+                Removed format_write_bom_utf8 enumeration; use format_write_bom instead
+              </li>
+<li class="listitem">
+                Removed xml_document::precompute_document_order, xml_attribute::document_order
+                and xml_node::document_order functions; document order sort optimization
+                is now automatic
+              </li>
+<li class="listitem">
+                Removed xml_document::parse functions and transfer_ownership struct;
+                use xml_document::load_buffer_inplace and xml_document::load_buffer_inplace_own
+                instead
+              </li>
+<li class="listitem">
+                Removed as_utf16 function; use as_wide instead
+              </li>
+</ol></div>
+        </li>
+</ul></div>
 <a name="manual.changes.1_07_2010___version_0_9"></a><h6>
       <a class="link" href="changes.html#manual.changes.1_07_2010___version_0_9">1.07.2010 - version
       0.9</a>
@@ -548,7 +767,8 @@
 </tr></table>
 <hr>
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

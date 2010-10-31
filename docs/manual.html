@@ -1,15 +1,16 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>pugixml 0.9</title>
+<title>pugixml 1.0</title>
 <link rel="stylesheet" href="pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="manual.html" title="pugixml 0.9">
+<link rel="home" href="manual.html" title="pugixml 1.0">
 <link rel="next" href="manual/install.html" title="Installation">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<b>Overview</b> |
 		<a href="manual/install.html">Installation</a> |
 		Document:
@@ -36,22 +37,24 @@
 <a name="manual.overview.introduction"></a><a class="link" href="manual.html#manual.overview.introduction" title="Introduction"> Introduction</a>
 </h3></div></div></div>
 <p>
-        pugixml is a light-weight C++ XML processing library. It consists of a DOM-like
-        interface with rich traversal/modification capabilities, an extremely fast
-        XML parser which constructs the DOM tree from an XML file/buffer, and an
-        XPath 1.0 implementation for complex data-driven tree queries. Full Unicode
-        support is also available, with <a class="link" href="manual/dom.html#manual.dom.unicode" title="Unicode interface">two Unicode
-        interface variants</a> and conversions between different Unicode encodings
-        (which happen automatically during parsing/saving). The library is <a class="link" href="manual/install.html#manual.install.portability" title="Portability">extremely portable</a> and easy to
-        integrate and use. pugixml is developed and maintained since 2006 and has
-        many users. All code is distributed under the MIT license, making it completely
-        free to use in both open-source and proprietary applications.
+        <a href="http://pugixml.org/" target="_top">pugixml</a> is a light-weight C++ XML
+        processing library. It consists of a DOM-like interface with rich traversal/modification
+        capabilities, an extremely fast XML parser which constructs the DOM tree
+        from an XML file/buffer, and an <a class="link" href="manual/xpath.html" title="XPath">XPath 1.0 implementation</a>
+        for complex data-driven tree queries. Full Unicode support is also available,
+        with <a class="link" href="manual/dom.html#manual.dom.unicode" title="Unicode interface">two Unicode interface variants</a>
+        and conversions between different Unicode encodings (which happen automatically
+        during parsing/saving). The library is <a class="link" href="manual/install.html#manual.install.portability" title="Portability">extremely
+        portable</a> and easy to integrate and use. pugixml is developed and maintained
+        since 2006 and has many users. All code is distributed under the <a class="link" href="manual.html#manual.overview.license" title="License">MIT
+        license</a>, making it completely free to use in both open-source and
+        proprietary applications.
       </p>
 <p>
         pugixml enables very fast, convenient and memory-efficient XML document processing.
         However, since pugixml has a DOM parser, it can't process XML documents that
         do not fit in memory; also the parser is a non-validating one, so if you
-        need DTD/Schema validation, the library is not for you.
+        need DTD or XML Schema validation, the library is not for you.
       </p>
 <p>
         This is the complete manual for pugixml, which describes all features of
@@ -90,19 +93,19 @@
 <p>
         Feature requests can be reported the same way as bugs, so if you're missing
         some functionality in pugixml or if the API is rough in some places and you
-        can suggest an improvement, file an issue. However please note that there
-        are many factors when considering API changes (compatibility with previous
-        versions, API redundancy, etc.), so generally features that can be implemented
-        via a small function without pugixml modification are not accepted. However,
-        all rules have exceptions.
+        can suggest an improvement, <a href="http://code.google.com/p/pugixml/issues/entry?template=Feature%20request" target="_top">file
+        an issue</a>. However please note that there are many factors when considering
+        API changes (compatibility with previous versions, API redundancy, etc.),
+        so generally features that can be implemented via a small function without
+        pugixml modification are not accepted. However, all rules have exceptions.
       </p>
 <p>
         If you have a contribution to pugixml, such as build script for some build
         system/IDE, or a well-designed set of helper functions, or a binding to some
-        language other than C++, please file an issue. You can include the relevant
-        patches as issue attachments. Your contribution has to be distributed under
-        the terms of a license that's compatible with pugixml license; i.e. GPL/LGPL
-        licensed code is not accepted.
+        language other than C++, please <a href="http://code.google.com/p/pugixml/issues/entry?template=Feature%20request" target="_top">file
+        an issue</a>. You can include the relevant patches as issue attachments.
+        Your contribution has to be distributed under the terms of a license that's
+        compatible with pugixml license; i.e. GPL/LGPL licensed code is not accepted.
       </p>
 <a name="email"></a><p>
         If filing an issue is not possible due to privacy or other concerns, you
@@ -168,15 +171,26 @@
           IN THE SOFTWARE.
         </p>
 </blockquote></div>
+<p>
+        This means that you can freely use pugixml in your applications, both open-source
+        and proprietary. If you use pugixml in a product, it is sufficient to add
+        an acknowledgment like this to the product distribution:
+      </p>
+<div class="blockquote"><blockquote class="blockquote"><p>
+          This software is based on pugixml library (http://pugixml.org).<br>
+pugixml
+          is Copyright (C) 2006-2010 Arseny Kapoulkine.
+        </p></blockquote></div>
 </div>
 </div></div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: July 15, 2010 at 17:02:03 GMT</small></p></td>
+<td align="left"><p><small>Last revised: October 31, 2010 at 07:44:52 GMT</small></p></td>
 <td align="right"><div class="copyright-footer"></div></td>
 </tr></table>
 <hr>
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<b>Overview</b> |
 		<a href="manual/install.html">Installation</a> |
 		Document:

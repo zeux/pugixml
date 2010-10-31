@@ -1,16 +1,16 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>pugixml 0.9</title>
+<title>pugixml 1.0</title>
 <link rel="stylesheet" href="pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="quickstart.html" title="pugixml 0.9">
+<link rel="home" href="quickstart.html" title="pugixml 1.0">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="article">
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="quickstart.main"></a><a class="link" href="quickstart.html#quickstart.main" title="pugixml 0.9 quick start guide"> pugixml 0.9 quick start guide</a>
+<a name="quickstart.main"></a><a class="link" href="quickstart.html#quickstart.main" title="pugixml 1.0 quick start guide"> pugixml 1.0 quick start guide</a>
 </h2></div></div></div>
 <div class="toc"><dl>
 <dt><span class="section"><a href="quickstart.html#quickstart.main.introduction"> Introduction</a></span></dt>
@@ -28,16 +28,17 @@
 <a name="quickstart.main.introduction"></a><a class="link" href="quickstart.html#quickstart.main.introduction" title="Introduction"> Introduction</a>
 </h3></div></div></div>
 <p>
-        pugixml is a light-weight C++ XML processing library. It consists of a DOM-like
-        interface with rich traversal/modification capabilities, an extremely fast
-        XML parser which constructs the DOM tree from an XML file/buffer, and an
-        XPath 1.0 implementation for complex data-driven tree queries. Full Unicode
-        support is also available, with Unicode interface variants and conversions
-        between different Unicode encodings (which happen automatically during parsing/saving).
-        The library is extremely portable and easy to integrate and use. pugixml
-        is developed and maintained since 2006 and has many users. All code is distributed
-        under the MIT license, making it completely free to use in both open-source
-        and proprietary applications.
+        <a href="http://pugixml.org/" target="_top">pugixml</a> is a light-weight C++ XML
+        processing library. It consists of a DOM-like interface with rich traversal/modification
+        capabilities, an extremely fast XML parser which constructs the DOM tree
+        from an XML file/buffer, and an XPath 1.0 implementation for complex data-driven
+        tree queries. Full Unicode support is also available, with Unicode interface
+        variants and conversions between different Unicode encodings (which happen
+        automatically during parsing/saving). The library is extremely portable and
+        easy to integrate and use. pugixml is developed and maintained since 2006
+        and has many users. All code is distributed under the <a class="link" href="quickstart.html#quickstart.main.license" title="License">MIT
+        license</a>, making it completely free to use in both open-source and
+        proprietary applications.
       </p>
 <p>
         pugixml enables very fast, convenient and memory-efficient XML document processing.
@@ -74,19 +75,21 @@
         pugixml is distributed in source form. You can download a source distribution
         via one of the following links:
       </p>
-<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-0.9.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-0.9.zip</a>
-<a href="http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz</a>
+<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-1.0.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.zip</a>
+<a href="http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz</a>
 </pre>
 <p>
         The distribution contains library source, documentation (the guide you're
         reading now and the manual) and some code examples. After downloading the
         distribution, install pugixml by extracting all files from the compressed
-        archive.
+        archive. The files have different line endings depending on the archive format
+        - <code class="filename">.zip</code> archive has Windows line endings, <code class="filename">.tar.gz</code> archive has Unix line endings.
+        Otherwise the files in both archives are identical.
       </p>
 <p>
-        The complete pugixml source consists of four files - two source files, <code class="filename">pugixml.cpp</code> and
-        <code class="filename">pugixpath.cpp</code>, and two header files, <code class="filename">pugixml.hpp</code> and <code class="filename">pugiconfig.hpp</code>. <code class="filename">pugixml.hpp</code> is
-        the primary header which you need to include in order to use pugixml classes/functions.
+        The complete pugixml source consists of three files - one source file, <code class="filename">pugixml.cpp</code>,
+        and two header files, <code class="filename">pugixml.hpp</code> and <code class="filename">pugiconfig.hpp</code>. <code class="filename">pugixml.hpp</code> is the primary
+        header which you need to include in order to use pugixml classes/functions.
         The rest of this guide assumes that <code class="filename">pugixml.hpp</code> is either in the current directory
         or in one of include directories of your projects, so that <code class="computeroutput"><span class="preprocessor">#include</span> <span class="string">"pugixml.hpp"</span></code>
         can find the header; however you can also use relative path (i.e. <code class="computeroutput"><span class="preprocessor">#include</span> <span class="string">"../libs/pugixml/src/pugixml.hpp"</span></code>)
@@ -94,13 +97,14 @@
         <span class="special">&lt;</span><span class="identifier">xml</span><span class="special">/</span><span class="identifier">thirdparty</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">/</span><span class="identifier">src</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>).
       </p>
 <p>
-        The easiest way to build pugixml is to compile two source files, <code class="filename">pugixml.cpp</code> and
-        <code class="filename">pugixpath.cpp</code>, along with the existing library/executable. This process depends
-        on the method of building your application; for example, if you're using
-        Microsoft Visual Studio<sup>[<a name="trademarks" href="#ftn.trademarks" class="footnote">1</a>]</sup>, Apple Xcode, Code::Blocks or any other IDE, just add
-        <code class="filename">pugixml.cpp</code> and <code class="filename">pugixpath.cpp</code> to one of your projects. There are other building
-        methods available, including building pugixml as a standalone static/shared
-        library; read the manual for further information.
+        The easiest way to build pugixml is to compile the source file, <code class="filename">pugixml.cpp</code>,
+        along with the existing library/executable. This process depends on the method
+        of building your application; for example, if you're using Microsoft Visual
+        Studio<sup>[<a name="trademarks" href="#ftn.trademarks" class="footnote">1</a>]</sup>,
+        Apple Xcode, Code::Blocks or any other IDE, just add <code class="filename">pugixml.cpp</code> to one of
+        your projects. There are other building methods available, including building
+        pugixml as a standalone static/shared library; <a href="manual/install.html#manual.install.building" target="_top">read
+        the manual</a> for further information.
       </p>
 </div>
 <div class="section">
@@ -176,11 +180,10 @@
         <code class="computeroutput"><span class="identifier">xml_document</span></code> is the owner
         of the entire document structure; destroying the document destroys the whole
         tree. The interface of <code class="computeroutput"><span class="identifier">xml_document</span></code>
-        consists of loading functions, saving functions and the interface of <code class="computeroutput"><span class="identifier">xml_node</span></code>, which allows for document inspection
-        and/or modification. Note that while <code class="computeroutput"><span class="identifier">xml_document</span></code>
-        is a sub-class of <code class="computeroutput"><span class="identifier">xml_node</span></code>,
-        <code class="computeroutput"><span class="identifier">xml_node</span></code> is not a polymorphic
-        type; the inheritance is only used to simplify usage.
+        consists of loading functions, saving functions and the entire interface
+        of <code class="computeroutput"><span class="identifier">xml_node</span></code>, which allows
+        for document inspection and/or modification. Note that while <code class="computeroutput"><span class="identifier">xml_document</span></code> is a sub-class of <code class="computeroutput"><span class="identifier">xml_node</span></code>, <code class="computeroutput"><span class="identifier">xml_node</span></code>
+        is not a polymorphic type; the inheritance is present only to simplify usage.
       </p>
 <p>
         <code class="computeroutput"><span class="identifier">xml_node</span></code> is the handle to
@@ -208,8 +211,8 @@
         <code class="computeroutput"><span class="identifier">xml_attribute</span></code> is the handle
         to an XML attribute; it has the same semantics as <code class="computeroutput"><span class="identifier">xml_node</span></code>,
         i.e. there can be several <code class="computeroutput"><span class="identifier">xml_attribute</span></code>
-        handles pointing to the same underlying object, there is a special null attribute
-        value, which propagates to function results.
+        handles pointing to the same underlying object and there is a special null
+        attribute value, which propagates to function results.
       </p>
 <p>
         There are two choices of interface and internal representation when configuring
@@ -217,8 +220,8 @@
         UTF-16/32 (also called wchar_t) one. The choice is controlled via <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code> define; you can set
         it via <code class="filename">pugiconfig.hpp</code> or via preprocessor options. All tree functions that
         work with strings work with either C-style null terminated strings or STL
-        strings of the selected character type. Read the manual for additional information
-        on Unicode interface.
+        strings of the selected character type. <a href="manual/dom.html#manual.dom.unicode" target="_top">Read
+        the manual</a> for additional information on Unicode interface.
       </p>
 </div>
 <div class="section">
@@ -601,13 +604,13 @@
 <p>
       </p>
 <p>
-        Nodes and attributes do not exist outside of document tree, so you can't
-        create them without adding them to some document. A node or attribute can
-        be created at the end of node/attribute list or before/after some other node.
-        All insertion functions return the handle to newly created object on success,
-        and null handle on failure. Even if the operation fails (for example, if
-        you're trying to add a child node to PCDATA node), the document remains in
-        consistent state, but the requested node/attribute is not added.
+        Nodes and attributes do not exist without a document tree, so you can't create
+        them without adding them to some document. A node or attribute can be created
+        at the end of node/attribute list or before/after some other node. All insertion
+        functions return the handle to newly created object on success, and null
+        handle on failure. Even if the operation fails (for example, if you're trying
+        to add a child node to PCDATA node), the document remains in consistent state,
+        but the requested node/attribute is not added.
       </p>
 <div class="caution"><table border="0" summary="Caution">
 <tr>
@@ -628,17 +631,14 @@
         
 </p>
 <pre class="programlisting"><span class="comment">// add node with some name
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">();</span>
-<span class="identifier">node</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 
 <span class="comment">// add description node with text child
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">descr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">();</span>
-<span class="identifier">descr</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">descr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
 <span class="identifier">descr</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">node_pcdata</span><span class="special">).</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"Simple node"</span><span class="special">);</span>
 
 <span class="comment">// add param node before the description
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">node_element</span><span class="special">,</span> <span class="identifier">descr</span><span class="special">);</span>
-<span class="identifier">param</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"param"</span><span class="special">);</span>
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="string">"param"</span><span class="special">,</span> <span class="identifier">descr</span><span class="special">);</span>
 
 <span class="comment">// add attributes to param node
 </span><span class="identifier">param</span><span class="special">.</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">)</span> <span class="special">=</span> <span class="string">"version"</span><span class="special">;</span>
@@ -647,7 +647,7 @@
 </pre>
 <p>
       </p>
-<a name="xml_node::remove_attribute"></a><a name="xml_node::remove_child"></a><p>
+<p>
         If you do not want your document to contain some node or attribute, you can
         remove it with <code class="computeroutput"><span class="identifier">remove_attribute</span></code>
         and <code class="computeroutput"><span class="identifier">remove_child</span></code> functions.
@@ -693,12 +693,12 @@
         encoding conversions.
       </p>
 <p>
-        The node/attribute data is written to the destination properly formatted
+        Before writing to the destination the node/attribute data is properly formatted
         according to the node type; all special XML symbols, such as &lt; and &amp;,
         are properly escaped. In order to guard against forgotten node/attribute
         names, empty node/attribute names are printed as <code class="computeroutput"><span class="string">":anonymous"</span></code>.
-        For proper output, make sure all node and attribute names are set to meaningful
-        values.
+        For well-formed output, make sure all node and attribute names are set to
+        meaningful values.
       </p>
 <p>
         If you want to save the whole document to a file, you can use the <code class="computeroutput"><span class="identifier">save_file</span></code> function, which returns <code class="computeroutput"><span class="keyword">true</span></code> on success. This is a simple example
@@ -713,11 +713,11 @@
 <p>
       </p>
 <p>
-        For additional interoperability pugixml provides functions for saving document
-        to any object which implements C++ std::ostream interface. This allows you
-        to save documents to any standard C++ stream (i.e. file stream) or any third-party
-        compliant implementation (i.e. Boost Iostreams). Most notably, this allows
-        for easy debug output, since you can use <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span></code>
+        To enhance interoperability pugixml provides functions for saving document
+        to any object which implements C++ <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span></code>
+        interface. This allows you to save documents to any standard C++ stream (i.e.
+        file stream) or any third-party compliant implementation (i.e. Boost Iostreams).
+        Most notably, this allows for easy debug output, since you can use <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span></code>
         stream as saving target. There are two functions, one works with narrow character
         streams, another handles wide character ones.
       </p>
@@ -763,11 +763,12 @@
 <p>
       </p>
 <p>
-        While the previously described functions saved the whole document to the
-        destination, it is easy to save a single subtree. Instead of calling <code class="computeroutput"><span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span></code>, just call <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span></code>
-        function on the target node. You can save node contents to C++ IOstream object
-        or custom writer in this way. Saving a subtree slightly differs from saving
-        the whole document; read the manual for more information.
+        While the previously described functions save the whole document to the destination,
+        it is easy to save a single subtree. Instead of calling <code class="computeroutput"><span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span></code>,
+        just call <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span></code> function on the target node. You
+        can save node contents to C++ IOstream object or custom writer in this way.
+        Saving a subtree slightly differs from saving the whole document; <a href="manual/saving.html#manual.saving.subtree" target="_top">read the manual</a> for
+        more information.
       </p>
 </div>
 <div class="section">
@@ -819,16 +820,25 @@
           IN THE SOFTWARE.
         </p>
 </blockquote></div>
+<p>
+        This means that you can freely use pugixml in your applications, both open-source
+        and proprietary. If you use pugixml in a product, it is sufficient to add
+        an acknowledgment like this to the product distribution:
+      </p>
+<div class="blockquote"><blockquote class="blockquote"><p>
+          This software is based on pugixml library (http://pugixml.org).<br>
+pugixml
+          is Copyright (C) 2006-2010 Arseny Kapoulkine.
+        </p></blockquote></div>
 </div>
 </div>
 <div class="footnotes">
 <br><hr width="100" align="left">
-<div class="footnote"><p><sup>[<a name="ftn.trademarks" href="#trademarks" class="para">1</a>] </sup>All trademarks used are properties of their
-        respective owners.</p></div>
+<div class="footnote"><p><sup>[<a name="ftn.trademarks" href="#trademarks" class="para">1</a>] </sup>All trademarks used are properties of their respective owners.</p></div>
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: July 15, 2010 at 17:02:03 GMT</small></p></td>
+<td align="left"><p><small>Last revised: October 31, 2010 at 07:44:52 GMT</small></p></td>
 <td align="right"><div class="copyright-footer"></div></td>
 </tr></table>
 </body>

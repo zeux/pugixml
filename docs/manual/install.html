@@ -4,14 +4,15 @@
 <title>Installation</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 0.9">
-<link rel="up" href="../manual.html" title="pugixml 0.9">
-<link rel="prev" href="../manual.html" title="pugixml 0.9">
+<link rel="home" href="../manual.html" title="pugixml 1.0">
+<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="prev" href="../manual.html" title="pugixml 1.0">
 <link rel="next" href="dom.html" title="Document object model">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<b>Installation</b> |
 		Document:
@@ -64,14 +65,16 @@
           You can download the latest source distribution via one of the following
           links:
         </p>
-<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-0.9.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-0.9.zip</a>
-<a href="http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz</a>
+<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-1.0.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.zip</a>
+<a href="http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz</a>
 </pre>
 <p>
           The distribution contains library source, documentation (the manual you're
           reading now and the quick start guide) and some code examples. After downloading
           the distribution, install pugixml by extracting all files from the compressed
-          archive.
+          archive. The files have different line endings depending on the archive
+          format - <code class="filename">.zip</code> archive has Windows line endings, <code class="filename">.tar.gz</code> archive has Unix
+          line endings. Otherwise the files in both archives are identical.
         </p>
 <p>
           If you need an older version, you can download it from the <a href="http://code.google.com/p/pugixml/downloads/list" target="_top">version
@@ -91,7 +94,7 @@
 <p>
           For example, to checkout the current version, you can use this command:
         </p>
-<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/release-0.9 pugixml</pre>
+<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/release-1.0 pugixml</pre>
 <p>
           To checkout the latest version, you can use this command:
         </p>
@@ -120,9 +123,9 @@
         have to build them yourself.
       </p>
 <p>
-        The complete pugixml source consists of four files - two source files, <code class="filename">pugixml.cpp</code> and
-        <code class="filename">pugixpath.cpp</code>, and two header files, <code class="filename">pugixml.hpp</code> and <code class="filename">pugiconfig.hpp</code>. <code class="filename">pugixml.hpp</code> is
-        the primary header which you need to include in order to use pugixml classes/functions;
+        The complete pugixml source consists of three files - one source file, <code class="filename">pugixml.cpp</code>,
+        and two header files, <code class="filename">pugixml.hpp</code> and <code class="filename">pugiconfig.hpp</code>. <code class="filename">pugixml.hpp</code> is the primary
+        header which you need to include in order to use pugixml classes/functions;
         <code class="filename">pugiconfig.hpp</code> is a supplementary configuration file (see <a class="xref" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
         options</a>).
         The rest of this guide assumes that <code class="filename">pugixml.hpp</code> is either in the current directory
@@ -131,40 +134,31 @@
         or include directory-relative path (i.e. <code class="computeroutput"><span class="preprocessor">#include</span>
         <span class="special">&lt;</span><span class="identifier">xml</span><span class="special">/</span><span class="identifier">thirdparty</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">/</span><span class="identifier">src</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>).
       </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-          You don't need to compile <code class="filename">pugixpath.cpp</code> unless you use XPath.
-        </p></td></tr>
-</table></div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
 <a name="manual.install.building.embed"></a><a class="link" href="install.html#manual.install.building.embed" title="Building pugixml as a part of another static library/executable"> Building pugixml as
         a part of another static library/executable</a>
 </h4></div></div></div>
 <p>
-          The easiest way to build pugixml is to compile two source files, <code class="filename">pugixml.cpp</code> and
-          <code class="filename">pugixpath.cpp</code>, along with the existing library/executable. This process
-          depends on the method of building your application; for example, if you're
-          using Microsoft Visual Studio<sup>[<a name="trademarks" href="#ftn.trademarks" class="footnote">1</a>]</sup>, Apple Xcode, Code::Blocks or any other IDE,
-          just add <code class="filename">pugixml.cpp</code> and <code class="filename">pugixpath.cpp</code> to one of your projects.
+          The easiest way to build pugixml is to compile the source file, <code class="filename">pugixml.cpp</code>,
+          along with the existing library/executable. This process depends on the
+          method of building your application; for example, if you're using Microsoft
+          Visual Studio<sup>[<a name="trademarks" href="#ftn.trademarks" class="footnote">1</a>]</sup>, Apple Xcode, Code::Blocks or any other IDE, just add <code class="filename">pugixml.cpp</code> to
+          one of your projects.
         </p>
 <p>
           If you're using Microsoft Visual Studio and the project has precompiled
           headers turned on, you'll see the following error messages:
         </p>
-<pre class="programlisting">pugixpath.cpp(3477) : fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?</pre>
+<pre class="programlisting">pugixml.cpp(3477) : fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?</pre>
 <p>
-          The correct way to resolve this is to disable precompiled headers for <code class="filename">pugixml.cpp</code> and
-          <code class="filename">pugixpath.cpp</code>; you have to set "Create/Use Precompiled Header"
-          option (Properties dialog -&gt; C/C++ -&gt; Precompiled Headers -&gt; Create/Use
-          Precompiled Header) to "Not Using Precompiled Headers". You'll
-          have to do it for both <code class="filename">pugixml.cpp</code> and <code class="filename">pugixpath.cpp</code>, for all project configurations/platforms
-          (you can select Configuration "All Configurations" and Platform
-          "All Platforms" before editing the option):
+          The correct way to resolve this is to disable precompiled headers for <code class="filename">pugixml.cpp</code>;
+          you have to set "Create/Use Precompiled Header" option (Properties
+          dialog -&gt; C/C++ -&gt; Precompiled Headers -&gt; Create/Use Precompiled
+          Header) to "Not Using Precompiled Headers". You'll have to do
+          it for all project configurations/platforms (you can select Configuration
+          "All Configurations" and Platform "All Platforms" before
+          editing the option):
         </p>
 <div class="informaltable"><table class="table">
 <colgroup><col></colgroup>
@@ -251,7 +245,7 @@
           process does not differ from building any other library as DLL (adding
           -shared to compilation flags should suffice); if you're using MSVC-based
           toolchain, you'll have to explicitly mark exported symbols with a declspec
-          attribute. You can do it by defining <code class="computeroutput"><span class="identifier">PUGIXML_API</span></code>
+          attribute. You can do it by defining <a class="link" href="install.html#PUGIXML_API">PUGIXML_API</a>
           macro, i.e. via <code class="filename">pugiconfig.hpp</code>:
         </p>
 <pre class="programlisting"><span class="preprocessor">#ifdef</span> <span class="identifier">_DLL</span>
@@ -260,6 +254,20 @@
 <span class="preprocessor">#define</span> <span class="identifier">PUGIXML_API</span> <span class="identifier">__declspec</span><span class="special">(</span><span class="identifier">dllimport</span><span class="special">)</span>
 <span class="preprocessor">#endif</span>
 </pre>
+<div class="caution"><table border="0" summary="Caution">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="../images/caution.png"></td>
+<th align="left">Caution</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            If you're using STL-related functions, you should use the shared runtime
+            library to ensure that a single heap is used for STL allocations in your
+            application and in pugixml; in MSVC, this means selecting the 'Multithreaded
+            DLL' or 'Multithreaded Debug DLL' to 'Runtime library' property (/MD
+            or /MDd linker switch). You should also make sure that your runtime library
+            choice is consistent between different projects.
+          </p></td></tr>
+</table></div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
@@ -270,13 +278,13 @@
           pugixml uses several defines to control the compilation process. There
           are two ways to define them: either put the needed definitions to <code class="filename">pugiconfig.hpp</code> (it
           has some examples that are commented out) or provide them via compiler
-          command-line. Define consistency is important, i.e. the definitions should
-          match in all source files that include <code class="filename">pugixml.hpp</code> (including pugixml sources)
-          throughout the application. Adding defines to <code class="filename">pugiconfig.hpp</code> lets you guarantee
-          this, unless your macro definition is wrapped in preprocessor <code class="computeroutput"><span class="preprocessor">#if</span></code>/<code class="computeroutput"><span class="preprocessor">#ifdef</span></code>
-          directive and this directive is not consistent. <code class="filename">pugiconfig.hpp</code> will never
-          contain anything but comments, which means that when upgrading to new version,
-          you can safely leave your modified version intact.
+          command-line. Consistency is important: the definitions should match in
+          all source files that include <code class="filename">pugixml.hpp</code> (including pugixml sources) throughout
+          the application. Adding defines to <code class="filename">pugiconfig.hpp</code> lets you guarantee this,
+          unless your macro definition is wrapped in preprocessor <code class="computeroutput"><span class="preprocessor">#if</span></code>/<code class="computeroutput"><span class="preprocessor">#ifdef</span></code> directive and this directive
+          is not consistent. <code class="filename">pugiconfig.hpp</code> will never contain anything but comments,
+          which means that when upgrading to a new version, you can safely leave
+          your modified version intact.
         </p>
 <p>
           <a name="PUGIXML_WCHAR_MODE"></a><code class="literal">PUGIXML_WCHAR_MODE</code> define toggles
@@ -289,10 +297,9 @@
         </p>
 <p>
           <a name="PUGIXML_NO_XPATH"></a><code class="literal">PUGIXML_NO_XPATH</code> define disables XPath.
-          Both XPath interfaces and XPath implementation are excluded from compilation;
-          you can still compile the file <code class="filename">pugixpath.cpp</code> (it will result in an empty
-          translation unit). This option is provided in case you do not need XPath
-          functionality and need to save code space.
+          Both XPath interfaces and XPath implementation are excluded from compilation.
+          This option is provided in case you do not need XPath functionality and
+          need to save code space.
         </p>
 <p>
           <a name="PUGIXML_NO_STL"></a><code class="literal">PUGIXML_NO_STL</code> define disables use of
@@ -301,33 +308,11 @@
           provided in case your target platform does not have a standard-compliant
           STL implementation.
         </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-            As of version 0.9, STL is used in XPath implementation; therefore, XPath
-            is also disabled if this macro is defined. This will change in version
-            1.0.
-          </p></td></tr>
-</table></div>
 <p>
           <a name="PUGIXML_NO_EXCEPTIONS"></a><code class="literal">PUGIXML_NO_EXCEPTIONS</code> define disables
           use of exceptions in pugixml. This option is provided in case your target
-          platform does not have exception handling capabilities
+          platform does not have exception handling capabilities.
         </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-            As of version 0.9, exceptions are <span class="bold"><strong>only</strong></span>
-            used in XPath implementation; therefore, XPath is also disabled if this
-            macro is defined. This will change in version 1.0.
-          </p></td></tr>
-</table></div>
 <p>
           <a name="PUGIXML_API"></a><code class="literal">PUGIXML_API</code>, <a name="PUGIXML_CLASS"></a><code class="literal">PUGIXML_CLASS</code>
           and <a name="PUGIXML_FUNCTION"></a><code class="literal">PUGIXML_FUNCTION</code> defines let you
@@ -414,8 +399,8 @@
 </div>
 <div class="footnotes">
 <br><hr width="100" align="left">
-<div class="footnote"><p><sup>[<a name="ftn.trademarks" href="#trademarks" class="para">1</a>] </sup>All trademarks used are properties
-          of their respective owners.</p></div>
+<div class="footnote"><p><sup>[<a name="ftn.trademarks" href="#trademarks" class="para">1</a>] </sup>All trademarks used are properties of their respective
+          owners.</p></div>
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
@@ -427,7 +412,8 @@
 </tr></table>
 <hr>
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<b>Installation</b> |
 		Document:

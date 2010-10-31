@@ -4,14 +4,15 @@
 <title>Modifying document data</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 0.9">
-<link rel="up" href="../manual.html" title="pugixml 0.9">
+<link rel="home" href="../manual.html" title="pugixml 1.0">
+<link rel="up" href="../manual.html" title="pugixml 1.0">
 <link rel="prev" href="access.html" title="Accessing document data">
 <link rel="next" href="saving.html" title="Saving document">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -62,12 +63,13 @@
 </h3></div></div></div>
 <a name="xml_node::set_name"></a><a name="xml_node::set_value"></a><p>
         As discussed before, nodes can have name and value, both of which are strings.
-        Depending on node type, name or value may be absent. <code class="computeroutput"><span class="identifier">node_document</span></code>
-        nodes do not have name or value, <code class="computeroutput"><span class="identifier">node_element</span></code>
-        and <code class="computeroutput"><span class="identifier">node_declaration</span></code> nodes
-        always have a name but never have a value, <code class="computeroutput"><span class="identifier">node_pcdata</span></code>,
-        <code class="computeroutput"><span class="identifier">node_cdata</span></code> and <code class="computeroutput"><span class="identifier">node_comment</span></code> nodes never have a name but
-        always have a value (it may be empty though), <code class="computeroutput"><span class="identifier">node_pi</span></code>
+        Depending on node type, name or value may be absent. <a class="link" href="dom.html#node_document">node_document</a>
+        nodes do not have a name or value, <a class="link" href="dom.html#node_element">node_element</a>
+        and <a class="link" href="dom.html#node_declaration">node_declaration</a> nodes always
+        have a name but never have a value, <a class="link" href="dom.html#node_pcdata">node_pcdata</a>,
+        <a class="link" href="dom.html#node_cdata">node_cdata</a>, <a class="link" href="dom.html#node_comment">node_comment</a>
+        and <a class="link" href="dom.html#node_doctype">node_doctype</a> nodes never have a name
+        but always have a value (it may be empty though), <a class="link" href="dom.html#node_pi">node_pi</a>
         nodes always have a name and a value (again, value may be empty). In order
         to set node's name or value, you can use the following functions:
       </p>
@@ -78,16 +80,15 @@
         Both functions try to set the name/value to the specified string, and return
         the operation result. The operation fails if the node can not have name or
         value (for instance, when trying to call <code class="computeroutput"><span class="identifier">set_name</span></code>
-        on a <code class="computeroutput"><span class="identifier">node_pcdata</span></code> node), if
-        the node handle is null, or if there is insufficient memory to handle the
-        request. The provided string is copied into document managed memory and can
-        be destroyed after the function returns (for example, you can safely pass
-        stack-allocated buffers to these functions). The name/value content is not
-        verified, so take care to use only valid XML names, or the document may become
-        malformed.
+        on a <a class="link" href="dom.html#node_pcdata">node_pcdata</a> node), if the node handle
+        is null, or if there is insufficient memory to handle the request. The provided
+        string is copied into document managed memory and can be destroyed after
+        the function returns (for example, you can safely pass stack-allocated buffers
+        to these functions). The name/value content is not verified, so take care
+        to use only valid XML names, or the document may become malformed.
       </p>
 <p>
-        There is no equivalent of <code class="computeroutput"><span class="identifier">child_value</span></code>
+        There is no equivalent of <a class="link" href="access.html#xml_node::child_value">child_value</a>
         function for modifying text children of the node.
       </p>
 <p>
@@ -185,7 +186,7 @@
         These operators simply call the right <code class="computeroutput"><span class="identifier">set_value</span></code>
         function and return the attribute they're called on; the return value of
         <code class="computeroutput"><span class="identifier">set_value</span></code> is ignored, so
-        errors are not detected.
+        errors are ignored.
       </p>
 <p>
         This is an example of setting attribute name and value (<a href="../samples/modify_base.cpp" target="_top">samples/modify_base.cpp</a>):
@@ -214,36 +215,48 @@
 <div class="titlepage"><div><div><h3 class="title">
 <a name="manual.modify.add"></a><a class="link" href="modify.html#manual.modify.add" title="Adding nodes/attributes"> Adding nodes/attributes</a>
 </h3></div></div></div>
-<a name="xml_node::append_attribute"></a><a name="xml_node::insert_attribute_after"></a><a name="xml_node::insert_attribute_before"></a><a name="xml_node::append_child"></a><a name="xml_node::insert_child_after"></a><a name="xml_node::insert_child_before"></a><p>
-        Nodes and attributes do not exist outside of document tree, so you can't
-        create them without adding them to some document. A node or attribute can
-        be created at the end of node/attribute list or before/after some other node:
+<a name="xml_node::prepend_attribute"></a><a name="xml_node::append_attribute"></a><a name="xml_node::insert_attribute_after"></a><a name="xml_node::insert_attribute_before"></a><a name="xml_node::prepend_child"></a><a name="xml_node::append_child"></a><a name="xml_node::insert_child_after"></a><a name="xml_node::insert_child_before"></a><p>
+        Nodes and attributes do not exist without a document tree, so you can't create
+        them without adding them to some document. A node or attribute can be created
+        at the end of node/attribute list or before/after some other node:
       </p>
 <pre class="programlisting"><span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">);</span>
+<span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">prepend_attribute</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_attribute_after</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_attribute_before</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span>
 
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">append_child</span><span class="special">(</span><span class="identifier">xml_node_type</span> <span class="identifier">type</span> <span class="special">=</span> <span class="identifier">node_element</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">prepend_child</span><span class="special">(</span><span class="identifier">xml_node_type</span> <span class="identifier">type</span> <span class="special">=</span> <span class="identifier">node_element</span><span class="special">);</span>
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_child_after</span><span class="special">(</span><span class="identifier">xml_node_type</span> <span class="identifier">type</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="identifier">xml_node_type</span> <span class="identifier">type</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
+
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">append_child</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">prepend_child</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_child_after</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
 </pre>
 <p>
         <code class="computeroutput"><span class="identifier">append_attribute</span></code> and <code class="computeroutput"><span class="identifier">append_child</span></code> create a new node/attribute
         at the end of the corresponding list of the node the method is called on;
-        <code class="computeroutput"><span class="identifier">insert_attribute_after</span></code>,
+        <code class="computeroutput"><span class="identifier">prepend_attribute</span></code> and <code class="computeroutput"><span class="identifier">prepend_child</span></code> create a new node/attribute
+        at the beginning of the list; <code class="computeroutput"><span class="identifier">insert_attribute_after</span></code>,
         <code class="computeroutput"><span class="identifier">insert_attribute_before</span></code>,
         <code class="computeroutput"><span class="identifier">insert_child_after</span></code> and <code class="computeroutput"><span class="identifier">insert_attribute_before</span></code> add the node/attribute
-        before or after specified node/attribute.
+        before or after the specified node/attribute.
       </p>
 <p>
         Attribute functions create an attribute with the specified name; you can
         specify the empty name and change the name later if you want to. Node functions
-        create the node with the specified type; since node type can't be changed,
-        you have to know the desired type beforehand. Also note that not all types
-        can be added as children; see below for clarification.
+        with the <code class="computeroutput"><span class="identifier">type</span></code> argument create
+        the node with the specified type; since node type can't be changed, you have
+        to know the desired type beforehand. Also note that not all types can be
+        added as children; see below for clarification. Node functions with the
+        <code class="computeroutput"><span class="identifier">name</span></code> argument create the
+        element node (<a class="link" href="dom.html#node_element">node_element</a>) with the
+        specified name.
       </p>
 <p>
-        All functions return the handle to newly created object on success, and null
+        All functions return the handle to the created object on success, and null
         handle on failure. There are several reasons for failure:
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
@@ -251,32 +264,30 @@
             Adding fails if the target node is null;
           </li>
 <li class="listitem">
-            Only <code class="computeroutput"><span class="identifier">node_element</span></code> nodes
-            can contain attributes, so attribute adding fails if node is not an element;
+            Only <a class="link" href="dom.html#node_element">node_element</a> nodes can contain
+            attributes, so attribute adding fails if node is not an element;
           </li>
 <li class="listitem">
-            Only <code class="computeroutput"><span class="identifier">node_document</span></code> and
-            <code class="computeroutput"><span class="identifier">node_element</span></code> nodes can
-            contain children, so child node adding fails if target node is not an
-            element or a document;
+            Only <a class="link" href="dom.html#node_document">node_document</a> and <a class="link" href="dom.html#node_element">node_element</a>
+            nodes can contain children, so child node adding fails if the target
+            node is not an element or a document;
           </li>
 <li class="listitem">
-            <code class="computeroutput"><span class="identifier">node_document</span></code> and <code class="computeroutput"><span class="identifier">node_null</span></code> nodes can not be inserted
-            as children, so passing <code class="computeroutput"><span class="identifier">node_document</span></code>
-            or <code class="computeroutput"><span class="identifier">node_null</span></code> value as
-            type results in operation failure;
+            <a class="link" href="dom.html#node_document">node_document</a> and <a class="link" href="dom.html#node_null">node_null</a>
+            nodes can not be inserted as children, so passing <a class="link" href="dom.html#node_document">node_document</a>
+            or <a class="link" href="dom.html#node_null">node_null</a> value as <code class="computeroutput"><span class="identifier">type</span></code> results in operation failure;
           </li>
 <li class="listitem">
-            <code class="computeroutput"><span class="identifier">node_declaration</span></code> nodes
-            can only be added as children of the document node; attempt to insert
-            declaration node as a child of an element node fails;
+            <a class="link" href="dom.html#node_declaration">node_declaration</a> nodes can only
+            be added as children of the document node; attempt to insert declaration
+            node as a child of an element node fails;
           </li>
 <li class="listitem">
             Adding node/attribute results in memory allocation, which may fail;
           </li>
 <li class="listitem">
-            Insertion functions fail if the specified node or attribute is not in
-            the target node's children/attribute list.
+            Insertion functions fail if the specified node or attribute is null or
+            is not in the target node's children/attribute list.
           </li>
 </ul></div>
 <p>
@@ -302,17 +313,14 @@
         
 </p>
 <pre class="programlisting"><span class="comment">// add node with some name
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">();</span>
-<span class="identifier">node</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 
 <span class="comment">// add description node with text child
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">descr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">();</span>
-<span class="identifier">descr</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">descr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
 <span class="identifier">descr</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">node_pcdata</span><span class="special">).</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"Simple node"</span><span class="special">);</span>
 
 <span class="comment">// add param node before the description
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">node_element</span><span class="special">,</span> <span class="identifier">descr</span><span class="special">);</span>
-<span class="identifier">param</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"param"</span><span class="special">);</span>
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="string">"param"</span><span class="special">,</span> <span class="identifier">descr</span><span class="special">);</span>
 
 <span class="comment">// add attributes to param node
 </span><span class="identifier">param</span><span class="special">.</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">)</span> <span class="special">=</span> <span class="string">"version"</span><span class="special">;</span>
@@ -400,29 +408,32 @@
 <div class="titlepage"><div><div><h3 class="title">
 <a name="manual.modify.clone"></a><a class="link" href="modify.html#manual.modify.clone" title="Cloning nodes/attributes"> Cloning nodes/attributes</a>
 </h3></div></div></div>
-<a name="xml_node::append_copy"></a><a name="xml_node::insert_copy_after"></a><a name="xml_node::insert_copy_before"></a><p>
+<a name="xml_node::prepend_copy"></a><a name="xml_node::append_copy"></a><a name="xml_node::insert_copy_after"></a><a name="xml_node::insert_copy_before"></a><p>
         With the help of previously described functions, it is possible to create
         trees with any contents and structure, including cloning the existing data.
         However since this is an often needed operation, pugixml provides built-in
         node/attribute cloning facilities. Since nodes and attributes do not exist
-        outside of document tree, you can't create a standalone copy - you have to
+        without a document tree, you can't create a standalone copy - you have to
         immediately insert it somewhere in the tree. For this, you can use one of
         the following functions:
       </p>
 <pre class="programlisting"><span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">append_copy</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">);</span>
+<span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">prepend_copy</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_copy_after</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_copy_before</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">attr</span><span class="special">);</span>
+
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">append_copy</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">prepend_copy</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">);</span>
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_copy_after</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_copy_before</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
 </pre>
 <p>
         These functions mirror the structure of <code class="computeroutput"><span class="identifier">append_child</span></code>,
-        <code class="computeroutput"><span class="identifier">insert_child_before</span></code> and related
-        functions - they take the handle to the prototype object, which is to be
-        cloned, insert a new attribute/node at the appropriate place, and then copy
-        the attribute data or the whole node subtree to the new object. The functions
-        return the handle to the resulting duplicate object, or null handle on failure.
+        <code class="computeroutput"><span class="identifier">prepend_child</span></code>, <code class="computeroutput"><span class="identifier">insert_child_before</span></code> and related functions
+        - they take the handle to the prototype object, which is to be cloned, insert
+        a new attribute/node at the appropriate place, and then copy the attribute
+        data or the whole node subtree to the new object. The functions return the
+        handle to the resulting duplicate object, or null handle on failure.
       </p>
 <p>
         The attribute is copied along with the name and value; the node is copied
@@ -445,7 +456,7 @@
 <li class="listitem">
             Node cloning starts with insertion of the node of the same type as that
             of the prototype; for this reason, cloning functions can not be directly
-            used to clone entire documents, since <code class="computeroutput"><span class="identifier">node_document</span></code>
+            used to clone entire documents, since <a class="link" href="dom.html#node_document">node_document</a>
             is not a valid insertion type. The example below provides a workaround.
           </li>
 <li class="listitem">
@@ -524,7 +535,8 @@
 </tr></table>
 <hr>
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

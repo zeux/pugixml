@@ -4,14 +4,15 @@
 <title>Document object model</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 0.9">
-<link rel="up" href="../manual.html" title="pugixml 0.9">
+<link rel="home" href="../manual.html" title="pugixml 1.0">
+<link rel="up" href="../manual.html" title="pugixml 1.0">
 <link rel="prev" href="install.html" title="Installation">
 <link rel="next" href="loading.html" title="Loading document">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -46,10 +47,10 @@
 <p>
       pugixml stores XML data in DOM-like way: the entire XML document (both document
       structure and element data) is stored in memory as a tree. The tree can be
-      loaded from character stream (file, string, C++ I/O stream), then traversed
-      via special API or XPath expressions. The whole tree is mutable: both node
-      structure and node/attribute data can be changed at any time. Finally, the
-      result of document transformations can be saved to a character stream (file,
+      loaded from a character stream (file, string, C++ I/O stream), then traversed
+      with the special API or XPath expressions. The whole tree is mutable: both
+      node structure and node/attribute data can be changed at any time. Finally,
+      the result of document transformations can be saved to a character stream (file,
       C++ I/O stream or custom transport).
     </p>
 <div class="section">
@@ -58,12 +59,11 @@
 </h3></div></div></div>
 <p>
         The XML document is represented with a tree data structure. The root of the
-        tree is the document itself, which corresponds to C++ type <code class="computeroutput"><span class="identifier">xml_document</span></code>. Document has one or more
-        child nodes, which correspond to C++ type <code class="computeroutput"><span class="identifier">xml_node</span></code>.
-        Nodes have different types; depending on a type, a node can have a collection
-        of child nodes, a collection of attributes, which correspond to C++ type
-        <code class="computeroutput"><span class="identifier">xml_attribute</span></code>, and some additional
-        data (i.e. name).
+        tree is the document itself, which corresponds to C++ type <a class="link" href="dom.html#xml_document">xml_document</a>.
+        Document has one or more child nodes, which correspond to C++ type <a class="link" href="dom.html#xml_node">xml_node</a>. Nodes have different types; depending
+        on a type, a node can have a collection of child nodes, a collection of attributes,
+        which correspond to C++ type <a class="link" href="dom.html#xml_attribute">xml_attribute</a>,
+        and some additional data (i.e. name).
       </p>
 <a name="xml_node_type"></a><p>
         The tree nodes can be of one of the following types (which together form
@@ -73,13 +73,13 @@
 <li class="listitem">
             Document node (<a name="node_document"></a><code class="literal">node_document</code>) - this
             is the root of the tree, which consists of several child nodes. This
-            node corresponds to <code class="computeroutput"><span class="identifier">xml_document</span></code>
-            class; note that <code class="computeroutput"><span class="identifier">xml_document</span></code>
-            is a sub-class of <code class="computeroutput"><span class="identifier">xml_node</span></code>,
-            so the entire node interface is also available. However, document node
-            is special in several ways, which will be covered below. There can be
-            only one document node in the tree; document node does not have any XML
-            representation. <br><br>
+            node corresponds to <a class="link" href="dom.html#xml_document">xml_document</a>
+            class; note that <a class="link" href="dom.html#xml_document">xml_document</a> is
+            a sub-class of <a class="link" href="dom.html#xml_node">xml_node</a>, so the entire
+            node interface is also available. However, document node is special in
+            several ways, which are covered below. There can be only one document
+            node in the tree; document node does not have any XML representation.
+            <br><br>
 
           </li>
 <li class="listitem">
@@ -87,13 +87,13 @@
             is the most common type of node, which represents XML elements. Element
             nodes have a name, a collection of attributes and a collection of child
             nodes (both of which may be empty). The attribute is a simple name/value
-            pair. The example XML representation of element node is as follows:
+            pair. The example XML representation of element nodes is as follows:
           </li>
 </ul></div>
 <pre class="programlisting"><span class="special">&lt;</span><span class="identifier">node</span> <span class="identifier">attr</span><span class="special">=</span><span class="string">"value"</span><span class="special">&gt;&lt;</span><span class="identifier">child</span><span class="special">/&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span>
 </pre>
 <div class="blockquote"><blockquote class="blockquote"><p>
-          There are two element nodes here; one has name <code class="computeroutput"><span class="string">"node"</span></code>,
+          There are two element nodes here: one has name <code class="computeroutput"><span class="string">"node"</span></code>,
           single attribute <code class="computeroutput"><span class="string">"attr"</span></code>
           and single child <code class="computeroutput"><span class="string">"child"</span></code>,
           another has name <code class="computeroutput"><span class="string">"child"</span></code>
@@ -102,10 +102,10 @@
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Plain character data nodes (<a name="node_pcdata"></a><code class="literal">node_pcdata</code>)
             represent plain text in XML. PCDATA nodes have a value, but do not have
-            name or children/attributes. Note that plain character data is not a
-            part of the element node but instead has its own node; for example, an
-            element node can have several child PCDATA nodes. The example XML representation
-            of text node is as follows:
+            a name or children/attributes. Note that plain character data is not
+            a part of the element node but instead has its own node; for example,
+            an element node can have several child PCDATA nodes. The example XML
+            representation of text nodes is as follows:
           </li></ul></div>
 <pre class="programlisting"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;</span> <span class="identifier">text1</span> <span class="special">&lt;</span><span class="identifier">child</span><span class="special">/&gt;</span> <span class="identifier">text2</span> <span class="special">&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span>
 </pre>
@@ -128,9 +128,9 @@
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Comment nodes (<a name="node_comment"></a><code class="literal">node_comment</code>) represent
-            comments in XML. Comment nodes have a value, but do not have name or
-            children/attributes. The example XML representation of comment node is
-            as follows:
+            comments in XML. Comment nodes have a value, but do not have a name or
+            children/attributes. The example XML representation of a comment node
+            is as follows:
           </li></ul></div>
 <pre class="programlisting"><span class="special">&lt;!--</span> <span class="identifier">comment</span> <span class="identifier">text</span> <span class="special">--&gt;</span>
 </pre>
@@ -138,14 +138,14 @@
           Here the comment node has value <code class="computeroutput"><span class="string">"comment
           text"</span></code>. By default comment nodes are treated as non-essential
           part of XML markup and are not loaded during XML parsing. You can override
-          this behavior by adding <code class="computeroutput"><span class="identifier">parse_comments</span></code>
+          this behavior with <a class="link" href="loading.html#parse_comments">parse_comments</a>
           flag.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Processing instruction node (<a name="node_pi"></a><code class="literal">node_pi</code>) represent
             processing instructions (PI) in XML. PI nodes have a name and an optional
             value, but do not have children/attributes. The example XML representation
-            of PI node is as follows:
+            of a PI node is as follows:
           </li></ul></div>
 <pre class="programlisting"><span class="special">&lt;?</span><span class="identifier">name</span> <span class="identifier">value</span><span class="special">?&gt;</span>
 </pre>
@@ -153,17 +153,17 @@
           Here the name (also called PI target) is <code class="computeroutput"><span class="string">"name"</span></code>,
           and the value is <code class="computeroutput"><span class="string">"value"</span></code>.
           By default PI nodes are treated as non-essential part of XML markup and
-          are not loaded during XML parsing. You can override this behavior by adding
-          <code class="computeroutput"><span class="identifier">parse_pi</span></code> flag.
+          are not loaded during XML parsing. You can override this behavior with
+          <a class="link" href="loading.html#parse_pi">parse_pi</a> flag.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Declaration node (<a name="node_declaration"></a><code class="literal">node_declaration</code>)
             represents document declarations in XML. Declaration nodes have a name
             (<code class="computeroutput"><span class="string">"xml"</span></code>) and an
-            optional collection of attributes, but does not have value or children.
+            optional collection of attributes, but do not have value or children.
             There can be only one declaration node in a document; moreover, it should
             be the topmost node (its parent should be the document). The example
-            XML representation of declaration node is as follows:
+            XML representation of a declaration node is as follows:
           </li></ul></div>
 <pre class="programlisting"><span class="special">&lt;?</span><span class="identifier">xml</span> <span class="identifier">version</span><span class="special">=</span><span class="string">"1.0"</span><span class="special">?&gt;</span>
 </pre>
@@ -172,12 +172,28 @@
           and a single attribute with name <code class="computeroutput"><span class="string">"version"</span></code>
           and value <code class="computeroutput"><span class="string">"1.0"</span></code>.
           By default declaration nodes are treated as non-essential part of XML markup
-          and are not loaded during XML parsing. You can override this behavior by
-          adding <code class="computeroutput"><span class="identifier">parse_declaration</span></code>
-          flag. Also, by default a dummy declaration is output when XML document
-          is saved unless there is already a declaration in the document; you can
-          disable this by adding <code class="computeroutput"><span class="identifier">format_no_declaration</span></code>
-          flag.
+          and are not loaded during XML parsing. You can override this behavior with
+          <a class="link" href="loading.html#parse_declaration">parse_declaration</a> flag. Also,
+          by default a dummy declaration is output when XML document is saved unless
+          there is already a declaration in the document; you can disable this with
+          <a class="link" href="saving.html#format_no_declaration">format_no_declaration</a> flag.
+        </p></blockquote></div>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+            Document type declaration node (<a name="node_doctype"></a><code class="literal">node_doctype</code>)
+            represents document type declarations in XML. Document type declaration
+            nodes have a value, which corresponds to the entire document type contents;
+            no additional nodes are created for inner elements like <code class="computeroutput"><span class="special">&lt;!</span><span class="identifier">ENTITY</span><span class="special">&gt;</span></code>. There can be only one document type
+            declaration node in a document; moreover, it should be the topmost node
+            (its parent should be the document). The example XML representation of
+            a document type declaration node is as follows:
+          </li></ul></div>
+<pre class="programlisting"><span class="special">&lt;!</span><span class="identifier">DOCTYPE</span> <span class="identifier">greeting</span> <span class="special">[</span> <span class="special">&lt;!</span><span class="identifier">ELEMENT</span> <span class="identifier">greeting</span> <span class="special">(</span><span class="preprocessor">#PCDATA</span><span class="special">)&gt;</span> <span class="special">]&gt;</span>
+</pre>
+<div class="blockquote"><blockquote class="blockquote"><p>
+          Here the node has value <code class="computeroutput"><span class="string">"greeting [ &lt;!ELEMENT
+          greeting (#PCDATA)&gt; ]"</span></code>. By default document type
+          declaration nodes are treated as non-essential part of XML markup and are
+          not loaded during XML parsing. You can override this behavior with <a class="link" href="loading.html#parse_doctype">parse_doctype</a> flag.
         </p></blockquote></div>
 <p>
         Finally, here is a complete example of XML document and the corresponding
@@ -227,40 +243,45 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-          All pugixml classes and functions are located in <code class="computeroutput"><span class="identifier">pugi</span></code>
+          All pugixml classes and functions are located in the <code class="computeroutput"><span class="identifier">pugi</span></code>
           namespace; you have to either use explicit name qualification (i.e. <code class="computeroutput"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span></code>), or to gain access to relevant
           symbols via <code class="computeroutput"><span class="keyword">using</span></code> directive
           (i.e. <code class="computeroutput"><span class="keyword">using</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span><span class="special">;</span></code> or <code class="computeroutput"><span class="keyword">using</span>
-          <span class="keyword">namespace</span> <span class="identifier">pugi</span><span class="special">;</span></code>). The namespace will be omitted from declarations
-          in this documentation hereafter; all code examples will use fully-qualified
-          names.
+          <span class="keyword">namespace</span> <span class="identifier">pugi</span><span class="special">;</span></code>). The namespace will be omitted from all
+          declarations in this documentation hereafter; all code examples will use
+          fully qualified names.
         </p></td></tr>
 </table></div>
 <p>
         Despite the fact that there are several node types, there are only three
-        C++ types representing the tree (<code class="computeroutput"><span class="identifier">xml_document</span></code>,
+        C++ classes representing the tree (<code class="computeroutput"><span class="identifier">xml_document</span></code>,
         <code class="computeroutput"><span class="identifier">xml_node</span></code>, <code class="computeroutput"><span class="identifier">xml_attribute</span></code>);
         some operations on <code class="computeroutput"><span class="identifier">xml_node</span></code>
-        are only valid for certain node types. They are described below.
+        are only valid for certain node types. The classes are described below.
       </p>
-<a name="xml_document"></a><p>
+<a name="xml_document"></a><a name="xml_document::document_element"></a><p>
         <code class="computeroutput"><span class="identifier">xml_document</span></code> is the owner
         of the entire document structure; it is a non-copyable class. The interface
         of <code class="computeroutput"><span class="identifier">xml_document</span></code> consists
         of loading functions (see <a class="xref" href="loading.html" title="Loading document"> Loading document</a>), saving functions (see <a class="xref" href="saving.html" title="Saving document"> Saving document</a>)
-        and the interface of <code class="computeroutput"><span class="identifier">xml_node</span></code>,
+        and the entire interface of <code class="computeroutput"><span class="identifier">xml_node</span></code>,
         which allows for document inspection and/or modification. Note that while
         <code class="computeroutput"><span class="identifier">xml_document</span></code> is a sub-class
         of <code class="computeroutput"><span class="identifier">xml_node</span></code>, <code class="computeroutput"><span class="identifier">xml_node</span></code> is not a polymorphic type; the
-        inheritance is only used to simplify usage.
+        inheritance is present only to simplify usage. Alternatively you can use
+        the <code class="computeroutput"><span class="identifier">document_element</span></code> function
+        to get the element node that's the immediate child of the document.
       </p>
-<a name="xml_document::ctor"></a><a name="xml_document::dtor"></a><p>
+<a name="xml_document::ctor"></a><a name="xml_document::dtor"></a><a name="xml_document::reset"></a><p>
         Default constructor of <code class="computeroutput"><span class="identifier">xml_document</span></code>
         initializes the document to the tree with only a root node (document node).
         You can then populate it with data using either tree modification functions
         or loading functions; all loading functions destroy the previous tree with
-        all occupied memory, which puts existing nodes/attributes from this document
-        to invalid state. Destructor of <code class="computeroutput"><span class="identifier">xml_document</span></code>
+        all occupied memory, which puts existing node/attribute handles for this
+        document to invalid state. If you want to destroy the previous tree, you
+        can use the <code class="computeroutput"><span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">reset</span></code>
+        function; it destroys the tree and replaces it with either an empty one or
+        a copy of the specified document. Destructor of <code class="computeroutput"><span class="identifier">xml_document</span></code>
         also destroys the tree, thus the lifetime of the document object should exceed
         the lifetimes of any node/attribute handles that point to the tree.
       </p>
@@ -271,7 +292,7 @@
 </tr>
 <tr><td align="left" valign="top"><p>
           While technically node/attribute handles can be alive when the tree they're
-          referring to is destroyed, calling any member function of these handles
+          referring to is destroyed, calling any member function for these handles
           results in undefined behavior. Thus it is recommended to make sure that
           the document is destroyed only after all references to its nodes/attributes
           are destroyed.
@@ -279,16 +300,17 @@
 </table></div>
 <a name="xml_node"></a><a name="xml_node::type"></a><p>
         <code class="computeroutput"><span class="identifier">xml_node</span></code> is the handle to
-        document node; it can point to any node in the document, including document
-        itself. There is a common interface for nodes of all types; the actual node
-        type can be queried via <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">type</span><span class="special">()</span></code> method. Note that <code class="computeroutput"><span class="identifier">xml_node</span></code>
+        document node; it can point to any node in the document, including the document
+        node itself. There is a common interface for nodes of all types; the actual
+        <a class="link" href="dom.html#xml_node_type">node type</a> can be queried via the <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">type</span><span class="special">()</span></code>
+        method. Note that <code class="computeroutput"><span class="identifier">xml_node</span></code>
         is only a handle to the actual node, not the node itself - you can have several
         <code class="computeroutput"><span class="identifier">xml_node</span></code> handles pointing
         to the same underlying object. Destroying <code class="computeroutput"><span class="identifier">xml_node</span></code>
         handle does not destroy the node and does not remove it from the tree. The
         size of <code class="computeroutput"><span class="identifier">xml_node</span></code> is equal
         to that of a pointer, so it is nothing more than a lightweight wrapper around
-        pointer; you can safely pass or return <code class="computeroutput"><span class="identifier">xml_node</span></code>
+        a pointer; you can safely pass or return <code class="computeroutput"><span class="identifier">xml_node</span></code>
         objects by value without additional overhead.
       </p>
 <a name="node_null"></a><p>
@@ -300,14 +322,14 @@
         for specific functions for more detailed information). This is useful for
         chaining calls; i.e. you can get the grandparent of a node like so: <code class="computeroutput"><span class="identifier">node</span><span class="special">.</span><span class="identifier">parent</span><span class="special">().</span><span class="identifier">parent</span><span class="special">()</span></code>; if a node is a null node or it does not
         have a parent, the first <code class="computeroutput"><span class="identifier">parent</span><span class="special">()</span></code> call returns null node; the second <code class="computeroutput"><span class="identifier">parent</span><span class="special">()</span></code>
-        call then also returns null node, so you don't have to check for errors twice.
+        call then also returns null node, which makes error handling easier.
       </p>
 <a name="xml_attribute"></a><p>
         <code class="computeroutput"><span class="identifier">xml_attribute</span></code> is the handle
         to an XML attribute; it has the same semantics as <code class="computeroutput"><span class="identifier">xml_node</span></code>,
         i.e. there can be several <code class="computeroutput"><span class="identifier">xml_attribute</span></code>
-        handles pointing to the same underlying object, there is a special null attribute
-        value, which propagates to function results.
+        handles pointing to the same underlying object and there is a special null
+        attribute value, which propagates to function results.
       </p>
 <a name="xml_attribute::ctor"></a><a name="xml_node::ctor"></a><p>
         Both <code class="computeroutput"><span class="identifier">xml_node</span></code> and <code class="computeroutput"><span class="identifier">xml_attribute</span></code> have the default constructor
@@ -316,16 +338,23 @@
 <a name="xml_attribute::comparison"></a><a name="xml_node::comparison"></a><p>
         <code class="computeroutput"><span class="identifier">xml_node</span></code> and <code class="computeroutput"><span class="identifier">xml_attribute</span></code> try to behave like pointers,
         that is, they can be compared with other objects of the same type, making
-        it possible to use them as keys of associative containers. All handles to
+        it possible to use them as keys in associative containers. All handles to
         the same underlying object are equal, and any two handles to different underlying
         objects are not equal. Null handles only compare as equal to themselves.
         The result of relational comparison can not be reliably determined from the
-        order of nodes in file or other ways. Do not use relational comparison operators
-        except for search optimization (i.e. associative container keys).
+        order of nodes in file or in any other way. Do not use relational comparison
+        operators except for search optimization (i.e. associative container keys).
+      </p>
+<a name="xml_attribute::hash_value"></a><a name="xml_node::hash_value"></a><p>
+        If you want to use <code class="computeroutput"><span class="identifier">xml_node</span></code>
+        or <code class="computeroutput"><span class="identifier">xml_attribute</span></code> objects
+        as keys in hash-based associative containers, you can use the <code class="computeroutput"><span class="identifier">hash_value</span></code> member functions. They return
+        the hash values that are guaranteed to be the same for all handles to the
+        same underlying object. The hash value for null handles is 0.
       </p>
 <a name="xml_attribute::unspecified_bool_type"></a><a name="xml_node::unspecified_bool_type"></a><a name="xml_attribute::empty"></a><a name="xml_node::empty"></a><p>
-        Additionally handles they can be implicitly cast to boolean-like objects,
-        so that you can test if the node/attribute is empty by just doing <code class="computeroutput"><span class="keyword">if</span> <span class="special">(</span><span class="identifier">node</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
+        Finally handles can be implicitly cast to boolean-like objects, so that you
+        can test if the node/attribute is empty with the following code: <code class="computeroutput"><span class="keyword">if</span> <span class="special">(</span><span class="identifier">node</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
         <span class="special">}</span></code> or <code class="computeroutput"><span class="keyword">if</span>
         <span class="special">(!</span><span class="identifier">node</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
         <span class="special">}</span> <span class="keyword">else</span> <span class="special">{</span> <span class="special">...</span> <span class="special">}</span></code>.
@@ -336,13 +365,14 @@
 <span class="keyword">bool</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">empty</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
-        Nodes and attributes do not exist outside of document tree, so you can't
-        create them without adding them to some document. Once underlying node/attribute
+        Nodes and attributes do not exist without a document tree, so you can't create
+        them without adding them to some document. Once underlying node/attribute
         objects are destroyed, the handles to those objects become invalid. While
         this means that destruction of the entire tree invalidates all node/attribute
-        handles, it also means that destroying a subtree (by calling <code class="computeroutput"><span class="identifier">remove_child</span></code>) or removing an attribute
-        invalidates the corresponding handles. There is no way to check handle validity;
-        you have to ensure correctness through external mechanisms.
+        handles, it also means that destroying a subtree (by calling <a class="link" href="modify.html#xml_node::remove_child">xml_node::remove_child</a>)
+        or removing an attribute invalidates the corresponding handles. There is
+        no way to check handle validity; you have to ensure correctness through external
+        mechanisms.
       </p>
 </div>
 <div class="section">
@@ -352,12 +382,14 @@
 <p>
         There are two choices of interface and internal representation when configuring
         pugixml: you can either choose the UTF-8 (also called char) interface or
-        UTF-16/32 (also called wchar_t) one. The choice is controlled via <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code> define; you can set
-        it via <code class="filename">pugiconfig.hpp</code> or via preprocessor options, as discussed in <a class="xref" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
-        options</a>.
-        If this define is set, the wchar_t interface is used; otherwise (by default)
-        the char interface is used. The exact wide character encoding is assumed
-        to be either UTF-16 or UTF-32 and is determined based on size of <code class="computeroutput"><span class="keyword">wchar_t</span></code> type.
+        UTF-16/32 (also called wchar_t) one. The choice is controlled via <a class="link" href="install.html#PUGIXML_WCHAR_MODE">PUGIXML_WCHAR_MODE</a>
+        define; you can set it via <code class="filename">pugiconfig.hpp</code> or via preprocessor options, as
+        discussed in <a class="xref" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
+        options</a>. If this define is set, the wchar_t
+        interface is used; otherwise (by default) the char interface is used. The
+        exact wide character encoding is assumed to be either UTF-16 or UTF-32 and
+        is determined based on the size of <code class="computeroutput"><span class="keyword">wchar_t</span></code>
+        type.
       </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
@@ -365,9 +397,9 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-          If size of <code class="computeroutput"><span class="keyword">wchar_t</span></code> is 2, pugixml
-          assumes UTF-16 encoding instead of UCS-2, which means that some characters
-          are represented as two code points.
+          If the size of <code class="computeroutput"><span class="keyword">wchar_t</span></code> is
+          2, pugixml assumes UTF-16 encoding instead of UCS-2, which means that some
+          characters are represented as two code points.
         </p></td></tr>
 </table></div>
 <p>
@@ -399,7 +431,7 @@
         <code class="computeroutput"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">char_t</span></code> upon document saving happen automatically,
         which also carries minor performance penalty. The general advice however
         is to select the character mode based on usage scenario, i.e. if UTF-8 is
-        inconvenient to process and most of your XML data is localized, wchar_t mode
+        inconvenient to process and most of your XML data is non-ASCII, wchar_t mode
         is probably a better choice.
       </p>
 <a name="as_utf8"></a><a name="as_wide"></a><p>
@@ -410,13 +442,18 @@
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">as_wide</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">str</span><span class="special">);</span>
 </pre>
 <p>
-        Both functions accept null-terminated string as an argument <code class="computeroutput"><span class="identifier">str</span></code>, and return the converted string.
+        Both functions accept a null-terminated string as an argument <code class="computeroutput"><span class="identifier">str</span></code>, and return the converted string.
         <code class="computeroutput"><span class="identifier">as_utf8</span></code> performs conversion
         from UTF-16/32 to UTF-8; <code class="computeroutput"><span class="identifier">as_wide</span></code>
         performs conversion from UTF-8 to UTF-16/32. Invalid UTF sequences are silently
         discarded upon conversion. <code class="computeroutput"><span class="identifier">str</span></code>
         has to be a valid string; passing null pointer results in undefined behavior.
+        There are also two overloads with the same semantics which accept a string
+        as an argument:
       </p>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">as_utf8</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span><span class="special">&amp;</span> <span class="identifier">str</span><span class="special">);</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span> <span class="identifier">as_wide</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&amp;</span> <span class="identifier">str</span><span class="special">);</span>
+</pre>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
@@ -425,8 +462,8 @@
 <tr><td align="left" valign="top">
 <p>
           Most examples in this documentation assume char interface and therefore
-          will not compile with <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code>.
-          This is to simplify the documentation; usually the only changes you'll
+          will not compile with <a class="link" href="install.html#PUGIXML_WCHAR_MODE">PUGIXML_WCHAR_MODE</a>.
+          This is done to simplify the documentation; usually the only changes you'll
           have to make is to pass <code class="computeroutput"><span class="keyword">wchar_t</span></code>
           string literals, i.e. instead of
         </p>
@@ -453,7 +490,7 @@
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
 <li class="listitem">
-            it is safe to call free functions from multiple threads
+            it is safe to call free (non-member) functions from multiple threads
           </li>
 <li class="listitem">
             it is safe to perform concurrent read-only accesses to the same tree
@@ -470,7 +507,7 @@
         structure and altering individual node/attribute data, i.e. changing names/values.
       </p>
 <p>
-        The only exception is <code class="computeroutput"><span class="identifier">set_memory_management_functions</span></code>;
+        The only exception is <a class="link" href="dom.html#set_memory_management_functions">set_memory_management_functions</a>;
         it modifies global variables and as such is not thread-safe. Its usage policy
         has more restrictions, see <a class="xref" href="dom.html#manual.dom.memory.custom" title="Custom memory allocation/deallocation functions"> Custom memory allocation/deallocation
         functions</a>.
@@ -488,15 +525,16 @@
         This is not applicable to functions that operate on STL strings or IOstreams;
         such functions have either strong guarantee (functions that operate on strings)
         or basic guarantee (functions that operate on streams). Also functions that
-        call user-defined callbacks (i.e. <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">traverse</span></code>
-        or <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">find_node</span></code>) do not provide any exception
-        guarantees beyond the ones provided by callback.
+        call user-defined callbacks (i.e. <a class="link" href="access.html#xml_node::traverse">xml_node::traverse</a>
+        or <a class="link" href="access.html#xml_node::find_node">xml_node::find_node</a>) do not
+        provide any exception guarantees beyond the ones provided by the callback.
       </p>
 <p>
-        XPath functions may throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
-        on parsing error; also, XPath implementation uses STL, and thus may throw
-        i.e. <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">bad_alloc</span></code> in low memory conditions. Still,
-        XPath functions provide strong exception guarantee.
+        If exception handling is not disabled with <a class="link" href="install.html#PUGIXML_NO_EXCEPTIONS">PUGIXML_NO_EXCEPTIONS</a>
+        define, XPath functions may throw <a class="link" href="xpath.html#xpath_exception">xpath_exception</a>
+        on parsing errors; also, XPath functions may throw <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">bad_alloc</span></code>
+        in low memory conditions. Still, XPath functions provide strong exception
+        guarantee.
       </p>
 </div>
 <div class="section">
@@ -514,10 +552,10 @@
         functions</a>
 </h4></div></div></div>
 <a name="allocation_function"></a><a name="deallocation_function"></a><p>
-          All memory for tree structure/data is allocated via globally specified
-          functions, which default to malloc/free. You can set your own allocation
-          functions with set_memory_management functions. The function interfaces
-          are the same as that of malloc/free:
+          All memory for tree structure, tree data and XPath objects is allocated
+          via globally specified functions, which default to malloc/free. You can
+          set your own allocation functions with set_memory_management function.
+          The function interfaces are the same as that of malloc/free:
         </p>
 <pre class="programlisting"><span class="keyword">typedef</span> <span class="keyword">void</span><span class="special">*</span> <span class="special">(*</span><span class="identifier">allocation_function</span><span class="special">)(</span><span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">);</span>
 <span class="keyword">typedef</span> <span class="keyword">void</span> <span class="special">(*</span><span class="identifier">deallocation_function</span><span class="special">)(</span><span class="keyword">void</span><span class="special">*</span> <span class="identifier">ptr</span><span class="special">);</span>
@@ -532,14 +570,18 @@
 </pre>
 <p>
           Allocation function is called with the size (in bytes) as an argument and
-          should return a pointer to memory block with alignment that is suitable
-          for pointer storage and size that is greater or equal to the requested
-          one. If the allocation fails, the function has to return null pointer (throwing
-          an exception from allocation function results in undefined behavior). Deallocation
-          function is called with the pointer that was returned by the previous call
-          or with a null pointer; null pointer deallocation should be handled as
-          a no-op. If memory management functions are not thread-safe, library thread
-          safety is not guaranteed.
+          should return a pointer to a memory block with alignment that is suitable
+          for storage of primitive types (usually a maximum of <code class="computeroutput"><span class="keyword">void</span><span class="special">*</span></code> and <code class="computeroutput"><span class="keyword">double</span></code>
+          types alignment is sufficient) and size that is greater than or equal to
+          the requested one. If the allocation fails, the function has to return
+          null pointer (throwing an exception from allocation function results in
+          undefined behavior).
+        </p>
+<p>
+          Deallocation function is called with the pointer that was returned by some
+          call to allocation function; it is never called with a null pointer. If
+          memory management functions are not thread-safe, library thread safety
+          is not guaranteed.
         </p>
 <p>
           This is a simple example of custom memory management (<a href="../samples/custom_memory_management.cpp" target="_top">samples/custom_memory_management.cpp</a>):
@@ -572,16 +614,6 @@
           are destroyed, the new deallocation function will be called with the memory
           obtained by the old allocation function, resulting in undefined behavior.
         </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-            Currently memory for XPath objects is allocated using default operators
-            new/delete; this will change in the next version.
-          </p></td></tr>
-</table></div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
@@ -590,7 +622,7 @@
 </h4></div></div></div>
 <p>
           Constructing a document object using the default constructor does not result
-          in any allocations; document node is stored inside the <code class="computeroutput"><span class="identifier">xml_document</span></code>
+          in any allocations; document node is stored inside the <a class="link" href="dom.html#xml_document">xml_document</a>
           object.
         </p>
 <p>
@@ -598,11 +630,11 @@
           function is used (see <a class="xref" href="loading.html#manual.loading.memory" title="Loading document from memory"> Loading document from memory</a>), a complete copy of character
           stream is made; all names/values of nodes and attributes are allocated
           in this buffer. This buffer is allocated via a single large allocation
-          and is only freed when document memory is reclaimed (i.e. if the <code class="computeroutput"><span class="identifier">xml_document</span></code> object is destroyed or if
-          another document is loaded in the same object). Also when loading from
-          file or stream, an additional large allocation may be performed if encoding
-          conversion is required; a temporary buffer is allocated, and it is freed
-          before load function returns.
+          and is only freed when document memory is reclaimed (i.e. if the <a class="link" href="dom.html#xml_document">xml_document</a> object is destroyed or if another
+          document is loaded in the same object). Also when loading from file or
+          stream, an additional large allocation may be performed if encoding conversion
+          is required; a temporary buffer is allocated, and it is freed before load
+          function returns.
         </p>
 <p>
           All additional memory, such as memory for document structure (node/attribute
@@ -632,7 +664,8 @@
 </tr></table>
 <hr>
 <table width="100%"><tr>
-<td>pugixml 0.9 manual |
+<td>
+<a href="http://pugixml.org/">pugixml 1.0</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
