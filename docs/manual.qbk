@@ -340,7 +340,7 @@ Despite the fact that there are several node types, there are only three C++ cla
 [#xml_document::ctor]
 [#xml_document::dtor]
 [#xml_document::reset]
-Default constructor of `xml_document` initializes the document to the tree with only a root node (document node). You can then populate it with data using either tree modification functions or loading functions; all loading functions destroy the previous tree with all occupied memory, which puts existing node/attribute handles for this document to invalid state. If you want to destroy the previous tree, you can use the `xml_document::reset` function; it destroys the tree and replaces it with an empty one. Destructor of `xml_document` also destroys the tree, thus the lifetime of the document object should exceed the lifetimes of any node/attribute handles that point to the tree.
+Default constructor of `xml_document` initializes the document to the tree with only a root node (document node). You can then populate it with data using either tree modification functions or loading functions; all loading functions destroy the previous tree with all occupied memory, which puts existing node/attribute handles for this document to invalid state. If you want to destroy the previous tree, you can use the `xml_document::reset` function; it destroys the tree and replaces it with either an empty one or a copy of the specified document. Destructor of `xml_document` also destroys the tree, thus the lifetime of the document object should exceed the lifetimes of any node/attribute handles that point to the tree.
 
 [caution While technically node/attribute handles can be alive when the tree they're referring to is destroyed, calling any member function for these handles results in undefined behavior. Thus it is recommended to make sure that the document is destroyed only after all references to its nodes/attributes are destroyed.]
 
@@ -604,7 +604,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 [lbr]
 
 * [anchor status_file_not_found] is only returned by `load_file` function and means that file could not be opened.
-* [anchor status_io_error] is returned by `load_file` function and by `load` functions with `std::istream`/`std::wstream` arguments; it means that some I/O error has occured during reading the file/stream.
+* [anchor status_io_error] is returned by `load_file` function and by `load` functions with `std::istream`/`std::wstream` arguments; it means that some I/O error has occurred during reading the file/stream.
 * [anchor status_out_of_memory] means that there was not enough memory during some allocation; any allocation failure during parsing results in this error.
 * [anchor status_internal_error] means that something went horribly wrong; currently this error does not occur
 [lbr]
@@ -815,7 +815,7 @@ All attributes have name and value, both of which are strings (value may be empt
 In case the attribute handle is null, both functions return empty strings - they never return null pointers.
 
 [#xml_attribute::as_int][#xml_attribute::as_uint][#xml_attribute::as_double][#xml_attribute::as_float][#xml_attribute::as_bool]
-In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type. The accessors are as follows:
+In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type:
 
     int xml_attribute::as_int() const;
     unsigned int xml_attribute::as_uint() const;
@@ -2127,6 +2127,7 @@ Classes:
     [lbr]
 
     * `void `[link xml_document::reset reset]`();`
+    * `void `[link xml_document::reset reset]`(const xml_document& proto);`
     [lbr]
 
     * `xml_parse_result `[link xml_document::load_stream load]`(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
