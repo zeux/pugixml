@@ -925,3 +925,13 @@ TEST_XML(document_reset_copy, "<node><child/></node>")
 
     CHECK(doc.first_child().offset_debug() == -1);
 }
+
+TEST_XML(document_reset_copy_self, "<node><child/></node>")
+{
+    CHECK_NODE(doc, STR("<node><child /></node>"));
+
+    doc.reset(doc);
+
+    CHECK(!doc.first_child());
+    CHECK_NODE(doc, STR(""));
+}
