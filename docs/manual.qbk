@@ -1208,7 +1208,7 @@ This is a simple example of saving XML document to file ([@samples/save_file.cpp
 [section:stream Saving document to C++ IOstreams]
 
 [#xml_document::save_stream]
-To enhance interoperability pugixml provides functions for saving document to any object which implements C++ std::ostream interface. This allows you to save documents to any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). Most notably, this allows for easy debug output, since you can use `std::cout` stream as saving target. There are two functions, one works with narrow character streams, another handles wide character ones:
+To enhance interoperability pugixml provides functions for saving document to any object which implements C++ `std::ostream` interface. This allows you to save documents to any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). Most notably, this allows for easy debug output, since you can use `std::cout` stream as saving target. There are two functions, one works with narrow character streams, another handles wide character ones:
 
     void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
     void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
@@ -1252,7 +1252,7 @@ This is a simple example of custom writer for saving document data to STL string
 [section:subtree Saving a single subtree]
 
 [#xml_node::print][#xml_node::print_stream]
-While the previously described functions saved the whole document to the destination, it is easy to save a single subtree. The following functions are provided:
+While the previously described functions save the whole document to the destination, it is easy to save a single subtree. The following functions are provided:
 
     void xml_node::print(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
     void xml_node::print(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
