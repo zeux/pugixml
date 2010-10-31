@@ -189,7 +189,7 @@ In addition to adding pugixml project to your workspace, you'll have to make sur
 
 [section:shared Building pugixml as a standalone shared library]
  
-It's possible to compile pugixml as a standalone shared library. The process is usually similar to the static library approach; however, no preconfigured projects/scripts are included into pugixml distribution, so you'll have to do it yourself. Generally, if you're using GCC-based toolchain, the process does not differ from building any other library as DLL (adding -shared to compilation flags should suffice); if you're using MSVC-based toolchain, you'll have to explicitly mark exported symbols with a declspec attribute. You can do it by defining `PUGIXML_API` macro, i.e. via [file pugiconfig.hpp]:
+It's possible to compile pugixml as a standalone shared library. The process is usually similar to the static library approach; however, no preconfigured projects/scripts are included into pugixml distribution, so you'll have to do it yourself. Generally, if you're using GCC-based toolchain, the process does not differ from building any other library as DLL (adding -shared to compilation flags should suffice); if you're using MSVC-based toolchain, you'll have to explicitly mark exported symbols with a declspec attribute. You can do it by defining [link PUGIXML_API] macro, i.e. via [file pugiconfig.hpp]:
 
     #ifdef _DLL
     #define PUGIXML_API __declspec(dllexport)
@@ -251,12 +251,12 @@ pugixml stores XML data in DOM-like way: the entire XML document (both document 
 
 [section:tree Tree structure]
 
-The XML document is represented with a tree data structure. The root of the tree is the document itself, which corresponds to C++ type `xml_document`. Document has one or more child nodes, which correspond to C++ type `xml_node`. Nodes have different types; depending on a type, a node can have a collection of child nodes, a collection of attributes, which correspond to C++ type `xml_attribute`, and some additional data (i.e. name).
+The XML document is represented with a tree data structure. The root of the tree is the document itself, which corresponds to C++ type [link xml_document]. Document has one or more child nodes, which correspond to C++ type [link xml_node]. Nodes have different types; depending on a type, a node can have a collection of child nodes, a collection of attributes, which correspond to C++ type [link xml_attribute], and some additional data (i.e. name).
 
 [#xml_node_type]
 The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
 
-* Document node ([anchor node_document]) - this is the root of the tree, which consists of several child nodes. This node corresponds to `xml_document` class; note that `xml_document` is a sub-class of `xml_node`, so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation.
+* Document node ([anchor node_document]) - this is the root of the tree, which consists of several child nodes. This node corresponds to [link xml_document] class; note that [link xml_document] is a sub-class of [link xml_node], so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation.
 [lbr]
 
 * Element/tag node ([anchor node_element]) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element nodes is as follows:
@@ -375,7 +375,7 @@ Finally handles can be implicitly cast to boolean-like objects, so that you can 
     bool xml_attribute::empty() const;
     bool xml_node::empty() const;
 
-Nodes and attributes do not exist without a document tree, so you can't create them without adding them to some document. Once underlying node/attribute objects are destroyed, the handles to those objects become invalid. While this means that destruction of the entire tree invalidates all node/attribute handles, it also means that destroying a subtree (by calling `remove_child`) or removing an attribute invalidates the corresponding handles. There is no way to check handle validity; you have to ensure correctness through external mechanisms.
+Nodes and attributes do not exist without a document tree, so you can't create them without adding them to some document. Once underlying node/attribute objects are destroyed, the handles to those objects become invalid. While this means that destruction of the entire tree invalidates all node/attribute handles, it also means that destroying a subtree (by calling [link xml_node::remove_child]) or removing an attribute invalidates the corresponding handles. There is no way to check handle validity; you have to ensure correctness through external mechanisms.
 
 [endsect] [/cpp]
 
@@ -413,7 +413,7 @@ Both functions accept a null-terminated string as an argument `str`, and return 
     std::string as_utf8(const std::wstring& str);
     std::wstring as_wide(const std::string& str);
 
-[note Most examples in this documentation assume char interface and therefore will not compile with `PUGIXML_WCHAR_MODE`. This is done to simplify the documentation; usually the only changes you'll have to make is to pass `wchar_t` string literals, i.e. instead of
+[note Most examples in this documentation assume char interface and therefore will not compile with [link PUGIXML_WCHAR_MODE]. This is done to simplify the documentation; usually the only changes you'll have to make is to pass `wchar_t` string literals, i.e. instead of
 
 `pugi::xml_node node = doc.child("bookstore").find_child_by_attribute("book", "id", "12345");`
 
@@ -433,7 +433,7 @@ Almost all functions in pugixml have the following thread-safety guarantees:
 
 Concurrent modification and traversing of a single tree requires synchronization, for example via reader-writer lock. Modification includes altering document structure and altering individual node/attribute data, i.e. changing names/values.
 
-The only exception is `set_memory_management_functions`; it modifies global variables and as such is not thread-safe. Its usage policy has more restrictions, see [sref manual.dom.memory.custom].
+The only exception is [link set_memory_management_functions]; it modifies global variables and as such is not thread-safe. Its usage policy has more restrictions, see [sref manual.dom.memory.custom].
 
 [endsect] [/thread]
 
@@ -441,7 +441,7 @@ The only exception is `set_memory_management_functions`; it modifies global vari
 
 With the exception of XPath, pugixml itself does not throw any exceptions. Additionally, most pugixml functions have a no-throw exception guarantee.
 
-This is not applicable to functions that operate on STL strings or IOstreams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. `xml_node::traverse` or `xml_node::find_node`) do not provide any exception guarantees beyond the ones provided by the callback.
+This is not applicable to functions that operate on STL strings or IOstreams; such functions have either strong guarantee (functions that operate on strings) or basic guarantee (functions that operate on streams). Also functions that call user-defined callbacks (i.e. [link xml_node::traverse] or [link xml_node::find_node]) do not provide any exception guarantees beyond the ones provided by the callback.
 
 If exception handling is not disabled with [link PUGIXML_NO_EXCEPTIONS] define, XPath functions may throw [link xpath_exception] on parsing errors; also, XPath functions may throw `std::bad_alloc` in low memory conditions. Still, XPath functions provide strong exception guarantee.
 
@@ -485,9 +485,9 @@ When setting new memory management functions, care must be taken to make sure th
 
 [section:internals Document memory management internals]
 
-Constructing a document object using the default constructor does not result in any allocations; document node is stored inside the `xml_document` object.
+Constructing a document object using the default constructor does not result in any allocations; document node is stored inside the [link xml_document] object.
 
-When the document is loaded from file/buffer, unless an inplace loading function is used (see [sref manual.loading.memory]), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the `xml_document` object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
+When the document is loaded from file/buffer, unless an inplace loading function is used (see [sref manual.loading.memory]), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the [link xml_document] object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
 
 All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 kilobytes; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
 
@@ -570,7 +570,7 @@ To enhance interoperability, pugixml provides functions for loading document fro
 
 `load` with `std::istream` argument loads the document from stream from the current read position to the end, treating the stream contents as a byte stream of the specified encoding (with encoding autodetection as necessary). Thus calling `xml_document::load` on an opened `std::ifstream` object is equivalent to calling `xml_document::load_file`.
 
-`load` with `std::wstream` argument treats the stream contents as a wide character stream (encoding is always `encoding_wchar`). Because of this, using `load` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to load documents from non-Unicode encodings, i.e. you can load Shift-JIS encoded data if you set the correct locale.
+`load` with `std::wstream` argument treats the stream contents as a wide character stream (encoding is always [link encoding_wchar]). Because of this, using `load` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to load documents from non-Unicode encodings, i.e. you can load Shift-JIS encoded data if you set the correct locale.
 
 This is a simple example of loading XML document from file using streams ([@samples/load_stream.cpp]); read the sample code for more complex examples involving wide streams and locales:
 
@@ -663,7 +663,7 @@ These flags control the resulting tree contents:
 * [anchor parse_cdata] determines if CDATA sections (nodes with type [link node_cdata]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *on* by default.
 [lbr]
 
-* [anchor parse_ws_pcdata] determines if PCDATA nodes (nodes with type [link node_pcdata]) that consist only of whitespace characters are to be put in DOM tree. Often whitespace-only data is not significant for the application, and the cost of allocating and storing such nodes (both memory and speed-wise) can be significant. For example, after parsing XML string `<node> <a/> </node>`, `<node>` element will have three children when `parse_ws_pcdata` is set (child with type `node_pcdata` and value `" "`, child with type `node_element` and name `"a"`, and another child with type `node_pcdata` and value `" "`), and only one child when `parse_ws_pcdata` is not set. This flag is *off* by default.
+* [anchor parse_ws_pcdata] determines if PCDATA nodes (nodes with type [link node_pcdata]) that consist only of whitespace characters are to be put in DOM tree. Often whitespace-only data is not significant for the application, and the cost of allocating and storing such nodes (both memory and speed-wise) can be significant. For example, after parsing XML string `<node> <a/> </node>`, `<node>` element will have three children when `parse_ws_pcdata` is set (child with type [link node_pcdata] and value `" "`, child with type [link node_element] and name `"a"`, and another child with type [link node_pcdata] and value `" "`), and only one child when `parse_ws_pcdata` is not set. This flag is *off* by default.
 
 These flags control the transformation of tree element contents:
 
@@ -673,16 +673,16 @@ These flags control the transformation of tree element contents:
 * [anchor parse_eol] determines if EOL handling (that is, replacing sequences `0x0d 0x0a` by a single `0x0a` character, and replacing all standalone `0x0d` characters by `0x0a`) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values). This flag is *on* by default.
 [lbr]
 
-* [anchor parse_wconv_attribute] determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if `parse_eol` is set, i.e. `\r\n` is converted to a single space.  This flag is *on* by default.
+* [anchor parse_wconv_attribute] determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if [link parse_eol] is set, i.e. `\r\n` is converted to a single space.  This flag is *on* by default.
 [lbr]
 
-* [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if `parse_wconv_attribute` was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. The value of `parse_wconv_attribute` has no effect if this flag is on. This flag is *off* by default.
+* [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if [link parse_wconv_attribute] was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. The value of [link parse_wconv_attribute] has no effect if this flag is on. This flag is *off* by default.
 
-[note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; `parse_wnorm_attribute` performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes should behave as if they are declared as [^CDATA], thus `parse_wconv_attribute` is the default option.]
+[note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; [link parse_wnorm_attribute] performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes should behave as if they are declared as [^CDATA], thus [link parse_wconv_attribute] is the default option.]
 
 Additionally there are three predefined option masks:
 
-* [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, document type declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as mentioned above, in practice `parse_default` is usually equally fast.
+* [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, document type declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as mentioned above, in practice [link parse_default] is usually equally fast.
 [lbr]
 
 * [anchor parse_default] is the default set of flags, i.e. it has all options set to their default values. It includes parsing CDATA sections (comments/PIs are not parsed), performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed (by default) for performance reasons.
@@ -1016,7 +1016,7 @@ As discussed before, nodes can have name and value, both of which are strings. D
 
 Both functions try to set the name\/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a [link node_pcdata] node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
 
-There is no equivalent of `child_value` function for modifying text children of the node.
+There is no equivalent of [link xml_node::child_value child_value] function for modifying text children of the node.
 
 This is an example of setting node name and value ([@samples/modify_base.cpp]):
 
@@ -1213,7 +1213,7 @@ To enhance interoperability pugixml provides functions for saving document to an
     void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
     void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
 
-`save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with `encoding_wchar` encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
+`save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with [link encoding_wchar] encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
 
 [#xml_writer_stream]
 Calling `save` with stream target is equivalent to creating an `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see [sref manual.saving.writer] for writer interface details.
@@ -1304,7 +1304,7 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
 
 While all other flags set the exact encoding, `encoding_auto` is meant for automatic encoding detection. The automatic detection does not make sense for output encoding, since there is usually nothing to infer the actual encoding from, so here `encoding_auto` means UTF-8 encoding, which is the most popular encoding for XML data storage. This is also the default value of output encoding; specify another value if you do not want UTF-8 encoded output.
 
-Also note that wide stream saving functions do not have `encoding` argument and always assume `encoding_wchar` encoding.
+Also note that wide stream saving functions do not have `encoding` argument and always assume [link encoding_wchar] encoding.
 
 [note The current behavior for Unicode conversion is to skip all invalid UTF sequences during conversion. This behavior should not be relied upon; if your node/attribute names do not contain any valid UTF sequences, they may be output as if they are empty, which will result in malformed XML document.]
 
@@ -1586,7 +1586,7 @@ Parsing result is represented as the error message; it is either a null pointer,
 `description()` member function can be used to get the error message; it never returns the null pointer, so you can safely use description() even if query parsing succeeded.
 
 [#xpath_parse_result::offset]
-In addition to the error message, parsing result has an `offset` member, which contains the offset of last successfully parsed character. This offset is in units of [link pugi::char_t] (bytes for character mode, wide characters for wide character mode).
+In addition to the error message, parsing result has an `offset` member, which contains the offset of last successfully parsed character. This offset is in units of [link char_t pugi::char_t] (bytes for character mode, wide characters for wide character mode).
 
 [#xpath_parse_result::bool]
 Parsing result object can be implicitly converted to `bool` like this: `if (result) { ... } else { ... }`.
@@ -1654,6 +1654,8 @@ Major release, featuring many XPath enhancements, wide character filename suppor
     # Added internal_object() and additional constructor for both xml_node and xml_attribute for easier marshalling (useful for language bindings)
     # Added xml_document::document_element() function
     # Added xml_node::prepend_attribute, xml_node::prepend_child and xml_node::prepend_copy functions
+    # Added xml_node::append_child, xml_node::prepend_child, xml_node::insert_child_before and xml_node::insert_child_after overloads for element nodes (with name instead of type)
+    # Added xml_document::reset() function
 
 * Performance improvements:
     # xml_node::root() and xml_node::offset_debug() are now O(1) instead of O(logN)
