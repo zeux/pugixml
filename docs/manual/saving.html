@@ -318,21 +318,20 @@
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc">
 <li class="listitem">
-            <a name="format_no_declaration"></a><code class="literal">format_no_declaration</code> allows
-            to disable default node declaration output. By default, if the document
-            is saved via <code class="computeroutput"><span class="identifier">save</span></code> or
-            <code class="computeroutput"><span class="identifier">save_file</span></code> function, and
-            it does not have any document declaration, a default declaration is output
-            before the document contents. Enabling this flag disables this declaration.
+            <a name="format_no_declaration"></a><code class="literal">format_no_declaration</code> disables
+            default node declaration output. By default, if the document is saved
+            via <code class="computeroutput"><span class="identifier">save</span></code> or <code class="computeroutput"><span class="identifier">save_file</span></code> function, and it does not
+            have any document declaration, a default declaration is output before
+            the document contents. Enabling this flag disables this declaration.
             This flag has no effect in <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span></code>
             functions: they never output the default declaration. This flag is <span class="bold"><strong>off</strong></span> by default. <br><br>
 
           </li>
 <li class="listitem">
-            <a name="format_write_bom"></a><code class="literal">format_write_bom</code> allows to enable
-            Byte Order Mark (BOM) output. By default, no BOM is output, so in case
-            of non UTF-8 encodings the resulting document's encoding may not be recognized
-            by some parsers and text editors, if they do not implement sophisticated
+            <a name="format_write_bom"></a><code class="literal">format_write_bom</code> enables Byte Order
+            Mark (BOM) output. By default, no BOM is output, so in case of non UTF-8
+            encodings the resulting document's encoding may not be recognized by
+            some parsers and text editors, if they do not implement sophisticated
             encoding detection. Enabling this flag adds an encoding-specific BOM
             to the output. This flag has no effect in <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span></code>
             functions: they never output the BOM. This flag is <span class="bold"><strong>off</strong></span>
