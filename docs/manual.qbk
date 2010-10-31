@@ -1057,7 +1057,7 @@ For convenience, all `set_value` functions have the corresponding assignment ope
     xml_attribute& xml_attribute::operator=(double rhs);
     xml_attribute& xml_attribute::operator=(bool rhs);
 
-These operators simply call the right `set_value` function and return the attribute they're called on; the return value of `set_value` is ignored, so errors are not detected.
+These operators simply call the right `set_value` function and return the attribute they're called on; the return value of `set_value` is ignored, so errors are ignored.
 
 This is an example of setting attribute name and value ([@samples/modify_base.cpp]):
 
@@ -1068,7 +1068,7 @@ This is an example of setting attribute name and value ([@samples/modify_base.cp
 [section:add Adding nodes/attributes]
 
 [#xml_node::prepend_attribute][#xml_node::append_attribute][#xml_node::insert_attribute_after][#xml_node::insert_attribute_before][#xml_node::prepend_child][#xml_node::append_child][#xml_node::insert_child_after][#xml_node::insert_child_before]
-Nodes and attributes do not exist outside of document tree, so you can't create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before\/after some other node:
+Nodes and attributes do not exist without a document tree, so you can't create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before\/after some other node:
 
     xml_attribute xml_node::append_attribute(const char_t* name);
     xml_attribute xml_node::prepend_attribute(const char_t* name);
@@ -1085,19 +1085,19 @@ Nodes and attributes do not exist outside of document tree, so you can't create 
     xml_node xml_node::insert_child_after(const char_t* name, const xml_node& node);
     xml_node xml_node::insert_child_before(const char_t* name, const xml_node& node);
 
-`append_attribute` and `append_child` create a new node\/attribute at the end of the corresponding list of the node the method is called on; `prepend_attribute` and `prepend_child` create a new node\/attribute at the beginning of the list; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node\/attribute before or after specified node\/attribute.
+`append_attribute` and `append_child` create a new node\/attribute at the end of the corresponding list of the node the method is called on; `prepend_attribute` and `prepend_child` create a new node\/attribute at the beginning of the list; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node\/attribute before or after the specified node\/attribute.
 
-Attribute functions create an attribute with the specified name; you can specify the empty name and change the name later if you want to. Node functions with the `type` argument create the node with the specified type; since node type can't be changed, you have to know the desired type beforehand. Also note that not all types can be added as children; see below for clarification. Node function with the `name` argument create the element node (`node_element`) with the specified name.
+Attribute functions create an attribute with the specified name; you can specify the empty name and change the name later if you want to. Node functions with the `type` argument create the node with the specified type; since node type can't be changed, you have to know the desired type beforehand. Also note that not all types can be added as children; see below for clarification. Node functions with the `name` argument create the element node ([link node_element]) with the specified name.
 
-All functions return the handle to newly created object on success, and null handle on failure. There are several reasons for failure:
+All functions return the handle to the created object on success, and null handle on failure. There are several reasons for failure:
 
 * Adding fails if the target node is null;
-* Only `node_element` nodes can contain attributes, so attribute adding fails if node is not an element;
-* Only `node_document` and `node_element` nodes can contain children, so child node adding fails if the target node is not an element or a document;
-* `node_document` and `node_null` nodes can not be inserted as children, so passing `node_document` or `node_null` value as type results in operation failure;
-* `node_declaration` nodes can only be added as children of the document node; attempt to insert declaration node as a child of an element node fails;
+* Only [link node_element] nodes can contain attributes, so attribute adding fails if node is not an element;
+* Only [link node_document] and [link node_element] nodes can contain children, so child node adding fails if the target node is not an element or a document;
+* [link node_document] and [link node_null] nodes can not be inserted as children, so passing [link node_document] or [link node_null] value as `type` results in operation failure;
+* [link node_declaration] nodes can only be added as children of the document node; attempt to insert declaration node as a child of an element node fails;
 * Adding node/attribute results in memory allocation, which may fail;
-* Insertion functions fail if the specified node or attribute is not in the target node's children/attribute list.
+* Insertion functions fail if the specified node or attribute is null or is not in the target node's children/attribute list.
 
 Even if the operation fails, the document remains in consistent state, but the requested node/attribute is not added.
 
@@ -1143,12 +1143,13 @@ This is an example of removing attributes\/nodes from the document ([@samples/mo
 [section:clone Cloning nodes/attributes]
 
 [#xml_node::prepend_copy][#xml_node::append_copy][#xml_node::insert_copy_after][#xml_node::insert_copy_before]
-With the help of previously described functions, it is possible to create trees with any contents and structure, including cloning the existing data. However since this is an often needed operation, pugixml provides built-in node/attribute cloning facilities. Since nodes and attributes do not exist outside of document tree, you can't create a standalone copy - you have to immediately insert it somewhere in the tree. For this, you can use one of the following functions:
+With the help of previously described functions, it is possible to create trees with any contents and structure, including cloning the existing data. However since this is an often needed operation, pugixml provides built-in node/attribute cloning facilities. Since nodes and attributes do not exist without a document tree, you can't create a standalone copy - you have to immediately insert it somewhere in the tree. For this, you can use one of the following functions:
 
     xml_attribute xml_node::append_copy(const xml_attribute& proto);
     xml_attribute xml_node::prepend_copy(const xml_attribute& proto);
     xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr);
     xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr);
+
     xml_node xml_node::append_copy(const xml_node& proto);
     xml_node xml_node::prepend_copy(const xml_node& proto);
     xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node);
@@ -1161,7 +1162,7 @@ The attribute is copied along with the name and value; the node is copied along 
 The failure conditions resemble those of `append_child`, `insert_child_before` and related functions, [link xml_node::append_child consult their documentation for more information]. There are additional caveats specific to cloning functions:
 
 * Cloning null handles results in operation failure;
-* Node cloning starts with insertion of the node of the same type as that of the prototype; for this reason, cloning functions can not be directly used to clone entire documents, since `node_document` is not a valid insertion type. The example below provides a workaround.
+* Node cloning starts with insertion of the node of the same type as that of the prototype; for this reason, cloning functions can not be directly used to clone entire documents, since [link node_document] is not a valid insertion type. The example below provides a workaround.
 * It is possible to copy a subtree as a child of some node inside this subtree, i.e. `node.append_copy(node.parent().parent());`. This is a valid operation, and it results in a clone of the subtree in the state before cloning started, i.e. no infinite recursion takes place.
 
 This is an example with one possible implementation of include tags in XML ([@samples/include.cpp]). It illustrates node cloning and usage of other document modification functions:
@@ -1177,7 +1178,7 @@ This is an example with one possible implementation of include tags in XML ([@sa
 
 Often after creating a new document or loading the existing one and processing it, it is necessary to save the result back to file. Also it is occasionally useful to output the whole document or a subtree to some stream; use cases include debug printing, serialization via network or other text-oriented medium, etc. pugixml provides several functions to output any subtree of the document to a file, stream or another generic transport interface; these functions allow to customize the output format (see [sref manual.saving.options]), and also perform necessary encoding conversions (see [sref manual.saving.encoding]). This section documents the relevant functionality.
 
-The node/attribute data is written to the destination properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped. In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For proper output, make sure all node and attribute names are set to meaningful values.
+Before writing to the destination the node/attribute data is properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped. In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For well-formed output, make sure all node and attribute names are set to meaningful values.
 
 CDATA sections with values that contain `"]]>"` are split into several sections as follows: section with value `"pre]]>post"` is written as `<![CDATA[pre]]]]><![CDATA[>post]]>`. While this alters the structure of the document (if you load the document after saving it, there will be two CDATA sections instead of one), this is the only way to escape CDATA contents.
 
@@ -1207,7 +1208,7 @@ This is a simple example of saving XML document to file ([@samples/save_file.cpp
 [section:stream Saving document to C++ IOstreams]
 
 [#xml_document::save_stream]
-For additional interoperability pugixml provides functions for saving document to any object which implements C++ std::ostream interface. This allows you to save documents to any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). Most notably, this allows for easy debug output, since you can use `std::cout` stream as saving target. There are two functions, one works with narrow character streams, another handles wide character ones:
+To enhance interoperability pugixml provides functions for saving document to any object which implements C++ std::ostream interface. This allows you to save documents to any standard C++ stream (i.e. file stream) or any third-party compliant implementation (i.e. Boost Iostreams). Most notably, this allows for easy debug output, since you can use `std::cout` stream as saving target. There are two functions, one works with narrow character streams, another handles wide character ones:
 
     void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
     void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
@@ -1239,7 +1240,7 @@ All of the above saving functions are implemented in terms of writer interface. 
 
 In order to output the document via some custom transport, for example sockets, you should create an object which implements `xml_writer_file` interface and pass it to `save` function. `xml_writer_file::write` function is called with a buffer as an input, where `data` points to buffer start, and `size` is equal to the buffer size in bytes. `write` implementation must write the buffer to the transport; it can not save the passed buffer pointer, as the buffer contents will change after `write` returns. The buffer contains the chunk of document data in the desired encoding.
 
-`write` function is called with relatively large blocks (size is usually several kilobytes, except for the first block with BOM, which is output only if `format_write_bom` is set, and last block, which may be small), so there is often no need for additional buffering in the implementation.
+`write` function is called with relatively large blocks (size is usually several kilobytes, except for the first block with BOM, which is output only if [link format_write_bom] is set, and last block, which may be small), so there is often no need for additional buffering in the implementation.
 
 This is a simple example of custom writer for saving document data to STL string ([@samples/save_custom_writer.cpp]); read the sample code for more complex examples:
 
@@ -1259,7 +1260,7 @@ While the previously described functions saved the whole document to the destina
 
 These functions have the same arguments with the same meaning as the corresponding `xml_document::save` functions, and allow you to save the subtree to either a C++ IOstream or to any object that implements `xml_writer` interface.
 
-Saving a subtree differs from saving the whole document: the process behaves as if `format_write_bom` is off, and `format_no_declaration` is on, even if actual values of the flags are different. This means that BOM is not written to the destination, and document declaration is only written if it is the node itself or is one of node's children. Note that this also holds if you're saving a document; this example ([@samples/save_subtree.cpp]) illustrates the difference:
+Saving a subtree differs from saving the whole document: the process behaves as if [link format_write_bom] is off, and [link format_no_declaration] is on, even if actual values of the flags are different. This means that BOM is not written to the destination, and document declaration is only written if it is the node itself or is one of node's children. Note that this also holds if you're saving a document; this example ([@samples/save_subtree.cpp]) illustrates the difference:
 
 [import samples/save_subtree.cpp]
 [code_save_subtree]
@@ -1274,10 +1275,10 @@ All saving functions accept the optional parameter `flags`. This is a bitmask th
 
 These flags control the resulting tree contents:
 
-* [anchor format_indent] determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is `"\t"` by default). If this flag is on, before every node the indentation string is output several times, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if `format_raw` is enabled. This flag is *on* by default.
+* [anchor format_indent] determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is `"\t"` by default). If this flag is on, before every node the indentation string is output several times, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if [link format_raw] is enabled. This flag is *on* by default.
 [lbr]
 
-* [anchor format_raw] switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with `parse_ws_pcdata` flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
+* [anchor format_raw] switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with [link parse_ws_pcdata] flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
 
 These flags control the additional output information:
 
@@ -1318,7 +1319,7 @@ If the task at hand is to select a subset of document nodes that match some crit
 [section:types XPath types]
 
 [#xpath_value_type][#xpath_type_number][#xpath_type_string][#xpath_type_boolean][#xpath_type_node_set][#xpath_type_none]
-Each XPath expression can have one of the following types: boolean, number, string or node set. Boolean type corresponds to `bool` type, number type corresponds to `double` type, string type corresponds to either `std::string` or `std::wstring`, depending on whether [link manual.dom.unicode wide character interface is enabled], and node set corresponds to `xpath_node_set` type. There is an enumeration, `xpath_value_type`, which can take the values `xpath_type_boolean`, `xpath_type_number`, `xpath_type_string` or `xpath_type_node_set`, accordingly.
+Each XPath expression can have one of the following types: boolean, number, string or node set. Boolean type corresponds to `bool` type, number type corresponds to `double` type, string type corresponds to either `std::string` or `std::wstring`, depending on whether [link manual.dom.unicode wide character interface is enabled], and node set corresponds to [link xpath_node_set] type. There is an enumeration, `xpath_value_type`, which can take the values `xpath_type_boolean`, `xpath_type_number`, `xpath_type_string` or `xpath_type_node_set`, accordingly.
 
 [#xpath_node][#xpath_node::node][#xpath_node::attribute][#xpath_node::parent]
 Because an XPath node can be either a node or an attribute, there is a special type, `xpath_node`, which is a discriminated union of these types. A value of this type contains two node handles, one of `xml_node` type, and another one of `xml_attribute` type; at most one of them can be non-null. The accessors to get these handles are available:
@@ -1357,7 +1358,7 @@ And it also can be iterated via indices, just like `std::vector`:
     size_t xpath_node_set::size() const;
     bool xpath_node_set::empty() const;
 
-All of the above operations have the same semantics as that of `std::vector`: the iterators are random-access, all of the above operations are constant time, and accessing the element at index that is greater or equal than the set size results in undefined behavior. You can use both iterator-based and index-based access for iteration, however the iterator-based can be faster.
+All of the above operations have the same semantics as that of `std::vector`: the iterators are random-access, all of the above operations are constant time, and accessing the element at index that is greater or equal than the set size results in undefined behavior. You can use both iterator-based and index-based access for iteration, however the iterator-based one can be faster.
 
 [#xpath_node_set::type][#xpath_node_set::type_unsorted][#xpath_node_set::type_sorted][#xpath_node_set::type_sorted_reverse][#xpath_node_set::sort]
 The order of iteration depends on the order of nodes inside the set; the order can be queried via the following function:
@@ -1397,7 +1398,7 @@ If you want to select nodes that match some XPath expression, you can do it with
 
 `select_nodes` function compiles the expression and then executes it with the node as a context node, and returns the resulting node set. `select_single_node` returns only the first node in document order from the result, and is equivalent to calling `select_nodes(query).first()`. If the XPath expression does not match anything, or the node handle is null, `select_nodes` returns an empty set, and `select_single_node` returns null XPath node.
 
-If exception handling is not disabled, both functions throw `xpath_exception` if the query can not be compiled or if it returns a value with type other than node set; see [sref manual.xpath.errors] for details.
+If exception handling is not disabled, both functions throw [link xpath_exception] if the query can not be compiled or if it returns a value with type other than node set; see [sref manual.xpath.errors] for details.
 
 [#xml_node::select_single_node_precomp][#xml_node::select_nodes_precomp]
 While compiling expressions is fast, the compilation time can introduce a significant overhead if the same expression is used many times on small subtrees. If you're doing many similar queries, consider compiling them into query objects (see [sref manual.xpath.query] for further reference). Once you get a compiled query object, you can pass it to select functions instead of an expression string:
@@ -1405,7 +1406,7 @@ While compiling expressions is fast, the compilation time can introduce a signif
     xpath_node xml_node::select_single_node(const xpath_query& query) const;
     xpath_node_set xml_node::select_nodes(const xpath_query& query) const;
 
-If exception handling is not disabled, both functions throw `xpath_exception` if the query returns a value with type other than node set.
+If exception handling is not disabled, both functions throw [link xpath_exception] if the query returns a value with type other than node set.
 
 This is an example of selecting nodes using XPath expressions ([@samples/xpath_select.cpp]):
 
@@ -1417,7 +1418,7 @@ This is an example of selecting nodes using XPath expressions ([@samples/xpath_s
 [section:query Using query objects]
 
 [#xpath_query]
-When you call `select_nodes` with an expression string as an argument, a query object is created behind the scene. A query object represents a compiled XPath expression. Query objects can be needed in the following circumstances:
+When you call `select_nodes` with an expression string as an argument, a query object is created behind the scenes. A query object represents a compiled XPath expression. Query objects can be needed in the following circumstances:
 
 * You can precompile expressions to query objects to save compilation time if it becomes an issue;
 * You can use query objects to evaluate XPath expressions which result in booleans, numbers or strings;
@@ -1431,7 +1432,7 @@ You can create a query object with the constructor that takes XPath expression a
     explicit xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables = 0);
 
 [#xpath_query::return_type]
-The expression is compiled and the compiled representation is stored in the new query object. If compilation fails, `xpath_exception` is thrown if exception handling is not disabled (see [sref manual.xpath.errors] for details). After the query is created, you can query the type of the evaluation result using the following function:
+The expression is compiled and the compiled representation is stored in the new query object. If compilation fails, [link xpath_exception] is thrown if exception handling is not disabled (see [sref manual.xpath.errors] for details). After the query is created, you can query the type of the evaluation result using the following function:
 
     xpath_value_type xpath_query::return_type() const;
 
@@ -1443,12 +1444,12 @@ You can evaluate the query using one of the following functions:
     string_t xpath_query::evaluate_string(const xpath_node& n) const;
     xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const;
 
-All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. By XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` results in an error if the return type is not node set (see [sref manual.xpath.errors]).
+All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. According to XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` results in an error if the return type is not node set (see [sref manual.xpath.errors]).
 
 [note Calling `node.select_nodes("query")` is equivalent to calling `xpath_query("query").evaluate_node_set(node)`.]
 
 [#xpath_query::evaluate_string_buffer]
-Note that `evaluate_string` function returns the STL string; as such, it's not available in `PUGIXML_NO_STL` mode and also usually allocates memory. There is another string evaluation function:
+Note that `evaluate_string` function returns the STL string; as such, it's not available in [link PUGIXML_NO_STL] mode and also usually allocates memory. There is another string evaluation function:
 
 	size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const;
 
@@ -1548,7 +1549,7 @@ This is an example of using variables in XPath queries ([@samples/xpath_variable
 
 [section:errors Error handling]
 
-There are two different mechanisms for error handling in XPath implementation; the mechanism used depends on whether exception support is disabled (this is controlled with `PUGIXML_NO_EXCEPTIONS` define).
+There are two different mechanisms for error handling in XPath implementation; the mechanism used depends on whether exception support is disabled (this is controlled with [link PUGIXML_NO_EXCEPTIONS] define).
 
 [#xpath_exception]
 [#xpath_exception::result]
@@ -1571,11 +1572,11 @@ The information about parsing result is returned via `xpath_parse_result` object
 
     struct xpath_parse_result
     {
-		const char* error;
-		ptrdiff_t offset;
+        const char* error;
+        ptrdiff_t offset;
 
-		operator bool() const;
-		const char* description() const;
+        operator bool() const;
+        const char* description() const;
     };
 
 [#xpath_parse_result::error]
@@ -1585,7 +1586,7 @@ Parsing result is represented as the error message; it is either a null pointer,
 `description()` member function can be used to get the error message; it never returns the null pointer, so you can safely use description() even if query parsing succeeded.
 
 [#xpath_parse_result::offset]
-In addition to the error message, parsing result has an `offset` member, which contains the offset of last successfully parsed character. This offset is in units of `pugi::char_t` (bytes for character mode, wide characters for wide character mode).
+In addition to the error message, parsing result has an `offset` member, which contains the offset of last successfully parsed character. This offset is in units of [link pugi::char_t] (bytes for character mode, wide characters for wide character mode).
 
 [#xpath_parse_result::bool]
 Parsing result object can be implicitly converted to `bool` like this: `if (result) { ... } else { ... }`.
@@ -1602,7 +1603,7 @@ This is an example of XPath error handling ([@samples/xpath_error.cpp]):
 Because of the differences in document object models, performance considerations and implementation complexity, pugixml does not provide a fully conformant XPath 1.0 implementation. This is the current list of incompatibilities:
 
 * Consecutive text nodes sharing the same parent are not merged, i.e. in `<node>text1 <![CDATA[data]]> text2</node>` node should have one text node children, but instead has three.
-* Since document can't have a document type declaration, `id()` function always returns an empty node set.
+* Since the document type declaration is not used for parsing, `id()` function always returns an empty node set.
 * Namespace nodes are not supported (affects namespace:: axis).
 * Name tests are performed on QNames in XML document instead of expanded names; for `<foo xmlns:ns1='uri' xmlns:ns2='uri'><ns1:child/><ns2:child/></foo>`, query `foo/ns1:*` will return only the first child, not both of them. Compliant XPath implementations can return both nodes if the user provides appropriate namespace declarations.
 * String functions consider a character to be either a single `char` value or a single `wchar_t` value, depending on the library configuration; this means that some string functions are not fully Unicode-aware. This affects `substring()`, `string-length()` and `translate()` functions.
