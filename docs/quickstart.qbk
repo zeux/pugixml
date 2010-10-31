@@ -1,7 +1,7 @@
 [article pugixml
     [quickbook 1.5]
 
-    [version 0.9]
+    [version 1.0]
     [id quickstart]
     [copyright 2010 Arseny Kapoulkine]
     [license Distributed under the MIT License]
@@ -11,7 +11,7 @@
 [template sref[name]'''<xref linkend="quickstart.main.'''[name]'''" xrefstyle="select:title" />''']
 [template ftnt[id text]'''<footnote id="'''[id]'''"><para>'''[text]'''</para></footnote>''']
 
-[section:main pugixml 0.9 quick start guide]
+[section:main pugixml 1.0 quick start guide]
 
 [section:introduction Introduction]
 
@@ -30,8 +30,8 @@ This is the quick start guide for pugixml, which purpose is to enable you to sta
 pugixml is distributed in source form. You can download a source distribution via one of the following links:
 
 [pre
-[@http://pugixml.googlecode.com/files/pugixml-0.9.zip]
-[@http://pugixml.googlecode.com/files/pugixml-0.9.tar.gz]
+[@http://pugixml.googlecode.com/files/pugixml-1.0.zip]
+[@http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz]
 ]
 
 The distribution contains library source, documentation (the guide you're reading now and the manual) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
