@@ -1282,10 +1282,10 @@ These flags control the resulting tree contents:
 
 These flags control the additional output information:
 
-* [anchor format_no_declaration] allows to disable default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.
+* [anchor format_no_declaration] disables default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.
 [lbr]
 
-* [anchor format_write_bom] allows to enable Byte Order Mark (BOM) output. By default, no BOM is output, so in case of non UTF-8 encodings the resulting document's encoding may not be recognized by some parsers and text editors, if they do not implement sophisticated encoding detection. Enabling this flag adds an encoding-specific BOM to the output. This flag has no effect in `xml_node::print` functions: they never output the BOM. This flag is *off* by default.
+* [anchor format_write_bom] enables Byte Order Mark (BOM) output. By default, no BOM is output, so in case of non UTF-8 encodings the resulting document's encoding may not be recognized by some parsers and text editors, if they do not implement sophisticated encoding detection. Enabling this flag adds an encoding-specific BOM to the output. This flag has no effect in `xml_node::print` functions: they never output the BOM. This flag is *off* by default.
 
 Additionally, there is one predefined option mask:
 
@@ -1538,7 +1538,7 @@ In order to set variable value, you should use one of the following functions, d
     bool xpath_variable::set(const char_t* value);
     bool xpath_variable::set(const xpath_node_set& value);
 
-These function modify the variable value. Note that no type conversions are performed; if the type mismatch occurs, the functions return `false`; they also return `false` on allocation failure. The variable values are copied to the internal variable storage, so you can modify or destroy them after the functions return.
+These functions modify the variable value. Note that no type conversions are performed; if the type mismatch occurs, the functions return `false`; they also return `false` on allocation failure. The variable values are copied to the internal variable storage, so you can modify or destroy them after the functions return.
 
 This is an example of using variables in XPath queries ([@samples/xpath_variables.cpp]):
 
