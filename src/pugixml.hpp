@@ -16,7 +16,19 @@
 
 #include "pugiconfig.hpp"
 
+// Include stddef.h for size_t and ptrdiff_t
+#include <stddef.h>
+
+// Include exception header for XPath
+#if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
+#	include <exception>
+#endif
+
 #ifndef PUGIXML_NO_STL
+// cstddef is needed so that we get the 'std' namespace declaration (STLport sometimes makes std a define)
+#include <cstddef>
+
+// Forward declarations for STL classes to reduce include dependencies
 namespace std
 {
 	struct bidirectional_iterator_tag;
@@ -31,7 +43,14 @@ namespace std
 #else
 	// Borland C++ compiler has a bug which forces template argument names in forward declarations to be the same as in actual definitions
 	template <class _Ty> class allocator;
+
+    // STLport defines char_traits as a class instead of a struct
+#   ifdef _STLPORT_VERSION
+	template <class _Ty> class char_traits;
+#   else
 	template <class _Ty> struct char_traits;
+#   endif
+
 	template <class _Elem, class _Traits> class basic_istream;
 	template <class _Elem, class _Traits> class basic_ostream;
 	template <class _Elem, class _Traits, class _Ax> class basic_string;
@@ -56,11 +75,6 @@ namespace std
 #	endif
 #endif
 
-// Include exception header for XPath
-#if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
-#	include <exception>
-#endif
-
 // If no API is defined, assume default
 #ifndef PUGIXML_API
 #   define PUGIXML_API
@@ -75,8 +89,6 @@ namespace std
 #ifndef PUGIXML_FUNCTION
 #   define PUGIXML_FUNCTION PUGIXML_API
 #endif
-
-#include <stddef.h>
 
 // Character interface macros
 #ifdef PUGIXML_WCHAR_MODE

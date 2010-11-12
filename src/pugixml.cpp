@@ -90,6 +90,11 @@ typedef __int32 int32_t;
 #	define DMC_VOLATILE
 #endif
 
+// In some environments MSVC is a compiler but the CRT lacks certain MSVC-specific features
+#if defined(_MSC_VER) && !defined(__S3E__)
+#	define MSVC_CRT_VERSION _MSC_VER
+#endif
+
 using namespace pugi;
 
 // Memory allocation
@@ -3088,7 +3093,7 @@ namespace
 	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	xml_parse_status get_file_size(FILE* file, size_t& out_result)
 	{
-	#if defined(_MSC_VER) && _MSC_VER >= 1400
+	#if defined(MSVC_CRT_VERSION) && MSVC_CRT_VERSION >= 1400
 		// there are 64-bit versions of fseek/ftell, let's use them
 		typedef __int64 length_type;
 
@@ -3194,7 +3199,7 @@ namespace
 	}
 #endif
 
-#if defined(_MSC_VER) || defined(__BORLANDC__) || defined(__MINGW32__)
+#if defined(MSVC_CRT_VERSION) || defined(__BORLANDC__) || defined(__MINGW32__)
 	FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
 	{
 		return _wfopen(path, mode);
@@ -5608,7 +5613,7 @@ namespace
 	
 	bool is_nan(double value)
 	{
-	#if defined(_MSC_VER) || defined(__BORLANDC__)
+	#if defined(MSVC_CRT_VERSION) || defined(__BORLANDC__)
 		return !!_isnan(value);
 	#elif defined(fpclassify) && defined(FP_NAN)
 		return fpclassify(value) == FP_NAN;
@@ -5621,7 +5626,7 @@ namespace
 	
 	const char_t* convert_number_to_string_special(double value)
 	{
-	#if defined(_MSC_VER) || defined(__BORLANDC__)
+	#if defined(MSVC_CRT_VERSION) || defined(__BORLANDC__)
 		if (_finite(value)) return (value == 0) ? PUGIXML_TEXT("0") : 0;
 		if (_isnan(value)) return PUGIXML_TEXT("NaN");
 		return PUGIXML_TEXT("-Infinity") + (value > 0);
@@ -5664,7 +5669,7 @@ namespace
 	}
 
 	// gets mantissa digits in the form of 0.xxxxx with 0. implied and the exponent
-#if defined(_MSC_VER) && _MSC_VER >= 1400
+#if defined(MSVC_CRT_VERSION) && MSVC_CRT_VERSION >= 1400
 	void convert_number_to_mantissa_exponent(double value, char* buffer, size_t buffer_size, char** out_mantissa, int* out_exponent)
 	{
 		// get base values
