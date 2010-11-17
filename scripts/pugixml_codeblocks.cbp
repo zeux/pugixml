@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="codeblocks/libpugixml_d.a" prefix_auto="0" extension_auto="0" />
+				<Option output="codeblocks/libpugixmld.a" prefix_auto="0" extension_auto="0" />
 				<Option object_output="codeblocks/Debug" />
 				<Option type="2" />
 				<Option compiler="gcc" />
@@ -24,11 +24,11 @@
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-g" />
 					<Add option="-O2" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add option="-s" />
 				</Linker>
 			</Target>
 		</Build>

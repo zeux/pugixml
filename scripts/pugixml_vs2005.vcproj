@@ -50,7 +50,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_d.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixmld.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_d.lib"
+				OutputFile="$(OutDir)\pugixmld.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -125,7 +125,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_d.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixmld.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_d.lib"
+				OutputFile="$(OutDir)\pugixmld.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

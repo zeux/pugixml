@@ -5,11 +5,6 @@ local static = _ARGS[1] == 'static'
 local action = premake.action.current()
 
 if string.startswith(_ACTION, "vs") then
-	-- We need debugging symbols for all configurations, but runtime library depends on official Symbols flag, so hack it
-	function premake.vs200x_vcproj_symbols(cfg)
-		return 3
-	end
-
 	if action then
 		-- Disable solution generation
 		function action.onsolution(sln)
@@ -18,7 +13,19 @@ if string.startswith(_ACTION, "vs") then
 
 		-- Rename output file
 		function action.onproject(prj)
-			premake.generate(prj, "%%_" .. _ACTION .. (static and "_static" or "") .. ".vcproj", premake.vs200x_vcproj)
+            local name = "%%_" .. _ACTION .. (static and "_static" or "")
+
+            if static then
+                for k, v in pairs(prj.project.__configs) do
+                    v.objectsdir = v.objectsdir .. "Static"
+                end
+            end
+
+            if _ACTION == "vs2010" then
+                premake.generate(prj, name .. ".vcxproj", premake.vs2010_vcxproj)
+            else
+                premake.generate(prj, name .. ".vcproj", premake.vs200x_vcproj)
+            end
 		end
 	end
 elseif _ACTION == "codeblocks" then
@@ -50,10 +57,10 @@ if string.startswith(_ACTION, "vs") then
 	configurations { "Debug", "Release" }
 
     if static then
-        configuration "Debug" targetsuffix "_sd"
-        configuration "Release" targetsuffix "_s"
+        configuration "Debug" targetsuffix "sd"
+        configuration "Release" targetsuffix "s"
     else
-        configuration "Debug" targetsuffix "_d"
+        configuration "Debug" targetsuffix "d"
     end
 else
 	if _ACTION == "xcode3" then
@@ -62,19 +69,18 @@ else
 
 	configurations { "Debug", "Release" }
 
-	configuration "Debug" targetsuffix "_d"
+	configuration "Debug" targetsuffix "d"
 end
 
 project "pugixml"
 	kind "StaticLib"
 	language "C++"
 	files { "../src/pugixml.hpp", "../src/pugiconfig.hpp", "../src/pugixml.cpp" }
-	flags { "NoPCH", "NoMinimalRebuild" }
+	flags { "NoPCH", "NoMinimalRebuild", "NoEditAndContinue", "Symbols" }
 	uuid "89A1E353-E2DC-495C-B403-742BE206ACED"
 
 configuration "Debug"
 	defines { "_DEBUG" }
-	flags { "Symbols" }
 
 configuration "Release"
 	defines { "NDEBUG" }

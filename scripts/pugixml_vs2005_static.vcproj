@@ -21,7 +21,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="vs2005\x32"
-			IntermediateDirectory="vs2005\x32\Debug"
+			IntermediateDirectory="vs2005\x32\DebugStatic"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -50,7 +50,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_sd.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixmlsd.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_sd.lib"
+				OutputFile="$(OutDir)\pugixmlsd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -95,7 +95,7 @@
 		<Configuration
 			Name="Debug|x64"
 			OutputDirectory="vs2005\x64"
-			IntermediateDirectory="vs2005\x64\Debug"
+			IntermediateDirectory="vs2005\x64\DebugStatic"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -125,7 +125,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_sd.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixmlsd.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_sd.lib"
+				OutputFile="$(OutDir)\pugixmlsd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -170,7 +170,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="vs2005\x32"
-			IntermediateDirectory="vs2005\x32\Release"
+			IntermediateDirectory="vs2005\x32\ReleaseStatic"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -199,7 +199,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_s.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixmls.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -214,7 +214,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_s.lib"
+				OutputFile="$(OutDir)\pugixmls.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -244,7 +244,7 @@
 		<Configuration
 			Name="Release|x64"
 			OutputDirectory="vs2005\x64"
-			IntermediateDirectory="vs2005\x64\Release"
+			IntermediateDirectory="vs2005\x64\ReleaseStatic"
 			ConfigurationType="4"
 			CharacterSet="2"
 			>
@@ -274,7 +274,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
-				ProgramDataBaseFileName="$(OutDir)\pugixml_s.pdb"
+				ProgramDataBaseFileName="$(OutDir)\pugixmls.pdb"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -289,7 +289,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\pugixml_s.lib"
+				OutputFile="$(OutDir)\pugixmls.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"

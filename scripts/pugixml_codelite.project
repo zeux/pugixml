@@ -7,7 +7,7 @@
   </VirtualDirectory>
   <Settings Type="Static Library">
     <Configuration Name="Debug" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Static Library">
-      <General OutputFile="codelite/libpugixml_d.a" IntermediateDirectory="codelite/Debug" Command="./libpugixml_d.a" CommandArguments="" WorkingDirectory="codelite" PauseExecWhenProcTerminates="yes"/>
+      <General OutputFile="codelite/libpugixmld.a" IntermediateDirectory="codelite/Debug" Command="./libpugixmld.a" CommandArguments="" WorkingDirectory="codelite" PauseExecWhenProcTerminates="yes"/>
       <Compiler Required="yes" Options="-g">
         <Preprocessor Value="_DEBUG"/>
       </Compiler>
@@ -29,10 +29,10 @@
     </Configuration>
     <Configuration Name="Release" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Static Library">
       <General OutputFile="codelite/libpugixml.a" IntermediateDirectory="codelite/Release" Command="./libpugixml.a" CommandArguments="" WorkingDirectory="codelite" PauseExecWhenProcTerminates="yes"/>
-      <Compiler Required="yes" Options="-O2">
+      <Compiler Required="yes" Options="-g;-O2">
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
-      <Linker Required="yes" Options="-s">
+      <Linker Required="yes" Options="">
       </Linker>
       <ResourceCompiler Required="no" Options=""/>
       <CustomBuild Enabled="no">
