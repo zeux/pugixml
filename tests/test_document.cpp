@@ -429,7 +429,7 @@ TEST(document_parse_result_bool)
 
 	for (int i = 1; i < 20; ++i)
 	{
-		result.status = (xml_parse_status)i;
+		result.status = static_cast<xml_parse_status>(i);
 		CHECK(!result);
 		CHECK(result == false);
 	}
@@ -441,7 +441,7 @@ TEST(document_parse_result_description)
 
 	for (int i = 0; i < 20; ++i)
 	{
-		result.status = (xml_parse_status)i;
+		result.status = static_cast<xml_parse_status>(i);
 
 		CHECK(result.description() != 0);
 		CHECK(result.description()[0] != 0);
@@ -461,7 +461,7 @@ inline void check_utftest_document(const xml_document& doc)
 	CHECK_STRING(doc.last_child().first_child().name(), STR("English"));
 
 	// check that we have parsed some non-ascii text
-	CHECK((unsigned)doc.last_child().last_child().name()[0] >= 0x80);
+	CHECK(static_cast<unsigned int>(doc.last_child().last_child().name()[0]) >= 0x80);
 
 	// check magic string
 	const pugi::char_t* v = doc.last_child().child(STR("Heavy")).previous_sibling().child_value();
@@ -645,7 +645,7 @@ static bool load_file_in_memory(const char* path, char*& data, size_t& size)
 	if (!file) return false;
 
 	fseek(file, 0, SEEK_END);
-	size = (size_t)ftell(file);
+	size = static_cast<size_t>(ftell(file));
 	fseek(file, 0, SEEK_SET);
 
 	data = new char[size];

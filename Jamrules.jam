@@ -34,7 +34,15 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 	{
 		local RESULT = -D$(DEFINES) ;
 
-		RESULT += -W -Wall -Wextra -Werror -pedantic ;
+		RESULT += -W -Wall -Wextra -pedantic -Werror ;
+        RESULT += -Wabi -Wctor-dtor-privacy -Wno-non-template-friend -Wold-style-cast -Wcast-qual -Wcast-align ;
+        RESULT += -Woverloaded-virtual -Wno-pmf-conversions -Wsign-promo -Wformat=2 -Winit-self -Wswitch-default ;
+        RESULT += -Wunused -Wstrict-aliasing=2 -Wundef -Wshadow -Wredundant-decls ;
+
+        if ( $(toolset) != mingw34 )
+        {
+            RESULT += -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations ;
+        }
 
 		if ( $(toolset:I=_0x) )
 		{

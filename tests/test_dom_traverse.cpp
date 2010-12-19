@@ -490,7 +490,7 @@ struct find_predicate_const
 {
 	bool result;
 
-	find_predicate_const(bool result): result(result)
+	find_predicate_const(bool result_): result(result_)
 	{
 	}
 
@@ -504,7 +504,7 @@ struct find_predicate_prefix
 {
 	const pugi::char_t* prefix;
 
-	find_predicate_prefix(const pugi::char_t* prefix): prefix(prefix)
+	find_predicate_prefix(const pugi::char_t* prefix_): prefix(prefix_)
 	{
 	}
 
@@ -616,7 +616,7 @@ struct test_walker: xml_tree_walker
 	unsigned int call_count;
 	unsigned int stop_count;
 
-	test_walker(unsigned int stop_count = 0): call_count(0), stop_count(stop_count)
+	test_walker(unsigned int stop_count_ = 0): call_count(0), stop_count(stop_count_)
 	{
 	}
 

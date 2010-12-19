@@ -28,12 +28,12 @@ static bool test_doctype_wf(const char_t* decl)
 	xml_document doc;
 
 	// standalone
-	if (!load_concat(doc, decl) || (bool)doc.first_child()) return false;
+	if (!load_concat(doc, decl) || !doc.first_child().empty()) return false;
 
 	// pcdata pre/postfix
-	if (!load_concat(doc, STR("a"), decl) || (bool)doc.first_child()) return false;
-	if (!load_concat(doc, decl, STR("b")) || (bool)doc.first_child()) return false;
-	if (!load_concat(doc, STR("a"), decl, STR("b")) || (bool)doc.first_child()) return false;
+	if (!load_concat(doc, STR("a"), decl) || !doc.first_child().empty()) return false;
+	if (!load_concat(doc, decl, STR("b")) || !doc.first_child().empty()) return false;
+	if (!load_concat(doc, STR("a"), decl, STR("b")) || !doc.first_child().empty()) return false;
 
 	// node pre/postfix
 	if (!load_concat(doc, STR("<nodea/>"), decl) || !test_node(doc, STR("<nodea />"), STR(""), format_raw)) return false;

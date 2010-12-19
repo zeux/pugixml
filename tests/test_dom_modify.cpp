@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-#include <float.h>
+#include <limits>
 
 TEST_XML(dom_attr_assign, "<node/>")
 {
@@ -707,8 +707,8 @@ TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
 {
 	xml_node node = doc.child(STR("node"));
 
-	node.attribute(STR("attr1")) = FLT_MAX;
-	node.attribute(STR("attr2")) = DBL_MAX;
+	node.attribute(STR("attr1")) = std::numeric_limits<float>::max();
+	node.attribute(STR("attr2")) = std::numeric_limits<double>::max();
 
 	CHECK(test_node(node, STR("<node attr1=\"3.40282e+038\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw) ||
 		  test_node(node, STR("<node attr1=\"3.40282e+38\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw));

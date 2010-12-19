@@ -2,13 +2,13 @@
 
 #include "common.hpp"
 
-#include <float.h>
 #include <string.h>
 #include <wchar.h>
 
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 static void load_document_copy(xml_document& doc, const char_t* text)
 {
@@ -162,10 +162,10 @@ TEST(xpath_long_numbers_parse)
 	xml_node c;
 
 	// check parsing
-	CHECK_XPATH_NUMBER(c, str_flt_max, FLT_MAX);
-	CHECK_XPATH_NUMBER(c, str_flt_max_dec, FLT_MAX);
-	CHECK_XPATH_NUMBER(c, str_dbl_max, DBL_MAX);
-	CHECK_XPATH_NUMBER(c, str_dbl_max_dec, DBL_MAX);
+	CHECK_XPATH_NUMBER(c, str_flt_max, std::numeric_limits<float>::max());
+	CHECK_XPATH_NUMBER(c, str_flt_max_dec, std::numeric_limits<float>::max());
+	CHECK_XPATH_NUMBER(c, str_dbl_max, std::numeric_limits<double>::max());
+	CHECK_XPATH_NUMBER(c, str_dbl_max_dec, std::numeric_limits<double>::max());
 }
 
 static bool test_xpath_string_prefix(const pugi::xml_node& node, const pugi::char_t* query, const pugi::char_t* expected, size_t match_length)

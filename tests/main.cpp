@@ -90,7 +90,7 @@ static bool run_test(test_runner* test)
 
 		if (g_memory_total_size != 0 || g_memory_total_count != 0)
 		{
-			printf("Test %s failed: memory leaks found (%u bytes in %u allocations)\n", test->_name, (unsigned int)g_memory_total_size, (unsigned int)g_memory_total_count);
+			printf("Test %s failed: memory leaks found (%u bytes in %u allocations)\n", test->_name, static_cast<unsigned int>(g_memory_total_size), static_cast<unsigned int>(g_memory_total_count));
 			return false;
 		}
 

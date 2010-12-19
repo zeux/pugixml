@@ -170,7 +170,7 @@ namespace
 		void* data;
 		void (*deleter)(void*);
 
-		buffer_holder(void* data, void (*deleter)(void*)): data(data), deleter(deleter)
+		buffer_holder(void* data_, void (*deleter_)(void*)): data(data_), deleter(deleter_)
 		{
 		}
 
@@ -695,8 +695,8 @@ namespace
 
 		static value_type high(value_type result, uint32_t ch)
 		{
-			uint32_t msh = (uint32_t)(ch - 0x10000) >> 10;
-			uint32_t lsh = (uint32_t)(ch - 0x10000) & 0x3ff;
+			uint32_t msh = static_cast<uint32_t>(ch - 0x10000) >> 10;
+			uint32_t lsh = static_cast<uint32_t>(ch - 0x10000) & 0x3ff;
 
 			result[0] = static_cast<uint16_t>(0xD800 + msh);
 			result[1] = static_cast<uint16_t>(0xDC00 + lsh);
@@ -802,21 +802,21 @@ namespace
 					}
 				}
 				// 110xxxxx -> U+0080..U+07FF
-				else if ((unsigned)(lead - 0xC0) < 0x20 && size >= 2 && (data[1] & 0xc0) == 0x80)
+				else if (static_cast<unsigned int>(lead - 0xC0) < 0x20 && size >= 2 && (data[1] & 0xc0) == 0x80)
 				{
 					result = Traits::low(result, ((lead & ~0xC0) << 6) | (data[1] & utf8_byte_mask));
 					data += 2;
 					size -= 2;
 				}
 				// 1110xxxx -> U+0800-U+FFFF
-				else if ((unsigned)(lead - 0xE0) < 0x10 && size >= 3 && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80)
+				else if (static_cast<unsigned int>(lead - 0xE0) < 0x10 && size >= 3 && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80)
 				{
 					result = Traits::low(result, ((lead & ~0xE0) << 12) | ((data[1] & utf8_byte_mask) << 6) | (data[2] & utf8_byte_mask));
 					data += 3;
 					size -= 3;
 				}
 				// 11110xxx -> U+10000..U+10FFFF
-				else if ((unsigned)(lead - 0xF0) < 0x08 && size >= 4 && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80 && (data[3] & 0xc0) == 0x80)
+				else if (static_cast<unsigned int>(lead - 0xF0) < 0x08 && size >= 4 && (data[1] & 0xc0) == 0x80 && (data[2] & 0xc0) == 0x80 && (data[3] & 0xc0) == 0x80)
 				{
 					result = Traits::high(result, ((lead & ~0xF0) << 18) | ((data[1] & utf8_byte_mask) << 12) | ((data[2] & utf8_byte_mask) << 6) | (data[3] & utf8_byte_mask));
 					data += 4;
@@ -848,17 +848,17 @@ namespace
 					data += 1;
 				}
 				// U+E000..U+FFFF
-				else if ((unsigned)(lead - 0xE000) < 0x2000)
+				else if (static_cast<unsigned int>(lead - 0xE000) < 0x2000)
 				{
 					result = Traits::low(result, lead);
 					data += 1;
 				}
 				// surrogate pair lead
-				else if ((unsigned)(lead - 0xD800) < 0x400 && data + 1 < end)
+				else if (static_cast<unsigned int>(lead - 0xD800) < 0x400 && data + 1 < end)
 				{
 					uint16_t next = opt_swap::value ? endian_swap(data[1]) : data[1];
 
-					if ((unsigned)(next - 0xDC00) < 0x400)
+					if (static_cast<unsigned int>(next - 0xDC00) < 0x400)
 					{
 						result = Traits::high(result, 0x10000 + ((lead & 0x3ff) << 10) + (next & 0x3ff));
 						data += 2;
@@ -1515,6 +1515,7 @@ namespace
 				g.push(s, stre - s);
 				return stre;
 			}
+
 			case 'a':	// &a
 			{
 				++stre;
@@ -1543,6 +1544,7 @@ namespace
 				}
 				break;
 			}
+
 			case 'g': // &g
 			{
 				if (*++stre == 't' && *++stre == ';') // &gt;
@@ -1555,6 +1557,7 @@ namespace
 				}
 				break;
 			}
+
 			case 'l': // &l
 			{
 				if (*++stre == 't' && *++stre == ';') // &lt;
@@ -1567,6 +1570,7 @@ namespace
 				}
 				break;
 			}
+
 			case 'q': // &q
 			{
 				if (*++stre == 'u' && *++stre == 'o' && *++stre == 't' && *++stre == ';') // &quot;
@@ -1579,6 +1583,9 @@ namespace
 				}
 				break;
 			}
+
+            default:
+                break;
 		}
 		
 		return stre;
@@ -1897,7 +1904,7 @@ namespace
 		#define THROW_ERROR(err, m)	error_offset = m, longjmp(error_handler, err)
 		#define CHECK_ERROR(err, m)	{ if (*s == 0) THROW_ERROR(err, m); }
 		
-		xml_parser(const xml_allocator& alloc): alloc(alloc), error_offset(0)
+		xml_parser(const xml_allocator& alloc_): alloc(alloc_), error_offset(0)
 		{
 		}
 
@@ -2503,7 +2510,7 @@ namespace
 		assert(length > 0);
 
 		// discard last character if it's the lead of a surrogate pair 
-		return (sizeof(wchar_t) == 2 && (unsigned)(static_cast<uint16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
+		return (sizeof(wchar_t) == 2 && static_cast<unsigned int>(static_cast<uint16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
 	}
 
 	size_t convert_buffer(char* result, const char_t* data, size_t length, xml_encoding encoding)
@@ -2623,7 +2630,7 @@ namespace
 		xml_buffered_writer& operator=(const xml_buffered_writer&);
 
 	public:
-		xml_buffered_writer(xml_writer& writer, xml_encoding user_encoding): writer(writer), bufsize(0), encoding(get_write_encoding(user_encoding))
+		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
 		{
 		}
 
@@ -3246,7 +3253,7 @@ namespace
 
 namespace pugi
 {
-	xml_writer_file::xml_writer_file(void* file): file(file)
+	xml_writer_file::xml_writer_file(void* file_): file(file_)
 	{
 	}
 
@@ -3367,9 +3374,9 @@ namespace pugi
 		if (!_attr || !_attr->value) return 0;
 
 	#ifdef PUGIXML_WCHAR_MODE
-		return (int)wcstol(_attr->value, 0, 10);
+		return static_cast<int>(wcstol(_attr->value, 0, 10));
 	#else
-		return (int)strtol(_attr->value, 0, 10);
+		return static_cast<int>(strtol(_attr->value, 0, 10));
 	#endif
 	}
 
@@ -3378,9 +3385,9 @@ namespace pugi
 		if (!_attr || !_attr->value) return 0;
 
 	#ifdef PUGIXML_WCHAR_MODE
-		return (unsigned int)wcstoul(_attr->value, 0, 10);
+		return static_cast<unsigned int>(wcstoul(_attr->value, 0, 10));
 	#else
-		return (unsigned int)strtoul(_attr->value, 0, 10);
+		return static_cast<unsigned int>(strtoul(_attr->value, 0, 10));
 	#endif
 	}
 
@@ -3400,9 +3407,9 @@ namespace pugi
 		if (!_attr || !_attr->value) return 0;
 
 	#ifdef PUGIXML_WCHAR_MODE
-		return (float)wcstod(_attr->value, 0);
+		return static_cast<float>(wcstod(_attr->value, 0));
 	#else
-		return (float)strtod(_attr->value, 0);
+		return static_cast<float>(strtod(_attr->value, 0));
 	#endif
 	}
 
@@ -3636,33 +3643,33 @@ namespace pugi
 		return (_root && _root->value) ? _root->value : PUGIXML_TEXT("");
 	}
 	
-	xml_node xml_node::child(const char_t* name) const
+	xml_node xml_node::child(const char_t* name_) const
 	{
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && strequal(name, i->name)) return xml_node(i);
+			if (i->name && strequal(name_, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
 
-	xml_attribute xml_node::attribute(const char_t* name) const
+	xml_attribute xml_node::attribute(const char_t* name_) const
 	{
 		if (!_root) return xml_attribute();
 
 		for (xml_attribute_struct* i = _root->first_attribute; i; i = i->next_attribute)
-			if (i->name && strequal(name, i->name))
+			if (i->name && strequal(name_, i->name))
 				return xml_attribute(i);
 		
 		return xml_attribute();
 	}
 	
-	xml_node xml_node::next_sibling(const char_t* name) const
+	xml_node xml_node::next_sibling(const char_t* name_) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
-			if (i->name && strequal(name, i->name)) return xml_node(i);
+			if (i->name && strequal(name_, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -3675,12 +3682,12 @@ namespace pugi
 		else return xml_node();
 	}
 
-	xml_node xml_node::previous_sibling(const char_t* name) const
+	xml_node xml_node::previous_sibling(const char_t* name_) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->prev_sibling_c; i->next_sibling; i = i->prev_sibling_c)
-			if (i->name && strequal(name, i->name)) return xml_node(i);
+			if (i->name && strequal(name_, i->name)) return xml_node(i);
 
 		return xml_node();
 	}
@@ -3713,18 +3720,18 @@ namespace pugi
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 		{
-			xml_node_type type = static_cast<xml_node_type>((i->header & xml_memory_page_type_mask) + 1);
+			xml_node_type type_ = static_cast<xml_node_type>((i->header & xml_memory_page_type_mask) + 1);
 
-			if (i->value && (type == node_pcdata || type == node_cdata))
+			if (i->value && (type_ == node_pcdata || type_ == node_cdata))
 				return i->value;
 		}
 
 		return PUGIXML_TEXT("");
 	}
 
-	const char_t* xml_node::child_value(const char_t* name) const
+	const char_t* xml_node::child_value(const char_t* name_) const
 	{
-		return child(name).child_value();
+		return child(name_).child_value();
 	}
 
 	xml_attribute xml_node::first_attribute() const
@@ -3777,24 +3784,24 @@ namespace pugi
 		}
 	}
 
-	xml_attribute xml_node::append_attribute(const char_t* name)
+	xml_attribute xml_node::append_attribute(const char_t* name_)
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
 		xml_attribute a(append_attribute_ll(_root, get_allocator(_root)));
-		a.set_name(name);
+		a.set_name(name_);
 		
 		return a;
 	}
 
-	xml_attribute xml_node::prepend_attribute(const char_t* name)
+	xml_attribute xml_node::prepend_attribute(const char_t* name_)
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
 		xml_attribute a(allocate_attribute(get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		a.set_name(name);
+		a.set_name(name_);
 		
         xml_attribute_struct* head = _root->first_attribute;
 
@@ -3812,7 +3819,7 @@ namespace pugi
 		return a;
 	}
 
-	xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr)
+	xml_attribute xml_node::insert_attribute_before(const char_t* name_, const xml_attribute& attr)
 	{
 		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
 		
@@ -3826,7 +3833,7 @@ namespace pugi
 		xml_attribute a(allocate_attribute(get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		a.set_name(name);
+		a.set_name(name_);
 
 		if (attr._attr->prev_attribute_c->next_attribute)
 			attr._attr->prev_attribute_c->next_attribute = a._attr;
@@ -3840,7 +3847,7 @@ namespace pugi
 		return a;
 	}
 
-	xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr)
+	xml_attribute xml_node::insert_attribute_after(const char_t* name_, const xml_attribute& attr)
 	{
 		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
 		
@@ -3854,7 +3861,7 @@ namespace pugi
 		xml_attribute a(allocate_attribute(get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		a.set_name(name);
+		a.set_name(name_);
 
 		if (attr._attr->next_attribute)
 			attr._attr->next_attribute->prev_attribute_c = a._attr;
@@ -3908,22 +3915,22 @@ namespace pugi
 		return result;
 	}
 
-	xml_node xml_node::append_child(xml_node_type type)
+	xml_node xml_node::append_child(xml_node_type type_)
 	{
-		if (!allow_insert_child(this->type(), type)) return xml_node();
+		if (!allow_insert_child(this->type(), type_)) return xml_node();
 		
-		xml_node n(append_node(_root, get_allocator(_root), type));
+		xml_node n(append_node(_root, get_allocator(_root), type_));
 
-		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
 		return n;
 	}
 
-	xml_node xml_node::prepend_child(xml_node_type type)
+	xml_node xml_node::prepend_child(xml_node_type type_)
 	{
-		if (!allow_insert_child(this->type(), type)) return xml_node();
+		if (!allow_insert_child(this->type(), type_)) return xml_node();
 		
-		xml_node n(allocate_node(get_allocator(_root), type));
+		xml_node n(allocate_node(get_allocator(_root), type_));
 		if (!n) return xml_node();
 
         n._root->parent = _root;
@@ -3941,17 +3948,17 @@ namespace pugi
 		n._root->next_sibling = head;
         _root->first_child = n._root;
 				
-		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
 		return n;
 	}
 
-	xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node)
+	xml_node xml_node::insert_child_before(xml_node_type type_, const xml_node& node)
 	{
-		if (!allow_insert_child(this->type(), type)) return xml_node();
+		if (!allow_insert_child(this->type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 	
-		xml_node n(allocate_node(get_allocator(_root), type));
+		xml_node n(allocate_node(get_allocator(_root), type_));
 		if (!n) return xml_node();
 
 		n._root->parent = _root;
@@ -3965,17 +3972,17 @@ namespace pugi
 		n._root->next_sibling = node._root;
 		node._root->prev_sibling_c = n._root;
 
-		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
 		return n;
 	}
 
-	xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node)
+	xml_node xml_node::insert_child_after(xml_node_type type_, const xml_node& node)
 	{
-		if (!allow_insert_child(this->type(), type)) return xml_node();
+		if (!allow_insert_child(this->type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 	
-		xml_node n(allocate_node(get_allocator(_root), type));
+		xml_node n(allocate_node(get_allocator(_root), type_));
 		if (!n) return xml_node();
 
 		n._root->parent = _root;
@@ -3989,43 +3996,43 @@ namespace pugi
 		n._root->prev_sibling_c = node._root;
 		node._root->next_sibling = n._root;
 
-		if (type == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
 		return n;
 	}
 
-    xml_node xml_node::append_child(const char_t* name)
+    xml_node xml_node::append_child(const char_t* name_)
     {
         xml_node result = append_child(node_element);
 
-        result.set_name(name);
+        result.set_name(name_);
 
         return result;
     }
 
-    xml_node xml_node::prepend_child(const char_t* name)
+    xml_node xml_node::prepend_child(const char_t* name_)
     {
         xml_node result = prepend_child(node_element);
 
-        result.set_name(name);
+        result.set_name(name_);
 
         return result;
     }
 
-    xml_node xml_node::insert_child_after(const char_t* name, const xml_node& node)
+    xml_node xml_node::insert_child_after(const char_t* name_, const xml_node& node)
     {
         xml_node result = insert_child_after(node_element, node);
 
-        result.set_name(name);
+        result.set_name(name_);
 
         return result;
     }
 
-    xml_node xml_node::insert_child_before(const char_t* name, const xml_node& node)
+    xml_node xml_node::insert_child_before(const char_t* name_, const xml_node& node)
     {
         xml_node result = insert_child_before(node_element, node);
 
-        result.set_name(name);
+        result.set_name(name_);
 
         return result;
     }
@@ -4066,9 +4073,9 @@ namespace pugi
 		return result;
 	}
 
-	bool xml_node::remove_attribute(const char_t* name)
+	bool xml_node::remove_attribute(const char_t* name_)
 	{
-		return remove_attribute(attribute(name));
+		return remove_attribute(attribute(name_));
 	}
 
 	bool xml_node::remove_attribute(const xml_attribute& a)
@@ -4093,9 +4100,9 @@ namespace pugi
 		return true;
 	}
 
-	bool xml_node::remove_child(const char_t* name)
+	bool xml_node::remove_child(const char_t* name_)
 	{
-		return remove_child(child(name));
+		return remove_child(child(name_));
 	}
 
 	bool xml_node::remove_child(const xml_node& n)
@@ -4113,12 +4120,12 @@ namespace pugi
 		return true;
 	}
 
-	xml_node xml_node::find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const
+	xml_node xml_node::find_child_by_attribute(const char_t* name_, const char_t* attr_name, const char_t* attr_value) const
 	{
 		if (!_root) return xml_node();
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && strequal(name, i->name))
+			if (i->name && strequal(name_, i->name))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
 					if (strequal(attr_name, a->name) && strequal(attr_value, a->value))
@@ -4143,11 +4150,9 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	string_t xml_node::path(char_t delimiter) const
 	{
-		string_t path;
-
 		xml_node cursor = *this; // Make a copy.
 		
-		path = cursor.name();
+		string_t result = cursor.name();
 
 		while (cursor.parent())
 		{
@@ -4155,28 +4160,28 @@ namespace pugi
 			
 			string_t temp = cursor.name();
 			temp += delimiter;
-			temp += path;
-			path.swap(temp);
+			temp += result;
+			result.swap(temp);
 		}
 
-		return path;
+		return result;
 	}
 #endif
 
-	xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter) const
+	xml_node xml_node::first_element_by_path(const char_t* path_, char_t delimiter) const
 	{
 		xml_node found = *this; // Current search context.
 
-		if (!_root || !path || !path[0]) return found;
+		if (!_root || !path_ || !path_[0]) return found;
 
-		if (path[0] == delimiter)
+		if (path_[0] == delimiter)
 		{
 			// Absolute path; e.g. '/foo/bar'
 			found = found.root();
-			++path;
+			++path_;
 		}
 
-		const char_t* path_segment = path;
+		const char_t* path_segment = path_;
 
 		while (*path_segment == delimiter) ++path_segment;
 
@@ -4239,7 +4244,7 @@ namespace pugi
 				else
 				{
 					// Borland C++ workaround
-					while (!cur.next_sibling() && cur != *this && (bool)cur.parent())
+					while (!cur.next_sibling() && cur != *this && !cur.parent().empty())
 					{
 						--walker._depth;
 						cur = cur.parent();
@@ -4601,20 +4606,20 @@ namespace pugi
 		return load_buffer(contents, strlength(contents) * sizeof(char_t), options, encoding);
 	}
 
-	xml_parse_result xml_document::load_file(const char* path, unsigned int options, xml_encoding encoding)
+	xml_parse_result xml_document::load_file(const char* path_, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		FILE* file = fopen(path, "rb");
+		FILE* file = fopen(path_, "rb");
 
 		return load_file_impl(*this, file, options, encoding);
 	}
 
-	xml_parse_result xml_document::load_file(const wchar_t* path, unsigned int options, xml_encoding encoding)
+	xml_parse_result xml_document::load_file(const wchar_t* path_, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		FILE* file = open_file_wide(path, L"rb");
+		FILE* file = open_file_wide(path_, L"rb");
 
 		return load_file_impl(*this, file, options, encoding);
 	}
@@ -4696,9 +4701,9 @@ namespace pugi
 	}
 #endif
 
-	bool xml_document::save_file(const char* path, const char_t* indent, unsigned int flags, xml_encoding encoding) const
+	bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		FILE* file = fopen(path, "wb");
+		FILE* file = fopen(path_, "wb");
 		if (!file) return false;
 
 		xml_writer_file writer(file);
@@ -4709,9 +4714,9 @@ namespace pugi
 		return true;
 	}
 
-	bool xml_document::save_file(const wchar_t* path, const char_t* indent, unsigned int flags, xml_encoding encoding) const
+	bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		FILE* file = open_file_wide(path, L"wb");
+		FILE* file = open_file_wide(path_, L"wb");
 		if (!file) return false;
 
 		xml_writer_file writer(file);
@@ -5273,10 +5278,10 @@ namespace
 
 		explicit xpath_string(const char_t* str, xpath_allocator* alloc)
 		{
-			bool empty = (*str == 0);
+			bool empty_ = (*str == 0);
 
-			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(str, alloc);
-			_uses_heap = !empty;
+			_buffer = empty_ ? PUGIXML_TEXT("") : duplicate_string(str, alloc);
+			_uses_heap = !empty_;
 		}
 
 		explicit xpath_string(const char_t* str, bool use_heap): _buffer(str), _uses_heap(use_heap)
@@ -5287,10 +5292,10 @@ namespace
 		{
 			assert(begin <= end);
 
-			bool empty = (begin == end);
+			bool empty_ = (begin == end);
 
-			_buffer = empty ? PUGIXML_TEXT("") : duplicate_string(begin, static_cast<size_t>(end - begin), alloc);
-			_uses_heap = !empty;
+			_buffer = empty_ ? PUGIXML_TEXT("") : duplicate_string(begin, static_cast<size_t>(end - begin), alloc);
+			_uses_heap = !empty_;
 		}
 
 		void append(const xpath_string& o, xpath_allocator* alloc)
@@ -5308,10 +5313,10 @@ namespace
 				// need to make heap copy
 				size_t target_length = strlength(_buffer);
 				size_t source_length = strlength(o._buffer);
-				size_t length = target_length + source_length;
+				size_t result_length = target_length + source_length;
 
 				// allocate new buffer
-				char_t* result = static_cast<char_t*>(alloc->reallocate(_uses_heap ? const_cast<char_t*>(_buffer) : 0, (target_length + 1) * sizeof(char_t), (length + 1) * sizeof(char_t)));
+				char_t* result = static_cast<char_t*>(alloc->reallocate(_uses_heap ? const_cast<char_t*>(_buffer) : 0, (target_length + 1) * sizeof(char_t), (result_length + 1) * sizeof(char_t)));
 				assert(result);
 
 				// append first string to the new buffer in case there was no reallocation
@@ -5319,7 +5324,7 @@ namespace
 
 				// append second string to the new buffer
 				memcpy(result + target_length, o._buffer, source_length * sizeof(char_t));
-				result[length] = 0;
+				result[result_length] = 0;
 
 				// finalize
 				_buffer = result;
@@ -5744,7 +5749,7 @@ namespace
 		{
 			while (exponent > 0)
 			{
-				assert(*mantissa == 0 || (unsigned)(*mantissa - '0') <= 9);
+				assert(*mantissa == 0 || static_cast<unsigned int>(*mantissa - '0') <= 9);
 				*s++ = *mantissa ? *mantissa++ : '0';
 				exponent--;
 			}
@@ -5766,7 +5771,7 @@ namespace
 			// extra mantissa digits
 			while (*mantissa)
 			{
-				assert((unsigned)(*mantissa - '0') <= 9);
+				assert(static_cast<unsigned int>(*mantissa - '0') <= 9);
 				*s++ = *mantissa++;
 			}
 		}
@@ -6243,25 +6248,25 @@ namespace
 			*_end++ = node;
 		}
 
-		void append(const xpath_node* begin, const xpath_node* end, xpath_allocator* alloc)
+		void append(const xpath_node* begin_, const xpath_node* end_, xpath_allocator* alloc)
 		{
-			size_t size = static_cast<size_t>(_end - _begin);
+			size_t size_ = static_cast<size_t>(_end - _begin);
 			size_t capacity = static_cast<size_t>(_eos - _begin);
-			size_t count = static_cast<size_t>(end - begin);
+			size_t count = static_cast<size_t>(end_ - begin_);
 
-			if (size + count > capacity)
+			if (size_ + count > capacity)
 			{
 				// reallocate the old array or allocate a new one
-				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), (size + count) * sizeof(xpath_node)));
+				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), (size_ + count) * sizeof(xpath_node)));
 				assert(data);
 
 				// finalize
 				_begin = data;
-				_end = data + size;
-				_eos = data + size + count;
+				_end = data + size_;
+				_eos = data + size_ + count;
 			}
 
-			memcpy(_end, begin, count * sizeof(xpath_node));
+			memcpy(_end, begin_, count * sizeof(xpath_node));
 			_end += count;
 		}
 
@@ -6290,9 +6295,9 @@ namespace
 			return _type;
 		}
 
-		void set_type(xpath_node_set::type_t type)
+		void set_type(xpath_node_set::type_t value)
 		{
-			_type = type;
+			_type = value;
 		}
 	};
 }
@@ -6304,7 +6309,7 @@ namespace
 		xpath_node n;
 		size_t position, size;
 
-		xpath_context(const xpath_node& n, size_t position, size_t size): n(n), position(position), size(size)
+		xpath_context(const xpath_node& n_, size_t position_, size_t size_): n(n_), position(position_), size(size_)
 		{
 		}
 	};
@@ -7363,34 +7368,34 @@ namespace
 		}
 		
 	public:
-		xpath_ast_node(ast_type_t type, xpath_value_type rettype, const char_t* value):
-			_type((char)type), _rettype((char)rettype), _axis(0), _test(0), _left(0), _right(0), _next(0)
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype_, const char_t* value):
+			_type(static_cast<char>(type)), _rettype(static_cast<char>(rettype_)), _axis(0), _test(0), _left(0), _right(0), _next(0)
 		{
 			assert(type == ast_string_constant);
 			_data.string = value;
 		}
 
-		xpath_ast_node(ast_type_t type, xpath_value_type rettype, double value):
-			_type((char)type), _rettype((char)rettype), _axis(0), _test(0), _left(0), _right(0), _next(0)
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype_, double value):
+			_type(static_cast<char>(type)), _rettype(static_cast<char>(rettype_)), _axis(0), _test(0), _left(0), _right(0), _next(0)
 		{
 			assert(type == ast_number_constant);
 			_data.number = value;
 		}
 		
-		xpath_ast_node(ast_type_t type, xpath_value_type rettype, xpath_variable* value):
-			_type((char)type), _rettype((char)rettype), _axis(0), _test(0), _left(0), _right(0), _next(0)
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype_, xpath_variable* value):
+			_type(static_cast<char>(type)), _rettype(static_cast<char>(rettype_)), _axis(0), _test(0), _left(0), _right(0), _next(0)
 		{
 			assert(type == ast_variable);
 			_data.variable = value;
 		}
 		
-		xpath_ast_node(ast_type_t type, xpath_value_type rettype, xpath_ast_node* left = 0, xpath_ast_node* right = 0):
-			_type((char)type), _rettype((char)rettype), _axis(0), _test(0), _left(left), _right(right), _next(0)
+		xpath_ast_node(ast_type_t type, xpath_value_type rettype_, xpath_ast_node* left = 0, xpath_ast_node* right = 0):
+			_type(static_cast<char>(type)), _rettype(static_cast<char>(rettype_)), _axis(0), _test(0), _left(left), _right(right), _next(0)
 		{
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const char_t* contents):
-			_type((char)type), _rettype(xpath_type_node_set), _axis((char)axis), _test((char)test), _left(left), _right(0), _next(0)
+			_type(static_cast<char>(type)), _rettype(xpath_type_node_set), _axis(static_cast<char>(axis)), _test(static_cast<char>(test)), _left(left), _right(0), _next(0)
 		{
 			_data.nodetest = contents;
 		}
@@ -7560,30 +7565,30 @@ namespace
 				return _data.number;
 
 			case ast_func_last:
-				return (double)c.size;
+				return static_cast<double>(c.size);
 			
 			case ast_func_position:
-				return (double)c.position;
+				return static_cast<double>(c.position);
 
 			case ast_func_count:
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				return (double)_left->eval_node_set(c, stack).size();
+				return static_cast<double>(_left->eval_node_set(c, stack).size());
 			}
 			
 			case ast_func_string_length_0:
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				return (double)string_value(c.n, stack.result).length();
+				return static_cast<double>(string_value(c.n, stack.result).length());
 			}
 			
 			case ast_func_string_length_1:
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				return (double)_left->eval_string(c, stack).length();
+				return static_cast<double>(_left->eval_string(c, stack).length());
 			}
 			
 			case ast_func_number_0:
@@ -7832,7 +7837,7 @@ namespace
 				if (is_nan(first)) return xpath_string(); // NaN
 				else if (first >= s_length + 1) return xpath_string();
 				
-				size_t pos = first < 1 ? 1 : (size_t)first;
+				size_t pos = first < 1 ? 1 : static_cast<size_t>(first);
 				assert(1 <= pos && pos <= s_length + 1);
 
 				const char_t* rbegin = s.c_str() + (pos - 1);
@@ -7857,8 +7862,8 @@ namespace
 				else if (first >= last) return xpath_string();
 				else if (last < 1) return xpath_string();
 				
-				size_t pos = first < 1 ? 1 : (size_t)first;
-				size_t end = last >= s_length + 1 ? s_length + 1 : (size_t)last;
+				size_t pos = first < 1 ? 1 : static_cast<size_t>(first);
+				size_t end = last >= s_length + 1 ? s_length + 1 : static_cast<size_t>(last);
 
 				assert(1 <= pos && pos <= end && end <= s_length + 1);
 				const char_t* rbegin = s.c_str() + (pos - 1);
@@ -8019,6 +8024,10 @@ namespace
 				
 				case axis_self:
 					return step_do(c, stack, axis_to_type<axis_self>());
+
+                default:
+                    assert(!"Unknown axis");
+                    return xpath_node_set_raw();
 				}
 			}
 
@@ -8271,6 +8280,9 @@ namespace
 					return new (alloc_node()) xpath_ast_node(ast_func_true, xpath_type_boolean);
 					
 				break;
+
+            default:
+                break;
 			}
 
 			throw_error("Unrecognized function or wrong parameter count");
@@ -8337,6 +8349,9 @@ namespace
 					return axis_self;
 				
 				break;
+
+            default:
+                break;
 			}
 
 			specified = false;
@@ -8370,9 +8385,12 @@ namespace
 					return nodetest_type_text;
 
 				break;
+            
+            default:
+                break;
 			}
 
-			return nodetest_none;
+            return nodetest_none;
 		}
 
 	    // PrimaryExpr ::= VariableReference | '(' Expr ')' | Literal | Number | FunctionCall
@@ -8999,9 +9017,9 @@ namespace
 namespace pugi
 {
 #ifndef PUGIXML_NO_EXCEPTIONS
-	xpath_exception::xpath_exception(const xpath_parse_result& result): _result(result)
+	xpath_exception::xpath_exception(const xpath_parse_result& result_): _result(result_)
 	{
-		assert(result.error);
+		assert(_result.error);
 	}
 	
 	const char* xpath_exception::what() const throw()
@@ -9019,11 +9037,11 @@ namespace pugi
 	{
 	}
 		
-	xpath_node::xpath_node(const xml_node& node): _node(node)
+	xpath_node::xpath_node(const xml_node& node_): _node(node_)
 	{
 	}
 		
-	xpath_node::xpath_node(const xml_attribute& attribute, const xml_node& parent): _node(attribute ? parent : xml_node()), _attribute(attribute)
+	xpath_node::xpath_node(const xml_attribute& attribute_, const xml_node& parent_): _node(attribute_ ? parent_ : xml_node()), _attribute(attribute_)
 	{
 	}
 
@@ -9074,27 +9092,27 @@ namespace pugi
 	}
 #endif
 
-	void xpath_node_set::_assign(const_iterator begin, const_iterator end)
+	void xpath_node_set::_assign(const_iterator begin_, const_iterator end_)
 	{
-		assert(begin <= end);
+		assert(begin_ <= end_);
 
-		size_t size = static_cast<size_t>(end - begin);
+		size_t size_ = static_cast<size_t>(end_ - begin_);
 
-		if (size <= 1)
+		if (size_ <= 1)
 		{
 			// deallocate old buffer
 			if (_begin != &_storage) global_deallocate(_begin);
 
 			// use internal buffer
-			if (begin != end) _storage = *begin;
+			if (begin_ != end_) _storage = *begin_;
 
 			_begin = &_storage;
-			_end = &_storage + size;
+			_end = &_storage + size_;
 		}
 		else
 		{
 			// make heap copy
-			xpath_node* storage = static_cast<xpath_node*>(global_allocate(size * sizeof(xpath_node)));
+			xpath_node* storage = static_cast<xpath_node*>(global_allocate(size_ * sizeof(xpath_node)));
 
 			if (!storage)
 			{
@@ -9105,14 +9123,14 @@ namespace pugi
 			#endif
 			}
 
-			memcpy(storage, begin, size * sizeof(xpath_node));
+			memcpy(storage, begin_, size_ * sizeof(xpath_node));
 			
 			// deallocate old buffer
 			if (_begin != &_storage) global_deallocate(_begin);
 
 			// finalize
 			_begin = storage;
-			_end = storage + size;
+			_end = storage + size_;
 		}
 	}
 
@@ -9120,9 +9138,9 @@ namespace pugi
 	{
 	}
 
-	xpath_node_set::xpath_node_set(const_iterator begin, const_iterator end, type_t type): _type(type), _begin(&_storage), _end(&_storage)
+	xpath_node_set::xpath_node_set(const_iterator begin_, const_iterator end_, type_t type_): _type(type_), _begin(&_storage), _end(&_storage)
 	{
-		_assign(begin, end);
+		_assign(begin_, end_);
 	}
 
 	xpath_node_set::~xpath_node_set()
@@ -9495,10 +9513,10 @@ namespace pugi
 		#ifdef PUGIXML_NO_EXCEPTIONS
 			return xpath_node_set();
 		#else
-			xpath_parse_result result;
-			result.error = "Expression does not evaluate to node set";
+			xpath_parse_result res;
+			res.error = "Expression does not evaluate to node set";
 
-			throw xpath_exception(result);
+			throw xpath_exception(res);
 		#endif
 		}
 		

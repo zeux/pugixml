@@ -141,7 +141,7 @@ void xpath_node_set_tester::check(bool condition)
 	}
 }
 
-xpath_node_set_tester::xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message): last(0), message(message)
+xpath_node_set_tester::xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message_): last(0), message(message_)
 {
 	result = set;
 

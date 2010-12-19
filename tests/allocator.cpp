@@ -33,7 +33,7 @@ namespace
 
         void* result = HeapAlloc(heap, 0, size + PAGE_SIZE);
 
-        return (void*)align_to_page((size_t)result);
+        return reinterpret_cast<void*>(align_to_page(reinterpret_cast<size_t>(result)));
     }
 
 	void* allocate(size_t size)
@@ -43,19 +43,19 @@ namespace
 		void* ptr = allocate_page_aligned(aligned_size + PAGE_SIZE);
 		if (!ptr) return 0;
 
-		void* end = (char*)ptr + aligned_size;
+		char* end = static_cast<char*>(ptr) + aligned_size;
 
 		DWORD old_flags;
 		VirtualProtect(end, PAGE_SIZE, PAGE_NOACCESS, &old_flags);
 
-		return (char*)end - size;
+		return end - size;
 	}
 
 	void deallocate(void* ptr, size_t size)
 	{
 		size_t aligned_size = align_to_page(size);
 
-		void* rptr = (char*)ptr + size - aligned_size;
+		void* rptr = static_cast<char*>(ptr) + size - aligned_size;
 
         DWORD old_flags;
         VirtualProtect(rptr, aligned_size + PAGE_SIZE, PAGE_NOACCESS, &old_flags);
@@ -88,13 +88,13 @@ void* memory_allocate(size_t size)
 
 	memcpy(result, &size, sizeof(size_t));
 
-	return (size_t*)result + 1;
+	return static_cast<size_t*>(result) + 1;
 }
 
 size_t memory_size(void* ptr)
 {
 	size_t result;
-	memcpy(&result, (size_t*)ptr - 1, sizeof(size_t));
+	memcpy(&result, static_cast<size_t*>(ptr) - 1, sizeof(size_t));
 
 	return result;
 }
@@ -105,6 +105,6 @@ void memory_deallocate(void* ptr)
 
 	size_t size = memory_size(ptr);
 
-	deallocate((size_t*)ptr - 1, size + sizeof(size_t));
+	deallocate(static_cast<size_t*>(ptr) - 1, size + sizeof(size_t));
 }
 
