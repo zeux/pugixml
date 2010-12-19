@@ -30,18 +30,39 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 		LDFLAGS += $(ARCH) ;
 	}
 
+    rule MatchVersion MAJOR : MINOR
+    {
+        local REGEX = "(gcc|mingw)"$(MAJOR)"\\.?"$(MINOR) ;
+
+        if ( $(toolset:I=$(REGEX)) )
+        {
+            return 1 ;
+        }
+        else
+        {
+            return 0 ;
+        }
+    }
+
 	rule GetCFlags CONFIG : DEFINES
 	{
 		local RESULT = -D$(DEFINES) ;
 
 		RESULT += -W -Wall -Wextra -pedantic -Werror ;
-        RESULT += -Wabi -Wctor-dtor-privacy -Wno-non-template-friend -Wold-style-cast -Wcast-qual -Wcast-align ;
-        RESULT += -Woverloaded-virtual -Wno-pmf-conversions -Wsign-promo -Wformat=2 -Winit-self -Wswitch-default ;
+        RESULT += -Wabi -Wno-non-template-friend -Wcast-qual -Wcast-align ;
+        RESULT += -Woverloaded-virtual -Wno-pmf-conversions -Wsign-promo -Wformat=2 -Winit-self ;
         RESULT += -Wunused -Wstrict-aliasing=2 -Wundef -Wshadow -Wredundant-decls ;
 
-        local REG_GCC44_PLUS = "(gcc|mingw)4.?[4-9]" ;
+        # gcc 4.0 has some warning regressions
+        if ( [ MatchVersion 4 : 0 ] = 0 )
+        {
+            RESULT += -Wold-style-cast ; # gives warnings for fpclassify() on gcc 4.0.1
+            RESULT += -Wswitch-default ; # gives false-positives for couple of switches on template argument on gcc 4.0.1
+            RESULT += -Wctor-dtor-privacy ; # gives false-positives for structs on gcc 4.0.1
+        }
 
-        if ( $(toolset:I=$(REG_GCC44_PLUS)) )
+        # these warnings are supported on newer GCC versions only
+        if ( [ MatchVersion 4 : "[4-9]" ] = 1 )
         {
             RESULT += -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations ;
         }
