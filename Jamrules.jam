@@ -39,7 +39,9 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
         RESULT += -Woverloaded-virtual -Wno-pmf-conversions -Wsign-promo -Wformat=2 -Winit-self -Wswitch-default ;
         RESULT += -Wunused -Wstrict-aliasing=2 -Wundef -Wshadow -Wredundant-decls ;
 
-        if ( $(toolset) != mingw34 )
+        local REG_GCC44_PLUS = "(gcc|mingw)4.?[4-9]" ;
+
+        if ( $(toolset:I=$(REG_GCC44_PLUS)) )
         {
             RESULT += -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations ;
         }
