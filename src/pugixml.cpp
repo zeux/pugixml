@@ -1324,7 +1324,7 @@ namespace
 	  	return result;
     }
 
-	std::wstring as_wide_impl(const char* str, size_t size)
+	std::basic_string<wchar_t> as_wide_impl(const char* str, size_t size)
 	{
 		const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
 
@@ -1332,7 +1332,7 @@ namespace
 		size_t length = utf_decoder<wchar_counter>::decode_utf8_block(data, size, 0);
 
 		// allocate resulting string
-		std::wstring result;
+		std::basic_string<wchar_t> result;
 		result.resize(length);
 
 		// second pass: convert to wchar_t
@@ -4744,19 +4744,19 @@ namespace pugi
         return as_utf8_impl(str, wcslen(str));
 	}
 
-	std::string PUGIXML_FUNCTION as_utf8(const std::wstring& str)
+	std::string PUGIXML_FUNCTION as_utf8(const std::basic_string<wchar_t>& str)
 	{
         return as_utf8_impl(str.c_str(), str.size());
 	}
 	
-	std::wstring PUGIXML_FUNCTION as_wide(const char* str)
+	std::basic_string<wchar_t> PUGIXML_FUNCTION as_wide(const char* str)
 	{
 		assert(str);
 
         return as_wide_impl(str, strlen(str));
 	}
 	
-	std::wstring PUGIXML_FUNCTION as_wide(const std::string& str)
+	std::basic_string<wchar_t> PUGIXML_FUNCTION as_wide(const std::string& str)
 	{
         return as_wide_impl(str.c_str(), str.size());
 	}
