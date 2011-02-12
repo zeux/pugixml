@@ -68,7 +68,7 @@ namespace pugi
 		}
 	};
 
-	xml_node_children_adapter children(const pugi::xml_node& node)
+	inline xml_node_children_adapter children(const pugi::xml_node& node)
 	{
 		xml_node_children_adapter result = {node};
 		return result;
@@ -92,7 +92,7 @@ namespace pugi
 		}
 	};
 
-	xml_node_attribute_adapter attributes(const pugi::xml_node& node)
+	inline xml_node_attribute_adapter attributes(const pugi::xml_node& node)
 	{
 		xml_node_attribute_adapter result = {node};
 		return result;
