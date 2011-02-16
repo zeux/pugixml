@@ -7,6 +7,8 @@ sub prettysuffix
 
 	return " C++0x" if ($suffix eq '_0x');
 	return " x64" if ($suffix eq '_x64');
+	return " CLR" if ($suffix eq '_clr');
+	return " CLR x64" if ($suffix eq '_clr_x64');
 	return " PPC" if ($suffix eq '_ppc');
 
 	return "";

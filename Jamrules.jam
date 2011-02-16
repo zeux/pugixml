@@ -139,13 +139,20 @@ else if ( $(toolset:I=^msvc) )
 			RESULT += /Z7 ;
 		}
 
+        local RUNTIME = "MT" ;
+
+        if ( $(toolset:I=_clr) )
+        {
+            RUNTIME = "MD" ;
+        }
+
 		if ( $(CONFIG) = "debug" )
 		{
-			RESULT += /D_DEBUG /MTd ;
+			RESULT += /D_DEBUG /$(RUNTIME)d ;
 		}
 		else
 		{
-			RESULT += /DNDEBUG /Ox /MT ;
+			RESULT += /DNDEBUG /Ox /$(RUNTIME) ;
 		}
 
 		if ( $(toolset) = msvc7 || $(toolset) = msvc71 || $(toolset) = msvc8 )
@@ -162,7 +169,11 @@ else if ( $(toolset:I=^msvc) )
 			RESULT += /W3 ; # lots of warnings at W4 in standard library
 		}
 
-		if ( ! ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) ) )
+        if ( $(toolset:I=_clr) )
+        {
+            RESULT += /clr ;
+        }
+        else if ( ! ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) ) )
 		{
 			RESULT += /EHsc ;
 		}
