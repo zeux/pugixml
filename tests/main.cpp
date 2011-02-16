@@ -72,6 +72,7 @@ static bool run_test(test_runner* test)
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable: 4611) // interaction between _setjmp and C++ object destruction is non-portable
+#   pragma warning(disable: 4793) // function compiled as native: presence of '_setjmp' makes a function unmanaged
 #endif
 
 		volatile int result = setjmp(test_runner::_failure_buffer);
