@@ -3175,7 +3175,92 @@ namespace
 	}
 
 #ifndef PUGIXML_NO_STL
-	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding)
+    struct xml_stream_chunk
+    {
+        static xml_stream_chunk* create()
+        {
+            void* memory = global_allocate(sizeof(xml_stream_chunk));
+            
+            return new (memory) xml_stream_chunk();
+        }
+
+        static void destroy(void* ptr)
+        {
+            xml_stream_chunk* chunk = static_cast<xml_stream_chunk*>(ptr);
+
+            // free chunk chain
+            while (chunk)
+            {
+                xml_stream_chunk* next = chunk->next;
+                global_deallocate(chunk);
+                chunk = next;
+            }
+        }
+
+        xml_stream_chunk(): next(0), size(0)
+        {
+        }
+
+        xml_stream_chunk* next;
+        size_t size;
+
+        // so that we can use this for both wchar_t and char data (char -> wchar_t casting is prohibited by strict aliasing)
+        wchar_t data[xml_memory_page_size / sizeof(wchar_t)];
+    };
+
+	template <typename T> xml_parse_status load_stream_data_noseek(std::basic_istream<T>& stream, void** out_buffer, size_t* out_size)
+    {
+        buffer_holder chunks(0, xml_stream_chunk::destroy);
+
+        // read file to a chunk list
+        size_t total = 0;
+        xml_stream_chunk* last = 0;
+
+        while (!stream.eof())
+        {
+            // allocate new chunk
+            xml_stream_chunk* chunk = xml_stream_chunk::create();
+            if (!chunk) return status_out_of_memory;
+
+            // append chunk to list
+            if (last) last = last->next = chunk;
+            else chunks.data = last = chunk;
+
+            // read data to chunk
+            stream.read(reinterpret_cast<T*>(chunk->data), static_cast<std::streamsize>(sizeof(chunk->data) / sizeof(T)));
+            chunk->size = static_cast<size_t>(stream.gcount()) * sizeof(T);
+
+            // read may set failbit | eofbit in case gcount() is less than read length, so check for other I/O errors
+            if (stream.bad() || (!stream.eof() && stream.fail())) return status_io_error;
+
+            // guard against huge files (chunk size is small enough to make this overflow check work)
+            if (total + chunk->size < total) return status_out_of_memory;
+            total += chunk->size;
+        }
+
+        // copy chunk list to a contiguous buffer
+        char* buffer = static_cast<char*>(global_allocate(total));
+        if (!buffer) return status_out_of_memory;
+
+        char* write = buffer;
+
+        for (xml_stream_chunk* chunk = static_cast<xml_stream_chunk*>(chunks.data); chunk; chunk = chunk->next)
+        {
+            assert(write + chunk->size <= buffer + total);
+            memcpy(write, chunk->data, chunk->size);
+            write += chunk->size;
+        }
+
+        assert(write == buffer + total);
+
+        // return buffer
+        *out_buffer = buffer;
+        *out_size = total;
+
+        return status_ok;
+    }
+
+	template <typename T> xml_parse_status load_stream_data_seek(std::basic_istream<T>& stream, void** out_buffer, size_t* out_size)
 	{
 		// get length of remaining data in stream
 		typename std::basic_istream<T>::pos_type pos = stream.tellg();
@@ -3183,28 +3268,43 @@ namespace
 		std::streamoff length = stream.tellg() - pos;
 		stream.seekg(pos);
 
-		if (stream.fail() || pos < 0) return make_parse_result(status_io_error);
+		if (stream.fail() || pos < 0) return status_io_error;
 
 		// guard against huge files
 		size_t read_length = static_cast<size_t>(length);
 
-		if (static_cast<std::streamsize>(read_length) != length || length < 0) return make_parse_result(status_out_of_memory);
+		if (static_cast<std::streamsize>(read_length) != length || length < 0) return status_out_of_memory;
 
 		// read stream data into memory (guard against stream exceptions with buffer holder)
 		buffer_holder buffer(global_allocate((read_length > 0 ? read_length : 1) * sizeof(T)), global_deallocate);
-		if (!buffer.data) return make_parse_result(status_out_of_memory);
+		if (!buffer.data) return status_out_of_memory;
 
 		stream.read(static_cast<T*>(buffer.data), static_cast<std::streamsize>(read_length));
 
 		// read may set failbit | eofbit in case gcount() is less than read_length (i.e. line ending conversion), so check for other I/O errors
-		if (stream.bad()) return make_parse_result(status_io_error);
+        if (stream.bad() || (!stream.eof() && stream.fail())) return status_io_error;
 
-		// load data from buffer
+		// return buffer
 		size_t actual_length = static_cast<size_t>(stream.gcount());
 		assert(actual_length <= read_length);
 
-		return doc.load_buffer_inplace_own(buffer.release(), actual_length * sizeof(T), options, encoding);
+        *out_buffer = buffer.release();
+        *out_size = actual_length * sizeof(T);
+
+        return status_ok;
 	}
+
+	template <typename T> xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding)
+	{
+        void* buffer = 0;
+        size_t size = 0;
+
+        // load stream to memory (using seek-based implementation if possible, since it's faster and takes less memory)
+        xml_parse_status status = (stream.tellg() < 0) ? load_stream_data_noseek(stream, &buffer, &size) : load_stream_data_seek(stream, &buffer, &size);
+        if (status != status_ok) return make_parse_result(status);
+
+		return doc.load_buffer_inplace_own(buffer, size, options, encoding);
+    }
 #endif
 
 #if defined(MSVC_CRT_VERSION) || defined(__BORLANDC__) || defined(__MINGW32__)
