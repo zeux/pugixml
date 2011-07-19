@@ -74,12 +74,9 @@ TEST(document_load_stream_error)
 {
 	pugi::xml_document doc;
 
-	std::ifstream fs1("filedoesnotexist");
-	CHECK(doc.load(fs1).status == status_io_error);
+	std::ifstream fs("filedoesnotexist");
+	CHECK(doc.load(fs).status == status_io_error);
 	
-	std::ifstream fs2("con");
-	CHECK(doc.load(fs2).status == status_io_error);
-
 	std::istringstream iss("<node/>");
 	test_runner::_memory_fail_threshold = 1;
 	CHECK(doc.load(iss).status == status_out_of_memory);
@@ -147,6 +144,57 @@ TEST(document_load_stream_wide_error_previous)
 	std::basic_ifstream<wchar_t> fs1("filedoesnotexist");
 	CHECK(doc.load(fs1).status == status_io_error);
 	CHECK(!doc.first_child());
+}
+
+template <typename T> class char_array_buffer: public std::basic_streambuf<T>
+{
+public:
+    char_array_buffer(T* begin, T* end)
+    {
+        this->setg(begin, begin, end);
+    }
+
+    typename std::basic_streambuf<T>::int_type underflow()
+    {
+        return this->gptr() == this->egptr() ? std::basic_streambuf<T>::traits_type::eof() : std::basic_streambuf<T>::traits_type::to_int_type(*this->gptr());
+    }
+};
+
+TEST(document_load_stream_nonseekable)
+{
+    char contents[] = "<node />";
+    char_array_buffer<char> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+    std::istream in(&buffer);
+
+    pugi::xml_document doc;
+    CHECK(doc.load(in));
+    CHECK_NODE(doc, STR("<node />"));
+}
+
+TEST(document_load_stream_wide_nonseekable)
+{
+    wchar_t contents[] = L"<node />";
+    char_array_buffer<wchar_t> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+    std::basic_istream<wchar_t> in(&buffer);
+
+    pugi::xml_document doc;
+    CHECK(doc.load(in));
+    CHECK_NODE(doc, STR("<node />"));
+}
+
+TEST(document_load_stream_nonseekable_large)
+{
+	std::basic_string<pugi::char_t> str;
+	str += STR("<node>");
+	for (int i = 0; i < 10000; ++i) str += STR("<node />");
+	str += STR("</node>");
+
+    char_array_buffer<pugi::char_t> buffer(&str[0], &str[0] + str.length());
+    std::basic_istream<pugi::char_t> in(&buffer);
+
+    pugi::xml_document doc;
+    CHECK(doc.load(in));
+    CHECK_NODE(doc, str.c_str());
 }
 #endif
 
