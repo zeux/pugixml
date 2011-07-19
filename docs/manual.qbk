@@ -577,8 +577,6 @@ This is a simple example of loading XML document from file using streams ([@samp
 [import samples/load_stream.cpp]
 [code_load_stream]
 
-Stream loading requires working seek/tell functions and therefore may fail when used with some stream implementations like gzstream.
-
 [endsect] [/stream]
 
 [section:errors Handling parsing errors]
