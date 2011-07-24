@@ -3175,7 +3175,7 @@ namespace
 	}
 
 #ifndef PUGIXML_NO_STL
-    struct xml_stream_chunk
+    template <typename T> struct xml_stream_chunk
     {
         static xml_stream_chunk* create()
         {
@@ -3204,22 +3204,21 @@ namespace
         xml_stream_chunk* next;
         size_t size;
 
-        // so that we can use this for both wchar_t and char data (char -> wchar_t casting is prohibited by strict aliasing)
-        wchar_t data[xml_memory_page_size / sizeof(wchar_t)];
+        T data[xml_memory_page_size / sizeof(T)];
     };
 
 	template <typename T> xml_parse_status load_stream_data_noseek(std::basic_istream<T>& stream, void** out_buffer, size_t* out_size)
     {
-        buffer_holder chunks(0, xml_stream_chunk::destroy);
+        buffer_holder chunks(0, xml_stream_chunk<T>::destroy);
 
         // read file to a chunk list
         size_t total = 0;
-        xml_stream_chunk* last = 0;
+        xml_stream_chunk<T>* last = 0;
 
         while (!stream.eof())
         {
             // allocate new chunk
-            xml_stream_chunk* chunk = xml_stream_chunk::create();
+            xml_stream_chunk<T>* chunk = xml_stream_chunk<T>::create();
             if (!chunk) return status_out_of_memory;
 
             // append chunk to list
@@ -3227,7 +3226,7 @@ namespace
             else chunks.data = last = chunk;
 
             // read data to chunk
-            stream.read(reinterpret_cast<T*>(chunk->data), static_cast<std::streamsize>(sizeof(chunk->data) / sizeof(T)));
+            stream.read(chunk->data, static_cast<std::streamsize>(sizeof(chunk->data) / sizeof(T)));
             chunk->size = static_cast<size_t>(stream.gcount()) * sizeof(T);
 
             // read may set failbit | eofbit in case gcount() is less than read length, so check for other I/O errors
@@ -3244,7 +3243,7 @@ namespace
 
         char* write = buffer;
 
-        for (xml_stream_chunk* chunk = static_cast<xml_stream_chunk*>(chunks.data); chunk; chunk = chunk->next)
+        for (xml_stream_chunk<T>* chunk = static_cast<xml_stream_chunk<T>*>(chunks.data); chunk; chunk = chunk->next)
         {
             assert(write + chunk->size <= buffer + total);
             memcpy(write, chunk->data, chunk->size);
