@@ -25,3 +25,9 @@ close LOG;
 
 $client->close();
 $server->close();
+
+# wait for vm shutdown to decrease peak memory consumption
+while (`vboxmanage showvminfo $vm` !~ /State:\s+powered off/)
+{
+    sleep(1);
+}
