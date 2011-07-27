@@ -9,11 +9,11 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 	else
 	{
 		GCCPATH = "%$(toolset)_PATH%\\bin\\" ;
-	}
+		LDFLAGS += -static-libgcc -static ;
+    }
 
 	if ( $(OS) != MACOSX )
 	{
-		LDFLAGS += -static-libgcc -static ;
 		ARCH = "" ;
 	}
 	else
