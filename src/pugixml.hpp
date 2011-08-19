@@ -273,7 +273,7 @@ namespace pugi
 	private:
 		xml_attribute_struct* _attr;
 	
-    	typedef xml_attribute_struct* xml_attribute::*unspecified_bool_type;
+    	typedef void (*unspecified_bool_type)(xml_attribute***);
 
 	public:
         // Default constructor. Constructs an empty attribute.
@@ -355,7 +355,7 @@ namespace pugi
 	protected:
 		xml_node_struct* _root;
 
-    	typedef xml_node_struct* xml_node::*unspecified_bool_type;
+    	typedef void (*unspecified_bool_type)(xml_node***);
 
 	public:
 		// Default constructor. Constructs an empty node.
@@ -899,7 +899,7 @@ namespace pugi
 		void* _impl;
 		xpath_parse_result _result;
 
-    	typedef void* xpath_query::*unspecified_bool_type;
+    	typedef void (*unspecified_bool_type)(xpath_query***);
 
 		// Non-copyable semantics
 		xpath_query(const xpath_query&);
@@ -977,7 +977,7 @@ namespace pugi
 		xml_node _node;
 		xml_attribute _attribute;
 	
-    	typedef xml_node xpath_node::*unspecified_bool_type;
+    	typedef void (*unspecified_bool_type)(xpath_node***);
 
 	public:
 		// Default constructor; constructs empty XPath node

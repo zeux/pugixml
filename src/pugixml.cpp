@@ -3419,9 +3419,13 @@ namespace pugi
 	{
 	}
 
+    static void unspecified_bool_xml_attribute(xml_attribute***)
+    {
+    }
+
 	xml_attribute::operator xml_attribute::unspecified_bool_type() const
 	{
-      	return _attr ? &xml_attribute::_attr : 0;
+      	return _attr ? unspecified_bool_xml_attribute : 0;
    	}
 
    	bool xml_attribute::operator!() const
@@ -3663,9 +3667,13 @@ namespace pugi
 	{
 	}
 	
+    static void unspecified_bool_xml_node(xml_node***)
+    {
+    }
+
 	xml_node::operator xml_node::unspecified_bool_type() const
 	{
-      	return _root ? &xml_node::_root : 0;
+      	return _root ? unspecified_bool_xml_node : 0;
    	}
 
    	bool xml_node::operator!() const
@@ -9160,9 +9168,13 @@ namespace pugi
 		return _attribute ? _node : _node.parent();
 	}
 
+    static void unspecified_bool_xpath_node(xpath_node***)
+    {
+    }
+
 	xpath_node::operator xpath_node::unspecified_bool_type() const
 	{
-		return (_node || _attribute) ? &xpath_node::_node : 0;
+		return (_node || _attribute) ? unspecified_bool_xpath_node : 0;
 	}
 	
 	bool xpath_node::operator!() const
@@ -9637,9 +9649,13 @@ namespace pugi
 		return _result;
 	}
 
+    static void unspecified_bool_xpath_query(xpath_query***)
+    {
+    }
+
 	xpath_query::operator xpath_query::unspecified_bool_type() const
 	{
-		return _impl ? &xpath_query::_impl : 0;
+		return _impl ? unspecified_bool_xpath_query : 0;
 	}
 
 	bool xpath_query::operator!() const
