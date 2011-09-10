@@ -1176,7 +1176,7 @@ This is an example with one possible implementation of include tags in XML ([@sa
 
 Often after creating a new document or loading the existing one and processing it, it is necessary to save the result back to file. Also it is occasionally useful to output the whole document or a subtree to some stream; use cases include debug printing, serialization via network or other text-oriented medium, etc. pugixml provides several functions to output any subtree of the document to a file, stream or another generic transport interface; these functions allow to customize the output format (see [sref manual.saving.options]), and also perform necessary encoding conversions (see [sref manual.saving.encoding]). This section documents the relevant functionality.
 
-Before writing to the destination the node/attribute data is properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped. In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For well-formed output, make sure all node and attribute names are set to meaningful values.
+Before writing to the destination the node/attribute data is properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped (unless [link format_no_escapes] flag is set). In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For well-formed output, make sure all node and attribute names are set to meaningful values.
 
 CDATA sections with values that contain `"]]>"` are split into several sections as follows: section with value `"pre]]>post"` is written as `<![CDATA[pre]]]]><![CDATA[>post]]>`. While this alters the structure of the document (if you load the document after saving it, there will be two CDATA sections instead of one), this is the only way to escape CDATA contents.
 
@@ -1277,6 +1277,9 @@ These flags control the resulting tree contents:
 [lbr]
 
 * [anchor format_raw] switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with [link parse_ws_pcdata] flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
+[lbr]
+
+* [anchor format_no_escapes] disables output escaping for attribute values and PCDATA contents. If this flag is on, special symbols (', &, <, >) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. &amp;) during output. If this flag is off, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray < in the PCDATA will make the output malformed). This flag is *on* by default.
 
 These flags control the additional output information:
 
@@ -1925,6 +1928,7 @@ Constants:
     * [link format_default]
     * [link format_indent]
     * [link format_no_declaration]
+    * [link format_no_escapes]
     * [link format_raw]
     * [link format_write_bom]
     [lbr]
