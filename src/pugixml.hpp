@@ -202,6 +202,9 @@ namespace pugi
 	// Omit default XML declaration even if there is no declaration in the document. This flag is off by default.
 	const unsigned int format_no_declaration = 0x08;
 
+    // Don't escape attribute values and PCDATA contents. This flag is off by default.
+    const unsigned int format_no_escapes = 0x10;
+
 	// The default set of formatting flags.
     // Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;

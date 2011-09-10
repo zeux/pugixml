@@ -97,6 +97,14 @@ TEST_XML(write_escape_unicode, "<node attr='&#x3c00;'/>")
 #endif
 }
 
+TEST_XML(write_no_escapes, "<node attr=''>text</node>")
+{
+	doc.child(STR("node")).attribute(STR("attr")) = STR("<>'\"&\x04\r\n\t");
+	doc.child(STR("node")).first_child().set_value(STR("<>'\"&\x04\r\n\t"));
+
+	CHECK_NODE_EX(doc, STR("<node attr=\"<>'\"&\x04\r\n\t\"><>'\"&\x04\r\n\t</node>"), STR(""), format_raw | format_no_escapes);
+}
+
 struct test_writer: xml_writer
 {
 	std::basic_string<pugi::char_t> contents;

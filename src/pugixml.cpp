@@ -2856,6 +2856,14 @@ namespace
 		}
 	}
 
+	void text_output(xml_buffered_writer& writer, const char_t* s, chartypex_t type, unsigned int flags)
+    {
+        if (flags & format_no_escapes)
+            writer.write(s);
+        else
+            text_output_escaped(writer, s, type);
+    }
+
 	void text_output_cdata(xml_buffered_writer& writer, const char_t* s)
 	{
 		do
@@ -2878,7 +2886,7 @@ namespace
 		while (*s);
 	}
 
-	void node_output_attributes(xml_buffered_writer& writer, const xml_node& node)
+	void node_output_attributes(xml_buffered_writer& writer, const xml_node& node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
@@ -2888,7 +2896,7 @@ namespace
 			writer.write(a.name()[0] ? a.name() : default_name);
 			writer.write('=', '"');
 
-			text_output_escaped(writer, a.value(), ctx_special_attr);
+            text_output(writer, a.value(), ctx_special_attr, flags);
 
 			writer.write('"');
 		}
@@ -2917,7 +2925,7 @@ namespace
 			writer.write('<');
 			writer.write(name);
 
-			node_output_attributes(writer, node);
+			node_output_attributes(writer, node, flags);
 
 			if (flags & format_raw)
 			{
@@ -2942,7 +2950,7 @@ namespace
 				writer.write('>');
 
                 if (node.first_child().type() == node_pcdata)
-                    text_output_escaped(writer, node.first_child().value(), ctx_special_pcdata);
+                    text_output(writer, node.first_child().value(), ctx_special_pcdata, flags);
                 else
                     text_output_cdata(writer, node.first_child().value());
 
@@ -2969,7 +2977,7 @@ namespace
 		}
 		
 		case node_pcdata:
-			text_output_escaped(writer, node.value(), ctx_special_pcdata);
+			text_output(writer, node.value(), ctx_special_pcdata, flags);
 			if ((flags & format_raw) == 0) writer.write('\n');
 			break;
 
@@ -2992,7 +3000,7 @@ namespace
 
 			if (node.type() == node_declaration)
 			{
-				node_output_attributes(writer, node);
+				node_output_attributes(writer, node, flags);
 			}
 			else if (node.value()[0])
 			{
