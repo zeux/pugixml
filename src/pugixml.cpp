@@ -45,6 +45,7 @@
 
 #ifdef __INTEL_COMPILER
 #	pragma warning(disable: 177) // function was declared but never referenced 
+#   pragma warning(disable: 279) // controlling expression is constant
 #	pragma warning(disable: 1478 1786) // function was declared "deprecated"
 #endif
 
