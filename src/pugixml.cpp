@@ -47,6 +47,7 @@
 #	pragma warning(disable: 177) // function was declared but never referenced 
 #   pragma warning(disable: 279) // controlling expression is constant
 #	pragma warning(disable: 1478 1786) // function was declared "deprecated"
+#   pragma warning(disable: 1684) // conversion from pointer to same-sized integral type
 #endif
 
 #ifdef __BORLANDC__
