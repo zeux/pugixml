@@ -211,81 +211,136 @@ else if ( $(toolset:I=^msvc) )
 }
 else if ( $(toolset:I=^ic) )
 {
-	if ( $(toolset) = ic8 || $(toolset) = ic9 )
-	{
-		msvc = "msvc71" ;
-	}
-	else
-	{
-		msvc = "msvc8" ;
-	}
+    if ( $(OS) = NT )
+    {
+        if ( $(toolset) = ic8 || $(toolset) = ic9 )
+        {
+            msvc = "msvc71" ;
+        }
+        else
+        {
+            msvc = "msvc8" ;
+        }
 
-	if ( $(toolset) = ic11 )
-	{
-		postfix = "\\ia32" ;
-	}
-	else if ( $(toolset) = ic11_x64 )
-	{
-		postfix = "\\intel64" ;
-	}
-	else
-	{
-		postfix = "" ;
-	}
+        if ( $(toolset) = ic11 )
+        {
+            postfix = "\\ia32" ;
+        }
+        else if ( $(toolset) = ic11_x64 )
+        {
+            postfix = "\\intel64" ;
+        }
+        else
+        {
+            postfix = "" ;
+        }
 
-	if ( $(toolset:I=_x64$) )
-	{
-		msvc_postfix = "\\amd64" ;
-		LDFLAGS += /MACHINE:X64 ;
-	}
-	else
-	{
-		msvc_postfix = "" ;
-	}
+        if ( $(toolset:I=_x64$) )
+        {
+            msvc_postfix = "\\amd64" ;
+            LDFLAGS += /MACHINE:X64 ;
+        }
+        else
+        {
+            msvc_postfix = "" ;
+        }
 
-	rule GetCFlags CONFIG : DEFINES
-	{
-		local RESULT = /D$(DEFINES) ;
+        rule GetCFlags CONFIG : DEFINES
+        {
+            local RESULT = /D$(DEFINES) ;
 
-		RESULT += /W3 /WX /Qvec_report0 ;
+            RESULT += /W3 /WX /Qvec_report0 ;
 
-		if ( $(toolset) != ic8 )
-		{
-			RESULT += /fp:precise ;
-		}
+            if ( $(toolset) != ic8 )
+            {
+                RESULT += /fp:precise ;
+            }
 
-		if ( $(CONFIG) = "debug" )
-		{
-			RESULT += /D_DEBUG /Od /MTd ;
-		}
-		else
-		{
-			RESULT += /DNDEBUG /Ox /MT ;
-		}
+            if ( $(CONFIG) = "debug" )
+            {
+                RESULT += /D_DEBUG /Od /MTd ;
+            }
+            else
+            {
+                RESULT += /DNDEBUG /Ox /MT ;
+            }
 
-		if ( ! ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) ) )
-		{
-			RESULT += /EHsc ;
-		}
+            if ( ! ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) ) )
+            {
+                RESULT += /EHsc ;
+            }
 
-		return $(RESULT) ;
-	}
+            return $(RESULT) ;
+        }
 
-	actions ObjectAction
-	{
-		set PATH=%$(msvc)_PATH%\bin
-		"%$(toolset)_PATH%\bin$(postfix)\icl.exe" /I"%$(msvc)_PATH%\include" /I"%$(msvc)_PATH%\PlatformSDK\Include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
-	}
-	
-	actions LibraryAction
-	{
-		"%$(msvc)_PATH%\bin\lib.exe" /NOLOGO /OUT:$(<) $(>)
-	}
-	
-	actions LinkAction
-	{
-		"%$(msvc)_PATH%\bin\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(msvc)_PATH%\lib$(msvc_postfix)" /LIBPATH:"%$(msvc)_PATH%\PlatformSDK\lib$(msvc_postfix)" $(LDFLAGS)
-	}
+        actions ObjectAction
+        {
+            set PATH=%$(msvc)_PATH%\bin
+            "%$(toolset)_PATH%\bin$(postfix)\icl.exe" /I"%$(msvc)_PATH%\include" /I"%$(msvc)_PATH%\PlatformSDK\Include" /I"%$(toolset)_PATH%\include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+        }
+        
+        actions LibraryAction
+        {
+            "%$(msvc)_PATH%\bin\lib.exe" /NOLOGO /OUT:$(<) $(>)
+        }
+        
+        actions LinkAction
+        {
+            "%$(msvc)_PATH%\bin\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(msvc)_PATH%\lib$(msvc_postfix)" /LIBPATH:"%$(msvc)_PATH%\PlatformSDK\lib$(msvc_postfix)" $(LDFLAGS)
+        }
+    }
+    else
+    {
+        rule GetCFlags CONFIG : DEFINES
+        {
+            local RESULT = -D$(DEFINES) ;
+
+            RESULT += -fp-model strict ;
+
+            RESULT += -Wall -Werror -Wcheck ;
+            RESULT += -Wformat -Wformat-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-aliasing ;
+            RESULT += -Wstrict-prototypes -Wpointer-arith -Wuninitialized -Wdeprecated -Wabi ;
+            RESULT += -Wcast-qual -Wunused-function -Wunknown-pragmas -Wmain -Wcomment -Wconversion ;
+            RESULT += -Wreturn-type -Wextra-tokens -Wpragma-once -Wshadow -Woverloaded-virtual -Wtrigraphs ;
+            RESULT += -Wmultichar -Woverflow -Wwrite-strings -Wsign-compare -Wp64 -Wshorten-64-to-32 ;
+
+            if ( $(fulldebug) )
+            {
+                RESULT += -g ;
+            }
+
+            if ( $(CONFIG) = "debug" )
+            {
+                RESULT += -D_DEBUG ;
+            }
+            else
+            {
+                RESULT += -DNDEBUG -O3 ;
+            }
+
+            if ( PUGIXML_NO_EXCEPTIONS in $(DEFINES) )
+            {
+                RESULT += -fno-exceptions ;
+            }
+
+            return $(RESULT) ;
+        }
+
+        actions ObjectAction
+        {
+            icc -c $(>) -o $(<) $(CCFLAGS)
+        }
+        
+        actions LibraryAction
+        {
+            ar rcs $(<) $(>)
+        }
+        
+        actions LinkAction
+        {
+            icc $(>) -o $(<) $(LDFLAGS)
+        }
+    }
 }
 else if ( $(toolset:I=^dmc) )
 {
