@@ -265,11 +265,11 @@ The tree nodes can be of one of the following types (which together form the enu
 
 [:There are two element nodes here: one has name `"node"`, single attribute `"attr"` and single child `"child"`, another has name `"child"` and does not have any attributes or child nodes.]
 
-* Plain character data nodes ([anchor node_pcdata]) represent plain text in XML. PCDATA nodes have a value, but do not have a name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, an element node can have several child PCDATA nodes. The example XML representation of text nodes is as follows:
+* Plain character data nodes ([anchor node_pcdata]) represent plain text in XML. PCDATA nodes have a value, but do not have a name or children/attributes. Note that *plain character data is not a part of the element node but instead has its own node*; an element node can have several child PCDATA nodes. The example XML representation of text nodes is as follows:
 
     <node> text1 <child/> text2 </node>
 
-[:Here `"node"` element has three children, two of which are PCDATA nodes with values `"text1"` and `"text2"`.]
+[:Here `"node"` element has three children, two of which are PCDATA nodes with values `" text1 "` and `" text2 "`.]
 
 * Character data nodes ([anchor node_cdata]) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
 
