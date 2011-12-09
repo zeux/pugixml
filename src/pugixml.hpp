@@ -164,6 +164,11 @@ namespace pugi
     // This flag determines if document type declaration (node_doctype) is added to the DOM tree. This flag is off by default.
 	const unsigned int parse_doctype = 0x0200;
 
+	// This flag determines if plain character data (node_pcdata) that is the only child of the parent node and that consists only
+    // of whitespace is added to the DOM tree.
+    // This flag is off by default; turning it on may result in slower parsing and more memory consumption.
+	const unsigned int parse_ws_pcdata_single = 0x0400;
+
 	// The default parsing mode.
     // Elements, PCDATA and CDATA sections are added to the DOM tree, character/reference entities are expanded,
     // End-of-Line characters are normalized, attribute values are normalized using CDATA normalization rules.

@@ -1898,7 +1898,7 @@ namespace
 		
 		// Parser utilities.
 		#define SKIPWS()			{ while (IS_CHARTYPE(*s, ct_space)) ++s; }
-		#define OPTSET(OPT)			( optmsk & OPT )
+		#define OPTSET(OPT)			( optmsk & (OPT) )
 		#define PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); if (!cursor) THROW_ERROR(status_out_of_memory, s); }
 		#define POPNODE()			{ cursor = cursor->parent; }
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
@@ -2402,10 +2402,20 @@ namespace
 
 					SKIPWS(); // Eat whitespace if no genuine PCDATA here.
 
-					if ((!OPTSET(parse_ws_pcdata) || mark == s) && (*s == '<' || !*s))
-					{
-						continue;
-					}
+                    if (*s == '<')
+                    {
+                        // We skipped some whitespace characters because otherwise we would take the tag branch instead of PCDATA one
+                        assert(mark != s);
+
+                        if (!OPTSET(parse_ws_pcdata | parse_ws_pcdata_single))
+                        {
+                            continue;
+                        }
+                        else if (OPTSET(parse_ws_pcdata_single))
+                        {
+                            if (s[1] != '/' || cursor->first_child) continue;
+                        }
+                    }
 
 					s = mark;
 							

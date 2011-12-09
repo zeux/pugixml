@@ -263,6 +263,85 @@ TEST(parse_ws_pcdata_parse)
 	CHECK_STRING(c2.first_child().value(), STR("  "));
 }
 
+static int get_tree_node_count(xml_node n)
+{
+    int result = 1;
+
+    for (xml_node c = n.first_child(); c; c = c.next_sibling())
+        result += get_tree_node_count(c);
+
+    return result;
+}
+
+TEST(parse_ws_pcdata_permutations)
+{
+    struct test_data_t
+    {
+        unsigned int mask; // 1 = default flags, 2 = parse_ws_pcdata, 4 = parse_ws_pcdata_single
+        const pugi::char_t* source;
+        const pugi::char_t* result;
+        int nodes; // negative if parsing should fail
+    };
+
+    test_data_t test_data[] =
+    {
+        // external pcdata should be discarded (whitespace or not)
+        {7, STR("ext1"), STR(""), 1},
+        {7, STR("    "), STR(""), 1},
+        {7, STR("ext1<node/>"), STR("<node />"), 2},
+        {7, STR("ext1<node/>ext2"), STR("<node />"), 2},
+        {7, STR(" <node/>"), STR("<node />"), 2},
+        {7, STR("<node/> "), STR("<node />"), 2},
+        {7, STR(" <node/> "), STR("<node />"), 2},
+        // inner pcdata should be preserved
+        {7, STR("<node>inner</node>"), STR("<node>inner</node>"), 3},
+        {7, STR("<node>inner1<child/>inner2</node>"), STR("<node>inner1<child />inner2</node>"), 5},
+        {7, STR("<node>inner1<child>deep</child>inner2</node>"), STR("<node>inner1<child>deep</child>inner2</node>"), 6},
+        // empty pcdata nodes should never be created
+        {7, STR("<node>inner1<child></child>inner2</node>"), STR("<node>inner1<child />inner2</node>"), 5},
+        {7, STR("<node><child></child>inner2</node>"), STR("<node><child />inner2</node>"), 4},
+        {7, STR("<node>inner1<child></child></node>"), STR("<node>inner1<child /></node>"), 4},
+        {7, STR("<node><child></child></node>"), STR("<node><child /></node>"), 3},
+        // comments, pi or other nodes should not cause pcdata creation either
+        {7, STR("<node><!----><child><?pi?></child><![CDATA[x]]></node>"), STR("<node><child /><![CDATA[x]]></node>"), 4},
+        // leading/trailing pcdata whitespace should be preserved (note: this will change if parse_ws_pcdata_trim is introduced)
+        {7, STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), 6},
+        // whitespace-only pcdata preservation depends on the parsing mode
+        {1, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child /><child><deep /></child></node>"), 5},
+        {2, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t\n\t</node>"), 13},
+        {4, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child>   </child><child><deep>  </deep></child></node>"), 7},
+        // current implementation of parse_ws_pcdata_single has an unfortunate bug; reproduce it here
+        {4, STR("<node>\t\t<!---->\n\n</node>"), STR("<node>\n\n</node>"), 3},
+        // error case: terminate PCDATA in the middle
+        {7, STR("<node>abcdef"), STR("<node>abcde</node>"), -3},
+        {7, STR("<node>      "), STR("<node>     </node>"), -3},
+        // error case: terminate PCDATA as early as possible
+        {7, STR("<node>"), STR("<node />"), -2},
+        {7, STR("<node>a"), STR("<node />"), -2},
+        {7, STR("<node> "), STR("<node />"), -2},
+    };
+
+    for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
+    {
+        const test_data_t& td = test_data[i];
+
+        for (int flag = 0; flag < 3; ++flag)
+        {
+            if (td.mask & (1 << flag))
+            {
+                unsigned int flags[] = {parse_default, parse_default | parse_ws_pcdata, parse_default | parse_ws_pcdata_single};
+
+                xml_document doc;
+                CHECK((td.nodes > 0) == doc.load(td.source, flags[flag]));
+                CHECK_NODE(doc, td.result);
+
+                int nodes = get_tree_node_count(doc);
+                CHECK((td.nodes < 0 ? -td.nodes : td.nodes) == nodes);
+            }
+        }
+    }
+}
+
 TEST(parse_pcdata_no_eol)
 {
 	xml_document doc;
