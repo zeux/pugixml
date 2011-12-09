@@ -662,6 +662,9 @@ These flags control the resulting tree contents:
 [lbr]
 
 * [anchor parse_ws_pcdata] determines if PCDATA nodes (nodes with type [link node_pcdata]) that consist only of whitespace characters are to be put in DOM tree. Often whitespace-only data is not significant for the application, and the cost of allocating and storing such nodes (both memory and speed-wise) can be significant. For example, after parsing XML string `<node> <a/> </node>`, `<node>` element will have three children when `parse_ws_pcdata` is set (child with type [link node_pcdata] and value `" "`, child with type [link node_element] and name `"a"`, and another child with type [link node_pcdata] and value `" "`), and only one child when `parse_ws_pcdata` is not set. This flag is *off* by default.
+[lbr]
+
+* [anchor parse_ws_pcdata_single] determines if whitespace-only PCDATA nodes that have no sibling nodes are to be put in DOM tree. In some cases application needs to parse the whitespace-only contents of nodes, i.e. `<node>  </node>`, but is not interested in whitespace markup elsewhere. It is possible to use [link parse_ws_pcdata] flag in this case, but it results in excessive allocations and complicates document processing in some cases; this flag is intended to avoid that. As an example, after parsing XML string `<node> <a>  </a> </node>` with `parse_ws_pcdata_single` flag set, `<node>` element will have one child `<a>`, and `<a>` element will have one child with type [link node_pcdata] and value `"  "`. This flag has no effect if [link parse_ws_pcdata] is enabled. This flag is *off* by default.
 
 These flags control the transformation of tree element contents:
 
@@ -674,7 +677,7 @@ These flags control the transformation of tree element contents:
 * [anchor parse_wconv_attribute] determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if [link parse_eol] is set, i.e. `\r\n` is converted to a single space.  This flag is *on* by default.
 [lbr]
 
-* [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if [link parse_wconv_attribute] was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. The value of [link parse_wconv_attribute] has no effect if this flag is on. This flag is *off* by default.
+* [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if [link parse_wconv_attribute] was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. [link parse_wconv_attribute] has no effect if this flag is on. This flag is *off* by default.
 
 [note `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; [link parse_wnorm_attribute] performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes should behave as if they are declared as [^CDATA], thus [link parse_wconv_attribute] is the default option.]
 
@@ -1945,6 +1948,7 @@ Constants:
     * [link parse_minimal]
     * [link parse_pi]
     * [link parse_ws_pcdata]
+    * [link parse_ws_pcdata_single]
     * [link parse_wconv_attribute]
     * [link parse_wnorm_attribute]
         
