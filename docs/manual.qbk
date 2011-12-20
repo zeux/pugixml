@@ -722,6 +722,7 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
 * [anchor encoding_utf32_be] corresponds to big-endian UTF-32 encoding as defined in the Unicode standard.
 * [anchor encoding_utf32] corresponds to UTF-32 encoding as defined in the Unicode standard; the endianness is assumed to be that of the target platform.
 * [anchor encoding_wchar] corresponds to the encoding of `wchar_t` type; it has the same meaning as either `encoding_utf16` or `encoding_utf32`, depending on `wchar_t` size.
+* [anchor encoding_latin1] corresponds to ISO-8859-1 encoding (also known as Latin-1).
 
 The algorithm used for `encoding_auto` correctly detects any supported Unicode encoding for all well-formed XML documents (since they start with document declaration) and for all other XML documents that start with [^<]; if your XML document does not start with [^<] and has encoding that is different from UTF-8, use the specific encoding.
 
@@ -1916,6 +1917,7 @@ Enumerations:
     * [link encoding_utf32_be]
     * [link encoding_utf32]
     * [link encoding_wchar]
+    * [link encoding_latin1]
     [lbr]
 
 * `enum `[link xpath_value_type]
