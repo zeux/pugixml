@@ -307,6 +307,7 @@ TEST_XML(document_save_bom, "<n/>")
 	CHECK(test_save_narrow(doc, flags, encoding_utf16_le, "\xff\xfe<\x00n\x00 \x00/\x00>\x00", 12));
 	CHECK(test_save_narrow(doc, flags, encoding_utf32_be, "\x00\x00\xfe\xff\x00\x00\x00<\x00\x00\x00n\x00\x00\x00 \x00\x00\x00/\x00\x00\x00>", 24));
 	CHECK(test_save_narrow(doc, flags, encoding_utf32_le, "\xff\xfe\x00\x00<\x00\x00\x00n\x00\x00\x00 \x00\x00\x00/\x00\x00\x00>\x00\x00\x00", 24));
+	CHECK(test_save_narrow(doc, flags, encoding_latin1, "<n />", 5));
 
 	// encodings synonyms
 	CHECK(save_narrow(doc, flags, encoding_utf16) == save_narrow(doc, flags, (is_little_endian() ? encoding_utf16_le : encoding_utf16_be)));
@@ -369,6 +370,15 @@ TEST_XML(document_save_declaration_present_last, "<node/>")
 
 	// node writer only looks for declaration before the first element child
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n<node />\n<?xml encoding=\"utf8\"?>\n"));
+}
+
+TEST_XML(document_save_declaration_latin1, "<node/>")
+{
+	xml_writer_string writer;
+
+	doc.save(writer, STR(""), pugi::format_default, encoding_latin1);
+
+	CHECK(writer.as_narrow() == "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<node />\n");
 }
 
 struct temp_file
@@ -704,18 +714,19 @@ static bool load_file_in_memory(const char* path, char*& data, size_t& size)
 	return true;
 }
 
+struct file_data_t
+{
+    const char* path;
+    xml_encoding encoding;
+
+    char* data;
+    size_t size;
+};
+
+
 TEST(document_contents_preserve)
 {
-	struct file_t
-	{
-		const char* path;
-		xml_encoding encoding;
-
-		char* data;
-		size_t size;
-	};
-
-	file_t files[] =
+	file_data_t files[] =
 	{
 		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
 		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
@@ -738,6 +749,41 @@ TEST(document_contents_preserve)
 			// parse into document (preserve comments, declaration and whitespace pcdata)
 			xml_document doc;
 			CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default | parse_ws_pcdata | parse_declaration | parse_comments));
+
+			// compare saved document with the original (raw formatting, without extra declaration, write bom if it was in original file)
+			CHECK(test_save_narrow(doc, format_raw | format_no_declaration | format_write_bom, files[dst].encoding, files[dst].data, files[dst].size));
+		}
+	}
+
+	// cleanup
+	for (unsigned int j = 0; j < sizeof(files) / sizeof(files[0]); ++j)
+	{
+		delete[] files[j].data;
+	}
+}
+
+TEST(document_contents_preserve_latin1)
+{
+	file_data_t files[] =
+	{
+		{"tests/data/latintest_utf8.xml", encoding_utf8, 0, 0},
+		{"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}
+	};
+
+	// load files in memory
+	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
+	{
+		CHECK(load_file_in_memory(files[i].path, files[i].data, files[i].size));
+	}
+
+	// convert each file to each format and compare bitwise
+	for (unsigned int src = 0; src < sizeof(files) / sizeof(files[0]); ++src)
+	{
+		for (unsigned int dst = 0; dst < sizeof(files) / sizeof(files[0]); ++dst)
+		{
+			// parse into document (preserve comments, declaration and whitespace pcdata)
+			xml_document doc;
+			CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default | parse_ws_pcdata | parse_declaration | parse_comments, files[src].encoding));
 
 			// compare saved document with the original (raw formatting, without extra declaration, write bom if it was in original file)
 			CHECK(test_save_narrow(doc, format_raw | format_no_declaration | format_write_bom, files[dst].encoding, files[dst].data, files[dst].size));
@@ -811,7 +857,8 @@ TEST(document_load_buffer_empty)
 		encoding_utf32_le,
 		encoding_utf32_be,
 		encoding_utf32,
-		encoding_wchar
+		encoding_wchar,
+        encoding_latin1
 	};
 
 	char buffer[1];

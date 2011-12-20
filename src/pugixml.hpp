@@ -194,7 +194,8 @@ namespace pugi
 		encoding_utf32_le,  // Little-endian UTF32
 		encoding_utf32_be,  // Big-endian UTF32
 		encoding_utf32,     // UTF32 with native endianness
-		encoding_wchar      // The same encoding wchar_t has (either UTF16 or UTF32)
+		encoding_wchar,     // The same encoding wchar_t has (either UTF16 or UTF32)
+        encoding_latin1
 	};
 
 	// Formatting flags

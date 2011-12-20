@@ -754,6 +754,27 @@ namespace
 		}
 	};
 
+	struct latin1_writer
+	{
+		typedef uint8_t* value_type;
+
+		static value_type low(value_type result, uint32_t ch)
+		{
+			*result = static_cast<uint8_t>(ch > 255 ? '?' : ch);
+
+			return result + 1;
+		}
+
+		static value_type high(value_type result, uint32_t ch)
+		{
+            (void)ch;
+
+			*result = '?';
+
+			return result + 1;
+		}
+	};
+
 	template <size_t size> struct wchar_selector;
 
 	template <> struct wchar_selector<2>
@@ -901,6 +922,16 @@ namespace
 					data += 1;
 				}
 			}
+
+			return result;
+		}
+
+		static inline typename Traits::value_type decode_latin1_block(const uint8_t* data, size_t size, typename Traits::value_type result)
+		{
+			for (size_t i = 0; i < size; ++i)
+            {
+                result = Traits::low(result, data[i]);
+            }
 
 			return result;
 		}
@@ -1172,6 +1203,27 @@ namespace
 		return true;
 	}
 
+	bool convert_buffer_latin1(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size)
+	{
+		const uint8_t* data = static_cast<const uint8_t*>(contents);
+
+		// get length in wchar_t units
+		out_length = size;
+
+		// allocate buffer of suitable length
+		out_buffer = static_cast<char_t*>(global_allocate((out_length > 0 ? out_length : 1) * sizeof(char_t)));
+		if (!out_buffer) return false;
+
+		// convert latin1 input to wchar_t
+		wchar_writer::value_type out_begin = reinterpret_cast<wchar_writer::value_type>(out_buffer);
+		wchar_writer::value_type out_end = utf_decoder<wchar_writer>::decode_latin1_block(data, size, out_begin);
+
+		assert(out_end == out_begin + out_length);
+		(void)!out_end;
+
+		return true;
+	}
+
 	bool convert_buffer(char_t*& out_buffer, size_t& out_length, xml_encoding encoding, const void* contents, size_t size, bool is_mutable)
 	{
 		// get native encoding
@@ -1205,6 +1257,9 @@ namespace
 				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_false()) :
 				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_true());
 		}
+
+        // source encoding is latin1
+		if (encoding == encoding_latin1) return convert_buffer_latin1(out_buffer, out_length, contents, size);
 
 		assert(!"Invalid encoding");
 		return false;
@@ -1254,6 +1309,48 @@ namespace
 		return true;
 	}
 
+    size_t get_latin1_7bit_prefix_length(const uint8_t* data, size_t size)
+    {
+        for (size_t i = 0; i < size; ++i)
+            if (data[i] > 127)
+                return i;
+
+        return size;
+    }
+
+	bool convert_buffer_latin1(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, bool is_mutable)
+	{
+		const uint8_t* data = static_cast<const uint8_t*>(contents);
+
+        // get size of prefix that does not need utf8 conversion
+        size_t prefix_length = get_latin1_7bit_prefix_length(data, size);
+        assert(prefix_length <= size);
+
+        const uint8_t* postfix = data + prefix_length;
+        size_t postfix_length = size - prefix_length;
+
+        // if no conversion is needed, just return the original buffer
+        if (postfix_length == 0) return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
+
+		// first pass: get length in utf8 units
+		out_length = prefix_length + utf_decoder<utf8_counter>::decode_latin1_block(postfix, postfix_length, 0);
+
+		// allocate buffer of suitable length
+		out_buffer = static_cast<char_t*>(global_allocate((out_length > 0 ? out_length : 1) * sizeof(char_t)));
+		if (!out_buffer) return false;
+
+		// second pass: convert latin1 input to utf8
+        memcpy(out_buffer, data, prefix_length);
+
+		uint8_t* out_begin = reinterpret_cast<uint8_t*>(out_buffer);
+		uint8_t* out_end = utf_decoder<utf8_writer>::decode_latin1_block(postfix, postfix_length, out_begin + prefix_length);
+
+		assert(out_end == out_begin + out_length);
+		(void)!out_end;
+
+		return true;
+	}
+
 	bool convert_buffer(char_t*& out_buffer, size_t& out_length, xml_encoding encoding, const void* contents, size_t size, bool is_mutable)
 	{
 		// fast path: no conversion required
@@ -1278,6 +1375,9 @@ namespace
 				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_false()) :
 				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_true());
 		}
+
+        // source encoding is latin1
+		if (encoding == encoding_latin1) return convert_buffer_latin1(out_buffer, out_length, contents, size, is_mutable);
 
 		assert(!"Invalid encoding");
 		return false;
@@ -2580,6 +2680,18 @@ namespace
 			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
 		}
 
+		// convert to latin1
+		if (encoding == encoding_latin1)
+		{
+			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
+
+			uint8_t* end = sizeof(wchar_t) == 2 ?
+				utf_decoder<latin1_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(data), length, dest) :
+				utf_decoder<latin1_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(data), length, dest);
+
+			return static_cast<size_t>(end - dest);
+		}
+
 		assert(!"Invalid encoding");
 		return 0;
 	}
@@ -2630,6 +2742,14 @@ namespace
 			if (native_encoding != encoding) convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
 
 			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
+		}
+
+		if (encoding == encoding_latin1)
+		{
+			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
+			uint8_t* end = utf_decoder<latin1_writer>::decode_utf8_block(reinterpret_cast<const uint8_t*>(data), length, dest);
+
+			return static_cast<size_t>(end - dest);
 		}
 
 		assert(!"Invalid encoding");
@@ -2821,6 +2941,9 @@ namespace
 		case encoding_utf32_le:
 			writer.write("\xff\xfe\x00\x00", 4);
 			break;
+
+        case encoding_latin1:
+            break;
 
 		default:
 			assert(!"Invalid encoding");
@@ -4806,7 +4929,9 @@ namespace pugi
 
 		if (!(flags & format_no_declaration) && !has_declaration(*this))
 		{
-			buffered_writer.write(PUGIXML_TEXT("<?xml version=\"1.0\"?>"));
+			buffered_writer.write(PUGIXML_TEXT("<?xml version=\"1.0\""));
+            if (encoding == encoding_latin1) buffered_writer.write(PUGIXML_TEXT(" encoding=\"ISO-8859-1\""));
+			buffered_writer.write('?', '>');
 			if (!(flags & format_raw)) buffered_writer.write('\n');
 		}
 
