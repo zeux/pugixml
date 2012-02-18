@@ -130,6 +130,14 @@ TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 	CHECK_STRING(copy4[0].node().name(), STR("foo"));
 }
 
+TEST(xpath_api_nodeset_copy_empty)
+{
+    xpath_node_set set;
+    xpath_node_set set2 = set;
+    xpath_node_set set3;
+    set3 = set;
+}
+
 TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 {
 	xpath_query q(STR("node/@attr"));
