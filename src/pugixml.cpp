@@ -64,9 +64,10 @@
 #if !defined(_MSC_VER) || _MSC_VER >= 1600
 #	include <stdint.h>
 #else
-#	if _MSC_VER < 1300
-// No native uintptr_t in MSVC6
+#	ifndef _UINTPTR_T_DEFINED
+// No native uintptr_t in MSVC6 and in some WinCE versions
 typedef size_t uintptr_t;
+#define _UINTPTR_T_DEFINED
 #	endif
 typedef unsigned __int8 uint8_t;
 typedef unsigned __int16 uint16_t;
