@@ -122,17 +122,35 @@ else if ( $(toolset:I=^msvc) )
 		LDFLAGS += /DEBUG ;
 	}
 
-	if ( $(toolset:I=x64$) )
-	{
-		postfix = "\\amd64" ;
-		sdk_postfix = "\\x64" ;
-		LDFLAGS += /MACHINE:X64 ;
-	}
-	else
-	{
-		postfix = "" ;
-		sdk_postfix = "" ;
-	}
+    if ( $(toolset:I=_wince) )
+    {
+        postfix = "\\x86_arm" ;
+        
+        LDFLAGS += /SUBSYSTEM:WINDOWSCE ;
+        LDFLAGS += coredll.lib corelibc.lib ccrtrtti.lib ;
+        LDFLAGS += "/LIBPATH:\"%$(toolset)_PATH%\\lib\\armv4\"" ;
+        LDFLAGS += "/LIBPATH:\"%WINCESDK_PATH%\\lib\\armv4\"" ;
+    }
+    else
+    {
+        local sdk_postfix ;
+
+        if ( $(toolset:I=x64$) )
+        {
+            postfix = "\\amd64" ;
+            sdk_postfix = "\\x64" ;
+            LDFLAGS += /MACHINE:X64 ;
+        }
+        else
+        {
+            postfix = "" ;
+            sdk_postfix = "" ;
+        }
+        
+        LDFLAGS += "/LIBPATH:\"%$(toolset)_PATH%\\lib$(postfix)\"" ;
+        LDFLAGS += "/LIBPATH:\"%$(toolset)_PATH%\\PlatformSDK\\lib$(postfix)\"" ;
+        LDFLAGS += "/LIBPATH:\"%WINSDK_PATH%\\lib$(sdk_postfix)\"" ;
+    }
 
 	rule GetCFlags CONFIG : DEFINES
 	{
@@ -181,9 +199,10 @@ else if ( $(toolset:I=^msvc) )
 		{
 			RESULT += /EHsc ;
 		}
-		else if ( $(toolset) = "msvc6" || $(toolset) = "msvc71" )
+		else if ( $(toolset) = "msvc6" || $(toolset) = "msvc71" || $(toolset:I=_wince) )
 		{
 			# No no-exception STL in MSVC6, buggy no-exception STL in MSVC71
+            # No proper runtime library variant for no-exception in WinCE (ccrtrtti.lib contains what() & dtor)
 			RESULT += /EHsc ;
 		}
 		else
@@ -191,12 +210,25 @@ else if ( $(toolset:I=^msvc) )
 			RESULT += /D_HAS_EXCEPTIONS=0 ;
 		}
 
+        if ( $(toolset:I=_wince) )
+        {
+            RESULT += /D_WIN32_WCE /DARM ;
+            RESULT += "/I\"%$(toolset)_PATH%\\include\"" ;
+            RESULT += "/I\"%WINCESDK_PATH%\\Include\"" ;
+        }
+        else
+        {
+            RESULT += "/I\"%$(toolset)_PATH%\\include\"" ;
+            RESULT += "/I\"%$(toolset)_PATH%\\PlatformSDK\\include\"" ;
+            RESULT += "/I\"%WINSDK_PATH%\\Include\"" ;
+        }
+
 		return $(RESULT) ;
 	}
 
 	actions ObjectAction
 	{
-		"%$(toolset)_PATH%\bin$(postfix)\cl.exe" /WX /I"%$(toolset)_PATH%\include" /I"%$(toolset)_PATH%\PlatformSDK\include" /I"%WINSDK_PATH%\Include" /c $(>) /Fo$(<) /nologo $(CCFLAGS)
+		"%$(toolset)_PATH%\bin$(postfix)\cl.exe" /WX /c $(>) /Fo$(<) /nologo $(CCFLAGS)
 	}
 	
 	actions LibraryAction
@@ -206,7 +238,7 @@ else if ( $(toolset:I=^msvc) )
 	
 	actions LinkAction
 	{
-		"%$(toolset)_PATH%\bin$(postfix)\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) /PDB:$(<:S=.pdb) $(>) /LIBPATH:"%$(toolset)_PATH%\lib$(postfix)" /LIBPATH:"%$(toolset)_PATH%\PlatformSDK\lib$(postfix)" /LIBPATH:"%WINSDK_PATH%\Lib$(sdk_postfix)" $(LDFLAGS)
+		"%$(toolset)_PATH%\bin$(postfix)\link.exe" /SUBSYSTEM:CONSOLE /NOLOGO /OUT:$(<) /PDB:$(<:S=.pdb) $(>) $(LDFLAGS)
 	}
 }
 else if ( $(toolset:I=^ic) )
@@ -684,7 +716,7 @@ if ( $(UNIX) )
 }
 else
 {
-	if ( $(toolset:I=^(xbox360|ps3)) )
+	if ( $(toolset:I=(^xbox360|^ps3|wince$)) )
 	{
 		actions RunAction
 		{
