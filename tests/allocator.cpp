@@ -9,6 +9,10 @@
 #		pragma cpp_extensions on // enable some extensions to include windows.h
 #	endif
 
+#   if defined(_MSC_VER)
+#       pragma warning(disable: 4201) // nonstandard extension used: nameless struct/union
+#   endif
+
 #	ifdef _XBOX_VER
 #		define NOD3D
 #		include <xtl.h>

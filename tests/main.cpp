@@ -3,8 +3,14 @@
 
 #include <exception>
 #include <stdio.h>
+#include <stdlib.h>
 #include <float.h>
 #include <assert.h>
+
+#ifdef _WIN32_WCE
+#   undef DebugBreak
+#   include <windows.h>
+#endif
 
 test_runner* test_runner::_tests = 0;
 size_t test_runner::_memory_fail_threshold = 0;
@@ -112,15 +118,17 @@ static bool run_test(test_runner* test)
 }
 
 #if defined(__CELLOS_LV2__) && defined(PUGIXML_NO_EXCEPTIONS) && !defined(__SNC__)
-#include <stdlib.h>
-
 void std::exception::_Raise() const
 {
 	abort();
 }
 #endif
 
+#ifdef _WIN32_WCE
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+#else
 int main()
+#endif
 {
 #ifdef __BORLANDC__
 	_control87(MCW_EM | PC_53, MCW_EM | MCW_PC);

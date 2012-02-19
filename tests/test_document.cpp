@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define _SCL_SECURE_NO_WARNINGS
+#define _SCL_SECURE_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE 0
 
 #include <string.h> // because Borland's STL is braindead, we have to include <string.h> _before_ <string> in order to get memcpy
@@ -393,7 +394,7 @@ struct temp_file
 
 		fd = mkstemp(path);
 		CHECK(fd != -1);
-	#elif defined(__CELLOS_LV2__)
+	#elif defined(__CELLOS_LV2__) || defined(_WIN32_WCE)
 		path[0] = 0; // no temporary file support
 	#else
 		tmpnam(path);
@@ -402,7 +403,9 @@ struct temp_file
 
 	~temp_file()
 	{
+    #ifndef _WIN32_WCE
 		CHECK(unlink(path) == 0);
+    #endif
 
 	#ifdef __unix
 		CHECK(close(fd) == 0);
