@@ -1,11 +1,19 @@
 # Rules for Jamfile.jam
 
-if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
+if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset:I=^android) )
 {
 	if ( $(toolset:I=^gcc) )
 	{
 		GCCPATH = "" ;
 	}
+    else if ( $(toolset:I=^bada) )
+    {
+		GCCPATH = "%$(toolset)_PATH%\\Tools\\Toolchains\\ARM\\bin\\arm-bada-eabi-" ;
+    }
+    else if ( $(toolset:I=^android) )
+    {
+		GCCPATH = "%$(toolset)_PATH%\\bin\\arm-linux-androideabi-" ;
+    }
 	else
 	{
 		GCCPATH = "%$(toolset)_PATH%\\bin\\" ;
@@ -15,7 +23,11 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 	{
 		ARCH = "" ;
 
-        if ( $(OS) = NT || $(OS) = FREEBSD )
+        if ( $(toolset:I=^bada) )
+        {
+            LDFLAGS += -lstdc++ -lsupc++-xnew -lc ;
+        }
+        else if ( $(OS) = NT || $(OS) = FREEBSD )
         {
             LDFLAGS += -static-libgcc -static ;
         }
@@ -34,19 +46,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 		LDFLAGS += $(ARCH) ;
 	}
 
-    rule MatchVersion MAJOR : MINOR
-    {
-        local REGEX = "(gcc|mingw)"$(MAJOR)"\\.?"$(MINOR) ;
-
-        if ( $(toolset:I=$(REGEX)) )
-        {
-            return 1 ;
-        }
-        else
-        {
-            return 0 ;
-        }
-    }
+    local VERSION = [ Shell "$(GCCPATH)gcc -dumpversion" ] ;
 
 	rule GetCFlags CONFIG : DEFINES
 	{
@@ -58,7 +58,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
         RESULT += -Wunused -Wstrict-aliasing=2 -Wundef -Wshadow -Wredundant-decls ;
 
         # gcc 4.0 has some warning regressions
-        if ( [ MatchVersion 4 : 0 ] = 0 )
+        if ( $(VERSION:X=4\.0) )
         {
             RESULT += -Wold-style-cast ; # gives warnings for fpclassify() on gcc 4.0.1
             RESULT += -Wswitch-default ; # gives false-positives for couple of switches on template argument on gcc 4.0.1
@@ -66,7 +66,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
         }
 
         # these warnings are supported on newer GCC versions only
-        if ( [ MatchVersion 4 : "[4-9]" ] = 1 )
+        if ( $(VERSION) >= "4.4.0" )
         {
             RESULT += -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations ;
         }
@@ -716,7 +716,7 @@ if ( $(UNIX) )
 }
 else
 {
-	if ( $(toolset:I=(^xbox360|^ps3|wince$)) )
+	if ( $(toolset:I=(^xbox360|^ps3|wince|^bada$)) )
 	{
 		actions RunAction
 		{
