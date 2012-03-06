@@ -12,6 +12,7 @@
 
 #ifdef _WIN32_WCE
 #   undef DebugBreak
+#   pragma warning(disable: 4201) // nonstandard extension used: nameless struct/union
 #   include <windows.h>
 #endif
 
@@ -61,6 +62,8 @@ static void replace_memory_management()
 }
 
 #if defined(_MSC_VER) && _MSC_VER > 1200 && _MSC_VER < 1400 && !defined(__INTEL_COMPILER) && !defined(__DMC__)
+#include <exception>
+
 namespace std
 {
 	_CRTIMP2 _Prhand _Raise_handler;
@@ -121,6 +124,8 @@ static bool run_test(test_runner* test)
 }
 
 #if defined(__CELLOS_LV2__) && defined(PUGIXML_NO_EXCEPTIONS) && !defined(__SNC__)
+#include <exception>
+
 void std::exception::_Raise() const
 {
 	abort();
