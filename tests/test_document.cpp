@@ -382,6 +382,8 @@ TEST_XML(document_save_declaration_latin1, "<node/>")
 	CHECK(writer.as_narrow() == "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<node />\n");
 }
 
+#define USE_MKSTEMP defined(__unix) || defined(__QNX__)
+
 struct temp_file
 {
 	char path[512];
@@ -389,7 +391,7 @@ struct temp_file
 	
 	temp_file(): fd(0)
 	{
-	#ifdef __unix
+	#if USE_MKSTEMP
 		strcpy(path, "/tmp/pugiXXXXXX");
 
 		fd = mkstemp(path);
@@ -407,7 +409,7 @@ struct temp_file
 		CHECK(unlink(path) == 0);
     #endif
 
-	#ifdef __unix
+	#if USE_MKSTEMP
 		CHECK(close(fd) == 0);
 	#endif
 	}
