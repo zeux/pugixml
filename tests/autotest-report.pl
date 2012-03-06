@@ -34,7 +34,8 @@ sub prettytoolset
 	return "Sony PlayStation3 GCC" if ($toolset =~ /^ps3_gcc/);
 	return "Sony PlayStation3 SNC" if ($toolset =~ /^ps3_snc/);
 
-	return "BadaSDK (GCC)" if ($toolset =~ /^bada$/);
+	return "bada SDK (GCC)" if ($toolset =~ /^bada$/);
+	return "BlackBerry NDK (GCC)" if ($toolset =~ /^blackberry$/);
 
 	$toolset;
 }
@@ -57,6 +58,7 @@ sub prettyplatform
 	return "ps3" if ($toolset =~ /^ps3/);
 
     return "arm" if ($toolset =~ /^bada/);
+    return "arm" if ($toolset =~ /^blackberry/);
 
 	return "win64" if ($platform =~ /MSWin32-x64/);
 	return "win32" if ($platform =~ /MSWin32/);
