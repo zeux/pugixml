@@ -1,11 +1,14 @@
 #include "test.hpp"
 #include "allocator.hpp"
 
-#include <exception>
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
 #include <assert.h>
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+#   include <exception>
+#endif
 
 #ifdef _WIN32_WCE
 #   undef DebugBreak

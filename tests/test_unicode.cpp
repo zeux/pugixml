@@ -24,7 +24,7 @@ TEST(as_wide_valid_basic)
 TEST(as_wide_valid_astral)
 {
 	// valid 4-byte input
-	std::wstring b4 = as_wide("\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
+	std::basic_string<wchar_t> b4 = as_wide("\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
 
 	size_t wcharsize = sizeof(wchar_t);
 
@@ -65,7 +65,7 @@ TEST(as_wide_invalid)
 	CHECK(as_wide("a\xf2_") == L"a_");
 
 	// invalid 5-byte input
-	std::wstring b5 = as_wide("\xf8\nbcd");
+	std::basic_string<wchar_t> b5 = as_wide("\xf8\nbcd");
 	CHECK(b5 == L"\nbcd");
 }
 
@@ -98,7 +98,7 @@ TEST(as_utf8_valid_astral)
 
 	if (wcharsize == 4)
 	{
-		std::wstring s;
+		std::basic_string<wchar_t> s;
 		s.resize(3);
 		s[0] = wchar_cast(0x97624);
 		s[1] = ' ';
@@ -144,7 +144,7 @@ TEST(as_utf8_invalid)
 
 TEST(as_utf8_string)
 {
-    std::wstring s = L"abcd";
+    std::basic_string<wchar_t> s = L"abcd";
 
     CHECK(as_utf8(s) == "abcd");
 }

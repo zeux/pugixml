@@ -179,7 +179,7 @@ TEST(write_encodings)
 	CHECK(write_narrow(doc, format_default, encoding_utf16) == write_narrow(doc, format_default, is_little_endian() ? encoding_utf16_le : encoding_utf16_be));
 
 	size_t wcharsize = sizeof(wchar_t);
-	std::wstring v = write_wide(doc, format_default, encoding_wchar);
+	std::basic_string<wchar_t> v = write_wide(doc, format_default, encoding_wchar);
 
 	if (wcharsize == 4)
 	{

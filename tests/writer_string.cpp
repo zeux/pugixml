@@ -23,12 +23,12 @@ std::string xml_writer_string::as_narrow() const
 	return contents;
 }
 
-std::wstring xml_writer_string::as_wide() const
+std::basic_string<wchar_t> xml_writer_string::as_wide() const
 {
 	CHECK(contents.size() % sizeof(wchar_t) == 0);
 
     // round-trip pointer through void* to avoid pointer alignment warnings; contents data should be heap allocated => safe to cast
-	return std::wstring(static_cast<const wchar_t*>(static_cast<const void*>(contents.data())), contents.size() / sizeof(wchar_t));
+	return std::basic_string<wchar_t>(static_cast<const wchar_t*>(static_cast<const void*>(contents.data())), contents.size() / sizeof(wchar_t));
 }
 
 std::basic_string<pugi::char_t> xml_writer_string::as_string() const
@@ -69,7 +69,7 @@ bool test_write_narrow(pugi::xml_node node, unsigned int flags, pugi::xml_encodi
 	return test_narrow(write_narrow(node, flags, encoding), expected, length);
 }
 
-std::wstring write_wide(pugi::xml_node node, unsigned int flags, pugi::xml_encoding encoding)
+std::basic_string<wchar_t> write_wide(pugi::xml_node node, unsigned int flags, pugi::xml_encoding encoding)
 {
 	xml_writer_string writer;
 

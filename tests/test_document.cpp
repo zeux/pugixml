@@ -22,7 +22,7 @@
 #	include <io.h> // for unlink in C++0x mode
 #endif
 
-#if defined(__CELLOS_LV2__) || defined(_GLIBCXX_HAVE_UNISTD_H)
+#if defined(__CELLOS_LV2__) || defined(ANDROID) || defined(_GLIBCXX_HAVE_UNISTD_H)
 #	include <unistd.h> // for unlink
 #endif
 
@@ -382,7 +382,7 @@ TEST_XML(document_save_declaration_latin1, "<node/>")
 	CHECK(writer.as_narrow() == "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<node />\n");
 }
 
-#define USE_MKSTEMP defined(__unix) || defined(__QNX__)
+#define USE_MKSTEMP defined(__unix) || defined(__QNX__) || defined(ANDROID)
 
 struct temp_file
 {
