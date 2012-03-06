@@ -348,7 +348,9 @@ namespace
 			assert(full_size < (1 << 16) || (page->busy_size == full_size && page_offset == 0));
 			header->full_size = static_cast<uint16_t>(full_size < (1 << 16) ? full_size : 0);
 
-			return reinterpret_cast<char_t*>(header + 1);
+            // round-trip through void* to avoid 'cast increases required alignment of target type' warning
+            // header is guaranteed a pointer-sized alignment, which should be enough for char_t
+			return static_cast<char_t*>(static_cast<void*>(header + 1));
 		}
 
 		void deallocate_string(char_t* string)
