@@ -187,7 +187,7 @@ TEST(write_encodings)
 	}
 	else
 	{
-		CHECK(v.size() == 10 && v[0] == '<' && v[1] == 0x54 && v[2] == 0xA2 && v[3] == 0x20AC && v[4] == 0xd852 && v[5] == 0xdf62 && v[6] == ' ' && v[7] == '/' && v[8] == '>' && v[9] == '\n');
+		CHECK(v.size() == 10 && v[0] == '<' && v[1] == 0x54 && v[2] == 0xA2 && v[3] == 0x20AC && v[4] == wchar_cast(0xd852) && v[5] == wchar_cast(0xdf62) && v[6] == ' ' && v[7] == '/' && v[8] == '>' && v[9] == '\n');
 	}
 
     CHECK(test_write_narrow(doc, format_default, encoding_latin1, "<\x54\xA2?? />\n", 9));

@@ -34,7 +34,7 @@ TEST(as_wide_valid_astral)
 	}
 	else
 	{
-		CHECK(b4.size() == 5 && b4[0] == 0xda1d && b4[1] == 0xde24 && b4[2] == L' ' && b4[3] == 0xdbc0 && b4[4] == 0xdfff);
+		CHECK(b4.size() == 5 && b4[0] == wchar_cast(0xda1d) && b4[1] == wchar_cast(0xde24) && b4[2] == L' ' && b4[3] == wchar_cast(0xdbc0) && b4[4] == wchar_cast(0xdfff));
 	}
 }
 

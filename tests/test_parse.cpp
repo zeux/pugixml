@@ -443,10 +443,9 @@ TEST(parse_escapes_unicode)
 #ifdef PUGIXML_WCHAR_MODE
 	const pugi::char_t* v = doc.child_value(STR("node"));
 
-	unsigned int v2 = v[2];
 	size_t wcharsize = sizeof(wchar_t);
 
-	CHECK(v[0] == 0x3b3 && v[1] == 0x3b3 && (wcharsize == 2 ? v[2] == 0xd852 && v[3] == 0xdf62 : v2 == 0x24b62));
+	CHECK(v[0] == 0x3b3 && v[1] == 0x3b3 && (wcharsize == 2 ? v[2] == wchar_cast(0xd852) && v[3] == wchar_cast(0xdf62) : v[2] == wchar_cast(0x24b62)));
 #else
 	CHECK_STRING(doc.child_value(STR("node")), "\xce\xb3\xce\xb3\xf0\xa4\xad\xa2");
 #endif

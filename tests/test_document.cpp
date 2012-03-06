@@ -22,7 +22,7 @@
 #	include <io.h> // for unlink in C++0x mode
 #endif
 
-#if defined(__CELLOS_LV2__)
+#if defined(__CELLOS_LV2__) || defined(_GLIBCXX_HAVE_UNISTD_H)
 #	include <unistd.h> // for unlink
 #endif
 
@@ -528,13 +528,12 @@ inline void check_utftest_document(const xml_document& doc)
 	const pugi::char_t* v = doc.last_child().child(STR("Heavy")).previous_sibling().child_value();
 
 #ifdef PUGIXML_WCHAR_MODE
-	CHECK(v[0] == 0x4e16 && v[1] == 0x754c && v[2] == 0x6709 && v[3] == 0x5f88 && v[4] == 0x591a && v[5] == 0x8bed && v[6] == 0x8a00);
+	CHECK(v[0] == 0x4e16 && v[1] == 0x754c && v[2] == 0x6709 && v[3] == 0x5f88 && v[4] == 0x591a && v[5] == wchar_cast(0x8bed) && v[6] == wchar_cast(0x8a00));
 
 	// last character is a surrogate pair
-	unsigned int v7 = v[7];
 	size_t wcharsize = sizeof(wchar_t);
 
-	CHECK(wcharsize == 2 ? (v[7] == 0xd852 && v[8] == 0xdf62) : (v7 == 0x24b62));
+	CHECK(wcharsize == 2 ? (v[7] == wchar_cast(0xd852) && v[8] == wchar_cast(0xdf62)) : (v[7] == wchar_cast(0x24b62)));
 #else
 	// unicode string
 	CHECK_STRING(v, "\xe4\xb8\x96\xe7\x95\x8c\xe6\x9c\x89\xe5\xbe\x88\xe5\xa4\x9a\xe8\xaf\xad\xe8\xa8\x80\xf0\xa4\xad\xa2");
