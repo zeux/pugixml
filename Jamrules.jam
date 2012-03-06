@@ -1,6 +1,6 @@
 # Rules for Jamfile.jam
 
-if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset:I=^android) )
+if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset:I=^android) || $(toolset:I=^blackberry) )
 {
 	if ( $(toolset:I=^gcc) )
 	{
@@ -9,6 +9,10 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
     else if ( $(toolset:I=^bada) )
     {
 		GCCPATH = "%$(toolset)_PATH%\\Tools\\Toolchains\\ARM\\bin\\arm-bada-eabi-" ;
+    }
+    else if ( $(toolset:I=^blackberry) )
+    {
+		GCCPATH = "%$(toolset)_PATH%\\host\\win32\\x86\\usr\\bin\\ntoarmv7-" ;
     }
     else if ( $(toolset:I=^android) )
     {
@@ -717,7 +721,7 @@ if ( $(UNIX) )
 }
 else
 {
-	if ( $(toolset:I=(^xbox360|^ps3|wince|^bada$)) )
+	if ( $(toolset:I=(^xbox360|^ps3|wince|^bada|^blackberry$)) )
 	{
         RUNRESULT = "skiprun" ;
 
