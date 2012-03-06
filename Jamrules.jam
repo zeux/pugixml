@@ -673,7 +673,8 @@ else
 	exit "Unknown toolset $(toolset)!" ;
 }
 
-COVSUCCESS = "echo $" "(COVPREFIX) success" ;
+RUNRESULT = "success" ;
+COVSUCCESS = "echo $" "(COVPREFIX) $" "(RUNRESULT)" ;
 
 if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) )
 {
@@ -718,6 +719,8 @@ else
 {
 	if ( $(toolset:I=(^xbox360|^ps3|wince|^bada$)) )
 	{
+        RUNRESULT = "skiprun" ;
+
 		actions RunAction
 		{
 		}

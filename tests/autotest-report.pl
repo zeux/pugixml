@@ -34,6 +34,8 @@ sub prettytoolset
 	return "Sony PlayStation3 GCC" if ($toolset =~ /^ps3_gcc/);
 	return "Sony PlayStation3 SNC" if ($toolset =~ /^ps3_snc/);
 
+	return "BadaSDK (GCC)" if ($toolset =~ /^bada$/);
+
 	$toolset;
 }
 
@@ -53,6 +55,8 @@ sub prettyplatform
 
 	return "x360" if ($toolset =~ /^xbox360/);
 	return "ps3" if ($toolset =~ /^ps3/);
+
+    return "arm" if ($toolset =~ /^bada/);
 
 	return "win64" if ($platform =~ /MSWin32-x64/);
 	return "win32" if ($platform =~ /MSWin32/);
@@ -93,11 +97,15 @@ while (<>)
 
 		if ($info =~ /^prepare/)
 		{
-			$results{$fulltool}{$fullconf}{result} = 1;
+			$results{$fulltool}{$fullconf}{result} = "";
 		}
 		elsif ($info =~ /^success/)
 		{
-			$results{$fulltool}{$fullconf}{result} = 0;
+			$results{$fulltool}{$fullconf}{result} = "success";
+		}
+		elsif ($info =~ /^skiprun/)
+		{
+			$results{$fulltool}{$fullconf}{result} = "skiprun";
 		}
 		elsif ($info =~ /^coverage (\S+)/)
 		{
@@ -178,7 +186,7 @@ foreach $tool (@toolsetarray)
 		{
 			print "<td bgcolor='#cccccc'>&nbsp;</td>";
 		}
-		elsif ($$info{result} == 0)
+		elsif ($$info{result} eq "success")
 		{
 			my $coverage = $$info{coverage};
 
@@ -190,6 +198,10 @@ foreach $tool (@toolsetarray)
 			}
 
 			print "</td>";
+		}
+		elsif ($$info{result} eq "skiprun")
+		{
+			print "<td bgcolor='#ffff80' align='center'>pass</td>"
 		}
 		else
 		{

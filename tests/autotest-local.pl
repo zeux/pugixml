@@ -34,7 +34,7 @@ sub getcpucount
 	undef;
 }
 
-@alltoolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw45_0x, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64, msvc10_clr, msvc10_clr_x64, xbox360, ps3_gcc, ps3_snc, msvc8_wince) : ($^O =~ /solaris/) ? (suncc, suncc_x64) : &gcctoolset();
+@alltoolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw45_0x, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64, msvc10_clr, msvc10_clr_x64, xbox360, ps3_gcc, ps3_snc, msvc8_wince, bada) : ($^O =~ /solaris/) ? (suncc, suncc_x64) : &gcctoolset();
 
 $fast = scalar grep(/^fast$/, @ARGV);
 @toolsets = map { /^fast$/ ? () : ($_) } @ARGV;
@@ -101,12 +101,13 @@ foreach $toolset (@toolsets)
 	while (<PIPE>)
 	{
 		# ... autotest release [wchar] success
-		if (/^\.\.\. autotest (\S+) \[(.*?)\] success/)
+		if (/^\.\.\. autotest (\S+) \[(.*?)\] (success|skiprun)/)
 		{
 			my $configuration = $1;
 			my $defineset = ($2 eq $stddefine) ? '' : $2;
+            my $result = $3;
 
-			print "### autotest $Config{archname} $toolset $configuration [$defineset] success\n";
+			print "### autotest $Config{archname} $toolset $configuration [$defineset] $result\n";
 		}
 		# ... autotest release [wchar] gcov
 		elsif (/^\.\.\. autotest (\S+) \[(.*?)\] gcov/)
