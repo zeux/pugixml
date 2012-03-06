@@ -6,6 +6,10 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
 	{
 		GCCPATH = "" ;
 	}
+    else if ( $(toolset:I=^android) )
+    {
+		GCCPATH = "%$(toolset)_PATH%\\toolchains\\arm-linux-androideabi-4.4.3\\prebuilt\\windows\\bin\\arm-linux-androideabi-" ;
+    }
     else if ( $(toolset:I=^bada) )
     {
 		GCCPATH = "%$(toolset)_PATH%\\Tools\\Toolchains\\ARM\\bin\\arm-bada-eabi-" ;
@@ -13,10 +17,6 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
     else if ( $(toolset:I=^blackberry) )
     {
 		GCCPATH = "%$(toolset)_PATH%\\host\\win32\\x86\\usr\\bin\\ntoarmv7-" ;
-    }
-    else if ( $(toolset:I=^android) )
-    {
-		GCCPATH = "%$(toolset)_PATH%\\bin\\arm-linux-androideabi-" ;
     }
 	else
 	{
@@ -30,6 +30,25 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
         if ( $(toolset:I=^bada) )
         {
             LDFLAGS += -lstdc++ -lsupc++-xnew -lc ;
+        }
+        else if ( $(toolset:I=^android) )
+        {
+            LDFLAGS += -nostdlib ;
+            LDFLAGS += -L"%$(toolset)_PATH%\\platforms\\android-5\\arch-arm\\usr\\lib" ;
+
+            if ( $(toolset:I=stlport) )
+            {
+                LDFLAGS += -L"%$(toolset)_PATH%\\sources\\cxx-stl\\stlport\\libs\\armeabi-v7a" ;
+                LDFLAGS += -lstlport_static ;
+            }
+            else
+            {
+                LDFLAGS += -L"%$(toolset)_PATH%\\sources\\cxx-stl\\gnu-libstdc++\\libs\\armeabi-v7a" ;
+                LDFLAGS += -lgnustl_static -lsupc++ ;
+            }
+
+            LDFLAGS += "%$(toolset)_PATH%\\platforms\\android-5\\arch-arm\\usr\\lib\\crtbegin_dynamic.o" ;
+            LDFLAGS += -lstdc++ -lc -lm -lgcc ;
         }
         else if ( $(OS) = NT || $(OS) = FREEBSD )
         {
@@ -98,6 +117,25 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
 		{
 			RESULT += -fno-exceptions ;
 		}
+
+        if ( $(toolset:I=^android) )
+        {
+            RESULT += -DANDROID ;
+            RESULT += -mfloat-abi=softfp ;
+
+            if ( $(toolset:I=stlport) )
+            {
+                RESULT += -isystem"%$(toolset)_path%/sources/cxx-stl/stlport/stlport" ;
+                RESULT += -isystem"%$(toolset)_path%/sources/cxx-stl/system/include" ;
+            }
+            else
+            {
+                RESULT += -isystem"%$(toolset)_path%/sources/cxx-stl/gnu-libstdc++/include" ;
+                RESULT += -isystem"%$(toolset)_path%/sources/cxx-stl/gnu-libstdc++/libs/armeabi-v7a/include" ;
+            }
+
+            RESULT += -isystem"%$(toolset)_path%/platforms/android-5/arch-arm/usr/include" ;
+        }
 
 		RESULT += $(ARCH) ;
 
@@ -721,7 +759,7 @@ if ( $(UNIX) )
 }
 else
 {
-	if ( $(toolset:I=(^xbox360|^ps3|wince|^bada|^blackberry$)) )
+	if ( $(toolset:I=(^xbox360|^ps3|wince|^android|^bada|^blackberry$)) )
 	{
         RUNRESULT = "skiprun" ;
 
