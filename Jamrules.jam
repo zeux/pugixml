@@ -81,7 +81,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
         RESULT += -Wunused -Wstrict-aliasing=2 -Wundef -Wshadow -Wredundant-decls ;
 
         # gcc 4.0 has some warning regressions
-        if ( $(VERSION:X=4\.0) )
+        if ( ! $(VERSION:I=4\.0) )
         {
             RESULT += -Wold-style-cast ; # gives warnings for fpclassify() on gcc 4.0.1
             RESULT += -Wswitch-default ; # gives false-positives for couple of switches on template argument on gcc 4.0.1

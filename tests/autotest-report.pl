@@ -34,6 +34,7 @@ sub prettytoolset
 	return "Sony PlayStation3 GCC" if ($toolset =~ /^ps3_gcc/);
 	return "Sony PlayStation3 SNC" if ($toolset =~ /^ps3_snc/);
 
+	return "Android NDK (GCC)" . ($1 eq '_stlport' ? " STLport" : "") if ($toolset =~ /^android(.*)$/);
 	return "bada SDK (GCC)" if ($toolset =~ /^bada$/);
 	return "BlackBerry NDK (GCC)" if ($toolset =~ /^blackberry$/);
 
@@ -57,6 +58,7 @@ sub prettyplatform
 	return "x360" if ($toolset =~ /^xbox360/);
 	return "ps3" if ($toolset =~ /^ps3/);
 
+    return "arm" if ($toolset =~ /^android/);
     return "arm" if ($toolset =~ /^bada/);
     return "arm" if ($toolset =~ /^blackberry/);
 
