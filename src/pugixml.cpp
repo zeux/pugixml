@@ -353,12 +353,15 @@ namespace
 
 		void deallocate_string(char_t* string)
 		{
+            // this function casts pointers through void* to avoid 'cast increases required alignment of target type' warnings
+            // we're guaranteed the proper (pointer-sized) alignment on the input string if it was allocated via allocate_string
+
 			// get header
-			xml_memory_string_header* header = reinterpret_cast<xml_memory_string_header*>(string) - 1;
+			xml_memory_string_header* header = static_cast<xml_memory_string_header*>(static_cast<void*>(string)) - 1;
 
 			// deallocate
 			size_t page_offset = offsetof(xml_memory_page, data) + header->page_offset;
-			xml_memory_page* page = reinterpret_cast<xml_memory_page*>(reinterpret_cast<char*>(header) - page_offset);
+			xml_memory_page* page = reinterpret_cast<xml_memory_page*>(static_cast<void*>(reinterpret_cast<char*>(header) - page_offset));
 
 			// if full_size == 0 then this string occupies the whole page
 			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size;
@@ -817,7 +820,8 @@ namespace
 					// process aligned single-byte (ascii) blocks
 					if ((reinterpret_cast<uintptr_t>(data) & 3) == 0)
 					{
-						while (size >= 4 && (*reinterpret_cast<const uint32_t*>(data) & 0x80808080) == 0)
+                        // round-trip through void* to silence 'cast increases required alignment of target type' warnings
+						while (size >= 4 && (*static_cast<const uint32_t*>(static_cast<const void*>(data)) & 0x80808080) == 0)
 						{
 							result = Traits::low(result, data[0]);
 							result = Traits::low(result, data[1]);
@@ -938,6 +942,21 @@ namespace
 
 			return result;
 		}
+
+		static inline typename Traits::value_type decode_wchar_block_impl(const uint16_t* data, size_t size, typename Traits::value_type result)
+        {
+            return decode_utf16_block(data, size, result);
+        }
+
+		static inline typename Traits::value_type decode_wchar_block_impl(const uint32_t* data, size_t size, typename Traits::value_type result)
+        {
+            return decode_utf32_block(data, size, result);
+        }
+
+		static inline typename Traits::value_type decode_wchar_block(const wchar_t* data, size_t size, typename Traits::value_type result)
+        {
+            return decode_wchar_block_impl(reinterpret_cast<const wchar_selector<sizeof(wchar_t)>::type*>(data), size, result);
+        }
 	};
 
 	template <typename T> inline void convert_utf_endian_swap(T* result, const T* data, size_t length)
@@ -1389,23 +1408,15 @@ namespace
 
 	size_t as_utf8_begin(const wchar_t* str, size_t length)
 	{
-		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
-
 		// get length in utf8 characters
-		return sizeof(wchar_t) == 2 ?
-			utf_decoder<utf8_counter>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, 0) :
-			utf_decoder<utf8_counter>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, 0);
+        return utf_decoder<utf8_counter>::decode_wchar_block(str, length, 0);
     }
 
     void as_utf8_end(char* buffer, size_t size, const wchar_t* str, size_t length)
     {
-		STATIC_ASSERT(sizeof(wchar_t) == 2 || sizeof(wchar_t) == 4);
-
         // convert to utf8
         uint8_t* begin = reinterpret_cast<uint8_t*>(buffer);
-        uint8_t* end = sizeof(wchar_t) == 2 ?
-            utf_decoder<utf8_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(str), length, begin) :
-            utf_decoder<utf8_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(str), length, begin);
+        uint8_t* end = utf_decoder<utf8_writer>::decode_wchar_block(str, length, begin);
     
         assert(begin + size == end);
         (void)!end;
@@ -2631,7 +2642,7 @@ namespace
 		return (sizeof(wchar_t) == 2 && static_cast<unsigned int>(static_cast<uint16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
 	}
 
-	size_t convert_buffer(char* result, const char_t* data, size_t length, xml_encoding encoding)
+	size_t convert_buffer(void* result, const char_t* data, size_t length, xml_encoding encoding)
 	{
 		// only endian-swapping is required
 		if (need_endian_swap_utf(encoding, get_wchar_encoding()))
@@ -2645,10 +2656,7 @@ namespace
 		if (encoding == encoding_utf8)
 		{
 			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
-
-			uint8_t* end = sizeof(wchar_t) == 2 ?
-				utf_decoder<utf8_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(data), length, dest) :
-				utf_decoder<utf8_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(data), length, dest);
+			uint8_t* end = utf_decoder<utf8_writer>::decode_wchar_block(data, length, dest);
 
 			return static_cast<size_t>(end - dest);
 		}
@@ -2659,7 +2667,7 @@ namespace
 			uint16_t* dest = reinterpret_cast<uint16_t*>(result);
 
 			// convert to native utf16
-			uint16_t* end = utf_decoder<utf16_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(data), length, dest);
+			uint16_t* end = utf_decoder<utf16_writer>::decode_wchar_block(data, length, dest);
 
 			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
@@ -2675,7 +2683,7 @@ namespace
 			uint32_t* dest = reinterpret_cast<uint32_t*>(result);
 
 			// convert to native utf32
-			uint32_t* end = utf_decoder<utf32_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(data), length, dest);
+			uint32_t* end = utf_decoder<utf32_writer>::decode_wchar_block(data, length, dest);
 
 			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
@@ -2689,10 +2697,7 @@ namespace
 		if (encoding == encoding_latin1)
 		{
 			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
-
-			uint8_t* end = sizeof(wchar_t) == 2 ?
-				utf_decoder<latin1_writer>::decode_utf16_block(reinterpret_cast<const uint16_t*>(data), length, dest) :
-				utf_decoder<latin1_writer>::decode_utf32_block(reinterpret_cast<const uint32_t*>(data), length, dest);
+			uint8_t* end = utf_decoder<latin1_writer>::decode_wchar_block(data, length, dest);
 
 			return static_cast<size_t>(end - dest);
 		}
@@ -2717,7 +2722,7 @@ namespace
 		return length;
 	}
 
-	size_t convert_buffer(char* result, const char_t* data, size_t length, xml_encoding encoding)
+	size_t convert_buffer(void* result, const char_t* data, size_t length, xml_encoding encoding)
 	{
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
