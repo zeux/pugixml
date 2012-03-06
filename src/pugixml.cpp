@@ -966,10 +966,12 @@ namespace
 		for (size_t i = 0; i < length; ++i) result[i] = endian_swap(data[i]);
 	}
 
+#ifdef PUGIXML_WCHAR_MODE
 	inline void convert_wchar_endian_swap(wchar_t* result, const wchar_t* data, size_t length)
 	{
 		for (size_t i = 0; i < length; ++i) result[i] = static_cast<wchar_t>(endian_swap(static_cast<wchar_selector<sizeof(wchar_t)>::type>(data[i])));
 	}
+#endif
 }
 
 namespace
