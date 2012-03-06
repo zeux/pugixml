@@ -17,12 +17,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <setjmp.h>
 #include <wchar.h>
 
 #ifndef PUGIXML_NO_XPATH
 #	include <math.h>
 #	include <float.h>
+#   ifdef PUGIXML_NO_EXCEPTIONS
+#       include <setjmp.h>
+#   endif
 #endif
 
 #ifndef PUGIXML_NO_STL
@@ -1995,7 +1997,7 @@ namespace
 	{
 		xml_allocator alloc;
 		char_t* error_offset;
-		jmp_buf error_handler;
+        xml_parse_status error_status;
 		
 		// Parser utilities.
 		#define SKIPWS()			{ while (IS_CHARTYPE(*s, ct_space)) ++s; }
@@ -2005,10 +2007,10 @@ namespace
 		#define SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define SCANWHILE(X)		{ while ((X)) ++s; }
 		#define ENDSEG()			{ ch = *s; *s = 0; ++s; }
-		#define THROW_ERROR(err, m)	error_offset = m, longjmp(error_handler, err)
+		#define THROW_ERROR(err, m)	return error_offset = m, error_status = err, static_cast<char_t*>(0)
 		#define CHECK_ERROR(err, m)	{ if (*s == 0) THROW_ERROR(err, m); }
 		
-		xml_parser(const xml_allocator& alloc_): alloc(alloc_), error_offset(0)
+		xml_parser(const xml_allocator& alloc_): alloc(alloc_), error_offset(0), error_status(status_ok)
 		{
 		}
 
@@ -2063,6 +2065,7 @@ namespace
 				{
 					// nested ignore section
 					s = parse_doctype_ignore(s);
+                    if (!s) return s;
 				}
 				else if (s[0] == ']' && s[1] == ']' && s[2] == '>')
 				{
@@ -2075,8 +2078,6 @@ namespace
 			}
 
 			THROW_ERROR(status_bad_doctype, s);
-
-			return s;
 		}
 
 		char_t* parse_doctype_group(char_t* s, char_t endch, bool toplevel)
@@ -2092,17 +2093,20 @@ namespace
 					{
 						// ignore
 						s = parse_doctype_ignore(s);
+                        if (!s) return s;
 					}
 					else
 					{
 						// some control group
 						s = parse_doctype_group(s, endch, false);
+                        if (!s) return s;
 					}
 				}
 				else if (s[0] == '<' || s[0] == '"' || s[0] == '\'')
 				{
 					// unknown tag (forbidden), or some primitive group
 					s = parse_doctype_primitive(s);
+                    if (!s) return s;
 				}
 				else if (*s == '>')
 				{
@@ -2206,6 +2210,7 @@ namespace
                 char_t* mark = s + 9;
 
 				s = parse_doctype_group(s, endch, true);
+                if (!s) return s;
 
                 if (OPTSET(parse_doctype))
                 {
@@ -2321,7 +2326,7 @@ namespace
 			return s;
 		}
 
-		void parse(char_t* s, xml_node_struct* xmldoc, unsigned int optmsk, char_t endch)
+		char_t* parse(char_t* s, xml_node_struct* xmldoc, unsigned int optmsk, char_t endch)
 		{
 			strconv_attribute_t strconv_attribute = get_strconv_attribute(optmsk);
 			strconv_pcdata_t strconv_pcdata = get_strconv_pcdata(optmsk);
@@ -2486,6 +2491,7 @@ namespace
 					else if (*s == '?') // '<?...'
 					{
 						s = parse_question(s, cursor, optmsk, endch);
+                        if (!s) return s;
 
 						assert(cursor);
 						if ((cursor->header & xml_memory_page_type_mask) + 1 == node_declaration) goto LOC_ATTRIBUTES;
@@ -2493,6 +2499,7 @@ namespace
 					else if (*s == '!') // '<!...'
 					{
 						s = parse_exclamation(s, cursor, optmsk, endch);
+                        if (!s) return s;
 					}
 					else if (*s == 0 && endch == '?') THROW_ERROR(status_bad_pi, s);
 					else THROW_ERROR(status_unrecognized_tag, s);
@@ -2546,6 +2553,8 @@ namespace
 
 			// check that last tag is closed
 			if (cursor != xmldoc) THROW_ERROR(status_end_element_mismatch, s);
+
+            return s;
 		}
 
 		static xml_parse_result parse(char_t* buffer, size_t length, xml_node_struct* root, unsigned int optmsk)
@@ -2566,14 +2575,9 @@ namespace
 			buffer[length - 1] = 0;
 			
 			// perform actual parsing
-			int error = setjmp(parser.error_handler);
+            parser.parse(buffer, xmldoc, optmsk, endch);
 
-			if (error == 0)
-			{
-				parser.parse(buffer, xmldoc, optmsk, endch);
-			}
-
-			xml_parse_result result = make_parse_result(static_cast<xml_parse_status>(error), parser.error_offset ? parser.error_offset - buffer : 0);
+			xml_parse_result result = make_parse_result(parser.error_status, parser.error_offset ? parser.error_offset - buffer : 0);
 			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
 
 			// update allocator state
