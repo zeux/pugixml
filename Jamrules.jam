@@ -180,18 +180,41 @@ else if ( $(toolset:I=^msvc) )
         if ( $(toolset:I=x64$) )
         {
             postfix = "\\amd64" ;
+            lib_postfix = "\\amd64" ;
             sdk_postfix = "\\x64" ;
+            kits_postfix = "\\x64" ;
             LDFLAGS += /MACHINE:X64 ;
+        }
+        else if ( $(toolset:I=arm$) )
+        {
+            postfix = "\\x86_arm" ;
+            lib_postfix = "\\arm" ;
+            sdk_postfix = "\\arm" ;
+            kits_postfix = "\\arm" ;
+            LDFLAGS += /MACHINE:ARM ;
         }
         else
         {
             postfix = "" ;
+            lib_postfix = "" ;
             sdk_postfix = "" ;
+            kits_postfix = "\\x86" ;
         }
         
-        LDFLAGS += "/LIBPATH:\"%$(toolset)_PATH%\\lib$(postfix)\"" ;
-        LDFLAGS += "/LIBPATH:\"%$(toolset)_PATH%\\PlatformSDK\\lib$(postfix)\"" ;
-        LDFLAGS += "/LIBPATH:\"%WINSDK_PATH%\\lib$(sdk_postfix)\"" ;
+        LDFLAGS += "/LIBPATH:\"%$(toolset)_PATH%\\lib$(lib_postfix)\"" ;
+
+        if ( $(toolset:I=msvc(6|7)) )
+        {
+            LDFLAGS += "/LIBPATH:\"%$(toolset)_PATH%\\PlatformSDK\\lib$(lib_postfix)\"" ;
+        }
+        else if ( $(toolset:I=msvc(8|9|10)) )
+        {
+            LDFLAGS += "/LIBPATH:\"%WINSDK_PATH%\\lib$(sdk_postfix)\"" ;
+        }
+        else
+        {
+            LDFLAGS += "/LIBPATH:\"%WINKITS_PATH%\\lib\\win8\\um$(kits_postfix)\"" ;
+        }
     }
 
 	rule GetCFlags CONFIG : DEFINES
@@ -261,8 +284,20 @@ else if ( $(toolset:I=^msvc) )
         else
         {
             RESULT += "/I\"%$(toolset)_PATH%\\include\"" ;
-            RESULT += "/I\"%$(toolset)_PATH%\\PlatformSDK\\include\"" ;
-            RESULT += "/I\"%WINSDK_PATH%\\Include\"" ;
+
+            if ( $(toolset:I=msvc(6|7)) )
+            {
+                RESULT += "/I\"%$(toolset)_PATH%\\PlatformSDK\\include\"" ;
+            }
+            else if ( $(toolset:I=msvc(8|9|10)) )
+            {
+                RESULT += "/I\"%WINSDK_PATH%\\Include\"" ;
+            }
+            else
+            {
+                RESULT += "/I\"%WINKITS_PATH%\\include\\shared\"" ;
+                RESULT += "/I\"%WINKITS_PATH%\\include\\um\"" ;
+            }
         }
 
 		return $(RESULT) ;
@@ -759,7 +794,7 @@ if ( $(UNIX) )
 }
 else
 {
-	if ( $(toolset:I=(^xbox360|^ps3|wince|^android|^bada|^blackberry$)) )
+	if ( $(toolset:I=(^xbox360|^ps3|wince$|arm$|^android|^bada|^blackberry)) )
 	{
         RUNRESULT = "skiprun" ;
 

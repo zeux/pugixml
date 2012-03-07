@@ -34,7 +34,7 @@ sub getcpucount
 	undef;
 }
 
-@alltoolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw45_0x, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64, msvc10_clr, msvc10_clr_x64, xbox360, ps3_gcc, ps3_snc, msvc8_wince, bada, blackberry, android, android_stlport) : ($^O =~ /solaris/) ? (suncc, suncc_x64) : &gcctoolset();
+@alltoolsets = ($^O =~ /MSWin/) ? (bcc, cw, dmc, ic8, ic9, ic9_x64, ic10, ic10_x64, ic11, ic11_x64, mingw34, mingw44, mingw45, mingw45_0x, mingw46_x64, msvc6, msvc7, msvc71, msvc8, msvc8_x64, msvc9, msvc9_x64, msvc10, msvc10_x64, msvc10_clr, msvc10_clr_x64, msvc11, msvc11_x64, msvc11_clr, msvc11_clr_x64, msvc11_arm, xbox360, ps3_gcc, ps3_snc, msvc8_wince, bada, blackberry, android, android_stlport) : ($^O =~ /solaris/) ? (suncc, suncc_x64) : &gcctoolset();
 
 $fast = scalar grep(/^fast$/, @ARGV);
 @toolsets = map { /^fast$/ ? () : ($_) } @ARGV;

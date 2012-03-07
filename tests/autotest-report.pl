@@ -11,6 +11,7 @@ sub prettysuffix
 	return " CLR x64" if ($suffix eq '_clr_x64');
 	return " PPC" if ($suffix eq '_ppc');
 	return " WinCE" if ($suffix eq '_wince');
+	return " ARM" if ($suffix eq '_arm');
 
 	return "";
 }
@@ -58,6 +59,8 @@ sub prettyplatform
 	return "x360" if ($toolset =~ /^xbox360/);
 	return "ps3" if ($toolset =~ /^ps3/);
 
+    return "arm" if ($toolset =~ /_arm$/);
+    return "arm" if ($toolset =~ /_wince$/);
     return "arm" if ($toolset =~ /^android/);
     return "arm" if ($toolset =~ /^bada/);
     return "arm" if ($toolset =~ /^blackberry/);
