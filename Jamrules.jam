@@ -69,7 +69,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
 		LDFLAGS += $(ARCH) ;
 	}
 
-    local VERSION = [ Shell "$(GCCPATH)gcc -dumpversion" ] ;
+    GCCVERSION = [ Shell "$(GCCPATH)gcc -dumpversion" ] ;
 
 	rule GetCFlags CONFIG : DEFINES
 	{
@@ -81,7 +81,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
         RESULT += -Wunused -Wstrict-aliasing=2 -Wundef -Wshadow -Wredundant-decls ;
 
         # gcc 4.0 has some warning regressions
-        if ( ! $(VERSION:I=4\.0) )
+        if ( ! $(GCCVERSION:I=4\.0) )
         {
             RESULT += -Wold-style-cast ; # gives warnings for fpclassify() on gcc 4.0.1
             RESULT += -Wswitch-default ; # gives false-positives for couple of switches on template argument on gcc 4.0.1
@@ -89,7 +89,7 @@ if ( $(toolset:I=^mingw) || $(toolset:I=^gcc) || $(toolset:I=^bada) || $(toolset
         }
 
         # these warnings are supported on newer GCC versions only
-        if ( $(VERSION) >= "4.4.0" )
+        if ( $(GCCVERSION) >= "4.4.0" )
         {
             RESULT += -Wstrict-null-sentinel -Wlogical-op -Wmissing-declarations ;
         }
