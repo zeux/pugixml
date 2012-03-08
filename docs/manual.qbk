@@ -616,7 +616,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 * [anchor status_end_element_mismatch] means that parsing stopped because the closing tag did not match the opening one (i.e. `<node></nedo>`) or because some tag was not closed at all
 
 [#xml_parse_result::description]
-`description()` member function can be used to convert parsing status to a string; the returned message is always in English, so you'll have to write your own function if you need a localized string. However please note that the exact messages returned by `description()` function may change from version to version, so any complex status handling should be based on `status` value.
+`description()` member function can be used to convert parsing status to a string; the returned message is always in English, so you'll have to write your own function if you need a localized string. However please note that the exact messages returned by `description()` function may change from version to version, so any complex status handling should be based on `status` value. Note that `description()` returns a `char` string even in `PUGIXML_WCHAR_MODE`; you'll have to call [link as_wide] to get the `wchar_t` string.
 
 If parsing failed because the source data was not a valid XML, the resulting tree is not destroyed - despite the fact that load function returns error, you can use the part of the tree that was successfully parsed. Obviously, the last element may have an unexpected name/value; for example, if the attribute value does not end with the necessary quotation mark, like in [^<node attr="value>some data</node>] example, the value of attribute `attr` will contain the string `value>some data</node>`.
 
@@ -1588,7 +1588,7 @@ The information about parsing result is returned via `xpath_parse_result` object
 Parsing result is represented as the error message; it is either a null pointer, in case there is no error, or the error message in the form of ASCII zero-terminated string.
 
 [#xpath_parse_result::description]
-`description()` member function can be used to get the error message; it never returns the null pointer, so you can safely use description() even if query parsing succeeded.
+`description()` member function can be used to get the error message; it never returns the null pointer, so you can safely use `description()` even if query parsing succeeded. Note that `description()` returns a `char` string even in `PUGIXML_WCHAR_MODE`; you'll have to call [link as_wide] to get the `wchar_t` string.
 
 [#xpath_parse_result::offset]
 In addition to the error message, parsing result has an `offset` member, which contains the offset of last successfully parsed character. This offset is in units of [link char_t pugi::char_t] (bytes for character mode, wide characters for wide character mode).
