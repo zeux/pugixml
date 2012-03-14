@@ -36,6 +36,11 @@
 // #define PUGIXML_HEADER_ONLY
 // #include "pugixml.cpp"
 
+// Tune these constants to adjust memory-related behavior
+// #define PUGIXML_MEMORY_PAGE_SIZE 32768
+// #define PUGIXML_MEMORY_OUTPUT_STACK 10240
+// #define PUGIXML_MEMORY_XPATH_PAGE_SIZE 4096
+
 #endif
 
 /**

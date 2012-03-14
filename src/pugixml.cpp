@@ -225,7 +225,13 @@ PUGI__NS_END
 #endif
 
 PUGI__NS_BEGIN
-	static const size_t xml_memory_page_size = 32768;
+	static const size_t xml_memory_page_size =
+    #ifdef PUGIXML_MEMORY_PAGE_SIZE
+        PUGIXML_MEMORY_PAGE_SIZE
+    #else
+        32768
+    #endif
+        ;
 
 	static const uintptr_t xml_memory_page_alignment = 32;
 	static const uintptr_t xml_memory_page_pointer_mask = ~(xml_memory_page_alignment - 1);
@@ -2803,6 +2809,7 @@ PUGI__NS_BEGIN
 	public:
 		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
 		{
+            PUGI__STATIC_ASSERT(bufcapacity >= 8);
 		}
 
 		~xml_buffered_writer()
@@ -2946,7 +2953,17 @@ PUGI__NS_BEGIN
 		// utf8 maximum expansion: x4 (-> utf32)
 		// utf16 maximum expansion: x2 (-> utf32)
 		// utf32 maximum expansion: x1
-		enum { bufcapacity = 2048 };
+		enum
+        {
+            bufcapacitybytes =
+            #ifdef PUGIXML_MEMORY_OUTPUT_STACK
+                PUGIXML_MEMORY_OUTPUT_STACK
+            #else
+                10240
+            #endif
+            ,
+            bufcapacity = bufcapacitybytes / (sizeof(char_t) + 4)
+        };
 
 		char_t buffer[bufcapacity];
 		char scratch[4 * bufcapacity];
@@ -5337,7 +5354,13 @@ PUGI__NS_BEGIN
 	{	
 		xpath_memory_block* next;
 
-		char data[4096];
+		char data[
+    #ifdef PUGIXML_MEMORY_XPATH_PAGE_SIZE
+            PUGIXML_MEMORY_XPATH_PAGE_SIZE
+    #else
+            4096
+    #endif
+        ];
 	};
 		
 	class xpath_allocator
