@@ -597,7 +597,7 @@ namespace pugi
 		friend class xml_node;
 
 	private:
-		xml_node _wrap;
+		mutable xml_node _wrap;
 		xml_node _parent;
 
 		xml_node_iterator(xml_node_struct* ref, xml_node_struct* parent);
@@ -623,8 +623,8 @@ namespace pugi
 		bool operator==(const xml_node_iterator& rhs) const;
 		bool operator!=(const xml_node_iterator& rhs) const;
 
-		xml_node& operator*();
-		xml_node* operator->();
+		xml_node& operator*() const;
+		xml_node* operator->() const;
 
 		const xml_node_iterator& operator++();
 		xml_node_iterator operator++(int);
@@ -639,7 +639,7 @@ namespace pugi
 		friend class xml_node;
 
 	private:
-		xml_attribute _wrap;
+		mutable xml_attribute _wrap;
 		xml_node _parent;
 
 		xml_attribute_iterator(xml_attribute_struct* ref, xml_node_struct* parent);
@@ -665,8 +665,8 @@ namespace pugi
 		bool operator==(const xml_attribute_iterator& rhs) const;
 		bool operator!=(const xml_attribute_iterator& rhs) const;
 
-		xml_attribute& operator*();
-		xml_attribute* operator->();
+		xml_attribute& operator*() const;
+		xml_attribute* operator->() const;
 
 		const xml_attribute_iterator& operator++();
 		xml_attribute_iterator operator++(int);

@@ -4652,13 +4652,13 @@ namespace pugi
 		return _wrap._root != rhs._wrap._root || _parent._root != rhs._parent._root;
 	}
 
-	PUGI__FN xml_node& xml_node_iterator::operator*()
+	PUGI__FN xml_node& xml_node_iterator::operator*() const
 	{
 		assert(_wrap._root);
 		return _wrap;
 	}
 
-	PUGI__FN xml_node* xml_node_iterator::operator->()
+	PUGI__FN xml_node* xml_node_iterator::operator->() const
 	{
 		assert(_wrap._root);
 		return &_wrap;
@@ -4713,13 +4713,13 @@ namespace pugi
 		return _wrap._attr != rhs._wrap._attr || _parent._root != rhs._parent._root;
 	}
 
-	PUGI__FN xml_attribute& xml_attribute_iterator::operator*()
+	PUGI__FN xml_attribute& xml_attribute_iterator::operator*() const
 	{
 		assert(_wrap._attr);
 		return _wrap;
 	}
 
-	PUGI__FN xml_attribute* xml_attribute_iterator::operator->()
+	PUGI__FN xml_attribute* xml_attribute_iterator::operator->() const
 	{
 		assert(_wrap._attr);
 		return &_wrap;
