@@ -32,8 +32,13 @@
 
 #ifndef PUGIXML_NO_STL
 // cstddef is needed so that we get the 'std' namespace declaration (STLport sometimes makes std a define)
-#include <cstddef>
+#   include <cstddef>
 
+#   if defined(PUGIXML_NO_STL_FWDDECL)
+#       include <iterator>
+#       include <iosfwd>
+#       include <string>
+#   else
 // Forward declarations for STL classes to reduce include dependencies
 namespace std
 {
@@ -41,19 +46,11 @@ namespace std
 
 #ifdef __SUNPRO_CC
 	// Sun C++ compiler has a bug which forces template argument names in forward declarations to be the same as in actual definitions
-#   ifndef _STLPORT_VERSION
-    template <class T> class allocator;
-    template <class charT> struct char_traits;
-    template <class charT, class traits > class basic_istream;
-    template <class charT, class traits > class basic_ostream;
-    template <class charT, class traits, class Allocator> class basic_string;
-#   else
-    template <class _T> class allocator;
-    template <class _charT> struct char_traits;
-    template <class _charT, class _Traits> class basic_istream;
-    template <class _charT, class _Traits> class basic_ostream;
-    template <class _charT, class _Traits, class _Allocator> class basic_string;
-#   endif
+	template <class _T> class allocator;
+	template <class _charT> struct char_traits;
+	template <class _charT, class _Traits> class basic_istream;
+	template <class _charT, class _Traits> class basic_ostream;
+	template <class _charT, class _Traits, class _Allocator> class basic_string;
 #else
 	// Borland C++ compiler has a bug which forces template argument names in forward declarations to be the same as in actual definitions
 	template <class _Ty> class allocator;
@@ -76,6 +73,7 @@ namespace std
 	template <> class char_traits<char>;
 #endif
 }
+#endif
 #endif
 
 // Macro for deprecated features
