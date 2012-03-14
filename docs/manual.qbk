@@ -216,6 +216,8 @@ pugixml uses several defines to control the compilation process. There are two w
 [anchor PUGIXML_API], [anchor PUGIXML_CLASS] and [anchor PUGIXML_FUNCTION] defines let you specify custom attributes (i.e. declspec or calling conventions) for pugixml classes and non-member functions. In absence of `PUGIXML_CLASS` or `PUGIXML_FUNCTION` definitions, `PUGIXML_API` definition is used instead. For example, to specify fixed calling convention, you can define `PUGIXML_FUNCTION` to i.e. `__fastcall`. Another example is DLL import/export attributes in MSVC (see [sref manual.install.building.shared]).
 
 [note In that example `PUGIXML_API` is inconsistent between several source files; this is an exception to the consistency rule.]
+
+[anchor PUGIXML_MEMORY_PAGE_SIZE], [anchor PUGIXML_MEMORY_OUTPUT_STACK] and [anchor PUGIXML_MEMORY_XPATH_PAGE_SIZE] can be used to customize certain important sizes to optimize memory usage for the application-specific patterns. For details see [sref manual.dom.memory.tuning].
  
 [endsect] [/config]
 
@@ -230,16 +232,18 @@ pugixml is written in standard-compliant C++ with some compiler-specific workaro
     * Digital Mars C++ Compiler 8.51
     * Intel C++ Compiler 8.0, 9.0 x86/x64, 10.0 x86/x64, 11.0 x86/x64
     * Metrowerks CodeWarrior 8.0
-    * Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64
+    * Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64, 11.0 x86/x64/ARM and some CLR versions
     * MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
 
 * Linux (GCC 4.4.3 x86/x64)
 * FreeBSD (GCC 4.2.1 x86/x64)
 * Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC)
+* Sun Solaris (sunCC x86/x64)
 * Microsoft Xbox 360
 * Nintendo Wii (Metrowerks CodeWarrior 4.1)
 * Sony Playstation Portable (GCC 3.4.2)
 * Sony Playstation 3 (GCC 4.1.1, SNC 310.1)
+* Various portable platforms (Android NDK, BlackBerry NDK, Samsung bada, Windows CE)
 
 [endsect] [/portability]
 
@@ -482,6 +486,22 @@ This is a simple example of custom memory management ([@samples/custom_memory_ma
 When setting new memory management functions, care must be taken to make sure that there are no live pugixml objects. Otherwise when the objects are destroyed, the new deallocation function will be called with the memory obtained by the old allocation function, resulting in undefined behavior.
 
 [endsect] [/custom]
+
+[section:tuning Memory consumption tuning]
+
+There are several important buffering optimizations in pugixml that rely on predefined constants. These constants have default values that were tuned for common usage patterns; for some applications, changing these constants might improve memory consumption or increase performance. Changing these constants is not recommended unless their default values result in visible problems.
+
+These constants can be tuned via configuration defines, as discussed in [sref manual.install.building.config]; it is recommended to set them in [file pugiconfig.hpp].
+
+* `PUGIXML_MEMORY_PAGE_SIZE` controls the page size for document memory allocation. Memory for node/attribute objects is allocated in pages of the specified size. The default size is 32 Kb; for some applications the size is too large (i.e. embedded systems with little heap space or applications that keep lots of XML documents in memory). A minimum size of 1 Kb is recommended.
+[lbr]
+
+* `PUGIXML_MEMORY_OUTPUT_STACK` controls the cumulative stack space required to output the node. Any output operation (i.e. saving a subtree to file) uses an internal buffering scheme for performance reasons. The default size is 10 Kb; if you're using node output from threads with little stack space, decreasing this value can prevent stack overflows. A minimum size of 1 Kb is recommended.
+[lbr]
+
+* `PUGIXML_MEMORY_XPATH_PAGE_SIZE` controls the page size for XPath memory allocation. Memory for XPath query objects as well as internal memory for XPath evaluation is allocated in pages of the specified size. The default size is 4 Kb; if you have a lot of resident XPath query objects, you might need to decrease the size to improve memory consumption. A minimum size of 256 bytes is recommended.
+
+[endsect] [/tuning]
 
 [section:internals Document memory management internals]
 
@@ -1867,6 +1887,9 @@ Macros:
 * `#define `[link PUGIXML_API]
 * `#define `[link PUGIXML_CLASS]
 * `#define `[link PUGIXML_FUNCTION]
+* `#define `[link PUGIXML_MEMORY_PAGE_SIZE]
+* `#define `[link PUGIXML_MEMORY_OUTPUT_STACK]
+* `#define `[link PUGIXML_MEMORY_XPATH_PAGE_SIZE]
 
 Types:
 
