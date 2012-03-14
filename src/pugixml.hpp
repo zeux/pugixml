@@ -41,11 +41,19 @@ namespace std
 
 #ifdef __SUNPRO_CC
 	// Sun C++ compiler has a bug which forces template argument names in forward declarations to be the same as in actual definitions
-	template <class _T> class allocator;
-	template <class _charT> struct char_traits;
-	template <class _charT, class _Traits> class basic_istream;
-	template <class _charT, class _Traits> class basic_ostream;
-	template <class _charT, class _Traits, class _Allocator> class basic_string;
+#   ifndef _STLPORT_VERSION
+    template <class T> class allocator;
+    template <class charT> struct char_traits;
+    template <class charT, class traits > class basic_istream;
+    template <class charT, class traits > class basic_ostream;
+    template <class charT, class traits, class Allocator> class basic_string;
+#   else
+    template <class _T> class allocator;
+    template <class _charT> struct char_traits;
+    template <class _charT, class _Traits> class basic_istream;
+    template <class _charT, class _Traits> class basic_ostream;
+    template <class _charT, class _Traits, class _Allocator> class basic_string;
+#   endif
 #else
 	// Borland C++ compiler has a bug which forces template argument names in forward declarations to be the same as in actual definitions
 	template <class _Ty> class allocator;
