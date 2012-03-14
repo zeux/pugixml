@@ -228,6 +228,22 @@ TEST_XML(dom_attr_iterator_invalidate, "<node><node1 attr1='0'/><node2 attr1='0'
 	CHECK(node2.attributes_end() == it3);
 }
 
+TEST_XML(dom_attr_iterator_const, "<node attr1='0' attr2='1'/>")
+{
+    pugi::xml_node node = doc.child(STR("node"));
+
+    const pugi::xml_attribute_iterator i1 = node.attributes_begin();
+    const pugi::xml_attribute_iterator i2 = ++xml_attribute_iterator(i1);
+    const pugi::xml_attribute_iterator i3 = ++xml_attribute_iterator(i2);
+
+    CHECK(*i1 == node.attribute(STR("attr1")));
+    CHECK(*i2 == node.attribute(STR("attr2")));
+    CHECK(i3 == node.attributes_end());
+
+    CHECK_STRING(i1->name(), STR("attr1"));
+    CHECK_STRING(i2->name(), STR("attr2"));
+}
+
 TEST_XML(dom_node_bool_ops, "<node/>")
 {
 	generic_bool_ops_test(doc.child(STR("node")));
@@ -332,6 +348,22 @@ TEST_XML(dom_node_iterator_invalidate, "<node><node1><child1/></node1><node2><ch
 
 	CHECK(node2.begin() == it3);
 	CHECK(node2.end() == it3);
+}
+
+TEST_XML(dom_node_iterator_const, "<node><child1/><child2/></node>")
+{
+    pugi::xml_node node = doc.child(STR("node"));
+
+    const pugi::xml_node_iterator i1 = node.begin();
+    const pugi::xml_node_iterator i2 = ++xml_node_iterator(i1);
+    const pugi::xml_node_iterator i3 = ++xml_node_iterator(i2);
+
+    CHECK(*i1 == node.child(STR("child1")));
+    CHECK(*i2 == node.child(STR("child2")));
+    CHECK(i3 == node.end());
+
+    CHECK_STRING(i1->name(), STR("child1"));
+    CHECK_STRING(i2->name(), STR("child2"));
 }
 
 TEST_XML(dom_node_parent, "<node><child/></node>")
