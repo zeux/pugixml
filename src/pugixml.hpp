@@ -11,14 +11,16 @@
  * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
  */
 
-#ifndef HEADER_PUGIXML_HPP
-#define HEADER_PUGIXML_HPP
-
+#ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 100 + minor so that it's safe to use in less-than comparisons
-#define PUGIXML_VERSION 100
+#   define PUGIXML_VERSION 100
+#endif
 
 // Include user configuration file (this can define various configuration macros)
 #include "pugiconfig.hpp"
+
+#ifndef HEADER_PUGIXML_HPP
+#define HEADER_PUGIXML_HPP
 
 // Include stddef.h for size_t and ptrdiff_t
 #include <stddef.h>
