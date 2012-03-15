@@ -50,7 +50,6 @@
 #endif
 
 #ifdef __INTEL_COMPILER
-#   pragma warning(push)
 #	pragma warning(disable: 177) // function was declared but never referenced 
 #   pragma warning(disable: 279) // controlling expression is constant
 #	pragma warning(disable: 1478 1786) // function was declared "deprecated"
@@ -9900,16 +9899,10 @@ namespace pugi
 #   pragma option pop
 #endif
 
-// Some Intel C++ versions (9, 10) do not properly keep warning state for function templates,
+// Intel C++ does not properly keep warning state for function templates,
 // so popping warning state at the end of translation unit leads to warnings in the middle.
-#if !defined(__INTEL_COMPILER) || __INTEL_COMPILER >= 1100
-#   ifdef __INTEL_COMPILER
-#      pragma warning(pop)
-#   endif
-
-#   ifdef _MSC_VER
-#      pragma warning(pop)
-#   endif
+#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
+#   pragma warning(pop)
 #endif
 
 // Undefine all local macros (makes sure we're not leaking macros in header-only mode)
