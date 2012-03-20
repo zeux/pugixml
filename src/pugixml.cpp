@@ -3566,7 +3566,8 @@ namespace pugi
 
 	PUGI__FN void xml_writer_file::write(const void* data, size_t size)
 	{
-		fwrite(data, size, 1, static_cast<FILE*>(file));
+		size_t result = fwrite(data, 1, size, static_cast<FILE*>(file));
+        (void)!result; // unfortunately we can't do proper error handling here
 	}
 
 #ifndef PUGIXML_NO_STL
