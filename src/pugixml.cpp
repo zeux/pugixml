@@ -56,6 +56,10 @@
 #   pragma warning(disable: 1684) // conversion from pointer to same-sized integral type
 #endif
 
+#if defined(__BORLANDC__) && defined(PUGIXML_HEADER_ONLY)
+#	pragma warn -8080 // symbol is declared but never used; disabling this inside push/pop bracket does not make the warning go away
+#endif
+
 #ifdef __BORLANDC__
 #   pragma option push
 #	pragma warn -8008 // condition is always false
@@ -85,6 +89,12 @@
 #	define PUGI__DMC_VOLATILE volatile
 #else
 #	define PUGI__DMC_VOLATILE
+#endif
+
+// Borland C++ bug workaround for not defining ::memcpy depending on header include order (can't always use std::memcpy because some compilers don't have it at all)
+#if defined(__BORLANDC__) && !defined(__MEM_H_USING_LIST)
+using std::memcpy;
+using std::memmove;
 #endif
 
 // In some environments MSVC is a compiler but the CRT lacks certain MSVC-specific features
