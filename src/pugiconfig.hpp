@@ -33,8 +33,8 @@
 // In absence of PUGIXML_CLASS/PUGIXML_FUNCTION definitions PUGIXML_API is used instead
 
 // Uncomment this to switch to header-only version
-// #define PUGIXML_HEADER_ONLY
-// #include "pugixml.cpp"
+#define PUGIXML_HEADER_ONLY
+#include "pugixml.cpp"
 
 // Tune these constants to adjust memory-related behavior
 // #define PUGIXML_MEMORY_PAGE_SIZE 32768

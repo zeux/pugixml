@@ -2685,12 +2685,12 @@ PUGI__NS_BEGIN
 		return (sizeof(wchar_t) == 2 && static_cast<unsigned int>(static_cast<uint16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
 	}
 
-	PUGI__FN size_t convert_buffer(void* result, const char_t* data, size_t length, xml_encoding encoding)
+	PUGI__FN size_t convert_buffer(char_t* r_char, uint8_t* r_u8, uint16_t* r_u16, uint32_t* r_u32, const char_t* data, size_t length, xml_encoding encoding)
 	{
 		// only endian-swapping is required
 		if (need_endian_swap_utf(encoding, get_wchar_encoding()))
 		{
-			convert_wchar_endian_swap(reinterpret_cast<char_t*>(result), data, length);
+			convert_wchar_endian_swap(r_char, data, length);
 
 			return length * sizeof(char_t);
 		}
@@ -2698,7 +2698,7 @@ PUGI__NS_BEGIN
 		// convert to utf8
 		if (encoding == encoding_utf8)
 		{
-			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
+			uint8_t* dest = r_u8;
 			uint8_t* end = utf_decoder<utf8_writer>::decode_wchar_block(data, length, dest);
 
 			return static_cast<size_t>(end - dest);
@@ -2707,7 +2707,7 @@ PUGI__NS_BEGIN
 		// convert to utf16
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
-			uint16_t* dest = reinterpret_cast<uint16_t*>(result);
+			uint16_t* dest = r_u16;
 
 			// convert to native utf16
 			uint16_t* end = utf_decoder<utf16_writer>::decode_wchar_block(data, length, dest);
@@ -2723,7 +2723,7 @@ PUGI__NS_BEGIN
 		// convert to utf32
 		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
 		{
-			uint32_t* dest = reinterpret_cast<uint32_t*>(result);
+			uint32_t* dest = r_u32;
 
 			// convert to native utf32
 			uint32_t* end = utf_decoder<utf32_writer>::decode_wchar_block(data, length, dest);
@@ -2739,7 +2739,7 @@ PUGI__NS_BEGIN
 		// convert to latin1
 		if (encoding == encoding_latin1)
 		{
-			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
+			uint8_t* dest = r_u8;
 			uint8_t* end = utf_decoder<latin1_writer>::decode_wchar_block(data, length, dest);
 
 			return static_cast<size_t>(end - dest);
@@ -2765,11 +2765,11 @@ PUGI__NS_BEGIN
 		return length;
 	}
 
-	PUGI__FN size_t convert_buffer(void* result, const char_t* data, size_t length, xml_encoding encoding)
+	PUGI__FN size_t convert_buffer(char_t* /* r_char */, uint8_t* r_u8, uint16_t* r_u16, uint32_t* r_u32, const char_t* data, size_t length, xml_encoding encoding)
 	{
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
-			uint16_t* dest = reinterpret_cast<uint16_t*>(result);
+			uint16_t* dest = r_u16;
 
 			// convert to native utf16
 			uint16_t* end = utf_decoder<utf16_writer>::decode_utf8_block(reinterpret_cast<const uint8_t*>(data), length, dest);
@@ -2784,7 +2784,7 @@ PUGI__NS_BEGIN
 
 		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
 		{
-			uint32_t* dest = reinterpret_cast<uint32_t*>(result);
+			uint32_t* dest = r_u32;
 
 			// convert to native utf32
 			uint32_t* end = utf_decoder<utf32_writer>::decode_utf8_block(reinterpret_cast<const uint8_t*>(data), length, dest);
@@ -2799,7 +2799,7 @@ PUGI__NS_BEGIN
 
 		if (encoding == encoding_latin1)
 		{
-			uint8_t* dest = reinterpret_cast<uint8_t*>(result);
+			uint8_t* dest = r_u8;
 			uint8_t* end = utf_decoder<latin1_writer>::decode_utf8_block(reinterpret_cast<const uint8_t*>(data), length, dest);
 
 			return static_cast<size_t>(end - dest);
@@ -2842,11 +2842,11 @@ PUGI__NS_BEGIN
 			else
 			{
 				// convert chunk
-				size_t result = convert_buffer(scratch, data, size, encoding);
+				size_t result = convert_buffer(scratch.data_char, scratch.data_u8, scratch.data_u16, scratch.data_u32, data, size, encoding);
 				assert(result <= sizeof(scratch));
 
 				// write data
-				writer.write(scratch, result);
+				writer.write(scratch.data_u8, result);
 			}
 		}
 
@@ -2975,7 +2975,14 @@ PUGI__NS_BEGIN
         };
 
 		char_t buffer[bufcapacity];
-		char scratch[4 * bufcapacity];
+
+        union
+        {
+            uint8_t data_u8[4 * bufcapacity];
+            uint16_t data_u16[2 * bufcapacity];
+            uint32_t data_u32[bufcapacity];
+            char_t data_char[bufcapacity];
+        } scratch;
 
 		xml_writer& writer;
 		size_t bufsize;
