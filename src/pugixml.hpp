@@ -391,8 +391,7 @@ namespace pugi
 		xml_node root() const;
 
         // Get text object for the current node
-        const xml_text text() const;
-        xml_text text();
+        xml_text text() const;
 
 		// Get child, attribute or next/previous sibling with the specified name
 		xml_node child(const char_t* name) const;

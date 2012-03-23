@@ -4090,12 +4090,7 @@ namespace pugi
 		return xml_node(static_cast<impl::xml_document_struct*>(page->allocator));
 	}
 
-    const xml_text xml_node::text() const
-    {
-        return xml_text(_root);
-    }
-
-    xml_text xml_node::text()
+    xml_text xml_node::text() const
     {
         return xml_text(_root);
     }
