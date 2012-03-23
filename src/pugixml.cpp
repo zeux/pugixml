@@ -3312,6 +3312,94 @@ PUGI__NS_BEGIN
 		}
 	}
 
+    // get value with conversion functions
+	PUGI__FN int get_value_int(const char_t* value)
+	{
+	#ifdef PUGIXML_WCHAR_MODE
+		return static_cast<int>(wcstol(value, 0, 10));
+	#else
+		return static_cast<int>(strtol(value, 0, 10));
+	#endif
+	}
+
+	PUGI__FN unsigned int get_value_uint(const char_t* value)
+	{
+	#ifdef PUGIXML_WCHAR_MODE
+		return static_cast<unsigned int>(wcstoul(value, 0, 10));
+	#else
+		return static_cast<unsigned int>(strtoul(value, 0, 10));
+	#endif
+	}
+
+	PUGI__FN double get_value_double(const char_t* value)
+	{
+	#ifdef PUGIXML_WCHAR_MODE
+		return wcstod(value, 0);
+	#else
+		return strtod(value, 0);
+	#endif
+	}
+
+	PUGI__FN float get_value_float(const char_t* value)
+	{
+	#ifdef PUGIXML_WCHAR_MODE
+		return static_cast<float>(wcstod(value, 0));
+	#else
+		return static_cast<float>(strtod(value, 0));
+	#endif
+	}
+
+	PUGI__FN bool get_value_bool(const char_t* value)
+	{
+		// only look at first char
+		char_t first = *value;
+
+		// 1*, t* (true), T* (True), y* (yes), Y* (YES)
+		return (first == '1' || first == 't' || first == 'T' || first == 'y' || first == 'Y');
+	}
+
+    // set value with conversion functions
+	PUGI__FN bool set_value_buffer(char_t*& dest, uintptr_t& header, uintptr_t header_mask, const char (&buf)[128])
+    {
+	#ifdef PUGIXML_WCHAR_MODE
+		char_t wbuf[128];
+		impl::widen_ascii(wbuf, buf);
+
+		return strcpy_insitu(dest, header, header_mask, wbuf);
+	#else
+		return strcpy_insitu(dest, header, header_mask, buf);
+	#endif
+    }
+
+	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, int value)
+    {
+		char buf[128];
+		sprintf(buf, "%d", value);
+	
+        return set_value_buffer(dest, header, header_mask, buf);
+    }
+
+	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, unsigned int value)
+	{
+		char buf[128];
+		sprintf(buf, "%u", value);
+
+        return set_value_buffer(dest, header, header_mask, buf);
+	}
+
+	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, double value)
+	{
+		char buf[128];
+		sprintf(buf, "%g", value);
+
+        return set_value_buffer(dest, header, header_mask, buf);
+	}
+	
+	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, bool value)
+	{
+		return strcpy_insitu(dest, header, header_mask, value ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
+	}
+
 	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	PUGI__FN xml_parse_status get_file_size(FILE* file, size_t& out_result)
 	{
@@ -3692,55 +3780,35 @@ namespace pugi
 	{
 		if (!_attr || !_attr->value) return 0;
 
-	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<int>(wcstol(_attr->value, 0, 10));
-	#else
-		return static_cast<int>(strtol(_attr->value, 0, 10));
-	#endif
+        return impl::get_value_int(_attr->value);
 	}
 
 	PUGI__FN unsigned int xml_attribute::as_uint() const
 	{
 		if (!_attr || !_attr->value) return 0;
 
-	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<unsigned int>(wcstoul(_attr->value, 0, 10));
-	#else
-		return static_cast<unsigned int>(strtoul(_attr->value, 0, 10));
-	#endif
+        return impl::get_value_uint(_attr->value);
 	}
 
 	PUGI__FN double xml_attribute::as_double() const
 	{
 		if (!_attr || !_attr->value) return 0;
 
-	#ifdef PUGIXML_WCHAR_MODE
-		return wcstod(_attr->value, 0);
-	#else
-		return strtod(_attr->value, 0);
-	#endif
+        return impl::get_value_double(_attr->value);
 	}
 
 	PUGI__FN float xml_attribute::as_float() const
 	{
 		if (!_attr || !_attr->value) return 0;
 
-	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<float>(wcstod(_attr->value, 0));
-	#else
-		return static_cast<float>(strtod(_attr->value, 0));
-	#endif
+        return impl::get_value_float(_attr->value);
 	}
 
 	PUGI__FN bool xml_attribute::as_bool() const
 	{
 		if (!_attr || !_attr->value) return false;
 
-		// only look at first char
-		char_t first = *_attr->value;
-
-		// 1*, t* (true), T* (True), y* (yes), Y* (YES)
-		return (first == '1' || first == 't' || first == 'T' || first == 'y' || first == 'Y');
+        return impl::get_value_bool(_attr->value);
 	}
 
 	PUGI__FN bool xml_attribute::empty() const
@@ -3814,52 +3882,30 @@ namespace pugi
 
 	PUGI__FN bool xml_attribute::set_value(int rhs)
 	{
-		char buf[128];
-		sprintf(buf, "%d", rhs);
-	
-	#ifdef PUGIXML_WCHAR_MODE
-		char_t wbuf[128];
-		impl::widen_ascii(wbuf, buf);
+		if (!_attr) return false;
 
-		return set_value(wbuf);
-	#else
-		return set_value(buf);
-	#endif
+        return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
 	}
 
 	PUGI__FN bool xml_attribute::set_value(unsigned int rhs)
 	{
-		char buf[128];
-		sprintf(buf, "%u", rhs);
+		if (!_attr) return false;
 
-	#ifdef PUGIXML_WCHAR_MODE
-		char_t wbuf[128];
-		impl::widen_ascii(wbuf, buf);
-
-		return set_value(wbuf);
-	#else
-		return set_value(buf);
-	#endif
+        return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
 	}
 
 	PUGI__FN bool xml_attribute::set_value(double rhs)
 	{
-		char buf[128];
-		sprintf(buf, "%g", rhs);
+		if (!_attr) return false;
 
-	#ifdef PUGIXML_WCHAR_MODE
-		char_t wbuf[128];
-		impl::widen_ascii(wbuf, buf);
-
-		return set_value(wbuf);
-	#else
-		return set_value(buf);
-	#endif
+        return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
 	}
 	
 	PUGI__FN bool xml_attribute::set_value(bool rhs)
 	{
-		return set_value(rhs ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
+		if (!_attr) return false;
+
+        return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
 	}
 
 #ifdef __BORLANDC__
