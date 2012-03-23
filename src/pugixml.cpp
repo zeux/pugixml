@@ -3322,6 +3322,8 @@ PUGI__NS_BEGIN
     // get value with conversion functions
 	PUGI__FN int get_value_int(const char_t* value)
 	{
+        if (!value) return 0;
+
 	#ifdef PUGIXML_WCHAR_MODE
 		return static_cast<int>(wcstol(value, 0, 10));
 	#else
@@ -3331,6 +3333,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN unsigned int get_value_uint(const char_t* value)
 	{
+        if (!value) return 0;
+
 	#ifdef PUGIXML_WCHAR_MODE
 		return static_cast<unsigned int>(wcstoul(value, 0, 10));
 	#else
@@ -3340,6 +3344,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN double get_value_double(const char_t* value)
 	{
+        if (!value) return 0;
+
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(value, 0);
 	#else
@@ -3349,6 +3355,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN float get_value_float(const char_t* value)
 	{
+        if (!value) return 0;
+
 	#ifdef PUGIXML_WCHAR_MODE
 		return static_cast<float>(wcstod(value, 0));
 	#else
@@ -3358,6 +3366,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN bool get_value_bool(const char_t* value)
 	{
+        if (!value) return false;
+
 		// only look at first char
 		char_t first = *value;
 
@@ -3785,37 +3795,27 @@ namespace pugi
 
 	PUGI__FN int xml_attribute::as_int() const
 	{
-		if (!_attr || !_attr->value) return 0;
-
-        return impl::get_value_int(_attr->value);
+        return impl::get_value_int(_attr ? _attr->value : 0);
 	}
 
 	PUGI__FN unsigned int xml_attribute::as_uint() const
 	{
-		if (!_attr || !_attr->value) return 0;
-
-        return impl::get_value_uint(_attr->value);
+        return impl::get_value_uint(_attr ? _attr->value : 0);
 	}
 
 	PUGI__FN double xml_attribute::as_double() const
 	{
-		if (!_attr || !_attr->value) return 0;
-
-        return impl::get_value_double(_attr->value);
+        return impl::get_value_double(_attr ? _attr->value : 0);
 	}
 
 	PUGI__FN float xml_attribute::as_float() const
 	{
-		if (!_attr || !_attr->value) return 0;
-
-        return impl::get_value_float(_attr->value);
+        return impl::get_value_float(_attr ? _attr->value : 0);
 	}
 
 	PUGI__FN bool xml_attribute::as_bool() const
 	{
-		if (!_attr || !_attr->value) return false;
-
-        return impl::get_value_bool(_attr->value);
+        return impl::get_value_bool(_attr ? _attr->value : 0);
 	}
 
 	PUGI__FN bool xml_attribute::empty() const
@@ -4089,6 +4089,16 @@ namespace pugi
 
 		return xml_node(static_cast<impl::xml_document_struct*>(page->allocator));
 	}
+
+    const xml_text xml_node::text() const
+    {
+        return xml_text(_root);
+    }
+
+    xml_text xml_node::text()
+    {
+        return xml_text(_root);
+    }
 
 	PUGI__FN const char_t* xml_node::child_value() const
 	{
@@ -4768,37 +4778,27 @@ namespace pugi
 
     PUGI__FN int xml_text::as_int() const
     {
-        const char_t* text = get();
-
-        return text ? impl::get_value_int(text) : 0;
+        return impl::get_value_int(get());
     }
 
     PUGI__FN unsigned int xml_text::as_uint() const
     {
-        const char_t* text = get();
-
-        return text ? impl::get_value_uint(text) : 0;
+        return impl::get_value_uint(get());
     }
 
     PUGI__FN double xml_text::as_double() const
     {
-        const char_t* text = get();
-
-        return text ? impl::get_value_double(text) : 0;
+        return impl::get_value_double(get());
     }
 
     PUGI__FN float xml_text::as_float() const
     {
-        const char_t* text = get();
-
-        return text ? impl::get_value_float(text) : 0;
+        return impl::get_value_float(get());
     }
 
     PUGI__FN bool xml_text::as_bool() const
     {
-        const char_t* text = get();
-
-        return text ? impl::get_value_bool(text) : false;
+        return impl::get_value_bool(get());
     }
 
     PUGI__FN bool xml_text::set(const char_t* rhs)

@@ -196,9 +196,11 @@ namespace pugi
 	class xml_attribute_iterator;
 
 	class xml_tree_walker;
-	
+
 	class xml_node;
 
+    class xml_text;
+	
 	#ifndef PUGIXML_NO_XPATH
 	class xpath_node;
 	class xpath_node_set;
@@ -387,6 +389,10 @@ namespace pugi
 
 		// Get root of DOM tree this node belongs to
 		xml_node root() const;
+
+        // Get text object for the current node
+        const xml_text text() const;
+        xml_text text();
 
 		// Get child, attribute or next/previous sibling with the specified name
 		xml_node child(const char_t* name) const;
