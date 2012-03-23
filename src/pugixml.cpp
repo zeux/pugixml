@@ -4740,8 +4740,8 @@ namespace pugi
 
     PUGI__FN xml_node_struct* xml_text::_data_new()
     {
-        xml_node_struct* data = _data();
-        if (data) return data;
+        xml_node_struct* d = _data();
+        if (d) return d;
 
         return xml_node(_root).append_child(node_pcdata).internal_object();
     }
@@ -4771,9 +4771,9 @@ namespace pugi
 
     PUGI__FN const char_t* xml_text::get() const
     {
-        xml_node_struct* data = _data();
+        xml_node_struct* d = _data();
 
-        return (data && data->value) ? data->value : PUGIXML_TEXT("");
+        return (d && d->value) ? d->value : PUGIXML_TEXT("");
     }
 
     PUGI__FN int xml_text::as_int() const
@@ -4803,37 +4803,37 @@ namespace pugi
 
     PUGI__FN bool xml_text::set(const char_t* rhs)
     {
-        xml_node_struct* data = _data_new();
+        xml_node_struct* dn = _data_new();
 
-        return data ? impl::strcpy_insitu(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+        return dn ? impl::strcpy_insitu(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
     }
 
     PUGI__FN bool xml_text::set(int rhs)
     {
-        xml_node_struct* data = _data_new();
+        xml_node_struct* dn = _data_new();
 
-        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+        return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
     }
 
     PUGI__FN bool xml_text::set(unsigned int rhs)
     {
-        xml_node_struct* data = _data_new();
+        xml_node_struct* dn = _data_new();
 
-        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+        return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
     }
 
     PUGI__FN bool xml_text::set(double rhs)
     {
-        xml_node_struct* data = _data_new();
+        xml_node_struct* dn = _data_new();
 
-        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+        return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
     }
 
     PUGI__FN bool xml_text::set(bool rhs)
     {
-        xml_node_struct* data = _data_new();
+        xml_node_struct* dn = _data_new();
 
-        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+        return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
     }
 
     PUGI__FN xml_text& xml_text::operator=(const char_t* rhs)
