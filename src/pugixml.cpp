@@ -5256,13 +5256,13 @@ namespace pugi
 
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		FILE* file = fopen(path_, "wb");
+		FILE* file = fopen(path_, (flags & format_save_file_text) ? "w" : "wb");
         return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		FILE* file = impl::open_file_wide(path_, L"wb");
+		FILE* file = impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb");
         return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 

@@ -184,6 +184,9 @@ namespace pugi
     // Don't escape attribute values and PCDATA contents. This flag is off by default.
     const unsigned int format_no_escapes = 0x10;
 
+    // Open file using text mode in xml_document::save_file. This enables special character (i.e. new-line) conversions on some systems. This flag is off by default.
+    const unsigned int format_save_file_text = 0x20;
+
 	// The default set of formatting flags.
     // Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;
