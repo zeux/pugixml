@@ -552,6 +552,62 @@ namespace pugi
 	bool PUGIXML_FUNCTION operator||(const xml_node& lhs, bool rhs);
 #endif
 
+    // A helper for working with text inside PCDATA nodes
+    class PUGIXML_CLASS xml_text
+    {
+        friend class xml_node;
+
+        xml_node_struct* _root;
+
+    	typedef void (*unspecified_bool_type)(xml_text***);
+
+        explicit xml_text(xml_node_struct* root);
+
+        xml_node_struct* _data_new();
+        xml_node_struct* _data() const;
+
+    public:
+        // Default constructor. Constructs an empty object.
+        xml_text();
+
+    	// Safe bool conversion operator
+    	operator unspecified_bool_type() const;
+
+    	// Borland C++ workaround
+    	bool operator!() const;
+
+		// Check if text object is empty
+		bool empty() const;
+
+		// Get text, or "" if object is empty
+		const char_t* get() const;
+
+		// Get text as a number, or 0 if conversion did not succeed or object is empty
+		int as_int() const;
+		unsigned int as_uint() const;
+		double as_double() const;
+		float as_float() const;
+
+        // Get text as bool (returns true if first character is in '1tTyY' set), or false if object is empty
+		bool as_bool() const;
+
+        // Set text (returns false if object is empty or there is not enough memory)
+		bool set(const char_t* rhs);
+
+        // Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
+		bool set(int rhs);
+		bool set(unsigned int rhs);
+		bool set(double rhs);
+		bool set(bool rhs);
+
+		// Set text (equivalent to set without error checking)
+		xml_text& operator=(const char_t* rhs);
+		xml_text& operator=(int rhs);
+		xml_text& operator=(unsigned int rhs);
+		xml_text& operator=(double rhs);
+		xml_text& operator=(bool rhs);
+    };
+
 	// Child node iterator (a bidirectional iterator over a collection of xml_node)
 	class PUGIXML_CLASS xml_node_iterator
 	{

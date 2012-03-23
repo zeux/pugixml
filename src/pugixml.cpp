@@ -3312,6 +3312,13 @@ PUGI__NS_BEGIN
 		}
 	}
 
+    inline bool is_text_node(xml_node_struct* node)
+    {
+        xml_node_type type = static_cast<xml_node_type>((node->header & impl::xml_memory_page_type_mask) + 1);
+
+        return type == node_pcdata || type == node_cdata;
+    }
+
     // get value with conversion functions
 	PUGI__FN int get_value_int(const char_t* value)
 	{
@@ -4088,12 +4095,8 @@ namespace pugi
 		if (!_root) return PUGIXML_TEXT("");
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-		{
-			xml_node_type type_ = static_cast<xml_node_type>((i->header & impl::xml_memory_page_type_mask) + 1);
-
-			if (i->value && (type_ == node_pcdata || type_ == node_cdata))
+			if (i->value && impl::is_text_node(i))
 				return i->value;
-		}
 
 		return PUGIXML_TEXT("");
 	}
@@ -4709,6 +4712,160 @@ namespace pugi
 		return (bool)lhs || rhs;
 	}
 #endif
+
+    PUGI__FN xml_text::xml_text(xml_node_struct* root): _root(root)
+    {
+    }
+
+    PUGI__FN xml_node_struct* xml_text::_data() const
+    {
+        if (!_root || impl::is_text_node(_root)) return _root;
+
+        for (xml_node_struct* node = _root->first_child; node; node = node->next_sibling)
+            if (impl::is_text_node(node))
+                return node;
+
+        return 0;
+    }
+
+    PUGI__FN xml_node_struct* xml_text::_data_new()
+    {
+        xml_node_struct* data = _data();
+        if (data) return data;
+
+        return xml_node(_root).append_child(node_pcdata).internal_object();
+    }
+
+    PUGI__FN xml_text::xml_text(): _root(0)
+    {
+    }
+
+    PUGI__FN static void unspecified_bool_xml_text(xml_text***)
+    {
+    }
+
+    PUGI__FN xml_text::operator xml_text::unspecified_bool_type() const
+    {
+        return _data() ? unspecified_bool_xml_text : 0;
+    }
+
+    PUGI__FN bool xml_text::operator!() const
+    {
+        return !_data();
+    }
+
+    PUGI__FN bool xml_text::empty() const
+    {
+        return _data() == 0;
+    }
+
+    PUGI__FN const char_t* xml_text::get() const
+    {
+        xml_node_struct* data = _data();
+
+        return (data && data->value) ? data->value : PUGIXML_TEXT("");
+    }
+
+    PUGI__FN int xml_text::as_int() const
+    {
+        const char_t* text = get();
+
+        return text ? impl::get_value_int(text) : 0;
+    }
+
+    PUGI__FN unsigned int xml_text::as_uint() const
+    {
+        const char_t* text = get();
+
+        return text ? impl::get_value_uint(text) : 0;
+    }
+
+    PUGI__FN double xml_text::as_double() const
+    {
+        const char_t* text = get();
+
+        return text ? impl::get_value_double(text) : 0;
+    }
+
+    PUGI__FN float xml_text::as_float() const
+    {
+        const char_t* text = get();
+
+        return text ? impl::get_value_float(text) : 0;
+    }
+
+    PUGI__FN bool xml_text::as_bool() const
+    {
+        const char_t* text = get();
+
+        return text ? impl::get_value_bool(text) : false;
+    }
+
+    PUGI__FN bool xml_text::set(const char_t* rhs)
+    {
+        xml_node_struct* data = _data_new();
+
+        return data ? impl::strcpy_insitu(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+    }
+
+    PUGI__FN bool xml_text::set(int rhs)
+    {
+        xml_node_struct* data = _data_new();
+
+        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+    }
+
+    PUGI__FN bool xml_text::set(unsigned int rhs)
+    {
+        xml_node_struct* data = _data_new();
+
+        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+    }
+
+    PUGI__FN bool xml_text::set(double rhs)
+    {
+        xml_node_struct* data = _data_new();
+
+        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+    }
+
+    PUGI__FN bool xml_text::set(bool rhs)
+    {
+        xml_node_struct* data = _data_new();
+
+        return data ? impl::set_value_convert(data->value, data->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+    }
+
+    PUGI__FN xml_text& xml_text::operator=(const char_t* rhs)
+    {
+        set(rhs);
+        return *this;
+    }
+
+    PUGI__FN xml_text& xml_text::operator=(int rhs)
+    {
+        set(rhs);
+        return *this;
+    }
+
+    PUGI__FN xml_text& xml_text::operator=(unsigned int rhs)
+    {
+        set(rhs);
+        return *this;
+    }
+
+    PUGI__FN xml_text& xml_text::operator=(double rhs)
+    {
+        set(rhs);
+        return *this;
+    }
+
+    PUGI__FN xml_text& xml_text::operator=(bool rhs)
+    {
+        set(rhs);
+        return *this;
+    }
+
 
 	PUGI__FN xml_node_iterator::xml_node_iterator()
 	{
