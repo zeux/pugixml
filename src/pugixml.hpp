@@ -614,6 +614,12 @@ namespace pugi
 		xml_text& operator=(bool rhs);
     };
 
+#ifdef __BORLANDC__
+	// Borland C++ workaround
+	bool PUGIXML_FUNCTION operator&&(const xml_text& lhs, bool rhs);
+	bool PUGIXML_FUNCTION operator||(const xml_text& lhs, bool rhs);
+#endif
+
 	// Child node iterator (a bidirectional iterator over a collection of xml_node)
 	class PUGIXML_CLASS xml_node_iterator
 	{

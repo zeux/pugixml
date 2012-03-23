@@ -4866,6 +4866,17 @@ namespace pugi
         return *this;
     }
 
+#ifdef __BORLANDC__
+	PUGI__FN bool operator&&(const xml_text& lhs, bool rhs)
+	{
+		return (bool)lhs && rhs;
+	}
+
+	PUGI__FN bool operator||(const xml_text& lhs, bool rhs)
+	{
+		return (bool)lhs || rhs;
+	}
+#endif
 
 	PUGI__FN xml_node_iterator::xml_node_iterator()
 	{
