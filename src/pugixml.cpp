@@ -4866,6 +4866,11 @@ namespace pugi
         return *this;
     }
 
+    PUGI__FN xml_node xml_text::data() const
+    {
+        return xml_node(_data());
+    }
+
 #ifdef __BORLANDC__
 	PUGI__FN bool operator&&(const xml_text& lhs, bool rhs)
 	{

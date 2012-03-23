@@ -612,6 +612,9 @@ namespace pugi
 		xml_text& operator=(unsigned int rhs);
 		xml_text& operator=(double rhs);
 		xml_text& operator=(bool rhs);
+
+        // Get the data node (node_pcdata or node_cdata) for this object
+        xml_node data() const;
     };
 
 #ifdef __BORLANDC__
