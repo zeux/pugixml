@@ -3376,7 +3376,7 @@ PUGI__NS_BEGIN
 	}
 
     // set value with conversion functions
-	PUGI__FN bool set_value_buffer(char_t*& dest, uintptr_t& header, uintptr_t header_mask, const char (&buf)[128])
+	PUGI__FN bool set_value_buffer(char_t*& dest, uintptr_t& header, uintptr_t header_mask, char (&buf)[128])
     {
 	#ifdef PUGIXML_WCHAR_MODE
 		char_t wbuf[128];
@@ -3668,6 +3668,18 @@ PUGI__NS_BEGIN
 		return result;
 	}
 #endif
+
+	PUGI__FN bool save_file_impl(const xml_document& doc, FILE* file, const char_t* indent, unsigned int flags, xml_encoding encoding)
+	{
+		if (!file) return false;
+
+		xml_writer_file writer(file);
+		doc.save(writer, indent, flags, encoding);
+
+		fclose(file);
+
+		return true;
+	}
 PUGI__NS_END
 
 namespace pugi
@@ -5243,27 +5255,13 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = fopen(path_, "wb");
-		if (!file) return false;
-
-		xml_writer_file writer(file);
-		save(writer, indent, flags, encoding);
-
-		fclose(file);
-
-		return true;
+        return save_file_impl(*this, file, indent, flags, encoding);
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = impl::open_file_wide(path_, L"wb");
-		if (!file) return false;
-
-		xml_writer_file writer(file);
-		save(writer, indent, flags, encoding);
-
-		fclose(file);
-
-		return true;
+        return save_file_impl(*this, file, indent, flags, encoding);
 	}
 
     PUGI__FN xml_node xml_document::document_element() const
