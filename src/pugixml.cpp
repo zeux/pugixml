@@ -3676,9 +3676,11 @@ PUGI__NS_BEGIN
 		xml_writer_file writer(file);
 		doc.save(writer, indent, flags, encoding);
 
+        int result = ferror(file);
+
 		fclose(file);
 
-		return true;
+		return result == 0;
 	}
 PUGI__NS_END
 
@@ -5255,13 +5257,13 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = fopen(path_, "wb");
-        return save_file_impl(*this, file, indent, flags, encoding);
+        return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = impl::open_file_wide(path_, L"wb");
-        return save_file_impl(*this, file, indent, flags, encoding);
+        return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 
     PUGI__FN xml_node xml_document::document_element() const
