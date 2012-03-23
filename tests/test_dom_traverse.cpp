@@ -30,14 +30,6 @@ template <typename I> static I move_iter(I base, int n)
 }
 #endif
 
-template <typename T> static void generic_empty_test(const T& obj)
-{
-	T null;
-
-	CHECK(null.empty());
-	CHECK(!obj.empty());
-}
-
 TEST_XML(dom_attr_bool_ops, "<node attr='1'/>")
 {
 	generic_bool_ops_test(doc.child(STR("node")).attribute(STR("attr")));

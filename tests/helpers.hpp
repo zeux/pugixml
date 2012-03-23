@@ -103,4 +103,12 @@ template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
 	CHECK(!(obj1 >= obj2));
 }
 
+template <typename T> static void generic_empty_test(const T& obj)
+{
+	T null;
+
+	CHECK(null.empty());
+	CHECK(!obj.empty());
+}
+
 #endif
