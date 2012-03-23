@@ -26,6 +26,36 @@
 #	include <unistd.h> // for unlink
 #endif
 
+static bool load_file_in_memory(const char* path, char*& data, size_t& size)
+{
+	FILE* file = fopen(path, "rb");
+	if (!file) return false;
+
+	fseek(file, 0, SEEK_END);
+	size = static_cast<size_t>(ftell(file));
+	fseek(file, 0, SEEK_SET);
+
+	data = new char[size];
+
+	CHECK(fread(data, 1, size, file) == size);
+	fclose(file);
+
+	return true;
+}
+
+static bool test_file_contents(const char* path, const char* data, size_t size)
+{
+    char* fdata;
+    size_t fsize;
+    if (!load_file_in_memory(path, fdata, fsize)) return false;
+
+    bool result = (size == fsize && memcmp(data, fdata, size) == 0);
+
+    delete[] fdata;
+
+    return result;
+}
+
 TEST(document_create_empty)
 {
 	pugi::xml_document doc;
@@ -444,6 +474,32 @@ TEST_XML(document_save_file_error, "<node/>")
 	CHECK(!doc.save_file("tests/data/unknown/output.xml"));
 }
 
+TEST_XML(document_save_file_text, "<node/>")
+{
+	temp_file f;
+
+	CHECK(doc.save_file(f.path, STR(""), pugi::format_no_declaration | pugi::format_save_file_text));
+    CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
+
+	CHECK(doc.save_file(f.path, STR(""), pugi::format_no_declaration));
+    CHECK(test_file_contents(f.path, "<node />\n", 9));
+}
+
+TEST_XML(document_save_file_wide_text, "<node/>")
+{
+	temp_file f;
+
+	// widen the path
+	wchar_t wpath[32];
+	std::copy(f.path, f.path + strlen(f.path) + 1, wpath + 0);
+
+	CHECK(doc.save_file(wpath, STR(""), pugi::format_no_declaration | pugi::format_save_file_text));
+    CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
+
+	CHECK(doc.save_file(wpath, STR(""), pugi::format_no_declaration));
+    CHECK(test_file_contents(f.path, "<node />\n", 9));
+}
+
 TEST(document_load_buffer)
 {
 	const pugi::char_t text[] = STR("<?xml?><node/>");
@@ -699,23 +755,6 @@ TEST(document_load_file_convert_native_endianness)
 			}
 		}
 	}
-}
-
-static bool load_file_in_memory(const char* path, char*& data, size_t& size)
-{
-	FILE* file = fopen(path, "rb");
-	if (!file) return false;
-
-	fseek(file, 0, SEEK_END);
-	size = static_cast<size_t>(ftell(file));
-	fseek(file, 0, SEEK_SET);
-
-	data = new char[size];
-
-	CHECK(fread(data, 1, size, file) == size);
-	fclose(file);
-
-	return true;
 }
 
 struct file_data_t
