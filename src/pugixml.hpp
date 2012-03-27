@@ -216,6 +216,8 @@ namespace pugi
     template <typename It> class xml_object_range
     {
     public:
+        typedef It const_iterator;
+
         xml_object_range(It b, It e): _begin(b), _end(e)
         {
         }
