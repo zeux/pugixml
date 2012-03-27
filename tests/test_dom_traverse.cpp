@@ -829,3 +829,37 @@ TEST_XML(dom_hash_value, "<node attr='value'>value</node>")
     xml_attribute attr_copy = attr;
     CHECK(attr_copy.hash_value() == attr.hash_value());
 }
+
+TEST_XML(dom_node_named_iterator, "<node><node1><child/></node1><node2><child/><child/></node2><node3/></node>")
+{
+	xml_node node1 = doc.child(STR("node")).child(STR("node1"));
+	xml_node node2 = doc.child(STR("node")).child(STR("node2"));
+	xml_node node3 = doc.child(STR("node")).child(STR("node3"));
+
+	CHECK(xml_named_node_iterator(xml_node(), STR("child")) == xml_named_node_iterator());
+
+    xml_named_node_iterator it1(node1.child(STR("child")), STR("child"));
+	CHECK(move_iter(it1, 1) == xml_named_node_iterator());
+	CHECK(*it1 == node1.child(STR("child")));
+	CHECK_STRING(it1->name(), STR("child"));
+
+    xml_named_node_iterator it2(node2.child(STR("child")), STR("child"));
+	CHECK(move_iter(it2, 1) != xml_named_node_iterator());
+	CHECK(move_iter(it2, 2) == xml_named_node_iterator());
+    CHECK(*it2 == node2.first_child());
+    CHECK(*move_iter(it2, 1) == node2.last_child());
+
+    xml_named_node_iterator it3(node3.child(STR("child")), STR("child"));
+	CHECK(it3 == xml_named_node_iterator());
+
+	xml_named_node_iterator it = xml_named_node_iterator(node1.child(STR("child")), STR("child"));
+	xml_named_node_iterator itt = it;
+
+	CHECK(itt == it);
+
+	CHECK(itt++ == it);
+	CHECK(itt == xml_named_node_iterator());
+
+	CHECK(itt != it);
+	CHECK(itt == ++it);
+}
