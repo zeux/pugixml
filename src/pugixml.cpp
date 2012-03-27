@@ -2989,38 +2989,6 @@ PUGI__NS_BEGIN
 		xml_encoding encoding;
 	};
 
-	PUGI__FN void write_bom(xml_writer& writer, xml_encoding encoding)
-	{
-		switch (encoding)
-		{
-		case encoding_utf8:
-			writer.write("\xef\xbb\xbf", 3);
-			break;
-
-		case encoding_utf16_be:
-			writer.write("\xfe\xff", 2);
-			break;
-
-		case encoding_utf16_le:
-			writer.write("\xff\xfe", 2);
-			break;
-
-		case encoding_utf32_be:
-			writer.write("\x00\x00\xfe\xff", 4);
-			break;
-
-		case encoding_utf32_le:
-			writer.write("\xff\xfe\x00\x00", 4);
-			break;
-
-        case encoding_latin1:
-            break;
-
-		default:
-			assert(!"Invalid encoding");
-		}
-	}
-
 	PUGI__FN void text_output_escaped(xml_buffered_writer& writer, const char_t* s, chartypex_t type)
 	{
 		while (*s)
@@ -5223,9 +5191,18 @@ namespace pugi
 
 	PUGI__FN void xml_document::save(xml_writer& writer, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		if (flags & format_write_bom) impl::write_bom(writer, impl::get_write_encoding(encoding));
-
 		impl::xml_buffered_writer buffered_writer(writer, encoding);
+
+		if ((flags & format_write_bom) && encoding != encoding_latin1)
+        {
+            // BOM always represents the codepoint U+FEFF, so just write it in native encoding
+        #ifdef PUGIXML_WCHAR_MODE
+            uint16_t bom = 0xfeff;
+            buffered_writer.write(static_cast<wchar_t>(bom));
+        #else
+            buffered_writer.write('\xef', '\xbb', '\xbf');
+        #endif
+        }
 
 		if (!(flags & format_no_declaration) && !impl::has_declaration(*this))
 		{
