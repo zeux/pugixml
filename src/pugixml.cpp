@@ -3950,6 +3950,21 @@ namespace pugi
 	{
 		return attribute_iterator(0, _root);
 	}
+    
+    PUGI__FN xml_object_range<xml_node_iterator> xml_node::children() const
+    {
+        return xml_object_range<xml_node_iterator>(begin(), end());
+    }
+
+    PUGI__FN xml_object_range<xml_named_node_iterator> xml_node::children(const char_t* name_) const
+    {
+        return xml_object_range<xml_named_node_iterator>(xml_named_node_iterator(child(name_), name_), xml_named_node_iterator());
+    }
+
+    PUGI__FN xml_object_range<xml_attribute_iterator> xml_node::attributes() const
+    {
+        return xml_object_range<xml_attribute_iterator>(attributes_begin(), attributes_end());
+    }
 
 	PUGI__FN bool xml_node::operator==(const xml_node& r) const
 	{
@@ -4982,6 +4997,47 @@ namespace pugi
 		return temp;
 	}
 
+    PUGI__FN xml_named_node_iterator::xml_named_node_iterator(): _name(0)
+    {
+    }
+
+    PUGI__FN xml_named_node_iterator::xml_named_node_iterator(const xml_node& node, const char_t* name): _node(node), _name(name)
+    {
+    }
+
+    PUGI__FN bool xml_named_node_iterator::operator==(const xml_named_node_iterator& rhs) const
+    {
+        return _node == rhs._node;
+    }
+
+    PUGI__FN bool xml_named_node_iterator::operator!=(const xml_named_node_iterator& rhs) const
+    {
+        return _node != rhs._node;
+    }
+
+    PUGI__FN xml_node& xml_named_node_iterator::operator*() const
+    {
+        return _node;
+    }
+
+    PUGI__FN xml_node* xml_named_node_iterator::operator->() const
+    {
+        return &_node;
+    }
+
+    PUGI__FN const xml_named_node_iterator& xml_named_node_iterator::operator++()
+    {
+        _node = _node.next_sibling(_name);
+        return *this;
+    }
+
+    PUGI__FN xml_named_node_iterator xml_named_node_iterator::operator++(int)
+    {
+        xml_named_node_iterator temp = *this;
+        ++*this;
+        return temp;
+    }
+
     PUGI__FN xml_parse_result::xml_parse_result(): status(status_internal_error), offset(0), encoding(encoding_auto)
     {
     }
@@ -5197,7 +5253,7 @@ namespace pugi
         {
             // BOM always represents the codepoint U+FEFF, so just write it in native encoding
         #ifdef PUGIXML_WCHAR_MODE
-            uint16_t bom = 0xfeff;
+            unsigned int bom = 0xfeff;
             buffered_writer.write(static_cast<wchar_t>(bom));
         #else
             buffered_writer.write('\xef', '\xbb', '\xbf');

@@ -197,6 +197,7 @@ namespace pugi
 
 	class xml_node_iterator;
 	class xml_attribute_iterator;
+    class xml_named_node_iterator;
 
 	class xml_tree_walker;
 
@@ -210,6 +211,21 @@ namespace pugi
 	class xpath_query;
 	class xpath_variable_set;
 	#endif
+
+    // Range-based for loop support
+    template <typename It> class xml_object_range
+    {
+    public:
+        xml_object_range(It b, It e): _begin(b), _end(e)
+        {
+        }
+
+        It begin() const { return _begin; }
+        It end() const { return _end; }
+
+    private:
+        It _begin, _end;
+    };
 
 	// Writer interface for node printing (see xml_node::print)
 	class PUGIXML_CLASS xml_writer
@@ -544,6 +560,11 @@ namespace pugi
 		attribute_iterator attributes_begin() const;
 		attribute_iterator attributes_end() const;
 
+        // Range-based for support
+        xml_object_range<xml_node_iterator> children() const;
+        xml_object_range<xml_named_node_iterator> children(const char_t* name) const;
+        xml_object_range<xml_attribute_iterator> attributes() const;
+
 		// Get node offset in parsed file/string (in char_t units) for debugging purposes
 		ptrdiff_t offset_debug() const;
 
@@ -708,6 +729,41 @@ namespace pugi
 		const xml_attribute_iterator& operator--();
 		xml_attribute_iterator operator--(int);
 	};
+
+    // Named node range helper
+    class xml_named_node_iterator
+    {
+    public:
+        // Iterator traits
+        typedef ptrdiff_t difference_type;
+        typedef xml_node value_type;
+        typedef xml_node* pointer;
+        typedef xml_node& reference;
+
+    #ifndef PUGIXML_NO_STL
+        typedef std::forward_iterator_tag iterator_category;
+    #endif
+
+        // Default constructor
+        xml_named_node_iterator();
+
+        // Construct an iterator which points to the specified node
+        xml_named_node_iterator(const xml_node& node, const char_t* name);
+
+        // Iterator operators
+        bool operator==(const xml_named_node_iterator& rhs) const;
+        bool operator!=(const xml_named_node_iterator& rhs) const;
+
+        xml_node& operator*() const;
+        xml_node* operator->() const;
+
+        const xml_named_node_iterator& operator++();
+        xml_named_node_iterator operator++(int);
+
+    private:
+        mutable xml_node _node;
+        const char_t* _name;
+    };
 
 	// Abstract tree walker class (see xml_node::traverse)
 	class PUGIXML_CLASS xml_tree_walker
