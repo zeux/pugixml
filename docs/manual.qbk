@@ -1262,7 +1262,7 @@ All of the above saving functions are implemented in terms of writer interface. 
 
 In order to output the document via some custom transport, for example sockets, you should create an object which implements `xml_writer` interface and pass it to `save` function. `xml_writer::write` function is called with a buffer as an input, where `data` points to buffer start, and `size` is equal to the buffer size in bytes. `write` implementation must write the buffer to the transport; it can not save the passed buffer pointer, as the buffer contents will change after `write` returns. The buffer contains the chunk of document data in the desired encoding.
 
-`write` function is called with relatively large blocks (size is usually several kilobytes, except for the first block with BOM, which is output only if [link format_write_bom] is set, and last block, which may be small), so there is often no need for additional buffering in the implementation.
+`write` function is called with relatively large blocks (size is usually several kilobytes, except for the last block that may be small), so there is often no need for additional buffering in the implementation.
 
 This is a simple example of custom writer for saving document data to STL string ([@samples/save_custom_writer.cpp]); read the sample code for more complex examples:
 
