@@ -50,52 +50,14 @@ namespace boost
 
 namespace pugi
 {
-	struct xml_node_children_adapter
+	inline xml_object_range<xml_node_iterator> children(const pugi::xml_node& node)
 	{
-		typedef pugi::xml_node::iterator iterator;
-		typedef pugi::xml_node::iterator const_iterator;
-
-		xml_node node;
-
-		const_iterator begin() const
-		{
-			return node.begin();
-		}
-
-		const_iterator end() const
-		{
-			return node.end();
-		}
-	};
-
-	inline xml_node_children_adapter children(const pugi::xml_node& node)
-	{
-		xml_node_children_adapter result = {node};
-		return result;
+        return node.children();
 	}
 
-	struct xml_node_attribute_adapter
+	inline xml_object_range<xml_attribute_iterator> attributes(const pugi::xml_node& node)
 	{
-		typedef pugi::xml_node::attribute_iterator iterator;
-		typedef pugi::xml_node::attribute_iterator const_iterator;
-
-		xml_node node;
-
-		const_iterator begin() const
-		{
-			return node.attributes_begin();
-		}
-
-		const_iterator end() const
-		{
-			return node.attributes_end();
-		}
-	};
-
-	inline xml_node_attribute_adapter attributes(const pugi::xml_node& node)
-	{
-		xml_node_attribute_adapter result = {node};
-		return result;
+        return node.attributes();
 	}
 }
 
