@@ -39,6 +39,24 @@ TEST_XML_FLAGS(dom_text_get, "<node><a>foo</a><b><node/><![CDATA[bar]]></b><c><?
     CHECK_STRING(xml_node().text().get(), STR(""));
 }
 
+TEST_XML_FLAGS(dom_text_as_string, "<node><a>foo</a><b><node/><![CDATA[bar]]></b><c><?pi value?></c><d/></node>", parse_default | parse_pi)
+{
+    xml_node node = doc.child(STR("node"));
+
+    CHECK_STRING(node.child(STR("a")).text().as_string(), STR("foo"));
+    CHECK_STRING(node.child(STR("a")).first_child().text().as_string(), STR("foo"));
+
+    CHECK_STRING(node.child(STR("b")).text().as_string(), STR("bar"));
+    CHECK_STRING(node.child(STR("b")).last_child().text().as_string(), STR("bar"));
+
+    CHECK_STRING(node.child(STR("c")).text().as_string(), STR(""));
+    CHECK_STRING(node.child(STR("c")).first_child().text().as_string(), STR(""));
+
+    CHECK_STRING(node.child(STR("d")).text().as_string(), STR(""));
+
+    CHECK_STRING(xml_node().text().as_string(), STR(""));
+}
+
 TEST_XML(dom_text_as_int, "<node><text1>1</text1><text2>-1</text2><text3>-2147483648</text3><text4>2147483647</text4></node>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -221,3 +239,14 @@ TEST_XML_FLAGS(dom_text_data, "<node><a>foo</a><b><![CDATA[bar]]></b><c><?pi val
     CHECK(!xml_text().data());
 }
 
+TEST(dom_text_defaults)
+{
+    xml_text text;
+
+    CHECK_STRING(text.as_string(STR("foo")), STR("foo"));
+    CHECK(text.as_int(42) == 42);
+    CHECK(text.as_uint(42) == 42);
+    CHECK(text.as_double(42) == 42);
+    CHECK(text.as_float(42) == 42);
+    CHECK(text.as_bool(true) == true);
+}

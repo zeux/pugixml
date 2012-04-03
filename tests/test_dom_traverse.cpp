@@ -73,6 +73,14 @@ TEST_XML(dom_attr_name_value, "<node attr='1'/>")
 	CHECK_NAME_VALUE(xml_attribute(), STR(""), STR(""));
 }
 
+TEST_XML(dom_attr_as_string, "<node attr='1'/>")
+{
+	xml_attribute attr = doc.child(STR("node")).attribute(STR("attr"));
+
+	CHECK_STRING(attr.as_string(), STR("1"));
+	CHECK_STRING(xml_attribute().as_string(), STR(""));
+}
+
 TEST_XML(dom_attr_as_int, "<node attr1='1' attr2='-1' attr3='-2147483648' attr4='2147483647'/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -133,6 +141,18 @@ TEST_XML(dom_attr_as_bool, "<node attr1='0' attr2='1' attr3='true' attr4='True' 
 	CHECK(node.attribute(STR("attr5")).as_bool());
 	CHECK(node.attribute(STR("attr6")).as_bool());
 	CHECK(!node.attribute(STR("attr7")).as_bool());
+}
+
+TEST(dom_attr_defaults)
+{
+    xml_attribute attr;
+
+    CHECK_STRING(attr.as_string(STR("foo")), STR("foo"));
+    CHECK(attr.as_int(42) == 42);
+    CHECK(attr.as_uint(42) == 42);
+    CHECK(attr.as_double(42) == 42);
+    CHECK(attr.as_float(42) == 42);
+    CHECK(attr.as_bool(true) == true);
 }
 
 TEST_XML(dom_attr_iterator, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/><node3/></node>")
