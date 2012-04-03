@@ -5386,6 +5386,11 @@ namespace std
 	{
 		return std::bidirectional_iterator_tag();
 	}
+
+	PUGI__FN std::forward_iterator_tag _Iter_cat(const pugi::xml_named_node_iterator&)
+	{
+		return std::forward_iterator_tag();
+	}
 }
 #endif
 
@@ -5401,6 +5406,11 @@ namespace std
 	PUGI__FN std::bidirectional_iterator_tag __iterator_category(const pugi::xml_attribute_iterator&)
 	{
 		return std::bidirectional_iterator_tag();
+	}
+
+	PUGI__FN std::forward_iterator_tag __iterator_category(const pugi::xml_named_node_iterator&)
+	{
+		return std::forward_iterator_tag();
 	}
 }
 #endif
