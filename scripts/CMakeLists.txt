@@ -11,7 +11,7 @@ else()
     add_library(pugixml STATIC ${SOURCES})
 endif()
 
-set_target_properties(pugixml PROPERTIES VERSION 1.0 SOVERSION 1.0)
+set_target_properties(pugixml PROPERTIES VERSION 1.2 SOVERSION 1.2)
 
 install(TARGETS pugixml LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 install(DIRECTORY ../src/ DESTINATION include/pugixml FILES_MATCHING PATTERN *.hpp)
