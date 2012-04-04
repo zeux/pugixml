@@ -22,6 +22,12 @@ template <typename I> static I move_iter(I base, int n)
 	else while (n++) --base;
 	return base;
 }
+
+static xml_named_node_iterator move_iter(xml_named_node_iterator base, int n)
+{
+	while (n--) ++base;
+	return base;
+}
 #else
 template <typename I> static I move_iter(I base, int n)
 {
