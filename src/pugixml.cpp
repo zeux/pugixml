@@ -67,7 +67,7 @@
 #endif
 
 #ifdef __SNC__
-#	pragma diag_push
+// Using diag_push/diag_pop does not disable the warnings inside templates due to a compiler bug
 #	pragma diag_suppress=178 // function was declared but never referenced
 #	pragma diag_suppress=237 // controlling expression is constant
 #endif
@@ -10186,11 +10186,6 @@ namespace pugi
 }
 
 #endif
-
-// SNC seems to have the same bug as Intel (below); I need to test more versions to do a proper check here
-// #ifdef __SNC__
-// #   pragma diag_pop
-// #endif
 
 #ifdef __BORLANDC__
 #	pragma option pop
