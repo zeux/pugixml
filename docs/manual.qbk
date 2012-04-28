@@ -836,22 +836,29 @@ All attributes have name and value, both of which are strings (value may be empt
 
 In case the attribute handle is null, both functions return empty strings - they never return null pointers.
 
+[#xml_attribute::as_string]
+If you need a non-empty string if the attribute handle is null (for example, you need to get the option value from XML attribute, but if it is not specified, you need it to default to `"sorted"` instead of `""`), you can use `as_string` accessor:
+
+    const char_t* xml_attribute::as_string(const char_t* def = "") const;
+
+It returns `def` argument if the attribute handle is null. If you do not specify the argument, the function is equivalent to `value()`.
+
 [#xml_attribute::as_int][#xml_attribute::as_uint][#xml_attribute::as_double][#xml_attribute::as_float][#xml_attribute::as_bool]
 In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type:
 
-    int xml_attribute::as_int() const;
-    unsigned int xml_attribute::as_uint() const;
-    double xml_attribute::as_double() const;
-    float xml_attribute::as_float() const;
-    bool xml_attribute::as_bool() const;
+    int xml_attribute::as_int(int def = 0) const;
+    unsigned int xml_attribute::as_uint(unsigned int def = 0) const;
+    double xml_attribute::as_double(double def = 0) const;
+    float xml_attribute::as_float(float def = 0) const;
+    bool xml_attribute::as_bool(bool def = false) const;
 
-`as_int`, `as_uint`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `0` is returned. Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as a decimal number (`as_int` or `as_uint`) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
+`as_int`, `as_uint`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `def` argument is returned (which is 0 by default). Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as a decimal number (`as_int` or `as_uint`) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
 
 In case the input string contains a number that is out of the target numeric range, the result is undefined.
 
 [caution Number conversion functions depend on current C locale as set with `setlocale`, so may return unexpected results if the locale is different from `"C"`.]
 
-`as_bool` converts attribute value to boolean as follows: if attribute handle is null or attribute value is empty, `false` is returned. Otherwise, `true` is returned if the first character is one of `'1', 't', 'T', 'y', 'Y'`. This means that strings like `"true"` and `"yes"` are recognized as `true`, while strings like `"false"` and `"no"` are recognized as `false`. For more complex matching you'll have to write your own function.
+`as_bool` converts attribute value to boolean as follows: if attribute handle is null, `def` argument is returned (which is `false` by default). If attribute value is empty, `false` is returned. Otherwise, `true` is returned if the first character is one of `'1', 't', 'T', 'y', 'Y'`. This means that strings like `"true"` and `"yes"` are recognized as `true`, while strings like `"false"` and `"no"` are recognized as `false`. For more complex matching you'll have to write your own function.
 
 [note There are no portable 64-bit types in C++, so there is no corresponding conversion function. If your platform has a 64-bit integer, you can easily write a conversion function yourself.]
 
@@ -1312,6 +1319,9 @@ These flags control the additional output information:
 
 * [anchor format_write_bom] enables Byte Order Mark (BOM) output. By default, no BOM is output, so in case of non UTF-8 encodings the resulting document's encoding may not be recognized by some parsers and text editors, if they do not implement sophisticated encoding detection. Enabling this flag adds an encoding-specific BOM to the output. This flag has no effect in `xml_node::print` functions: they never output the BOM. This flag is *off* by default.
 
+* [anchor format_save_file_text] changes the file mode when using `save_file` function. By default, file is opened in binary mode, which means that the output file will
+contain platform-independent newline \\n (ASCII 10). If this flag is on, file is opened in text mode, which on some systems changes the newline format (i.e. on Windows you can use this flag to output XML documents with \\r\\n (ASCII 13 10) newlines. This flag is *off* by default.
+
 Additionally, there is one predefined option mask:
 
 * [anchor format_default] is the default set of flags, i.e. it has all options set to their default values. It sets formatted output with indentation, without BOM and with default node declaration, if necessary.
@@ -1639,6 +1649,34 @@ Because of the differences in document object models, performance considerations
 
 [section:changes Changelog]
 
+[h5 1.05.2012 - version 1.2]
+
+Major release, featuring header-only mode, various interface enhancements (i.e. PCDATA manipulation and C++11 iteration), many other features and compatibility improvements.
+
+* New features:
+    # Added xml_text helper class for working with PCDATA/CDATA contents of an element node
+    # Added optional header-only mode (controlled by PUGIXML_HEADER_ONLY define)
+    # Added xml_node::children() and xml_node::attributes() for C++11 ranged for loop or BOOST_FOREACH
+    # Added support for Latin-1 (ISO-8859-1) encoding conversion during loading and saving
+    # Added custom default values for '''xml_attribute::as_*''' (they are returned if the attribute does not exist)
+    # Added parse_ws_pcdata_single flag for preserving whitespace-only PCDATA in case it's the only child
+    # Added format_save_file_text for xml_document::save_file to open files as text instead of binary (changes newlines on Windows)
+    # Added format_no_escapes flag to disable special symbol escaping (complements ~parse_escapes)
+    # Added support for loading document from streams that do not support seeking
+    # Added '''PUGIXML_MEMORY_*''' constants for tweaking allocation behavior (useful for embedded systems)
+    # Added PUGIXML_VERSION preprocessor define
+
+* Compatibility improvements:
+    # Parser does not require setjmp support (improves compatibility with some embedded platforms, enables clr:pure compilation)
+    # STL forward declarations are no longer used (fixes SunCC/RWSTL compilation, fixes clang compilation in C++11 mode)
+    # Fixed AirPlay SDK, Android, Windows Mobile (WinCE) and C++/CLI compilation
+    # Fixed several compilation warnings for various GCC versions, Intel C++ compiler and Clang
+
+* Bug fixes:
+    # Fixed unsafe bool conversion to avoid problems on C++/CLI
+    # Iterator dereference operator is const now (fixes Boost filter_iterator support)
+    # xml_document::save_file now checks for file I/O errors during saving
+
 [h5 1.11.2010 - version 1.0]
 
 Major release, featuring many XPath enhancements, wide character filename support, miscellaneous performance improvements, bug fixes and more.
@@ -1958,6 +1996,7 @@ Constants:
     * [link format_no_declaration]
     * [link format_no_escapes]
     * [link format_raw]
+    * [link format_save_file_text]
     * [link format_write_bom]
     [lbr]
 
@@ -2006,11 +2045,12 @@ Classes:
     * `const char_t* `[link xml_attribute::value value]`() const;`
     [lbr]
 
-    * `int `[link xml_attribute::as_int as_int]`() const;`
-    * `unsigned int `[link xml_attribute::as_uint as_uint]`() const;`
-    * `double `[link xml_attribute::as_double as_double]`() const;`
-    * `float `[link xml_attribute::as_float as_float]`() const;`
-    * `bool `[link xml_attribute::as_bool as_bool]`() const;`
+    * `const char_t* `[link xml_attribute::as_string as_string]`(const char_t* def = "") const;`
+    * `int `[link xml_attribute::as_int as_int]`(int def = 0) const;`
+    * `unsigned int `[link xml_attribute::as_uint as_uint]`(unsigned int def = 0) const;`
+    * `double `[link xml_attribute::as_double as_double]`(double def = 0) const;`
+    * `float `[link xml_attribute::as_float as_float]`(float def = 0) const;`
+    * `bool `[link xml_attribute::as_bool as_bool]`(bool def = false) const;`
     [lbr]
 
     * `bool `[link xml_attribute::set_name set_name]`(const char_t* rhs);`
