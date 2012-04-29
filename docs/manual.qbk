@@ -928,6 +928,24 @@ This is an example of using these functions ([@samples/traverse_base.cpp]):
 
 [endsect] [/contents]
 
+[section:rangefor Range-based for-loop support]
+
+[#xml_node::children][#xml_node::attributes]
+If your C++ compiler supports range-based for-loop (this is a C++11 feature, at the time of writing it's supported by Microsoft Visual Studio 11 Beta, GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with [@http://www.boost.org/libs/foreach/ Boost Foreach], and possibly other pre-C++11 foreach facilities.
+
+    ``/implementation-defined type/`` xml_node::children() const;
+    ``/implementation-defined type/`` xml_node::children(const char_t* name) const;
+    ``/implementation-defined type/`` xml_node::attributes() const;
+
+`children` function allows you to enumerate all child nodes; `children` function with `name` argument allows you to enumerate all child nodes with a specific name; `attributes` function allows you to enumerate all attributes of the node. Note that you can also use node object itself in a range-based for construct, which is equivalent to using `children()`.
+
+This is an example of using these functions ([@samples/traverse_rangefor.cpp]):
+
+[import samples/traverse_rangefor.cpp]
+[code_traverse_rangefor]
+
+[endsect] [/rangefor]
+
 [section:iterators Traversing node/attribute lists via iterators]
 
 [#xml_node_iterator][#xml_attribute_iterator][#xml_node::begin][#xml_node::end][#xml_node::attributes_begin][#xml_node::attributes_end]
@@ -2131,6 +2149,11 @@ Classes:
 
     * `xml_attribute `[link xml_node::first_attribute first_attribute]`() const;`
     * `xml_attribute `[link xml_node::last_attribute last_attribute]`() const;`
+    [lbr]
+
+    * /implementation-defined type/ [link xml_node::children children]`() const;`
+    * /implementation-defined type/ [link xml_node::children children]`(const char_t* name) const;`
+    * /implementation-defined type/ [link xml_node::attributes attributes]`() const;`
     [lbr]
 
     * `xml_node `[link xml_node::child child]`(const char_t* name) const;`
