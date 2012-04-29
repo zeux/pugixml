@@ -200,6 +200,33 @@ It's possible to compile pugixml as a standalone shared library. The process is 
 [caution If you're using STL-related functions, you should use the shared runtime library to ensure that a single heap is used for STL allocations in your application and in pugixml; in MSVC, this means selecting the 'Multithreaded DLL' or 'Multithreaded Debug DLL' to 'Runtime library' property (/MD or /MDd linker switch). You should also make sure that your runtime library choice is consistent between different projects.]
 
 [endsect] [/shared]
+
+[#PUGIXML_HEADER_ONLY]
+[section:header Using pugixml in header-only mode]
+
+It's possible to use pugixml in header-only mode. This means that all source code for pugixml will be included in every translation unit that includes [file pugixml.hpp]. This is how most of Boost and STL libraries work.
+
+Note that there are advantages and drawbacks of this approach. Header mode may improve tree traversal/modification performance (because many simple functions will be inlined), if your compiler toolchain does not support link-time optimization, or if you have it turned off (with link-time optimization the performance should be similar to non-header mode). However, since compiler now has to compile pugixml source once for each translation unit that includes it, compilation times may increase noticeably. If you want to use pugixml in header mode but do not need XPath support, you can consider disabling it by using [link PUGIXML_NO_XPATH] define to improve compilation time.
+
+Enabling header-only mode is a two-step process:
+
+# You have to define `PUGIXML_HEADER_ONLY`
+# You have to include [file pugixml.cpp] whenever you include pugixml.hpp
+
+Both of these are best done via [file pugiconfig.hpp] like this:
+
+    #define PUGIXML_HEADER_ONLY
+    #include "pugixml.cpp"
+
+Note that it is safe to compile [file pugixml.cpp] if `PUGIXML_HEADER_ONLY` is defined - so if you want to i.e. use header-only mode only in Release configuration, you
+can include pugixml.cpp in your project (see [sref manual.install.building.embed]), and conditionally enable header-only mode in [file pugiconfig.hpp], i.e.:
+
+    #ifndef _DEBUG
+        #define PUGIXML_HEADER_ONLY
+        #include "pugixml.cpp"
+    #endif
+
+[endsect] [/header]
  
 [section:config Additional configuration options]
 
@@ -1928,6 +1955,7 @@ Macros:
 * `#define `[link PUGIXML_MEMORY_PAGE_SIZE]
 * `#define `[link PUGIXML_MEMORY_OUTPUT_STACK]
 * `#define `[link PUGIXML_MEMORY_XPATH_PAGE_SIZE]
+* `#define `[link PUGIXML_HEADER_ONLY]
 
 Types:
 
