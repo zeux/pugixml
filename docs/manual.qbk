@@ -842,12 +842,15 @@ Apart from structural information (parent, child nodes, attributes), nodes can h
 In case node does not have a name or value or if the node handle is null, both functions return empty strings - they never return null pointers.
 
 [#xml_node::child_value]
-It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type [link node_pcdata] with value `"This is a node"`. pugixml provides two helper functions to parse such data:
+It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type [link node_pcdata] with value `"This is a node"`. pugixml provides several helper functions to parse such data:
 
     const char_t* xml_node::child_value() const;
     const char_t* xml_node::child_value(const char_t* name) const;
+    xml_text xml_node::text() const;
 
 `child_value()` returns the value of the first child with type [link node_pcdata] or [link node_cdata]; `child_value(name)` is a simple wrapper for `child(name).child_value()`. For the above example, calling `node.child_value("description")` and `description.child_value()` will both produce string `"This is a node"`. If there is no child with relevant type, or if the handle is null, `child_value` functions return empty string.
+
+`text()` returns a special object that can be used for working with PCDATA contents in more complex cases than just retrieving the value; it is described in [sref manual.access.text] sections.
 
 There is an example of using some of these functions [link code_traverse_base_data at the end of the next section].
 
@@ -1039,6 +1042,57 @@ This is an example of using predicate-based functions ([@samples/traverse_predic
 
 [endsect] [/predicate]
 
+[section:text Working with text contents]
+
+[#xml_text]
+It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type [link node_pcdata] with value `"This is a node"`. pugixml provides a special class, `xml_text`, to work with such data. Working with text objects to modify data is described in [link manual.modify.text the documentation for modifying document data]; this section describes the access interface of `xml_text`.
+
+[#xml_node::text]
+You can get the text object from a node by using `text()` method:
+    
+    xml_text xml_node::text() const;
+
+If the node has a type `node_pcdata` or `node_cdata`, then the node itself is used to return data; otherwise, a first child node of type `node_pcdata` or `node_cdata` is used.
+
+[#xml_text::empty]
+[#xml_text::unspecified_bool_type]
+You can check if the text object is bound to a valid PCDATA/CDATA node by using it as a boolean value, i.e. `if (text) { ... }` or `if (!text) { ... }`. Alternatively you can check it by using the `empty()` method:
+
+    bool xml_text::empty() const;
+
+[#xml_text::get]
+Given a text object, you can get the contents (i.e. the value of PCDATA/CDATA node) by using the following function:
+
+    const char_t* xml_text::get() const;
+
+In case text object is empty, the function returns an empty string - it never returns a null pointer.
+
+[#xml_text::as_string][#xml_text::as_int][#xml_text::as_uint][#xml_text::as_double][#xml_text::as_float][#xml_text::as_bool]
+If you need a non-empty string if the text object is empty, or if the text contents is actually a number or a boolean that is stored as a string, you can use the following accessors:
+
+    const char_t* xml_text::as_string(const char_t* def = "") const;
+    int xml_text::as_int(int def = 0) const;
+    unsigned int xml_text::as_uint(unsigned int def = 0) const;
+    double xml_text::as_double(double def = 0) const;
+    float xml_text::as_float(float def = 0) const;
+    bool xml_text::as_bool(bool def = false) const;
+
+All of the above functions have the same semantics as similar `xml_attribute` members: they return the default argument if the text object is empty, they convert the text contents to a target type using the same rules and restrictions. You can [link xml_attribute::as_int refer to documentation for the attribute functions] for details.
+
+[#xml_text::data]
+`xml_text` is essentially a helper class that operates on `xml_node` values. It is bound to a node of type [link node_pcdata] or [node_cdata]. You can use the following function to retrieve this node:
+
+    xml_node xml_text::data() const;
+
+Essentially, assuming `text` is an `xml_text` object, callling `text.get()` is equivalent to calling `text.data().value()`.
+
+This is an example of using `xml_text` object ([@samples/text.cpp]):
+
+[import samples/text.cpp]
+[code_text_access]
+
+[endsect] [/text]
+
 [section:misc Miscellaneous functions]
 
 [#xml_node::root]
@@ -1213,6 +1267,45 @@ This is an example of removing attributes\/nodes from the document ([@samples/mo
 [code_modify_remove]
 
 [endsect] [/remove]
+
+[section:text Working with text contents]
+
+pugixml provides a special class, `xml_text`, to work with text contents stored as a value of some node, i.e. `<node><description>This is a node</description></node>`. Working with text objects to retrieve data is described in [link manual.access.text the documentation for accessing document data]; this section describes the modification interface of `xml_text`.
+
+[#xml_text::set]
+Once you have an `xml_text` object, you can set the text contents using the following function:
+
+    bool xml_text::set(const char_t* rhs);
+
+This function tries to set the contents to the specified string, and returns the operation result. The operation fails if the text object was retrieved from a node that can not have a value and that is not an element node (i.e. it is a [link node_declaration] node), if the text object is empty, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to this function). Note that if the text object was retrieved from an element node, this function creates the PCDATA child node if necessary (i.e. if the element node does not have a PCDATA/CDATA child already).
+
+[#xml_text::set_value]
+In addition to a string function, several functions are provided for handling text with numbers and booleans as contents:
+
+    bool xml_text::set(int rhs);
+    bool xml_text::set(unsigned int rhs);
+    bool xml_text::set(double rhs);
+    bool xml_text::set(bool rhs);
+    
+The above functions convert the argument to string and then call the base `set` function. These functions have the same semantics as similar `xml_attribute` functions. You can [link xml_attribute::set_value refer to documentation for the attribute functions] for details.
+
+[#xml_text::assign]
+
+For convenience, all `set` functions have the corresponding assignment operators:
+
+    xml_text& xml_text::operator=(const char_t* rhs);
+    xml_text& xml_text::operator=(int rhs);
+    xml_text& xml_text::operator=(unsigned int rhs);
+    xml_text& xml_text::operator=(double rhs);
+    xml_text& xml_text::operator=(bool rhs);
+
+These operators simply call the right `set` function and return the attribute they're called on; the return value of `set` is ignored, so errors are ignored.
+
+This is an example of using `xml_text` object to modify text contents ([@samples/text.cpp]):
+
+[code_text_modify]
+
+[endsect] [/text]
 
 [section:clone Cloning nodes/attributes]
 
@@ -2181,6 +2274,7 @@ Classes:
 
     * `const char_t* `[link xml_node::child_value child_value]`() const;`
     * `const char_t* `[link xml_node::child_value child_value]`(const char_t* name) const;`
+    * `xml_text `[link xml_node::text text]`() const;`
     [lbr]
 
     * `typedef xml_node_iterator `[link xml_node_iterator iterator]`;`
@@ -2318,6 +2412,41 @@ Classes:
     [lbr]
 
     * `int `[link xml_tree_walker::depth depth]`() const;`
+    [lbr]
+
+* `class `[link xml_text]
+    * `bool `[link xml_text::empty empty]`() const;`
+    * `operator `[link xml_text::unspecified_bool_type]`() const;`
+    [lbr]
+
+    * `const char_t* `[link xml_text::get]`() const;`
+    [lbr]
+
+    * `const char_t* `[link xml_text::as_string as_string]`(const char_t* def = "") const;`
+    * `int `[link xml_text::as_int as_int]`(int def = 0) const;`
+    * `unsigned int `[link xml_text::as_uint as_uint]`(unsigned int def = 0) const;`
+    * `double `[link xml_text::as_double as_double]`(double def = 0) const;`
+    * `float `[link xml_text::as_float as_float]`(float def = 0) const;`
+    * `bool `[link xml_text::as_bool as_bool]`(bool def = false) const;`
+    [lbr]
+
+    * `bool `[link xml_text::set set]`(const char_t* rhs);`
+    [lbr]
+
+    * `bool `[link xml_text::set set]`(int rhs);`
+    * `bool `[link xml_text::set set]`(unsigned int rhs);`
+    * `bool `[link xml_text::set set]`(double rhs);`
+    * `bool `[link xml_text::set set]`(bool rhs);`
+    [lbr]
+
+    * `xml_text& `[link xml_text::assign operator=]`(const char_t* rhs);`
+    * `xml_text& `[link xml_text::assign operator=]`(int rhs);`
+    * `xml_text& `[link xml_text::assign operator=]`(unsigned int rhs);`
+    * `xml_text& `[link xml_text::assign operator=]`(double rhs);`
+    * `xml_text& `[link xml_text::assign operator=]`(bool rhs);`
+    [lbr]
+
+    * `xml_node `[link xml_text::data data]`() const;`
     [lbr]
 
 * `class `[link xml_writer]
