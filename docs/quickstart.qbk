@@ -53,7 +53,7 @@ The most common node types are:
 
 * Document node (`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to `xml_document` class; note that `xml_document` is a sub-class of `xml_node`, so the entire node interface is also available.
 * Element/tag node (`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair.
-* Plain character data nodes (`node_pcdata`) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that plain character data is not a part of the element node but instead has its own node; for example, an element node can have several child PCDATA nodes.
+* Plain character data nodes (`node_pcdata`) represent plain text in XML. PCDATA nodes have a value, but do not have name or children/attributes. Note that *plain character data is not a part of the element node but instead has its own node*; for example, an element node can have several child PCDATA nodes.
 
 Despite the fact that there are several node types, there are only three C++ types representing the tree (`xml_document`, `xml_node`, `xml_attribute`); some operations on `xml_node` are only valid for certain node types. They are described below.
 
@@ -114,7 +114,7 @@ pugixml features an extensive interface for getting various types of data from t
 
 You can get node or attribute name via `name()` accessor, and value via `value()` accessor. Note that both functions never return null pointers - they either return a string with the relevant content, or an empty string if name/value is absent or if the handle is null. Also there are two notable things for reading values:
 
-* It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type `node_pcdata` with value `"This is a node"`. pugixml provides `child_value()` helper functions to parse such data.
+* It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type `node_pcdata` with value `"This is a node"`. pugixml provides `child_value()` and `text()` helper functions to parse such data.
 
 * In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type.
 
@@ -133,6 +133,13 @@ Here is an example of using iterators for document traversal ([@samples/traverse
 
 [import samples/traverse_iter.cpp]
 [code_traverse_iter]
+
+If your C++ compiler supports range-based for-loop (this is a C++11 feature, at the time of writing it's supported by Microsoft Visual Studio 11 Beta, GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with [@http://www.boost.org/libs/foreach/ Boost Foreach], and possibly other pre-C++11 foreach facilities.
+
+Here is an example of using C++11 range-based for loop for document traversal ([@samples/traverse_rangefor.cpp]):
+
+[import samples/traverse_rangefor.cpp]
+[code_traverse_rangefor]
 
 The methods described above allow traversal of immediate children of some node; if you want to do a deep tree traversal, you'll have to do it via a recursive function or some equivalent method. However, pugixml provides a helper for depth-first traversal of a subtree. In order to use it, you have to implement `xml_tree_walker` interface and to call `traverse` function.
 
