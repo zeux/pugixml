@@ -1390,6 +1390,21 @@ Also note that wide stream saving functions do not have `encoding` argument and 
 
 [endsect] [/encoding]
 
+[section:declaration Customizing document declaration]
+
+When you are saving the document using `xml_document::save()` or `xml_document::save_file()`, a default XML document declaration is output, if `format_no_declaration` is not speficied and if the document does not have a declaration node. However, the default declaration is not customizable. If you want to customize the declaration output, you need to create the declaration node yourself.
+
+[note By default the declaration node is not added to the document during parsing. If you just need to preserve the original declaration node, you have to add the flag [link parse_declaration] to the parsing flags; the resulting document will contain the original declaration node, which will be output during saving.]
+
+Declaration node is a node with type [link node_declaration]; it behaves like an element node in that it has attributes with values (but it does not have child nodes). Therefore setting custom version, encoding or standalone declaration involves adding attributes and setting attribute values.
+
+This is an example that shows how to create a custom declaration node ([@samples/save_declaration.cpp]):
+
+[import samples/save_declaration.cpp]
+[code_save_declaration]
+
+[endsect] [/declaration]
+
 [endsect] [/saving]
 
 [section:xpath XPath]
