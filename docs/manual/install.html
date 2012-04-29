@@ -4,15 +4,15 @@
 <title>Installation</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
-<link rel="prev" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
+<link rel="prev" href="../manual.html" title="pugixml 1.2">
 <link rel="next" href="dom.html" title="Document object model">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<b>Installation</b> |
 		Document:
@@ -44,6 +44,8 @@
         a standalone static library</a></span></dt>
 <dt><span class="section"><a href="install.html#manual.install.building.shared"> Building pugixml as
         a standalone shared library</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.building.header"> Using pugixml in header-only
+        mode</a></span></dt>
 <dt><span class="section"><a href="install.html#manual.install.building.config"> Additional configuration
         options</a></span></dt>
 </dl></dd>
@@ -65,8 +67,8 @@
           You can download the latest source distribution via one of the following
           links:
         </p>
-<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-1.0.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.zip</a>
-<a href="http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz</a>
+<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-1.2.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-1.2.zip</a>
+<a href="http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz</a>
 </pre>
 <p>
           The distribution contains library source, documentation (the manual you're
@@ -94,7 +96,7 @@
 <p>
           For example, to checkout the current version, you can use this command:
         </p>
-<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/release-1.0 pugixml</pre>
+<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/release-1.2 pugixml</pre>
 <p>
           To checkout the latest version, you can use this command:
         </p>
@@ -269,6 +271,58 @@
           </p></td></tr>
 </table></div>
 </div>
+<a name="PUGIXML_HEADER_ONLY"></a><div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.building.header"></a><a class="link" href="install.html#manual.install.building.header" title="Using pugixml in header-only mode"> Using pugixml in header-only
+        mode</a>
+</h4></div></div></div>
+<p>
+          It's possible to use pugixml in header-only mode. This means that all source
+          code for pugixml will be included in every translation unit that includes
+          <code class="filename">pugixml.hpp</code>. This is how most of Boost and STL libraries work.
+        </p>
+<p>
+          Note that there are advantages and drawbacks of this approach. Header mode
+          may improve tree traversal/modification performance (because many simple
+          functions will be inlined), if your compiler toolchain does not support
+          link-time optimization, or if you have it turned off (with link-time optimization
+          the performance should be similar to non-header mode). However, since compiler
+          now has to compile pugixml source once for each translation unit that includes
+          it, compilation times may increase noticeably. If you want to use pugixml
+          in header mode but do not need XPath support, you can consider disabling
+          it by using <a class="link" href="install.html#PUGIXML_NO_XPATH">PUGIXML_NO_XPATH</a> define
+          to improve compilation time.
+        </p>
+<p>
+          Enabling header-only mode is a two-step process:
+        </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+              You have to define <code class="computeroutput"><span class="identifier">PUGIXML_HEADER_ONLY</span></code>
+            </li>
+<li class="listitem">
+              You have to include <code class="filename">pugixml.cpp</code> whenever you include pugixml.hpp
+            </li>
+</ol></div>
+<p>
+          Both of these are best done via <code class="filename">pugiconfig.hpp</code> like this:
+        </p>
+<pre class="programlisting"><span class="preprocessor">#define</span> <span class="identifier">PUGIXML_HEADER_ONLY</span>
+<span class="preprocessor">#include</span> <span class="string">"pugixml.cpp"</span>
+</pre>
+<p>
+          Note that it is safe to compile <code class="filename">pugixml.cpp</code> if <code class="computeroutput"><span class="identifier">PUGIXML_HEADER_ONLY</span></code>
+          is defined - so if you want to i.e. use header-only mode only in Release
+          configuration, you can include pugixml.cpp in your project (see <a class="xref" href="install.html#manual.install.building.embed" title="Building pugixml as a part of another static library/executable"> Building pugixml as
+        a part of another static library/executable</a>),
+          and conditionally enable header-only mode in <code class="filename">pugiconfig.hpp</code>, i.e.:
+        </p>
+<pre class="programlisting"><span class="preprocessor">#ifndef</span> <span class="identifier">_DEBUG</span>
+    <span class="preprocessor">#define</span> <span class="identifier">PUGIXML_HEADER_ONLY</span>
+    <span class="preprocessor">#include</span> <span class="string">"pugixml.cpp"</span>
+<span class="preprocessor">#endif</span>
+</pre>
+</div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
 <a name="manual.install.building.config"></a><a class="link" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
@@ -337,6 +391,12 @@
             the consistency rule.
           </p></td></tr>
 </table></div>
+<p>
+          <a name="PUGIXML_MEMORY_PAGE_SIZE"></a><code class="literal">PUGIXML_MEMORY_PAGE_SIZE</code>, <a name="PUGIXML_MEMORY_OUTPUT_STACK"></a><code class="literal">PUGIXML_MEMORY_OUTPUT_STACK</code>
+          and <a name="PUGIXML_MEMORY_XPATH_PAGE_SIZE"></a><code class="literal">PUGIXML_MEMORY_XPATH_PAGE_SIZE</code>
+          can be used to customize certain important sizes to optimize memory usage
+          for the application-specific patterns. For details see <a class="xref" href="dom.html#manual.dom.memory.tuning" title="Memory consumption tuning"> Memory consumption tuning</a>.
+        </p>
 </div>
 </div>
 <div class="section">
@@ -367,7 +427,8 @@
                 </li>
 <li class="listitem">
                   Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64,
-                  9.0 (2008) x86/x64, 10.0 (2010) x86/x64
+                  9.0 (2008) x86/x64, 10.0 (2010) x86/x64, 11.0 x86/x64/ARM and some
+                  CLR versions
                 </li>
 <li class="listitem">
                   MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
@@ -384,6 +445,9 @@
             Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC)
           </li>
 <li class="listitem">
+            Sun Solaris (sunCC x86/x64)
+          </li>
+<li class="listitem">
             Microsoft Xbox 360
           </li>
 <li class="listitem">
@@ -395,6 +459,10 @@
 <li class="listitem">
             Sony Playstation 3 (GCC 4.1.1, SNC 310.1)
           </li>
+<li class="listitem">
+            Various portable platforms (Android NDK, BlackBerry NDK, Samsung bada,
+            Windows CE)
+          </li>
 </ul></div>
 </div>
 <div class="footnotes">
@@ -405,7 +473,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -413,7 +481,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<b>Installation</b> |
 		Document:

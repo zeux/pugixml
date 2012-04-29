@@ -1,34 +1,5 @@
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>pugixml 1.0</title>
-<link rel="stylesheet" href="pugixml.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="quickstart.html" title="pugixml 1.0">
-</head>
-<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<div class="article">
-<div class="section">
-<div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="quickstart.main"></a><a class="link" href="quickstart.html#quickstart.main" title="pugixml 1.0 quick start guide"> pugixml 1.0 quick start guide</a>
-</h2></div></div></div>
-<div class="toc"><dl>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.introduction"> Introduction</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.install"> Installation</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.dom"> Document object model</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.loading"> Loading document</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.access"> Accessing document data</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.modify"> Modifying document data</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.saving"> Saving document</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.feedback"> Feedback</a></span></dt>
-<dt><span class="section"><a href="quickstart.html#quickstart.main.license"> License</a></span></dt>
-</dl></div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.introduction"></a><a class="link" href="quickstart.html#quickstart.main.introduction" title="Introduction"> Introduction</a>
-</h3></div></div></div>
-<p>
-        <a href="http://pugixml.org/" target="_top">pugixml</a> is a light-weight C++ XML
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>pugixml 1.2</title><link rel="stylesheet" href="pugixml.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"><link rel="home" href="quickstart.html" title="pugixml 1.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" title="pugixml 1.2"><div class="section" title="pugixml 1.2 quick start guide"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="quickstart.main"></a><a class="link" href="quickstart.html#quickstart.main" title="pugixml 1.2 quick start guide"> pugixml 1.2 quick start guide</a></h2></div></div></div><div class="toc"><dl><dt><span class="section"><a href="quickstart.html#quickstart.main.introduction"> Introduction</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.install"> Installation</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.dom"> Document object model</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.loading"> Loading document</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.access"> Accessing document data</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.modify"> Modifying document data</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.saving"> Saving document</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.feedback"> Feedback</a></span></dt><dt><span class="section"><a href="quickstart.html#quickstart.main.license"> License</a></span></dt></dl></div><div class="section" title="Introduction"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.introduction"></a><a class="link" href="quickstart.html#quickstart.main.introduction" title="Introduction"> Introduction</a></h3></div></div></div><p>
+        <a class="ulink" href="http://pugixml.org/" target="_top">pugixml</a> is a light-weight C++ XML
         processing library. It consists of a DOM-like interface with rich traversal/modification
         capabilities, an extremely fast XML parser which constructs the DOM tree
         from an XML file/buffer, and an XPath 1.0 implementation for complex data-driven
@@ -39,54 +10,36 @@
         and has many users. All code is distributed under the <a class="link" href="quickstart.html#quickstart.main.license" title="License">MIT
         license</a>, making it completely free to use in both open-source and
         proprietary applications.
-      </p>
-<p>
+      </p><p>
         pugixml enables very fast, convenient and memory-efficient XML document processing.
         However, since pugixml has a DOM parser, it can't process XML documents that
         do not fit in memory; also the parser is a non-validating one, so if you
         need DTD/Schema validation, the library is not for you.
-      </p>
-<p>
+      </p><p>
         This is the quick start guide for pugixml, which purpose is to enable you
         to start using the library quickly. Many important library features are either
         not described at all or only mentioned briefly; for more complete information
-        you <a href="manual.html" target="_top">should read the complete manual</a>.
-      </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
+        you <a class="ulink" href="manual.html" target="_top">should read the complete manual</a>.
+      </p><div class="note" title="Note"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>
           No documentation is perfect, neither is this one. If you encounter a description
           that is unclear, please file an issue as described in <a class="xref" href="quickstart.html#quickstart.main.feedback" title="Feedback"> Feedback</a>. Also if
           you can spare the time for a full proof-reading, including spelling and
           grammar, that would be great! Please <a class="link" href="quickstart.html#email">send me an e-mail</a>;
           as a token of appreciation, your name will be included into the corresponding
           section of the manual.
-        </p></td></tr>
-</table></div>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.install"></a><a class="link" href="quickstart.html#quickstart.main.install" title="Installation"> Installation</a>
-</h3></div></div></div>
-<p>
+        </p></td></tr></table></div></div><div class="section" title="Installation"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.install"></a><a class="link" href="quickstart.html#quickstart.main.install" title="Installation"> Installation</a></h3></div></div></div><p>
         pugixml is distributed in source form. You can download a source distribution
         via one of the following links:
-      </p>
-<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-1.0.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.zip</a>
-<a href="http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-1.0.tar.gz</a>
-</pre>
-<p>
+      </p><pre class="programlisting"><a class="ulink" href="http://pugixml.googlecode.com/files/pugixml-1.2.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-1.2.zip</a>
+<a class="ulink" href="http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz</a>
+</pre><p>
         The distribution contains library source, documentation (the guide you're
         reading now and the manual) and some code examples. After downloading the
         distribution, install pugixml by extracting all files from the compressed
         archive. The files have different line endings depending on the archive format
         - <code class="filename">.zip</code> archive has Windows line endings, <code class="filename">.tar.gz</code> archive has Unix line endings.
         Otherwise the files in both archives are identical.
-      </p>
-<p>
+      </p><p>
         The complete pugixml source consists of three files - one source file, <code class="filename">pugixml.cpp</code>,
         and two header files, <code class="filename">pugixml.hpp</code> and <code class="filename">pugiconfig.hpp</code>. <code class="filename">pugixml.hpp</code> is the primary
         header which you need to include in order to use pugixml classes/functions.
@@ -95,23 +48,16 @@
         can find the header; however you can also use relative path (i.e. <code class="computeroutput"><span class="preprocessor">#include</span> <span class="string">"../libs/pugixml/src/pugixml.hpp"</span></code>)
         or include directory-relative path (i.e. <code class="computeroutput"><span class="preprocessor">#include</span>
         <span class="special">&lt;</span><span class="identifier">xml</span><span class="special">/</span><span class="identifier">thirdparty</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">/</span><span class="identifier">src</span><span class="special">/</span><span class="identifier">pugixml</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>).
-      </p>
-<p>
+      </p><p>
         The easiest way to build pugixml is to compile the source file, <code class="filename">pugixml.cpp</code>,
         along with the existing library/executable. This process depends on the method
         of building your application; for example, if you're using Microsoft Visual
         Studio<sup>[<a name="trademarks" href="#ftn.trademarks" class="footnote">1</a>]</sup>,
         Apple Xcode, Code::Blocks or any other IDE, just add <code class="filename">pugixml.cpp</code> to one of
         your projects. There are other building methods available, including building
-        pugixml as a standalone static/shared library; <a href="manual/install.html#manual.install.building" target="_top">read
+        pugixml as a standalone static/shared library; <a class="ulink" href="manual/install.html#manual.install.building" target="_top">read
         the manual</a> for further information.
-      </p>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.dom"></a><a class="link" href="quickstart.html#quickstart.main.dom" title="Document object model"> Document object model</a>
-</h3></div></div></div>
-<p>
+      </p></div><div class="section" title="Document object model"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.dom"></a><a class="link" href="quickstart.html#quickstart.main.dom" title="Document object model"> Document object model</a></h3></div></div></div><p>
         pugixml stores XML data in DOM-like way: the entire XML document (both document
         structure and element data) is stored in memory as a tree. The tree can be
         loaded from character stream (file, string, C++ I/O stream), then traversed
@@ -119,8 +65,7 @@
         structure and node/attribute data can be changed at any time. Finally, the
         result of document transformations can be saved to a character stream (file,
         C++ I/O stream or custom transport).
-      </p>
-<p>
+      </p><p>
         The root of the tree is the document itself, which corresponds to C++ type
         <code class="computeroutput"><span class="identifier">xml_document</span></code>. Document has
         one or more child nodes, which correspond to C++ type <code class="computeroutput"><span class="identifier">xml_node</span></code>.
@@ -128,55 +73,40 @@
         of child nodes, a collection of attributes, which correspond to C++ type
         <code class="computeroutput"><span class="identifier">xml_attribute</span></code>, and some additional
         data (i.e. name).
-      </p>
-<p>
+      </p><p>
         The most common node types are:
-      </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
-<li class="listitem">
+      </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Document node (<code class="computeroutput"><span class="identifier">node_document</span></code>)
             - this is the root of the tree, which consists of several child nodes.
             This node corresponds to <code class="computeroutput"><span class="identifier">xml_document</span></code>
             class; note that <code class="computeroutput"><span class="identifier">xml_document</span></code>
             is a sub-class of <code class="computeroutput"><span class="identifier">xml_node</span></code>,
             so the entire node interface is also available.
-          </li>
-<li class="listitem">
+          </li><li class="listitem">
             Element/tag node (<code class="computeroutput"><span class="identifier">node_element</span></code>)
             - this is the most common type of node, which represents XML elements.
             Element nodes have a name, a collection of attributes and a collection
             of child nodes (both of which may be empty). The attribute is a simple
             name/value pair.
-          </li>
-<li class="listitem">
+          </li><li class="listitem">
             Plain character data nodes (<code class="computeroutput"><span class="identifier">node_pcdata</span></code>)
             represent plain text in XML. PCDATA nodes have a value, but do not have
-            name or children/attributes. Note that plain character data is not a
-            part of the element node but instead has its own node; for example, an
-            element node can have several child PCDATA nodes.
-          </li>
-</ul></div>
-<p>
+            name or children/attributes. Note that <span class="bold"><strong>plain character
+            data is not a part of the element node but instead has its own node</strong></span>;
+            for example, an element node can have several child PCDATA nodes.
+          </li></ul></div><p>
         Despite the fact that there are several node types, there are only three
         C++ types representing the tree (<code class="computeroutput"><span class="identifier">xml_document</span></code>,
         <code class="computeroutput"><span class="identifier">xml_node</span></code>, <code class="computeroutput"><span class="identifier">xml_attribute</span></code>);
         some operations on <code class="computeroutput"><span class="identifier">xml_node</span></code>
         are only valid for certain node types. They are described below.
-      </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
+      </p><div class="note" title="Note"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>
           All pugixml classes and functions are located in <code class="computeroutput"><span class="identifier">pugi</span></code>
           namespace; you have to either use explicit name qualification (i.e. <code class="computeroutput"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span></code>), or to gain access to relevant
           symbols via <code class="computeroutput"><span class="keyword">using</span></code> directive
           (i.e. <code class="computeroutput"><span class="keyword">using</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span><span class="special">;</span></code> or <code class="computeroutput"><span class="keyword">using</span>
           <span class="keyword">namespace</span> <span class="identifier">pugi</span><span class="special">;</span></code>).
-        </p></td></tr>
-</table></div>
-<p>
+        </p></td></tr></table></div><p>
         <code class="computeroutput"><span class="identifier">xml_document</span></code> is the owner
         of the entire document structure; destroying the document destroys the whole
         tree. The interface of <code class="computeroutput"><span class="identifier">xml_document</span></code>
@@ -184,16 +114,14 @@
         of <code class="computeroutput"><span class="identifier">xml_node</span></code>, which allows
         for document inspection and/or modification. Note that while <code class="computeroutput"><span class="identifier">xml_document</span></code> is a sub-class of <code class="computeroutput"><span class="identifier">xml_node</span></code>, <code class="computeroutput"><span class="identifier">xml_node</span></code>
         is not a polymorphic type; the inheritance is present only to simplify usage.
-      </p>
-<p>
+      </p><p>
         <code class="computeroutput"><span class="identifier">xml_node</span></code> is the handle to
         document node; it can point to any node in the document, including document
         itself. There is a common interface for nodes of all types. Note that <code class="computeroutput"><span class="identifier">xml_node</span></code> is only a handle to the actual
         node, not the node itself - you can have several <code class="computeroutput"><span class="identifier">xml_node</span></code>
         handles pointing to the same underlying object. Destroying <code class="computeroutput"><span class="identifier">xml_node</span></code> handle does not destroy the node
         and does not remove it from the tree.
-      </p>
-<p>
+      </p><p>
         There is a special value of <code class="computeroutput"><span class="identifier">xml_node</span></code>
         type, known as null node or empty node. It does not correspond to any node
         in any document, and thus resembles null pointer. However, all operations
@@ -206,29 +134,21 @@
         don't have to check for errors twice. You can test if a handle is null via
         implicit boolean cast: <code class="computeroutput"><span class="keyword">if</span> <span class="special">(</span><span class="identifier">node</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span> <span class="special">}</span></code>
         or <code class="computeroutput"><span class="keyword">if</span> <span class="special">(!</span><span class="identifier">node</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span> <span class="special">}</span></code>.
-      </p>
-<p>
+      </p><p>
         <code class="computeroutput"><span class="identifier">xml_attribute</span></code> is the handle
         to an XML attribute; it has the same semantics as <code class="computeroutput"><span class="identifier">xml_node</span></code>,
         i.e. there can be several <code class="computeroutput"><span class="identifier">xml_attribute</span></code>
         handles pointing to the same underlying object and there is a special null
         attribute value, which propagates to function results.
-      </p>
-<p>
+      </p><p>
         There are two choices of interface and internal representation when configuring
         pugixml: you can either choose the UTF-8 (also called char) interface or
         UTF-16/32 (also called wchar_t) one. The choice is controlled via <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code> define; you can set
         it via <code class="filename">pugiconfig.hpp</code> or via preprocessor options. All tree functions that
         work with strings work with either C-style null terminated strings or STL
-        strings of the selected character type. <a href="manual/dom.html#manual.dom.unicode" target="_top">Read
+        strings of the selected character type. <a class="ulink" href="manual/dom.html#manual.dom.unicode" target="_top">Read
         the manual</a> for additional information on Unicode interface.
-      </p>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.loading"></a><a class="link" href="quickstart.html#quickstart.main.loading" title="Loading document"> Loading document</a>
-</h3></div></div></div>
-<p>
+      </p></div><div class="section" title="Loading document"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.loading"></a><a class="link" href="quickstart.html#quickstart.main.loading" title="Loading document"> Loading document</a></h3></div></div></div><p>
         pugixml provides several functions for loading XML data from various places
         - files, C++ iostreams, memory buffers. All functions use an extremely fast
         non-validating parser. This parser is not fully W3C conformant - it can load
@@ -239,36 +159,29 @@
         Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and
         little endian); UCS-2 is naturally supported since it's a strict subset of
         UTF-16) and handles all encoding conversions automatically.
-      </p>
-<p>
+      </p><p>
         The most common source of XML data is files; pugixml provides a separate
         function for loading XML document from file. This function accepts file path
         as its first argument, and also two optional arguments, which specify parsing
         options and input data encoding, which are described in the manual.
-      </p>
-<p>
-        This is an example of loading XML document from file (<a href="samples/load_file.cpp" target="_top">samples/load_file.cpp</a>):
-      </p>
-<p>
+      </p><p>
+        This is an example of loading XML document from file (<a class="ulink" href="samples/load_file.cpp" target="_top">samples/load_file.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
+</p><pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
 
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_file</span><span class="special">(</span><span class="string">"tree.xml"</span><span class="special">);</span>
 
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Load result: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">result</span><span class="special">.</span><span class="identifier">description</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">", mesh name: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"mesh"</span><span class="special">).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         <code class="computeroutput"><span class="identifier">load_file</span></code>, as well as other
         loading functions, destroys the existing document tree and then tries to
         load the new tree from the specified file. The result of the operation is
         returned in an <code class="computeroutput"><span class="identifier">xml_parse_result</span></code>
         object; this object contains the operation status, and the related information
         (i.e. last successfully parsed position in the input file, if parsing fails).
-      </p>
-<p>
+      </p><p>
         Parsing result object can be implicitly converted to <code class="computeroutput"><span class="keyword">bool</span></code>;
         if you do not want to handle parsing errors thoroughly, you can just check
         the return value of load functions as if it was a <code class="computeroutput"><span class="keyword">bool</span></code>:
@@ -277,14 +190,11 @@
         Otherwise you can use the <code class="computeroutput"><span class="identifier">status</span></code>
         member to get parsing status, or the <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> member function to get the status in a
         string form.
-      </p>
-<p>
-        This is an example of handling loading errors (<a href="samples/load_error_handling.cpp" target="_top">samples/load_error_handling.cpp</a>):
-      </p>
-<p>
+      </p><p>
+        This is an example of handling loading errors (<a class="ulink" href="samples/load_error_handling.cpp" target="_top">samples/load_error_handling.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
+</p><pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">);</span>
 
 <span class="keyword">if</span> <span class="special">(</span><span class="identifier">result</span><span class="special">)</span>
@@ -295,10 +205,8 @@
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Error description: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">result</span><span class="special">.</span><span class="identifier">description</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Error offset: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">result</span><span class="special">.</span><span class="identifier">offset</span> <span class="special">&lt;&lt;</span> <span class="string">" (error at [..."</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">source</span> <span class="special">+</span> <span class="identifier">result</span><span class="special">.</span><span class="identifier">offset</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">"]\n\n"</span><span class="special">;</span>
 <span class="special">}</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         Sometimes XML data should be loaded from some other source than file, i.e.
         HTTP URL; also you may want to load XML data from file using non-standard
         functions, i.e. to use your virtual file system facilities or to load XML
@@ -308,8 +216,7 @@
         document from C++ IOstream, in which case you should provide an object which
         implements <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">istream</span></code> or <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wistream</span></code>
         interface.
-      </p>
-<p>
+      </p><p>
         There are different functions for loading document from memory; they treat
         the passed buffer as either an immutable one (<code class="computeroutput"><span class="identifier">load_buffer</span></code>),
         a mutable buffer which is owned by the caller (<code class="computeroutput"><span class="identifier">load_buffer_inplace</span></code>),
@@ -317,24 +224,18 @@
         There is also a simple helper function, <code class="computeroutput"><span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load</span></code>,
         for cases when you want to load the XML document from null-terminated character
         string.
-      </p>
-<p>
+      </p><p>
         This is an example of loading XML document from memory using one of these
-        functions (<a href="samples/load_memory.cpp" target="_top">samples/load_memory.cpp</a>);
+        functions (<a class="ulink" href="samples/load_memory.cpp" target="_top">samples/load_memory.cpp</a>);
         read the sample code for more examples:
-      </p>
-<p>
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">source</span><span class="special">[]</span> <span class="special">=</span> <span class="string">"&lt;mesh name='sphere'&gt;&lt;bounds&gt;0 0 1 1&lt;/bounds&gt;&lt;/mesh&gt;"</span><span class="special">;</span>
+</p><pre class="programlisting"><span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">source</span><span class="special">[]</span> <span class="special">=</span> <span class="string">"&lt;mesh name='sphere'&gt;&lt;bounds&gt;0 0 1 1&lt;/bounds&gt;&lt;/mesh&gt;"</span><span class="special">;</span>
 <span class="identifier">size_t</span> <span class="identifier">size</span> <span class="special">=</span> <span class="keyword">sizeof</span><span class="special">(</span><span class="identifier">source</span><span class="special">);</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="comment">// You can use load_buffer_inplace to load document from mutable memory block; the block's lifetime must exceed that of document
+</p><pre class="programlisting"><span class="comment">// You can use load_buffer_inplace to load document from mutable memory block; the block's lifetime must exceed that of document
 </span><span class="keyword">char</span><span class="special">*</span> <span class="identifier">buffer</span> <span class="special">=</span> <span class="keyword">new</span> <span class="keyword">char</span><span class="special">[</span><span class="identifier">size</span><span class="special">];</span>
 <span class="identifier">memcpy</span><span class="special">(</span><span class="identifier">buffer</span><span class="special">,</span> <span class="identifier">source</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
 
@@ -343,95 +244,70 @@
 
 <span class="comment">// You have to destroy the block yourself after the document is no longer used
 </span><span class="keyword">delete</span><span class="special">[]</span> <span class="identifier">buffer</span><span class="special">;</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         This is a simple example of loading XML document from file using streams
-        (<a href="samples/load_stream.cpp" target="_top">samples/load_stream.cpp</a>); read
+        (<a class="ulink" href="samples/load_stream.cpp" target="_top">samples/load_stream.cpp</a>); read
         the sample code for more complex examples involving wide streams and locales:
-      </p>
-<p>
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">ifstream</span> <span class="identifier">stream</span><span class="special">(</span><span class="string">"weekly-utf-8.xml"</span><span class="special">);</span>
+</p><pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">ifstream</span> <span class="identifier">stream</span><span class="special">(</span><span class="string">"weekly-utf-8.xml"</span><span class="special">);</span>
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">stream</span><span class="special">);</span>
-</pre>
-<p>
-      </p>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.access"></a><a class="link" href="quickstart.html#quickstart.main.access" title="Accessing document data"> Accessing document data</a>
-</h3></div></div></div>
-<p>
+</pre><p>
+      </p></div><div class="section" title="Accessing document data"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.access"></a><a class="link" href="quickstart.html#quickstart.main.access" title="Accessing document data"> Accessing document data</a></h3></div></div></div><p>
         pugixml features an extensive interface for getting various types of data
         from the document and for traversing the document. You can use various accessors
         to get node/attribute data, you can traverse the child node/attribute lists
         via accessors or iterators, you can do depth-first traversals with <code class="computeroutput"><span class="identifier">xml_tree_walker</span></code> objects, and you can use
         XPath for complex data-driven queries.
-      </p>
-<p>
+      </p><p>
         You can get node or attribute name via <code class="computeroutput"><span class="identifier">name</span><span class="special">()</span></code> accessor, and value via <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code> accessor. Note that both functions never
         return null pointers - they either return a string with the relevant content,
         or an empty string if name/value is absent or if the handle is null. Also
         there are two notable things for reading values:
-      </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
-<li class="listitem">
+      </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             It is common to store data as text contents of some node - i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;</span><span class="identifier">description</span><span class="special">&gt;</span><span class="identifier">This</span>
             <span class="identifier">is</span> <span class="identifier">a</span>
             <span class="identifier">node</span><span class="special">&lt;/</span><span class="identifier">description</span><span class="special">&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
             In this case, <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">description</span><span class="special">&gt;</span></code> node does not have a value, but instead
             has a child of type <code class="computeroutput"><span class="identifier">node_pcdata</span></code>
             with value <code class="computeroutput"><span class="string">"This is a node"</span></code>.
-            pugixml provides <code class="computeroutput"><span class="identifier">child_value</span><span class="special">()</span></code> helper functions to parse such data.
-          </li>
-<li class="listitem">
+            pugixml provides <code class="computeroutput"><span class="identifier">child_value</span><span class="special">()</span></code> and <code class="computeroutput"><span class="identifier">text</span><span class="special">()</span></code> helper functions to parse such data.
+          </li><li class="listitem">
             In many cases attribute values have types that are not strings - i.e.
             an attribute may always contain values that should be treated as integers,
             despite the fact that they are represented as strings in XML. pugixml
             provides several accessors that convert attribute value to some other
             type.
-          </li>
-</ul></div>
-<p>
-        This is an example of using these functions (<a href="samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
-      </p>
-<p>
+          </li></ul></div><p>
+        This is an example of using these functions (<a class="ulink" href="samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
+</p><pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
 <span class="special">{</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">();</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">": AllowRemote "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"AllowRemote"</span><span class="special">).</span><span class="identifier">as_bool</span><span class="special">();</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">", Timeout "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Timeout"</span><span class="special">).</span><span class="identifier">as_int</span><span class="special">();</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">", Description '"</span> <span class="special">&lt;&lt;</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">child_value</span><span class="special">(</span><span class="string">"Description"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">"'\n"</span><span class="special">;</span>
 <span class="special">}</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         Since a lot of document traversal consists of finding the node/attribute
         with the correct name, there are special functions for that purpose. For
         example, <code class="computeroutput"><span class="identifier">child</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">)</span></code>
         returns the first node which has the name <code class="computeroutput"><span class="string">"Tool"</span></code>,
         or null handle if there is no such node. This is an example of using such
-        functions (<a href="samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
-      </p>
-<p>
+        functions (<a class="ulink" href="samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool for *.dae generation: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">find_child_by_attribute</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">,</span> <span class="string">"OutputFileMasks"</span><span class="special">,</span> <span class="string">"*.dae"</span><span class="special">).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
+</p><pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool for *.dae generation: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">find_child_by_attribute</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">,</span> <span class="string">"OutputFileMasks"</span><span class="special">,</span> <span class="string">"*.dae"</span><span class="special">).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
 
 <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
 <span class="special">{</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
 <span class="special">}</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         Child node lists and attribute lists are simply double-linked lists; while
         you can use <code class="computeroutput"><span class="identifier">previous_sibling</span></code>/<code class="computeroutput"><span class="identifier">next_sibling</span></code> and other such functions for
         iteration, pugixml additionally provides node and attribute iterators, so
@@ -440,14 +316,11 @@
         iterators are invalidated if the node/attribute objects they're pointing
         to are removed from the tree; adding nodes/attributes does not invalidate
         any iterators.
-      </p>
-<p>
-        Here is an example of using iterators for document traversal (<a href="samples/traverse_iter.cpp" target="_top">samples/traverse_iter.cpp</a>):
-      </p>
-<p>
+      </p><p>
+        Here is an example of using iterators for document traversal (<a class="ulink" href="samples/traverse_iter.cpp" target="_top">samples/traverse_iter.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node_iterator</span> <span class="identifier">it</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">begin</span><span class="special">();</span> <span class="identifier">it</span> <span class="special">!=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">end</span><span class="special">();</span> <span class="special">++</span><span class="identifier">it</span><span class="special">)</span>
+</p><pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node_iterator</span> <span class="identifier">it</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">begin</span><span class="special">();</span> <span class="identifier">it</span> <span class="special">!=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">end</span><span class="special">();</span> <span class="special">++</span><span class="identifier">it</span><span class="special">)</span>
 <span class="special">{</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool:"</span><span class="special">;</span>
 
@@ -458,10 +331,37 @@
 
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 <span class="special">}</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
+        If your C++ compiler supports range-based for-loop (this is a C++11 feature,
+        at the time of writing it's supported by Microsoft Visual Studio 11 Beta,
+        GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional
+        helpers are provided to support this; note that they are also compatible
+        with <a class="ulink" href="http://www.boost.org/libs/foreach/" target="_top">Boost Foreach</a>,
+        and possibly other pre-C++11 foreach facilities.
+      </p><p>
+        Here is an example of using C++11 range-based for loop for document traversal
+        (<a class="ulink" href="samples/traverse_rangefor.cpp" target="_top">samples/traverse_rangefor.cpp</a>):
+      </p><p>
+        
+</p><pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span><span class="special">:</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">children</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
+<span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool:"</span><span class="special">;</span>
+
+    <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">attr</span><span class="special">:</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">attributes</span><span class="special">())</span>
+    <span class="special">{</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">name</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"="</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">value</span><span class="special">();</span>
+    <span class="special">}</span>
+
+    <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">child</span><span class="special">:</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">children</span><span class="special">())</span>
+    <span class="special">{</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">", child "</span> <span class="special">&lt;&lt;</span> <span class="identifier">child</span><span class="special">.</span><span class="identifier">name</span><span class="special">();</span>
+    <span class="special">}</span>
+
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="special">}</span>
+</pre><p>
+      </p><p>
         The methods described above allow traversal of immediate children of some
         node; if you want to do a deep tree traversal, you'll have to do it via a
         recursive function or some equivalent method. However, pugixml provides a
@@ -469,14 +369,11 @@
         to implement <code class="computeroutput"><span class="identifier">xml_tree_walker</span></code>
         interface and to call <code class="computeroutput"><span class="identifier">traverse</span></code>
         function.
-      </p>
-<p>
-        This is an example of traversing tree hierarchy with xml_tree_walker (<a href="samples/traverse_walker.cpp" target="_top">samples/traverse_walker.cpp</a>):
-      </p>
-<p>
+      </p><p>
+        This is an example of traversing tree hierarchy with xml_tree_walker (<a class="ulink" href="samples/traverse_walker.cpp" target="_top">samples/traverse_walker.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="keyword">struct</span> <span class="identifier">simple_walker</span><span class="special">:</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_tree_walker</span>
+</p><pre class="programlisting"><span class="keyword">struct</span> <span class="identifier">simple_walker</span><span class="special">:</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_tree_walker</span>
 <span class="special">{</span>
     <span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="identifier">for_each</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">)</span>
     <span class="special">{</span>
@@ -487,27 +384,20 @@
         <span class="keyword">return</span> <span class="keyword">true</span><span class="special">;</span> <span class="comment">// continue traversal
 </span>    <span class="special">}</span>
 <span class="special">};</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">simple_walker</span> <span class="identifier">walker</span><span class="special">;</span>
+</p><pre class="programlisting"><span class="identifier">simple_walker</span> <span class="identifier">walker</span><span class="special">;</span>
 <span class="identifier">doc</span><span class="special">.</span><span class="identifier">traverse</span><span class="special">(</span><span class="identifier">walker</span><span class="special">);</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         Finally, for complex queries often a higher-level DSL is needed. pugixml
         provides an implementation of XPath 1.0 language for such queries. The complete
         description of XPath usage can be found in the manual, but here are some
         examples:
-      </p>
-<p>
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote='true' and @DeriveCaptionFrom='lastparam']"</span><span class="special">);</span>
+</p><pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote='true' and @DeriveCaptionFrom='lastparam']"</span><span class="special">);</span>
 
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tools:"</span><span class="special">;</span>
 
@@ -520,25 +410,11 @@
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node</span> <span class="identifier">build_tool</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="string">"//Tool[contains(Description, 'build system')]"</span><span class="special">);</span>
 
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"\nBuild tool: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">build_tool</span><span class="special">.</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
-</pre>
-<p>
-      </p>
-<div class="caution"><table border="0" summary="Caution">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
-<th align="left">Caution</th>
-</tr>
-<tr><td align="left" valign="top"><p>
+</pre><p>
+      </p><div class="caution" title="Caution"><table border="0" summary="Caution"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td><th align="left">Caution</th></tr><tr><td align="left" valign="top"><p>
           XPath functions throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
           objects on error; the sample above does not catch these exceptions.
-        </p></td></tr>
-</table></div>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.modify"></a><a class="link" href="quickstart.html#quickstart.main.modify" title="Modifying document data"> Modifying document data</a>
-</h3></div></div></div>
-<p>
+        </p></td></tr></table></div></div><div class="section" title="Modifying document data"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.modify"></a><a class="link" href="quickstart.html#quickstart.main.modify" title="Modifying document data"> Modifying document data</a></h3></div></div></div><p>
         The document in pugixml is fully mutable: you can completely change the document
         structure and modify the data of nodes/attributes. All functions take care
         of memory management and structural integrity themselves, so they always
@@ -549,27 +425,23 @@
         memory you can create documents from scratch with pugixml and later save
         them to file/stream instead of relying on error-prone manual text writing
         and without too much overhead.
-      </p>
-<p>
+      </p><p>
         All member functions that change node/attribute data or structure are non-constant
         and thus can not be called on constant handles. However, you can easily convert
         constant handle to non-constant one by simple assignment: <code class="computeroutput"><span class="keyword">void</span>
         <span class="identifier">foo</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="special">{</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">nc</span> <span class="special">=</span> <span class="identifier">n</span><span class="special">;</span> <span class="special">}</span></code>, so const-correctness
         here mainly provides additional documentation.
-      </p>
-<p>
+      </p><p>
         As discussed before, nodes can have name and value, both of which are strings.
         Depending on node type, name or value may be absent. You can use <code class="computeroutput"><span class="identifier">set_name</span></code> and <code class="computeroutput"><span class="identifier">set_value</span></code>
         member functions to set them. Similar functions are available for attributes;
         however, the <code class="computeroutput"><span class="identifier">set_value</span></code> function
         is overloaded for some other types except strings, like floating-point numbers.
         Also, attribute value can be set using an assignment operator. This is an
-        example of setting node/attribute name and value (<a href="samples/modify_base.cpp" target="_top">samples/modify_base.cpp</a>):
-      </p>
-<p>
+        example of setting node/attribute name and value (<a class="ulink" href="samples/modify_base.cpp" target="_top">samples/modify_base.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
+</p><pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 
 <span class="comment">// change node name
 </span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"notnode"</span><span class="special">);</span>
@@ -581,13 +453,10 @@
 
 <span class="comment">// we can't change value of the element or name of the comment
 </span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"1"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"2"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">attr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"id"</span><span class="special">);</span>
+</p><pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">attr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"id"</span><span class="special">);</span>
 
 <span class="comment">// change attribute name/value
 </span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"key"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"345"</span><span class="special">);</span>
@@ -600,10 +469,8 @@
 <span class="comment">// we can also use assignment operators for more concise code
 </span><span class="identifier">attr</span> <span class="special">=</span> <span class="keyword">true</span><span class="special">;</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"final attribute value: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         Nodes and attributes do not exist without a document tree, so you can't create
         them without adding them to some document. A node or attribute can be created
         at the end of node/attribute list or before/after some other node. All insertion
@@ -611,26 +478,16 @@
         handle on failure. Even if the operation fails (for example, if you're trying
         to add a child node to PCDATA node), the document remains in consistent state,
         but the requested node/attribute is not added.
-      </p>
-<div class="caution"><table border="0" summary="Caution">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td>
-<th align="left">Caution</th>
-</tr>
-<tr><td align="left" valign="top"><p>
+      </p><div class="caution" title="Caution"><table border="0" summary="Caution"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="images/caution.png"></td><th align="left">Caution</th></tr><tr><td align="left" valign="top"><p>
           attribute() and child() functions do not add attributes or nodes to the
           tree, so code like <code class="computeroutput"><span class="identifier">node</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"id"</span><span class="special">)</span> <span class="special">=</span> <span class="number">123</span><span class="special">;</span></code> will not do anything if <code class="computeroutput"><span class="identifier">node</span></code> does not have an attribute with
           name <code class="computeroutput"><span class="string">"id"</span></code>. Make sure
           you're operating with existing attributes/nodes by adding them if necessary.
-        </p></td></tr>
-</table></div>
-<p>
-        This is an example of adding new attributes/nodes to the document (<a href="samples/modify_add.cpp" target="_top">samples/modify_add.cpp</a>):
-      </p>
-<p>
+        </p></td></tr></table></div><p>
+        This is an example of adding new attributes/nodes to the document (<a class="ulink" href="samples/modify_add.cpp" target="_top">samples/modify_add.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="comment">// add node with some name
+</p><pre class="programlisting"><span class="comment">// add node with some name
 </span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 
 <span class="comment">// add description node with text child
@@ -644,10 +501,8 @@
 </span><span class="identifier">param</span><span class="special">.</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">)</span> <span class="special">=</span> <span class="string">"version"</span><span class="special">;</span>
 <span class="identifier">param</span><span class="special">.</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="string">"value"</span><span class="special">)</span> <span class="special">=</span> <span class="number">1.1</span><span class="special">;</span>
 <span class="identifier">param</span><span class="special">.</span><span class="identifier">insert_attribute_after</span><span class="special">(</span><span class="string">"type"</span><span class="special">,</span> <span class="identifier">param</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">))</span> <span class="special">=</span> <span class="string">"float"</span><span class="special">;</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         If you do not want your document to contain some node or attribute, you can
         remove it with <code class="computeroutput"><span class="identifier">remove_attribute</span></code>
         and <code class="computeroutput"><span class="identifier">remove_child</span></code> functions.
@@ -656,14 +511,11 @@
         node also invalidates all past-the-end iterators to its attribute or child
         node list. Be careful to ensure that all such handles and iterators either
         do not exist or are not used after the attribute/node is removed.
-      </p>
-<p>
-        This is an example of removing attributes/nodes from the document (<a href="samples/modify_remove.cpp" target="_top">samples/modify_remove.cpp</a>):
-      </p>
-<p>
+      </p><p>
+        This is an example of removing attributes/nodes from the document (<a class="ulink" href="samples/modify_remove.cpp" target="_top">samples/modify_remove.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="comment">// remove description node with the whole subtree
+</p><pre class="programlisting"><span class="comment">// remove description node with the whole subtree
 </span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 <span class="identifier">node</span><span class="special">.</span><span class="identifier">remove_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
 
@@ -674,15 +526,8 @@
 <span class="comment">// we can also remove nodes/attributes by handles
 </span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">id</span> <span class="special">=</span> <span class="identifier">param</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">);</span>
 <span class="identifier">param</span><span class="special">.</span><span class="identifier">remove_attribute</span><span class="special">(</span><span class="identifier">id</span><span class="special">);</span>
-</pre>
-<p>
-      </p>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.saving"></a><a class="link" href="quickstart.html#quickstart.main.saving" title="Saving document"> Saving document</a>
-</h3></div></div></div>
-<p>
+</pre><p>
+      </p></div><div class="section" title="Saving document"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.saving"></a><a class="link" href="quickstart.html#quickstart.main.saving" title="Saving document"> Saving document</a></h3></div></div></div><p>
         Often after creating a new document or loading the existing one and processing
         it, it is necessary to save the result back to file. Also it is occasionally
         useful to output the whole document or a subtree to some stream; use cases
@@ -691,28 +536,22 @@
         the document to a file, stream or another generic transport interface; these
         functions allow to customize the output format, and also perform necessary
         encoding conversions.
-      </p>
-<p>
+      </p><p>
         Before writing to the destination the node/attribute data is properly formatted
         according to the node type; all special XML symbols, such as &lt; and &amp;,
         are properly escaped. In order to guard against forgotten node/attribute
         names, empty node/attribute names are printed as <code class="computeroutput"><span class="string">":anonymous"</span></code>.
         For well-formed output, make sure all node and attribute names are set to
         meaningful values.
-      </p>
-<p>
+      </p><p>
         If you want to save the whole document to a file, you can use the <code class="computeroutput"><span class="identifier">save_file</span></code> function, which returns <code class="computeroutput"><span class="keyword">true</span></code> on success. This is a simple example
-        of saving XML document to file (<a href="samples/save_file.cpp" target="_top">samples/save_file.cpp</a>):
-      </p>
-<p>
+        of saving XML document to file (<a class="ulink" href="samples/save_file.cpp" target="_top">samples/save_file.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="comment">// save document to file
+</p><pre class="programlisting"><span class="comment">// save document to file
 </span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Saving result: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">save_file</span><span class="special">(</span><span class="string">"save_file_output.xml"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         To enhance interoperability pugixml provides functions for saving document
         to any object which implements C++ <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">ostream</span></code>
         interface. This allows you to save documents to any standard C++ stream (i.e.
@@ -720,20 +559,15 @@
         Most notably, this allows for easy debug output, since you can use <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span></code>
         stream as saving target. There are two functions, one works with narrow character
         streams, another handles wide character ones.
-      </p>
-<p>
-        This is a simple example of saving XML document to standard output (<a href="samples/save_stream.cpp" target="_top">samples/save_stream.cpp</a>):
-      </p>
-<p>
+      </p><p>
+        This is a simple example of saving XML document to standard output (<a class="ulink" href="samples/save_stream.cpp" target="_top">samples/save_stream.cpp</a>):
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="comment">// save document to standard output
+</p><pre class="programlisting"><span class="comment">// save document to standard output
 </span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Document:\n"</span><span class="special">;</span>
 <span class="identifier">doc</span><span class="special">.</span><span class="identifier">save</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">);</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         All of the above saving functions are implemented in terms of writer interface.
         This is a simple interface with a single function, which is called several
         times during output process with chunks of document data as input. In order
@@ -741,16 +575,13 @@
         should create an object which implements <code class="computeroutput"><span class="identifier">xml_writer_file</span></code>
         interface and pass it to <code class="computeroutput"><span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span></code>
         function.
-      </p>
-<p>
+      </p><p>
         This is a simple example of custom writer for saving document data to STL
-        string (<a href="samples/save_custom_writer.cpp" target="_top">samples/save_custom_writer.cpp</a>);
+        string (<a class="ulink" href="samples/save_custom_writer.cpp" target="_top">samples/save_custom_writer.cpp</a>);
         read the sample code for more complex examples:
-      </p>
-<p>
+      </p><p>
         
-</p>
-<pre class="programlisting"><span class="keyword">struct</span> <span class="identifier">xml_string_writer</span><span class="special">:</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_writer</span>
+</p><pre class="programlisting"><span class="keyword">struct</span> <span class="identifier">xml_string_writer</span><span class="special">:</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_writer</span>
 <span class="special">{</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">result</span><span class="special">;</span>
 
@@ -759,58 +590,38 @@
         <span class="identifier">result</span> <span class="special">+=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">(</span><span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">data</span><span class="special">),</span> <span class="identifier">size</span><span class="special">);</span>
     <span class="special">}</span>
 <span class="special">};</span>
-</pre>
-<p>
-      </p>
-<p>
+</pre><p>
+      </p><p>
         While the previously described functions save the whole document to the destination,
         it is easy to save a single subtree. Instead of calling <code class="computeroutput"><span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">save</span></code>,
         just call <code class="computeroutput"><span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">print</span></code> function on the target node. You
         can save node contents to C++ IOstream object or custom writer in this way.
-        Saving a subtree slightly differs from saving the whole document; <a href="manual/saving.html#manual.saving.subtree" target="_top">read the manual</a> for
+        Saving a subtree slightly differs from saving the whole document; <a class="ulink" href="manual/saving.html#manual.saving.subtree" target="_top">read the manual</a> for
         more information.
-      </p>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.feedback"></a><a class="link" href="quickstart.html#quickstart.main.feedback" title="Feedback"> Feedback</a>
-</h3></div></div></div>
-<p>
-        If you believe you've found a bug in pugixml, please file an issue via <a href="http://code.google.com/p/pugixml/issues/entry" target="_top">issue submission form</a>.
+      </p></div><div class="section" title="Feedback"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.feedback"></a><a class="link" href="quickstart.html#quickstart.main.feedback" title="Feedback"> Feedback</a></h3></div></div></div><p>
+        If you believe you've found a bug in pugixml, please file an issue via <a class="ulink" href="http://code.google.com/p/pugixml/issues/entry" target="_top">issue submission form</a>.
         Be sure to include the relevant information so that the bug can be reproduced:
         the version of pugixml, compiler version and target architecture, the code
         that uses pugixml and exhibits the bug, etc. Feature requests and contributions
         can be filed as issues, too.
-      </p>
-<a name="email"></a><p>
+      </p><a name="email"></a><p>
         If filing an issue is not possible due to privacy or other concerns, you
-        can contact pugixml author by e-mail directly: <a href="mailto:arseny.kapoulkine@gmail.com" target="_top">arseny.kapoulkine@gmail.com</a>.
-      </p>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="quickstart.main.license"></a><a class="link" href="quickstart.html#quickstart.main.license" title="License"> License</a>
-</h3></div></div></div>
-<p>
+        can contact pugixml author by e-mail directly: <a class="ulink" href="mailto:arseny.kapoulkine@gmail.com" target="_top">arseny.kapoulkine@gmail.com</a>.
+      </p></div><div class="section" title="License"><div class="titlepage"><div><div><h3 class="title"><a name="quickstart.main.license"></a><a class="link" href="quickstart.html#quickstart.main.license" title="License"> License</a></h3></div></div></div><p>
         The pugixml library is distributed under the MIT license:
-      </p>
-<div class="blockquote"><blockquote class="blockquote">
-<p>
-          Copyright (c) 2006-2010 Arseny Kapoulkine
-        </p>
-<p>
+      </p><div class="blockquote"><blockquote class="blockquote"><p>
+          Copyright (c) 2006-2012 Arseny Kapoulkine
+        </p><p>
           Permission is hereby granted, free of charge, to any person obtaining a
           copy of this software and associated documentation files (the "Software"),
           to deal in the Software without restriction, including without limitation
           the rights to use, copy, modify, merge, publish, distribute, sublicense,
           and/or sell copies of the Software, and to permit persons to whom the Software
           is furnished to do so, subject to the following conditions:
-        </p>
-<p>
+        </p><p>
           The above copyright notice and this permission notice shall be included
           in all copies or substantial portions of the Software.
-        </p>
-<p>
+        </p><p>
           THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
           EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
           FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
@@ -818,28 +629,12 @@
           LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
           FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
           IN THE SOFTWARE.
-        </p>
-</blockquote></div>
-<p>
+        </p></blockquote></div><p>
         This means that you can freely use pugixml in your applications, both open-source
         and proprietary. If you use pugixml in a product, it is sufficient to add
         an acknowledgment like this to the product distribution:
-      </p>
-<div class="blockquote"><blockquote class="blockquote"><p>
+      </p><div class="blockquote"><blockquote class="blockquote"><p>
           This software is based on pugixml library (http://pugixml.org).<br>
 pugixml
-          is Copyright (C) 2006-2010 Arseny Kapoulkine.
-        </p></blockquote></div>
-</div>
-</div>
-<div class="footnotes">
-<br><hr width="100" align="left">
-<div class="footnote"><p><sup>[<a name="ftn.trademarks" href="#trademarks" class="para">1</a>] </sup>All trademarks used are properties of their respective owners.</p></div>
-</div>
-</div>
-<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: October 31, 2010 at 07:44:52 GMT</small></p></td>
-<td align="right"><div class="copyright-footer"></div></td>
-</tr></table>
-</body>
-</html>
+          is Copyright (C) 2006-2012 Arseny Kapoulkine.
+        </p></blockquote></div></div></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.trademarks" href="#trademarks" class="para">1</a>] </sup>All trademarks used are properties of their respective owners.</p></div></div></div></body></html>

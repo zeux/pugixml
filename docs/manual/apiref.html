@@ -4,15 +4,15 @@
 <title>API Reference</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
 <link rel="prev" href="changes.html" title="Changelog">
 <link rel="next" href="toc.html" title="Table of Contents">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -59,6 +59,18 @@
         </li>
 <li class="listitem">
           <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_FUNCTION">PUGIXML_FUNCTION</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_MEMORY_PAGE_SIZE">PUGIXML_MEMORY_PAGE_SIZE</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_MEMORY_OUTPUT_STACK">PUGIXML_MEMORY_OUTPUT_STACK</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_MEMORY_XPATH_PAGE_SIZE">PUGIXML_MEMORY_XPATH_PAGE_SIZE</a>
+        </li>
+<li class="listitem">
+          <code class="computeroutput"><span class="preprocessor">#define</span> </code><a class="link" href="install.html#PUGIXML_HEADER_ONLY">PUGIXML_HEADER_ONLY</a>
         </li>
 </ul></div>
 <p>
@@ -199,7 +211,10 @@
                 <a class="link" href="loading.html#encoding_utf32">encoding_utf32</a>
               </li>
 <li class="listitem">
-                <a class="link" href="loading.html#encoding_wchar">encoding_wchar</a> <br><br>
+                <a class="link" href="loading.html#encoding_wchar">encoding_wchar</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#encoding_latin1">encoding_latin1</a> <br><br>
 
               </li>
 </ul></div>
@@ -242,7 +257,13 @@
                 <a class="link" href="saving.html#format_no_declaration">format_no_declaration</a>
               </li>
 <li class="listitem">
+                <a class="link" href="saving.html#format_no_escapes">format_no_escapes</a>
+              </li>
+<li class="listitem">
                 <a class="link" href="saving.html#format_raw">format_raw</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="saving.html#format_save_file_text">format_save_file_text</a>
               </li>
 <li class="listitem">
                 <a class="link" href="saving.html#format_write_bom">format_write_bom</a> <br><br>
@@ -285,6 +306,9 @@
               </li>
 <li class="listitem">
                 <a class="link" href="loading.html#parse_ws_pcdata">parse_ws_pcdata</a>
+              </li>
+<li class="listitem">
+                <a class="link" href="loading.html#parse_ws_pcdata_single">parse_ws_pcdata_single</a>
               </li>
 <li class="listitem">
                 <a class="link" href="loading.html#parse_wconv_attribute">parse_wconv_attribute</a>
@@ -364,20 +388,38 @@
 
               </li>
 <li class="listitem">
-                <code class="computeroutput"><span class="keyword">int</span> </code><a class="link" href="access.html#xml_attribute::as_int">as_int</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_attribute::as_string">as_string</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">def</span> <span class="special">=</span>
+                <span class="string">""</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">int</span> </code><a class="link" href="access.html#xml_attribute::as_int">as_int</a><code class="computeroutput"><span class="special">(</span><span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span>
+                <span class="number">0</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
               </li>
 <li class="listitem">
                 <code class="computeroutput"><span class="keyword">unsigned</span> <span class="keyword">int</span>
-                </code><a class="link" href="access.html#xml_attribute::as_uint">as_uint</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+                </code><a class="link" href="access.html#xml_attribute::as_uint">as_uint</a><code class="computeroutput"><span class="special">(</span><span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">def</span>
+                <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code>
               </li>
 <li class="listitem">
-                <code class="computeroutput"><span class="keyword">double</span> </code><a class="link" href="access.html#xml_attribute::as_double">as_double</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+                <code class="computeroutput"><span class="keyword">double</span> </code><a class="link" href="access.html#xml_attribute::as_double">as_double</a><code class="computeroutput"><span class="special">(</span><span class="keyword">double</span>
+                <span class="identifier">def</span> <span class="special">=</span>
+                <span class="number">0</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
               </li>
 <li class="listitem">
-                <code class="computeroutput"><span class="keyword">float</span> </code><a class="link" href="access.html#xml_attribute::as_float">as_float</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+                <code class="computeroutput"><span class="keyword">float</span> </code><a class="link" href="access.html#xml_attribute::as_float">as_float</a><code class="computeroutput"><span class="special">(</span><span class="keyword">float</span> <span class="identifier">def</span> <span class="special">=</span>
+                <span class="number">0</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
               </li>
 <li class="listitem">
-                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="access.html#xml_attribute::as_bool">as_bool</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="access.html#xml_attribute::as_bool">as_bool</a><code class="computeroutput"><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">def</span> <span class="special">=</span>
+                <span class="keyword">false</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
 
               </li>
 <li class="listitem">
@@ -519,6 +561,18 @@
 
               </li>
 <li class="listitem">
+                <span class="emphasis"><em>implementation-defined type</em></span> <a class="link" href="access.html#xml_node::children">children</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <span class="emphasis"><em>implementation-defined type</em></span> <a class="link" href="access.html#xml_node::children">children</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">name</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <span class="emphasis"><em>implementation-defined type</em></span> <a class="link" href="access.html#xml_node::attributes">attributes</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
                 <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_node::child">child</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
                 <span class="identifier">name</span><span class="special">)</span>
                 <span class="keyword">const</span><span class="special">;</span></code>
@@ -557,7 +611,9 @@
                 <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_node::child_value">child_value</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
                 <span class="identifier">name</span><span class="special">)</span>
                 <span class="keyword">const</span><span class="special">;</span></code>
-                <br><br>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_text</span> </code><a class="link" href="access.html#xml_node::text">text</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
 
               </li>
 <li class="listitem">
@@ -1024,6 +1080,108 @@
 </ul></div>
         </li>
 <li class="listitem">
+          <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="access.html#xml_text">xml_text</a>
+          <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="access.html#xml_text::empty">empty</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">operator</span> </code><a class="link" href="access.html#xml_text::unspecified_bool_type">xml_text::unspecified_bool_type</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_text::get">xml_text::get</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> </code><a class="link" href="access.html#xml_text::as_string">as_string</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">def</span> <span class="special">=</span>
+                <span class="string">""</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">int</span> </code><a class="link" href="access.html#xml_text::as_int">as_int</a><code class="computeroutput"><span class="special">(</span><span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span>
+                <span class="number">0</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">unsigned</span> <span class="keyword">int</span>
+                </code><a class="link" href="access.html#xml_text::as_uint">as_uint</a><code class="computeroutput"><span class="special">(</span><span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">def</span>
+                <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">double</span> </code><a class="link" href="access.html#xml_text::as_double">as_double</a><code class="computeroutput"><span class="special">(</span><span class="keyword">double</span>
+                <span class="identifier">def</span> <span class="special">=</span>
+                <span class="number">0</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">float</span> </code><a class="link" href="access.html#xml_text::as_float">as_float</a><code class="computeroutput"><span class="special">(</span><span class="keyword">float</span> <span class="identifier">def</span> <span class="special">=</span>
+                <span class="number">0</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="access.html#xml_text::as_bool">as_bool</a><code class="computeroutput"><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">def</span> <span class="special">=</span>
+                <span class="keyword">false</span><span class="special">)</span>
+                <span class="keyword">const</span><span class="special">;</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_text::set">set</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_text::set">set</a><code class="computeroutput"><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_text::set">set</a><code class="computeroutput"><span class="special">(</span><span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_text::set">set</a><code class="computeroutput"><span class="special">(</span><span class="keyword">double</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="keyword">bool</span> </code><a class="link" href="modify.html#xml_text::set">set</a><code class="computeroutput"><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_text</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_text::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_text</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_text::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_text</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_text::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">unsigned</span>
+                <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_text</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_text::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">double</span>
+                <span class="identifier">rhs</span><span class="special">);</span></code>
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_text</span><span class="special">&amp;</span>
+                </code><a class="link" href="modify.html#xml_text::assign">operator=</a><code class="computeroutput"><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span></code>
+                <br><br>
+
+              </li>
+<li class="listitem">
+                <code class="computeroutput"><span class="identifier">xml_node</span> </code><a class="link" href="access.html#xml_text::data">data</a><code class="computeroutput"><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span></code> <br><br>
+
+              </li>
+</ul></div>
+        </li>
+<li class="listitem">
           <code class="computeroutput"><span class="keyword">class</span> </code><a class="link" href="saving.html#xml_writer">xml_writer</a>
           <div class="itemizedlist"><ul class="itemizedlist" type="circle"><li class="listitem">
                 <code class="computeroutput"><span class="keyword">virtual</span> <span class="keyword">void</span>
@@ -1371,7 +1529,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -1379,7 +1537,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

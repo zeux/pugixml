@@ -4,15 +4,15 @@
 <title>Loading document</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
 <link rel="prev" href="dom.html" title="Document object model">
 <link rel="next" href="access.html" title="Accessing document data">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -282,10 +282,6 @@
 </pre>
 <p>
       </p>
-<p>
-        Stream loading requires working seek/tell functions and therefore may fail
-        when used with some stream implementations like gzstream.
-      </p>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
@@ -384,7 +380,9 @@
         returned by <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code>
         function may change from version to version, so any complex status handling
         should be based on <code class="computeroutput"><span class="identifier">status</span></code>
-        value.
+        value. Note that <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> returns a <code class="computeroutput"><span class="keyword">char</span></code>
+        string even in <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code>;
+        you'll have to call <a class="link" href="dom.html#as_wide">as_wide</a> to get the <code class="computeroutput"><span class="keyword">wchar_t</span></code> string.
       </p>
 <p>
         If parsing failed because the source data was not a valid XML, the resulting
@@ -533,6 +531,25 @@
             <code class="computeroutput"><span class="string">" "</span></code>), and only
             one child when <code class="computeroutput"><span class="identifier">parse_ws_pcdata</span></code>
             is not set. This flag is <span class="bold"><strong>off</strong></span> by default.
+            <br><br>
+
+          </li>
+<li class="listitem">
+            <a name="parse_ws_pcdata_single"></a><code class="literal">parse_ws_pcdata_single</code> determines
+            if whitespace-only PCDATA nodes that have no sibling nodes are to be
+            put in DOM tree. In some cases application needs to parse the whitespace-only
+            contents of nodes, i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;</span>
+            <span class="special">&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>, but is not interested in whitespace
+            markup elsewhere. It is possible to use <a class="link" href="loading.html#parse_ws_pcdata">parse_ws_pcdata</a>
+            flag in this case, but it results in excessive allocations and complicates
+            document processing in some cases; this flag is intended to avoid that.
+            As an example, after parsing XML string <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;</span>
+            <span class="special">&lt;</span><span class="identifier">a</span><span class="special">&gt;</span> <span class="special">&lt;/</span><span class="identifier">a</span><span class="special">&gt;</span> <span class="special">&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code> with <code class="computeroutput"><span class="identifier">parse_ws_pcdata_single</span></code>
+            flag set, <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;</span></code> element will have one child <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">a</span><span class="special">&gt;</span></code>, and <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">a</span><span class="special">&gt;</span></code>
+            element will have one child with type <a class="link" href="dom.html#node_pcdata">node_pcdata</a>
+            and value <code class="computeroutput"><span class="string">" "</span></code>.
+            This flag has no effect if <a class="link" href="loading.html#parse_ws_pcdata">parse_ws_pcdata</a>
+            is enabled. This flag is <span class="bold"><strong>off</strong></span> by default.
           </li>
 </ul></div>
 <p>
@@ -581,8 +598,7 @@
             attributes. This means, that after attribute values are normalized as
             if <a class="link" href="loading.html#parse_wconv_attribute">parse_wconv_attribute</a>
             was set, leading and trailing space characters are removed, and all sequences
-            of space characters are replaced by a single space character. The value
-            of <a class="link" href="loading.html#parse_wconv_attribute">parse_wconv_attribute</a>
+            of space characters are replaced by a single space character. <a class="link" href="loading.html#parse_wconv_attribute">parse_wconv_attribute</a>
             has no effect if this flag is on. This flag is <span class="bold"><strong>off</strong></span>
             by default.
           </li>
@@ -755,6 +771,10 @@
             or <code class="computeroutput"><span class="identifier">encoding_utf32</span></code>, depending
             on <code class="computeroutput"><span class="keyword">wchar_t</span></code> size.
           </li>
+<li class="listitem">
+            <a name="encoding_latin1"></a><code class="literal">encoding_latin1</code> corresponds to ISO-8859-1
+            encoding (also known as Latin-1).
+          </li>
 </ul></div>
 <p>
         The algorithm used for <code class="computeroutput"><span class="identifier">encoding_auto</span></code>
@@ -828,7 +848,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -836,7 +856,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

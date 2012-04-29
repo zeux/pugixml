@@ -4,15 +4,15 @@
 <title>Document object model</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
 <link rel="prev" href="install.html" title="Installation">
 <link rel="next" href="loading.html" title="Loading document">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -40,6 +40,7 @@
 <dd><dl>
 <dt><span class="section"><a href="dom.html#manual.dom.memory.custom"> Custom memory allocation/deallocation
         functions</a></span></dt>
+<dt><span class="section"><a href="dom.html#manual.dom.memory.tuning"> Memory consumption tuning</a></span></dt>
 <dt><span class="section"><a href="dom.html#manual.dom.memory.internals"> Document memory management
         internals</a></span></dt>
 </dl></dd>
@@ -102,16 +103,17 @@
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Plain character data nodes (<a name="node_pcdata"></a><code class="literal">node_pcdata</code>)
             represent plain text in XML. PCDATA nodes have a value, but do not have
-            a name or children/attributes. Note that plain character data is not
-            a part of the element node but instead has its own node; for example,
-            an element node can have several child PCDATA nodes. The example XML
-            representation of text nodes is as follows:
+            a name or children/attributes. Note that <span class="bold"><strong>plain
+            character data is not a part of the element node but instead has its
+            own node</strong></span>; an element node can have several child PCDATA nodes.
+            The example XML representation of text nodes is as follows:
           </li></ul></div>
 <pre class="programlisting"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;</span> <span class="identifier">text1</span> <span class="special">&lt;</span><span class="identifier">child</span><span class="special">/&gt;</span> <span class="identifier">text2</span> <span class="special">&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span>
 </pre>
 <div class="blockquote"><blockquote class="blockquote"><p>
           Here <code class="computeroutput"><span class="string">"node"</span></code> element
-          has three children, two of which are PCDATA nodes with values <code class="computeroutput"><span class="string">"text1"</span></code> and <code class="computeroutput"><span class="string">"text2"</span></code>.
+          has three children, two of which are PCDATA nodes with values <code class="computeroutput"><span class="string">" text1 "</span></code> and <code class="computeroutput"><span class="string">"
+          text2 "</span></code>.
         </p></blockquote></div>
 <div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
             Character data nodes (<a name="node_cdata"></a><code class="literal">node_cdata</code>) represent
@@ -617,6 +619,54 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
+<a name="manual.dom.memory.tuning"></a><a class="link" href="dom.html#manual.dom.memory.tuning" title="Memory consumption tuning"> Memory consumption tuning</a>
+</h4></div></div></div>
+<p>
+          There are several important buffering optimizations in pugixml that rely
+          on predefined constants. These constants have default values that were
+          tuned for common usage patterns; for some applications, changing these
+          constants might improve memory consumption or increase performance. Changing
+          these constants is not recommended unless their default values result in
+          visible problems.
+        </p>
+<p>
+          These constants can be tuned via configuration defines, as discussed in
+          <a class="xref" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
+        options</a>; it is recommended to set them in <code class="filename">pugiconfig.hpp</code>.
+        </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+              <code class="computeroutput"><span class="identifier">PUGIXML_MEMORY_PAGE_SIZE</span></code>
+              controls the page size for document memory allocation. Memory for node/attribute
+              objects is allocated in pages of the specified size. The default size
+              is 32 Kb; for some applications the size is too large (i.e. embedded
+              systems with little heap space or applications that keep lots of XML
+              documents in memory). A minimum size of 1 Kb is recommended. <br><br>
+
+            </li>
+<li class="listitem">
+              <code class="computeroutput"><span class="identifier">PUGIXML_MEMORY_OUTPUT_STACK</span></code>
+              controls the cumulative stack space required to output the node. Any
+              output operation (i.e. saving a subtree to file) uses an internal buffering
+              scheme for performance reasons. The default size is 10 Kb; if you're
+              using node output from threads with little stack space, decreasing
+              this value can prevent stack overflows. A minimum size of 1 Kb is recommended.
+              <br><br>
+
+            </li>
+<li class="listitem">
+              <code class="computeroutput"><span class="identifier">PUGIXML_MEMORY_XPATH_PAGE_SIZE</span></code>
+              controls the page size for XPath memory allocation. Memory for XPath
+              query objects as well as internal memory for XPath evaluation is allocated
+              in pages of the specified size. The default size is 4 Kb; if you have
+              a lot of resident XPath query objects, you might need to decrease the
+              size to improve memory consumption. A minimum size of 256 bytes is
+              recommended.
+            </li>
+</ul></div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
 <a name="manual.dom.memory.internals"></a><a class="link" href="dom.html#manual.dom.memory.internals" title="Document memory management internals"> Document memory management
         internals</a>
 </h4></div></div></div>
@@ -657,7 +707,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -665,7 +715,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

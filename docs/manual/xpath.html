@@ -4,15 +4,15 @@
 <title>XPath</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
 <link rel="prev" href="saving.html" title="Saving document">
 <link rel="next" href="changes.html" title="Changelog">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -624,7 +624,11 @@
 <a name="xpath_parse_result::description"></a><p>
         <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code>
         member function can be used to get the error message; it never returns the
-        null pointer, so you can safely use description() even if query parsing succeeded.
+        null pointer, so you can safely use <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> even if query parsing succeeded. Note that
+        <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code>
+        returns a <code class="computeroutput"><span class="keyword">char</span></code> string even in
+        <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code>; you'll
+        have to call <a class="link" href="dom.html#as_wide">as_wide</a> to get the <code class="computeroutput"><span class="keyword">wchar_t</span></code> string.
       </p>
 <a name="xpath_parse_result::offset"></a><p>
         In addition to the error message, parsing result has an <code class="computeroutput"><span class="identifier">offset</span></code>
@@ -717,7 +721,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -725,7 +729,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

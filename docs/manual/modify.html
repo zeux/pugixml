@@ -4,15 +4,15 @@
 <title>Modifying document data</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
 <link rel="prev" href="access.html" title="Accessing document data">
 <link rel="next" href="saving.html" title="Saving document">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -35,6 +35,7 @@
 <dt><span class="section"><a href="modify.html#manual.modify.attrdata"> Setting attribute data</a></span></dt>
 <dt><span class="section"><a href="modify.html#manual.modify.add"> Adding nodes/attributes</a></span></dt>
 <dt><span class="section"><a href="modify.html#manual.modify.remove"> Removing nodes/attributes</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.text"> Working with text contents</a></span></dt>
 <dt><span class="section"><a href="modify.html#manual.modify.clone"> Cloning nodes/attributes</a></span></dt>
 </dl></div>
 <p>
@@ -406,6 +407,85 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
+<a name="manual.modify.text"></a><a class="link" href="modify.html#manual.modify.text" title="Working with text contents"> Working with text contents</a>
+</h3></div></div></div>
+<p>
+        pugixml provides a special class, <code class="computeroutput"><span class="identifier">xml_text</span></code>,
+        to work with text contents stored as a value of some node, i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;</span><span class="identifier">description</span><span class="special">&gt;</span><span class="identifier">This</span> <span class="identifier">is</span> <span class="identifier">a</span> <span class="identifier">node</span><span class="special">&lt;/</span><span class="identifier">description</span><span class="special">&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
+        Working with text objects to retrieve data is described in <a class="link" href="access.html#manual.access.text" title="Working with text contents">the
+        documentation for accessing document data</a>; this section describes
+        the modification interface of <code class="computeroutput"><span class="identifier">xml_text</span></code>.
+      </p>
+<a name="xml_text::set"></a><p>
+        Once you have an <code class="computeroutput"><span class="identifier">xml_text</span></code>
+        object, you can set the text contents using the following function:
+      </p>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">rhs</span><span class="special">);</span>
+</pre>
+<p>
+        This function tries to set the contents to the specified string, and returns
+        the operation result. The operation fails if the text object was retrieved
+        from a node that can not have a value and that is not an element node (i.e.
+        it is a <a class="link" href="dom.html#node_declaration">node_declaration</a> node), if
+        the text object is empty, or if there is insufficient memory to handle the
+        request. The provided string is copied into document managed memory and can
+        be destroyed after the function returns (for example, you can safely pass
+        stack-allocated buffers to this function). Note that if the text object was
+        retrieved from an element node, this function creates the PCDATA child node
+        if necessary (i.e. if the element node does not have a PCDATA/CDATA child
+        already).
+      </p>
+<a name="xml_text::set_value"></a><p>
+        In addition to a string function, several functions are provided for handling
+        text with numbers and booleans as contents:
+      </p>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span>
+</pre>
+<p>
+        The above functions convert the argument to string and then call the base
+        <code class="computeroutput"><span class="identifier">set</span></code> function. These functions
+        have the same semantics as similar <code class="computeroutput"><span class="identifier">xml_attribute</span></code>
+        functions. You can <a class="link" href="modify.html#xml_attribute::set_value">refer to documentation
+        for the attribute functions</a> for details.
+      </p>
+<a name="xml_text::assign"></a><p>
+        For convenience, all <code class="computeroutput"><span class="identifier">set</span></code>
+        functions have the corresponding assignment operators:
+      </p>
+<pre class="programlisting"><span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">double</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span>
+</pre>
+<p>
+        These operators simply call the right <code class="computeroutput"><span class="identifier">set</span></code>
+        function and return the attribute they're called on; the return value of
+        <code class="computeroutput"><span class="identifier">set</span></code> is ignored, so errors
+        are ignored.
+      </p>
+<p>
+        This is an example of using <code class="computeroutput"><span class="identifier">xml_text</span></code>
+        object to modify text contents (<a href="../samples/text.cpp" target="_top">samples/text.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="comment">// change project version
+</span><span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"version"</span><span class="special">).</span><span class="identifier">text</span><span class="special">()</span> <span class="special">=</span> <span class="number">1.2</span><span class="special">;</span>
+
+<span class="comment">// add description element and set the contents
+</span><span class="comment">// note that we do not have to explicitly add the node_pcdata child
+</span><span class="identifier">project</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">set</span><span class="special">(</span><span class="string">"a test project"</span><span class="special">);</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
 <a name="manual.modify.clone"></a><a class="link" href="modify.html#manual.modify.clone" title="Cloning nodes/attributes"> Cloning nodes/attributes</a>
 </h3></div></div></div>
 <a name="xml_node::prepend_copy"></a><a name="xml_node::append_copy"></a><a name="xml_node::insert_copy_after"></a><a name="xml_node::insert_copy_before"></a><p>
@@ -528,7 +608,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -536,7 +616,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

@@ -4,15 +4,15 @@
 <title>Accessing document data</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
 <link rel="prev" href="loading.html" title="Loading document">
 <link rel="next" href="modify.html" title="Modifying document data">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -35,11 +35,13 @@
 <dt><span class="section"><a href="access.html#manual.access.nodedata"> Getting node data</a></span></dt>
 <dt><span class="section"><a href="access.html#manual.access.attrdata"> Getting attribute data</a></span></dt>
 <dt><span class="section"><a href="access.html#manual.access.contents"> Contents-based traversal functions</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.rangefor"> Range-based for-loop support</a></span></dt>
 <dt><span class="section"><a href="access.html#manual.access.iterators"> Traversing node/attribute lists
       via iterators</a></span></dt>
 <dt><span class="section"><a href="access.html#manual.access.walker"> Recursive traversal with xml_tree_walker</a></span></dt>
 <dt><span class="section"><a href="access.html#manual.access.predicate"> Searching for nodes/attributes
       with predicates</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.text"> Working with text contents</a></span></dt>
 <dt><span class="section"><a href="access.html#manual.access.misc"> Miscellaneous functions</a></span></dt>
 </dl></div>
 <p>
@@ -167,10 +169,11 @@
         In this case, <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">description</span><span class="special">&gt;</span></code> node does not have a value, but instead
         has a child of type <a class="link" href="dom.html#node_pcdata">node_pcdata</a> with value
         <code class="computeroutput"><span class="string">"This is a node"</span></code>. pugixml
-        provides two helper functions to parse such data:
+        provides several helper functions to parse such data:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">child_value</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">child_value</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xml_text</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">text</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
         <code class="computeroutput"><span class="identifier">child_value</span><span class="special">()</span></code>
@@ -180,6 +183,12 @@
         For the above example, calling <code class="computeroutput"><span class="identifier">node</span><span class="special">.</span><span class="identifier">child_value</span><span class="special">(</span><span class="string">"description"</span><span class="special">)</span></code> and <code class="computeroutput"><span class="identifier">description</span><span class="special">.</span><span class="identifier">child_value</span><span class="special">()</span></code> will both produce string <code class="computeroutput"><span class="string">"This is a node"</span></code>. If there is no
         child with relevant type, or if the handle is null, <code class="computeroutput"><span class="identifier">child_value</span></code>
         functions return empty string.
+      </p>
+<p>
+        <code class="computeroutput"><span class="identifier">text</span><span class="special">()</span></code>
+        returns a special object that can be used for working with PCDATA contents
+        in more complex cases than just retrieving the value; it is described in
+        <a class="xref" href="access.html#manual.access.text" title="Working with text contents"> Working with text contents</a> sections.
       </p>
 <p>
         There is an example of using some of these functions <a class="link" href="access.html#code_traverse_base_data">at
@@ -201,26 +210,40 @@
         In case the attribute handle is null, both functions return empty strings
         - they never return null pointers.
       </p>
+<a name="xml_attribute::as_string"></a><p>
+        If you need a non-empty string if the attribute handle is null (for example,
+        you need to get the option value from XML attribute, but if it is not specified,
+        you need it to default to <code class="computeroutput"><span class="string">"sorted"</span></code>
+        instead of <code class="computeroutput"><span class="string">""</span></code>), you
+        can use <code class="computeroutput"><span class="identifier">as_string</span></code> accessor:
+      </p>
+<pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">def</span> <span class="special">=</span> <span class="string">""</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        It returns <code class="computeroutput"><span class="identifier">def</span></code> argument if
+        the attribute handle is null. If you do not specify the argument, the function
+        is equivalent to <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code>.
+      </p>
 <a name="xml_attribute::as_int"></a><a name="xml_attribute::as_uint"></a><a name="xml_attribute::as_double"></a><a name="xml_attribute::as_float"></a><a name="xml_attribute::as_bool"></a><p>
         In many cases attribute values have types that are not strings - i.e. an
         attribute may always contain values that should be treated as integers, despite
         the fact that they are represented as strings in XML. pugixml provides several
         accessors that convert attribute value to some other type:
       </p>
-<pre class="programlisting"><span class="keyword">int</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_int</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-<span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_uint</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-<span class="keyword">double</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_double</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-<span class="keyword">float</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_float</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
-<span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_bool</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<pre class="programlisting"><span class="keyword">int</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_int</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_uint</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">double</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_double</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">float</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_float</span><span class="special">(</span><span class="keyword">float</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_bool</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">def</span> <span class="special">=</span> <span class="keyword">false</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
         <code class="computeroutput"><span class="identifier">as_int</span></code>, <code class="computeroutput"><span class="identifier">as_uint</span></code>,
         <code class="computeroutput"><span class="identifier">as_double</span></code> and <code class="computeroutput"><span class="identifier">as_float</span></code> convert attribute values to numbers.
-        If attribute handle is null or attribute value is empty, <code class="computeroutput"><span class="number">0</span></code>
-        is returned. Otherwise, all leading whitespace characters are truncated,
-        and the remaining string is parsed as a decimal number (<code class="computeroutput"><span class="identifier">as_int</span></code>
-        or <code class="computeroutput"><span class="identifier">as_uint</span></code>) or as a floating
-        point number in either decimal or scientific form (<code class="computeroutput"><span class="identifier">as_double</span></code>
+        If attribute handle is null or attribute value is empty, <code class="computeroutput"><span class="identifier">def</span></code>
+        argument is returned (which is 0 by default). Otherwise, all leading whitespace
+        characters are truncated, and the remaining string is parsed as a decimal
+        number (<code class="computeroutput"><span class="identifier">as_int</span></code> or <code class="computeroutput"><span class="identifier">as_uint</span></code>) or as a floating point number
+        in either decimal or scientific form (<code class="computeroutput"><span class="identifier">as_double</span></code>
         or <code class="computeroutput"><span class="identifier">as_float</span></code>). Any extra characters
         are silently discarded, i.e. <code class="computeroutput"><span class="identifier">as_int</span></code>
         will return <code class="computeroutput"><span class="number">1</span></code> for string <code class="computeroutput"><span class="string">"1abc"</span></code>.
@@ -241,10 +264,11 @@
 </table></div>
 <p>
         <code class="computeroutput"><span class="identifier">as_bool</span></code> converts attribute
-        value to boolean as follows: if attribute handle is null or attribute value
-        is empty, <code class="computeroutput"><span class="keyword">false</span></code> is returned.
-        Otherwise, <code class="computeroutput"><span class="keyword">true</span></code> is returned
-        if the first character is one of <code class="computeroutput"><span class="char">'1'</span><span class="special">,</span> <span class="char">'t'</span><span class="special">,</span>
+        value to boolean as follows: if attribute handle is null, <code class="computeroutput"><span class="identifier">def</span></code>
+        argument is returned (which is <code class="computeroutput"><span class="keyword">false</span></code>
+        by default). If attribute value is empty, <code class="computeroutput"><span class="keyword">false</span></code>
+        is returned. Otherwise, <code class="computeroutput"><span class="keyword">true</span></code>
+        is returned if the first character is one of <code class="computeroutput"><span class="char">'1'</span><span class="special">,</span> <span class="char">'t'</span><span class="special">,</span>
         <span class="char">'T'</span><span class="special">,</span> <span class="char">'y'</span><span class="special">,</span> <span class="char">'Y'</span></code>.
         This means that strings like <code class="computeroutput"><span class="string">"true"</span></code>
         and <code class="computeroutput"><span class="string">"yes"</span></code> are recognized
@@ -340,6 +364,56 @@
 <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
 <span class="special">{</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
+<span class="special">}</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.access.rangefor"></a><a class="link" href="access.html#manual.access.rangefor" title="Range-based for-loop support"> Range-based for-loop support</a>
+</h3></div></div></div>
+<a name="xml_node::children"></a><a name="xml_node::attributes"></a><p>
+        If your C++ compiler supports range-based for-loop (this is a C++11 feature,
+        at the time of writing it's supported by Microsoft Visual Studio 11 Beta,
+        GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional
+        helpers are provided to support this; note that they are also compatible
+        with <a href="http://www.boost.org/libs/foreach/" target="_top">Boost Foreach</a>,
+        and possibly other pre-C++11 foreach facilities.
+      </p>
+<pre class="programlisting"><span class="emphasis"><em>implementation-defined type</em></span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">children</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="emphasis"><em>implementation-defined type</em></span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">children</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="emphasis"><em>implementation-defined type</em></span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">attributes</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        <code class="computeroutput"><span class="identifier">children</span></code> function allows
+        you to enumerate all child nodes; <code class="computeroutput"><span class="identifier">children</span></code>
+        function with <code class="computeroutput"><span class="identifier">name</span></code> argument
+        allows you to enumerate all child nodes with a specific name; <code class="computeroutput"><span class="identifier">attributes</span></code> function allows you to enumerate
+        all attributes of the node. Note that you can also use node object itself
+        in a range-based for construct, which is equivalent to using <code class="computeroutput"><span class="identifier">children</span><span class="special">()</span></code>.
+      </p>
+<p>
+        This is an example of using these functions (<a href="../samples/traverse_rangefor.cpp" target="_top">samples/traverse_rangefor.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span><span class="special">:</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">children</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
+<span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool:"</span><span class="special">;</span>
+
+    <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">attr</span><span class="special">:</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">attributes</span><span class="special">())</span>
+    <span class="special">{</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">name</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"="</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">value</span><span class="special">();</span>
+    <span class="special">}</span>
+
+    <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">child</span><span class="special">:</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">children</span><span class="special">())</span>
+    <span class="special">{</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">", child "</span> <span class="special">&lt;&lt;</span> <span class="identifier">child</span><span class="special">.</span><span class="identifier">name</span><span class="special">();</span>
+    <span class="special">}</span>
+
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 <span class="special">}</span>
 </pre>
 <p>
@@ -616,6 +690,100 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
+<a name="manual.access.text"></a><a class="link" href="access.html#manual.access.text" title="Working with text contents"> Working with text contents</a>
+</h3></div></div></div>
+<a name="xml_text"></a><p>
+        It is common to store data as text contents of some node - i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;</span><span class="identifier">description</span><span class="special">&gt;</span><span class="identifier">This</span> <span class="identifier">is</span> <span class="identifier">a</span> <span class="identifier">node</span><span class="special">&lt;/</span><span class="identifier">description</span><span class="special">&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
+        In this case, <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">description</span><span class="special">&gt;</span></code> node does not have a value, but instead
+        has a child of type <a class="link" href="dom.html#node_pcdata">node_pcdata</a> with value
+        <code class="computeroutput"><span class="string">"This is a node"</span></code>. pugixml
+        provides a special class, <code class="computeroutput"><span class="identifier">xml_text</span></code>,
+        to work with such data. Working with text objects to modify data is described
+        in <a class="link" href="modify.html#manual.modify.text" title="Working with text contents">the documentation for modifying document
+        data</a>; this section describes the access interface of <code class="computeroutput"><span class="identifier">xml_text</span></code>.
+      </p>
+<a name="xml_node::text"></a><p>
+        You can get the text object from a node by using <code class="computeroutput"><span class="identifier">text</span><span class="special">()</span></code> method:
+      </p>
+<pre class="programlisting"><span class="identifier">xml_text</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">text</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        If the node has a type <code class="computeroutput"><span class="identifier">node_pcdata</span></code>
+        or <code class="computeroutput"><span class="identifier">node_cdata</span></code>, then the node
+        itself is used to return data; otherwise, a first child node of type <code class="computeroutput"><span class="identifier">node_pcdata</span></code> or <code class="computeroutput"><span class="identifier">node_cdata</span></code>
+        is used.
+      </p>
+<a name="xml_text::empty"></a><a name="xml_text::unspecified_bool_type"></a><p>
+        You can check if the text object is bound to a valid PCDATA/CDATA node by
+        using it as a boolean value, i.e. <code class="computeroutput"><span class="keyword">if</span>
+        <span class="special">(</span><span class="identifier">text</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
+        <span class="special">}</span></code> or <code class="computeroutput"><span class="keyword">if</span>
+        <span class="special">(!</span><span class="identifier">text</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
+        <span class="special">}</span></code>. Alternatively you can check it
+        by using the <code class="computeroutput"><span class="identifier">empty</span><span class="special">()</span></code>
+        method:
+      </p>
+<pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">empty</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<a name="xml_text::get"></a><p>
+        Given a text object, you can get the contents (i.e. the value of PCDATA/CDATA
+        node) by using the following function:
+      </p>
+<pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">get</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        In case text object is empty, the function returns an empty string - it never
+        returns a null pointer.
+      </p>
+<a name="xml_text::as_string"></a><a name="xml_text::as_int"></a><a name="xml_text::as_uint"></a><a name="xml_text::as_double"></a><a name="xml_text::as_float"></a><a name="xml_text::as_bool"></a><p>
+        If you need a non-empty string if the text object is empty, or if the text
+        contents is actually a number or a boolean that is stored as a string, you
+        can use the following accessors:
+      </p>
+<pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">def</span> <span class="special">=</span> <span class="string">""</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">int</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_int</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_uint</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">double</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_double</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">float</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_float</span><span class="special">(</span><span class="keyword">float</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_bool</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">def</span> <span class="special">=</span> <span class="keyword">false</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        All of the above functions have the same semantics as similar <code class="computeroutput"><span class="identifier">xml_attribute</span></code> members: they return the
+        default argument if the text object is empty, they convert the text contents
+        to a target type using the same rules and restrictions. You can <a class="link" href="access.html#xml_attribute::as_int">refer
+        to documentation for the attribute functions</a> for details.
+      </p>
+<a name="xml_text::data"></a><p>
+        <code class="computeroutput"><span class="identifier">xml_text</span></code> is essentially a
+        helper class that operates on <code class="computeroutput"><span class="identifier">xml_node</span></code>
+        values. It is bound to a node of type <a class="link" href="dom.html#node_pcdata">node_pcdata</a>
+        or [node_cdata]. You can use the following function to retrieve this node:
+      </p>
+<pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">data</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
+</pre>
+<p>
+        Essentially, assuming <code class="computeroutput"><span class="identifier">text</span></code>
+        is an <code class="computeroutput"><span class="identifier">xml_text</span></code> object, callling
+        <code class="computeroutput"><span class="identifier">text</span><span class="special">.</span><span class="identifier">get</span><span class="special">()</span></code> is
+        equivalent to calling <code class="computeroutput"><span class="identifier">text</span><span class="special">.</span><span class="identifier">data</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span></code>.
+      </p>
+<p>
+        This is an example of using <code class="computeroutput"><span class="identifier">xml_text</span></code>
+        object (<a href="../samples/text.cpp" target="_top">samples/text.cpp</a>):
+      </p>
+<p>
+        
+</p>
+<pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Project name: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"name"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">get</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Project version: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"version"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">as_double</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Project visibility: "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"public"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">as_bool</span><span class="special">(/*</span> <span class="identifier">def</span><span class="special">=</span> <span class="special">*/</span> <span class="keyword">true</span><span class="special">)</span> <span class="special">?</span> <span class="string">"public"</span> <span class="special">:</span> <span class="string">"private"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Project description: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"description"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">get</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+</pre>
+<p>
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
 <a name="manual.access.misc"></a><a class="link" href="access.html#manual.access.misc" title="Miscellaneous functions"> Miscellaneous functions</a>
 </h3></div></div></div>
 <a name="xml_node::root"></a><p>
@@ -698,7 +866,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -706,7 +874,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

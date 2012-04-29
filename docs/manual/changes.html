@@ -4,15 +4,15 @@
 <title>Changelog</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.0">
-<link rel="up" href="../manual.html" title="pugixml 1.0">
+<link rel="home" href="../manual.html" title="pugixml 1.2">
+<link rel="up" href="../manual.html" title="pugixml 1.2">
 <link rel="prev" href="xpath.html" title="XPath">
 <link rel="next" href="apiref.html" title="API Reference">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -30,6 +30,100 @@
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="manual.changes"></a><a class="link" href="changes.html" title="Changelog"> Changelog</a>
 </h2></div></div></div>
+<a name="manual.changes.1_05_2012___version_1_2"></a><h6>
+      <a class="link" href="changes.html#manual.changes.1_05_2012___version_1_2">1.05.2012 - version
+      1.2</a>
+    </h6>
+<p>
+      Major release, featuring header-only mode, various interface enhancements (i.e.
+      PCDATA manipulation and C++11 iteration), many other features and compatibility
+      improvements.
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<li class="listitem">
+          New features:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Added xml_text helper class for working with PCDATA/CDATA contents
+                of an element node
+              </li>
+<li class="listitem">
+                Added optional header-only mode (controlled by PUGIXML_HEADER_ONLY
+                define)
+              </li>
+<li class="listitem">
+                Added xml_node::children() and xml_node::attributes() for C++11 ranged
+                for loop or BOOST_FOREACH
+              </li>
+<li class="listitem">
+                Added support for Latin-1 (ISO-8859-1) encoding conversion during
+                loading and saving
+              </li>
+<li class="listitem">
+                Added custom default values for xml_attribute::as_* (they are returned if the attribute
+                does not exist)
+              </li>
+<li class="listitem">
+                Added parse_ws_pcdata_single flag for preserving whitespace-only
+                PCDATA in case it's the only child
+              </li>
+<li class="listitem">
+                Added format_save_file_text for xml_document::save_file to open files
+                as text instead of binary (changes newlines on Windows)
+              </li>
+<li class="listitem">
+                Added format_no_escapes flag to disable special symbol escaping (complements
+                ~parse_escapes)
+              </li>
+<li class="listitem">
+                Added support for loading document from streams that do not support
+                seeking
+              </li>
+<li class="listitem">
+                Added PUGIXML_MEMORY_* constants for tweaking allocation behavior (useful for embedded
+                systems)
+              </li>
+<li class="listitem">
+                Added PUGIXML_VERSION preprocessor define
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Compatibility improvements:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Parser does not require setjmp support (improves compatibility with
+                some embedded platforms, enables clr:pure compilation)
+              </li>
+<li class="listitem">
+                STL forward declarations are no longer used (fixes SunCC/RWSTL compilation,
+                fixes clang compilation in C++11 mode)
+              </li>
+<li class="listitem">
+                Fixed AirPlay SDK, Android, Windows Mobile (WinCE) and C++/CLI compilation
+              </li>
+<li class="listitem">
+                Fixed several compilation warnings for various GCC versions, Intel
+                C++ compiler and Clang
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Bug fixes:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Fixed unsafe bool conversion to avoid problems on C++/CLI
+              </li>
+<li class="listitem">
+                Iterator dereference operator is const now (fixes Boost filter_iterator
+                support)
+              </li>
+<li class="listitem">
+                xml_document::save_file now checks for file I/O errors during saving
+              </li>
+</ol></div>
+        </li>
+</ul></div>
 <a name="manual.changes.1_11_2010___version_1_0"></a><h6>
       <a class="link" href="changes.html#manual.changes.1_11_2010___version_1_0">1.11.2010 - version
       1.0</a>
@@ -760,7 +854,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2010 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -768,7 +862,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.0</a> manual |
+<a href="http://pugixml.org/">pugixml 1.2</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
