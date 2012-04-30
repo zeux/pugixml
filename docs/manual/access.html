@@ -757,13 +757,14 @@
         <code class="computeroutput"><span class="identifier">xml_text</span></code> is essentially a
         helper class that operates on <code class="computeroutput"><span class="identifier">xml_node</span></code>
         values. It is bound to a node of type <a class="link" href="dom.html#node_pcdata">node_pcdata</a>
-        or [node_cdata]. You can use the following function to retrieve this node:
+        or <a class="link" href="dom.html#node_cdata">node_cdata</a>. You can use the following
+        function to retrieve this node:
       </p>
 <pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">data</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
         Essentially, assuming <code class="computeroutput"><span class="identifier">text</span></code>
-        is an <code class="computeroutput"><span class="identifier">xml_text</span></code> object, callling
+        is an <code class="computeroutput"><span class="identifier">xml_text</span></code> object, calling
         <code class="computeroutput"><span class="identifier">text</span><span class="special">.</span><span class="identifier">get</span><span class="special">()</span></code> is
         equivalent to calling <code class="computeroutput"><span class="identifier">text</span><span class="special">.</span><span class="identifier">data</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span></code>.
       </p>
