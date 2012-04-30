@@ -1080,11 +1080,11 @@ If you need a non-empty string if the text object is empty, or if the text conte
 All of the above functions have the same semantics as similar `xml_attribute` members: they return the default argument if the text object is empty, they convert the text contents to a target type using the same rules and restrictions. You can [link xml_attribute::as_int refer to documentation for the attribute functions] for details.
 
 [#xml_text::data]
-`xml_text` is essentially a helper class that operates on `xml_node` values. It is bound to a node of type [link node_pcdata] or [node_cdata]. You can use the following function to retrieve this node:
+`xml_text` is essentially a helper class that operates on `xml_node` values. It is bound to a node of type [link node_pcdata] or [link node_cdata]. You can use the following function to retrieve this node:
 
     xml_node xml_text::data() const;
 
-Essentially, assuming `text` is an `xml_text` object, callling `text.get()` is equivalent to calling `text.data().value()`.
+Essentially, assuming `text` is an `xml_text` object, calling `text.get()` is equivalent to calling `text.data().value()`.
 
 This is an example of using `xml_text` object ([@samples/text.cpp]):
 
@@ -1277,7 +1277,7 @@ Once you have an `xml_text` object, you can set the text contents using the foll
 
     bool xml_text::set(const char_t* rhs);
 
-This function tries to set the contents to the specified string, and returns the operation result. The operation fails if the text object was retrieved from a node that can not have a value and that is not an element node (i.e. it is a [link node_declaration] node), if the text object is empty, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to this function). Note that if the text object was retrieved from an element node, this function creates the PCDATA child node if necessary (i.e. if the element node does not have a PCDATA/CDATA child already).
+This function tries to set the contents to the specified string, and returns the operation result. The operation fails if the text object was retrieved from a node that can not have a value and is not an element node (i.e. it is a [link node_declaration] node), if the text object is empty, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to this function). Note that if the text object was retrieved from an element node, this function creates the PCDATA child node if necessary (i.e. if the element node does not have a PCDATA/CDATA child already).
 
 [#xml_text::set_value]
 In addition to a string function, several functions are provided for handling text with numbers and booleans as contents:
@@ -1485,7 +1485,7 @@ Also note that wide stream saving functions do not have `encoding` argument and 
 
 [section:declaration Customizing document declaration]
 
-When you are saving the document using `xml_document::save()` or `xml_document::save_file()`, a default XML document declaration is output, if `format_no_declaration` is not speficied and if the document does not have a declaration node. However, the default declaration is not customizable. If you want to customize the declaration output, you need to create the declaration node yourself.
+When you are saving the document using `xml_document::save()` or `xml_document::save_file()`, a default XML document declaration is output, if `format_no_declaration` is not specified and if the document does not have a declaration node. However, the default declaration is not customizable. If you want to customize the declaration output, you need to create the declaration node yourself.
 
 [note By default the declaration node is not added to the document during parsing. If you just need to preserve the original declaration node, you have to add the flag [link parse_declaration] to the parsing flags; the resulting document will contain the original declaration node, which will be output during saving.]
 
