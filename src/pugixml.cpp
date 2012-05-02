@@ -4928,7 +4928,7 @@ namespace pugi
 	PUGI__FN xml_node* xml_node_iterator::operator->() const
 	{
 		assert(_wrap._root);
-		return &_wrap;
+		return const_cast<xml_node*>(&_wrap); // BCC32 workaround
 	}
 
 	PUGI__FN const xml_node_iterator& xml_node_iterator::operator++()
@@ -4989,7 +4989,7 @@ namespace pugi
 	PUGI__FN xml_attribute* xml_attribute_iterator::operator->() const
 	{
 		assert(_wrap._attr);
-		return &_wrap;
+		return const_cast<xml_attribute*>(&_wrap); // BCC32 workaround
 	}
 
 	PUGI__FN const xml_attribute_iterator& xml_attribute_iterator::operator++()
@@ -5039,16 +5039,19 @@ namespace pugi
 
 	PUGI__FN xml_node& xml_named_node_iterator::operator*() const
 	{
+		assert(_node._root);
 		return _node;
 	}
 
 	PUGI__FN xml_node* xml_named_node_iterator::operator->() const
 	{
-		return &_node;
+		assert(_node._root);
+		return const_cast<xml_node*>(&_node); // BCC32 workaround
 	}
 
 	PUGI__FN const xml_named_node_iterator& xml_named_node_iterator::operator++()
 	{
+		assert(_node._root);
 		_node = _node.next_sibling(_name);
 		return *this;
 	}

@@ -359,6 +359,7 @@ namespace pugi
 	{
 		friend class xml_attribute_iterator;
 		friend class xml_node_iterator;
+		friend class xml_named_node_iterator;
 
 	protected:
 		xml_node_struct* _root;
