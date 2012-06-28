@@ -740,7 +740,7 @@ namespace pugi
 	};
 
 	// Named node range helper
-	class xml_named_node_iterator
+	class PUGIXML_CLASS xml_named_node_iterator
 	{
 	public:
 		// Iterator traits
