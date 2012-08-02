@@ -217,6 +217,7 @@ namespace pugi
 	{
 	public:
 		typedef It const_iterator;
+		typedef It iterator;
 
 		xml_object_range(It b, It e): _begin(b), _end(e)
 		{
