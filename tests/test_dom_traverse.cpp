@@ -537,6 +537,31 @@ TEST_XML(dom_node_find_child_by_attribute, "<node><stub attr='value3' /><child1 
 	CHECK(node.find_child_by_attribute(STR("attr3"), STR("value")) == xml_node());
 }
 
+TEST(dom_node_find_child_by_attribute_null)
+{
+	xml_document doc;
+	xml_node node0 = doc.append_child();
+	xml_node node1 = doc.append_child(STR("a"));
+	xml_node node2 = doc.append_child(STR("a"));
+	xml_node node3 = doc.append_child(STR("a"));
+
+	// this adds an attribute with null name and/or value in the internal representation
+	node1.append_attribute(STR(""));
+	node2.append_attribute(STR("id"));
+	node3.append_attribute(STR("id")) = STR("1");
+
+	// make sure find_child_by_attribute works if name/value is null
+	CHECK(doc.find_child_by_attribute(STR("unknown"), STR("wrong")) == xml_node());
+	CHECK(doc.find_child_by_attribute(STR("id"), STR("wrong")) == xml_node());
+	CHECK(doc.find_child_by_attribute(STR("id"), STR("")) == node2);
+	CHECK(doc.find_child_by_attribute(STR("id"), STR("1")) == node3);
+
+	CHECK(doc.find_child_by_attribute(STR("a"), STR("unknown"), STR("wrong")) == xml_node());
+	CHECK(doc.find_child_by_attribute(STR("a"), STR("id"), STR("wrong")) == xml_node());
+	CHECK(doc.find_child_by_attribute(STR("a"), STR("id"), STR("")) == node2);
+	CHECK(doc.find_child_by_attribute(STR("a"), STR("id"), STR("1")) == node3);
+}
+
 struct find_predicate_const
 {
 	bool result;

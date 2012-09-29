@@ -4507,7 +4507,7 @@ namespace pugi
 			if (i->name && impl::strequal(name_, i->name))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value))
+					if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : PUGIXML_TEXT("")))
 						return xml_node(i);
 			}
 
@@ -4520,7 +4520,7 @@ namespace pugi
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value))
+				if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : PUGIXML_TEXT("")))
 					return xml_node(i);
 
 		return xml_node();
