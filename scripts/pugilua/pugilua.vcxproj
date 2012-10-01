@@ -78,11 +78,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\pugilua\pugilua.cpp" />
-    <ClCompile Include="..\..\pugilua\pugilua_lib.cpp" />
+    <ClCompile Include="..\..\contrib\pugilua\pugilua.cpp" />
+    <ClCompile Include="..\..\contrib\pugilua\pugilua_lib.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\pugilua\pugilua_lib.h" />
+    <ClInclude Include="..\..\contrib\pugilua\pugilua_lib.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Lua\lib\test.lua" />
