@@ -22,11 +22,37 @@ namespace pugi {
 			pugi::xml_parse_result res;
 		};
 
+		class lxml_node {
+		public:
+			lxml_node(pugi::xml_node& n):node(n){}
+			lxml_node() { }
+		
+		public:
+			bool valid() const {
+				return (bool)node;
+			}
+
+			RefCountedPtr<lxml_node> child(char const* name) {
+				return RefCountedPtr<lxml_node>(new lxml_node(node.child(name)));
+			}
+
+			std::string name() const {
+				return node.name();
+			}
+
+		private:
+			pugi::xml_node node;
+		};
+
 		class lxml_document {
 		public:
-			
 			RefCountedPtr<lxml_parse_result> load_file(char const* path) {
 				return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
+			}
+
+			// redundant, but defined due to composition up to now
+			RefCountedPtr<lxml_node> child(char const* name) {
+				return RefCountedPtr<lxml_node>(new lxml_node(doc.child(name)));
 			}
 
 		private:
@@ -46,9 +72,17 @@ void register_pugilua (lua_State* L) {
 			.addProperty("description",&lxml_parse_result::description)
 			.endClass()
 
+			.beginClass<lxml_node>("xml_node")
+			.addConstructor<void (*)()>()
+			.addProperty("valid",&lxml_node::valid)
+			.addProperty("name",&lxml_node::name)
+			.addFunction("child",&lxml_node::child)
+			.endClass()
+
 			.beginClass<lxml_document>("xml_document")
 			.addConstructor<void (*)()>()
 			.addFunction("load_file",&lxml_document::load_file)
+			.addFunction("child",&lxml_document::child)
 			.endClass()
 
 		.endNamespace()
