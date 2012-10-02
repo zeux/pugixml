@@ -1,7 +1,7 @@
 pugilua
 =======
 
-An almost one-to-one lua binding for [pugixm;](http://pugixml.org/). Currently, work in progress ...
+An almost one-to-one lua binding for [pugixml](http://pugixml.org/). Currently, work in progress ...
 
 Usage
 -----
