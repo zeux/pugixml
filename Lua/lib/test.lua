@@ -4,6 +4,7 @@ local doc=pugi.xml_document()
 os.execute("cd")
 local res=doc:load_file [[..\..\scripts\pugilua\pugilua.vcxproj]]
 print(res.description)
+assert(res.valid)
 
 local node=doc:child('Project')
 assert(node.valid)
