@@ -89,8 +89,6 @@ namespace pugi {
 			std::string name() const;
 			std::string value() const;
 
-			RefCountedPtr<lxpath_node_set> select_nodes(char const* query);
-
 			bool empty() const;
 
 			int type() const; //todo: define constants
@@ -152,7 +150,15 @@ namespace pugi {
 			RefCountedPtr<lxml_node> find_child_by_name_and_attribute(const char* name, const char* attr_name, const char* attr_value) const;
 			RefCountedPtr<lxml_node> find_child_by_attribute(const char* attr_name, const char* attr_value) const;
 
-			//todo: text()
+			std::string path() const;
+
+			RefCountedPtr<lxml_node> first_element_by_path(const char* path) const;
+
+			RefCountedPtr<lxpath_node> select_single_node(const char* query) const;
+				
+			RefCountedPtr<lxpath_node_set> select_nodes(char const* query) const;
+
+			//todo: text(), xml_tree_walker somehow
 
 		public: // non-lua interface
 			pugi::xml_node const& get() const;
@@ -257,7 +263,7 @@ namespace pugi {
 			return node.value();
 		}
 
-		RefCountedPtr<lxpath_node_set> lxml_node::select_nodes(char const* query) {
+		RefCountedPtr<lxpath_node_set> lxml_node::select_nodes(char const* query) const {
 			try {
 				return RefCountedPtr<lxpath_node_set>(new lxpath_node_set(node.select_nodes(query)));
 			} catch (pugi::xpath_exception const& e) {
@@ -434,6 +440,23 @@ namespace pugi {
 			return RefCountedPtr<lxml_node>(new lxml_node(node.find_child_by_attribute(attr_name,attr_name,attr_value)));
 		}
 
+		std::string lxml_node::path() const {
+			return node.path();
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::first_element_by_path(const char* path) const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.first_element_by_path(path)));
+		}
+
+		RefCountedPtr<lxpath_node> lxml_node::select_single_node(char const* query) const {
+			try {
+				return RefCountedPtr<lxpath_node>(new lxpath_node(node.select_single_node(query)));
+			} catch (pugi::xpath_exception const& e) {
+				std::cerr<<"Error: "<<e.what()<<std::endl;
+				return RefCountedPtr<lxpath_node>(new lxpath_node());
+			}
+		}
+
 		///////////////////
 		RefCountedPtr<lxml_parse_result> lxml_document::load_file(char const* path) {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
@@ -522,8 +545,8 @@ void register_pugilua (lua_State* L) {
 		.addProperty("name",&lxml_node::name)
 		.addProperty("value",&lxml_node::value)
 		.addProperty("type",&lxml_node::type)
+		.addProperty("path",&lxml_node::path)
 		.addFunction("child",&lxml_node::child)
-		.addFunction("select_nodes",&lxml_node::select_nodes)
 		.addFunction("first_attribute",&lxml_node::first_attribute)
 		.addFunction("last_attribute",&lxml_node::last_attribute)
 		.addFunction("first_child",&lxml_node::first_child)
@@ -564,6 +587,9 @@ void register_pugilua (lua_State* L) {
 		.addFunction("remove_child_by_name",&lxml_node::remove_child_by_name)
 		.addFunction("find_child_by_name_and_attribute",&lxml_node::find_child_by_name_and_attribute)
 		.addFunction("find_child_by_attribute",&lxml_node::find_child_by_attribute)
+		.addFunction("first_element_by_path",&lxml_node::first_element_by_path)
+		.addFunction("select_single_node",&lxml_node::select_single_node)
+		.addFunction("select_nodes",&lxml_node::select_nodes)
 		.endClass()
 
 		.beginClass<lxml_document>("xml_document")

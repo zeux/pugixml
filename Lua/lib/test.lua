@@ -22,7 +22,7 @@ n=query1.size
 for i=0,n-1 do
 	local node=query1:get(i):node()
 	local attribute=query1:get(i):attribute()
-	print(node.valid,attribute.valid)
+	print(node.valid,node.path,attribute.valid)
 	local a=node:first_attribute()
 	while a.valid do
 		print(a.name)
