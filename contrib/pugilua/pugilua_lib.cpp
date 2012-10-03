@@ -56,11 +56,11 @@ namespace pugi {
 
 			bool valid() const;
 
-			int status() const {
+			int status() const { //todo: define constants
 				return res.status;
 			}
 
-			int encoding() const {
+			int encoding() const { //todo: define constants
 				return res.encoding;
 			}
 
@@ -81,13 +81,19 @@ namespace pugi {
 		public:
 			bool valid() const;
 
-			RefCountedPtr<lxml_node> child(char const* name);
+			RefCountedPtr<lxml_node> child(char const* name) const;
 
 			std::string name() const;
+			std::string value() const;
 
 			RefCountedPtr<lxpath_node_set> select_nodes(char const* query);
 
-			bool empty () const;
+			bool empty() const;
+
+			int type() const; //todo: define constants
+
+			RefCountedPtr<lxml_attribute> first_attribute() const;
+			RefCountedPtr<lxml_attribute> last_attribute() const;
 
 		private:
 			pugi::xml_node node;
@@ -173,12 +179,16 @@ namespace pugi {
 			return (bool)node;
 		}
 
-		RefCountedPtr<lxml_node> lxml_node::child(char const* name) {
+		RefCountedPtr<lxml_node> lxml_node::child(char const* name) const {
 			return RefCountedPtr<lxml_node>(new lxml_node(node.child(name)));
 		}
 
 		std::string lxml_node::name() const {
 			return node.name();
+		}
+
+		std::string lxml_node::value() const {
+			return node.value();
 		}
 
 		RefCountedPtr<lxpath_node_set> lxml_node::select_nodes(char const* query) {
@@ -192,6 +202,18 @@ namespace pugi {
 
 		bool lxml_node::empty() const {
 			return node.empty();
+		}
+
+		int lxml_node::type() const {
+			return node.type();
+		}
+
+		RefCountedPtr<lxml_attribute> lxml_node::first_attribute() const {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.first_attribute()));
+		}
+
+		RefCountedPtr<lxml_attribute> lxml_node::last_attribute() const {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.last_attribute()));
 		}
 
 		///////////////////
@@ -280,8 +302,12 @@ void register_pugilua (lua_State* L) {
 		.addConstructor<void (*)()>()
 		.addProperty("valid",&lxml_node::valid)
 		.addProperty("name",&lxml_node::name)
+		.addProperty("value",&lxml_node::value)
+		.addProperty("type",&lxml_node::type)
 		.addFunction("child",&lxml_node::child)
 		.addFunction("select_nodes",&lxml_node::select_nodes)
+		.addFunction("first_attribute",&lxml_node::first_attribute)
+		.addFunction("last_attribute",&lxml_node::last_attribute)
 		.endClass()
 
 		.beginClass<lxml_document>("xml_document")
