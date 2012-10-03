@@ -56,6 +56,18 @@ namespace pugi {
 
 			bool valid() const;
 
+			int status() const {
+				return res.status;
+			}
+
+			int encoding() const {
+				return res.encoding;
+			}
+
+			ptrdiff_t offset() const {
+				return res.offset;
+			}
+
 		private:
 			pugi::xml_parse_result res;
 		};
@@ -74,6 +86,8 @@ namespace pugi {
 			std::string name() const;
 
 			RefCountedPtr<lxpath_node_set> select_nodes(char const* query);
+
+			bool empty () const;
 
 		private:
 			pugi::xml_node node;
@@ -178,6 +192,10 @@ namespace pugi {
 			}
 		}
 
+		bool lxml_node::empty() const {
+			return node.empty();
+		}
+
 		///////////////////
 		RefCountedPtr<lxml_parse_result> lxml_document::load_file(char const* path) {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
@@ -264,6 +282,9 @@ void register_pugilua (lua_State* L) {
 		.addConstructor<void (*)()>()
 		.addProperty("description",&lxml_parse_result::description)
 		.addProperty("valid",&lxml_parse_result::valid)
+		.addProperty("status",&lxml_parse_result::status)
+		.addProperty("encoding",&lxml_parse_result::encoding)
+		.addProperty("offset",&lxml_parse_result::offset)
 		.endClass()
 
 		.beginClass<lxml_node>("xml_node")
