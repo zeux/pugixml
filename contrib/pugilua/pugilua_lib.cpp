@@ -81,8 +81,6 @@ namespace pugi {
 		public:
 			bool valid() const;
 
-			RefCountedPtr<lxml_node> child(char const* name) const;
-
 			std::string name() const;
 			std::string value() const;
 
@@ -94,6 +92,25 @@ namespace pugi {
 
 			RefCountedPtr<lxml_attribute> first_attribute() const;
 			RefCountedPtr<lxml_attribute> last_attribute() const;
+
+			RefCountedPtr<lxml_node> first_child() const;
+			RefCountedPtr<lxml_node> last_child() const;
+
+			RefCountedPtr<lxml_node> parent() const;
+			RefCountedPtr<lxml_node> root() const;
+
+			RefCountedPtr<lxml_node> child(char const* name) const;
+			RefCountedPtr<lxml_attribute> attribute(char const* name) const;
+
+			RefCountedPtr<lxml_node> next() const;
+			RefCountedPtr<lxml_node> previous() const;
+
+			RefCountedPtr<lxml_node> next_sibling(char const* name) const;
+			RefCountedPtr<lxml_node> previous_sibling(char const* name) const;
+
+			//todo: text()
+
+
 
 		private:
 			pugi::xml_node node;
@@ -216,6 +233,42 @@ namespace pugi {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.last_attribute()));
 		}
 
+		RefCountedPtr<lxml_node> lxml_node::first_child() const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.first_child()));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::last_child() const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.last_child()));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::parent() const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.parent()));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::root() const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.root()));
+		}
+
+		RefCountedPtr<lxml_attribute> lxml_node::attribute(char const* name) const {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.attribute(name)));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::next() const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.next_sibling()));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::previous() const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.previous_sibling()));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::next_sibling(char const* name) const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.next_sibling(name)));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::previous_sibling(char const* name) const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.previous_sibling(name)));
+		}
+
 		///////////////////
 		RefCountedPtr<lxml_parse_result> lxml_document::load_file(char const* path) {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
@@ -308,6 +361,15 @@ void register_pugilua (lua_State* L) {
 		.addFunction("select_nodes",&lxml_node::select_nodes)
 		.addFunction("first_attribute",&lxml_node::first_attribute)
 		.addFunction("last_attribute",&lxml_node::last_attribute)
+		.addFunction("first_child",&lxml_node::first_child)
+		.addFunction("last_child",&lxml_node::last_child)
+		.addFunction("parent",&lxml_node::parent)
+		.addFunction("root",&lxml_node::root)
+		.addFunction("attribute",&lxml_node::attribute)
+		.addFunction("next",&lxml_node::next)
+		.addFunction("previous",&lxml_node::previous)
+		.addFunction("next_sibling",&lxml_node::next_sibling)
+		.addFunction("previous_sibling",&lxml_node::previous_sibling)
 		.endClass()
 
 		.beginClass<lxml_document>("xml_document")

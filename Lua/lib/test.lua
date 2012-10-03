@@ -25,7 +25,7 @@ for i=0,n-1 do
 	print(node.valid,attribute.valid)
 	local a=node:first_attribute()
 	while a.valid do
-		print('\t',a.name,a.value)
+		print(a.name)
 		a=a:next_attribute()
 	end
 end
