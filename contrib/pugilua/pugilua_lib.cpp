@@ -12,6 +12,39 @@ namespace pugi {
 		class lxpath_node;
 		class lxpath_node_set;
 
+		////////////////////
+		class lxml_attribute {
+		public:
+			lxml_attribute(pugi::xml_attribute const& a):att(a) {}
+			lxml_attribute() {}
+
+		public:
+			bool valid() const { return (bool)att; }
+			bool empty() const { return att.empty(); }
+			std::string name() const { return att.name(); }
+			std::string value() const { return att.value(); }
+			double number() const { return att.as_double(); }
+			bool as_bool() const { return att.as_bool(); }
+
+			void set_name(char const* n) { att.set_name(n); }
+			void set_value(char const* v) { att.set_value(v); }
+			
+			RefCountedPtr<lxml_attribute> next_attribute() const {
+				return RefCountedPtr<lxml_attribute>(new lxml_attribute(att.next_attribute()));
+			}
+
+			RefCountedPtr<lxml_attribute> previous_attribute() const {
+				return RefCountedPtr<lxml_attribute>(new lxml_attribute(att.previous_attribute()));
+			}
+
+			size_t hash_value() const {
+				return att.hash_value();
+			}
+
+		private:
+			pugi::xml_attribute att;
+		};
+
 		///////////////////////
 		class lxml_parse_result {
 		public:
@@ -70,6 +103,7 @@ namespace pugi {
 			bool valid() const;
 
 			RefCountedPtr<lxml_node> node() const;
+			RefCountedPtr<lxml_attribute> attribute() const;
 
 		private:
 			pugi::xpath_node _node;
@@ -179,6 +213,10 @@ namespace pugi {
 			return RefCountedPtr<lxml_node>(new lxml_node(_node.node()));
 		}
 
+		RefCountedPtr<lxml_attribute> lxpath_node::attribute() const {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(_node.attribute()));
+		}
+
 
 		/////////////////////
 		lxpath_node_set::lxpath_node_set(pugi::xpath_node_set& s):node_set(s) { }
@@ -207,21 +245,19 @@ void register_pugilua (lua_State* L) {
 	luabridge::getGlobalNamespace(L)
 		.beginNamespace("pugi")
 
-		.beginClass<lxpath_node>("xpath_node")
+		.beginClass<lxml_attribute>("xml_attribute")
 		.addConstructor<void (*)()>()
-		.addProperty("valid",&lxpath_node::valid)
-		.addFunction("node",&lxpath_node::node)
-		.endClass()
-
-		.beginClass<lxpath_node_set>("xpath_node_set")
-		.addConstructor<void (*)()>()
-		.addProperty("type",&lxpath_node_set::type)
-		.addProperty("size",&lxpath_node_set::size)
-		.addStaticProperty("type_unsorted",&lxpath_node_set::type_unsorted)
-		.addStaticProperty("type_sorted",&lxpath_node_set::type_sorted)
-		.addStaticProperty("type_sorted_reverse",&lxpath_node_set::type_sorted_reverse)
-		.addFunction("get",&lxpath_node_set::get)
-		.addFunction("sort",&lxpath_node_set::sort)
+		.addProperty("valid",&lxml_attribute::valid)
+		.addProperty("empty",&lxml_attribute::empty)
+		.addProperty("name",&lxml_attribute::name)
+		.addProperty("value",&lxml_attribute::value)
+		.addProperty("number",&lxml_attribute::number)
+		.addProperty("bool",&lxml_attribute::as_bool)
+		.addProperty("hash_value",&lxml_attribute::hash_value)
+		.addFunction("set_name",&lxml_attribute::set_name)
+		.addFunction("set_value",&lxml_attribute::set_value)
+		.addFunction("next_attribute",&lxml_attribute::next_attribute)
+		.addFunction("previous_attribute",&lxml_attribute::previous_attribute)
 		.endClass()
 
 		.beginClass<lxml_parse_result>("xml_parse_result")
@@ -244,6 +280,24 @@ void register_pugilua (lua_State* L) {
 		.addFunction("load_file",&lxml_document::load_file)
 		.addFunction("child",&lxml_document::child)
 		.addFunction("select_nodes",&lxml_document::select_nodes)
+		.endClass()
+
+		.beginClass<lxpath_node>("xpath_node")
+		.addConstructor<void (*)()>()
+		.addProperty("valid",&lxpath_node::valid)
+		.addFunction("node",&lxpath_node::node)
+		.addFunction("attribute",&lxpath_node::attribute)
+		.endClass()
+
+		.beginClass<lxpath_node_set>("xpath_node_set")
+		.addConstructor<void (*)()>()
+		.addProperty("type",&lxpath_node_set::type)
+		.addProperty("size",&lxpath_node_set::size)
+		.addStaticProperty("type_unsorted",&lxpath_node_set::type_unsorted)
+		.addStaticProperty("type_sorted",&lxpath_node_set::type_sorted)
+		.addStaticProperty("type_sorted_reverse",&lxpath_node_set::type_sorted_reverse)
+		.addFunction("get",&lxpath_node_set::get)
+		.addFunction("sort",&lxpath_node_set::sort)
 		.endClass()
 
 		.endNamespace()
