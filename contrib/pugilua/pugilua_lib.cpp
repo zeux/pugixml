@@ -123,15 +123,25 @@ namespace pugi {
 			RefCountedPtr<lxml_attribute> insert_attribute_after(const char* name, RefCountedPtr<lxml_attribute> attr);
 			RefCountedPtr<lxml_attribute> insert_attribute_before(const char* name, RefCountedPtr<lxml_attribute> attr);
 
-			RefCountedPtr<lxml_attribute> append_copy(RefCountedPtr<lxml_attribute> proto);
-			RefCountedPtr<lxml_attribute> prepend_copy(RefCountedPtr<lxml_attribute> proto);
-			RefCountedPtr<lxml_attribute> insert_copy_after(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
-			RefCountedPtr<lxml_attribute> insert_copy_before(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
+			RefCountedPtr<lxml_attribute> append_attribute_copy(RefCountedPtr<lxml_attribute> proto);
+			RefCountedPtr<lxml_attribute> prepend_attribute_copy(RefCountedPtr<lxml_attribute> proto);
+			RefCountedPtr<lxml_attribute> insert_attribute_copy_after(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
+			RefCountedPtr<lxml_attribute> insert_attribute_copy_before(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
 
 			RefCountedPtr<lxml_node> append(int type);
 			RefCountedPtr<lxml_node> prepend(int type);
 			RefCountedPtr<lxml_node> insert_after(int type, RefCountedPtr<lxml_node> _node);
 			RefCountedPtr<lxml_node> insert_before(int type, RefCountedPtr<lxml_node> _node);
+
+			RefCountedPtr<lxml_node> append_child(const char* name);
+			RefCountedPtr<lxml_node> prepend_child(const char* name);
+			RefCountedPtr<lxml_node> insert_child_after(const char* name, RefCountedPtr<lxml_node> _node);
+			RefCountedPtr<lxml_node> insert_child_before(const char* name, RefCountedPtr<lxml_node> _node);
+
+			RefCountedPtr<lxml_node> append_copy(RefCountedPtr<lxml_node> proto);
+			RefCountedPtr<lxml_node> prepend_copy(RefCountedPtr<lxml_node> proto);
+			RefCountedPtr<lxml_node> insert_copy_after(RefCountedPtr<lxml_node> proto, RefCountedPtr<lxml_node> _node);
+			RefCountedPtr<lxml_node> insert_copy_before(RefCountedPtr<lxml_node> proto, RefCountedPtr<lxml_node> _node);
 
 			//todo: text()
 
@@ -327,19 +337,19 @@ namespace pugi {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.insert_attribute_before(name,attr->get())));
 		}
 
-		RefCountedPtr<lxml_attribute> lxml_node::append_copy(RefCountedPtr<lxml_attribute> proto) {
+		RefCountedPtr<lxml_attribute> lxml_node::append_attribute_copy(RefCountedPtr<lxml_attribute> proto) {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.append_copy(proto->get())));
 		}
 
-		RefCountedPtr<lxml_attribute> lxml_node::prepend_copy(RefCountedPtr<lxml_attribute> proto) {
+		RefCountedPtr<lxml_attribute> lxml_node::prepend_attribute_copy(RefCountedPtr<lxml_attribute> proto) {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.prepend_copy(proto->get())));
 		}
 
-		RefCountedPtr<lxml_attribute> lxml_node::insert_copy_after(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr) {
+		RefCountedPtr<lxml_attribute> lxml_node::insert_attribute_copy_after(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr) {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.insert_copy_after(proto->get(),attr->get())));
 		}
 
-		RefCountedPtr<lxml_attribute> lxml_node::insert_copy_before(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr) {
+		RefCountedPtr<lxml_attribute> lxml_node::insert_attribute_copy_before(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr) {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.insert_copy_before(proto->get(),attr->get())));
 		}
 
@@ -357,6 +367,38 @@ namespace pugi {
 
 		RefCountedPtr<lxml_node> lxml_node::insert_before(int type, RefCountedPtr<lxml_node> _node) {
 			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_child_before((xml_node_type)type,_node->get())));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::append_child(const char* name) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.append_child(name)));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::prepend_child(const char* name) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.prepend_child(name)));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::insert_child_after(const char* name, RefCountedPtr<lxml_node> _node) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_child_after(name,_node->get())));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::insert_child_before(const char* name, RefCountedPtr<lxml_node> _node) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_child_before(name,_node->get())));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::append_copy(RefCountedPtr<lxml_node> proto) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.append_copy(proto->get())));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::prepend_copy(RefCountedPtr<lxml_node> proto) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.prepend_copy(proto->get())));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::insert_copy_after(RefCountedPtr<lxml_node> proto, RefCountedPtr<lxml_node> _node) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_copy_after(proto->get(),_node->get())));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::insert_copy_before(RefCountedPtr<lxml_node> proto, RefCountedPtr<lxml_node> _node) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_copy_before(proto->get(),_node->get())));
 		}
 
 		///////////////////
@@ -467,14 +509,22 @@ void register_pugilua (lua_State* L) {
 		.addFunction("prepend_attribute",&lxml_node::prepend_attribute)
 		.addFunction("insert_attribute_after",&lxml_node::insert_attribute_after)
 		.addFunction("insert_attribute_before",&lxml_node::insert_attribute_before)
-		.addFunction("append_copy",&lxml_node::append_copy)
-		.addFunction("prepend_copy",&lxml_node::prepend_copy)
-		.addFunction("insert_copy_after",&lxml_node::insert_copy_after)
-		.addFunction("insert_copy_before",&lxml_node::insert_copy_before)
+		.addFunction("append_attribute_copy",&lxml_node::append_attribute_copy)
+		.addFunction("prepend_attribute_copy",&lxml_node::prepend_attribute_copy)
+		.addFunction("insert_attribute_copy_after",&lxml_node::insert_attribute_copy_after)
+		.addFunction("insert_attribute_copy_before",&lxml_node::insert_attribute_copy_before)
 		.addFunction("append",&lxml_node::append)
 		.addFunction("prepend",&lxml_node::prepend)
 		.addFunction("insert_after",&lxml_node::insert_after)
 		.addFunction("insert_before",&lxml_node::insert_before)
+		.addFunction("append_child",&lxml_node::append_child)
+		.addFunction("prepend_child",&lxml_node::prepend_child)
+		.addFunction("insert_child_after",&lxml_node::insert_child_after)
+		.addFunction("insert_child_before",&lxml_node::insert_child_before)
+		.addFunction("append_copy",&lxml_node::append_copy)
+		.addFunction("prepend_copy",&lxml_node::prepend_copy)
+		.addFunction("insert_copy_after",&lxml_node::insert_copy_after)
+		.addFunction("insert_copy_before",&lxml_node::insert_copy_before)
 		.endClass()
 
 		.beginClass<lxml_document>("xml_document")
