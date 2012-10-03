@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\pugilua\pugilua.cpp">
+    <ClCompile Include="..\..\contrib\pugilua\pugilua.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\pugilua\pugilua_lib.cpp">
+    <ClCompile Include="..\..\contrib\pugilua\pugilua_lib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\pugilua\pugilua_lib.h">
+    <ClInclude Include="..\..\contrib\pugilua\pugilua_lib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
