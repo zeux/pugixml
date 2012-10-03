@@ -98,9 +98,7 @@ namespace pugi {
 		public:
 			RefCountedPtr<lxml_parse_result> load_file(char const* path);
 
-			RefCountedPtr<lxml_node> child(char const* name);
-
-			RefCountedPtr<lxpath_node_set> select_nodes(char const* query);
+			RefCountedPtr<lxml_node> lxml_document::root() const;
 
 			bool valid() const;
 
@@ -201,17 +199,8 @@ namespace pugi {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
 		}
 
-		RefCountedPtr<lxml_node> lxml_document::child(char const* name) {
-			return RefCountedPtr<lxml_node>(new lxml_node(doc.child(name)));
-		}
-
-		RefCountedPtr<lxpath_node_set> lxml_document::select_nodes(char const* query) {
-			try {
-				return RefCountedPtr<lxpath_node_set>(new lxpath_node_set(doc.select_nodes(query)));
-			} catch (pugi::xpath_exception const& e) {
-				std::cerr<<"Error: "<<e.what()<<std::endl;
-				return RefCountedPtr<lxpath_node_set>(new lxpath_node_set());
-			}
+		RefCountedPtr<lxml_node> lxml_document::root() const {
+			return RefCountedPtr<lxml_node>(new lxml_node(pugi::xml_node(doc)));
 		}
 
 		bool lxml_document::valid() const {
@@ -299,8 +288,7 @@ void register_pugilua (lua_State* L) {
 		.addConstructor<void (*)()>()
 		.addProperty("valid",&lxml_document::valid)
 		.addFunction("load_file",&lxml_document::load_file)
-		.addFunction("child",&lxml_document::child)
-		.addFunction("select_nodes",&lxml_document::select_nodes)
+		.addFunction("root",&lxml_document::root)
 		.endClass()
 
 		.beginClass<lxpath_node>("xpath_node")
