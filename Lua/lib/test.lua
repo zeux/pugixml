@@ -1,5 +1,7 @@
 assert(require 'pugilua')
 
+print(pugi.version)
+
 local doc=pugi.xml_document()
 os.execute("cd")
 local res=doc:load_file [[..\..\scripts\pugilua\pugilua.vcxproj]]

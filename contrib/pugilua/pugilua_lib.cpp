@@ -10,8 +10,33 @@
 namespace pugi {
 	namespace lua {
 
+		static char const* version = "0.1.0";
+
 		class lxpath_node;
 		class lxpath_node_set;
+
+		////////////////////
+		static int encoding_auto = (int)pugi::encoding_auto;
+		static int encoding_utf8 = (int)pugi::encoding_utf8;	
+		static int encoding_utf16_le = (int)pugi::encoding_utf16_le;
+		static int encoding_utf16_be = (int)pugi::encoding_utf16_be;
+		static int encoding_utf16 = (int)pugi::encoding_utf16;	
+		static int encoding_utf32_le = (int)pugi::encoding_utf32_le;
+		static int encoding_utf32_be = (int)pugi::encoding_utf32_be;
+		static int encoding_utf32 = (int)pugi::encoding_utf32;	
+		static int encoding_wchar = (int)pugi::encoding_wchar;	
+		static int encoding_latin1 = (int)pugi::encoding_latin1;
+
+		////////////////////
+		static int node_null = (int)pugi::node_null;		
+		static int node_document = (int)pugi::node_document;	
+		static int node_element = (int)pugi::node_element;	
+		static int node_pcdata = (int)pugi::node_pcdata;	
+		static int node_cdata = (int)pugi::node_cdata;		
+		static int node_comment = (int)pugi::node_comment;	
+		static int node_pi = (int)pugi::node_pi;		
+		static int node_declaration = (int)pugi::node_declaration;
+		static int node_doctype = (int)pugi::node_doctype;	
 
 		////////////////////
 		class lxml_attribute {
@@ -62,17 +87,34 @@ namespace pugi {
 
 			bool valid() const;
 
-			int status() const { //todo: define constants
+			int status() const {
 				return res.status;
 			}
 
-			int encoding() const { //todo: define constants
+			int encoding() const {
 				return res.encoding;
 			}
 
 			ptrdiff_t offset() const {
 				return res.offset;
 			}
+
+		public:
+			static int status_ok() { return pugi::status_ok; }
+			static int status_file_not_found() { return pugi::status_file_not_found; }		
+			static int status_io_error() { return pugi::status_io_error; }			
+			static int status_out_of_memory() { return pugi::status_out_of_memory; }		
+			static int status_internal_error() { return pugi::status_internal_error; }		
+			static int status_unrecognized_tag() { return pugi::status_unrecognized_tag; }
+			static int status_bad_pi() { return pugi::status_bad_pi; }
+			static int status_bad_comment() { return pugi::status_bad_comment; }		
+			static int status_bad_cdata() { return pugi::status_bad_cdata; }			
+			static int status_bad_doctype() { return pugi::status_bad_doctype; }		
+			static int status_bad_pcdata() { return pugi::status_bad_pcdata; }		
+			static int status_bad_start_element() { return pugi::status_bad_start_element; }	
+			static int status_bad_attribute() { return pugi::status_bad_attribute; }		
+			static int status_bad_end_element() { return pugi::status_bad_end_element; }		
+			static int status_end_element_mismatch() { return pugi::status_end_element_mismatch; }
 
 		private:
 			pugi::xml_parse_result res;
@@ -92,7 +134,7 @@ namespace pugi {
 
 			bool empty() const;
 
-			int type() const; //todo: define constants
+			int type() const;
 
 			RefCountedPtr<lxml_attribute> first_attribute() const;
 			RefCountedPtr<lxml_attribute> last_attribute() const;
@@ -173,11 +215,15 @@ namespace pugi {
 		///////////////////
 		class lxml_document {
 		public:
-			RefCountedPtr<lxml_parse_result> load_file(char const* path);
-
 			RefCountedPtr<lxml_node> lxml_document::root() const;
 
 			bool valid() const;
+
+			void reset();
+
+			RefCountedPtr<lxml_parse_result> load_file(char const* path);
+			RefCountedPtr<lxml_parse_result> load(char const* contents);
+			bool save_file(char const* path) const;
 
 		private:
 			pugi::xml_document doc;
@@ -479,6 +525,17 @@ namespace pugi {
 			return (bool)doc;
 		}
 
+		void lxml_document::reset() {
+			doc.reset();
+		}
+
+		RefCountedPtr<lxml_parse_result> lxml_document::load(char const* contents) {
+			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load(contents)));
+		}
+
+		bool lxml_document::save_file(char const* path) const {
+			return doc.save_file(path);
+		}
 		
 		//////////////////////
 		lxpath_node::lxpath_node(pugi::xpath_node const& n):_node(n){}
@@ -524,6 +581,29 @@ void register_pugilua (lua_State* L) {
 	luabridge::getGlobalNamespace(L)
 		.beginNamespace("pugi")
 
+		.addVariable("version",&version,false)
+
+		.addVariable("encoding_auto",&encoding_auto,false)
+		.addVariable("encoding_utf8",&encoding_utf8,false)	
+		.addVariable("encoding_utf16_le",&encoding_utf16_le,false)
+		.addVariable("encoding_utf16_be",&encoding_utf16_be,false)
+		.addVariable("encoding_utf16",&encoding_utf16,false)	
+		.addVariable("encoding_utf32_le",&encoding_utf32_le,false)
+		.addVariable("encoding_utf32_be",&encoding_utf32_be,false)
+		.addVariable("encoding_utf32",&encoding_utf32,false)	
+		.addVariable("encoding_wchar",&encoding_wchar,false)	
+		.addVariable("encoding_latin1",&encoding_latin1,false)
+
+		.addVariable("node_null",&node_null,false)		
+		.addVariable("node_document",&node_document,false)	
+		.addVariable("node_element",&node_element,false)	
+		.addVariable("node_pcdata",&node_pcdata,false)	
+		.addVariable("node_cdata",&node_cdata,false)		
+		.addVariable("node_comment",&node_comment,false)	
+		.addVariable("node_pi",&node_pi,false)		
+		.addVariable("node_declaration",&node_declaration,false)
+		.addVariable("node_doctype",&node_doctype,false)	
+
 		.beginClass<lxml_attribute>("xml_attribute")
 		.addConstructor<void (*)()>()
 		.addProperty("valid",&lxml_attribute::valid)
@@ -546,6 +626,21 @@ void register_pugilua (lua_State* L) {
 		.addProperty("status",&lxml_parse_result::status)
 		.addProperty("encoding",&lxml_parse_result::encoding)
 		.addProperty("offset",&lxml_parse_result::offset)
+		.addStaticProperty("status_ok",&lxml_parse_result::status_ok)
+		.addStaticProperty("status_io_error",&lxml_parse_result::status_io_error)	
+		.addStaticProperty("status_out_of_memory",&lxml_parse_result::status_out_of_memory)		
+		.addStaticProperty("status_internal_error",&lxml_parse_result::status_internal_error)		
+		.addStaticProperty("status_unrecognized_tag",&lxml_parse_result::status_unrecognized_tag)	
+		.addStaticProperty("status_bad_pi",&lxml_parse_result::status_bad_pi)				
+		.addStaticProperty("status_bad_comment",&lxml_parse_result::status_bad_comment)			
+		.addStaticProperty("status_bad_cdata",&lxml_parse_result::status_bad_cdata)			
+		.addStaticProperty("status_bad_doctype",&lxml_parse_result::status_bad_doctype)			
+		.addStaticProperty("status_bad_pcdata",&lxml_parse_result::status_bad_pcdata)			
+		.addStaticProperty("status_bad_start_element",&lxml_parse_result::status_bad_start_element)	
+		.addStaticProperty("status_bad_attribute",&lxml_parse_result::status_bad_attribute)		
+		.addStaticProperty("status_bad_end_element",&lxml_parse_result::status_bad_end_element)		
+		.addStaticProperty("status_end_element_mismatch",&lxml_parse_result::status_end_element_mismatch)
+		.addStaticProperty("status_file_not_found",&lxml_parse_result::status_file_not_found)
 		.endClass()
 
 		.beginClass<lxml_node>("xml_node")
@@ -605,8 +700,11 @@ void register_pugilua (lua_State* L) {
 		.beginClass<lxml_document>("xml_document")
 		.addConstructor<void (*)()>()
 		.addProperty("valid",&lxml_document::valid)
-		.addFunction("load_file",&lxml_document::load_file)
 		.addFunction("root",&lxml_document::root)
+		.addFunction("reset",&lxml_document::reset)
+		.addFunction("load_file",&lxml_document::load_file)
+		.addFunction("load",&lxml_document::load)
+		.addFunction("save_file",&lxml_document::save_file)
 		.endClass()
 
 		.beginClass<lxpath_node>("xpath_node")
