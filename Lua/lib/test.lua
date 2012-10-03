@@ -20,6 +20,7 @@ print(query1.type,pugi.xpath_node_set.type_sorted)
 print(query1.size,query2.size)
 n=query1.size
 for i=0,n-1 do
-	node=query1:get(i):node()
-	print(node.valid)
+	local node=query1:get(i):node()
+	local attribute=query1:get(i):attribute()
+	print(node.valid,attribute.valid)
 end
