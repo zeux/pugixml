@@ -143,6 +143,15 @@ namespace pugi {
 			RefCountedPtr<lxml_node> insert_copy_after(RefCountedPtr<lxml_node> proto, RefCountedPtr<lxml_node> _node);
 			RefCountedPtr<lxml_node> insert_copy_before(RefCountedPtr<lxml_node> proto, RefCountedPtr<lxml_node> _node);
 
+			bool remove_attribute(RefCountedPtr<lxml_attribute> a);
+			bool remove_attribute_by_name(const char* name);
+
+			bool remove_child(RefCountedPtr<lxml_node> n);
+			bool remove_child_by_name(const char* name);
+
+			RefCountedPtr<lxml_node> find_child_by_name_and_attribute(const char* name, const char* attr_name, const char* attr_value) const;
+			RefCountedPtr<lxml_node> find_child_by_attribute(const char* attr_name, const char* attr_value) const;
+
 			//todo: text()
 
 		public: // non-lua interface
@@ -401,6 +410,30 @@ namespace pugi {
 			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_copy_before(proto->get(),_node->get())));
 		}
 
+		bool lxml_node::remove_attribute(RefCountedPtr<lxml_attribute> a) {
+			return node.remove_attribute(a->get());
+		}
+
+		bool lxml_node::remove_attribute_by_name(const char* name) {
+			return node.remove_attribute(name);
+		}
+
+		bool lxml_node::remove_child(RefCountedPtr<lxml_node> n) {
+			return node.remove_child(n->get());
+		}
+
+		bool lxml_node::remove_child_by_name(const char* name) {
+			return node.remove_child(name);
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::find_child_by_name_and_attribute(const char* name, const char* attr_name, const char* attr_value) const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.find_child_by_attribute(name,attr_name,attr_value)));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::find_child_by_attribute(const char* attr_name, const char* attr_value) const {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.find_child_by_attribute(attr_name,attr_name,attr_value)));
+		}
+
 		///////////////////
 		RefCountedPtr<lxml_parse_result> lxml_document::load_file(char const* path) {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
@@ -525,6 +558,12 @@ void register_pugilua (lua_State* L) {
 		.addFunction("prepend_copy",&lxml_node::prepend_copy)
 		.addFunction("insert_copy_after",&lxml_node::insert_copy_after)
 		.addFunction("insert_copy_before",&lxml_node::insert_copy_before)
+		.addFunction("remove_attribute",&lxml_node::remove_attribute)
+		.addFunction("remove_attribute_by_name",&lxml_node::remove_attribute_by_name)
+		.addFunction("remove_child",&lxml_node::remove_child)
+		.addFunction("remove_child_by_name",&lxml_node::remove_child_by_name)
+		.addFunction("find_child_by_name_and_attribute",&lxml_node::find_child_by_name_and_attribute)
+		.addFunction("find_child_by_attribute",&lxml_node::find_child_by_attribute)
 		.endClass()
 
 		.beginClass<lxml_document>("xml_document")
