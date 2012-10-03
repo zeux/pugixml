@@ -128,9 +128,15 @@ namespace pugi {
 			RefCountedPtr<lxml_attribute> insert_copy_after(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
 			RefCountedPtr<lxml_attribute> insert_copy_before(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
 
+			RefCountedPtr<lxml_node> append(int type);
+			RefCountedPtr<lxml_node> prepend(int type);
+			RefCountedPtr<lxml_node> insert_after(int type, RefCountedPtr<lxml_node> _node);
+			RefCountedPtr<lxml_node> insert_before(int type, RefCountedPtr<lxml_node> _node);
+
 			//todo: text()
 
-
+		public: // non-lua interface
+			pugi::xml_node const& get() const;
 
 		private:
 			pugi::xml_node node;
@@ -211,6 +217,10 @@ namespace pugi {
 		///////////////
 		lxml_node::lxml_node(pugi::xml_node const& n):node(n){}
 		lxml_node::lxml_node() { }
+
+		pugi::xml_node const& lxml_node::get() const {
+			return node;
+		}
 
 		bool lxml_node::valid() const {
 			return (bool)node;
@@ -333,6 +343,22 @@ namespace pugi {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.insert_copy_before(proto->get(),attr->get())));
 		}
 
+		RefCountedPtr<lxml_node> lxml_node::append(int type) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.append_child((xml_node_type)type)));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::prepend(int type) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.prepend_child((xml_node_type)type)));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::insert_after(int type, RefCountedPtr<lxml_node> _node) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_child_after((xml_node_type)type,_node->get())));
+		}
+
+		RefCountedPtr<lxml_node> lxml_node::insert_before(int type, RefCountedPtr<lxml_node> _node) {
+			return RefCountedPtr<lxml_node>(new lxml_node(node.insert_child_before((xml_node_type)type,_node->get())));
+		}
+
 		///////////////////
 		RefCountedPtr<lxml_parse_result> lxml_document::load_file(char const* path) {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
@@ -445,6 +471,10 @@ void register_pugilua (lua_State* L) {
 		.addFunction("prepend_copy",&lxml_node::prepend_copy)
 		.addFunction("insert_copy_after",&lxml_node::insert_copy_after)
 		.addFunction("insert_copy_before",&lxml_node::insert_copy_before)
+		.addFunction("append",&lxml_node::append)
+		.addFunction("prepend",&lxml_node::prepend)
+		.addFunction("insert_after",&lxml_node::insert_after)
+		.addFunction("insert_before",&lxml_node::insert_before)
 		.endClass()
 
 		.beginClass<lxml_document>("xml_document")
