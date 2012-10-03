@@ -42,7 +42,7 @@ namespace pugi {
 			}
 
 		public: // non-lua interface
-			pugi::xml_attribute const& get() {
+			pugi::xml_attribute const& get() const {
 				return att;
 			}
 
@@ -122,6 +122,11 @@ namespace pugi {
 			RefCountedPtr<lxml_attribute> prepend_attribute(const char* name);
 			RefCountedPtr<lxml_attribute> insert_attribute_after(const char* name, RefCountedPtr<lxml_attribute> attr);
 			RefCountedPtr<lxml_attribute> insert_attribute_before(const char* name, RefCountedPtr<lxml_attribute> attr);
+
+			RefCountedPtr<lxml_attribute> append_copy(RefCountedPtr<lxml_attribute> proto);
+			RefCountedPtr<lxml_attribute> prepend_copy(RefCountedPtr<lxml_attribute> proto);
+			RefCountedPtr<lxml_attribute> insert_copy_after(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
+			RefCountedPtr<lxml_attribute> insert_copy_before(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr);
 
 			//todo: text()
 
@@ -312,6 +317,22 @@ namespace pugi {
 			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.insert_attribute_before(name,attr->get())));
 		}
 
+		RefCountedPtr<lxml_attribute> lxml_node::append_copy(RefCountedPtr<lxml_attribute> proto) {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.append_copy(proto->get())));
+		}
+
+		RefCountedPtr<lxml_attribute> lxml_node::prepend_copy(RefCountedPtr<lxml_attribute> proto) {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.prepend_copy(proto->get())));
+		}
+
+		RefCountedPtr<lxml_attribute> lxml_node::insert_copy_after(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr) {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.insert_copy_after(proto->get(),attr->get())));
+		}
+
+		RefCountedPtr<lxml_attribute> lxml_node::insert_copy_before(RefCountedPtr<lxml_attribute> proto, RefCountedPtr<lxml_attribute> attr) {
+			return RefCountedPtr<lxml_attribute>(new lxml_attribute(node.insert_copy_before(proto->get(),attr->get())));
+		}
+
 		///////////////////
 		RefCountedPtr<lxml_parse_result> lxml_document::load_file(char const* path) {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
@@ -420,6 +441,10 @@ void register_pugilua (lua_State* L) {
 		.addFunction("prepend_attribute",&lxml_node::prepend_attribute)
 		.addFunction("insert_attribute_after",&lxml_node::insert_attribute_after)
 		.addFunction("insert_attribute_before",&lxml_node::insert_attribute_before)
+		.addFunction("append_copy",&lxml_node::append_copy)
+		.addFunction("prepend_copy",&lxml_node::prepend_copy)
+		.addFunction("insert_copy_after",&lxml_node::insert_copy_after)
+		.addFunction("insert_copy_before",&lxml_node::insert_copy_before)
 		.endClass()
 
 		.beginClass<lxml_document>("xml_document")
