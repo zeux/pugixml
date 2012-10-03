@@ -5,6 +5,7 @@
 #include <RefCountedPtr.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 
 namespace pugi {
 	namespace lua {
@@ -157,6 +158,8 @@ namespace pugi {
 			RefCountedPtr<lxpath_node> select_single_node(const char* query) const;
 				
 			RefCountedPtr<lxpath_node_set> select_nodes(char const* query) const;
+
+			std::string text() const;
 
 			//todo: text(), xml_tree_walker somehow
 
@@ -457,6 +460,12 @@ namespace pugi {
 			}
 		}
 
+		std::string lxml_node::text() const {
+			std::stringstream ss;
+			node.print(ss);
+			return ss.str();
+		}
+
 		///////////////////
 		RefCountedPtr<lxml_parse_result> lxml_document::load_file(char const* path) {
 			return RefCountedPtr<lxml_parse_result>(new lxml_parse_result(doc.load_file(path)));
@@ -546,6 +555,7 @@ void register_pugilua (lua_State* L) {
 		.addProperty("value",&lxml_node::value)
 		.addProperty("type",&lxml_node::type)
 		.addProperty("path",&lxml_node::path)
+		.addProperty("text",&lxml_node::text)
 		.addFunction("child",&lxml_node::child)
 		.addFunction("first_attribute",&lxml_node::first_attribute)
 		.addFunction("last_attribute",&lxml_node::last_attribute)

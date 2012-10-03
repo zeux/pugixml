@@ -29,3 +29,7 @@ for i=0,n-1 do
 		a=a:next_attribute()
 	end
 end
+
+----
+node=doc:root():child('Project')
+print(node.text)
