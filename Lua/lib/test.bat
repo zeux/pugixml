@@ -1,0 +1,2 @@
+lua test.lua
+pause
