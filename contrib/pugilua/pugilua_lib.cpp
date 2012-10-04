@@ -1,7 +1,7 @@
 #include "pugilua_lib.h"
 
 #include <pugixml.hpp>
-#include <luabridge.h>
+#include <LuaBridge.h>
 #include <RefCountedPtr.h>
 #include <string>
 #include <iostream>
@@ -79,7 +79,7 @@ namespace pugi {
 		///////////////////////
 		class lxml_parse_result {
 		public:
-			lxml_parse_result(pugi::xml_parse_result& r);
+			lxml_parse_result(pugi::xml_parse_result const& r);
 			lxml_parse_result();
 
 		public:
@@ -215,7 +215,7 @@ namespace pugi {
 		///////////////////
 		class lxml_document {
 		public:
-			RefCountedPtr<lxml_node> lxml_document::root() const;
+			RefCountedPtr<lxml_node> root() const;
 
 			bool valid() const;
 
@@ -247,7 +247,7 @@ namespace pugi {
 		/////////////////////
 		class lxpath_node_set {
 		public:
-			lxpath_node_set(pugi::xpath_node_set& s);
+			lxpath_node_set(pugi::xpath_node_set const& s);
 			lxpath_node_set();
 		public:
 
@@ -276,7 +276,7 @@ namespace pugi {
 	namespace lua {
 
 		///////////////////////
-		lxml_parse_result::lxml_parse_result(pugi::xml_parse_result& r):res(r) { }
+		lxml_parse_result::lxml_parse_result(pugi::xml_parse_result const& r):res(r) { }
 		lxml_parse_result::lxml_parse_result() { }
 
 		std::string lxml_parse_result::description() const {
@@ -555,7 +555,7 @@ namespace pugi {
 
 
 		/////////////////////
-		lxpath_node_set::lxpath_node_set(pugi::xpath_node_set& s):node_set(s) { }
+		lxpath_node_set::lxpath_node_set(pugi::xpath_node_set const& s):node_set(s) { }
 		lxpath_node_set::lxpath_node_set() { }
 
 		int lxpath_node_set::type() const {

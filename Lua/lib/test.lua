@@ -35,3 +35,23 @@ end
 ----
 node=doc:root():child('Project')
 print(node.text)
+
+----
+doc:reset()
+--- from the tutorial
+-- add node with some name
+local node = doc:root():append_child("node");
+
+-- add description node with text child
+local descr = node:append_child("description");
+descr:append(pugi.node_pcdata):set_value("Simple node");
+
+-- add param node before the description
+local param = node:insert_child_before("param", descr);
+
+-- add attributes to param node
+param:append_attribute("name"):set_value("version");
+param:append_attribute("value"):set_value(1.1);
+param:insert_attribute_after("type", param:attribute("name")):set_value("float");
+
+print(doc:save_file("tutorial.xml"));
