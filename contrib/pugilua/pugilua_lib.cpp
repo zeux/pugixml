@@ -10,7 +10,7 @@
 namespace pugi {
 	namespace lua {
 
-		static char const* version = "0.1.0";
+		static char const* version = "0.1.2";
 
 		class lxpath_node;
 		class lxpath_node_set;

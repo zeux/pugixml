@@ -3,7 +3,7 @@
 
 #include "pugilua_lib.h"
 
-#ifdef WIN32
+#ifdef _MSC_VER
 #define PUGILUA __declspec(dllexport)
 #else
 #define PUGILUA
