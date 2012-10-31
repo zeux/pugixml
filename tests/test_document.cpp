@@ -273,10 +273,6 @@ TEST(document_load_file_error)
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
 
-#ifdef _WIN32
-	CHECK(doc.load_file("con").status == status_io_error);
-#endif
-
 	test_runner::_memory_fail_threshold = 1;
 	CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory);
 }
