@@ -861,8 +861,6 @@ namespace pugi
 		void create();
 		void destroy();
 
-		xml_parse_result load_buffer_impl(void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own);
-
 	public:
 		// Default constructor, makes empty document
 		xml_document();

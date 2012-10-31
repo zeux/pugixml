@@ -2380,13 +2380,13 @@ PUGI__NS_BEGIN
 			return s;
 		}
 
-		char_t* parse(char_t* s, xml_node_struct* xmldoc, unsigned int optmsk, char_t endch)
+		char_t* parse(char_t* s, xml_node_struct* root, unsigned int optmsk, char_t endch)
 		{
 			strconv_attribute_t strconv_attribute = get_strconv_attribute(optmsk);
 			strconv_pcdata_t strconv_pcdata = get_strconv_pcdata(optmsk);
 			
 			char_t ch = 0;
-			xml_node_struct* cursor = xmldoc;
+			xml_node_struct* cursor = root;
 			char_t* mark = s;
 
 			while (*s != 0)
@@ -2606,36 +2606,37 @@ PUGI__NS_BEGIN
 			}
 
 			// check that last tag is closed
-			if (cursor != xmldoc) PUGI__THROW_ERROR(status_end_element_mismatch, s);
+			if (cursor != root) PUGI__THROW_ERROR(status_end_element_mismatch, s);
 
 			return s;
 		}
 
-		static xml_parse_result parse(char_t* buffer, size_t length, xml_node_struct* root, unsigned int optmsk)
+		static xml_parse_result parse(char_t* buffer, size_t length, xml_document_struct* xmldoc, xml_node_struct* root, unsigned int optmsk)
 		{
-			xml_document_struct* xmldoc = static_cast<xml_document_struct*>(root);
+			// allocator object is a part of document object
+			xml_allocator& alloc = *static_cast<xml_allocator*>(xmldoc);
 
 			// store buffer for offset_debug
-			xmldoc->buffer = buffer;
+			if (xmldoc == root) xmldoc->buffer = buffer;
 
 			// early-out for empty documents
 			if (length == 0) return make_parse_result(status_ok);
 
 			// create parser on stack
-			xml_parser parser(*xmldoc);
+			xml_parser parser(alloc);
 
 			// save last character and make buffer zero-terminated (speeds up parsing)
 			char_t endch = buffer[length - 1];
 			buffer[length - 1] = 0;
 			
 			// perform actual parsing
-			parser.parse(buffer, xmldoc, optmsk, endch);
+			parser.parse(buffer, root, optmsk, endch);
 
 			xml_parse_result result = make_parse_result(parser.error_status, parser.error_offset ? parser.error_offset - buffer : 0);
 			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
 
 			// update allocator state
-			*static_cast<xml_allocator*>(xmldoc) = parser.alloc;
+			alloc = parser.alloc;
 
 			// since we removed last character, we have to handle the only possible false positive
 			if (result && endch == '<')
@@ -3649,6 +3650,35 @@ PUGI__NS_BEGIN
 		fclose(file);
 
 		return result == 0;
+	}
+
+	PUGI__FN xml_parse_result load_buffer_impl(xml_document_struct* doc, xml_node_struct* root, void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own, char_t** out_buffer)
+	{
+		// check input buffer
+		assert(contents || size == 0);
+
+		// get actual encoding
+		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);
+
+		// get private buffer
+		char_t* buffer = 0;
+		size_t length = 0;
+
+		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
+		
+		// delete original buffer if we performed a conversion
+		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
+
+		// parse
+		xml_parse_result res = impl::xml_parser::parse(buffer, length, doc, root, options);
+
+		// remember encoding
+		res.encoding = buffer_encoding;
+
+		// grab onto buffer if it's our buffer, user is responsible for deallocating contents himself
+		if (own || buffer != contents) *out_buffer = buffer;
+
+		return res;
 	}
 PUGI__NS_END
 
@@ -5224,50 +5254,25 @@ namespace pugi
 		return impl::load_file_impl(*this, file, options, encoding);
 	}
 
-	PUGI__FN xml_parse_result xml_document::load_buffer_impl(void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own)
+	PUGI__FN xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		// check input buffer
-		assert(contents || size == 0);
-
-		// get actual encoding
-		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);
-
-		// get private buffer
-		char_t* buffer = 0;
-		size_t length = 0;
-
-		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
-		
-		// delete original buffer if we performed a conversion
-		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
-
-		// parse
-		xml_parse_result res = impl::xml_parser::parse(buffer, length, _root, options);
-
-		// remember encoding
-		res.encoding = buffer_encoding;
-
-		// grab onto buffer if it's our buffer, user is responsible for deallocating contens himself
-		if (own || buffer != contents) _buffer = buffer;
-
-		return res;
-	}
-
-	PUGI__FN xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, xml_encoding encoding)
-	{
-		return load_buffer_impl(const_cast<void*>(contents), size, options, encoding, false, false);
+		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, const_cast<void*>(contents), size, options, encoding, false, false, &_buffer);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
-		return load_buffer_impl(contents, size, options, encoding, true, false);
+		reset();
+
+		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, false, &_buffer);
 	}
 		
 	PUGI__FN xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
-		return load_buffer_impl(contents, size, options, encoding, true, true);
+		reset();
+
+		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, true, &_buffer);
 	}
 
 	PUGI__FN void xml_document::save(xml_writer& writer, const char_t* indent, unsigned int flags, xml_encoding encoding) const
