@@ -2616,9 +2616,6 @@ PUGI__NS_BEGIN
 			// allocator object is a part of document object
 			xml_allocator& alloc = *static_cast<xml_allocator*>(xmldoc);
 
-			// store buffer for offset_debug
-			if (xmldoc == root) xmldoc->buffer = buffer;
-
 			// early-out for empty documents
 			if (length == 0) return make_parse_result(status_ok);
 
@@ -3668,6 +3665,9 @@ PUGI__NS_BEGIN
 		
 		// delete original buffer if we performed a conversion
 		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
+
+		// store buffer for offset_debug
+		doc->buffer = buffer;
 
 		// parse
 		xml_parse_result res = impl::xml_parser::parse(buffer, length, doc, root, options);
