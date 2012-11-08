@@ -5479,13 +5479,13 @@ PUGI__NS_BEGIN
 
 	template <typename I> void reverse(I begin, I end)
 	{
-		while (begin + 1 < end) swap(*begin++, *--end);
+		while (end - begin > 1) swap(*begin++, *--end);
 	}
 
 	template <typename I> I unique(I begin, I end)
 	{
 		// fast skip head
-		while (begin + 1 < end && *begin != *(begin + 1)) begin++;
+		while (end - begin > 1 && *begin != *(begin + 1)) begin++;
 
 		if (begin == end) return begin;
 
