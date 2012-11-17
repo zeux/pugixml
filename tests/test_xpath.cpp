@@ -382,7 +382,7 @@ TEST_XML(xpath_out_of_memory_evaluate_union, "<node><a/><a/><a/><a/><a/><a/><a/>
 {
 	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
 
-	pugi::xpath_query q(STR("a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a|a"));
+	pugi::xpath_query q(STR("a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|(a|a)))))))))))))))))))"));
 
 #ifdef PUGIXML_NO_EXCEPTIONS
 	CHECK(q.evaluate_node_set(doc.child(STR("node"))).empty());
