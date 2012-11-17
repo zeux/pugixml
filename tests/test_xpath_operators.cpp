@@ -435,6 +435,17 @@ TEST(xpath_operators_union_error)
 	CHECK_XPATH_FAIL(STR("count(.) | ."));
 }
 
+TEST_XML(xpath_operators_union_minus, "<node1>3</node1><node2>4</node2>")
+{
+	CHECK_XPATH_FAIL(STR("(-node1) | node2"));
+	CHECK_XPATH_FAIL(STR("node1 | -node2"));
+	CHECK_XPATH_NUMBER(doc, STR("-(node1 | node2)"), -3);
+	CHECK_XPATH_NUMBER(doc, STR("-node1 | node2"), -3);
+	CHECK_XPATH_NUMBER(doc, STR("--node1 | node2"), 3);
+	CHECK_XPATH_NUMBER(doc, STR("-(-node1 | node2)"), 3);
+	CHECK_XPATH_NUMBER(doc, STR("--(-node1 | node2)"), -3);
+}
+
 TEST(xpath_operators_associativity_boolean)
 {
 	xml_node c;
