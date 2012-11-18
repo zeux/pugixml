@@ -7279,6 +7279,7 @@ PUGI__NS_BEGIN
 
 	enum ast_type_t
 	{
+		ast_unknown,
 		ast_op_or,						// left or right
 		ast_op_and,						// left and right
 		ast_op_equal,					// left = right
@@ -9338,7 +9339,9 @@ PUGI__NS_BEGIN
 		//				| FilterExpr
 		//				| FilterExpr '/' RelativeLocationPath
 		//				| FilterExpr '//' RelativeLocationPath
-		xpath_ast_node* parse_path_expression()
+		// UnionExpr ::= PathExpr | UnionExpr '|' PathExpr
+		// UnaryExpr ::= UnionExpr | '-' UnaryExpr
+		xpath_ast_node* parse_path_or_unary_expression()
 		{
 			// Clarification.
 			// PathExpr begins with either LocationPath or FilterExpr.
@@ -9384,170 +9387,136 @@ PUGI__NS_BEGIN
 
 				return n;
 			}
-			else return parse_location_path();
-		}
-
-		// UnionExpr ::= PathExpr | UnionExpr '|' PathExpr
-		xpath_ast_node* parse_union_expression()
-		{
-			xpath_ast_node* n = parse_path_expression();
-
-			while (_lexer.current() == lex_union)
+			else if (_lexer.current() == lex_minus)
 			{
 				_lexer.next();
 
-				xpath_ast_node* expr = parse_union_expression();
-
-				if (n->rettype() != xpath_type_node_set || expr->rettype() != xpath_type_node_set)
-					throw_error("Union operator has to be applied to node sets");
-
-				n = new (alloc_node()) xpath_ast_node(ast_op_union, xpath_type_node_set, n, expr);
-			}
-
-			return n;
-		}
-
-		// UnaryExpr ::= UnionExpr | '-' UnaryExpr
-		xpath_ast_node* parse_unary_expression()
-		{
-			if (_lexer.current() == lex_minus)
-			{
-				_lexer.next();
-
-				xpath_ast_node* expr = parse_unary_expression();
+				// precedence 7+ - only parses union expressions
+				xpath_ast_node* expr = parse_expression_rec(parse_path_or_unary_expression(), 7);
 
 				return new (alloc_node()) xpath_ast_node(ast_op_negate, xpath_type_number, expr);
 			}
-			else return parse_union_expression();
+			else
+				return parse_location_path();
 		}
-		
-		// MultiplicativeExpr ::= UnaryExpr
-		//						  | MultiplicativeExpr '*' UnaryExpr
-		//						  | MultiplicativeExpr 'div' UnaryExpr
-		//						  | MultiplicativeExpr 'mod' UnaryExpr
-		xpath_ast_node* parse_multiplicative_expression()
+
+		struct binary_op_t
 		{
-			xpath_ast_node* n = parse_unary_expression();
+			ast_type_t asttype;
+			xpath_value_type rettype;
+			int precedence;
 
-			while (_lexer.current() == lex_multiply || (_lexer.current() == lex_string &&
-				   (_lexer.contents() == PUGIXML_TEXT("mod") || _lexer.contents() == PUGIXML_TEXT("div"))))
+			binary_op_t(): asttype(ast_unknown), rettype(xpath_type_none), precedence(0)
 			{
-				ast_type_t op = _lexer.current() == lex_multiply ? ast_op_multiply :
-					_lexer.contents().begin[0] == 'd' ? ast_op_divide : ast_op_mod;
-				_lexer.next();
-
-				xpath_ast_node* expr = parse_unary_expression();
-
-				n = new (alloc_node()) xpath_ast_node(op, xpath_type_number, n, expr);
 			}
 
-			return n;
-		}
-
-		// AdditiveExpr ::= MultiplicativeExpr
-		//					| AdditiveExpr '+' MultiplicativeExpr
-		//					| AdditiveExpr '-' MultiplicativeExpr
-		xpath_ast_node* parse_additive_expression()
-		{
-			xpath_ast_node* n = parse_multiplicative_expression();
-
-			while (_lexer.current() == lex_plus || _lexer.current() == lex_minus)
+			binary_op_t(ast_type_t asttype_, xpath_value_type rettype_, int precedence_): asttype(asttype_), rettype(rettype_), precedence(precedence_)
 			{
-				lexeme_t l = _lexer.current();
-
-				_lexer.next();
-
-				xpath_ast_node* expr = parse_multiplicative_expression();
-
-				n = new (alloc_node()) xpath_ast_node(l == lex_plus ? ast_op_add : ast_op_subtract, xpath_type_number, n, expr);
 			}
 
-			return n;
+			static binary_op_t parse(xpath_lexer& lexer)
+			{
+				switch (lexer.current())
+				{
+				case lex_string:
+					if (lexer.contents() == PUGIXML_TEXT("or"))
+						return binary_op_t(ast_op_or, xpath_type_boolean, 1);
+					else if (lexer.contents() == PUGIXML_TEXT("and"))
+						return binary_op_t(ast_op_and, xpath_type_boolean, 2);
+					else if (lexer.contents() == PUGIXML_TEXT("div"))
+						return binary_op_t(ast_op_divide, xpath_type_number, 6);
+					else if (lexer.contents() == PUGIXML_TEXT("mod"))
+						return binary_op_t(ast_op_mod, xpath_type_number, 6);
+					else
+						return binary_op_t();
+
+				case lex_equal:
+					return binary_op_t(ast_op_equal, xpath_type_boolean, 3);
+
+				case lex_not_equal:
+					return binary_op_t(ast_op_not_equal, xpath_type_boolean, 3);
+
+				case lex_less:
+					return binary_op_t(ast_op_less, xpath_type_boolean, 4);
+
+				case lex_greater:
+					return binary_op_t(ast_op_greater, xpath_type_boolean, 4);
+
+				case lex_less_or_equal:
+					return binary_op_t(ast_op_less_or_equal, xpath_type_boolean, 4);
+
+				case lex_greater_or_equal:
+					return binary_op_t(ast_op_greater_or_equal, xpath_type_boolean, 4);
+
+				case lex_plus:
+					return binary_op_t(ast_op_add, xpath_type_number, 5);
+
+				case lex_minus:
+					return binary_op_t(ast_op_subtract, xpath_type_number, 5);
+
+				case lex_multiply:
+					return binary_op_t(ast_op_multiply, xpath_type_number, 6);
+
+				case lex_union:
+					return binary_op_t(ast_op_union, xpath_type_node_set, 7);
+
+				default:
+					return binary_op_t();
+				}
+			}
+		};
+
+		xpath_ast_node* parse_expression_rec(xpath_ast_node* lhs, int limit)
+		{
+			binary_op_t op = binary_op_t::parse(_lexer);
+
+			while (op.asttype != ast_unknown && op.precedence >= limit)
+			{
+				_lexer.next();
+
+				xpath_ast_node* rhs = parse_path_or_unary_expression();
+
+				binary_op_t nextop = binary_op_t::parse(_lexer);
+
+				while (nextop.asttype != ast_unknown && nextop.precedence > op.precedence)
+				{
+					rhs = parse_expression_rec(rhs, nextop.precedence);
+
+					nextop = binary_op_t::parse(_lexer);
+				}
+
+				if (op.asttype == ast_op_union && (lhs->rettype() != xpath_type_node_set || rhs->rettype() != xpath_type_node_set))
+					throw_error("Union operator has to be applied to node sets");
+
+				lhs = new (alloc_node()) xpath_ast_node(op.asttype, op.rettype, lhs, rhs);
+
+				op = binary_op_t::parse(_lexer);
+			}
+
+			return lhs;
 		}
 
+		// Expr ::= OrExpr
+		// OrExpr ::= AndExpr | OrExpr 'or' AndExpr
+		// AndExpr ::= EqualityExpr | AndExpr 'and' EqualityExpr
+		// EqualityExpr ::= RelationalExpr
+		//					| EqualityExpr '=' RelationalExpr
+		//					| EqualityExpr '!=' RelationalExpr
 		// RelationalExpr ::= AdditiveExpr
 		//					  | RelationalExpr '<' AdditiveExpr
 		//					  | RelationalExpr '>' AdditiveExpr
 		//					  | RelationalExpr '<=' AdditiveExpr
 		//					  | RelationalExpr '>=' AdditiveExpr
-		xpath_ast_node* parse_relational_expression()
-		{
-			xpath_ast_node* n = parse_additive_expression();
-
-			while (_lexer.current() == lex_less || _lexer.current() == lex_less_or_equal || 
-				   _lexer.current() == lex_greater || _lexer.current() == lex_greater_or_equal)
-			{
-				lexeme_t l = _lexer.current();
-				_lexer.next();
-
-				xpath_ast_node* expr = parse_additive_expression();
-
-				n = new (alloc_node()) xpath_ast_node(l == lex_less ? ast_op_less : l == lex_greater ? ast_op_greater :
-								l == lex_less_or_equal ? ast_op_less_or_equal : ast_op_greater_or_equal, xpath_type_boolean, n, expr);
-			}
-
-			return n;
-		}
-		
-		// EqualityExpr ::= RelationalExpr
-		//					| EqualityExpr '=' RelationalExpr
-		//					| EqualityExpr '!=' RelationalExpr
-		xpath_ast_node* parse_equality_expression()
-		{
-			xpath_ast_node* n = parse_relational_expression();
-
-			while (_lexer.current() == lex_equal || _lexer.current() == lex_not_equal)
-			{
-				lexeme_t l = _lexer.current();
-
-				_lexer.next();
-
-				xpath_ast_node* expr = parse_relational_expression();
-
-				n = new (alloc_node()) xpath_ast_node(l == lex_equal ? ast_op_equal : ast_op_not_equal, xpath_type_boolean, n, expr);
-			}
-
-			return n;
-		}
-		
-		// AndExpr ::= EqualityExpr | AndExpr 'and' EqualityExpr
-		xpath_ast_node* parse_and_expression()
-		{
-			xpath_ast_node* n = parse_equality_expression();
-
-			while (_lexer.current() == lex_string && _lexer.contents() == PUGIXML_TEXT("and"))
-			{
-				_lexer.next();
-
-				xpath_ast_node* expr = parse_equality_expression();
-
-				n = new (alloc_node()) xpath_ast_node(ast_op_and, xpath_type_boolean, n, expr);
-			}
-
-			return n;
-		}
-
-		// OrExpr ::= AndExpr | OrExpr 'or' AndExpr
-		xpath_ast_node* parse_or_expression()
-		{
-			xpath_ast_node* n = parse_and_expression();
-
-			while (_lexer.current() == lex_string && _lexer.contents() == PUGIXML_TEXT("or"))
-			{
-				_lexer.next();
-
-				xpath_ast_node* expr = parse_and_expression();
-
-				n = new (alloc_node()) xpath_ast_node(ast_op_or, xpath_type_boolean, n, expr);
-			}
-
-			return n;
-		}
-		
-		// Expr ::= OrExpr
+		// AdditiveExpr ::= MultiplicativeExpr
+		//					| AdditiveExpr '+' MultiplicativeExpr
+		//					| AdditiveExpr '-' MultiplicativeExpr
+		// MultiplicativeExpr ::= UnaryExpr
+		//						  | MultiplicativeExpr '*' UnaryExpr
+		//						  | MultiplicativeExpr 'div' UnaryExpr
+		//						  | MultiplicativeExpr 'mod' UnaryExpr
 		xpath_ast_node* parse_expression()
 		{
-			return parse_or_expression();
+			return parse_expression_rec(parse_path_or_unary_expression(), 0);
 		}
 
 		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result)
