@@ -6440,7 +6440,7 @@ PUGI__NS_BEGIN
 	#endif
 	}
 
-	PUGI__FN bool convert_string_to_number(char_t (&buffer)[32], const char_t* begin, const char_t* end, double* out_result)
+	PUGI__FN bool convert_string_to_number_scratch(char_t (&buffer)[32], const char_t* begin, const char_t* end, double* out_result)
 	{
 		size_t length = static_cast<size_t>(end - begin);
 		char_t* scratch = buffer;
@@ -6734,7 +6734,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN xpath_variable* get_variable(char_t (&buffer)[32], xpath_variable_set* set, const char_t* begin, const char_t* end)
+	PUGI__FN xpath_variable* get_variable_scratch(char_t (&buffer)[32], xpath_variable_set* set, const char_t* begin, const char_t* end)
 	{
 		size_t length = static_cast<size_t>(end - begin);
 		char_t* scratch = buffer;
@@ -9017,7 +9017,7 @@ PUGI__NS_BEGIN
 				if (!_variables)
 					throw_error("Unknown variable: variable set is not provided");
 
-				xpath_variable* var = get_variable(_scratch, _variables, name.begin, name.end);
+				xpath_variable* var = get_variable_scratch(_scratch, _variables, name.begin, name.end);
 
 				if (!var)
 					throw_error("Unknown variable: variable set does not contain the given name");
@@ -9055,7 +9055,7 @@ PUGI__NS_BEGIN
 			{
 				double value = 0;
 
-				if (!convert_string_to_number(_scratch, _lexer.contents().begin, _lexer.contents().end, &value))
+				if (!convert_string_to_number_scratch(_scratch, _lexer.contents().begin, _lexer.contents().end, &value))
 					throw_error_oom();
 
 				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
