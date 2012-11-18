@@ -6341,14 +6341,18 @@ PUGI__NS_BEGIN
 		if (special) return xpath_string_const(special);
 
 		// get mantissa + exponent form
-		char mantissa_buffer[64];
+		char mantissa_buffer[32];
 
 		char* mantissa;
 		int exponent;
 		convert_number_to_mantissa_exponent(value, mantissa_buffer, sizeof(mantissa_buffer), &mantissa, &exponent);
 
+		// allocate a buffer of suitable length for the number
+		size_t result_size = strlen(mantissa_buffer) + (exponent > 0 ? exponent : -exponent) + 4;
+		char_t* result = static_cast<char_t*>(alloc->allocate(sizeof(char_t) * result_size));
+		assert(result);
+
 		// make the number!
-		char_t result[512];
 		char_t* s = result;
 
 		// sign
@@ -6391,10 +6395,10 @@ PUGI__NS_BEGIN
 		}
 
 		// zero-terminate
-		assert(s < result + sizeof(result) / sizeof(result[0]));
+		assert(s < result + result_size);
 		*s = 0;
 
-		return xpath_string(result, alloc);
+		return xpath_string(result, true);
 	}
 	
 	PUGI__FN bool check_string_to_number_format(const char_t* string)
