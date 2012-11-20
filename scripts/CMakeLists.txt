@@ -16,7 +16,7 @@ else()
     add_library(pugixml STATIC ${SOURCES})
 endif()
 
-set_target_properties(pugixml PROPERTIES VERSION 1.2 SOVERSION 1.2)
+set_target_properties(pugixml PROPERTIES VERSION 1.2 SOVERSION 1)
 
 install(TARGETS pugixml LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${HEADERS} DESTINATION include)
