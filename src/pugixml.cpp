@@ -20,7 +20,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <wchar.h>
+
+#ifdef PUGIXML_WCHAR_MODE
+#	include <wchar.h>
+#endif
 
 #ifndef PUGIXML_NO_XPATH
 #	include <math.h>
@@ -195,7 +198,21 @@ PUGI__NS_BEGIN
 	
 		return lhs[count] == 0;
 	}
-	
+
+	// Get length of wide string, even if CRT lacks wide character support
+	PUGI__FN size_t strlength_wide(const wchar_t* s)
+	{
+		assert(s);
+
+	#ifdef PUGIXML_WCHAR_MODE
+		return wcslen(s);
+	#else
+		const wchar_t* end = s;
+		while (*end) end++;
+		return static_cast<size_t>(end - s);
+	#endif
+	}
+
 #ifdef PUGIXML_WCHAR_MODE
 	// Convert string to wide string, assuming all symbols are ASCII
 	PUGI__FN void widen_ascii(wchar_t* dest, const char* source)
@@ -3610,7 +3627,7 @@ PUGI__NS_BEGIN
 		assert(str);
 
 		// first pass: get length in utf8 characters
-		size_t length = wcslen(str);
+		size_t length = strlength_wide(str);
 		size_t size = as_utf8_begin(str, length);
 
 		// allocate resulting string
@@ -5394,7 +5411,7 @@ namespace pugi
 	{
 		assert(str);
 
-		return impl::as_utf8_impl(str, wcslen(str));
+		return impl::as_utf8_impl(str, impl::strlength_wide(str));
 	}
 
 	PUGI__FN std::string PUGIXML_FUNCTION as_utf8(const std::basic_string<wchar_t>& str)
