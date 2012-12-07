@@ -503,13 +503,21 @@ namespace pugi
 }
 
 PUGI__NS_BEGIN
+	struct xml_extra_buffer
+	{
+		char_t* buffer;
+		xml_extra_buffer* next;
+	};
+
 	struct xml_document_struct: public xml_node_struct, public xml_allocator
 	{
-		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0)
+		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0)
 		{
 		}
 
 		const char_t* buffer;
+
+		xml_extra_buffer* extra_buffers;
 	};
 
 	inline xml_allocator& get_allocator(const xml_node_struct* node)
@@ -4529,6 +4537,39 @@ namespace pugi
 		return true;
 	}
 
+	PUGI__FN xml_parse_result xml_node::append_buffer(const void* contents, size_t size, unsigned int options, xml_encoding encoding)
+	{
+		// append_buffer is only valid for elements/documents
+		if (!impl::allow_insert_child(type(), node_element)) return impl::make_parse_result(status_append_invalid_root);
+
+		// get document node
+		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(root()._root);
+		assert(doc);
+		
+		// get extra buffer element (we'll store the document fragment buffer there so that we can deallocate it later)
+		impl::xml_memory_page* page = 0;
+		impl::xml_extra_buffer* extra = static_cast<impl::xml_extra_buffer*>(doc->allocate_memory(sizeof(impl::xml_extra_buffer), page));
+		(void)page;
+
+		if (!extra) return impl::make_parse_result(status_out_of_memory);
+
+		// save name; name of the root has to be NULL before parsing - otherwise closing node mismatches will not be detected at the top level
+		char_t* name = _root->name;
+		_root->name = 0;
+
+		// parse
+		xml_parse_result res = load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
+
+		// restore name
+		_root->name = name;
+
+		// add extra buffer to the list
+		extra->next = doc->extra_buffers;
+		doc->extra_buffers = extra;
+
+		return res;
+	}
+
 	PUGI__FN xml_node xml_node::find_child_by_attribute(const char_t* name_, const char_t* attr_name, const char_t* attr_value) const
 	{
 		if (!_root) return xml_node();
@@ -5125,6 +5166,8 @@ namespace pugi
 		case status_bad_end_element: return "Error parsing end element tag";
 		case status_end_element_mismatch: return "Start-end tags mismatch";
 
+		case status_append_invalid_root: return "Unable to append nodes: root is not an element or document";
+
 		default: return "Unknown error";
 		}
 	}
@@ -5181,6 +5224,12 @@ namespace pugi
 		{
 			impl::xml_memory::deallocate(_buffer);
 			_buffer = 0;
+		}
+
+		// destroy extra buffers (note: no need to destroy linked list nodes, they're allocated using document allocator)
+		for (impl::xml_extra_buffer* extra = static_cast<impl::xml_document_struct*>(_root)->extra_buffers; extra; extra = extra->next)
+		{
+			if (extra->buffer) impl::xml_memory::deallocate(extra->buffer);
 		}
 
 		// destroy dynamic storage, leave sentinel page (it's in static memory)
