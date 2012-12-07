@@ -1339,6 +1339,40 @@ This is an example with one possible implementation of include tags in XML ([@sa
 
 [endsect] [/clone]
 
+[section:fragments Assembling document from fragments]
+
+[#xml_node::append_buffer]
+pugixml provides several ways to assemble an XML document from other XML documents. Assuming there is a set of document fragments, represented as in-memory buffers, the implementation choices are as follows:
+
+* Use a temporary document to parse the data from a string, then clone the nodes to a destination node. For example:
+
+    bool append_fragment(pugi::xml_node target, const char* buffer, size_t size)
+    {
+        pugi::xml_document doc;
+        if (!doc.load_buffer(buffer, size)) return false;
+
+        for (pugi::xml_node child = doc.first_child(); child; child = child.next_sibling())
+            target.append_copy(child);
+    }
+
+* Cache the parsing step - instead of keeping in-memory buffers, keep document objects that already contain the parsed fragment:
+
+    bool append_fragment(pugi::xml_node target, const pugi::xml_document& cached_fragment)
+    {
+        for (pugi::xml_node child = cached_fragment.first_child(); child; child = child.next_sibling())
+            target.append_copy(child);
+    }
+
+* Use xml_node::append_buffer directly:
+
+    xml_parse_result xml_node::append_buffer(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+
+The first method is more convenient, but slower than the other two. The relative performance of `append_copy` and `append_buffer` depends on the buffer format - usually `append_buffer` is faster if the buffer is in native encoding (UTF-8 or wchar_t, depending on `PUGIXML_WCHAR_MODE`). At the same time it might be less efficient in terms of memory usage - the implementation makes a copy of the provided buffer, and the copy has the same lifetime as the document - the memory used by that copy will be reclaimed after the document is destroyed, but no sooner. Even deleting all nodes in the document, including the appended ones, won't reclaim the memory.
+
+`append_buffer` behaves in the same way as [link xml_document::load_buffer] - the input buffer is a byte buffer, with size in bytes; the buffer is not modified and can be freed after the function returns.
+
+[endsect] [/fragments]
+
 [endsect] [/modify]
 
 [section:saving Saving document]
@@ -2339,6 +2373,9 @@ Classes:
     * `bool `[link xml_node::remove_attribute remove_attribute]`(const char_t* name);`
     * `bool `[link xml_node::remove_child remove_child]`(const xml_node& n);`
     * `bool `[link xml_node::remove_child remove_child]`(const char_t* name);`
+    [lbr]
+
+    * `xml_parse_result `[link xml_node::append_buffer append_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
     [lbr]
 
     * `void `[link xml_node::print print]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
