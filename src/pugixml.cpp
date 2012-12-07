@@ -4558,12 +4558,14 @@ namespace pugi
 		_root->name = 0;
 
 		// parse
-		xml_parse_result res = impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
+		char_t* buffer = 0;
+		xml_parse_result res = impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &buffer);
 
 		// restore name
 		_root->name = rootname;
 
 		// add extra buffer to the list
+		extra->buffer = buffer;
 		extra->next = doc->extra_buffers;
 		doc->extra_buffers = extra;
 
