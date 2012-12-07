@@ -4554,14 +4554,14 @@ namespace pugi
 		if (!extra) return impl::make_parse_result(status_out_of_memory);
 
 		// save name; name of the root has to be NULL before parsing - otherwise closing node mismatches will not be detected at the top level
-		char_t* name = _root->name;
+		char_t* rootname = _root->name;
 		_root->name = 0;
 
 		// parse
-		xml_parse_result res = load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
+		xml_parse_result res = impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
 
 		// restore name
-		_root->name = name;
+		_root->name = rootname;
 
 		// add extra buffer to the list
 		extra->next = doc->extra_buffers;
@@ -5307,21 +5307,21 @@ namespace pugi
 	{
 		reset();
 
-		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, const_cast<void*>(contents), size, options, encoding, false, false, &_buffer);
+		return impl::load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, const_cast<void*>(contents), size, options, encoding, false, false, &_buffer);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load_buffer_inplace(void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, false, &_buffer);
+		return impl::load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, false, &_buffer);
 	}
 		
 	PUGI__FN xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		return load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, true, &_buffer);
+		return impl::load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, true, &_buffer);
 	}
 
 	PUGI__FN void xml_document::save(xml_writer& writer, const char_t* indent, unsigned int flags, xml_encoding encoding) const

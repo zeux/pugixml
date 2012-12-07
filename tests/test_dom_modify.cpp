@@ -1019,7 +1019,7 @@ TEST(dom_node_append_buffer_out_of_memory_buffer)
 {
 	test_runner::_memory_fail_threshold = 32768 + 128;
 
-	const char data[128] = {};
+	char data[128] = {0};
 
 	xml_document doc;
 	CHECK(doc.append_buffer(data, sizeof(data)).status == status_out_of_memory);

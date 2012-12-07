@@ -830,7 +830,7 @@ namespace pugi
 		status_bad_end_element,		// Parsing error occurred while parsing end element tag
 		status_end_element_mismatch,// There was a mismatch of start-end tags (closing tag had incorrect name, some tag was not closed or there was an excessive closing tag)
 
-		status_append_invalid_root,	// Unable to append nodes since root type is not node_element or node_document (exclusive to xml_node::append_buffer)
+		status_append_invalid_root	// Unable to append nodes since root type is not node_element or node_document (exclusive to xml_node::append_buffer)
 	};
 
 	// Parsing result
