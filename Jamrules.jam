@@ -297,6 +297,11 @@ else if ( $(toolset:I=^msvc) )
             {
                 RESULT += "/I\"%WINKITS_PATH%\\include\\shared\"" ;
                 RESULT += "/I\"%WINKITS_PATH%\\include\\um\"" ;
+
+                if ( $(toolset:I=arm$) )
+                {
+                    RESULT += /D_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE ;
+                }
             }
         }
 
