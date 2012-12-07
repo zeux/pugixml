@@ -913,3 +913,115 @@ TEST(dom_node_doctype_value)
     CHECK(node.set_value(STR("id [ foo ]")));
     CHECK_NODE(node, STR("<!DOCTYPE id [ foo ]>"));
 }
+
+TEST_XML(dom_node_append_buffer_native, "<node>test</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	const char_t data1[] = STR("<child1 id='1' /><child2>text</child2>");
+	const char_t data2[] = STR("<child3 />");
+
+	CHECK(node.append_buffer(data1, sizeof(data1)));
+	CHECK(node.append_buffer(data2, sizeof(data2)));
+	CHECK(node.append_buffer(data1, sizeof(data1)));
+	CHECK(node.append_buffer(data2, sizeof(data2)));
+	CHECK(node.append_buffer(data2, sizeof(data2)));
+
+	CHECK_NODE(doc, STR("<node>test<child1 id=\"1\" /><child2>text</child2><child3 /><child1 id=\"1\" /><child2>text</child2><child3 /><child3 /></node>"));
+}
+
+TEST_XML(dom_node_append_buffer_convert, "<node>test</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	const char data[] = {0, 0, 0, '<', 0, 0, 0, 'n', 0, 0, 0, '/', 0, 0, 0, '>'};
+
+	CHECK(node.append_buffer(data, sizeof(data)));
+	CHECK(node.append_buffer(data, sizeof(data), parse_default, encoding_utf32_be));
+
+	CHECK_NODE(doc, STR("<node>test<n /><n /></node>"));
+}
+
+
+TEST_XML(dom_node_append_buffer_remove, "<node>test</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	const char data1[] = "<child1 id='1' /><child2>text</child2>";
+	const char data2[] = "<child3 />";
+
+	CHECK(node.append_buffer(data1, sizeof(data1)));
+	CHECK(node.append_buffer(data2, sizeof(data2)));
+	CHECK(node.append_buffer(data1, sizeof(data1)));
+	CHECK(node.append_buffer(data2, sizeof(data2)));
+
+	CHECK_NODE(doc, STR("<node>test<child1 id=\"1\" /><child2>text</child2><child3 /><child1 id=\"1\" /><child2>text</child2><child3 /></node>"));
+
+	while (node.remove_child(STR("child2"))) {}
+
+	CHECK_NODE(doc, STR("<node>test<child1 id=\"1\" /><child3 /><child1 id=\"1\" /><child3 /></node>"));
+
+	while (node.remove_child(STR("child1"))) {}
+
+	CHECK_NODE(doc, STR("<node>test<child3 /><child3 /></node>"));
+
+	while (node.remove_child(STR("child3"))) {}
+
+	CHECK_NODE(doc, STR("<node>test</node>"));
+
+	doc.remove_child(STR("node"));
+
+	CHECK(!doc.first_child());
+}
+
+TEST(dom_node_append_buffer_empty_document)
+{
+	xml_document doc;
+
+	const char data[] = "<child1 id='1' /><child2>text</child2>";
+
+	doc.append_buffer(data, sizeof(data));
+
+	CHECK_NODE(doc, STR("<child1 id=\"1\" /><child2>text</child2>"));
+}
+
+TEST_XML(dom_node_append_buffer_invalid_type, "<node>test</node>")
+{
+	const char data[] = "<child1 id='1' /><child2>text</child2>";
+
+	CHECK(xml_node().append_buffer(data, sizeof(data)).status == status_append_invalid_root);
+	CHECK(doc.first_child().first_child().append_buffer(data, sizeof(data)).status == status_append_invalid_root);
+}
+
+TEST_XML(dom_node_append_buffer_close_external, "<node />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	const char data[] = "<child1 /></node><child2 />";
+
+	CHECK(node.append_buffer(data, sizeof(data)).status == status_end_element_mismatch);
+	CHECK_NODE(doc, STR("<node><child1 /></node>"));
+
+	CHECK(node.append_buffer(data, sizeof(data)).status == status_end_element_mismatch);
+	CHECK_NODE(doc, STR("<node><child1 /><child1 /></node>"));
+}
+
+TEST(dom_node_append_buffer_out_of_memory_extra)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document doc;
+	CHECK(doc.append_buffer("<n/>", 4).status == status_out_of_memory);
+	CHECK(!doc.first_child());
+}
+
+TEST(dom_node_append_buffer_out_of_memory_buffer)
+{
+	test_runner::_memory_fail_threshold = 32768 + 128;
+
+	const char data[128] = {};
+
+	xml_document doc;
+	CHECK(doc.append_buffer(data, sizeof(data)).status == status_out_of_memory);
+	CHECK(!doc.first_child());
+}
