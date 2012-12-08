@@ -323,6 +323,7 @@ PUGI__NS_BEGIN
 
 			// prepare page structure
 			xml_memory_page* page = xml_memory_page::construct(page_memory);
+			assert(page);
 
 			page->memory = memory;
 			page->allocator = _root->allocator;
@@ -1550,6 +1551,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN bool strcpy_insitu(char_t*& dest, uintptr_t& header, uintptr_t header_mask, const char_t* source)
 	{
+		assert(header);
+
 		size_t source_length = strlength(source);
 
 		if (source_length == 0)
@@ -1882,7 +1885,7 @@ PUGI__NS_BEGIN
 		case 1: return strconv_pcdata_impl<opt_false, opt_true>::parse;
 		case 2: return strconv_pcdata_impl<opt_true, opt_false>::parse;
 		case 3: return strconv_pcdata_impl<opt_true, opt_true>::parse;
-		default: return 0; // should not get here
+		default: assert(false); return 0; // should not get here
 		}
 	}
 
@@ -2059,7 +2062,7 @@ PUGI__NS_BEGIN
 		case 13: return strconv_attribute_impl<opt_true>::parse_wnorm;
 		case 14: return strconv_attribute_impl<opt_false>::parse_wnorm;
 		case 15: return strconv_attribute_impl<opt_true>::parse_wnorm;
-		default: return 0; // should not get here
+		default: assert(false); return 0; // should not get here
 		}
 	}
 
@@ -5225,6 +5228,7 @@ namespace pugi
 
 		// prepare page structure
 		impl::xml_memory_page* page = impl::xml_memory_page::construct(page_memory);
+		assert(page);
 
 		page->busy_size = impl::xml_memory_page_size;
 
@@ -8843,6 +8847,7 @@ PUGI__NS_BEGIN
 
 				char_t* c = static_cast<char_t*>(_alloc->allocate_nothrow((length + 1) * sizeof(char_t)));
 				if (!c) throw_error_oom();
+				assert(c); // workaround for clang static analysis
 
 				memcpy(c, value.begin, length * sizeof(char_t));
 				c[length] = 0;
