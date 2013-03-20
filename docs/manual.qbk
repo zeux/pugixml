@@ -1482,7 +1482,7 @@ These flags control the resulting tree contents:
 * [anchor format_raw] switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with [link parse_ws_pcdata] flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
 [lbr]
 
-* [anchor format_no_escapes] disables output escaping for attribute values and PCDATA contents. If this flag is on, special symbols (', &, <, >) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. &amp;) during output. If this flag is off, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray < in the PCDATA will make the output malformed). This flag is *on* by default.
+* [anchor format_no_escapes] disables output escaping for attribute values and PCDATA contents. If this flag is off, special symbols (', &, <, >) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. &amp;) during output. If this flag is on, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray < in the PCDATA will make the output malformed). This flag is *off* by default.
 
 These flags control the additional output information:
 
