@@ -5825,7 +5825,7 @@ PUGI__NS_BEGIN
 			if (result != ptr && ptr)
 			{
 				// copy old data
-				assert(new_size > old_size);
+				assert(new_size >= old_size);
 				memcpy(result, ptr, old_size);
 
 				// free the previous page if it had no other objects

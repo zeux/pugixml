@@ -420,4 +420,18 @@ TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/>
 #endif
 }
 
+TEST(xpath_memory_concat_massive)
+{
+	pugi::xml_document doc;
+	pugi::xml_node node = doc.append_child(STR("node"));
+
+	for (int i = 0; i < 5000; ++i)
+		node.append_child(STR("c")).text().set(i % 10);
+
+	pugi::xpath_query q(STR("/"));
+	size_t size = q.evaluate_string(0, 0, node);
+
+	CHECK(size == 5001);
+}
+
 #endif
