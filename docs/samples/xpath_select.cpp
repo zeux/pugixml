@@ -10,17 +10,18 @@ int main()
 //[code_xpath_select
     pugi::xpath_node_set tools = doc.select_nodes("/Profile/Tools/Tool[@AllowRemote='true' and @DeriveCaptionFrom='lastparam']");
 
-    std::cout << "Tools:";
+    std::cout << "Tools:\n";
 
     for (pugi::xpath_node_set::const_iterator it = tools.begin(); it != tools.end(); ++it)
     {
         pugi::xpath_node node = *it;
-        std::cout << " " << node.node().attribute("Filename").value();
+        std::cout << node.node().attribute("Filename").value() << "\n";
     }
 
     pugi::xpath_node build_tool = doc.select_single_node("//Tool[contains(Description, 'build system')]");
 
-    std::cout << "\nBuild tool: " << build_tool.node().attribute("Filename").value() << "\n";
+    if (build_tool)
+        std::cout << "Build tool: " << build_tool.node().attribute("Filename").value() << "\n";
 //]
 }
 
