@@ -2,7 +2,8 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 	<xsl:template name="navbar.section">
 		<xsl:param name="name" select="/foo" />
-		<xsl:param name="target" select="id($name)" />
+        <xsl:param name="targets" select="key('id',$name)"/>
+        <xsl:param name="target" select="$targets[1]"/>
 		<xsl:param name="text" select="normalize-space($target/title)" />
 
 		<xsl:choose>
