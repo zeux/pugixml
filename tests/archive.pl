@@ -17,6 +17,18 @@ for $source (sort {$a cmp $b} @sources)
 	my $meta = &readfile_meta($source);
 	my $file = $basedir . $source;
 
+    if (-T $source)
+    {
+        # convert all newlines to Unix format
+        $contents =~ s/\r//g;
+
+        if ($zip)
+        {
+            # convert all newlines to Windows format for .zip distribution
+            $contents =~ s/\n/\r\n/g;
+        }
+    }
+
 	if ($zip)
 	{
 		my $path = $file;
@@ -31,9 +43,6 @@ for $source (sort {$a cmp $b} @sources)
 	}
 	else
 	{
-		# tgz releases are for Unix people, Unix people like Unix newlines
-		$contents =~ s/\r//g if (-T $source);
-
 		$arch->add_data($file, $contents, $meta);
 	}
 }
