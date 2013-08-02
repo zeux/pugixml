@@ -5220,6 +5220,8 @@ namespace pugi
 
 	PUGI__FN void xml_document::create()
 	{
+        assert(!_root);
+
 		// initialize sentinel page
 		PUGI__STATIC_ASSERT(offsetof(impl::xml_memory_page, data) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment <= sizeof(_memory));
 
@@ -5242,6 +5244,8 @@ namespace pugi
 
 	PUGI__FN void xml_document::destroy()
 	{
+        assert(_root);
+
 		// destroy static storage
 		if (_buffer)
 		{
@@ -5256,28 +5260,19 @@ namespace pugi
 		}
 
 		// destroy dynamic storage, leave sentinel page (it's in static memory)
-		if (_root)
-		{
-			impl::xml_memory_page* root_page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
-			assert(root_page && !root_page->prev && !root_page->memory);
+        impl::xml_memory_page* root_page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
+        assert(root_page && !root_page->prev && !root_page->memory);
 
-			// destroy all pages
-			for (impl::xml_memory_page* page = root_page->next; page; )
-			{
-				impl::xml_memory_page* next = page->next;
+        for (impl::xml_memory_page* page = root_page->next; page; )
+        {
+            impl::xml_memory_page* next = page->next;
 
-				impl::xml_allocator::deallocate_page(page);
+            impl::xml_allocator::deallocate_page(page);
 
-				page = next;
-			}
+            page = next;
+        }
 
-			// cleanup root page
-			root_page->allocator = 0;
-			root_page->next = 0;
-			root_page->busy_size = root_page->freed_size = 0;
-
-			_root = 0;
-		}
+        _root = 0;
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -5403,6 +5398,8 @@ namespace pugi
 
 	PUGI__FN xml_node xml_document::document_element() const
 	{
+        assert(_root);
+
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if ((i->header & impl::xml_memory_page_type_mask) + 1 == node_element)
 				return xml_node(i);
