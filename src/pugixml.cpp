@@ -1681,7 +1681,7 @@ PUGI__NS_BEGIN
 
 					for (;;)
 					{
-						if (static_cast<unsigned int>(ch - '0') <= 9)
+						if (static_cast<unsigned int>(static_cast<unsigned int>(ch) - '0') <= 9)
 							ucsc = 10 * ucsc + (ch - '0');
 						else if (ch == ';')
 							break;
@@ -6436,7 +6436,7 @@ PUGI__NS_BEGIN
 		{
 			while (exponent > 0)
 			{
-				assert(*mantissa == 0 || static_cast<unsigned int>(*mantissa - '0') <= 9);
+				assert(*mantissa == 0 || static_cast<unsigned int>(static_cast<unsigned int>(*mantissa) - '0') <= 9);
 				*s++ = *mantissa ? *mantissa++ : '0';
 				exponent--;
 			}
