@@ -87,7 +87,7 @@ TEST_XML(dom_attr_as_string, "<node attr='1'/>")
 	CHECK_STRING(xml_attribute().as_string(), STR(""));
 }
 
-TEST_XML(dom_attr_as_int, "<node attr1='1' attr2='-1' attr3='-2147483648' attr4='2147483647'/>")
+TEST_XML(dom_attr_as_int, "<node attr1='1' attr2='-1' attr3='-2147483648' attr4='2147483647' attr5='0'/>")
 {
 	xml_node node = doc.child(STR("node"));
 
@@ -96,9 +96,22 @@ TEST_XML(dom_attr_as_int, "<node attr1='1' attr2='-1' attr3='-2147483648' attr4=
 	CHECK(node.attribute(STR("attr2")).as_int() == -1);
 	CHECK(node.attribute(STR("attr3")).as_int() == -2147483647 - 1);
 	CHECK(node.attribute(STR("attr4")).as_int() == 2147483647);
+	CHECK(node.attribute(STR("attr5")).as_int() == 0);
 }
 
-TEST_XML(dom_attr_as_uint, "<node attr1='0' attr2='1' attr3='2147483647' attr4='4294967295'/>")
+TEST_XML(dom_attr_as_int_hex, "<node attr1='0777' attr2='0x5ab' attr3='0XFf' attr4='-0x20' attr5='-0x80000000' attr6='0x'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_int() == 777); // no octal support! intentional
+	CHECK(node.attribute(STR("attr2")).as_int() == 1451);
+	CHECK(node.attribute(STR("attr3")).as_int() == 255);
+	CHECK(node.attribute(STR("attr4")).as_int() == -32);
+	CHECK(node.attribute(STR("attr5")).as_int() == -2147483647 - 1);
+	CHECK(node.attribute(STR("attr6")).as_int() == 0);
+}
+
+TEST_XML(dom_attr_as_uint, "<node attr1='0' attr2='1' attr3='2147483647' attr4='4294967295' attr5='0'/>")
 {
 	xml_node node = doc.child(STR("node"));
 
@@ -107,6 +120,29 @@ TEST_XML(dom_attr_as_uint, "<node attr1='0' attr2='1' attr3='2147483647' attr4='
 	CHECK(node.attribute(STR("attr2")).as_uint() == 1);
 	CHECK(node.attribute(STR("attr3")).as_uint() == 2147483647);
 	CHECK(node.attribute(STR("attr4")).as_uint() == 4294967295u);
+	CHECK(node.attribute(STR("attr5")).as_uint() == 0);
+}
+
+TEST_XML(dom_attr_as_uint_hex, "<node attr1='0777' attr2='0x5ab' attr3='0XFf' attr4='0x20' attr5='0xFFFFFFFF' attr6='0x'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_uint() == 777); // no octal support! intentional
+	CHECK(node.attribute(STR("attr2")).as_uint() == 1451);
+	CHECK(node.attribute(STR("attr3")).as_uint() == 255);
+	CHECK(node.attribute(STR("attr4")).as_uint() == 32);
+	CHECK(node.attribute(STR("attr5")).as_uint() == 4294967295u);
+	CHECK(node.attribute(STR("attr6")).as_uint() == 0);
+}
+
+TEST_XML(dom_attr_as_integer_space, "<node attr1=' \t1234' attr2='\t 0x123' attr3='- 16' attr4='- 0x10'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_int() == 1234);
+	CHECK(node.attribute(STR("attr2")).as_int() == 291);
+	CHECK(node.attribute(STR("attr3")).as_int() == 0);
+	CHECK(node.attribute(STR("attr4")).as_int() == 0);
 }
 
 TEST_XML(dom_attr_as_float, "<node attr1='0' attr2='1' attr3='0.12' attr4='-5.1' attr5='3e-4' attr6='3.14159265358979323846'/>")

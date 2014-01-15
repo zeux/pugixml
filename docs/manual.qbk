@@ -882,7 +882,7 @@ In many cases attribute values have types that are not strings - i.e. an attribu
     float xml_attribute::as_float(float def = 0) const;
     bool xml_attribute::as_bool(bool def = false) const;
 
-`as_int`, `as_uint`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `def` argument is returned (which is 0 by default). Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as a decimal number (`as_int` or `as_uint`) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
+`as_int`, `as_uint`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `def` argument is returned (which is 0 by default). Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as an integer number in either decimal or hexadecimal form (`as_int` or `as_uint`; hexadecimal format is used if the number has `0x` or `0X` prefix) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
 
 In case the input string contains a number that is out of the target numeric range, the result is undefined.
 

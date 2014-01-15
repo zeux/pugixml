@@ -3314,14 +3314,29 @@ PUGI__NS_BEGIN
 	}
 
 	// get value with conversion functions
+	PUGI__FN int get_integer_base(const char_t* value)
+	{
+		const char_t* s = value;
+
+		while (PUGI__IS_CHARTYPE(*s, ct_space))
+			s++;
+
+		if (*s == '-')
+			s++;
+
+		return (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) ? 16 : 10;
+	}
+
 	PUGI__FN int get_value_int(const char_t* value, int def)
 	{
 		if (!value) return def;
 
+		int base = get_integer_base(value);
+
 	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<int>(wcstol(value, 0, 10));
+		return static_cast<int>(wcstol(value, 0, base));
 	#else
-		return static_cast<int>(strtol(value, 0, 10));
+		return static_cast<int>(strtol(value, 0, base));
 	#endif
 	}
 
@@ -3329,10 +3344,12 @@ PUGI__NS_BEGIN
 	{
 		if (!value) return def;
 
+		int base = get_integer_base(value);
+
 	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<unsigned int>(wcstoul(value, 0, 10));
+		return static_cast<unsigned int>(wcstoul(value, 0, base));
 	#else
-		return static_cast<unsigned int>(strtoul(value, 0, 10));
+		return static_cast<unsigned int>(strtoul(value, 0, base));
 	#endif
 	}
 
@@ -9876,7 +9893,7 @@ namespace pugi
 		return error ? error : "No error";
 	}
 
-	PUGI__FN xpath_variable::xpath_variable()
+	PUGI__FN xpath_variable::xpath_variable(): _type(xpath_type_none), _next(0)
 	{
 	}
 

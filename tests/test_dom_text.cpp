@@ -57,7 +57,7 @@ TEST_XML_FLAGS(dom_text_as_string, "<node><a>foo</a><b><node/><![CDATA[bar]]></b
     CHECK_STRING(xml_node().text().as_string(), STR(""));
 }
 
-TEST_XML(dom_text_as_int, "<node><text1>1</text1><text2>-1</text2><text3>-2147483648</text3><text4>2147483647</text4></node>")
+TEST_XML(dom_text_as_int, "<node><text1>1</text1><text2>-1</text2><text3>-2147483648</text3><text4>2147483647</text4><text5>0</text5></node>")
 {
 	xml_node node = doc.child(STR("node"));
 
@@ -66,9 +66,22 @@ TEST_XML(dom_text_as_int, "<node><text1>1</text1><text2>-1</text2><text3>-214748
 	CHECK(node.child(STR("text2")).text().as_int() == -1);
 	CHECK(node.child(STR("text3")).text().as_int() == -2147483647 - 1);
 	CHECK(node.child(STR("text4")).text().as_int() == 2147483647);
+    CHECK(node.child(STR("text5")).text().as_int() == 0);
 }
 
-TEST_XML(dom_text_as_uint, "<node><text1>0</text1><text2>1</text2><text3>2147483647</text3><text4>4294967295</text4></node>")
+TEST_XML(dom_text_as_int_hex, "<node><text1>0777</text1><text2>0x5ab</text2><text3>0XFf</text3><text4>-0x20</text4><text5>-0x80000000</text5><text6>0x</text6></node>")
+{
+    xml_node node = doc.child(STR("node"));
+
+    CHECK(node.child(STR("text1")).text().as_int() == 777); // no octal support! intentional
+    CHECK(node.child(STR("text2")).text().as_int() == 1451);
+    CHECK(node.child(STR("text3")).text().as_int() == 255);
+    CHECK(node.child(STR("text4")).text().as_int() == -32);
+    CHECK(node.child(STR("text5")).text().as_int() == -2147483647 - 1);
+    CHECK(node.child(STR("text6")).text().as_int() == 0);
+}
+
+TEST_XML(dom_text_as_uint, "<node><text1>0</text1><text2>1</text2><text3>2147483647</text3><text4>4294967295</text4><text5>0</text5></node>")
 {
 	xml_node node = doc.child(STR("node"));
 
@@ -77,6 +90,29 @@ TEST_XML(dom_text_as_uint, "<node><text1>0</text1><text2>1</text2><text3>2147483
 	CHECK(node.child(STR("text2")).text().as_uint() == 1);
 	CHECK(node.child(STR("text3")).text().as_uint() == 2147483647);
 	CHECK(node.child(STR("text4")).text().as_uint() == 4294967295u);
+    CHECK(node.child(STR("text5")).text().as_uint() == 0);
+}
+
+TEST_XML(dom_text_as_uint_hex, "<node><text1>0777</text1><text2>0x5ab</text2><text3>0XFf</text3><text4>0x20</text4><text5>0xFFFFFFFF</text5><text6>0x</text6></node>")
+{
+    xml_node node = doc.child(STR("node"));
+
+    CHECK(node.child(STR("text1")).text().as_uint() == 777); // no octal support! intentional
+    CHECK(node.child(STR("text2")).text().as_uint() == 1451);
+    CHECK(node.child(STR("text3")).text().as_uint() == 255);
+    CHECK(node.child(STR("text4")).text().as_uint() == 32);
+    CHECK(node.child(STR("text5")).text().as_uint() == 4294967295u);
+    CHECK(node.child(STR("text6")).text().as_uint() == 0);
+}
+
+TEST_XML(dom_text_as_integer_space, "<node><text1> \t\n1234</text1><text2>\n\t 0x123</text2><text3>- 16</text3><text4>- 0x10</text4></node>")
+{
+    xml_node node = doc.child(STR("node"));
+
+    CHECK(node.child(STR("text1")).text().as_int() == 1234);
+    CHECK(node.child(STR("text2")).text().as_int() == 291);
+    CHECK(node.child(STR("text3")).text().as_int() == 0);
+    CHECK(node.child(STR("text4")).text().as_int() == 0);
 }
 
 TEST_XML(dom_text_as_float, "<node><text1>0</text1><text2>1</text2><text3>0.12</text3><text4>-5.1</text4><text5>3e-4</text5><text6>3.14159265358979323846</text6></node>")
