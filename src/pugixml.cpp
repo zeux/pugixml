@@ -5240,7 +5240,7 @@ namespace pugi
         assert(!_root);
 
 		// initialize sentinel page
-		PUGI__STATIC_ASSERT(offsetof(impl::xml_memory_page, data) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment <= sizeof(_memory));
+		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment <= sizeof(_memory));
 
 		// align upwards to page boundary
 		void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(_memory) + (impl::xml_memory_page_alignment - 1)) & ~(impl::xml_memory_page_alignment - 1));
