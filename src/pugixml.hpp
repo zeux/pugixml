@@ -753,6 +753,8 @@ namespace pugi
 	// Named node range helper
 	class PUGIXML_CLASS xml_named_node_iterator
 	{
+		friend class xml_node;
+
 	public:
 		// Iterator traits
 		typedef ptrdiff_t difference_type;
@@ -761,7 +763,7 @@ namespace pugi
 		typedef xml_node& reference;
 
 	#ifndef PUGIXML_NO_STL
-		typedef std::forward_iterator_tag iterator_category;
+		typedef std::bidirectional_iterator_tag iterator_category;
 	#endif
 
 		// Default constructor
@@ -780,9 +782,15 @@ namespace pugi
 		const xml_named_node_iterator& operator++();
 		xml_named_node_iterator operator++(int);
 
+		const xml_named_node_iterator& operator--();
+		xml_named_node_iterator operator--(int);
+
 	private:
-		mutable xml_node _node;
+		mutable xml_node _wrap;
+		xml_node _parent;
 		const char_t* _name;
+
+		xml_named_node_iterator(xml_node_struct* ref, xml_node_struct* parent, const char_t* name);
 	};
 
 	// Abstract tree walker class (see xml_node::traverse)
@@ -1234,7 +1242,7 @@ namespace std
 	// Workarounds for (non-standard) iterator category detection for older versions (MSVC7/IC8 and earlier)
 	std::bidirectional_iterator_tag PUGIXML_FUNCTION _Iter_cat(const pugi::xml_node_iterator&);
 	std::bidirectional_iterator_tag PUGIXML_FUNCTION _Iter_cat(const pugi::xml_attribute_iterator&);
-	std::forward_iterator_tag PUGIXML_FUNCTION _Iter_cat(const pugi::xml_named_node_iterator&);
+	std::bidirectional_iterator_tag PUGIXML_FUNCTION _Iter_cat(const pugi::xml_named_node_iterator&);
 }
 #endif
 
@@ -1244,7 +1252,7 @@ namespace std
 	// Workarounds for (non-standard) iterator category detection
 	std::bidirectional_iterator_tag PUGIXML_FUNCTION __iterator_category(const pugi::xml_node_iterator&);
 	std::bidirectional_iterator_tag PUGIXML_FUNCTION __iterator_category(const pugi::xml_attribute_iterator&);
-	std::forward_iterator_tag PUGIXML_FUNCTION __iterator_category(const pugi::xml_named_node_iterator&);
+	std::bidirectional_iterator_tag PUGIXML_FUNCTION __iterator_category(const pugi::xml_named_node_iterator&);
 }
 #endif
 

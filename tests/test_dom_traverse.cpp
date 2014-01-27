@@ -22,12 +22,6 @@ template <typename I> static I move_iter(I base, int n)
 	else while (n++) --base;
 	return base;
 }
-
-static xml_named_node_iterator move_iter(xml_named_node_iterator base, int n)
-{
-	while (n--) ++base;
-	return base;
-}
 #else
 template <typename I> static I move_iter(I base, int n)
 {
@@ -919,36 +913,51 @@ TEST_XML(dom_hash_value, "<node attr='value'>value</node>")
     CHECK(attr_copy.hash_value() == attr.hash_value());
 }
 
-TEST_XML(dom_node_named_iterator, "<node><node1><child/></node1><node2><child/><child/></node2><node3/></node>")
+TEST_XML(dom_node_named_iterator, "<node><node1><child/></node1><node2><child/><child/></node2><node3/><node4><child/><x/></node4></node>")
 {
 	xml_node node1 = doc.child(STR("node")).child(STR("node1"));
 	xml_node node2 = doc.child(STR("node")).child(STR("node2"));
 	xml_node node3 = doc.child(STR("node")).child(STR("node3"));
+	xml_node node4 = doc.child(STR("node")).child(STR("node4"));
 
 	CHECK(xml_named_node_iterator(xml_node(), STR("child")) == xml_named_node_iterator());
 
-    xml_named_node_iterator it1(node1.child(STR("child")), STR("child"));
-	CHECK(move_iter(it1, 1) == xml_named_node_iterator());
-	CHECK(*it1 == node1.child(STR("child")));
-	CHECK_STRING(it1->name(), STR("child"));
+	xml_object_range<xml_named_node_iterator> r1 = node1.children(STR("child"));
+	xml_object_range<xml_named_node_iterator> r2 = node2.children(STR("child"));
+	xml_object_range<xml_named_node_iterator> r3 = node3.children(STR("child"));
+	xml_object_range<xml_named_node_iterator> r4 = node4.children(STR("child"));
 
-    xml_named_node_iterator it2(node2.child(STR("child")), STR("child"));
-	CHECK(move_iter(it2, 1) != xml_named_node_iterator());
-	CHECK(move_iter(it2, 2) == xml_named_node_iterator());
-    CHECK(*it2 == node2.first_child());
-    CHECK(*move_iter(it2, 1) == node2.last_child());
+	CHECK(r1.begin() != r1.end());
+	CHECK(*r1.begin() == node1.first_child());
+	CHECK(r1.begin() == move_iter(r1.end(), -1));
+	CHECK(move_iter(r1.begin(), 1) == r1.end());
 
-    xml_named_node_iterator it3(node3.child(STR("child")), STR("child"));
-	CHECK(it3 == xml_named_node_iterator());
+	CHECK(r2.begin() != r2.end());
+	CHECK(*r2.begin() == node2.first_child());
+	CHECK(*move_iter(r2.begin(), 1) == node2.last_child());
+	CHECK(r2.begin() == move_iter(r2.end(), -2));
+	CHECK(move_iter(r2.begin(), 1) == move_iter(r2.end(), -1));
+	CHECK(move_iter(r2.begin(), 2) == r2.end());
 
-	xml_named_node_iterator it = xml_named_node_iterator(node1.child(STR("child")), STR("child"));
+	CHECK(r3.begin() == r3.end());
+	CHECK(!(r3.begin() != r3.end()));
+
+	CHECK(r4.begin() != r4.end());
+	CHECK(*r4.begin() == node4.first_child());
+	CHECK(r4.begin() == move_iter(r4.end(), -1));
+	CHECK(move_iter(r4.begin(), 1) == r4.end());
+
+	xml_named_node_iterator it = r1.begin();
 	xml_named_node_iterator itt = it;
 
 	CHECK(itt == it);
 
 	CHECK(itt++ == it);
-	CHECK(itt == xml_named_node_iterator());
+	CHECK(itt == r1.end());
 
 	CHECK(itt != it);
 	CHECK(itt == ++it);
+
+	CHECK(itt-- == r1.end());
+	CHECK(itt == r1.begin());
 }
