@@ -3627,9 +3627,20 @@ PUGI__NS_BEGIN
 	{
 		void* buffer = 0;
 		size_t size = 0;
+		xml_parse_status status = status_ok;
+
+		// if stream has an error bit set, bail out (otherwise tellg() can fail and we'll clear error bits)
+		if (stream.fail()) return make_parse_result(status_io_error);
 
 		// load stream to memory (using seek-based implementation if possible, since it's faster and takes less memory)
-		xml_parse_status status = (stream.tellg() < 0) ? load_stream_data_noseek(stream, &buffer, &size) : load_stream_data_seek(stream, &buffer, &size);
+		if (stream.tellg() < 0)
+		{
+			stream.clear(); // clear error flags that could be set by a failing tellg
+			status = load_stream_data_noseek(stream, &buffer, &size);
+		}
+		else
+			status = load_stream_data_seek(stream, &buffer, &size);
+
 		if (status != status_ok) return make_parse_result(status);
 
 		return doc.load_buffer_inplace_own(buffer, size, options, encoding);
