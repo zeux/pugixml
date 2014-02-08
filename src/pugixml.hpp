@@ -320,6 +320,11 @@ namespace pugi
 		double as_double(double def = 0) const;
 		float as_float(float def = 0) const;
 
+	#ifdef PUGIXML_HAS_LONG_LONG
+		long long as_llong(long long def = 0) const;
+		unsigned long long as_ullong(unsigned long long def = 0) const;
+	#endif
+
 		// Get attribute value as bool (returns true if first character is in '1tTyY' set), or the default value if attribute is empty
 		bool as_bool(bool def = false) const;
 
@@ -333,12 +338,22 @@ namespace pugi
 		bool set_value(double rhs);
 		bool set_value(bool rhs);
 
+	#ifdef PUGIXML_HAS_LONG_LONG
+		bool set_value(long long rhs);
+		bool set_value(unsigned long long rhs);
+	#endif
+
 		// Set attribute value (equivalent to set_value without error checking)
 		xml_attribute& operator=(const char_t* rhs);
 		xml_attribute& operator=(int rhs);
 		xml_attribute& operator=(unsigned int rhs);
 		xml_attribute& operator=(double rhs);
 		xml_attribute& operator=(bool rhs);
+
+	#ifdef PUGIXML_HAS_LONG_LONG
+		xml_attribute& operator=(long long rhs);
+		xml_attribute& operator=(unsigned long long rhs);
+	#endif
 
 		// Get next/previous attribute in the attribute list of the parent node
 		xml_attribute next_attribute() const;
@@ -637,6 +652,11 @@ namespace pugi
 		double as_double(double def = 0) const;
 		float as_float(float def = 0) const;
 
+	#ifdef PUGIXML_HAS_LONG_LONG
+		long long as_llong(long long def = 0) const;
+		unsigned long long as_ullong(unsigned long long def = 0) const;
+	#endif
+
 		// Get text as bool (returns true if first character is in '1tTyY' set), or the default value if object is empty
 		bool as_bool(bool def = false) const;
 
@@ -649,12 +669,22 @@ namespace pugi
 		bool set(double rhs);
 		bool set(bool rhs);
 
+	#ifdef PUGIXML_HAS_LONG_LONG
+		bool set(long long rhs);
+		bool set(unsigned long long rhs);
+	#endif
+
 		// Set text (equivalent to set without error checking)
 		xml_text& operator=(const char_t* rhs);
 		xml_text& operator=(int rhs);
 		xml_text& operator=(unsigned int rhs);
 		xml_text& operator=(double rhs);
 		xml_text& operator=(bool rhs);
+
+	#ifdef PUGIXML_HAS_LONG_LONG
+		xml_text& operator=(long long rhs);
+		xml_text& operator=(unsigned long long rhs);
+	#endif
 
 		// Get the data node (node_pcdata or node_cdata) for this object
 		xml_node data() const;

@@ -155,6 +155,56 @@ TEST_XML(dom_text_as_bool, "<node><text1>0</text1><text2>1</text2><text3>true</t
 	CHECK(!node.child(STR("text7")).text().as_bool());
 }
 
+#ifdef PUGIXML_HAS_LONG_LONG
+TEST_XML(dom_text_as_llong, "<node><text1>1</text1><text2>-1</text2><text3>-9223372036854775808</text3><text4>9223372036854775807</text4><text5>0</text5></node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(xml_text().as_llong() == 0);
+	CHECK(node.child(STR("text1")).text().as_llong() == 1);
+	CHECK(node.child(STR("text2")).text().as_llong() == -1);
+	CHECK(node.child(STR("text3")).text().as_llong() == -9223372036854775807ll - 1);
+	CHECK(node.child(STR("text4")).text().as_llong() == 9223372036854775807ll);
+	CHECK(node.child(STR("text5")).text().as_llong() == 0);
+}
+
+TEST_XML(dom_text_as_llong_hex, "<node><text1>0777</text1><text2>0x5ab</text2><text3>0XFf</text3><text4>-0x20</text4><text5>-0x8000000000000000</text5><text6>0x</text6></node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.child(STR("text1")).text().as_llong() == 777); // no octal support! intentional
+	CHECK(node.child(STR("text2")).text().as_llong() == 1451);
+	CHECK(node.child(STR("text3")).text().as_llong() == 255);
+	CHECK(node.child(STR("text4")).text().as_llong() == -32);
+	CHECK(node.child(STR("text5")).text().as_llong() == -9223372036854775807ll - 1);
+	CHECK(node.child(STR("text6")).text().as_llong() == 0);
+}
+
+TEST_XML(dom_text_as_ullong, "<node><text1>0</text1><text2>1</text2><text3>9223372036854775807</text3><text4>18446744073709551615</text4><text5>0</text5></node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(xml_text().as_ullong() == 0);
+	CHECK(node.child(STR("text1")).text().as_ullong() == 0);
+	CHECK(node.child(STR("text2")).text().as_ullong() == 1);
+	CHECK(node.child(STR("text3")).text().as_ullong() == 9223372036854775807ll);
+	CHECK(node.child(STR("text4")).text().as_ullong() == 18446744073709551615ull);
+	CHECK(node.child(STR("text5")).text().as_ullong() == 0);
+}
+
+TEST_XML(dom_text_as_ullong_hex, "<node><text1>0777</text1><text2>0x5ab</text2><text3>0XFf</text3><text4>0x20</text4><text5>0xFFFFFFFFFFFFFFFF</text5><text6>0x</text6></node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.child(STR("text1")).text().as_ullong() == 777); // no octal support! intentional
+	CHECK(node.child(STR("text2")).text().as_ullong() == 1451);
+	CHECK(node.child(STR("text3")).text().as_ullong() == 255);
+	CHECK(node.child(STR("text4")).text().as_ullong() == 32);
+	CHECK(node.child(STR("text5")).text().as_ullong() == 18446744073709551615ull);
+	CHECK(node.child(STR("text6")).text().as_ullong() == 0);
+}
+#endif
+
 TEST_XML(dom_text_get_no_state, "<node/>")
 {
     xml_node node = doc.child(STR("node"));
@@ -208,7 +258,7 @@ TEST_XML(dom_text_assign, "<node/>")
 
 	node.append_child(STR("text4")).text() = 4294967295u;
 	node.append_child(STR("text5")).text() = 4294967294u;
-	xml_text() = 2147483647;
+	xml_text() = 4294967295u;
 
 	node.append_child(STR("text6")).text() = 0.5;
 	xml_text() = 0.5;
@@ -232,7 +282,7 @@ TEST_XML(dom_text_set_value, "<node/>")
 
 	CHECK(node.append_child(STR("text4")).text().set(4294967295u));
 	CHECK(node.append_child(STR("text5")).text().set(4294967294u));
-	CHECK(!xml_text().set(2147483647));
+	CHECK(!xml_text().set(4294967295u));
 
 	CHECK(node.append_child(STR("text6")).text().set(0.5));
 	CHECK(!xml_text().set(0.5));
@@ -242,6 +292,38 @@ TEST_XML(dom_text_set_value, "<node/>")
 
 	CHECK_NODE(node, STR("<node><text1>v1</text1><text2>-2147483647</text2><text3>-2147483648</text3><text4>4294967295</text4><text5>4294967294</text5><text6>0.5</text6><text7>true</text7></node>"));
 }
+
+#ifdef PUGIXML_HAS_LONG_LONG
+TEST_XML(dom_text_assign_llong, "<node/>")
+{
+	xml_node node = doc.child(STR("node"));
+	
+	node.append_child(STR("text1")).text() = -9223372036854775807ll;
+	node.append_child(STR("text2")).text() = -9223372036854775807ll - 1;
+	xml_text() = -9223372036854775807ll - 1;
+
+	node.append_child(STR("text3")).text() = 18446744073709551615ull;
+	node.append_child(STR("text4")).text() = 18446744073709551614ull;
+	xml_text() = 18446744073709551615ull;
+	
+	CHECK_NODE(node, STR("<node><text1>-9223372036854775807</text1><text2>-9223372036854775808</text2><text3>18446744073709551615</text3><text4>18446744073709551614</text4></node>"));
+}
+
+TEST_XML(dom_text_set_value_llong, "<node/>")
+{
+	xml_node node = doc.child(STR("node"));
+	
+	CHECK(node.append_child(STR("text1")).text().set(-9223372036854775807ll));
+	CHECK(node.append_child(STR("text2")).text().set(-9223372036854775807ll - 1));
+	CHECK(!xml_text().set(-9223372036854775807ll - 1));
+
+	CHECK(node.append_child(STR("text3")).text().set(18446744073709551615ull));
+	CHECK(node.append_child(STR("text4")).text().set(18446744073709551614ull));
+	CHECK(!xml_text().set(18446744073709551615ull));
+
+	CHECK_NODE(node, STR("<node><text1>-9223372036854775807</text1><text2>-9223372036854775808</text2><text3>18446744073709551615</text3><text4>18446744073709551614</text4></node>"));
+}
+#endif
 
 TEST_XML(dom_text_middle, "<node><c1>notthisone</c1>text<c2/></node>")
 {
@@ -285,4 +367,9 @@ TEST(dom_text_defaults)
     CHECK(text.as_double(42) == 42);
     CHECK(text.as_float(42) == 42);
     CHECK(text.as_bool(true) == true);
+
+#ifdef PUGIXML_HAS_LONG_LONG
+    CHECK(text.as_llong(42) == 42);
+    CHECK(text.as_ullong(42) == 42);
+#endif
 }

@@ -179,6 +179,56 @@ TEST_XML(dom_attr_as_bool, "<node attr1='0' attr2='1' attr3='true' attr4='True' 
 	CHECK(!node.attribute(STR("attr7")).as_bool());
 }
 
+#ifdef PUGIXML_HAS_LONG_LONG
+TEST_XML(dom_attr_as_llong, "<node attr1='1' attr2='-1' attr3='-9223372036854775808' attr4='9223372036854775807' attr5='0'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(xml_attribute().as_llong() == 0);
+	CHECK(node.attribute(STR("attr1")).as_llong() == 1);
+	CHECK(node.attribute(STR("attr2")).as_llong() == -1);
+	CHECK(node.attribute(STR("attr3")).as_llong() == -9223372036854775807ll - 1);
+	CHECK(node.attribute(STR("attr4")).as_llong() == 9223372036854775807ll);
+	CHECK(node.attribute(STR("attr5")).as_llong() == 0);
+}
+
+TEST_XML(dom_attr_as_llong_hex, "<node attr1='0777' attr2='0x5ab' attr3='0XFf' attr4='-0x20' attr5='-0x8000000000000000' attr6='0x'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_llong() == 777); // no octal support! intentional
+	CHECK(node.attribute(STR("attr2")).as_llong() == 1451);
+	CHECK(node.attribute(STR("attr3")).as_llong() == 255);
+	CHECK(node.attribute(STR("attr4")).as_llong() == -32);
+	CHECK(node.attribute(STR("attr5")).as_llong() == -9223372036854775807ll - 1);
+	CHECK(node.attribute(STR("attr6")).as_llong() == 0);
+}
+
+TEST_XML(dom_attr_as_ullong, "<node attr1='0' attr2='1' attr3='9223372036854775807' attr4='18446744073709551615' attr5='0'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(xml_attribute().as_ullong() == 0);
+	CHECK(node.attribute(STR("attr1")).as_ullong() == 0);
+	CHECK(node.attribute(STR("attr2")).as_ullong() == 1);
+	CHECK(node.attribute(STR("attr3")).as_ullong() == 9223372036854775807ull);
+	CHECK(node.attribute(STR("attr4")).as_ullong() == 18446744073709551615ull);
+	CHECK(node.attribute(STR("attr5")).as_ullong() == 0);
+}
+
+TEST_XML(dom_attr_as_ullong_hex, "<node attr1='0777' attr2='0x5ab' attr3='0XFf' attr4='0x20' attr5='0xFFFFFFFFFFFFFFFF' attr6='0x'/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_ullong() == 777); // no octal support! intentional
+	CHECK(node.attribute(STR("attr2")).as_ullong() == 1451);
+	CHECK(node.attribute(STR("attr3")).as_ullong() == 255);
+	CHECK(node.attribute(STR("attr4")).as_ullong() == 32);
+	CHECK(node.attribute(STR("attr5")).as_ullong() == 18446744073709551615ull);
+	CHECK(node.attribute(STR("attr6")).as_ullong() == 0);
+}
+#endif
+
 TEST(dom_attr_defaults)
 {
     xml_attribute attr;
@@ -189,6 +239,11 @@ TEST(dom_attr_defaults)
     CHECK(attr.as_double(42) == 42);
     CHECK(attr.as_float(42) == 42);
     CHECK(attr.as_bool(true) == true);
+
+#ifdef PUGIXML_HAS_LONG_LONG
+    CHECK(attr.as_llong(42) == 42);
+    CHECK(attr.as_ullong(42) == 42);
+#endif
 }
 
 TEST_XML(dom_attr_iterator, "<node><node1 attr1='0'/><node2 attr1='0' attr2='1'/><node3/></node>")

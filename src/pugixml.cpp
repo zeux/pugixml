@@ -3386,6 +3386,34 @@ PUGI__NS_BEGIN
 		return (first == '1' || first == 't' || first == 'T' || first == 'y' || first == 'Y');
 	}
 
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN long long get_value_llong(const char_t* value, long long def)
+	{
+		if (!value) return def;
+
+		int base = get_integer_base(value);
+
+	#ifdef PUGIXML_WCHAR_MODE
+		return wcstoll(value, 0, base);
+	#else
+		return strtoll(value, 0, base);
+	#endif
+	}
+
+	PUGI__FN unsigned long long get_value_ullong(const char_t* value, unsigned long long def)
+	{
+		if (!value) return def;
+
+		int base = get_integer_base(value);
+
+	#ifdef PUGIXML_WCHAR_MODE
+		return wcstoull(value, 0, base);
+	#else
+		return strtoull(value, 0, base);
+	#endif
+	}
+#endif
+
 	// set value with conversion functions
 	PUGI__FN bool set_value_buffer(char_t*& dest, uintptr_t& header, uintptr_t header_mask, char (&buf)[128])
 	{
@@ -3427,6 +3455,24 @@ PUGI__NS_BEGIN
 	{
 		return strcpy_insitu(dest, header, header_mask, value ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
 	}
+
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, long long value)
+	{
+		char buf[128];
+		sprintf(buf, "%lld", value);
+	
+		return set_value_buffer(dest, header, header_mask, buf);
+	}
+
+	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, unsigned long long value)
+	{
+		char buf[128];
+		sprintf(buf, "%llu", value);
+	
+		return set_value_buffer(dest, header, header_mask, buf);
+	}
+#endif
 
 	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	PUGI__FN xml_parse_status get_file_size(FILE* file, size_t& out_result)
@@ -3891,6 +3937,18 @@ namespace pugi
 		return impl::get_value_bool(_attr ? _attr->value : 0, def);
 	}
 
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN long long xml_attribute::as_llong(long long def) const
+	{
+		return impl::get_value_llong(_attr ? _attr->value : 0, def);
+	}
+
+	PUGI__FN unsigned long long xml_attribute::as_ullong(unsigned long long def) const
+	{
+		return impl::get_value_ullong(_attr ? _attr->value : 0, def);
+	}
+#endif
+
 	PUGI__FN bool xml_attribute::empty() const
 	{
 		return !_attr;
@@ -3946,6 +4004,20 @@ namespace pugi
 		return *this;
 	}
 
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN xml_attribute& xml_attribute::operator=(long long rhs)
+	{
+		set_value(rhs);
+		return *this;
+	}
+
+	PUGI__FN xml_attribute& xml_attribute::operator=(unsigned long long rhs)
+	{
+		set_value(rhs);
+		return *this;
+	}
+#endif
+
 	PUGI__FN bool xml_attribute::set_name(const char_t* rhs)
 	{
 		if (!_attr) return false;
@@ -3987,6 +4059,22 @@ namespace pugi
 
 		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
 	}
+
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN bool xml_attribute::set_value(long long rhs)
+	{
+		if (!_attr) return false;
+
+		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
+	}
+
+	PUGI__FN bool xml_attribute::set_value(unsigned long long rhs)
+	{
+		if (!_attr) return false;
+
+		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
+	}
+#endif
 
 #ifdef __BORLANDC__
 	PUGI__FN bool operator&&(const xml_attribute& lhs, bool rhs)
@@ -4936,6 +5024,22 @@ namespace pugi
 		return impl::get_value_bool(d ? d->value : 0, def);
 	}
 
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN long long xml_text::as_llong(long long def) const
+	{
+		xml_node_struct* d = _data();
+
+		return impl::get_value_llong(d ? d->value : 0, def);
+	}
+
+	PUGI__FN unsigned long long xml_text::as_ullong(unsigned long long def) const
+	{
+		xml_node_struct* d = _data();
+
+		return impl::get_value_ullong(d ? d->value : 0, def);
+	}
+#endif
+
 	PUGI__FN bool xml_text::set(const char_t* rhs)
 	{
 		xml_node_struct* dn = _data_new();
@@ -4971,6 +5075,22 @@ namespace pugi
 		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
 	}
 
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN bool xml_text::set(long long rhs)
+	{
+		xml_node_struct* dn = _data_new();
+
+		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+	}
+
+	PUGI__FN bool xml_text::set(unsigned long long rhs)
+	{
+		xml_node_struct* dn = _data_new();
+
+		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+	}
+#endif
+
 	PUGI__FN xml_text& xml_text::operator=(const char_t* rhs)
 	{
 		set(rhs);
@@ -5000,6 +5120,20 @@ namespace pugi
 		set(rhs);
 		return *this;
 	}
+
+#ifdef PUGIXML_HAS_LONG_LONG
+	PUGI__FN xml_text& xml_text::operator=(long long rhs)
+	{
+		set(rhs);
+		return *this;
+	}
+
+	PUGI__FN xml_text& xml_text::operator=(unsigned long long rhs)
+	{
+		set(rhs);
+		return *this;
+	}
+#endif
 
 	PUGI__FN xml_node xml_text::data() const
 	{
