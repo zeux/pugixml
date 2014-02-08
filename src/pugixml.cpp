@@ -3394,9 +3394,17 @@ PUGI__NS_BEGIN
 		int base = get_integer_base(value);
 
 	#ifdef PUGIXML_WCHAR_MODE
-		return wcstoll(value, 0, base);
+		#ifdef PUGI__MSVC_CRT_VERSION
+			return _wcstoi64(value, 0, base);
+		#else
+			return wcstoll(value, 0, base);
+		#endif
 	#else
-		return strtoll(value, 0, base);
+		#ifdef PUGI__MSVC_CRT_VERSION
+			return _strtoi64(value, 0, base);
+		#else
+			return strtoll(value, 0, base);
+		#endif
 	#endif
 	}
 
@@ -3407,9 +3415,17 @@ PUGI__NS_BEGIN
 		int base = get_integer_base(value);
 
 	#ifdef PUGIXML_WCHAR_MODE
-		return wcstoull(value, 0, base);
+		#ifdef PUGI__MSVC_CRT_VERSION
+			return _wcstoui64(value, 0, base);
+		#else
+			return wcstoull(value, 0, base);
+		#endif
 	#else
-		return strtoull(value, 0, base);
+		#ifdef PUGI__MSVC_CRT_VERSION
+			return _strtoui64(value, 0, base);
+		#else
+			return strtoull(value, 0, base);
+		#endif
 	#endif
 	}
 #endif

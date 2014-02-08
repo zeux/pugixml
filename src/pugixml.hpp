@@ -63,6 +63,15 @@
 #	define PUGIXML_FUNCTION PUGIXML_API
 #endif
 
+// If the platform is known to have long long support, enable long long functions
+#ifndef PUGIXML_HAS_LONG_LONG
+#	if defined(__cplusplus) && __cplusplus >= 201103
+#		define PUGIXML_HAS_LONG_LONG
+#	elif defined(_MSC_VER) && _MSC_VER >= 1400
+#		define PUGIXML_HAS_LONG_LONG
+#	endif
+#endif
+
 // Character interface macros
 #ifdef PUGIXML_WCHAR_MODE
 #	define PUGIXML_TEXT(t) L ## t
