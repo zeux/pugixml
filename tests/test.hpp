@@ -104,10 +104,10 @@ struct dummy_fixture {};
 
 #define TEST_XML(name, xml) TEST_XML_FLAGS(name, xml, pugi::parse_default)
 
-#define CHECK_JOIN(text, file, line) text file #line
+#define CHECK_JOIN(text, file, line) text " at " file ":" #line
 #define CHECK_JOIN2(text, file, line) CHECK_JOIN(text, file, line)
-#define CHECK_TEXT(condition, text) if (condition) ; else test_runner::_failure_message = CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__), longjmp(test_runner::_failure_buffer, 1)
-#define CHECK_FORCE_FAIL(text) test_runner::_failure_message = CHECK_JOIN2(text, " at "__FILE__ ":", __LINE__), longjmp(test_runner::_failure_buffer, 1)
+#define CHECK_TEXT(condition, text) if (condition) ; else test_runner::_failure_message = CHECK_JOIN2(text, __FILE__, __LINE__), longjmp(test_runner::_failure_buffer, 1)
+#define CHECK_FORCE_FAIL(text) test_runner::_failure_message = CHECK_JOIN2(text, __FILE__, __LINE__), longjmp(test_runner::_failure_buffer, 1)
 
 #if (defined(_MSC_VER) && _MSC_VER == 1200) || defined(__MWERKS__)
 #	define STRINGIZE(value) "??" // MSVC 6.0 and CodeWarrior have troubles stringizing stuff with strings w/escaping inside
@@ -128,7 +128,7 @@ struct dummy_fixture {};
 #define CHECK_XPATH_BOOLEAN_VAR(node, query, variables, expected) CHECK_TEXT(test_xpath_boolean(node, query, variables, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
 #define CHECK_XPATH_NUMBER_VAR(node, query, variables, expected) CHECK_TEXT(test_xpath_number(node, query, variables, expected), STRINGIZE(query) " does not evaluate to " STRINGIZE(expected) " in context " STRINGIZE(node))
 #define CHECK_XPATH_NUMBER_NAN_VAR(node, query, variables) CHECK_TEXT(test_xpath_number_nan(node, query, variables), STRINGIZE(query) " does not evaluate to NaN in context " STRINGIZE(node))
-#define CHECK_XPATH_NODESET_VAR(node, query, variables) xpath_node_set_tester(pugi::xpath_query(query, variables).evaluate_node_set(node), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), " at "__FILE__ ":", __LINE__))
+#define CHECK_XPATH_NODESET_VAR(node, query, variables) xpath_node_set_tester(pugi::xpath_query(query, variables).evaluate_node_set(node), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), __FILE__, __LINE__))
 #define CHECK_XPATH_FAIL_VAR(query, variables) CHECK_TEXT(test_xpath_fail_compile(query, variables), STRINGIZE(query) " should not compile")
 
 #define CHECK_XPATH_STRING(node, query, expected) CHECK_XPATH_STRING_VAR(node, query, 0, expected)
