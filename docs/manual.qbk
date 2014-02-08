@@ -245,6 +245,8 @@ pugixml uses several defines to control the compilation process. There are two w
 [note In that example `PUGIXML_API` is inconsistent between several source files; this is an exception to the consistency rule.]
 
 [anchor PUGIXML_MEMORY_PAGE_SIZE], [anchor PUGIXML_MEMORY_OUTPUT_STACK] and [anchor PUGIXML_MEMORY_XPATH_PAGE_SIZE] can be used to customize certain important sizes to optimize memory usage for the application-specific patterns. For details see [sref manual.dom.memory.tuning].
+
+[anchor PUGIXML_HAS_LONG_LONG] define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C++-11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
  
 [endsect] [/config]
 
@@ -873,7 +875,7 @@ If you need a non-empty string if the attribute handle is null (for example, you
 
 It returns `def` argument if the attribute handle is null. If you do not specify the argument, the function is equivalent to `value()`.
 
-[#xml_attribute::as_int][#xml_attribute::as_uint][#xml_attribute::as_double][#xml_attribute::as_float][#xml_attribute::as_bool]
+[#xml_attribute::as_int][#xml_attribute::as_uint][#xml_attribute::as_double][#xml_attribute::as_float][#xml_attribute::as_bool][#xml_attribute::as_llong][#xml_attribute::as_ullong]
 In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type:
 
     int xml_attribute::as_int(int def = 0) const;
@@ -881,8 +883,10 @@ In many cases attribute values have types that are not strings - i.e. an attribu
     double xml_attribute::as_double(double def = 0) const;
     float xml_attribute::as_float(float def = 0) const;
     bool xml_attribute::as_bool(bool def = false) const;
+    long long xml_attribute::as_llong(long long def = 0) const;
+    unsigned long long xml_attribute::as_ullong(unsigned long long def = 0) const;
 
-`as_int`, `as_uint`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `def` argument is returned (which is 0 by default). Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as an integer number in either decimal or hexadecimal form (`as_int` or `as_uint`; hexadecimal format is used if the number has `0x` or `0X` prefix) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
+`as_int`, `as_uint`, `as_llong`, `as_ullong`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null or attribute value is empty, `def` argument is returned (which is 0 by default). Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as an integer number in either decimal or hexadecimal form (applicable to `as_int`, `as_uint`, `as_llong` and `as_ullong`; hexadecimal format is used if the number has `0x` or `0X` prefix) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`). Any extra characters are silently discarded, i.e. `as_int` will return `1` for string `"1abc"`.
 
 In case the input string contains a number that is out of the target numeric range, the result is undefined.
 
@@ -890,7 +894,7 @@ In case the input string contains a number that is out of the target numeric ran
 
 `as_bool` converts attribute value to boolean as follows: if attribute handle is null, `def` argument is returned (which is `false` by default). If attribute value is empty, `false` is returned. Otherwise, `true` is returned if the first character is one of `'1', 't', 'T', 'y', 'Y'`. This means that strings like `"true"` and `"yes"` are recognized as `true`, while strings like `"false"` and `"no"` are recognized as `false`. For more complex matching you'll have to write your own function.
 
-[note There are no portable 64-bit types in C++, so there is no corresponding conversion function. If your platform has a 64-bit integer, you can easily write a conversion function yourself.]
+[note `as_llong` and `as_ullong` are only available if your platform has reliable support for the `long long` type, including string conversions.]
 
 [#code_traverse_base_data]
 This is an example of using these functions, along with node data retrieval ones ([@samples/traverse_base.cpp]):
@@ -1067,7 +1071,7 @@ Given a text object, you can get the contents (i.e. the value of PCDATA/CDATA no
 
 In case text object is empty, the function returns an empty string - it never returns a null pointer.
 
-[#xml_text::as_string][#xml_text::as_int][#xml_text::as_uint][#xml_text::as_double][#xml_text::as_float][#xml_text::as_bool]
+[#xml_text::as_string][#xml_text::as_int][#xml_text::as_uint][#xml_text::as_double][#xml_text::as_float][#xml_text::as_bool][#xml_text::as_llong][#xml_text::as_ullong]
 If you need a non-empty string if the text object is empty, or if the text contents is actually a number or a boolean that is stored as a string, you can use the following accessors:
 
     const char_t* xml_text::as_string(const char_t* def = "") const;
@@ -1076,6 +1080,8 @@ If you need a non-empty string if the text object is empty, or if the text conte
     double xml_text::as_double(double def = 0) const;
     float xml_text::as_float(float def = 0) const;
     bool xml_text::as_bool(bool def = false) const;
+    long long xml_text::as_llong(long long def = 0) const;
+    unsigned long long xml_text::as_ullong(unsigned long long def = 0) const;
 
 All of the above functions have the same semantics as similar `xml_attribute` members: they return the default argument if the text object is empty, they convert the text contents to a target type using the same rules and restrictions. You can [link xml_attribute::as_int refer to documentation for the attribute functions] for details.
 
@@ -1168,12 +1174,14 @@ In addition to string functions, several functions are provided for handling att
     bool xml_attribute::set_value(unsigned int rhs);
     bool xml_attribute::set_value(double rhs);
     bool xml_attribute::set_value(bool rhs);
+    bool xml_attribute::set_value(long long rhs);
+    bool xml_attribute::set_value(unsigned long long rhs);
     
 The above functions convert the argument to string and then call the base `set_value` function. Integers are converted to a decimal form, floating-point numbers are converted to either decimal or scientific form, depending on the number magnitude, boolean values are converted to either `"true"` or `"false"`.
 
 [caution Number conversion functions depend on current C locale as set with `setlocale`, so may generate unexpected results if the locale is different from `"C"`.]
 
-[note There are no portable 64-bit types in C++, so there is no corresponding `set_value` function. If your platform has a 64-bit integer, you can easily write such a function yourself.]
+[note `set_value` overloads with `long long` type are only available if your platform has reliable support for the type, including string conversions.]
 
 [#xml_attribute::assign]
 
@@ -1184,6 +1192,8 @@ For convenience, all `set_value` functions have the corresponding assignment ope
     xml_attribute& xml_attribute::operator=(unsigned int rhs);
     xml_attribute& xml_attribute::operator=(double rhs);
     xml_attribute& xml_attribute::operator=(bool rhs);
+    xml_attribute& xml_attribute::operator=(long long rhs);
+    xml_attribute& xml_attribute::operator=(unsigned long long rhs);
 
 These operators simply call the right `set_value` function and return the attribute they're called on; the return value of `set_value` is ignored, so errors are ignored.
 
@@ -1286,6 +1296,8 @@ In addition to a string function, several functions are provided for handling te
     bool xml_text::set(unsigned int rhs);
     bool xml_text::set(double rhs);
     bool xml_text::set(bool rhs);
+    bool xml_text::set(long long rhs);
+    bool xml_text::set(unsigned long long rhs);
     
 The above functions convert the argument to string and then call the base `set` function. These functions have the same semantics as similar `xml_attribute` functions. You can [link xml_attribute::set_value refer to documentation for the attribute functions] for details.
 
@@ -1298,6 +1310,8 @@ For convenience, all `set` functions have the corresponding assignment operators
     xml_text& xml_text::operator=(unsigned int rhs);
     xml_text& xml_text::operator=(double rhs);
     xml_text& xml_text::operator=(bool rhs);
+    xml_text& xml_text::operator=(long long rhs);
+    xml_text& xml_text::operator=(unsigned long long rhs);
 
 These operators simply call the right `set` function and return the attribute they're called on; the return value of `set` is ignored, so errors are ignored.
 
@@ -2116,6 +2130,7 @@ Macros:
 * `#define `[link PUGIXML_MEMORY_OUTPUT_STACK]
 * `#define `[link PUGIXML_MEMORY_XPATH_PAGE_SIZE]
 * `#define `[link PUGIXML_HEADER_ONLY]
+* `#define `[link PUGIXML_HAS_LONG_LONG]
 
 Types:
 
@@ -2239,6 +2254,8 @@ Classes:
     * `double `[link xml_attribute::as_double as_double]`(double def = 0) const;`
     * `float `[link xml_attribute::as_float as_float]`(float def = 0) const;`
     * `bool `[link xml_attribute::as_bool as_bool]`(bool def = false) const;`
+    * `long long `[link xml_attribute::as_llong as_llong]`(long long def = 0) const;`
+    * `unsigned long long `[link xml_attribute::as_ullong as_ullong]`(unsigned long long def = 0) const;`
     [lbr]
 
     * `bool `[link xml_attribute::set_name set_name]`(const char_t* rhs);`
@@ -2247,6 +2264,8 @@ Classes:
     * `bool `[link xml_attribute::set_value set_value]`(unsigned int rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(double rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(bool rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(long long rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(unsigned long long rhs);`
     [lbr]
 
     * `xml_attribute& `[link xml_attribute::assign operator=]`(const char_t* rhs);`
@@ -2254,6 +2273,8 @@ Classes:
     * `xml_attribute& `[link xml_attribute::assign operator=]`(unsigned int rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(double rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(bool rhs);`
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(long long rhs);`
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(unsnigned long long rhs);`
     [lbr]
 
 * `class `[link xml_node]
@@ -2465,6 +2486,8 @@ Classes:
     * `double `[link xml_text::as_double as_double]`(double def = 0) const;`
     * `float `[link xml_text::as_float as_float]`(float def = 0) const;`
     * `bool `[link xml_text::as_bool as_bool]`(bool def = false) const;`
+    * `long long `[link xml_text::as_llong as_llong]`(long long def = 0) const;`
+    * `unsigned long long `[link xml_text::as_ullong as_ullong]`(unsigned long long def = 0) const;`
     [lbr]
 
     * `bool `[link xml_text::set set]`(const char_t* rhs);`
@@ -2474,6 +2497,8 @@ Classes:
     * `bool `[link xml_text::set set]`(unsigned int rhs);`
     * `bool `[link xml_text::set set]`(double rhs);`
     * `bool `[link xml_text::set set]`(bool rhs);`
+    * `bool `[link xml_text::set set]`(long long rhs);`
+    * `bool `[link xml_text::set set]`(unsigned long long rhs);`
     [lbr]
 
     * `xml_text& `[link xml_text::assign operator=]`(const char_t* rhs);`
@@ -2481,6 +2506,8 @@ Classes:
     * `xml_text& `[link xml_text::assign operator=]`(unsigned int rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(double rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(bool rhs);`
+    * `xml_text& `[link xml_text::assign operator=]`(long long rhs);`
+    * `xml_text& `[link xml_text::assign operator=]`(unsigned long long rhs);`
     [lbr]
 
     * `xml_node `[link xml_text::data data]`() const;`
