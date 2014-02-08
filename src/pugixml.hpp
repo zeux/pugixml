@@ -1288,6 +1288,11 @@ namespace std
 
 #endif
 
+// Make sure implementation is included in header-only mode
+#ifdef PUGIXML_HEADER_ONLY
+#	include "pugixml.cpp"
+#endif
+
 /**
  * Copyright (c) 2006-2012 Arseny Kapoulkine
  *

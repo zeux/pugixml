@@ -39,7 +39,6 @@
 
 // Uncomment this to switch to header-only version
 // #define PUGIXML_HEADER_ONLY
-// #include "pugixml.cpp"
 
 #endif
 
