@@ -1,9 +1,9 @@
 [article pugixml
     [quickbook 1.5]
 
-    [version 1.2]
+    [version 1.4]
     [id quickstart]
-    [copyright 2012 Arseny Kapoulkine]
+    [copyright 2014 Arseny Kapoulkine]
     [license Distributed under the MIT License]
 ]
 
@@ -11,7 +11,7 @@
 [template sref[name]'''<xref linkend="quickstart.main.'''[name]'''" xrefstyle="select:title" />''']
 [template ftnt[id text]'''<footnote id="'''[id]'''"><para>'''[text]'''</para></footnote>''']
 
-[section:main pugixml 1.2 quick start guide]
+[section:main pugixml 1.4 quick start guide]
 
 [section:introduction Introduction]
 
@@ -30,8 +30,8 @@ This is the quick start guide for pugixml, which purpose is to enable you to sta
 pugixml is distributed in source form. You can download a source distribution via one of the following links:
 
 [pre
-[@http://pugixml.googlecode.com/files/pugixml-1.2.zip]
-[@http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz]
+[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.zip]
+[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.tar.gz]
 ]
 
 The distribution contains library source, documentation (the guide you're reading now and the manual) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
@@ -231,7 +231,7 @@ If filing an issue is not possible due to privacy or other concerns, you can con
 The pugixml library is distributed under the MIT license:
 
 [:
-Copyright (c) 2006-2012 Arseny Kapoulkine
+Copyright (c) 2006-2014 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -259,7 +259,7 @@ This means that you can freely use pugixml in your applications, both open-sourc
  
 [:
 This software is based on pugixml library (http://pugixml.org).'''<sbr />'''
-pugixml is Copyright (C) 2006-2012 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2014 Arseny Kapoulkine.
 ]
 
 [endsect] [/license]

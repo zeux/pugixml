@@ -144,7 +144,7 @@ for SAMPLE in [ Glob docs/samples : *.cpp ]
 }
 
 # release
-VERSION = 1.2 ;
+VERSION = 1.4 ;
 RELEASE_FILES = 
 	[ Glob contrib : *.cpp *.hpp ] 
 	[ Glob src : *.cpp *.hpp ] 

@@ -1,9 +1,9 @@
 [book pugixml
     [quickbook 1.5]
 
-    [version 1.2]
+    [version 1.4]
     [id manual]
-    [copyright 2012 Arseny Kapoulkine]
+    [copyright 2014 Arseny Kapoulkine]
     [license Distributed under the MIT License]
 ]
 
@@ -60,7 +60,7 @@ Thanks to *Vyacheslav Egorov* for documentation proofreading.
 The pugixml library is distributed under the MIT license:
 
 [:
-Copyright (c) 2006-2012 Arseny Kapoulkine
+Copyright (c) 2006-2014 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -88,7 +88,7 @@ This means that you can freely use pugixml in your applications, both open-sourc
  
 [:
 This software is based on pugixml library (http://pugixml.org).'''<sbr />'''
-pugixml is Copyright (C) 2006-2012 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2014 Arseny Kapoulkine.
 ]
 
 [endsect] [/license]
@@ -106,8 +106,8 @@ pugixml is distributed in source form. You can either download a source distribu
 You can download the latest source distribution via one of the following links:
 
 [pre
-[@http://pugixml.googlecode.com/files/pugixml-1.2.zip]
-[@http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz]
+[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.zip]
+[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.tar.gz]
 ]
 
 The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
@@ -122,7 +122,7 @@ The Subversion repository is located at [@http://pugixml.googlecode.com/svn/]. T
 
 For example, to checkout the current version, you can use this command:
 
-[pre svn checkout http://pugixml.googlecode.com/svn/tags/release-1.2 pugixml]
+[pre svn checkout http://pugixml.googlecode.com/svn/tags/release-1.4 pugixml]
 
 To checkout the latest version, you can use this command:
 
@@ -133,6 +133,12 @@ The repository contains library source, documentation, code examples and full un
 Use latest version tag if you want to automatically get new versions via =svn update=. Use other tags if you want to switch to new versions only explicitly (for example, using =svn switch= command). Also please note that Subversion trunk contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from trunk without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
 
 [endsect] [/subversion]
+
+[section:git Git repository]
+
+The Subversion repository is mirrored by a Git repository at [@https://github.com/zeux/pugixml]. The mirror is frequently updated and has the same structure in terms of tags and contents as Subversion repository.
+
+[endsect] [/git]
 
 [endsect] [/getting]
 
@@ -1849,6 +1855,29 @@ Because of the differences in document object models, performance considerations
 [endsect] [/xpath]
 
 [section:changes Changelog]
+
+[h5 14.02.2014 - version 1.4]
+
+Major release, featuring.
+
+* New features:
+    # Added long long support for xml_attribute and xml_text (as_llong, as_ullong and set_value/set overloads)
+    # Added hexadecimal integer parsing support for as_int/as_uint/as_llong/as_ullong
+    # Added xml_node::append_buffer to improve performance of assembling documents from fragments
+    # xml_named_node_iterator is now bidirectional
+    # Reduced XPath stack consumption during compilation and evaluation (useful for embedded systems)
+
+* Compatibility improvements:
+    # Improved support for platforms without wchar_t support
+    # Fixed several false positives in clang static analysis
+    # Fixed several compilation warnings for various GCC versions
+
+* Bug fixes:
+    # Fixed undefined pointer arithmetic in XPath implementation
+    # Fixed non-seekable iostream support for certain stream types, i.e. boost file_source with pipe input
+    # Fixed xpath_query::return_type() for some expressions
+    # Fixed dllexport issues with xml_named_node_iterator
+    # Fixed find_child_by_attribute assertion for attributes with null name/value
 
 [h5 1.05.2012 - version 1.2]
 
