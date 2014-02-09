@@ -2,4 +2,7 @@ language: cpp
 compiler:
   - clang
   - gcc
-script: make -f tests/Makefile.travis test
+env:
+  - DEFINES=standard
+  - DEFINES=PUGIXML_WCHAR_MODE
+script: make test defines=$(DEFINES) -j2
