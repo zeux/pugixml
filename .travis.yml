@@ -1,0 +1,5 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+script: make -f tests/Makefile.travis test
