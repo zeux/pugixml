@@ -81,6 +81,8 @@ static bool run_test(test_runner* test)
 		g_memory_total_count = 0;
 		test_runner::_memory_fail_threshold = 0;
 	
+		pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
+		
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable: 4611) // interaction between _setjmp and C++ object destruction is non-portable
