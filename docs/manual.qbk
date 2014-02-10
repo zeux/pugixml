@@ -260,17 +260,17 @@ pugixml uses several defines to control the compilation process. There are two w
 
 [section:portability Portability]
 
-pugixml is written in standard-compliant C++ with some compiler-specific workarounds where appropriate. pugixml is compatible with the upcoming C++0x standard (verified using GCC 4.5). Each version is tested with a unit test suite (with code coverage about 99%) on the following platforms:
+pugixml is written in standard-compliant C++ with some compiler-specific workarounds where appropriate. pugixml is compatible with the C++11 standard, but does not require C++11 support. Each version is tested with a unit test suite (with code coverage about 99%) on the following platforms:
 
 * Microsoft Windows:
     * Borland C++ Compiler 5.82
     * Digital Mars C++ Compiler 8.51
     * Intel C++ Compiler 8.0, 9.0 x86/x64, 10.0 x86/x64, 11.0 x86/x64
     * Metrowerks CodeWarrior 8.0
-    * Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64, 11.0 x86/x64/ARM and some CLR versions
+    * Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64, 11.0 (2011) x86/x64/ARM, 12.0 (2013) x86/x64/ARM and some CLR versions
     * MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
 
-* Linux (GCC 4.4.3 x86/x64)
+* Linux (GCC 4.4.3 x86/x64, GCC 4.8.1 x64, Clang 3.2 x64)
 * FreeBSD (GCC 4.2.1 x86/x64)
 * Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC)
 * Sun Solaris (sunCC x86/x64)
