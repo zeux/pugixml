@@ -313,12 +313,12 @@ TEST(parse_ws_pcdata_permutations)
         // current implementation of parse_ws_pcdata_single has an unfortunate bug; reproduce it here
         {4, STR("<node>\t\t<!---->\n\n</node>"), STR("<node>\n\n</node>"), 3},
         // error case: terminate PCDATA in the middle
-        {7, STR("<node>abcdef"), STR("<node>abcde</node>"), -3},
-        {7, STR("<node>      "), STR("<node>     </node>"), -3},
+        {7, STR("<node>abcdef"), STR("<node>abcdef</node>"), -3},
+        {7, STR("<node>      "), STR("<node>      </node>"), -3},
         // error case: terminate PCDATA as early as possible
         {7, STR("<node>"), STR("<node />"), -2},
-        {7, STR("<node>a"), STR("<node />"), -2},
-        {7, STR("<node> "), STR("<node />"), -2},
+        {7, STR("<node>a"), STR("<node>a</node>"), -3},
+        {7, STR("<node> "), STR("<node> </node>"), -3},
     };
 
     for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
@@ -805,7 +805,7 @@ TEST(parse_error_offset)
 
 	CHECK_OFFSET("<3d/>", parse_default, status_unrecognized_tag, 1);
 	CHECK_OFFSET(" <3d/>", parse_default, status_unrecognized_tag, 2);
-	CHECK_OFFSET(" <", parse_default, status_unrecognized_tag, 2);
+	CHECK_OFFSET(" <", parse_default, status_unrecognized_tag, 1);
 
 	CHECK_OFFSET("<?pi", parse_default, status_bad_pi, 3);
 	CHECK_OFFSET("<?pi", parse_default | parse_pi, status_bad_pi, 3);

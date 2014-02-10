@@ -1069,3 +1069,104 @@ TEST_XML(document_reset_copy_self, "<node><child/></node>")
     CHECK(!doc.first_child());
     CHECK_NODE(doc, STR(""));
 }
+
+struct document_data_t
+{
+    xml_encoding encoding;
+
+    const unsigned char* data;
+    size_t size;
+};
+
+#include <stdio.h>
+
+TEST(document_load_buffer_utf_truncated)
+{
+	const unsigned char utf8[] = {'<', 0xe2, 0x82, 0xac, '/', '>'};
+	const unsigned char utf16_be[] = {0, '<', 0x20, 0xac, 0, '/', 0, '>'};
+	const unsigned char utf16_le[] = {'<', 0, 0xac, 0x20, '/', 0, '>', 0};
+	const unsigned char utf32_be[] = {0, 0, 0, '<', 0, 0, 0x20, 0xac, 0, 0, 0, '/', 0, 0, 0, '>'};
+	const unsigned char utf32_le[] = {'<', 0, 0, 0, 0xac, 0x20, 0, 0, '/', 0, 0, 0, '>', 0, 0, 0};
+
+	const document_data_t data[] =
+	{
+		{ encoding_utf8, utf8, sizeof(utf8) },
+		{ encoding_utf16_be, utf16_be, sizeof(utf16_be) },
+		{ encoding_utf16_le, utf16_le, sizeof(utf16_le) },
+		{ encoding_utf32_be, utf32_be, sizeof(utf32_be) },
+		{ encoding_utf32_le, utf32_le, sizeof(utf32_le) },
+	};
+
+	for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); ++i)
+	{
+		const document_data_t& d = data[i];
+
+		for (size_t j = 0; j <= d.size; ++j)
+		{
+			char* buffer = new char[j];
+			memcpy(buffer, d.data, j);
+
+			xml_document doc;
+			xml_parse_result res = doc.load_buffer(buffer, j, parse_default, d.encoding);
+
+			if (j == d.size)
+			{
+				CHECK(res);
+
+				const char_t* name = doc.first_child().name();
+
+			#ifdef PUGIXML_WCHAR_MODE
+				CHECK(name[0] == 0x20ac && name[1] == 0);
+			#else
+				CHECK_STRING(name, "\xe2\x82\xac");
+			#endif
+			}
+			else
+			{
+				CHECK(!res || !doc.first_child());
+			}
+
+			delete[] buffer;
+		}
+	}
+}
+
+#ifndef PUGIXML_NO_STL
+TEST(document_load_stream_truncated)
+{
+	const unsigned char utf32_be[] = {0, 0, 0, '<', 0, 0, 0x20, 0xac, 0, 0, 0, '/', 0, 0, 0, '>'};
+
+	for (size_t i = 0; i <= sizeof(utf32_be); ++i)
+	{
+		std::string prefix(reinterpret_cast<const char*>(utf32_be), i);
+		std::istringstream iss(prefix);
+
+		xml_document doc;
+		xml_parse_result res = doc.load(iss);
+
+		if (i == sizeof(utf32_be))
+		{
+			CHECK(res);
+		}
+		else
+		{
+			CHECK(!res || !doc.first_child());
+
+			if (i < 8)
+			{
+				CHECK(!doc.first_child());
+			}
+			else
+			{
+				const char_t* name = doc.first_child().name();
+
+			#ifdef PUGIXML_WCHAR_MODE
+				CHECK(name[0] == 0x20ac && name[1] == 0);
+			#else
+				CHECK_STRING(name, "\xe2\x82\xac");
+			#endif
+			}
+		}
+	}
+}
+#endif
