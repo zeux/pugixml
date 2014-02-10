@@ -2408,7 +2408,7 @@ PUGI__NS_BEGIN
 			return s;
 		}
 
-		char_t* parse(char_t* s, xml_node_struct* root, unsigned int optmsk, char_t endch)
+		char_t* parse_tree(char_t* s, xml_node_struct* root, unsigned int optmsk, char_t endch)
 		{
 			strconv_attribute_t strconv_attribute = get_strconv_attribute(optmsk);
 			strconv_pcdata_t strconv_pcdata = get_strconv_pcdata(optmsk);
@@ -2655,7 +2655,7 @@ PUGI__NS_BEGIN
 			buffer[length - 1] = 0;
 			
 			// perform actual parsing
-			parser.parse(buffer, root, optmsk, endch);
+			parser.parse_tree(buffer, root, optmsk, endch);
 
 			xml_parse_result result = make_parse_result(parser.error_status, parser.error_offset ? parser.error_offset - buffer : 0);
 			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
@@ -2711,7 +2711,7 @@ PUGI__NS_BEGIN
 		return (sizeof(wchar_t) == 2 && static_cast<unsigned int>(static_cast<uint16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
 	}
 
-	PUGI__FN size_t convert_buffer(char_t* r_char, uint8_t* r_u8, uint16_t* r_u16, uint32_t* r_u32, const char_t* data, size_t length, xml_encoding encoding)
+	PUGI__FN size_t convert_buffer_output(char_t* r_char, uint8_t* r_u8, uint16_t* r_u16, uint32_t* r_u32, const char_t* data, size_t length, xml_encoding encoding)
 	{
 		// only endian-swapping is required
 		if (need_endian_swap_utf(encoding, get_wchar_encoding()))
@@ -2791,7 +2791,7 @@ PUGI__NS_BEGIN
 		return length;
 	}
 
-	PUGI__FN size_t convert_buffer(char_t* /* r_char */, uint8_t* r_u8, uint16_t* r_u16, uint32_t* r_u32, const char_t* data, size_t length, xml_encoding encoding)
+	PUGI__FN size_t convert_buffer_output(char_t* /* r_char */, uint8_t* r_u8, uint16_t* r_u16, uint32_t* r_u32, const char_t* data, size_t length, xml_encoding encoding)
 	{
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
@@ -2868,7 +2868,7 @@ PUGI__NS_BEGIN
 			else
 			{
 				// convert chunk
-				size_t result = convert_buffer(scratch.data_char, scratch.data_u8, scratch.data_u16, scratch.data_u32, data, size, encoding);
+				size_t result = convert_buffer_output(scratch.data_char, scratch.data_u8, scratch.data_u16, scratch.data_u32, data, size, encoding);
 				assert(result <= sizeof(scratch));
 
 				// write data
