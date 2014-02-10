@@ -13,7 +13,7 @@
 
 #ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 100 + minor so that it's safe to use in less-than comparisons
-#	define PUGIXML_VERSION 120
+#	define PUGIXML_VERSION 140
 #endif
 
 // Include user configuration file (this can define various configuration macros)
