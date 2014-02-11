@@ -1,6 +1,6 @@
-#ifndef PUGIXML_NO_XPATH
-
 #define _CRT_SECURE_NO_WARNINGS
+
+#ifndef PUGIXML_NO_XPATH
 
 #include "common.hpp"
 
