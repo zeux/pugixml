@@ -669,6 +669,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 * [anchor status_bad_attribute] means that parsing stopped because there was an incorrect attribute, such as an attribute without value or with value that is not quoted (note that `<node attr=1>` is incorrect in XML)
 * [anchor status_bad_end_element] means that parsing stopped because ending tag had incorrect syntax (i.e. extra non-whitespace symbols between tag name and `>`)
 * [anchor status_end_element_mismatch] means that parsing stopped because the closing tag did not match the opening one (i.e. `<node></nedo>`) or because some tag was not closed at all
+* [anchor status_no_document_element] means that no element nodes were discovered during parsing; this usually indicates an empty or invalid document
 
 [#xml_parse_result::description]
 `description()` member function can be used to convert parsing status to a string; the returned message is always in English, so you'll have to write your own function if you need a localized string. However please note that the exact messages returned by `description()` function may change from version to version, so any complex status handling should be based on `status` value. Note that `description()` returns a `char` string even in `PUGIXML_WCHAR_MODE`; you'll have to call [link as_wide] to get the `wchar_t` string.
@@ -720,6 +721,11 @@ These flags control the resulting tree contents:
 [lbr]
 
 * [anchor parse_ws_pcdata_single] determines if whitespace-only PCDATA nodes that have no sibling nodes are to be put in DOM tree. In some cases application needs to parse the whitespace-only contents of nodes, i.e. `<node>  </node>`, but is not interested in whitespace markup elsewhere. It is possible to use [link parse_ws_pcdata] flag in this case, but it results in excessive allocations and complicates document processing in some cases; this flag is intended to avoid that. As an example, after parsing XML string `<node> <a>  </a> </node>` with `parse_ws_pcdata_single` flag set, `<node>` element will have one child `<a>`, and `<a>` element will have one child with type [link node_pcdata] and value `"  "`. This flag has no effect if [link parse_ws_pcdata] is enabled. This flag is *off* by default.
+[lbr]
+
+* [anchor parse_fragment] determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid. This flag is *off* by default.
+
+[caution Using in-place parsing ([link xml_document::load_buffer_inplace load_buffer_inplace]) with `parse_fragment` flag may result in the loss of the last character of the buffer if it is a part of PCDATA. Since PCDATA values are null-terminated strings, the only way to resolve this is to provide a null-terminated buffer as an input to `load_buffer_inplace` - i.e. `doc.load_buffer_inplace("test\0", 5, pugi::parse_default | pugi::parse_fragment)`.]
 
 These flags control the transformation of tree element contents:
 
@@ -1391,6 +1397,9 @@ The first method is more convenient, but slower than the other two. The relative
 
 `append_buffer` behaves in the same way as [link xml_document::load_buffer] - the input buffer is a byte buffer, with size in bytes; the buffer is not modified and can be freed after the function returns.
 
+[#status_append_invalid_root]
+Since `append_buffer` needs to append child nodes to the current node, it only works if the current node is either document or element node. Calling `append_buffer` on a node with any other type results in an error with `status_append_invalid_root` status.
+
 [endsect] [/fragments]
 
 [endsect] [/modify]
@@ -1858,9 +1867,13 @@ Because of the differences in document object models, performance considerations
 
 [h5 14.02.2014 - version 1.4]
 
-Major release, featuring.
+Major release, featuring various new features, bug fixes and compatibility improvements.
+
+* Specification changes:
+    # Documents without element nodes are now rejected with status_no_document_element error, unless parse_fragment option is used
 
 * New features:
+    # Added XML fragment parsing (parse_fragment flag)
     # Added long long support for xml_attribute and xml_text (as_llong, as_ullong and set_value/set overloads)
     # Added hexadecimal integer parsing support for as_int/as_uint/as_llong/as_ullong
     # Added xml_node::append_buffer to improve performance of assembling documents from fragments
@@ -2198,6 +2211,8 @@ Enumerations:
     * [link status_bad_attribute]
     * [link status_bad_end_element]
     * [link status_end_element_mismatch]
+    * [link status_append_invalid_root]
+    * [link status_no_document_element]
     [lbr]
 
 * `enum `[link xml_encoding]
@@ -2240,6 +2255,7 @@ Constants:
     * [link parse_doctype]
     * [link parse_eol]
     * [link parse_escapes]
+    * [link parse_fragment]
     * [link parse_full]
     * [link parse_minimal]
     * [link parse_pi]
