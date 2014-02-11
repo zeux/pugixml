@@ -119,7 +119,7 @@ TEST(memory_large_allocations)
 		CHECK(allocate_count == deallocate_count + 1); // only one live page left (it waits for new allocations)
 
 		char buffer;
-		CHECK(doc.load_buffer_inplace(&buffer, 0, parse_default, get_native_encoding()));
+		CHECK(doc.load_buffer_inplace(&buffer, 0, parse_fragment, get_native_encoding()));
 
 		CHECK(allocate_count == deallocate_count); // no live pages left
 	}

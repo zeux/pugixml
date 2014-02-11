@@ -2199,7 +2199,7 @@ PUGI__NS_BEGIN
 
 		char_t* parse_doctype_group(char_t* s, char_t endch, bool toplevel)
 		{
-			assert(s[0] == '<' && s[1] == '!');
+			assert((s[0] == '<' || s[0] == 0) && s[1] == '!');
 			s++;
 
 			while (*s)
@@ -2331,6 +2331,9 @@ PUGI__NS_BEGIN
 				s = parse_doctype_group(s, endch, true);
 				if (!s) return s;
 
+				assert((*s == 0 && endch == '>') || *s == '>');
+				if (*s) *s++ = 0;
+
 				if (PUGI__OPTSET(parse_doctype))
 				{
 					while (PUGI__IS_CHARTYPE(*mark, ct_space)) ++mark;
@@ -2338,9 +2341,6 @@ PUGI__NS_BEGIN
 					PUGI__PUSHNODE(node_doctype);
 
 					cursor->value = mark;
-
-					assert((*s == 0 && endch == '>') || *s == '>');
-					if (*s) *s++ = 0;
 
 					PUGI__POPNODE();
 				}
@@ -2629,7 +2629,7 @@ PUGI__NS_BEGIN
 
 					PUGI__SKIPWS(); // Eat whitespace if no genuine PCDATA here.
 
-					if (*s == '<')
+					if (*s == '<' || !*s)
 					{
 						// We skipped some whitespace characters because otherwise we would take the tag branch instead of PCDATA one
 						assert(mark != s);
@@ -2640,13 +2640,13 @@ PUGI__NS_BEGIN
 						}
 						else if (PUGI__OPTSET(parse_ws_pcdata_single))
 						{
-							if (s[1] != '/' || cursor->first_child) continue;
+							if (s[0] != '<' || s[1] != '/' || cursor->first_child) continue;
 						}
 					}
 
 					s = mark;
 							
-					if (cursor->parent)
+					if (cursor->parent || PUGI__OPTSET(parse_fragment))
 					{
 						PUGI__PUSHNODE(node_pcdata); // Append a new node on the tree.
 						cursor->value = s; // Save the offset.
@@ -2676,14 +2676,43 @@ PUGI__NS_BEGIN
 			return s;
 		}
 
+	#ifdef PUGIXML_WCHAR_MODE
+		static char_t* parse_skip_bom(char_t* s)
+		{
+			return (s[0] == 0xfeff) ? s + 1 : s;
+		}
+	#else
+		static char_t* parse_skip_bom(char_t* s)
+		{
+			return (s[0] == '\xef' && s[1] == '\xbb' && s[2] == '\xbf') ? s + 3 : s;
+		}
+	#endif
+
+		static bool has_element_node_siblings(xml_node_struct* node)
+		{
+			while (node)
+			{
+				xml_node_type type = static_cast<xml_node_type>((node->header & impl::xml_memory_page_type_mask) + 1);
+				if (type == node_element) return true;
+
+				node = node->next_sibling;
+			}
+
+			return false;
+		}
+
 		static xml_parse_result parse(char_t* buffer, size_t length, xml_document_struct* xmldoc, xml_node_struct* root, unsigned int optmsk)
 		{
 			// allocator object is a part of document object
 			xml_allocator& alloc = *static_cast<xml_allocator*>(xmldoc);
 
 			// early-out for empty documents
-			if (length == 0) return make_parse_result(status_ok);
+			if (length == 0)
+				return make_parse_result(PUGI__OPTSET(parse_fragment) ? status_ok : status_no_document_element);
 
+			// get last child of the root before parsing
+			xml_node_struct* last_root_child = root->first_child ? root->first_child->prev_sibling_c : 0;
+	
 			// create parser on stack
 			xml_parser parser(alloc);
 
@@ -2691,24 +2720,35 @@ PUGI__NS_BEGIN
 			char_t endch = buffer[length - 1];
 			buffer[length - 1] = 0;
 			
+			// skip BOM to make sure it does not end up as part of parse output
+			char_t* buffer_data = parse_skip_bom(buffer);
+
 			// perform actual parsing
-			parser.parse_tree(buffer, root, optmsk, endch);
-
-			xml_parse_result result = make_parse_result(parser.error_status, parser.error_offset ? parser.error_offset - buffer : 0);
-			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
-
-			// roll back offset if it occurs on a null terminator in the source buffer
-			if (result.offset > 0 && static_cast<size_t>(result.offset) == length - 1 && endch == 0)
-				result.offset--;
+			parser.parse_tree(buffer_data, root, optmsk, endch);
 
 			// update allocator state
 			alloc = parser.alloc;
 
-			// since we removed last character, we have to handle the only possible false positive
-			if (result && endch == '<')
+			xml_parse_result result = make_parse_result(parser.error_status, parser.error_offset ? parser.error_offset - buffer : 0);
+			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
+
+			if (result)
 			{
-				// there's no possible well-formed document with < at the end
-				return make_parse_result(status_unrecognized_tag, length - 1);
+				// since we removed last character, we have to handle the only possible false positive (stray <)
+				if (endch == '<')
+					return make_parse_result(status_unrecognized_tag, length - 1);
+
+				// check if there are any element nodes parsed
+				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling : root->first_child;
+
+				if (!PUGI__OPTSET(parse_fragment) && !has_element_node_siblings(first_root_child_parsed))
+					return make_parse_result(status_no_document_element, length - 1);
+			}
+			else
+			{
+				// roll back offset if it occurs on a null terminator in the source buffer
+				if (result.offset > 0 && static_cast<size_t>(result.offset) == length - 1 && endch == 0)
+					result.offset--;
 			}
 
 			return result;
@@ -5468,6 +5508,8 @@ namespace pugi
 		case status_end_element_mismatch: return "Start-end tags mismatch";
 
 		case status_append_invalid_root: return "Unable to append nodes: root is not an element or document";
+
+		case status_no_document_element: return "No document element found";
 
 		default: return "Unknown error";
 		}

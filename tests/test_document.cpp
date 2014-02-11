@@ -249,7 +249,7 @@ TEST(document_load_file_empty)
 {
 	pugi::xml_document doc;
 
-	CHECK(doc.load_file("tests/data/empty.xml"));
+	CHECK(doc.load_file("tests/data/empty.xml").status == status_no_document_element);
 	CHECK(!doc.first_child());
 }
 
@@ -907,16 +907,52 @@ TEST(document_load_buffer_empty)
 		xml_encoding encoding = encodings[i];
 
 		xml_document doc;
-		CHECK(doc.load_buffer(buffer, 0, parse_default, encoding) && !doc.first_child());
-		CHECK(doc.load_buffer(0, 0, parse_default, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer(buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
+		CHECK(doc.load_buffer(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 
-		CHECK(doc.load_buffer_inplace(buffer, 0, parse_default, encoding) && !doc.first_child());
-		CHECK(doc.load_buffer_inplace(0, 0, parse_default, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace(buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
+		CHECK(doc.load_buffer_inplace(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 
 		void* own_buffer = pugi::get_memory_allocation_function()(1);
 
-		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_default, encoding) && !doc.first_child());
-		CHECK(doc.load_buffer_inplace_own(0, 0, parse_default, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
+		CHECK(doc.load_buffer_inplace_own(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
+	}
+}
+
+TEST(document_load_buffer_empty_fragment)
+{
+	xml_encoding encodings[] =
+	{
+		encoding_auto,
+		encoding_utf8,
+		encoding_utf16_le,
+		encoding_utf16_be,
+		encoding_utf16,
+		encoding_utf32_le,
+		encoding_utf32_be,
+		encoding_utf32,
+		encoding_wchar,
+        encoding_latin1
+	};
+
+	char buffer[1];
+
+	for (unsigned int i = 0; i < sizeof(encodings) / sizeof(encodings[0]); ++i)
+	{
+		xml_encoding encoding = encodings[i];
+
+		xml_document doc;
+		CHECK(doc.load_buffer(buffer, 0, parse_fragment, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer(0, 0, parse_fragment, encoding) && !doc.first_child());
+
+		CHECK(doc.load_buffer_inplace(buffer, 0, parse_fragment, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace(0, 0, parse_fragment, encoding) && !doc.first_child());
+
+		void* own_buffer = pugi::get_memory_allocation_function()(1);
+
+		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_fragment, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace_own(0, 0, parse_fragment, encoding) && !doc.first_child());
 	}
 }
 
@@ -933,13 +969,27 @@ TEST(document_progressive_truncation)
 	{
 		char* truncated_data = buffer + original_size - i;
 
-		memcpy(truncated_data, original_data, i);
+		// default flags
+		{
+			memcpy(truncated_data, original_data, i);
 
-		xml_document doc;
-		bool result = doc.load_buffer_inplace(truncated_data, i);
+			xml_document doc;
+			bool result = doc.load_buffer_inplace(truncated_data, i);
 
-		// some truncate locations are parseable - those that come after declaration, declaration + doctype, declaration + doctype + comment and eof
-		CHECK(((i - 21) < 3 || (i - 66) < 3 || (i - 95) < 3 || i >= 3325) ? result : !result);
+			// only eof is parseable
+			CHECK((i >= 3325) ? result : !result);
+		}
+
+		// fragment mode
+		{
+			memcpy(truncated_data, original_data, i);
+
+			xml_document doc;
+			bool result = doc.load_buffer_inplace(truncated_data, i, parse_default | parse_fragment);
+
+			// some truncate locations are parseable - those that come after declaration, declaration + doctype, declaration + doctype + comment and eof
+			CHECK(((i - 21) < 3 || (i - 66) < 3 || (i - 95) < 3 || i >= 3325) ? result : !result);
+		}
 	}
 
 	delete[] buffer;
@@ -953,12 +1003,29 @@ TEST(document_load_buffer_short)
 
 	xml_document doc;
 
-	CHECK(doc.load_buffer(data, 4));
-	CHECK(doc.load_buffer(data + 1, 3));
-	CHECK(doc.load_buffer(data + 2, 2));
-	CHECK(doc.load_buffer(data + 3, 1));
-	CHECK(doc.load_buffer(data + 4, 0));
-	CHECK(doc.load_buffer(0, 0));
+	CHECK(doc.load_buffer(data, 4).status == status_no_document_element);
+	CHECK(doc.load_buffer(data + 1, 3).status == status_no_document_element);
+	CHECK(doc.load_buffer(data + 2, 2).status == status_no_document_element);
+	CHECK(doc.load_buffer(data + 3, 1).status == status_no_document_element);
+	CHECK(doc.load_buffer(data + 4, 0).status == status_no_document_element);
+	CHECK(doc.load_buffer(0, 0).status == status_no_document_element);
+
+	delete[] data;
+}
+
+TEST(document_load_buffer_short_fragment)
+{
+	char* data = new char[4];
+	memcpy(data, "abcd", 4);
+
+	xml_document doc;
+
+	CHECK(doc.load_buffer(data, 4, parse_fragment) && test_string_equal(doc.text().get(), STR("abcd")));
+	CHECK(doc.load_buffer(data + 1, 3, parse_fragment) && test_string_equal(doc.text().get(), STR("bcd")));
+	CHECK(doc.load_buffer(data + 2, 2, parse_fragment) && test_string_equal(doc.text().get(), STR("cd")));
+	CHECK(doc.load_buffer(data + 3, 1, parse_fragment) && test_string_equal(doc.text().get(), STR("d")));
+	CHECK(doc.load_buffer(data + 4, 0, parse_fragment) && !doc.first_child());
+	CHECK(doc.load_buffer(0, 0, parse_fragment) && !doc.first_child());
 
 	delete[] data;
 }
@@ -970,12 +1037,12 @@ TEST(document_load_buffer_inplace_short)
 
 	xml_document doc;
 
-	CHECK(doc.load_buffer_inplace(data, 4));
-	CHECK(doc.load_buffer_inplace(data + 1, 3));
-	CHECK(doc.load_buffer_inplace(data + 2, 2));
-	CHECK(doc.load_buffer_inplace(data + 3, 1));
-	CHECK(doc.load_buffer_inplace(data + 4, 0));
-	CHECK(doc.load_buffer_inplace(0, 0));
+	CHECK(doc.load_buffer_inplace(data, 4).status == status_no_document_element);
+	CHECK(doc.load_buffer_inplace(data + 1, 3).status == status_no_document_element);
+	CHECK(doc.load_buffer_inplace(data + 2, 2).status == status_no_document_element);
+	CHECK(doc.load_buffer_inplace(data + 3, 1).status == status_no_document_element);
+	CHECK(doc.load_buffer_inplace(data + 4, 0).status == status_no_document_element);
+	CHECK(doc.load_buffer_inplace(0, 0).status == status_no_document_element);
 
 	delete[] data;
 }
@@ -1006,7 +1073,7 @@ TEST_XML_FLAGS(document_element, "<?xml version='1.0'?><node><child/></node><!--
     CHECK(doc.document_element() == doc.child(STR("node")));
 }
 
-TEST_XML_FLAGS(document_element_absent, "<!---->", parse_comments)
+TEST_XML_FLAGS(document_element_absent, "<!---->", parse_comments | parse_fragment)
 {
     CHECK(doc.document_element() == xml_node());
 }
@@ -1070,16 +1137,6 @@ TEST_XML(document_reset_copy_self, "<node><child/></node>")
     CHECK_NODE(doc, STR(""));
 }
 
-struct document_data_t
-{
-    xml_encoding encoding;
-
-    const unsigned char* data;
-    size_t size;
-};
-
-#include <stdio.h>
-
 TEST(document_load_buffer_utf_truncated)
 {
 	const unsigned char utf8[] = {'<', 0xe2, 0x82, 0xac, '/', '>'};
@@ -1087,6 +1144,14 @@ TEST(document_load_buffer_utf_truncated)
 	const unsigned char utf16_le[] = {'<', 0, 0xac, 0x20, '/', 0, '>', 0};
 	const unsigned char utf32_be[] = {0, 0, 0, '<', 0, 0, 0x20, 0xac, 0, 0, 0, '/', 0, 0, 0, '>'};
 	const unsigned char utf32_le[] = {'<', 0, 0, 0, 0xac, 0x20, 0, 0, '/', 0, 0, 0, '>', 0, 0, 0};
+
+	struct document_data_t
+	{
+	    xml_encoding encoding;
+
+	    const unsigned char* data;
+	    size_t size;
+	};
 
 	const document_data_t data[] =
 	{

@@ -20,7 +20,7 @@ static xml_parse_result load_concat(xml_document& doc, const char_t* a, const ch
 	strcat(buffer, c);
 #endif
 
-	return doc.load(buffer);
+	return doc.load(buffer, parse_fragment);
 }
 
 static bool test_doctype_wf(const char_t* decl)
@@ -31,9 +31,9 @@ static bool test_doctype_wf(const char_t* decl)
 	if (!load_concat(doc, decl) || !doc.first_child().empty()) return false;
 
 	// pcdata pre/postfix
-	if (!load_concat(doc, STR("a"), decl) || !doc.first_child().empty()) return false;
-	if (!load_concat(doc, decl, STR("b")) || !doc.first_child().empty()) return false;
-	if (!load_concat(doc, STR("a"), decl, STR("b")) || !doc.first_child().empty()) return false;
+	if (!load_concat(doc, STR("a"), decl) || !test_node(doc, STR("a"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, decl, STR("b")) || !test_node(doc, STR("b"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("a"), decl, STR("b")) || !test_node(doc, STR("ab"), STR(""), format_raw)) return false;
 
 	// node pre/postfix
 	if (!load_concat(doc, STR("<nodea/>"), decl) || !test_node(doc, STR("<nodea />"), STR(""), format_raw)) return false;
@@ -41,7 +41,7 @@ static bool test_doctype_wf(const char_t* decl)
 	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
 
     // check load-store contents preservation
-    CHECK(doc.load(decl, parse_doctype));
+    CHECK(doc.load(decl, parse_doctype | parse_fragment));
     CHECK_NODE(doc, decl);
 
 	return true;
@@ -281,8 +281,8 @@ TEST(parse_doctype_xmlconf_oasis_1)
 
     // not actually a doctype :)
     xml_document doc;
-    CHECK(doc.load(STR("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"), parse_full) && doc.first_child().type() == node_comment && doc.last_child().type() == node_comment && doc.first_child().next_sibling() == doc.last_child());
-	CHECK(doc.load(STR("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"), parse_full) && doc.first_child().type() == node_pi && doc.first_child() == doc.last_child());
+    CHECK(doc.load(STR("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"), parse_full | parse_fragment) && doc.first_child().type() == node_comment && doc.last_child().type() == node_comment && doc.first_child().next_sibling() == doc.last_child());
+	CHECK(doc.load(STR("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"), parse_full | parse_fragment) && doc.first_child().type() == node_pi && doc.first_child() == doc.last_child());
 }
 
 TEST(parse_doctype_xmlconf_xmltest_1)
@@ -299,7 +299,7 @@ TEST(parse_doctype_xmlconf_xmltest_1)
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]>");
 }
 
-TEST_XML_FLAGS(parse_doctype_value, "<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]>", parse_minimal | parse_doctype)
+TEST_XML_FLAGS(parse_doctype_value, "<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]>", parse_fragment | parse_doctype)
 {
     xml_node n = doc.first_child();
 

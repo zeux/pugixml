@@ -151,6 +151,10 @@ namespace pugi
 	// This flag is off by default; turning it on may result in slower parsing and more memory consumption.
 	const unsigned int parse_ws_pcdata_single = 0x0400;
 
+	// This flag determines if plain character data that does not have a parent node is added to the DOM tree, and if an empty document
+	// is a valid document. This flag is off by default.
+	const unsigned int parse_fragment = 0x0800;
+
 	// The default parsing mode.
 	// Elements, PCDATA and CDATA sections are added to the DOM tree, character/reference entities are expanded,
 	// End-of-Line characters are normalized, attribute values are normalized using CDATA normalization rules.
@@ -880,7 +884,9 @@ namespace pugi
 		status_bad_end_element,		// Parsing error occurred while parsing end element tag
 		status_end_element_mismatch,// There was a mismatch of start-end tags (closing tag had incorrect name, some tag was not closed or there was an excessive closing tag)
 
-		status_append_invalid_root	// Unable to append nodes since root type is not node_element or node_document (exclusive to xml_node::append_buffer)
+		status_append_invalid_root,	// Unable to append nodes since root type is not node_element or node_document (exclusive to xml_node::append_buffer)
+
+		status_no_document_element	// Parsing resulted in a document without element nodes
 	};
 
 	// Parsing result

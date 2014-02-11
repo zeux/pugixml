@@ -1057,3 +1057,20 @@ TEST(dom_node_append_buffer_out_of_memory_buffer)
 	CHECK(doc.append_buffer(data, sizeof(data)).status == status_out_of_memory);
 	CHECK(!doc.first_child());
 }
+
+TEST_XML(dom_node_append_buffer_fragment, "<node />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.append_buffer("1", 1).status == status_no_document_element);
+	CHECK_NODE(doc, STR("<node>1</node>"));
+
+	CHECK(node.append_buffer("2", 1, parse_fragment));
+	CHECK_NODE(doc, STR("<node>12</node>"));
+
+	CHECK(node.append_buffer("3", 1).status == status_no_document_element);
+	CHECK_NODE(doc, STR("<node>123</node>"));
+
+	CHECK(node.append_buffer("4", 1, parse_fragment));
+	CHECK_NODE(doc, STR("<node>1234</node>"));
+}

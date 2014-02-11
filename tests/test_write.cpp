@@ -25,19 +25,19 @@ TEST_XML(write_pcdata, "<node attr='1'><child><sub/>text</child></node>")
 	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\n\t<child>\n\t\t<sub />\n\t\ttext\n\t</child>\n</node>\n"), STR("\t"), format_indent);
 }
 
-TEST_XML(write_cdata, "<![CDATA[value]]>")
+TEST_XML_FLAGS(write_cdata, "<![CDATA[value]]>", parse_cdata | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<![CDATA[value]]>"));
 	CHECK_NODE_EX(doc, STR("<![CDATA[value]]>\n"), STR(""), 0);
 }
 
-TEST_XML(write_cdata_empty, "<![CDATA[]]>")
+TEST_XML_FLAGS(write_cdata_empty, "<![CDATA[]]>", parse_cdata | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<![CDATA[]]>"));
 	CHECK_NODE_EX(doc, STR("<![CDATA[]]>\n"), STR(""), 0);
 }
 
-TEST_XML(write_cdata_escape, "<![CDATA[value]]>")
+TEST_XML_FLAGS(write_cdata_escape, "<![CDATA[value]]>", parse_cdata | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<![CDATA[value]]>"));
 
@@ -51,26 +51,25 @@ TEST_XML(write_cdata_inner, "<node><![CDATA[value]]></node>")
 	CHECK_NODE_EX(doc, STR("<node><![CDATA[value]]></node>\n"), STR(""), 0);
 }
 
-
-TEST_XML_FLAGS(write_comment, "<!--text-->", parse_default | parse_comments)
+TEST_XML_FLAGS(write_comment, "<!--text-->", parse_comments | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<!--text-->"));
 	CHECK_NODE_EX(doc, STR("<!--text-->\n"), STR(""), 0);
 }
 
-TEST_XML_FLAGS(write_pi, "<?name value?>", parse_default | parse_pi)
+TEST_XML_FLAGS(write_pi, "<?name value?>", parse_pi | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<?name value?>"));
 	CHECK_NODE_EX(doc, STR("<?name value?>\n"), STR(""), 0);
 }
 
-TEST_XML_FLAGS(write_declaration, "<?xml version='2.0'?>", parse_default | parse_declaration)
+TEST_XML_FLAGS(write_declaration, "<?xml version='2.0'?>", parse_declaration | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<?xml version=\"2.0\"?>"));
 	CHECK_NODE_EX(doc, STR("<?xml version=\"2.0\"?>\n"), STR(""), 0);
 }
 
-TEST_XML_FLAGS(write_doctype, "<!DOCTYPE id [ foo ]>", parse_default | parse_doctype)
+TEST_XML_FLAGS(write_doctype, "<!DOCTYPE id [ foo ]>", parse_doctype | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<!DOCTYPE id [ foo ]>"));
 	CHECK_NODE_EX(doc, STR("<!DOCTYPE id [ foo ]>\n"), STR(""), 0);
