@@ -2679,7 +2679,8 @@ PUGI__NS_BEGIN
 	#ifdef PUGIXML_WCHAR_MODE
 		static char_t* parse_skip_bom(char_t* s)
 		{
-			return (s[0] == 0xfeff) ? s + 1 : s;
+			unsigned int bom = 0xfeff;
+			return (s[0] == static_cast<wchar_t>(bom)) ? s + 1 : s;
 		}
 	#else
 		static char_t* parse_skip_bom(char_t* s)
