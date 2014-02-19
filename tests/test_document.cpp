@@ -408,35 +408,20 @@ TEST_XML(document_save_declaration_latin1, "<node/>")
 	CHECK(writer.as_narrow() == "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<node />\n");
 }
 
-#define USE_MKSTEMP defined(__unix) || defined(__QNX__) || defined(ANDROID)
-
 struct temp_file
 {
 	char path[512];
-	int fd;
 	
-	temp_file(): fd(0)
+	temp_file()
 	{
-	#if USE_MKSTEMP
-		strcpy(path, "/tmp/pugiXXXXXX");
-
-		fd = mkstemp(path);
-		CHECK(fd != -1);
-	#elif defined(__CELLOS_LV2__) || defined(_WIN32_WCE)
-		path[0] = 0; // no temporary file support
-	#else
-		tmpnam(path);
-	#endif
+		static int index = 0;
+		sprintf(path, "%stempfile%d", test_runner::_temp_path, index++);
 	}
 
 	~temp_file()
 	{
-    #ifndef _WIN32_WCE
+	#ifndef _WIN32_WCE
 		CHECK(unlink(path) == 0);
-    #endif
-
-	#if USE_MKSTEMP
-		CHECK(close(fd) == 0);
 	#endif
 	}
 };
@@ -456,7 +441,7 @@ TEST_XML(document_save_file_wide, "<node/>")
 	temp_file f;
 
 	// widen the path
-	wchar_t wpath[32];
+	wchar_t wpath[sizeof(f.path)];
 	std::copy(f.path, f.path + strlen(f.path) + 1, wpath + 0);
 
 	CHECK(doc.save_file(wpath));
@@ -486,7 +471,7 @@ TEST_XML(document_save_file_wide_text, "<node/>")
 	temp_file f;
 
 	// widen the path
-	wchar_t wpath[32];
+	wchar_t wpath[sizeof(f.path)];
 	std::copy(f.path, f.path + strlen(f.path) + 1, wpath + 0);
 
 	CHECK(doc.save_file(wpath, STR(""), pugi::format_no_declaration | pugi::format_save_file_text));

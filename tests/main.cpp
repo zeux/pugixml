@@ -6,6 +6,8 @@
 #include <float.h>
 #include <assert.h>
 
+#include <string>
+
 #ifndef PUGIXML_NO_EXCEPTIONS
 #   include <exception>
 #endif
@@ -20,6 +22,7 @@ test_runner* test_runner::_tests = 0;
 size_t test_runner::_memory_fail_threshold = 0;
 jmp_buf test_runner::_failure_buffer;
 const char* test_runner::_failure_message;
+const char* test_runner::_temp_path;
 
 static size_t g_memory_total_size = 0;
 static size_t g_memory_total_count = 0;
@@ -134,15 +137,18 @@ void std::exception::_Raise() const
 }
 #endif
 
-#ifdef _WIN32_WCE
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
-#else
-int main()
-#endif
+int main(int, char** argv)
 {
 #ifdef __BORLANDC__
 	_control87(MCW_EM | PC_53, MCW_EM | MCW_PC);
 #endif
+
+	// setup temp path as the executable folder
+	std::string temp = argv[0];
+	std::string::size_type slash = temp.find_last_of("\\/");
+	temp.erase((slash != std::string::npos) ? slash + 1 : 0);
+
+	test_runner::_temp_path = temp.c_str();
 	
 	replace_memory_management();
 
@@ -166,3 +172,10 @@ int main()
 
 	return failed;
 }
+
+#ifdef _WIN32_WCE
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+	return main(1, "");
+}
+#endif

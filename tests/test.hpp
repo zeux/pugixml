@@ -25,6 +25,8 @@ struct test_runner
 	static size_t _memory_fail_threshold;
 	static jmp_buf _failure_buffer;
 	static const char* _failure_message;
+
+	static const char* _temp_path;
 };
 
 bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs);
