@@ -975,3 +975,10 @@ TEST(parse_bom_fragment_invalid_utf32)
 	CHECK_STRING(value, "\xef\xbf\xbf");
 #endif
 }
+
+TEST(parse_pcdata_gap_fragment)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("a&amp;b"), parse_fragment | parse_escapes));
+	CHECK_STRING(doc.text().get(), STR("a&b"));
+}

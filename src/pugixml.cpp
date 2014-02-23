@@ -1903,6 +1903,8 @@ PUGI__NS_BEGIN
 				}
 				else if (*s == 0)
 				{
+					*g.flush(s) = 0;
+					
 					return s;
 				}
 				else ++s;
