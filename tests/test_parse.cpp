@@ -425,6 +425,62 @@ TEST(parse_pcdata_error)
 	CHECK(doc.load(STR("<root>pcdata"), parse_minimal).status == status_end_element_mismatch);
 }
 
+TEST(parse_pcdata_trim)
+{
+    struct test_data_t
+    {
+        const pugi::char_t* source;
+        const pugi::char_t* result;
+        unsigned int flags;
+    };
+
+    test_data_t test_data[] =
+    {
+    	{ STR("<node> text</node>"), STR("text"), 0 },
+    	{ STR("<node>\t\n text</node>"), STR("text"), 0 },
+    	{ STR("<node>text </node>"), STR("text"), 0 },
+    	{ STR("<node>text \t\n</node>"), STR("text"), 0 },
+    	{ STR("<node>\r\n\t text \t\n\r</node>"), STR("text"), 0 },
+    	{ STR(" text"), STR("text"), parse_fragment },
+    	{ STR("\t\n text"), STR("text"), parse_fragment },
+    	{ STR("text "), STR("text"), parse_fragment },
+    	{ STR("text \t\n"), STR("text"), parse_fragment },
+    	{ STR("\r\n\t text \t\n\r"), STR("text"), parse_fragment },
+    	{ STR("<node>\r\n\t text \t\n\r more \r\n\t</node>"), STR("text \t\n\r more"), 0 },
+    	{ STR("<node>\r\n\t text \t\n\r more \r\n\t</node>"), STR("text \t\n\n more"), parse_eol },
+    	{ STR("<node>\r\n\t text \r\n\r\n\r\n\r\n\r\n\r\n\r\n more \r\n\t</node>"), STR("text \n\n\n\n\n\n\n more"), parse_eol },
+    	{ STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&amp;&amp;&amp;&amp;&amp;&amp;&amp;"), 0 },
+    	{ STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&&&&&&&"), parse_escapes },
+    	{ STR("     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    "), STR("test&&&&&&&"), parse_fragment | parse_escapes }
+    };
+
+    for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
+    {
+        const test_data_t& td = test_data[i];
+
+        xml_document doc;
+        CHECK(doc.load(td.source, td.flags | parse_trim_pcdata));
+
+        const pugi::char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
+        CHECK_STRING(value, td.result);
+    }
+}
+
+TEST(parse_pcdata_trim_empty)
+{
+	unsigned int flags[] = { 0, parse_ws_pcdata, parse_ws_pcdata_single, parse_ws_pcdata | parse_ws_pcdata_single };
+
+	for (size_t i = 0; i < sizeof(flags) / sizeof(flags[0]); ++i)
+	{
+		xml_document doc;
+		CHECK(doc.load(STR("<node>   </node>"), flags[i] | parse_trim_pcdata));
+
+		xml_node node = doc.child(STR("node"));
+		CHECK(node);
+		CHECK(!node.first_child());
+	}
+}
+
 TEST(parse_escapes_skip)
 {
 	xml_document doc;
