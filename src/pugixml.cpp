@@ -1875,19 +1875,27 @@ PUGI__NS_BEGIN
 	
 	typedef char_t* (*strconv_pcdata_t)(char_t*);
 		
-	template <typename opt_eol, typename opt_escape> struct strconv_pcdata_impl
+	template <typename opt_trim, typename opt_eol, typename opt_escape> struct strconv_pcdata_impl
 	{
 		static char_t* parse(char_t* s)
 		{
 			gap g;
-			
+
+			char_t* begin = s;
+
 			while (true)
 			{
 				while (!PUGI__IS_CHARTYPE(*s, ct_parse_pcdata)) ++s;
 					
 				if (*s == '<') // PCDATA ends here
 				{
-					*g.flush(s) = 0;
+					char_t* end = g.flush(s);
+
+					if (opt_trim::value)
+						while (end > begin && PUGI__IS_CHARTYPE(end[-1], ct_space))
+							--end;
+
+					*end = 0;
 					
 					return s + 1;
 				}
@@ -1903,8 +1911,14 @@ PUGI__NS_BEGIN
 				}
 				else if (*s == 0)
 				{
-					*g.flush(s) = 0;
-					
+					char_t* end = g.flush(s);
+
+					if (opt_trim::value)
+						while (end > begin && PUGI__IS_CHARTYPE(end[-1], ct_space))
+							--end;
+
+					*end = 0;
+
 					return s;
 				}
 				else ++s;
@@ -1914,14 +1928,18 @@ PUGI__NS_BEGIN
 	
 	PUGI__FN strconv_pcdata_t get_strconv_pcdata(unsigned int optmask)
 	{
-		PUGI__STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20);
+		PUGI__STATIC_ASSERT(parse_escapes == 0x10 && parse_eol == 0x20 && parse_trim_pcdata == 0x0800);
 
-		switch ((optmask >> 4) & 3) // get bitmask for flags (eol escapes)
+		switch (((optmask >> 4) & 3) | ((optmask >> 9) & 4)) // get bitmask for flags (eol escapes trim)
 		{
-		case 0: return strconv_pcdata_impl<opt_false, opt_false>::parse;
-		case 1: return strconv_pcdata_impl<opt_false, opt_true>::parse;
-		case 2: return strconv_pcdata_impl<opt_true, opt_false>::parse;
-		case 3: return strconv_pcdata_impl<opt_true, opt_true>::parse;
+		case 0: return strconv_pcdata_impl<opt_false, opt_false, opt_false>::parse;
+		case 1: return strconv_pcdata_impl<opt_false, opt_false, opt_true>::parse;
+		case 2: return strconv_pcdata_impl<opt_false, opt_true, opt_false>::parse;
+		case 3: return strconv_pcdata_impl<opt_false, opt_true, opt_true>::parse;
+		case 4: return strconv_pcdata_impl<opt_true, opt_false, opt_false>::parse;
+		case 5: return strconv_pcdata_impl<opt_true, opt_false, opt_true>::parse;
+		case 6: return strconv_pcdata_impl<opt_true, opt_true, opt_false>::parse;
+		case 7: return strconv_pcdata_impl<opt_true, opt_true, opt_true>::parse;
 		default: assert(false); return 0; // should not get here
 		}
 	}
@@ -2636,7 +2654,7 @@ PUGI__NS_BEGIN
 						// We skipped some whitespace characters because otherwise we would take the tag branch instead of PCDATA one
 						assert(mark != s);
 
-						if (!PUGI__OPTSET(parse_ws_pcdata | parse_ws_pcdata_single))
+						if (!PUGI__OPTSET(parse_ws_pcdata | parse_ws_pcdata_single) || PUGI__OPTSET(parse_trim_pcdata))
 						{
 							continue;
 						}
@@ -2646,7 +2664,8 @@ PUGI__NS_BEGIN
 						}
 					}
 
-					s = mark;
+					if (!PUGI__OPTSET(parse_trim_pcdata))
+						s = mark;
 							
 					if (cursor->parent || PUGI__OPTSET(parse_fragment))
 					{

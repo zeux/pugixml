@@ -151,9 +151,12 @@ namespace pugi
 	// This flag is off by default; turning it on may result in slower parsing and more memory consumption.
 	const unsigned int parse_ws_pcdata_single = 0x0400;
 
+	// This flag determines if leading and trailing whitespace is to be removed from plain character data. This flag is off by default.
+	const unsigned int parse_trim_pcdata = 0x0800;
+
 	// This flag determines if plain character data that does not have a parent node is added to the DOM tree, and if an empty document
 	// is a valid document. This flag is off by default.
-	const unsigned int parse_fragment = 0x0800;
+	const unsigned int parse_fragment = 0x1000;
 
 	// The default parsing mode.
 	// Elements, PCDATA and CDATA sections are added to the DOM tree, character/reference entities are expanded,
