@@ -717,6 +717,9 @@ These flags control the resulting tree contents:
 * [anchor parse_cdata] determines if CDATA sections (nodes with type [link node_cdata]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *on* by default.
 [lbr]
 
+* [anchor parse_trim_pcdata] determines if leading and trailing whitespace characters are to be removed from PCDATA nodes. While for some applications leading/trailing whitespace is significant, often the application only cares about the non-whitespace contents so it's easier to trim whitespace from text during parsing. This flag is *off* by default.
+[lbr]
+
 * [anchor parse_ws_pcdata] determines if PCDATA nodes (nodes with type [link node_pcdata]) that consist only of whitespace characters are to be put in DOM tree. Often whitespace-only data is not significant for the application, and the cost of allocating and storing such nodes (both memory and speed-wise) can be significant. For example, after parsing XML string `<node> <a/> </node>`, `<node>` element will have three children when `parse_ws_pcdata` is set (child with type [link node_pcdata] and value `" "`, child with type [link node_element] and name `"a"`, and another child with type [link node_pcdata] and value `" "`), and only one child when `parse_ws_pcdata` is not set. This flag is *off* by default.
 [lbr]
 
@@ -1865,7 +1868,7 @@ Because of the differences in document object models, performance considerations
 
 [section:changes Changelog]
 
-[h5 14.02.2014 - version 1.4]
+[h5 1.03.2014 - version 1.4]
 
 Major release, featuring various new features, bug fixes and compatibility improvements.
 
@@ -1874,6 +1877,7 @@ Major release, featuring various new features, bug fixes and compatibility impro
 
 * New features:
     # Added XML fragment parsing (parse_fragment flag)
+    # Added PCDATA whitespace trimming (parse_trim_pcdata flag)
     # Added long long support for xml_attribute and xml_text (as_llong, as_ullong and set_value/set overloads)
     # Added hexadecimal integer parsing support for as_int/as_uint/as_llong/as_ullong
     # Added xml_node::append_buffer to improve performance of assembling documents from fragments
@@ -2259,6 +2263,7 @@ Constants:
     * [link parse_full]
     * [link parse_minimal]
     * [link parse_pi]
+    * [link parse_trim_pcdata]
     * [link parse_ws_pcdata]
     * [link parse_ws_pcdata_single]
     * [link parse_wconv_attribute]
