@@ -176,6 +176,6 @@ int main(int, char** argv)
 #ifdef _WIN32_WCE
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	return main(1, "");
+	return main(0, NULL);
 }
 #endif
