@@ -1,6 +1,7 @@
 #include "pugixml.hpp"
 
 #include <iostream>
+#include <cstring>
 
 int main()
 {

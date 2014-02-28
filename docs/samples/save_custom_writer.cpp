@@ -1,8 +1,8 @@
 #include "pugixml.hpp"
 
 #include <string>
-
-#include <stdio.h>
+#include <iostream>
+#include <cstring>
 
 //[code_save_custom_writer
 struct xml_string_writer: pugi::xml_writer
@@ -97,19 +97,19 @@ int main()
     doc.load("<foo bar='baz'>hey</foo>");
 
     // get contents as std::string (single pass)
-    printf("contents: [%s]\n", node_to_string(doc).c_str());
+    std::cout << "contents: [" << node_to_string(doc) << "]\n";
 
     // get contents into fixed-size buffer (single pass)
     char large_buf[128];
-    printf("contents: [%s]\n", node_to_buffer(doc, large_buf, sizeof(large_buf)));
+    std::cout << "contents: [" << node_to_buffer(doc, large_buf, sizeof(large_buf)) << "]\n";
 
     // get contents into fixed-size buffer (single pass, shows truncating behavior)
     char small_buf[22];
-    printf("contents: [%s]\n", node_to_buffer(doc, small_buf, sizeof(small_buf)));
+    std::cout << "contents: [" << node_to_buffer(doc, small_buf, sizeof(small_buf)) << "]\n";
 
     // get contents into heap-allocated buffer (two passes)
     char* heap_buf = node_to_buffer_heap(doc);
-    printf("contents: [%s]\n", heap_buf);
+    std::cout << "contents: [" << heap_buf << "]\n";
     delete[] heap_buf;
 }
 
