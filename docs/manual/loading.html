@@ -3,16 +3,16 @@
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
 <title>Loading document</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.2">
-<link rel="up" href="../manual.html" title="pugixml 1.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="../manual.html" title="pugixml 1.4">
+<link rel="up" href="../manual.html" title="pugixml 1.4">
 <link rel="prev" href="dom.html" title="Document object model">
 <link rel="next" href="access.html" title="Accessing document data">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -28,16 +28,16 @@
 <hr>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="manual.loading"></a><a class="link" href="loading.html" title="Loading document"> Loading document</a>
+<a name="manual.loading"></a><a class="link" href="loading.html" title="Loading document">Loading document</a>
 </h2></div></div></div>
-<div class="toc"><dl>
-<dt><span class="section"><a href="loading.html#manual.loading.file"> Loading document from file</a></span></dt>
-<dt><span class="section"><a href="loading.html#manual.loading.memory"> Loading document from memory</a></span></dt>
-<dt><span class="section"><a href="loading.html#manual.loading.stream"> Loading document from C++ IOstreams</a></span></dt>
-<dt><span class="section"><a href="loading.html#manual.loading.errors"> Handling parsing errors</a></span></dt>
-<dt><span class="section"><a href="loading.html#manual.loading.options"> Parsing options</a></span></dt>
-<dt><span class="section"><a href="loading.html#manual.loading.encoding"> Encodings</a></span></dt>
-<dt><span class="section"><a href="loading.html#manual.loading.w3c"> Conformance to W3C specification</a></span></dt>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="loading.html#manual.loading.file">Loading document from file</a></span></dt>
+<dt><span class="section"><a href="loading.html#manual.loading.memory">Loading document from memory</a></span></dt>
+<dt><span class="section"><a href="loading.html#manual.loading.stream">Loading document from C++ IOstreams</a></span></dt>
+<dt><span class="section"><a href="loading.html#manual.loading.errors">Handling parsing errors</a></span></dt>
+<dt><span class="section"><a href="loading.html#manual.loading.options">Parsing options</a></span></dt>
+<dt><span class="section"><a href="loading.html#manual.loading.encoding">Encodings</a></span></dt>
+<dt><span class="section"><a href="loading.html#manual.loading.w3c">Conformance to W3C specification</a></span></dt>
 </dl></div>
 <p>
       pugixml provides several functions for loading XML data from various places
@@ -49,25 +49,26 @@
       EOL handling or attribute value normalization) can impact parsing speed and
       thus can be disabled. However for vast majority of XML documents there is no
       performance difference between different parsing options. Parsing options also
-      control whether certain XML nodes are parsed; see <a class="xref" href="loading.html#manual.loading.options" title="Parsing options"> Parsing options</a> for
+      control whether certain XML nodes are parsed; see <a class="xref" href="loading.html#manual.loading.options" title="Parsing options">Parsing options</a> for
       more information.
     </p>
 <p>
-      XML data is always converted to internal character format (see <a class="xref" href="dom.html#manual.dom.unicode" title="Unicode interface"> Unicode interface</a>)
+      XML data is always converted to internal character format (see <a class="xref" href="dom.html#manual.dom.unicode" title="Unicode interface">Unicode interface</a>)
       before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16
       (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally
       supported since it's a strict subset of UTF-16) and handles all encoding conversions
       automatically. Unless explicit encoding is specified, loading functions perform
       automatic encoding detection based on first few characters of XML data, so
       in almost all cases you do not have to specify document encoding. Encoding
-      conversion is described in more detail in <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings"> Encodings</a>.
+      conversion is described in more detail in <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings">Encodings</a>.
     </p>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.loading.file"></a><a class="link" href="loading.html#manual.loading.file" title="Loading document from file"> Loading document from file</a>
+<a name="manual.loading.file"></a><a class="link" href="loading.html#manual.loading.file" title="Loading document from file">Loading document from file</a>
 </h3></div></div></div>
-<a name="xml_document::load_file"></a><a name="xml_document::load_file_wide"></a><p>
-        The most common source of XML data is files; pugixml provides dedicated functions
+<p>
+        <a name="xml_document::load_file"></a><a name="xml_document::load_file_wide"></a>The
+        most common source of XML data is files; pugixml provides dedicated functions
         for loading an XML document from file:
       </p>
 <pre class="programlisting"><span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load_file</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span>
@@ -75,8 +76,8 @@
 </pre>
 <p>
         These functions accept the file path as its first argument, and also two
-        optional arguments, which specify parsing options (see <a class="xref" href="loading.html#manual.loading.options" title="Parsing options"> Parsing options</a>)
-        and input data encoding (see <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings"> Encodings</a>). The path has the target
+        optional arguments, which specify parsing options (see <a class="xref" href="loading.html#manual.loading.options" title="Parsing options">Parsing options</a>)
+        and input data encoding (see <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings">Encodings</a>). The path has the target
         operating system format, so it can be a relative or absolute one, it should
         have the delimiters of the target system, it should have the exact case if
         the target file system is case-sensitive, etc.
@@ -94,13 +95,12 @@
         The result of the operation is returned in an <a class="link" href="loading.html#xml_parse_result">xml_parse_result</a>
         object; this object contains the operation status and the related information
         (i.e. last successfully parsed position in the input file, if parsing fails).
-        See <a class="xref" href="loading.html#manual.loading.errors" title="Handling parsing errors"> Handling parsing errors</a> for error handling details.
+        See <a class="xref" href="loading.html#manual.loading.errors" title="Handling parsing errors">Handling parsing errors</a> for error handling details.
       </p>
 <p>
         This is an example of loading XML document from file (<a href="../samples/load_file.cpp" target="_top">samples/load_file.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
 
@@ -113,19 +113,19 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.loading.memory"></a><a class="link" href="loading.html#manual.loading.memory" title="Loading document from memory"> Loading document from memory</a>
+<a name="manual.loading.memory"></a><a class="link" href="loading.html#manual.loading.memory" title="Loading document from memory">Loading document from memory</a>
 </h3></div></div></div>
-<a name="xml_document::load_buffer"></a><a name="xml_document::load_buffer_inplace"></a><a name="xml_document::load_buffer_inplace_own"></a><p>
-        Sometimes XML data should be loaded from some other source than a file, i.e.
-        HTTP URL; also you may want to load XML data from file using non-standard
-        functions, i.e. to use your virtual file system facilities or to load XML
-        from gzip-compressed files. All these scenarios require loading document
-        from memory. First you should prepare a contiguous memory block with all
-        XML data; then you have to invoke one of buffer loading functions. These
-        functions will handle the necessary encoding conversions, if any, and then
-        will parse the data into the corresponding XML tree. There are several buffer
-        loading functions, which differ in the behavior and thus in performance/memory
-        usage:
+<p>
+        <a name="xml_document::load_buffer"></a><a name="xml_document::load_buffer_inplace"></a><a name="xml_document::load_buffer_inplace_own"></a>Sometimes XML data should be
+        loaded from some other source than a file, i.e. HTTP URL; also you may want
+        to load XML data from file using non-standard functions, i.e. to use your
+        virtual file system facilities or to load XML from gzip-compressed files.
+        All these scenarios require loading document from memory. First you should
+        prepare a contiguous memory block with all XML data; then you have to invoke
+        one of buffer loading functions. These functions will handle the necessary
+        encoding conversions, if any, and then will parse the data into the corresponding
+        XML tree. There are several buffer loading functions, which differ in the
+        behavior and thus in performance/memory usage:
       </p>
 <pre class="programlisting"><span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load_buffer</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">void</span><span class="special">*</span> <span class="identifier">contents</span><span class="special">,</span> <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span>
 <span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load_buffer_inplace</span><span class="special">(</span><span class="keyword">void</span><span class="special">*</span> <span class="identifier">contents</span><span class="special">,</span> <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span>
@@ -135,7 +135,7 @@
         All functions accept the buffer which is represented by a pointer to XML
         data, <code class="computeroutput"><span class="identifier">contents</span></code>, and data
         size in bytes. Also there are two optional arguments, which specify parsing
-        options (see <a class="xref" href="loading.html#manual.loading.options" title="Parsing options"> Parsing options</a>) and input data encoding (see <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings"> Encodings</a>).
+        options (see <a class="xref" href="loading.html#manual.loading.options" title="Parsing options">Parsing options</a>) and input data encoding (see <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings">Encodings</a>).
         The buffer does not have to be zero-terminated.
       </p>
 <p>
@@ -163,9 +163,10 @@
         is the recommended function if you have to load the document from memory
         and performance is critical.
       </p>
-<a name="xml_document::load_string"></a><p>
-        There is also a simple helper function for cases when you want to load the
-        XML document from null-terminated character string:
+<p>
+        <a name="xml_document::load_string"></a>There is also a simple helper function
+        for cases when you want to load the XML document from null-terminated character
+        string:
       </p>
 <pre class="programlisting"><span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">contents</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">);</span>
 </pre>
@@ -183,7 +184,6 @@
         (<a href="../samples/load_memory.cpp" target="_top">samples/load_memory.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="keyword">char</span> <span class="identifier">source</span><span class="special">[]</span> <span class="special">=</span> <span class="string">"&lt;mesh name='sphere'&gt;&lt;bounds&gt;0 0 1 1&lt;/bounds&gt;&lt;/mesh&gt;"</span><span class="special">;</span>
 <span class="identifier">size_t</span> <span class="identifier">size</span> <span class="special">=</span> <span class="keyword">sizeof</span><span class="special">(</span><span class="identifier">source</span><span class="special">);</span>
@@ -191,61 +191,57 @@
 <p>
       </p>
 <p>
-        
 </p>
-<pre class="programlisting"><span class="comment">// You can use load_buffer to load document from immutable memory block:
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_buffer</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
+<pre class="programlisting"><span class="comment">// You can use load_buffer to load document from immutable memory block:</span>
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_buffer</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
 </pre>
 <p>
       </p>
 <p>
-        
 </p>
-<pre class="programlisting"><span class="comment">// You can use load_buffer_inplace to load document from mutable memory block; the block's lifetime must exceed that of document
-</span><span class="keyword">char</span><span class="special">*</span> <span class="identifier">buffer</span> <span class="special">=</span> <span class="keyword">new</span> <span class="keyword">char</span><span class="special">[</span><span class="identifier">size</span><span class="special">];</span>
+<pre class="programlisting"><span class="comment">// You can use load_buffer_inplace to load document from mutable memory block; the block's lifetime must exceed that of document</span>
+<span class="keyword">char</span><span class="special">*</span> <span class="identifier">buffer</span> <span class="special">=</span> <span class="keyword">new</span> <span class="keyword">char</span><span class="special">[</span><span class="identifier">size</span><span class="special">];</span>
 <span class="identifier">memcpy</span><span class="special">(</span><span class="identifier">buffer</span><span class="special">,</span> <span class="identifier">source</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
 
-<span class="comment">// The block can be allocated by any method; the block is modified during parsing
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_buffer_inplace</span><span class="special">(</span><span class="identifier">buffer</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
+<span class="comment">// The block can be allocated by any method; the block is modified during parsing</span>
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_buffer_inplace</span><span class="special">(</span><span class="identifier">buffer</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
 
-<span class="comment">// You have to destroy the block yourself after the document is no longer used
-</span><span class="keyword">delete</span><span class="special">[]</span> <span class="identifier">buffer</span><span class="special">;</span>
+<span class="comment">// You have to destroy the block yourself after the document is no longer used</span>
+<span class="keyword">delete</span><span class="special">[]</span> <span class="identifier">buffer</span><span class="special">;</span>
 </pre>
 <p>
       </p>
 <p>
-        
 </p>
-<pre class="programlisting"><span class="comment">// You can use load_buffer_inplace_own to load document from mutable memory block and to pass the ownership of this block
-</span><span class="comment">// The block has to be allocated via pugixml allocation function - using i.e. operator new here is incorrect
-</span><span class="keyword">char</span><span class="special">*</span> <span class="identifier">buffer</span> <span class="special">=</span> <span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">get_memory_allocation_function</span><span class="special">()(</span><span class="identifier">size</span><span class="special">));</span>
+<pre class="programlisting"><span class="comment">// You can use load_buffer_inplace_own to load document from mutable memory block and to pass the ownership of this block</span>
+<span class="comment">// The block has to be allocated via pugixml allocation function - using i.e. operator new here is incorrect</span>
+<span class="keyword">char</span><span class="special">*</span> <span class="identifier">buffer</span> <span class="special">=</span> <span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">get_memory_allocation_function</span><span class="special">()(</span><span class="identifier">size</span><span class="special">));</span>
 <span class="identifier">memcpy</span><span class="special">(</span><span class="identifier">buffer</span><span class="special">,</span> <span class="identifier">source</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
 
-<span class="comment">// The block will be deleted by the document
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_buffer_inplace_own</span><span class="special">(</span><span class="identifier">buffer</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
+<span class="comment">// The block will be deleted by the document</span>
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_buffer_inplace_own</span><span class="special">(</span><span class="identifier">buffer</span><span class="special">,</span> <span class="identifier">size</span><span class="special">);</span>
 </pre>
 <p>
       </p>
 <p>
-        
 </p>
-<pre class="programlisting"><span class="comment">// You can use load to load document from null-terminated strings, for example literals:
-</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="string">"&lt;mesh name='sphere'&gt;&lt;bounds&gt;0 0 1 1&lt;/bounds&gt;&lt;/mesh&gt;"</span><span class="special">);</span>
+<pre class="programlisting"><span class="comment">// You can use load to load document from null-terminated strings, for example literals:</span>
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="string">"&lt;mesh name='sphere'&gt;&lt;bounds&gt;0 0 1 1&lt;/bounds&gt;&lt;/mesh&gt;"</span><span class="special">);</span>
 </pre>
 <p>
       </p>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.loading.stream"></a><a class="link" href="loading.html#manual.loading.stream" title="Loading document from C++ IOstreams"> Loading document from C++ IOstreams</a>
+<a name="manual.loading.stream"></a><a class="link" href="loading.html#manual.loading.stream" title="Loading document from C++ IOstreams">Loading document from C++ IOstreams</a>
 </h3></div></div></div>
-<a name="xml_document::load_stream"></a><p>
-        To enhance interoperability, pugixml provides functions for loading document
-        from any object which implements C++ <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">istream</span></code>
-        interface. This allows you to load documents from any standard C++ stream
-        (i.e. file stream) or any third-party compliant implementation (i.e. Boost
-        Iostreams). There are two functions, one works with narrow character streams,
-        another handles wide character ones:
+<p>
+        <a name="xml_document::load_stream"></a>To enhance interoperability, pugixml
+        provides functions for loading document from any object which implements
+        C++ <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">istream</span></code> interface. This allows you to load
+        documents from any standard C++ stream (i.e. file stream) or any third-party
+        compliant implementation (i.e. Boost Iostreams). There are two functions,
+        one works with narrow character streams, another handles wide character ones:
       </p>
 <pre class="programlisting"><span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">istream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">,</span> <span class="identifier">xml_encoding</span> <span class="identifier">encoding</span> <span class="special">=</span> <span class="identifier">encoding_auto</span><span class="special">);</span>
 <span class="identifier">xml_parse_result</span> <span class="identifier">xml_document</span><span class="special">::</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">wistream</span><span class="special">&amp;</span> <span class="identifier">stream</span><span class="special">,</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">options</span> <span class="special">=</span> <span class="identifier">parse_default</span><span class="special">);</span>
@@ -275,7 +271,6 @@
         the sample code for more complex examples involving wide streams and locales:
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">ifstream</span> <span class="identifier">stream</span><span class="special">(</span><span class="string">"weekly-utf-8.xml"</span><span class="special">);</span>
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">stream</span><span class="special">);</span>
@@ -285,12 +280,14 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.loading.errors"></a><a class="link" href="loading.html#manual.loading.errors" title="Handling parsing errors"> Handling parsing errors</a>
+<a name="manual.loading.errors"></a><a class="link" href="loading.html#manual.loading.errors" title="Handling parsing errors">Handling parsing errors</a>
 </h3></div></div></div>
-<a name="xml_parse_result"></a><p>
-        All document loading functions return the parsing result via <code class="computeroutput"><span class="identifier">xml_parse_result</span></code> object. It contains parsing
-        status, the offset of last successfully parsed character from the beginning
-        of the source stream, and the encoding of the source stream:
+<p>
+        <a name="xml_parse_result"></a>All document loading functions return the
+        parsing result via <code class="computeroutput"><span class="identifier">xml_parse_result</span></code>
+        object. It contains parsing status, the offset of last successfully parsed
+        character from the beginning of the source stream, and the encoding of the
+        source stream:
       </p>
 <pre class="programlisting"><span class="keyword">struct</span> <span class="identifier">xml_parse_result</span>
 <span class="special">{</span>
@@ -302,16 +299,16 @@
     <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">description</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 </pre>
-<a name="xml_parse_status"></a><a name="xml_parse_result::status"></a><p>
-        Parsing status is represented as the <code class="computeroutput"><span class="identifier">xml_parse_status</span></code>
+<p>
+        <a name="xml_parse_status"></a><a name="xml_parse_result::status"></a>Parsing
+        status is represented as the <code class="computeroutput"><span class="identifier">xml_parse_status</span></code>
         enumeration and can be one of the following:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             <a name="status_ok"></a><code class="literal">status_ok</code> means that no error was encountered
             during parsing; the source stream represents the valid XML document which
             was fully parsed and converted to a tree. <br><br>
-
           </li>
 <li class="listitem">
             <a name="status_file_not_found"></a><code class="literal">status_file_not_found</code> is only
@@ -330,7 +327,6 @@
 <li class="listitem">
             <a name="status_internal_error"></a><code class="literal">status_internal_error</code> means that
             something went horribly wrong; currently this error does not occur <br><br>
-
           </li>
 <li class="listitem">
             <a name="status_unrecognized_tag"></a><code class="literal">status_unrecognized_tag</code> means
@@ -371,15 +367,18 @@
             opening one (i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;/</span><span class="identifier">nedo</span><span class="special">&gt;</span></code>) or because some tag was not closed
             at all
           </li>
+<li class="listitem">
+            <a name="status_no_document_element"></a><code class="literal">status_no_document_element</code>
+            means that no element nodes were discovered during parsing; this usually
+            indicates an empty or invalid document
+          </li>
 </ul></div>
-<a name="xml_parse_result::description"></a><p>
-        <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code>
-        member function can be used to convert parsing status to a string; the returned
-        message is always in English, so you'll have to write your own function if
-        you need a localized string. However please note that the exact messages
-        returned by <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code>
-        function may change from version to version, so any complex status handling
-        should be based on <code class="computeroutput"><span class="identifier">status</span></code>
+<p>
+        <a name="xml_parse_result::description"></a><code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> member function can be used to convert
+        parsing status to a string; the returned message is always in English, so
+        you'll have to write your own function if you need a localized string. However
+        please note that the exact messages returned by <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> function may change from version to version,
+        so any complex status handling should be based on <code class="computeroutput"><span class="identifier">status</span></code>
         value. Note that <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> returns a <code class="computeroutput"><span class="keyword">char</span></code>
         string even in <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code>;
         you'll have to call <a class="link" href="dom.html#as_wide">as_wide</a> to get the <code class="computeroutput"><span class="keyword">wchar_t</span></code> string.
@@ -394,16 +393,18 @@
         attribute <code class="computeroutput"><span class="identifier">attr</span></code> will contain
         the string <code class="computeroutput"><span class="identifier">value</span><span class="special">&gt;</span><span class="identifier">some</span> <span class="identifier">data</span><span class="special">&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
       </p>
-<a name="xml_parse_result::offset"></a><p>
-        In addition to the status code, parsing result has an <code class="computeroutput"><span class="identifier">offset</span></code>
-        member, which contains the offset of last successfully parsed character if
-        parsing failed because of an error in source data; otherwise <code class="computeroutput"><span class="identifier">offset</span></code> is 0. For parsing efficiency reasons,
-        pugixml does not track the current line during parsing; this offset is in
-        units of <a class="link" href="dom.html#char_t">pugi::char_t</a> (bytes for character
-        mode, wide characters for wide character mode). Many text editors support
-        'Go To Position' feature - you can use it to locate the exact error position.
-        Alternatively, if you're loading the document from memory, you can display
-        the error chunk along with the error description (see the example code below).
+<p>
+        <a name="xml_parse_result::offset"></a>In addition to the status code, parsing
+        result has an <code class="computeroutput"><span class="identifier">offset</span></code> member,
+        which contains the offset of last successfully parsed character if parsing
+        failed because of an error in source data; otherwise <code class="computeroutput"><span class="identifier">offset</span></code>
+        is 0. For parsing efficiency reasons, pugixml does not track the current
+        line during parsing; this offset is in units of <a class="link" href="dom.html#char_t">pugi::char_t</a>
+        (bytes for character mode, wide characters for wide character mode). Many
+        text editors support 'Go To Position' feature - you can use it to locate
+        the exact error position. Alternatively, if you're loading the document from
+        memory, you can display the error chunk along with the error description
+        (see the example code below).
       </p>
 <div class="caution"><table border="0" summary="Caution">
 <tr>
@@ -416,16 +417,17 @@
           track the error position.
         </p></td></tr>
 </table></div>
-<a name="xml_parse_result::encoding"></a><p>
-        Parsing result also has an <code class="computeroutput"><span class="identifier">encoding</span></code>
-        member, which can be used to check that the source data encoding was correctly
-        guessed. It is equal to the exact encoding used during parsing (i.e. with
-        the exact endianness); see <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings"> Encodings</a> for more information.
+<p>
+        <a name="xml_parse_result::encoding"></a>Parsing result also has an <code class="computeroutput"><span class="identifier">encoding</span></code> member, which can be used to check
+        that the source data encoding was correctly guessed. It is equal to the exact
+        encoding used during parsing (i.e. with the exact endianness); see <a class="xref" href="loading.html#manual.loading.encoding" title="Encodings">Encodings</a> for
+        more information.
       </p>
-<a name="xml_parse_result::bool"></a><p>
-        Parsing result object can be implicitly converted to <code class="computeroutput"><span class="keyword">bool</span></code>;
-        if you do not want to handle parsing errors thoroughly, you can just check
-        the return value of load functions as if it was a <code class="computeroutput"><span class="keyword">bool</span></code>:
+<p>
+        <a name="xml_parse_result::bool"></a>Parsing result object can be implicitly
+        converted to <code class="computeroutput"><span class="keyword">bool</span></code>; if you do
+        not want to handle parsing errors thoroughly, you can just check the return
+        value of load functions as if it was a <code class="computeroutput"><span class="keyword">bool</span></code>:
         <code class="computeroutput"><span class="keyword">if</span> <span class="special">(</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_file</span><span class="special">(</span><span class="string">"file.xml"</span><span class="special">))</span> <span class="special">{</span> <span class="special">...</span>
         <span class="special">}</span> <span class="keyword">else</span> <span class="special">{</span> <span class="special">...</span> <span class="special">}</span></code>.
       </p>
@@ -433,7 +435,6 @@
         This is an example of handling loading errors (<a href="../samples/load_error_handling.cpp" target="_top">samples/load_error_handling.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">);</span>
@@ -452,7 +453,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.loading.options"></a><a class="link" href="loading.html#manual.loading.options" title="Parsing options"> Parsing options</a>
+<a name="manual.loading.options"></a><a class="link" href="loading.html#manual.loading.options" title="Parsing options">Parsing options</a>
 </h3></div></div></div>
 <p>
         All document loading functions accept the optional parameter <code class="computeroutput"><span class="identifier">options</span></code>. This is a bitmask that customizes
@@ -478,20 +479,18 @@
 <p>
         These flags control the resulting tree contents:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             <a name="parse_declaration"></a><code class="literal">parse_declaration</code> determines if XML
             document declaration (node with type <a class="link" href="dom.html#node_declaration">node_declaration</a>)
             is to be put in DOM tree. If this flag is off, it is not put in the tree,
             but is still parsed and checked for correctness. This flag is <span class="bold"><strong>off</strong></span> by default. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_doctype"></a><code class="literal">parse_doctype</code> determines if XML document
             type declaration (node with type <a class="link" href="dom.html#node_doctype">node_doctype</a>)
             is to be put in DOM tree. If this flag is off, it is not put in the tree,
             but is still parsed and checked for correctness. This flag is <span class="bold"><strong>off</strong></span> by default. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_pi"></a><code class="literal">parse_pi</code> determines if processing instructions
@@ -499,21 +498,26 @@
             in DOM tree. If this flag is off, they are not put in the tree, but are
             still parsed and checked for correctness. Note that <code class="computeroutput"><span class="special">&lt;?</span><span class="identifier">xml</span> <span class="special">...?&gt;</span></code>
             (document declaration) is not considered to be a PI. This flag is <span class="bold"><strong>off</strong></span> by default. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_comments"></a><code class="literal">parse_comments</code> determines if comments
             (nodes with type <a class="link" href="dom.html#node_comment">node_comment</a>) are
             to be put in DOM tree. If this flag is off, they are not put in the tree,
             but are still parsed and checked for correctness. This flag is <span class="bold"><strong>off</strong></span> by default. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_cdata"></a><code class="literal">parse_cdata</code> determines if CDATA sections
             (nodes with type <a class="link" href="dom.html#node_cdata">node_cdata</a>) are to
             be put in DOM tree. If this flag is off, they are not put in the tree,
             but are still parsed and checked for correctness. This flag is <span class="bold"><strong>on</strong></span> by default. <br><br>
-
+          </li>
+<li class="listitem">
+            <a name="parse_trim_pcdata"></a><code class="literal">parse_trim_pcdata</code> determines if leading
+            and trailing whitespace characters are to be removed from PCDATA nodes.
+            While for some applications leading/trailing whitespace is significant,
+            often the application only cares about the non-whitespace contents so
+            it's easier to trim whitespace from text during parsing. This flag is
+            <span class="bold"><strong>off</strong></span> by default. <br><br>
           </li>
 <li class="listitem">
             <a name="parse_ws_pcdata"></a><code class="literal">parse_ws_pcdata</code> determines if PCDATA
@@ -532,7 +536,6 @@
             one child when <code class="computeroutput"><span class="identifier">parse_ws_pcdata</span></code>
             is not set. This flag is <span class="bold"><strong>off</strong></span> by default.
             <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_ws_pcdata_single"></a><code class="literal">parse_ws_pcdata_single</code> determines
@@ -550,12 +553,38 @@
             and value <code class="computeroutput"><span class="string">" "</span></code>.
             This flag has no effect if <a class="link" href="loading.html#parse_ws_pcdata">parse_ws_pcdata</a>
             is enabled. This flag is <span class="bold"><strong>off</strong></span> by default.
+            <br><br>
+          </li>
+<li class="listitem">
+            <a name="parse_fragment"></a><code class="literal">parse_fragment</code> determines if document
+            should be treated as a fragment of a valid XML. Parsing document as a
+            fragment leads to top-level PCDATA content (i.e. text that is not located
+            inside a node) to be added to a tree, and additionally treats documents
+            without element nodes as valid. This flag is <span class="bold"><strong>off</strong></span>
+            by default.
           </li>
 </ul></div>
+<div class="caution"><table border="0" summary="Caution">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Caution]" src="../images/caution.png"></td>
+<th align="left">Caution</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+          Using in-place parsing (<a class="link" href="loading.html#xml_document::load_buffer_inplace">load_buffer_inplace</a>)
+          with <code class="computeroutput"><span class="identifier">parse_fragment</span></code> flag
+          may result in the loss of the last character of the buffer if it is a part
+          of PCDATA. Since PCDATA values are null-terminated strings, the only way
+          to resolve this is to provide a null-terminated buffer as an input to
+          <code class="computeroutput"><span class="identifier">load_buffer_inplace</span></code> - i.e.
+          <code class="computeroutput"><span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_buffer_inplace</span><span class="special">(</span><span class="string">"test\0"</span><span class="special">,</span>
+          <span class="number">5</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_default</span> <span class="special">|</span>
+          <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_fragment</span><span class="special">)</span></code>.
+        </p></td></tr>
+</table></div>
 <p>
         These flags control the transformation of tree element contents:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             <a name="parse_escapes"></a><code class="literal">parse_escapes</code> determines if character
             and entity references are to be expanded during the parsing process.
@@ -569,7 +598,6 @@
             ones). If character/entity reference can not be expanded, it is left
             as is, so you can do additional processing later. Reference expansion
             is performed on attribute values and PCDATA content. This flag is <span class="bold"><strong>on</strong></span> by default. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_eol"></a><code class="literal">parse_eol</code> determines if EOL handling (that
@@ -579,7 +607,6 @@
             be performed on input data (that is, comments contents, PCDATA/CDATA
             contents and attribute values). This flag is <span class="bold"><strong>on</strong></span>
             by default. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_wconv_attribute"></a><code class="literal">parse_wconv_attribute</code> determines
@@ -590,7 +617,6 @@
             is set, i.e. <code class="computeroutput"><span class="special">\</span><span class="identifier">r</span><span class="special">\</span><span class="identifier">n</span></code>
             is converted to a single space. This flag is <span class="bold"><strong>on</strong></span>
             by default. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_wnorm_attribute"></a><code class="literal">parse_wnorm_attribute</code> determines
@@ -621,7 +647,7 @@
 <p>
         Additionally there are three predefined option masks:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             <a name="parse_minimal"></a><code class="literal">parse_minimal</code> has all options turned
             off. This option mask means that pugixml does not add declaration nodes,
@@ -630,7 +656,6 @@
             so theoretically it is the fastest mode. However, as mentioned above,
             in practice <a class="link" href="loading.html#parse_default">parse_default</a> is usually
             equally fast. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_default"></a><code class="literal">parse_default</code> is the default set of flags,
@@ -640,7 +665,6 @@
             in attribute values and performing EOL handling. Note, that PCDATA sections
             consisting only of whitespace characters are not parsed (by default)
             for performance reasons. <br><br>
-
           </li>
 <li class="listitem">
             <a name="parse_full"></a><code class="literal">parse_full</code> is the set of flags which adds
@@ -657,24 +681,23 @@
         This is an example of using different parsing options (<a href="../samples/load_options.cpp" target="_top">samples/load_options.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">source</span> <span class="special">=</span> <span class="string">"&lt;!--comment--&gt;&lt;node&gt;&amp;lt;&lt;/node&gt;"</span><span class="special">;</span>
 
-<span class="comment">// Parsing with default options; note that comment node is not added to the tree, and entity reference &amp;lt; is expanded
-</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">);</span>
+<span class="comment">// Parsing with default options; note that comment node is not added to the tree, and entity reference &amp;lt; is expanded</span>
+<span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"First node value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_child</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"], node child value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child_value</span><span class="special">(</span><span class="string">"node"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">"]\n"</span><span class="special">;</span>
 
-<span class="comment">// Parsing with additional parse_comments option; comment node is now added to the tree
-</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_default</span> <span class="special">|</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_comments</span><span class="special">);</span>
+<span class="comment">// Parsing with additional parse_comments option; comment node is now added to the tree</span>
+<span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_default</span> <span class="special">|</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_comments</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"First node value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_child</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"], node child value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child_value</span><span class="special">(</span><span class="string">"node"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">"]\n"</span><span class="special">;</span>
 
-<span class="comment">// Parsing with additional parse_comments option and without the (default) parse_escapes option; &amp;lt; is not expanded
-</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_default</span> <span class="special">|</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_comments</span><span class="special">)</span> <span class="special">&amp;</span> <span class="special">~</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_escapes</span><span class="special">);</span>
+<span class="comment">// Parsing with additional parse_comments option and without the (default) parse_escapes option; &amp;lt; is not expanded</span>
+<span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_default</span> <span class="special">|</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_comments</span><span class="special">)</span> <span class="special">&amp;</span> <span class="special">~</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_escapes</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"First node value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_child</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"], node child value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child_value</span><span class="special">(</span><span class="string">"node"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">"]\n"</span><span class="special">;</span>
 
-<span class="comment">// Parsing with minimal option mask; comment node is not added to the tree, and &amp;lt; is not expanded
-</span><span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_minimal</span><span class="special">);</span>
+<span class="comment">// Parsing with minimal option mask; comment node is not added to the tree, and &amp;lt; is not expanded</span>
+<span class="identifier">doc</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">source</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_minimal</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"First node value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_child</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"], node child value: ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child_value</span><span class="special">(</span><span class="string">"node"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">"]\n"</span><span class="special">;</span>
 </pre>
 <p>
@@ -682,24 +705,25 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.loading.encoding"></a><a class="link" href="loading.html#manual.loading.encoding" title="Encodings"> Encodings</a>
+<a name="manual.loading.encoding"></a><a class="link" href="loading.html#manual.loading.encoding" title="Encodings">Encodings</a>
 </h3></div></div></div>
-<a name="xml_encoding"></a><p>
-        pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little
-        endian), UTF-32 (big and little endian); UCS-2 is naturally supported since
-        it's a strict subset of UTF-16) and handles all encoding conversions. Most
-        loading functions accept the optional parameter <code class="computeroutput"><span class="identifier">encoding</span></code>.
-        This is a value of enumeration type <code class="computeroutput"><span class="identifier">xml_encoding</span></code>,
+<p>
+        <a name="xml_encoding"></a>pugixml supports all popular Unicode encodings
+        (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2
+        is naturally supported since it's a strict subset of UTF-16) and handles
+        all encoding conversions. Most loading functions accept the optional parameter
+        <code class="computeroutput"><span class="identifier">encoding</span></code>. This is a value
+        of enumeration type <code class="computeroutput"><span class="identifier">xml_encoding</span></code>,
         that can have the following values:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             <a name="encoding_auto"></a><code class="literal">encoding_auto</code> means that pugixml will
             try to guess the encoding based on source XML data. The algorithm is
             a modified version of the one presented in Appendix F.1 of XML recommendation;
             it tries to match the first few bytes of input data with the following
             patterns in strict order: <br><br>
-            <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
 <li class="listitem">
                   If first four bytes match UTF-32 BOM (Byte Order Mark), encoding
                   is assumed to be UTF-32 with the endianness equal to that of BOM;
@@ -727,7 +751,6 @@
                 </li>
 <li class="listitem">
                   Otherwise encoding is assumed to be UTF-8. <br><br>
-
                 </li>
 </ul></div>
           </li>
@@ -799,7 +822,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.loading.w3c"></a><a class="link" href="loading.html#manual.loading.w3c" title="Conformance to W3C specification"> Conformance to W3C specification</a>
+<a name="manual.loading.w3c"></a><a class="link" href="loading.html#manual.loading.w3c" title="Conformance to W3C specification">Conformance to W3C specification</a>
 </h3></div></div></div>
 <p>
         pugixml is not fully W3C conformant - it can load any valid XML document,
@@ -818,7 +841,7 @@
         As for rejecting invalid XML documents, there are a number of incompatibilities
         with W3C specification, including:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             Multiple attributes of the same node can have equal names.
           </li>
@@ -848,7 +871,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2014 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -856,7 +879,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

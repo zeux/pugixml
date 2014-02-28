@@ -3,16 +3,16 @@
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
 <title>Changelog</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.2">
-<link rel="up" href="../manual.html" title="pugixml 1.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="../manual.html" title="pugixml 1.4">
+<link rel="up" href="../manual.html" title="pugixml 1.4">
 <link rel="prev" href="xpath.html" title="XPath">
 <link rel="next" href="apiref.html" title="API Reference">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -28,18 +28,102 @@
 <hr>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="manual.changes"></a><a class="link" href="changes.html" title="Changelog"> Changelog</a>
+<a name="manual.changes"></a><a class="link" href="changes.html" title="Changelog">Changelog</a>
 </h2></div></div></div>
-<a name="manual.changes.1_05_2012___version_1_2"></a><h6>
-      <a class="link" href="changes.html#manual.changes.1_05_2012___version_1_2">1.05.2012 - version
-      1.2</a>
+<h6>
+<a name="manual.changes.h0"></a>
+      <span class="phrase"><a name="manual.changes.1_03_2014___version_1_4"></a></span><a class="link" href="changes.html#manual.changes.1_03_2014___version_1_4">1.03.2014
+      - version 1.4</a>
+    </h6>
+<p>
+      Major release, featuring various new features, bug fixes and compatibility
+      improvements.
+    </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+          Specification changes:
+          <div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+                Documents without element nodes are now rejected with status_no_document_element
+                error, unless parse_fragment option is used
+              </li></ol></div>
+        </li>
+<li class="listitem">
+          New features:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Added XML fragment parsing (parse_fragment flag)
+              </li>
+<li class="listitem">
+                Added PCDATA whitespace trimming (parse_trim_pcdata flag)
+              </li>
+<li class="listitem">
+                Added long long support for xml_attribute and xml_text (as_llong,
+                as_ullong and set_value/set overloads)
+              </li>
+<li class="listitem">
+                Added hexadecimal integer parsing support for as_int/as_uint/as_llong/as_ullong
+              </li>
+<li class="listitem">
+                Added xml_node::append_buffer to improve performance of assembling
+                documents from fragments
+              </li>
+<li class="listitem">
+                xml_named_node_iterator is now bidirectional
+              </li>
+<li class="listitem">
+                Reduced XPath stack consumption during compilation and evaluation
+                (useful for embedded systems)
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Compatibility improvements:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Improved support for platforms without wchar_t support
+              </li>
+<li class="listitem">
+                Fixed several false positives in clang static analysis
+              </li>
+<li class="listitem">
+                Fixed several compilation warnings for various GCC versions
+              </li>
+</ol></div>
+        </li>
+<li class="listitem">
+          Bug fixes:
+          <div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+                Fixed undefined pointer arithmetic in XPath implementation
+              </li>
+<li class="listitem">
+                Fixed non-seekable iostream support for certain stream types, i.e.
+                boost file_source with pipe input
+              </li>
+<li class="listitem">
+                Fixed xpath_query::return_type() for some expressions
+              </li>
+<li class="listitem">
+                Fixed dllexport issues with xml_named_node_iterator
+              </li>
+<li class="listitem">
+                Fixed find_child_by_attribute assertion for attributes with null
+                name/value
+              </li>
+</ol></div>
+        </li>
+</ul></div>
+<h6>
+<a name="manual.changes.h1"></a>
+      <span class="phrase"><a name="manual.changes.1_05_2012___version_1_2"></a></span><a class="link" href="changes.html#manual.changes.1_05_2012___version_1_2">1.05.2012
+      - version 1.2</a>
     </h6>
 <p>
       Major release, featuring header-only mode, various interface enhancements (i.e.
       PCDATA manipulation and C++11 iteration), many other features and compatibility
       improvements.
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           New features:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -124,15 +208,16 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.1_11_2010___version_1_0"></a><h6>
-      <a class="link" href="changes.html#manual.changes.1_11_2010___version_1_0">1.11.2010 - version
-      1.0</a>
+<h6>
+<a name="manual.changes.h2"></a>
+      <span class="phrase"><a name="manual.changes.1_11_2010___version_1_0"></a></span><a class="link" href="changes.html#manual.changes.1_11_2010___version_1_0">1.11.2010
+      - version 1.0</a>
     </h6>
 <p>
       Major release, featuring many XPath enhancements, wide character filename support,
       miscellaneous performance improvements, bug fixes and more.
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           XPath:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -342,15 +427,16 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.1_07_2010___version_0_9"></a><h6>
-      <a class="link" href="changes.html#manual.changes.1_07_2010___version_0_9">1.07.2010 - version
-      0.9</a>
+<h6>
+<a name="manual.changes.h3"></a>
+      <span class="phrase"><a name="manual.changes.1_07_2010___version_0_9"></a></span><a class="link" href="changes.html#manual.changes.1_07_2010___version_0_9">1.07.2010
+      - version 0.9</a>
     </h6>
 <p>
       Major release, featuring extended and improved Unicode support, miscellaneous
       performance improvements, bug fixes and more.
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           Major Unicode improvements:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -463,14 +549,15 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.8_11_2009___version_0_5"></a><h6>
-      <a class="link" href="changes.html#manual.changes.8_11_2009___version_0_5">8.11.2009 - version
-      0.5</a>
+<h6>
+<a name="manual.changes.h4"></a>
+      <span class="phrase"><a name="manual.changes.8_11_2009___version_0_5"></a></span><a class="link" href="changes.html#manual.changes.8_11_2009___version_0_5">8.11.2009
+      - version 0.5</a>
     </h6>
 <p>
       Major bugfix release. Changes:
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           XPath bugfixes:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -574,14 +661,15 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.17_09_2009___version_0_42"></a><h6>
-      <a class="link" href="changes.html#manual.changes.17_09_2009___version_0_42">17.09.2009 - version
-      0.42</a>
+<h6>
+<a name="manual.changes.h5"></a>
+      <span class="phrase"><a name="manual.changes.17_09_2009___version_0_42"></a></span><a class="link" href="changes.html#manual.changes.17_09_2009___version_0_42">17.09.2009
+      - version 0.42</a>
     </h6>
 <p>
       Maintenance release. Changes:
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           Bug fixes:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -619,28 +707,30 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.8_02_2009___version_0_41"></a><h6>
-      <a class="link" href="changes.html#manual.changes.8_02_2009___version_0_41">8.02.2009 - version
-      0.41</a>
+<h6>
+<a name="manual.changes.h6"></a>
+      <span class="phrase"><a name="manual.changes.8_02_2009___version_0_41"></a></span><a class="link" href="changes.html#manual.changes.8_02_2009___version_0_41">8.02.2009
+      - version 0.41</a>
     </h6>
 <p>
       Maintenance release. Changes:
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
           Bug fixes:
           <div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
                 Fixed bug with node printing (occasionally some content was not written
                 to output stream)
               </li></ol></div>
         </li></ul></div>
-<a name="manual.changes.18_01_2009___version_0_4"></a><h6>
-      <a class="link" href="changes.html#manual.changes.18_01_2009___version_0_4">18.01.2009 - version
-      0.4</a>
+<h6>
+<a name="manual.changes.h7"></a>
+      <span class="phrase"><a name="manual.changes.18_01_2009___version_0_4"></a></span><a class="link" href="changes.html#manual.changes.18_01_2009___version_0_4">18.01.2009
+      - version 0.4</a>
     </h6>
 <p>
       Changes:
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           Bug fixes:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -711,14 +801,15 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.31_10_2007___version_0_34"></a><h6>
-      <a class="link" href="changes.html#manual.changes.31_10_2007___version_0_34">31.10.2007 - version
-      0.34</a>
+<h6>
+<a name="manual.changes.h8"></a>
+      <span class="phrase"><a name="manual.changes.31_10_2007___version_0_34"></a></span><a class="link" href="changes.html#manual.changes.31_10_2007___version_0_34">31.10.2007
+      - version 0.34</a>
     </h6>
 <p>
       Maintenance release. Changes:
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           Bug fixes:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -749,14 +840,15 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.21_02_2007___version_0_3"></a><h6>
-      <a class="link" href="changes.html#manual.changes.21_02_2007___version_0_3">21.02.2007 - version
-      0.3</a>
+<h6>
+<a name="manual.changes.h9"></a>
+      <span class="phrase"><a name="manual.changes.21_02_2007___version_0_3"></a></span><a class="link" href="changes.html#manual.changes.21_02_2007___version_0_3">21.02.2007
+      - version 0.3</a>
     </h6>
 <p>
       Refactored, reworked and improved version. Changes:
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           Interface:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -810,14 +902,15 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.6_11_2006___version_0_2"></a><h6>
-      <a class="link" href="changes.html#manual.changes.6_11_2006___version_0_2">6.11.2006 - version
-      0.2</a>
+<h6>
+<a name="manual.changes.h10"></a>
+      <span class="phrase"><a name="manual.changes.6_11_2006___version_0_2"></a></span><a class="link" href="changes.html#manual.changes.6_11_2006___version_0_2">6.11.2006
+      - version 0.2</a>
     </h6>
 <p>
       First public release. Changes:
     </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
           Bug fixes:
           <div class="orderedlist"><ol class="orderedlist" type="1">
@@ -844,9 +937,10 @@
 </ol></div>
         </li>
 </ul></div>
-<a name="manual.changes.15_07_2006___version_0_1"></a><h6>
-      <a class="link" href="changes.html#manual.changes.15_07_2006___version_0_1">15.07.2006 - version
-      0.1</a>
+<h6>
+<a name="manual.changes.h11"></a>
+      <span class="phrase"><a name="manual.changes.15_07_2006___version_0_1"></a></span><a class="link" href="changes.html#manual.changes.15_07_2006___version_0_1">15.07.2006
+      - version 0.1</a>
     </h6>
 <p>
       First private release for testing purposes
@@ -854,7 +948,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2014 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -862,7 +956,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

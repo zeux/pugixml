@@ -3,16 +3,16 @@
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
 <title>Accessing document data</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.2">
-<link rel="up" href="../manual.html" title="pugixml 1.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="../manual.html" title="pugixml 1.4">
+<link rel="up" href="../manual.html" title="pugixml 1.4">
 <link rel="prev" href="loading.html" title="Loading document">
 <link rel="next" href="modify.html" title="Modifying document data">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -28,27 +28,27 @@
 <hr>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="manual.access"></a><a class="link" href="access.html" title="Accessing document data"> Accessing document data</a>
+<a name="manual.access"></a><a class="link" href="access.html" title="Accessing document data">Accessing document data</a>
 </h2></div></div></div>
-<div class="toc"><dl>
-<dt><span class="section"><a href="access.html#manual.access.basic"> Basic traversal functions</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.nodedata"> Getting node data</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.attrdata"> Getting attribute data</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.contents"> Contents-based traversal functions</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.rangefor"> Range-based for-loop support</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.iterators"> Traversing node/attribute lists
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="access.html#manual.access.basic">Basic traversal functions</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.nodedata">Getting node data</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.attrdata">Getting attribute data</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.contents">Contents-based traversal functions</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.rangefor">Range-based for-loop support</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.iterators">Traversing node/attribute lists
       via iterators</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.walker"> Recursive traversal with xml_tree_walker</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.predicate"> Searching for nodes/attributes
+<dt><span class="section"><a href="access.html#manual.access.walker">Recursive traversal with xml_tree_walker</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.predicate">Searching for nodes/attributes
       with predicates</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.text"> Working with text contents</a></span></dt>
-<dt><span class="section"><a href="access.html#manual.access.misc"> Miscellaneous functions</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.text">Working with text contents</a></span></dt>
+<dt><span class="section"><a href="access.html#manual.access.misc">Miscellaneous functions</a></span></dt>
 </dl></div>
 <p>
       pugixml features an extensive interface for getting various types of data from
       the document and for traversing the document. This section provides documentation
       for all such functions that do not modify the tree except for XPath-related
-      functions; see <a class="xref" href="xpath.html" title="XPath"> XPath</a> for XPath reference. As discussed in <a class="xref" href="dom.html#manual.dom.cpp" title="C++ interface"> C++ interface</a>,
+      functions; see <a class="xref" href="xpath.html" title="XPath">XPath</a> for XPath reference. As discussed in <a class="xref" href="dom.html#manual.dom.cpp" title="C++ interface">C++ interface</a>,
       there are two types of handles to tree data - <a class="link" href="dom.html#xml_node">xml_node</a>
       and <a class="link" href="dom.html#xml_attribute">xml_attribute</a>. The handles have special
       null (empty) values which propagate through various functions and thus are
@@ -58,11 +58,12 @@
     </p>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.basic"></a><a class="link" href="access.html#manual.access.basic" title="Basic traversal functions"> Basic traversal functions</a>
+<a name="manual.access.basic"></a><a class="link" href="access.html#manual.access.basic" title="Basic traversal functions">Basic traversal functions</a>
 </h3></div></div></div>
-<a name="xml_node::parent"></a><a name="xml_node::first_child"></a><a name="xml_node::last_child"></a><a name="xml_node::next_sibling"></a><a name="xml_node::previous_sibling"></a><a name="xml_node::first_attribute"></a><a name="xml_node::last_attribute"></a><a name="xml_attribute::next_attribute"></a><a name="xml_attribute::previous_attribute"></a><p>
-        The internal representation of the document is a tree, where each node has
-        a list of child nodes (the order of children corresponds to their order in
+<p>
+        <a name="xml_node::parent"></a><a name="xml_node::first_child"></a><a name="xml_node::last_child"></a><a name="xml_node::next_sibling"></a><a name="xml_node::previous_sibling"></a><a name="xml_node::first_attribute"></a><a name="xml_node::last_attribute"></a><a name="xml_attribute::next_attribute"></a><a name="xml_attribute::previous_attribute"></a>The
+        internal representation of the document is a tree, where each node has a
+        list of child nodes (the order of children corresponds to their order in
         the XML representation), and additionally element nodes have a list of attributes,
         which is also ordered. Several functions are provided in order to let you
         get from one node in the tree to the other. These functions roughly correspond
@@ -123,7 +124,6 @@
         all attributes like this (<a href="../samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">first_child</span><span class="special">();</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">())</span>
 <span class="special">{</span>
@@ -142,15 +142,15 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.nodedata"></a><a class="link" href="access.html#manual.access.nodedata" title="Getting node data"> Getting node data</a>
+<a name="manual.access.nodedata"></a><a class="link" href="access.html#manual.access.nodedata" title="Getting node data">Getting node data</a>
 </h3></div></div></div>
-<a name="xml_node::name"></a><a name="xml_node::value"></a><p>
-        Apart from structural information (parent, child nodes, attributes), nodes
-        can have name and value, both of which are strings. Depending on node type,
-        name or value may be absent. <a class="link" href="dom.html#node_document">node_document</a>
-        nodes do not have a name or value, <a class="link" href="dom.html#node_element">node_element</a>
-        and <a class="link" href="dom.html#node_declaration">node_declaration</a> nodes always
-        have a name but never have a value, <a class="link" href="dom.html#node_pcdata">node_pcdata</a>,
+<p>
+        <a name="xml_node::name"></a><a name="xml_node::value"></a>Apart from structural
+        information (parent, child nodes, attributes), nodes can have name and value,
+        both of which are strings. Depending on node type, name or value may be absent.
+        <a class="link" href="dom.html#node_document">node_document</a> nodes do not have a name
+        or value, <a class="link" href="dom.html#node_element">node_element</a> and <a class="link" href="dom.html#node_declaration">node_declaration</a>
+        nodes always have a name but never have a value, <a class="link" href="dom.html#node_pcdata">node_pcdata</a>,
         <a class="link" href="dom.html#node_cdata">node_cdata</a>, <a class="link" href="dom.html#node_comment">node_comment</a>
         and <a class="link" href="dom.html#node_doctype">node_doctype</a> nodes never have a name
         but always have a value (it may be empty though), <a class="link" href="dom.html#node_pi">node_pi</a>
@@ -164,8 +164,9 @@
         In case node does not have a name or value or if the node handle is null,
         both functions return empty strings - they never return null pointers.
       </p>
-<a name="xml_node::child_value"></a><p>
-        It is common to store data as text contents of some node - i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;</span><span class="identifier">description</span><span class="special">&gt;</span><span class="identifier">This</span> <span class="identifier">is</span> <span class="identifier">a</span> <span class="identifier">node</span><span class="special">&lt;/</span><span class="identifier">description</span><span class="special">&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
+<p>
+        <a name="xml_node::child_value"></a>It is common to store data as text contents
+        of some node - i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;</span><span class="identifier">description</span><span class="special">&gt;</span><span class="identifier">This</span> <span class="identifier">is</span> <span class="identifier">a</span> <span class="identifier">node</span><span class="special">&lt;/</span><span class="identifier">description</span><span class="special">&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
         In this case, <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">description</span><span class="special">&gt;</span></code> node does not have a value, but instead
         has a child of type <a class="link" href="dom.html#node_pcdata">node_pcdata</a> with value
         <code class="computeroutput"><span class="string">"This is a node"</span></code>. pugixml
@@ -188,7 +189,7 @@
         <code class="computeroutput"><span class="identifier">text</span><span class="special">()</span></code>
         returns a special object that can be used for working with PCDATA contents
         in more complex cases than just retrieving the value; it is described in
-        <a class="xref" href="access.html#manual.access.text" title="Working with text contents"> Working with text contents</a> sections.
+        <a class="xref" href="access.html#manual.access.text" title="Working with text contents">Working with text contents</a> sections.
       </p>
 <p>
         There is an example of using some of these functions <a class="link" href="access.html#code_traverse_base_data">at
@@ -197,11 +198,12 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.attrdata"></a><a class="link" href="access.html#manual.access.attrdata" title="Getting attribute data"> Getting attribute data</a>
+<a name="manual.access.attrdata"></a><a class="link" href="access.html#manual.access.attrdata" title="Getting attribute data">Getting attribute data</a>
 </h3></div></div></div>
-<a name="xml_attribute::name"></a><a name="xml_attribute::value"></a><p>
-        All attributes have name and value, both of which are strings (value may
-        be empty). There are two corresponding accessors, like for <code class="computeroutput"><span class="identifier">xml_node</span></code>:
+<p>
+        <a name="xml_attribute::name"></a><a name="xml_attribute::value"></a>All
+        attributes have name and value, both of which are strings (value may be empty).
+        There are two corresponding accessors, like for <code class="computeroutput"><span class="identifier">xml_node</span></code>:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">name</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">value</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -210,12 +212,12 @@
         In case the attribute handle is null, both functions return empty strings
         - they never return null pointers.
       </p>
-<a name="xml_attribute::as_string"></a><p>
-        If you need a non-empty string if the attribute handle is null (for example,
-        you need to get the option value from XML attribute, but if it is not specified,
-        you need it to default to <code class="computeroutput"><span class="string">"sorted"</span></code>
-        instead of <code class="computeroutput"><span class="string">""</span></code>), you
-        can use <code class="computeroutput"><span class="identifier">as_string</span></code> accessor:
+<p>
+        <a name="xml_attribute::as_string"></a>If you need a non-empty string if
+        the attribute handle is null (for example, you need to get the option value
+        from XML attribute, but if it is not specified, you need it to default to
+        <code class="computeroutput"><span class="string">"sorted"</span></code> instead of
+        <code class="computeroutput"><span class="string">""</span></code>), you can use <code class="computeroutput"><span class="identifier">as_string</span></code> accessor:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">def</span> <span class="special">=</span> <span class="string">""</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -224,29 +226,36 @@
         the attribute handle is null. If you do not specify the argument, the function
         is equivalent to <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code>.
       </p>
-<a name="xml_attribute::as_int"></a><a name="xml_attribute::as_uint"></a><a name="xml_attribute::as_double"></a><a name="xml_attribute::as_float"></a><a name="xml_attribute::as_bool"></a><p>
-        In many cases attribute values have types that are not strings - i.e. an
-        attribute may always contain values that should be treated as integers, despite
-        the fact that they are represented as strings in XML. pugixml provides several
-        accessors that convert attribute value to some other type:
+<p>
+        <a name="xml_attribute::as_int"></a><a name="xml_attribute::as_uint"></a><a name="xml_attribute::as_double"></a><a name="xml_attribute::as_float"></a><a name="xml_attribute::as_bool"></a><a name="xml_attribute::as_llong"></a><a name="xml_attribute::as_ullong"></a>In many cases attribute values have types
+        that are not strings - i.e. an attribute may always contain values that should
+        be treated as integers, despite the fact that they are represented as strings
+        in XML. pugixml provides several accessors that convert attribute value to
+        some other type:
       </p>
 <pre class="programlisting"><span class="keyword">int</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_int</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_uint</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">double</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_double</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">float</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_float</span><span class="special">(</span><span class="keyword">float</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_bool</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">def</span> <span class="special">=</span> <span class="keyword">false</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_llong</span><span class="special">(</span><span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">as_ullong</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
         <code class="computeroutput"><span class="identifier">as_int</span></code>, <code class="computeroutput"><span class="identifier">as_uint</span></code>,
+        <code class="computeroutput"><span class="identifier">as_llong</span></code>, <code class="computeroutput"><span class="identifier">as_ullong</span></code>,
         <code class="computeroutput"><span class="identifier">as_double</span></code> and <code class="computeroutput"><span class="identifier">as_float</span></code> convert attribute values to numbers.
         If attribute handle is null or attribute value is empty, <code class="computeroutput"><span class="identifier">def</span></code>
         argument is returned (which is 0 by default). Otherwise, all leading whitespace
-        characters are truncated, and the remaining string is parsed as a decimal
-        number (<code class="computeroutput"><span class="identifier">as_int</span></code> or <code class="computeroutput"><span class="identifier">as_uint</span></code>) or as a floating point number
-        in either decimal or scientific form (<code class="computeroutput"><span class="identifier">as_double</span></code>
-        or <code class="computeroutput"><span class="identifier">as_float</span></code>). Any extra characters
-        are silently discarded, i.e. <code class="computeroutput"><span class="identifier">as_int</span></code>
-        will return <code class="computeroutput"><span class="number">1</span></code> for string <code class="computeroutput"><span class="string">"1abc"</span></code>.
+        characters are truncated, and the remaining string is parsed as an integer
+        number in either decimal or hexadecimal form (applicable to <code class="computeroutput"><span class="identifier">as_int</span></code>, <code class="computeroutput"><span class="identifier">as_uint</span></code>,
+        <code class="computeroutput"><span class="identifier">as_llong</span></code> and <code class="computeroutput"><span class="identifier">as_ullong</span></code>; hexadecimal format is used if
+        the number has <code class="computeroutput"><span class="number">0</span><span class="identifier">x</span></code>
+        or <code class="computeroutput"><span class="number">0</span><span class="identifier">X</span></code>
+        prefix) or as a floating point number in either decimal or scientific form
+        (<code class="computeroutput"><span class="identifier">as_double</span></code> or <code class="computeroutput"><span class="identifier">as_float</span></code>). Any extra characters are silently
+        discarded, i.e. <code class="computeroutput"><span class="identifier">as_int</span></code> will
+        return <code class="computeroutput"><span class="number">1</span></code> for string <code class="computeroutput"><span class="string">"1abc"</span></code>.
       </p>
 <p>
         In case the input string contains a number that is out of the target numeric
@@ -282,17 +291,16 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-          There are no portable 64-bit types in C++, so there is no corresponding
-          conversion function. If your platform has a 64-bit integer, you can easily
-          write a conversion function yourself.
+          <code class="computeroutput"><span class="identifier">as_llong</span></code> and <code class="computeroutput"><span class="identifier">as_ullong</span></code> are only available if your
+          platform has reliable support for the <code class="computeroutput"><span class="keyword">long</span>
+          <span class="keyword">long</span></code> type, including string conversions.
         </p></td></tr>
 </table></div>
-<a name="code_traverse_base_data"></a><p>
-        This is an example of using these functions, along with node data retrieval
-        ones (<a href="../samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
+<p>
+        <a name="code_traverse_base_data"></a>This is an example of using these functions,
+        along with node data retrieval ones (<a href="../samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
 <span class="special">{</span>
@@ -307,11 +315,12 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.contents"></a><a class="link" href="access.html#manual.access.contents" title="Contents-based traversal functions"> Contents-based traversal functions</a>
+<a name="manual.access.contents"></a><a class="link" href="access.html#manual.access.contents" title="Contents-based traversal functions">Contents-based traversal functions</a>
 </h3></div></div></div>
-<a name="xml_node::child"></a><a name="xml_node::attribute"></a><a name="xml_node::next_sibling_name"></a><a name="xml_node::previous_sibling_name"></a><p>
-        Since a lot of document traversal consists of finding the node/attribute
-        with the correct name, there are special functions for that purpose:
+<p>
+        <a name="xml_node::child"></a><a name="xml_node::attribute"></a><a name="xml_node::next_sibling_name"></a><a name="xml_node::previous_sibling_name"></a>Since a lot of document traversal consists
+        of finding the node/attribute with the correct name, there are special functions
+        for that purpose:
       </p>
 <pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">child</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">attribute</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -333,11 +342,15 @@
       </p>
 <pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
 </pre>
-<a name="xml_node::find_child_by_attribute"></a><p>
-        Occasionally the needed node is specified not by the unique name but instead
-        by the value of some attribute; for example, it is common to have node collections
-        with each node having a unique id: <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">group</span><span class="special">&gt;&lt;</span><span class="identifier">item</span> <span class="identifier">id</span><span class="special">=</span><span class="string">"1"</span><span class="special">/&gt;</span> <span class="special">&lt;</span><span class="identifier">item</span> <span class="identifier">id</span><span class="special">=</span><span class="string">"2"</span><span class="special">/&gt;&lt;/</span><span class="identifier">group</span><span class="special">&gt;</span></code>. There are two functions for finding
-        child nodes based on the attribute values:
+<p>
+        <a name="xml_node::find_child_by_attribute"></a>Occasionally the needed node
+        is specified not by the unique name but instead by the value of some attribute;
+        for example, it is common to have node collections with each node having
+        a unique id: <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">group</span><span class="special">&gt;&lt;</span><span class="identifier">item</span>
+        <span class="identifier">id</span><span class="special">=</span><span class="string">"1"</span><span class="special">/&gt;</span>
+        <span class="special">&lt;</span><span class="identifier">item</span>
+        <span class="identifier">id</span><span class="special">=</span><span class="string">"2"</span><span class="special">/&gt;&lt;/</span><span class="identifier">group</span><span class="special">&gt;</span></code>.
+        There are two functions for finding child nodes based on the attribute values:
       </p>
 <pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">find_child_by_attribute</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">attr_name</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">attr_value</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">find_child_by_attribute</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">attr_name</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">attr_value</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -357,7 +370,6 @@
         This is an example of using these functions (<a href="../samples/traverse_base.cpp" target="_top">samples/traverse_base.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Tool for *.dae generation: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">find_child_by_attribute</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">,</span> <span class="string">"OutputFileMasks"</span><span class="special">,</span> <span class="string">"*.dae"</span><span class="special">).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
 
@@ -371,12 +383,13 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.rangefor"></a><a class="link" href="access.html#manual.access.rangefor" title="Range-based for-loop support"> Range-based for-loop support</a>
+<a name="manual.access.rangefor"></a><a class="link" href="access.html#manual.access.rangefor" title="Range-based for-loop support">Range-based for-loop support</a>
 </h3></div></div></div>
-<a name="xml_node::children"></a><a name="xml_node::attributes"></a><p>
-        If your C++ compiler supports range-based for-loop (this is a C++11 feature,
-        at the time of writing it's supported by Microsoft Visual Studio 11 Beta,
-        GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional
+<p>
+        <a name="xml_node::children"></a><a name="xml_node::attributes"></a>If your
+        C++ compiler supports range-based for-loop (this is a C++11 feature, at the
+        time of writing it's supported by Microsoft Visual Studio 11 Beta, GCC 4.6
+        and Clang 3.0), you can use it to enumerate nodes/attributes. Additional
         helpers are provided to support this; note that they are also compatible
         with <a href="http://www.boost.org/libs/foreach/" target="_top">Boost Foreach</a>,
         and possibly other pre-C++11 foreach facilities.
@@ -397,7 +410,6 @@
         This is an example of using these functions (<a href="../samples/traverse_rangefor.cpp" target="_top">samples/traverse_rangefor.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span><span class="special">:</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">children</span><span class="special">(</span><span class="string">"Tool"</span><span class="special">))</span>
 <span class="special">{</span>
@@ -421,12 +433,12 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.iterators"></a><a class="link" href="access.html#manual.access.iterators" title="Traversing node/attribute lists via iterators"> Traversing node/attribute lists
+<a name="manual.access.iterators"></a><a class="link" href="access.html#manual.access.iterators" title="Traversing node/attribute lists via iterators">Traversing node/attribute lists
       via iterators</a>
 </h3></div></div></div>
-<a name="xml_node_iterator"></a><a name="xml_attribute_iterator"></a><a name="xml_node::begin"></a><a name="xml_node::end"></a><a name="xml_node::attributes_begin"></a><a name="xml_node::attributes_end"></a><p>
-        Child node lists and attribute lists are simply double-linked lists; while
-        you can use <code class="computeroutput"><span class="identifier">previous_sibling</span></code>/<code class="computeroutput"><span class="identifier">next_sibling</span></code> and other such functions for
+<p>
+        <a name="xml_node_iterator"></a><a name="xml_attribute_iterator"></a><a name="xml_node::begin"></a><a name="xml_node::end"></a><a name="xml_node::attributes_begin"></a><a name="xml_node::attributes_end"></a>Child node lists and attribute lists are simply
+        double-linked lists; while you can use <code class="computeroutput"><span class="identifier">previous_sibling</span></code>/<code class="computeroutput"><span class="identifier">next_sibling</span></code> and other such functions for
         iteration, pugixml additionally provides node and attribute iterators, so
         that you can treat nodes as containers of other nodes or attributes:
       </p>
@@ -474,7 +486,6 @@
         Here is an example of using iterators for document traversal (<a href="../samples/traverse_iter.cpp" target="_top">samples/traverse_iter.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node_iterator</span> <span class="identifier">it</span> <span class="special">=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">begin</span><span class="special">();</span> <span class="identifier">it</span> <span class="special">!=</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">end</span><span class="special">();</span> <span class="special">++</span><span class="identifier">it</span><span class="special">)</span>
 <span class="special">{</span>
@@ -507,14 +518,14 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.walker"></a><a class="link" href="access.html#manual.access.walker" title="Recursive traversal with xml_tree_walker"> Recursive traversal with xml_tree_walker</a>
+<a name="manual.access.walker"></a><a class="link" href="access.html#manual.access.walker" title="Recursive traversal with xml_tree_walker">Recursive traversal with xml_tree_walker</a>
 </h3></div></div></div>
-<a name="xml_tree_walker"></a><p>
-        The methods described above allow traversal of immediate children of some
-        node; if you want to do a deep tree traversal, you'll have to do it via a
-        recursive function or some equivalent method. However, pugixml provides a
-        helper for depth-first traversal of a subtree. In order to use it, you have
-        to implement <code class="computeroutput"><span class="identifier">xml_tree_walker</span></code>
+<p>
+        <a name="xml_tree_walker"></a>The methods described above allow traversal
+        of immediate children of some node; if you want to do a deep tree traversal,
+        you'll have to do it via a recursive function or some equivalent method.
+        However, pugixml provides a helper for depth-first traversal of a subtree.
+        In order to use it, you have to implement <code class="computeroutput"><span class="identifier">xml_tree_walker</span></code>
         interface and to call <code class="computeroutput"><span class="identifier">traverse</span></code>
         function:
       </p>
@@ -530,11 +541,12 @@
 
 <span class="keyword">bool</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">traverse</span><span class="special">(</span><span class="identifier">xml_tree_walker</span><span class="special">&amp;</span> <span class="identifier">walker</span><span class="special">);</span>
 </pre>
-<a name="xml_tree_walker::begin"></a><a name="xml_tree_walker::for_each"></a><a name="xml_tree_walker::end"></a><a name="xml_node::traverse"></a><p>
-        The traversal is launched by calling <code class="computeroutput"><span class="identifier">traverse</span></code>
+<p>
+        <a name="xml_tree_walker::begin"></a><a name="xml_tree_walker::for_each"></a><a name="xml_tree_walker::end"></a><a name="xml_node::traverse"></a>The traversal
+        is launched by calling <code class="computeroutput"><span class="identifier">traverse</span></code>
         function on traversal root and proceeds as follows:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             First, <code class="computeroutput"><span class="identifier">begin</span></code> function
             is called with traversal root as its argument.
@@ -558,10 +570,10 @@
         <code class="computeroutput"><span class="identifier">begin</span></code> or <code class="computeroutput"><span class="identifier">end</span></code>
         functions; their default implementations return <code class="computeroutput"><span class="keyword">true</span></code>.
       </p>
-<a name="xml_tree_walker::depth"></a><p>
-        You can get the node's depth relative to the traversal root at any point
-        by calling <code class="computeroutput"><span class="identifier">depth</span></code> function.
-        It returns <code class="computeroutput"><span class="special">-</span><span class="number">1</span></code>
+<p>
+        <a name="xml_tree_walker::depth"></a>You can get the node's depth relative
+        to the traversal root at any point by calling <code class="computeroutput"><span class="identifier">depth</span></code>
+        function. It returns <code class="computeroutput"><span class="special">-</span><span class="number">1</span></code>
         if called from <code class="computeroutput"><span class="identifier">begin</span></code>/<code class="computeroutput"><span class="identifier">end</span></code>, and returns 0-based depth if called
         from <code class="computeroutput"><span class="identifier">for_each</span></code> - depth is
         0 for all children of the traversal root, 1 for all grandchildren and so
@@ -571,24 +583,22 @@
         This is an example of traversing tree hierarchy with xml_tree_walker (<a href="../samples/traverse_walker.cpp" target="_top">samples/traverse_walker.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">struct</span> <span class="identifier">simple_walker</span><span class="special">:</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_tree_walker</span>
 <span class="special">{</span>
     <span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="identifier">for_each</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">)</span>
     <span class="special">{</span>
-        <span class="keyword">for</span> <span class="special">(</span><span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="identifier">depth</span><span class="special">();</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"  "</span><span class="special">;</span> <span class="comment">// indentation
-</span>
+        <span class="keyword">for</span> <span class="special">(</span><span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="identifier">depth</span><span class="special">();</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"  "</span><span class="special">;</span> <span class="comment">// indentation</span>
+
         <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node_types</span><span class="special">[</span><span class="identifier">node</span><span class="special">.</span><span class="identifier">type</span><span class="special">()]</span> <span class="special">&lt;&lt;</span> <span class="string">": name='"</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">name</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"', value='"</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"'\n"</span><span class="special">;</span>
 
-        <span class="keyword">return</span> <span class="keyword">true</span><span class="special">;</span> <span class="comment">// continue traversal
-</span>    <span class="special">}</span>
+        <span class="keyword">return</span> <span class="keyword">true</span><span class="special">;</span> <span class="comment">// continue traversal</span>
+    <span class="special">}</span>
 <span class="special">};</span>
 </pre>
 <p>
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="identifier">simple_walker</span> <span class="identifier">walker</span><span class="special">;</span>
 <span class="identifier">doc</span><span class="special">.</span><span class="identifier">traverse</span><span class="special">(</span><span class="identifier">walker</span><span class="special">);</span>
@@ -598,15 +608,15 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.predicate"></a><a class="link" href="access.html#manual.access.predicate" title="Searching for nodes/attributes with predicates"> Searching for nodes/attributes
+<a name="manual.access.predicate"></a><a class="link" href="access.html#manual.access.predicate" title="Searching for nodes/attributes with predicates">Searching for nodes/attributes
       with predicates</a>
 </h3></div></div></div>
-<a name="xml_node::find_attribute"></a><a name="xml_node::find_child"></a><a name="xml_node::find_node"></a><p>
-        While there are existing functions for getting a node/attribute with known
-        contents, they are often not sufficient for simple queries. As an alternative
-        for manual iteration through nodes/attributes until the needed one is found,
-        you can make a predicate and call one of <code class="computeroutput"><span class="identifier">find_</span></code>
-        functions:
+<p>
+        <a name="xml_node::find_attribute"></a><a name="xml_node::find_child"></a><a name="xml_node::find_node"></a>While there are existing functions for getting
+        a node/attribute with known contents, they are often not sufficient for simple
+        queries. As an alternative for manual iteration through nodes/attributes
+        until the needed one is found, you can make a predicate and call one of
+        <code class="computeroutput"><span class="identifier">find_</span></code> functions:
       </p>
 <pre class="programlisting"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">Predicate</span><span class="special">&gt;</span> <span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">find_attribute</span><span class="special">(</span><span class="identifier">Predicate</span> <span class="identifier">pred</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">Predicate</span><span class="special">&gt;</span> <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">find_child</span><span class="special">(</span><span class="identifier">Predicate</span> <span class="identifier">pred</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -648,7 +658,6 @@
         This is an example of using predicate-based functions (<a href="../samples/traverse_predicate.cpp" target="_top">samples/traverse_predicate.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">small_timeout</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span><span class="special">)</span>
 <span class="special">{</span>
@@ -671,29 +680,29 @@
 <p>
       </p>
 <p>
-        
 </p>
-<pre class="programlisting"><span class="comment">// Find child via predicate (looks for direct children only)
-</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">find_child</span><span class="special">(</span><span class="identifier">allow_remote_predicate</span><span class="special">()).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<pre class="programlisting"><span class="comment">// Find child via predicate (looks for direct children only)</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">find_child</span><span class="special">(</span><span class="identifier">allow_remote_predicate</span><span class="special">()).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// Find node via predicate (looks for all descendants in depth-first order)
-</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">find_node</span><span class="special">(</span><span class="identifier">allow_remote_predicate</span><span class="special">()).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="comment">// Find node via predicate (looks for all descendants in depth-first order)</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">find_node</span><span class="special">(</span><span class="identifier">allow_remote_predicate</span><span class="special">()).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// Find attribute via predicate
-</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">find_attribute</span><span class="special">(</span><span class="identifier">allow_remote_predicate</span><span class="special">()).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="comment">// Find attribute via predicate</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">find_attribute</span><span class="special">(</span><span class="identifier">allow_remote_predicate</span><span class="special">()).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// We can use simple functions instead of function objects
-</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">find_child</span><span class="special">(</span><span class="identifier">small_timeout</span><span class="special">).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="comment">// We can use simple functions instead of function objects</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">tools</span><span class="special">.</span><span class="identifier">find_child</span><span class="special">(</span><span class="identifier">small_timeout</span><span class="special">).</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 </pre>
 <p>
       </p>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.text"></a><a class="link" href="access.html#manual.access.text" title="Working with text contents"> Working with text contents</a>
+<a name="manual.access.text"></a><a class="link" href="access.html#manual.access.text" title="Working with text contents">Working with text contents</a>
 </h3></div></div></div>
-<a name="xml_text"></a><p>
-        It is common to store data as text contents of some node - i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;</span><span class="identifier">description</span><span class="special">&gt;</span><span class="identifier">This</span> <span class="identifier">is</span> <span class="identifier">a</span> <span class="identifier">node</span><span class="special">&lt;/</span><span class="identifier">description</span><span class="special">&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
+<p>
+        <a name="xml_text"></a>It is common to store data as text contents of some
+        node - i.e. <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">node</span><span class="special">&gt;&lt;</span><span class="identifier">description</span><span class="special">&gt;</span><span class="identifier">This</span> <span class="identifier">is</span> <span class="identifier">a</span> <span class="identifier">node</span><span class="special">&lt;/</span><span class="identifier">description</span><span class="special">&gt;&lt;/</span><span class="identifier">node</span><span class="special">&gt;</span></code>.
         In this case, <code class="computeroutput"><span class="special">&lt;</span><span class="identifier">description</span><span class="special">&gt;</span></code> node does not have a value, but instead
         has a child of type <a class="link" href="dom.html#node_pcdata">node_pcdata</a> with value
         <code class="computeroutput"><span class="string">"This is a node"</span></code>. pugixml
@@ -702,8 +711,10 @@
         in <a class="link" href="modify.html#manual.modify.text" title="Working with text contents">the documentation for modifying document
         data</a>; this section describes the access interface of <code class="computeroutput"><span class="identifier">xml_text</span></code>.
       </p>
-<a name="xml_node::text"></a><p>
-        You can get the text object from a node by using <code class="computeroutput"><span class="identifier">text</span><span class="special">()</span></code> method:
+<p>
+        <a name="xml_node::text"></a>You can get the text object from a node by using
+        <code class="computeroutput"><span class="identifier">text</span><span class="special">()</span></code>
+        method:
       </p>
 <pre class="programlisting"><span class="identifier">xml_text</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">text</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -713,11 +724,11 @@
         itself is used to return data; otherwise, a first child node of type <code class="computeroutput"><span class="identifier">node_pcdata</span></code> or <code class="computeroutput"><span class="identifier">node_cdata</span></code>
         is used.
       </p>
-<a name="xml_text::empty"></a><a name="xml_text::unspecified_bool_type"></a><p>
-        You can check if the text object is bound to a valid PCDATA/CDATA node by
-        using it as a boolean value, i.e. <code class="computeroutput"><span class="keyword">if</span>
-        <span class="special">(</span><span class="identifier">text</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
-        <span class="special">}</span></code> or <code class="computeroutput"><span class="keyword">if</span>
+<p>
+        <a name="xml_text::empty"></a><a name="xml_text::unspecified_bool_type"></a>You
+        can check if the text object is bound to a valid PCDATA/CDATA node by using
+        it as a boolean value, i.e. <code class="computeroutput"><span class="keyword">if</span> <span class="special">(</span><span class="identifier">text</span><span class="special">)</span>
+        <span class="special">{</span> <span class="special">...</span> <span class="special">}</span></code> or <code class="computeroutput"><span class="keyword">if</span>
         <span class="special">(!</span><span class="identifier">text</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
         <span class="special">}</span></code>. Alternatively you can check it
         by using the <code class="computeroutput"><span class="identifier">empty</span><span class="special">()</span></code>
@@ -725,9 +736,9 @@
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">empty</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
-<a name="xml_text::get"></a><p>
-        Given a text object, you can get the contents (i.e. the value of PCDATA/CDATA
-        node) by using the following function:
+<p>
+        <a name="xml_text::get"></a>Given a text object, you can get the contents
+        (i.e. the value of PCDATA/CDATA node) by using the following function:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">get</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -735,10 +746,11 @@
         In case text object is empty, the function returns an empty string - it never
         returns a null pointer.
       </p>
-<a name="xml_text::as_string"></a><a name="xml_text::as_int"></a><a name="xml_text::as_uint"></a><a name="xml_text::as_double"></a><a name="xml_text::as_float"></a><a name="xml_text::as_bool"></a><p>
-        If you need a non-empty string if the text object is empty, or if the text
-        contents is actually a number or a boolean that is stored as a string, you
-        can use the following accessors:
+<p>
+        <a name="xml_text::as_string"></a><a name="xml_text::as_int"></a><a name="xml_text::as_uint"></a><a name="xml_text::as_double"></a><a name="xml_text::as_float"></a><a name="xml_text::as_bool"></a><a name="xml_text::as_llong"></a><a name="xml_text::as_ullong"></a>If
+        you need a non-empty string if the text object is empty, or if the text contents
+        is actually a number or a boolean that is stored as a string, you can use
+        the following accessors:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">def</span> <span class="special">=</span> <span class="string">""</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">int</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_int</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -746,6 +758,8 @@
 <span class="keyword">double</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_double</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">float</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_float</span><span class="special">(</span><span class="keyword">float</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_bool</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">def</span> <span class="special">=</span> <span class="keyword">false</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_llong</span><span class="special">(</span><span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">as_ullong</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">def</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
         All of the above functions have the same semantics as similar <code class="computeroutput"><span class="identifier">xml_attribute</span></code> members: they return the
@@ -753,9 +767,9 @@
         to a target type using the same rules and restrictions. You can <a class="link" href="access.html#xml_attribute::as_int">refer
         to documentation for the attribute functions</a> for details.
       </p>
-<a name="xml_text::data"></a><p>
-        <code class="computeroutput"><span class="identifier">xml_text</span></code> is essentially a
-        helper class that operates on <code class="computeroutput"><span class="identifier">xml_node</span></code>
+<p>
+        <a name="xml_text::data"></a><code class="computeroutput"><span class="identifier">xml_text</span></code>
+        is essentially a helper class that operates on <code class="computeroutput"><span class="identifier">xml_node</span></code>
         values. It is bound to a node of type <a class="link" href="dom.html#node_pcdata">node_pcdata</a>
         or <a class="link" href="dom.html#node_cdata">node_cdata</a>. You can use the following
         function to retrieve this node:
@@ -773,7 +787,6 @@
         object (<a href="../samples/text.cpp" target="_top">samples/text.cpp</a>):
       </p>
 <p>
-        
 </p>
 <pre class="programlisting"><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Project name: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"name"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">get</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Project version: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"version"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">as_double</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
@@ -785,11 +798,11 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.access.misc"></a><a class="link" href="access.html#manual.access.misc" title="Miscellaneous functions"> Miscellaneous functions</a>
+<a name="manual.access.misc"></a><a class="link" href="access.html#manual.access.misc" title="Miscellaneous functions">Miscellaneous functions</a>
 </h3></div></div></div>
-<a name="xml_node::root"></a><p>
-        If you need to get the document root of some node, you can use the following
-        function:
+<p>
+        <a name="xml_node::root"></a>If you need to get the document root of some
+        node, you can use the following function:
       </p>
 <pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">root</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -798,10 +811,11 @@
         which is the root node of the document the node belongs to (unless the node
         is null, in which case null node is returned).
       </p>
-<a name="xml_node::path"></a><a name="xml_node::first_element_by_path"></a><p>
-        While pugixml supports complex XPath expressions, sometimes a simple path
-        handling facility is needed. There are two functions, for getting node path
-        and for converting path to a node:
+<p>
+        <a name="xml_node::path"></a><a name="xml_node::first_element_by_path"></a>While
+        pugixml supports complex XPath expressions, sometimes a simple path handling
+        facility is needed. There are two functions, for getting node path and for
+        converting path to a node:
       </p>
 <pre class="programlisting"><span class="identifier">string_t</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">path</span><span class="special">(</span><span class="identifier">char_t</span> <span class="identifier">delimiter</span> <span class="special">=</span> <span class="char">'/'</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">first_element_by_path</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">path</span><span class="special">,</span> <span class="identifier">char_t</span> <span class="identifier">delimiter</span> <span class="special">=</span> <span class="char">'/'</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -846,12 +860,13 @@
           is defined.
         </p></td></tr>
 </table></div>
-<a name="xml_node::offset_debug"></a><p>
-        pugixml does not record row/column information for nodes upon parsing for
-        efficiency reasons. However, if the node has not changed in a significant
-        way since parsing (the name/value are not changed, and the node itself is
-        the original one, i.e. it was not deleted from the tree and re-added later),
-        it is possible to get the offset from the beginning of XML buffer:
+<p>
+        <a name="xml_node::offset_debug"></a>pugixml does not record row/column information
+        for nodes upon parsing for efficiency reasons. However, if the node has not
+        changed in a significant way since parsing (the name/value are not changed,
+        and the node itself is the original one, i.e. it was not deleted from the
+        tree and re-added later), it is possible to get the offset from the beginning
+        of XML buffer:
       </p>
 <pre class="programlisting"><span class="identifier">ptrdiff_t</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">offset_debug</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -867,7 +882,7 @@
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2014 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -875,7 +890,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

@@ -3,16 +3,16 @@
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
 <title>Installation</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
-<link rel="home" href="../manual.html" title="pugixml 1.2">
-<link rel="up" href="../manual.html" title="pugixml 1.2">
-<link rel="prev" href="../manual.html" title="pugixml 1.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="../manual.html" title="pugixml 1.4">
+<link rel="up" href="../manual.html" title="pugixml 1.4">
+<link rel="prev" href="../manual.html" title="pugixml 1.4">
 <link rel="next" href="dom.html" title="Document object model">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<b>Installation</b> |
 		Document:
@@ -28,32 +28,33 @@
 <hr>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="manual.install"></a><a class="link" href="install.html" title="Installation"> Installation</a>
+<a name="manual.install"></a><a class="link" href="install.html" title="Installation">Installation</a>
 </h2></div></div></div>
-<div class="toc"><dl>
-<dt><span class="section"><a href="install.html#manual.install.getting"> Getting pugixml</a></span></dt>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="install.html#manual.install.getting">Getting pugixml</a></span></dt>
 <dd><dl>
-<dt><span class="section"><a href="install.html#manual.install.getting.source"> Source distributions</a></span></dt>
-<dt><span class="section"><a href="install.html#manual.install.getting.subversion"> Subversion repository</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.getting.source">Source distributions</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.getting.subversion">Subversion repository</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.getting.git">Git repository</a></span></dt>
 </dl></dd>
-<dt><span class="section"><a href="install.html#manual.install.building"> Building pugixml</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.building">Building pugixml</a></span></dt>
 <dd><dl>
-<dt><span class="section"><a href="install.html#manual.install.building.embed"> Building pugixml as
+<dt><span class="section"><a href="install.html#manual.install.building.embed">Building pugixml as
         a part of another static library/executable</a></span></dt>
-<dt><span class="section"><a href="install.html#manual.install.building.static"> Building pugixml as
+<dt><span class="section"><a href="install.html#manual.install.building.static">Building pugixml as
         a standalone static library</a></span></dt>
-<dt><span class="section"><a href="install.html#manual.install.building.shared"> Building pugixml as
+<dt><span class="section"><a href="install.html#manual.install.building.shared">Building pugixml as
         a standalone shared library</a></span></dt>
-<dt><span class="section"><a href="install.html#manual.install.building.header"> Using pugixml in header-only
-        mode</a></span></dt>
-<dt><span class="section"><a href="install.html#manual.install.building.config"> Additional configuration
+<dt><span class="section"><a href="install.html#manual.install.building.header">Using
+        pugixml in header-only mode</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.building.config">Additional configuration
         options</a></span></dt>
 </dl></dd>
-<dt><span class="section"><a href="install.html#manual.install.portability"> Portability</a></span></dt>
+<dt><span class="section"><a href="install.html#manual.install.portability">Portability</a></span></dt>
 </dl></div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.install.getting"></a><a class="link" href="install.html#manual.install.getting" title="Getting pugixml"> Getting pugixml</a>
+<a name="manual.install.getting"></a><a class="link" href="install.html#manual.install.getting" title="Getting pugixml">Getting pugixml</a>
 </h3></div></div></div>
 <p>
         pugixml is distributed in source form. You can either download a source distribution
@@ -61,14 +62,14 @@
       </p>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="manual.install.getting.source"></a><a class="link" href="install.html#manual.install.getting.source" title="Source distributions"> Source distributions</a>
+<a name="manual.install.getting.source"></a><a class="link" href="install.html#manual.install.getting.source" title="Source distributions">Source distributions</a>
 </h4></div></div></div>
 <p>
           You can download the latest source distribution via one of the following
           links:
         </p>
-<pre class="programlisting"><a href="http://pugixml.googlecode.com/files/pugixml-1.2.zip" target="_top">http://pugixml.googlecode.com/files/pugixml-1.2.zip</a>
-<a href="http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz" target="_top">http://pugixml.googlecode.com/files/pugixml-1.2.tar.gz</a>
+<pre class="programlisting"><a href="https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.zip" target="_top">https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.zip</a>
+<a href="https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.tar.gz" target="_top">https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.tar.gz</a>
 </pre>
 <p>
           The distribution contains library source, documentation (the manual you're
@@ -85,7 +86,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="manual.install.getting.subversion"></a><a class="link" href="install.html#manual.install.getting.subversion" title="Subversion repository"> Subversion repository</a>
+<a name="manual.install.getting.subversion"></a><a class="link" href="install.html#manual.install.getting.subversion" title="Subversion repository">Subversion repository</a>
 </h4></div></div></div>
 <p>
           The Subversion repository is located at <a href="http://pugixml.googlecode.com/svn/" target="_top">http://pugixml.googlecode.com/svn/</a>.
@@ -96,7 +97,7 @@
 <p>
           For example, to checkout the current version, you can use this command:
         </p>
-<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/release-1.2 pugixml</pre>
+<pre class="programlisting">svn checkout http://pugixml.googlecode.com/svn/tags/release-1.4 pugixml</pre>
 <p>
           To checkout the latest version, you can use this command:
         </p>
@@ -115,10 +116,20 @@
           that occasionally the code can be broken in some configurations.
         </p>
 </div>
+<div class="section">
+<div class="titlepage"><div><div><h4 class="title">
+<a name="manual.install.getting.git"></a><a class="link" href="install.html#manual.install.getting.git" title="Git repository">Git repository</a>
+</h4></div></div></div>
+<p>
+          The Subversion repository is mirrored by a Git repository at <a href="https://github.com/zeux/pugixml" target="_top">https://github.com/zeux/pugixml</a>.
+          The mirror is frequently updated and has the same structure in terms of
+          tags and contents as Subversion repository.
+        </p>
+</div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.install.building"></a><a class="link" href="install.html#manual.install.building" title="Building pugixml"> Building pugixml</a>
+<a name="manual.install.building"></a><a class="link" href="install.html#manual.install.building" title="Building pugixml">Building pugixml</a>
 </h3></div></div></div>
 <p>
         pugixml is distributed in source form without any pre-built binaries; you
@@ -128,7 +139,7 @@
         The complete pugixml source consists of three files - one source file, <code class="filename">pugixml.cpp</code>,
         and two header files, <code class="filename">pugixml.hpp</code> and <code class="filename">pugiconfig.hpp</code>. <code class="filename">pugixml.hpp</code> is the primary
         header which you need to include in order to use pugixml classes/functions;
-        <code class="filename">pugiconfig.hpp</code> is a supplementary configuration file (see <a class="xref" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
+        <code class="filename">pugiconfig.hpp</code> is a supplementary configuration file (see <a class="xref" href="install.html#manual.install.building.config" title="Additional configuration options">Additional configuration
         options</a>).
         The rest of this guide assumes that <code class="filename">pugixml.hpp</code> is either in the current directory
         or in one of include directories of your projects, so that <code class="computeroutput"><span class="preprocessor">#include</span> <span class="string">"pugixml.hpp"</span></code>
@@ -138,14 +149,14 @@
       </p>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="manual.install.building.embed"></a><a class="link" href="install.html#manual.install.building.embed" title="Building pugixml as a part of another static library/executable"> Building pugixml as
+<a name="manual.install.building.embed"></a><a class="link" href="install.html#manual.install.building.embed" title="Building pugixml as a part of another static library/executable">Building pugixml as
         a part of another static library/executable</a>
 </h4></div></div></div>
 <p>
           The easiest way to build pugixml is to compile the source file, <code class="filename">pugixml.cpp</code>,
           along with the existing library/executable. This process depends on the
           method of building your application; for example, if you're using Microsoft
-          Visual Studio<sup>[<a name="trademarks" href="#ftn.trademarks" class="footnote">1</a>]</sup>, Apple Xcode, Code::Blocks or any other IDE, just add <code class="filename">pugixml.cpp</code> to
+          Visual Studio<a href="#ftn.trademarks" class="footnote" name="trademarks"><sup class="footnote">[1]</sup></a>, Apple Xcode, Code::Blocks or any other IDE, just add <code class="filename">pugixml.cpp</code> to
           one of your projects.
         </p>
 <p>
@@ -173,7 +184,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="manual.install.building.static"></a><a class="link" href="install.html#manual.install.building.static" title="Building pugixml as a standalone static library"> Building pugixml as
+<a name="manual.install.building.static"></a><a class="link" href="install.html#manual.install.building.static" title="Building pugixml as a standalone static library">Building pugixml as
         a standalone static library</a>
 </h4></div></div></div>
 <p>
@@ -183,7 +194,7 @@
           are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual
           Studio 2005, 2008, 2010, and configuration scripts for CMake and premake4.
           You're welcome to submit project files/build scripts for other software;
-          see <a class="xref" href="../manual.html#manual.overview.feedback" title="Feedback"> Feedback</a>.
+          see <a class="xref" href="../manual.html#manual.overview.feedback" title="Feedback">Feedback</a>.
         </p>
 <p>
           There are two projects for each version of Microsoft Visual Studio: one
@@ -236,7 +247,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="manual.install.building.shared"></a><a class="link" href="install.html#manual.install.building.shared" title="Building pugixml as a standalone shared library"> Building pugixml as
+<a name="manual.install.building.shared"></a><a class="link" href="install.html#manual.install.building.shared" title="Building pugixml as a standalone shared library">Building pugixml as
         a standalone shared library</a>
 </h4></div></div></div>
 <p>
@@ -271,10 +282,10 @@
           </p></td></tr>
 </table></div>
 </div>
-<a name="PUGIXML_HEADER_ONLY"></a><div class="section">
+<div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="manual.install.building.header"></a><a class="link" href="install.html#manual.install.building.header" title="Using pugixml in header-only mode"> Using pugixml in header-only
-        mode</a>
+<a name="manual.install.building.header"></a><a name="PUGIXML_HEADER_ONLY"></a><a class="link" href="install.html#manual.install.building.header" title="Using pugixml in header-only mode">Using
+        pugixml in header-only mode</a>
 </h4></div></div></div>
 <p>
           It's possible to use pugixml in header-only mode. This means that all source
@@ -313,7 +324,7 @@
 <p>
           Note that it is safe to compile <code class="filename">pugixml.cpp</code> if <code class="computeroutput"><span class="identifier">PUGIXML_HEADER_ONLY</span></code>
           is defined - so if you want to i.e. use header-only mode only in Release
-          configuration, you can include pugixml.cpp in your project (see <a class="xref" href="install.html#manual.install.building.embed" title="Building pugixml as a part of another static library/executable"> Building pugixml as
+          configuration, you can include pugixml.cpp in your project (see <a class="xref" href="install.html#manual.install.building.embed" title="Building pugixml as a part of another static library/executable">Building pugixml as
         a part of another static library/executable</a>),
           and conditionally enable header-only mode in <code class="filename">pugiconfig.hpp</code>, i.e.:
         </p>
@@ -325,7 +336,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="manual.install.building.config"></a><a class="link" href="install.html#manual.install.building.config" title="Additional configuration options"> Additional configuration
+<a name="manual.install.building.config"></a><a class="link" href="install.html#manual.install.building.config" title="Additional configuration options">Additional configuration
         options</a>
 </h4></div></div></div>
 <p>
@@ -347,7 +358,7 @@
           as character type) and UTF-16/32 style interface (the in-memory text encoding
           is assumed to be UTF-16/32, depending on <code class="computeroutput"><span class="keyword">wchar_t</span></code>
           size, most functions use <code class="computeroutput"><span class="keyword">wchar_t</span></code>
-          as character type). See <a class="xref" href="dom.html#manual.dom.unicode" title="Unicode interface"> Unicode interface</a> for more details.
+          as character type). See <a class="xref" href="dom.html#manual.dom.unicode" title="Unicode interface">Unicode interface</a> for more details.
         </p>
 <p>
           <a name="PUGIXML_NO_XPATH"></a><code class="literal">PUGIXML_NO_XPATH</code> define disables XPath.
@@ -377,7 +388,7 @@
           is used instead. For example, to specify fixed calling convention, you
           can define <code class="computeroutput"><span class="identifier">PUGIXML_FUNCTION</span></code>
           to i.e. <code class="computeroutput"><span class="identifier">__fastcall</span></code>. Another
-          example is DLL import/export attributes in MSVC (see <a class="xref" href="install.html#manual.install.building.shared" title="Building pugixml as a standalone shared library"> Building pugixml as
+          example is DLL import/export attributes in MSVC (see <a class="xref" href="install.html#manual.install.building.shared" title="Building pugixml as a standalone shared library">Building pugixml as
         a standalone shared library</a>).
         </p>
 <div class="note"><table border="0" summary="Note">
@@ -395,24 +406,34 @@
           <a name="PUGIXML_MEMORY_PAGE_SIZE"></a><code class="literal">PUGIXML_MEMORY_PAGE_SIZE</code>, <a name="PUGIXML_MEMORY_OUTPUT_STACK"></a><code class="literal">PUGIXML_MEMORY_OUTPUT_STACK</code>
           and <a name="PUGIXML_MEMORY_XPATH_PAGE_SIZE"></a><code class="literal">PUGIXML_MEMORY_XPATH_PAGE_SIZE</code>
           can be used to customize certain important sizes to optimize memory usage
-          for the application-specific patterns. For details see <a class="xref" href="dom.html#manual.dom.memory.tuning" title="Memory consumption tuning"> Memory consumption tuning</a>.
+          for the application-specific patterns. For details see <a class="xref" href="dom.html#manual.dom.memory.tuning" title="Memory consumption tuning">Memory consumption tuning</a>.
+        </p>
+<p>
+          <a name="PUGIXML_HAS_LONG_LONG"></a><code class="literal">PUGIXML_HAS_LONG_LONG</code> define enables
+          support for <code class="computeroutput"><span class="keyword">long</span> <span class="keyword">long</span></code>
+          type in pugixml. This define is automatically enabled if your platform
+          is known to have <code class="computeroutput"><span class="keyword">long</span> <span class="keyword">long</span></code>
+          support (i.e. has C++-11 support or uses a reasonably modern version of
+          a known compiler); if pugixml does not recognize that your platform supports
+          <code class="computeroutput"><span class="keyword">long</span> <span class="keyword">long</span></code>
+          but in fact it does, you can enable the define manually.
         </p>
 </div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.install.portability"></a><a class="link" href="install.html#manual.install.portability" title="Portability"> Portability</a>
+<a name="manual.install.portability"></a><a class="link" href="install.html#manual.install.portability" title="Portability">Portability</a>
 </h3></div></div></div>
 <p>
         pugixml is written in standard-compliant C++ with some compiler-specific
-        workarounds where appropriate. pugixml is compatible with the upcoming C++0x
-        standard (verified using GCC 4.5). Each version is tested with a unit test
+        workarounds where appropriate. pugixml is compatible with the C++11 standard,
+        but does not require C++11 support. Each version is tested with a unit test
         suite (with code coverage about 99%) on the following platforms:
       </p>
-<div class="itemizedlist"><ul class="itemizedlist" type="disc">
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
             Microsoft Windows:
-            <div class="itemizedlist"><ul class="itemizedlist" type="circle">
+            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
 <li class="listitem">
                   Borland C++ Compiler 5.82
                 </li>
@@ -427,8 +448,8 @@
                 </li>
 <li class="listitem">
                   Microsoft Visual C++ 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64,
-                  9.0 (2008) x86/x64, 10.0 (2010) x86/x64, 11.0 x86/x64/ARM and some
-                  CLR versions
+                  9.0 (2008) x86/x64, 10.0 (2010) x86/x64, 11.0 (2011) x86/x64/ARM,
+                  12.0 (2013) x86/x64/ARM and some CLR versions
                 </li>
 <li class="listitem">
                   MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64
@@ -436,7 +457,7 @@
 </ul></div>
           </li>
 <li class="listitem">
-            Linux (GCC 4.4.3 x86/x64)
+            Linux (GCC 4.4.3 x86/x64, GCC 4.8.1 x64, Clang 3.2 x64)
           </li>
 <li class="listitem">
             FreeBSD (GCC 4.2.1 x86/x64)
@@ -466,14 +487,14 @@
 </ul></div>
 </div>
 <div class="footnotes">
-<br><hr width="100" align="left">
-<div class="footnote"><p><sup>[<a name="ftn.trademarks" href="#trademarks" class="para">1</a>] </sup>All trademarks used are properties of their respective
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.trademarks" class="footnote"><p><a href="#trademarks" class="para"><sup class="para">[1] </sup></a>All trademarks used are properties of their respective
           owners.</p></div>
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
 <td align="left"></td>
-<td align="right"><div class="copyright-footer">Copyright &#169; 2012 Arseny Kapoulkine<p>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2014 Arseny Kapoulkine<p>
         Distributed under the MIT License
       </p>
 </div></td>
@@ -481,7 +502,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.2</a> manual |
+<a href="http://pugixml.org/">pugixml 1.4</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<b>Installation</b> |
 		Document:
