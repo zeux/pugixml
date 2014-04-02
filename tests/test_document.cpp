@@ -22,7 +22,7 @@
 #	include <io.h> // for unlink in C++0x mode
 #endif
 
-#if defined(__CELLOS_LV2__) || defined(ANDROID) || defined(_GLIBCXX_HAVE_UNISTD_H)
+#if defined(__CELLOS_LV2__) || defined(ANDROID) || defined(_GLIBCXX_HAVE_UNISTD_H) || defined(__APPLE__)
 #	include <unistd.h> // for unlink
 #endif
 
