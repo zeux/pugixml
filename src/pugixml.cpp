@@ -3939,6 +3939,9 @@ PUGI__NS_END
 
 namespace pugi
 {
+    static const PUGIXML_CHAR* g_empty_string = PUGIXML_TEXT("");
+    
+    
 	PUGI__FN xml_writer_file::xml_writer_file(void* file_): file(file_)
 	{
 	}
@@ -4109,12 +4112,12 @@ namespace pugi
 
 	PUGI__FN const char_t* xml_attribute::name() const
 	{
-		return (_attr && _attr->name) ? _attr->name : PUGIXML_TEXT("");
+		return (_attr && _attr->name) ? _attr->name : g_empty_string;
 	}
 
 	PUGI__FN const char_t* xml_attribute::value() const
 	{
-		return (_attr && _attr->value) ? _attr->value : PUGIXML_TEXT("");
+		return (_attr && _attr->value) ? _attr->value : g_empty_string;
 	}
 
 	PUGI__FN size_t xml_attribute::hash_value() const
@@ -4335,7 +4338,7 @@ namespace pugi
 	
 	PUGI__FN const char_t* xml_node::name() const
 	{
-		return (_root && _root->name) ? _root->name : PUGIXML_TEXT("");
+		return (_root && _root->name) ? _root->name : g_empty_string;
 	}
 
 	PUGI__FN xml_node_type xml_node::type() const
@@ -4345,7 +4348,7 @@ namespace pugi
 	
 	PUGI__FN const char_t* xml_node::value() const
 	{
-		return (_root && _root->value) ? _root->value : PUGIXML_TEXT("");
+		return (_root && _root->value) ? _root->value : g_empty_string;
 	}
 	
 	PUGI__FN xml_node xml_node::child(const char_t* name_) const
@@ -4426,13 +4429,13 @@ namespace pugi
 
 	PUGI__FN const char_t* xml_node::child_value() const
 	{
-		if (!_root) return PUGIXML_TEXT("");
+		if (!_root) return g_empty_string;
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if (i->value && impl::is_text_node(i))
 				return i->value;
 
-		return PUGIXML_TEXT("");
+		return g_empty_string;
 	}
 
 	PUGI__FN const char_t* xml_node::child_value(const char_t* name_) const
@@ -4869,7 +4872,7 @@ namespace pugi
 			if (i->name && impl::strequal(name_, i->name))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : PUGIXML_TEXT("")))
+					if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : g_empty_string))
 						return xml_node(i);
 			}
 
@@ -4882,7 +4885,7 @@ namespace pugi
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : PUGIXML_TEXT("")))
+				if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : g_empty_string))
 					return xml_node(i);
 
 		return xml_node();
@@ -5132,7 +5135,7 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return (d && d->value) ? d->value : PUGIXML_TEXT("");
+		return (d && d->value) ? d->value : g_empty_string;
 	}
 
 	PUGI__FN const char_t* xml_text::as_string(const char_t* def) const
@@ -6299,7 +6302,7 @@ PUGI__NS_BEGIN
 		}
 
 	public:
-		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false)
+		xpath_string(): _buffer(g_empty_string), _uses_heap(false)
 		{
 		}
 
@@ -6307,7 +6310,7 @@ PUGI__NS_BEGIN
 		{
 			bool empty_ = (*str == 0);
 
-			_buffer = empty_ ? PUGIXML_TEXT("") : duplicate_string(str, alloc);
+			_buffer = empty_ ? g_empty_string : duplicate_string(str, alloc);
 			_uses_heap = !empty_;
 		}
 
@@ -6321,7 +6324,7 @@ PUGI__NS_BEGIN
 
 			bool empty_ = (begin == end);
 
-			_buffer = empty_ ? PUGIXML_TEXT("") : duplicate_string(begin, static_cast<size_t>(end - begin), alloc);
+			_buffer = empty_ ? g_empty_string : duplicate_string(begin, static_cast<size_t>(end - begin), alloc);
 			_uses_heap = !empty_;
 		}
 
@@ -6943,7 +6946,7 @@ PUGI__NS_BEGIN
 			p = p.parent();
 		}
 		
-		return PUGIXML_TEXT("");
+		return g_empty_string;
 	}
 
 	PUGI__FN const char_t* namespace_uri(const xml_attribute& attr, const xml_node& parent)
@@ -6951,7 +6954,7 @@ PUGI__NS_BEGIN
 		namespace_uri_predicate pred = attr.name();
 		
 		// Default namespace does not apply to attributes
-		if (!pred.prefix) return PUGIXML_TEXT("");
+		if (!pred.prefix) return g_empty_string;
 		
 		xml_node p = parent;
 		
@@ -6964,7 +6967,7 @@ PUGI__NS_BEGIN
 			p = p.parent();
 		}
 		
-		return PUGIXML_TEXT("");
+		return g_empty_string;
 	}
 
 	PUGI__FN const char_t* namespace_uri(const xpath_node& node)
@@ -10263,7 +10266,7 @@ namespace pugi
 	PUGI__FN const char_t* xpath_variable::get_string() const
 	{
 		const char_t* value = (_type == xpath_type_string) ? static_cast<const impl::xpath_variable_string*>(this)->value : 0;
-		return value ? value : PUGIXML_TEXT("");
+		return value ? value : g_empty_string;
 	}
 
 	PUGI__FN const xpath_node_set& xpath_variable::get_node_set() const
