@@ -3939,7 +3939,7 @@ PUGI__NS_END
 
 namespace pugi
 {
-    static const PUGIXML_CHAR* g_empty_string = PUGIXML_TEXT("");
+    static const PUGIXML_CHAR g_empty_string[] = PUGIXML_TEXT("");
     
     
 	PUGI__FN xml_writer_file::xml_writer_file(void* file_): file(file_)
