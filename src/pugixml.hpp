@@ -1212,6 +1212,9 @@ namespace pugi
 		
 		// Constant iterator type
 		typedef const xpath_node* const_iterator;
+
+		// We define non-constant iterator to be the same as constant iterator so that various generic algorithms (i.e. boost foreach) work
+		typedef const xpath_node* iterator;
 	
 		// Default constructor. Constructs empty set.
 		xpath_node_set();
