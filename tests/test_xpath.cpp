@@ -328,7 +328,7 @@ TEST(xpath_large_node_set)
 
 TEST(xpath_out_of_memory_evaluate_concat)
 {
-	test_runner::_memory_fail_threshold = 4096 * 2 * sizeof(char_t) + 4096 * 2;
+	test_runner::_memory_fail_threshold = 4196 * sizeof(char_t) + 4096 * 2;
 
 	std::basic_string<char_t> query = STR("concat(\"a\", \"");
 
@@ -354,7 +354,7 @@ TEST(xpath_out_of_memory_evaluate_concat)
 
 TEST(xpath_out_of_memory_evaluate_substring)
 {
-	test_runner::_memory_fail_threshold = 4096 * 2 * sizeof(char_t) + 4096 * 2;
+	test_runner::_memory_fail_threshold = 4196 * sizeof(char_t) + 4096 * 2;
 
 	std::basic_string<char_t> query = STR("substring(\"");
 

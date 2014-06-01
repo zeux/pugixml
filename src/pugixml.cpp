@@ -6069,6 +6069,7 @@ PUGI__NS_BEGIN
 	struct xpath_memory_block
 	{	
 		xpath_memory_block* next;
+		size_t capacity;
 
 		char data[
 	#ifdef PUGIXML_MEMORY_XPATH_PAGE_SIZE
@@ -6098,12 +6099,10 @@ PUGI__NS_BEGIN
 		
 		void* allocate_nothrow(size_t size)
 		{
-			const size_t block_capacity = sizeof(_root->data);
-
 			// align size so that we're able to store pointers in subsequent blocks
 			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
 
-			if (_root_size + size <= block_capacity)
+			if (_root_size + size <= _root->capacity)
 			{
 				void* buf = _root->data + _root_size;
 				_root_size += size;
@@ -6111,13 +6110,18 @@ PUGI__NS_BEGIN
 			}
 			else
 			{
-				size_t block_data_size = (size > block_capacity) ? size : block_capacity;
-				size_t block_size = block_data_size + offsetof(xpath_memory_block, data);
+				// make sure we have at least 1/4th of the page free after allocation to satisfy subsequent allocation requests
+				size_t block_capacity_base = sizeof(_root->data);
+				size_t block_capacity_req = size + block_capacity_base / 4;
+				size_t block_capacity = (block_capacity_base > block_capacity_req) ? block_capacity_base : block_capacity_req;
+
+				size_t block_size = block_capacity + offsetof(xpath_memory_block, data);
 
 				xpath_memory_block* block = static_cast<xpath_memory_block*>(xml_memory::allocate(block_size));
 				if (!block) return 0;
 				
 				block->next = _root;
+				block->capacity = block_capacity;
 				
 				_root = block;
 				_root_size = size;
@@ -6258,6 +6262,7 @@ PUGI__NS_BEGIN
 		xpath_stack_data(): result(blocks + 0), temp(blocks + 1)
 		{
 			blocks[0].next = blocks[1].next = 0;
+			blocks[0].capacity = blocks[1].capacity = sizeof(blocks[0].data);
 
 			stack.result = &result;
 			stack.temp = &temp;
@@ -9990,6 +9995,7 @@ PUGI__NS_BEGIN
 		xpath_query_impl(): root(0), alloc(&block)
 		{
 			block.next = 0;
+			block.capacity = sizeof(block.data);
 		}
 
 		xpath_ast_node* root;
