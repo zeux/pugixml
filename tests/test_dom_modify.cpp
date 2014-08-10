@@ -1074,3 +1074,171 @@ TEST_XML(dom_node_append_buffer_fragment, "<node />")
 	CHECK(node.append_buffer("4", 1, parse_fragment));
 	CHECK_NODE(doc, STR("<node>1234</node>"));
 }
+
+TEST_XML(dom_node_prepend_move, "<node>foo<child/></node>")
+{
+	xml_node child = doc.child(STR("node")).child(STR("child"));
+
+	CHECK(xml_node().prepend_move(xml_node()) == xml_node());
+	CHECK(doc.child(STR("node")).first_child().prepend_move(child) == xml_node());
+	CHECK(doc.prepend_move(doc) == xml_node());
+	CHECK(doc.prepend_move(xml_node()) == xml_node());
+
+	xml_node n1 = doc.child(STR("node")).prepend_move(doc.child(STR("node")).first_child());
+	CHECK(n1 && n1 == doc.child(STR("node")).first_child());
+	CHECK_STRING(n1.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node>foo<child /></node>"));
+
+	xml_node n2 = doc.child(STR("node")).prepend_move(doc.child(STR("node")).child(STR("child")));
+	CHECK(n2 && n2 != n1 && n2 == child);
+	CHECK_STRING(n2.name(), STR("child"));
+	CHECK_NODE(doc, STR("<node><child />foo</node>"));
+
+	xml_node n3 = doc.child(STR("node")).child(STR("child")).prepend_move(doc.child(STR("node")).first_child().next_sibling());
+	CHECK(n3 && n3 == n1 && n3 != n2);
+	CHECK_STRING(n3.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node><child>foo</child></node>"));
+}
+
+TEST_XML(dom_node_append_move, "<node>foo<child/></node>")
+{
+	xml_node child = doc.child(STR("node")).child(STR("child"));
+
+	CHECK(xml_node().append_move(xml_node()) == xml_node());
+	CHECK(doc.child(STR("node")).first_child().append_move(child) == xml_node());
+	CHECK(doc.append_move(doc) == xml_node());
+	CHECK(doc.append_move(xml_node()) == xml_node());
+
+	xml_node n1 = doc.child(STR("node")).append_move(doc.child(STR("node")).first_child());
+	CHECK(n1 && n1 == doc.child(STR("node")).last_child());
+	CHECK_STRING(n1.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node><child />foo</node>"));
+
+	xml_node n2 = doc.child(STR("node")).append_move(doc.child(STR("node")).last_child());
+	CHECK(n2 && n2 == n1);
+	CHECK_STRING(n2.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node><child />foo</node>"));
+
+	xml_node n3 = doc.child(STR("node")).child(STR("child")).append_move(doc.child(STR("node")).last_child());
+	CHECK(n3 && n3 == n1 && n3 == n2);
+	CHECK_STRING(n3.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node><child>foo</child></node>"));
+}
+
+TEST_XML(dom_node_insert_move_after, "<node>foo<child>bar</child></node>")
+{
+	xml_node child = doc.child(STR("node")).child(STR("child"));
+
+	CHECK(xml_node().insert_move_after(xml_node(), xml_node()) == xml_node());
+	CHECK(doc.child(STR("node")).first_child().insert_move_after(doc.child(STR("node")), doc.child(STR("node"))) == xml_node());
+	CHECK(doc.insert_move_after(doc, doc) == xml_node());
+	CHECK(doc.insert_move_after(xml_node(), doc.child(STR("node"))) == xml_node());
+	CHECK(doc.insert_move_after(doc.child(STR("node")), xml_node()) == xml_node());
+
+	xml_node n1 = doc.child(STR("node")).insert_move_after(child, doc.child(STR("node")).first_child());
+	CHECK(n1 && n1 == child);
+	CHECK_STRING(n1.name(), STR("child"));
+	CHECK_NODE(doc, STR("<node>foo<child>bar</child></node>"));
+
+	xml_node n2 = doc.child(STR("node")).insert_move_after(doc.child(STR("node")).first_child(), child);
+	CHECK(n2 && n2 != n1);
+	CHECK_STRING(n2.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node><child>bar</child>foo</node>"));
+
+	xml_node n3 = child.insert_move_after(doc.child(STR("node")).last_child(), child.first_child());
+	CHECK(n3 && n3 != n1 && n3 == n2);
+	CHECK_STRING(n3.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node><child>barfoo</child></node>"));
+}
+
+TEST_XML(dom_node_insert_move_before, "<node>foo<child>bar</child></node>")
+{
+	xml_node child = doc.child(STR("node")).child(STR("child"));
+
+	CHECK(xml_node().insert_move_before(xml_node(), xml_node()) == xml_node());
+	CHECK(doc.child(STR("node")).first_child().insert_move_before(doc.child(STR("node")), doc.child(STR("node"))) == xml_node());
+	CHECK(doc.insert_move_before(doc, doc) == xml_node());
+	CHECK(doc.insert_move_before(xml_node(), doc.child(STR("node"))) == xml_node());
+	CHECK(doc.insert_move_before(doc.child(STR("node")), xml_node()) == xml_node());
+
+	xml_node n1 = doc.child(STR("node")).insert_move_before(child, doc.child(STR("node")).first_child());
+	CHECK(n1 && n1 == child);
+	CHECK_STRING(n1.name(), STR("child"));
+	CHECK_NODE(doc, STR("<node><child>bar</child>foo</node>"));
+
+	xml_node n2 = doc.child(STR("node")).insert_move_before(doc.child(STR("node")).last_child(), child);
+	CHECK(n2 && n2 != n1);
+	CHECK_STRING(n2.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node>foo<child>bar</child></node>"));
+
+	xml_node n3 = child.insert_move_before(doc.child(STR("node")).first_child(), child.first_child());
+	CHECK(n3 && n3 != n1 && n3 == n2);
+	CHECK_STRING(n3.value(), STR("foo"));
+	CHECK_NODE(doc, STR("<node><child>foobar</child></node>"));
+}
+
+TEST_XML(dom_node_move_recursive, "<root><node>foo<child/></node></root>")
+{
+	xml_node root = doc.child(STR("root"));
+	xml_node node = doc.child(STR("node"));
+	xml_node foo = node.first_child();
+
+	CHECK(node.prepend_move(node) == xml_node());
+	CHECK(node.prepend_move(root) == xml_node());
+
+	CHECK(node.append_move(node) == xml_node());
+	CHECK(node.append_move(root) == xml_node());
+
+	CHECK(node.insert_move_before(node, foo) == xml_node());
+	CHECK(node.insert_move_before(root, foo) == xml_node());
+
+	CHECK(node.insert_move_after(node, foo) == xml_node());
+	CHECK(node.insert_move_after(root, foo) == xml_node());
+
+	CHECK_NODE(doc, STR("<root><node>foo<child /></node></root>"));
+}
+
+TEST_XML(dom_node_move_marker, "<node />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(doc.insert_move_before(node, node) == xml_node());
+	CHECK(doc.insert_move_after(node, node) == xml_node());
+
+	CHECK_NODE(doc, STR("<node />"));
+}
+
+TEST_XML(dom_node_move_crossdoc, "<node/>")
+{
+	xml_document newdoc;
+	CHECK(newdoc.append_move(doc.child(STR("node"))) == xml_node());
+	CHECK_NODE(newdoc, STR(""));
+}
+
+TEST_XML(dom_node_move_tree, "<root><n1 a1='v1'><c1/>t1</n1><n2 a2='v2'><c2/>t2</n2><n3 a3='v3'><c3/>t3</n3><n4 a4='v4'><c4/>t4</n4></root>")
+{
+	xml_node root = doc.child(STR("root"));
+	xml_node n1 = root.child(STR("n1"));
+	xml_node n2 = root.child(STR("n2"));
+	xml_node n3 = root.child(STR("n3"));
+	xml_node n4 = root.child(STR("n4"));
+
+	// n2 n1 n3 n4
+	CHECK(n2 == root.prepend_move(n2));
+
+	// n2 n3 n4 n1
+	CHECK(n1 == root.append_move(n1));
+
+	// n2 n4 n3 n1
+	CHECK(n4 == root.insert_move_before(n4, n3));
+
+	// n2 n4 n1 + n3
+	CHECK(n3 == doc.insert_move_after(n3, root));
+
+	CHECK_NODE(doc, STR("<root><n2 a2=\"v2\"><c2 />t2</n2><n4 a4=\"v4\"><c4 />t4</n4><n1 a1=\"v1\"><c1 />t1</n1></root><n3 a3=\"v3\"><c3 />t3</n3>"));
+
+	CHECK(n1 == root.child(STR("n1")));
+	CHECK(n2 == root.child(STR("n2")));
+	CHECK(n3 == doc.child(STR("n3")));
+	CHECK(n4 == root.child(STR("n4")));
+}
