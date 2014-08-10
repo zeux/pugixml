@@ -501,6 +501,12 @@ namespace pugi
 		xml_node insert_copy_after(const xml_node& proto, const xml_node& node);
 		xml_node insert_copy_before(const xml_node& proto, const xml_node& node);
 
+		// Move the specified node to become a child of this node. Returns moved node, or empty node on errors.
+		xml_node append_move(const xml_node& moved);
+		xml_node prepend_move(const xml_node& moved);
+		xml_node insert_move_after(const xml_node& moved, const xml_node& node);
+		xml_node insert_move_before(const xml_node& moved, const xml_node& node);
+
 		// Remove specified attribute
 		bool remove_attribute(const xml_attribute& a);
 		bool remove_attribute(const char_t* name);

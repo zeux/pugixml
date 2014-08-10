@@ -621,6 +621,8 @@ PUGI__NS_BEGIN
 			node->first_child = child;
 			child->prev_sibling_c = child;
 		}
+
+		child->next_sibling = 0;
 	}
 
 	inline void prepend_node(xml_node_struct* child, xml_node_struct* node)
@@ -641,23 +643,6 @@ PUGI__NS_BEGIN
 		node->first_child = child;
 	}
 
-	inline void insert_node_before(xml_node_struct* child, xml_node_struct* node)
-	{
-		xml_node_struct* parent = node->parent;
-
-		child->parent = parent;
-
-		if (node->prev_sibling_c->next_sibling)
-			node->prev_sibling_c->next_sibling = child;
-		else
-			parent->first_child = child;
-
-		child->prev_sibling_c = node->prev_sibling_c;
-		child->next_sibling = node;
-
-		node->prev_sibling_c = child;
-	}
-
 	inline void insert_node_after(xml_node_struct* child, xml_node_struct* node)
 	{
 		xml_node_struct* parent = node->parent;
@@ -673,6 +658,23 @@ PUGI__NS_BEGIN
 		child->prev_sibling_c = node;
 
 		node->next_sibling = child;
+	}
+
+	inline void insert_node_before(xml_node_struct* child, xml_node_struct* node)
+	{
+		xml_node_struct* parent = node->parent;
+
+		child->parent = parent;
+
+		if (node->prev_sibling_c->next_sibling)
+			node->prev_sibling_c->next_sibling = child;
+		else
+			parent->first_child = child;
+
+		child->prev_sibling_c = node->prev_sibling_c;
+		child->next_sibling = node;
+
+		node->prev_sibling_c = child;
 	}
 
 	inline void remove_node(xml_node_struct* node)
@@ -3428,6 +3430,30 @@ PUGI__NS_BEGIN
 		return true;
 	}
 
+	PUGI__FN bool allow_move(const xml_node& parent, const xml_node& child)
+	{
+		// check that child can be a child of parent
+		if (!allow_insert_child(parent.type(), child.type()))
+			return false;
+
+		// check that node is not moved between documents
+		if (parent.root() != child.root())
+			return false;
+
+		// check that new parent is not in the child subtree
+		xml_node cur = parent;
+
+		while (cur)
+		{
+			if (cur == child)
+				return false;
+
+			cur = cur.parent();
+		}
+
+		return true;
+	}
+
 	PUGI__FN void recursive_copy_skip(xml_node& dest, const xml_node& source, const xml_node& skip)
 	{
 		assert(dest.type() == source.type());
@@ -4821,6 +4847,50 @@ namespace pugi
 		if (result) impl::recursive_copy_skip(result, proto, result);
 
 		return result;
+	}
+
+	PUGI__FN xml_node xml_node::append_move(const xml_node& moved)
+	{
+		if (!impl::allow_move(*this, moved)) return xml_node();
+
+		impl::remove_node(moved._root);
+		impl::append_node(moved._root, _root);
+
+		return moved;
+	}
+
+	PUGI__FN xml_node xml_node::prepend_move(const xml_node& moved)
+	{
+		if (!impl::allow_move(*this, moved)) return xml_node();
+
+		impl::remove_node(moved._root);
+		impl::prepend_node(moved._root, _root);
+
+		return moved;
+	}
+
+	PUGI__FN xml_node xml_node::insert_move_after(const xml_node& moved, const xml_node& node)
+	{
+		if (!impl::allow_move(*this, moved)) return xml_node();
+		if (!node._root || node._root->parent != _root) return xml_node();
+		if (moved._root == node._root) return xml_node();
+
+		impl::remove_node(moved._root);
+		impl::insert_node_after(moved._root, node._root);
+
+		return moved;
+	}
+
+	PUGI__FN xml_node xml_node::insert_move_before(const xml_node& moved, const xml_node& node)
+	{
+		if (!impl::allow_move(*this, moved)) return xml_node();
+		if (!node._root || node._root->parent != _root) return xml_node();
+		if (moved._root == node._root) return xml_node();
+
+		impl::remove_node(moved._root);
+		impl::insert_node_before(moved._root, node._root);
+
+		return moved;
 	}
 
 	PUGI__FN bool xml_node::remove_attribute(const char_t* name_)
