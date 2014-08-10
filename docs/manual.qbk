@@ -1368,6 +1368,27 @@ This is an example with one possible implementation of include tags in XML ([@sa
 
 [endsect] [/clone]
 
+[section:move Moving nodes]
+
+[#xml_node::prepend_move][#xml_node::append_move][#xml_node::insert_move_after][#xml_node::insert_move_before]
+Sometimes instead of cloning a node you need to move an existing node to a different position in a tree. This can be accomplished by copying the node and removing the original; however, this is expensive since it results in a lot of extra operations. For moving nodes within the same document tree, you can use of the following functions instead:
+
+    xml_node xml_node::append_move(const xml_node& moved);
+    xml_node xml_node::prepend_move(const xml_node& moved);
+    xml_node xml_node::insert_move_after(const xml_node& moved, const xml_node& node);
+    xml_node xml_node::insert_move_before(const xml_node& moved, const xml_node& node);
+
+These functions mirror the structure of `append_copy`, `prepend_copy`, `insert_copy_before` and `insert_copy_after` - they take the handle to the moved object and move it to the appropriate place with all attributes and/or child nodes. The functions return the handle to the resulting object (which is the same as the moved object), or null handle on failure.
+
+The failure conditions resemble those of `append_child`, `insert_child_before` and related functions, [link xml_node::append_child consult their documentation for more information]. There are additional caveats specific to moving functions:
+
+* Moving null handles results in operation failure;
+* Moving is only possible for nodes that belong to the same document; attempting to move nodes between documents will fail.
+* `insert_move_after` and `insert_move_before` functions fail if the moved node is the same as the `node` argument (this operation would be a no-op otherwise).
+* It is impossible to move a subtree to a child of some node inside this subtree, i.e. `node.append_move(node.parent().parent());` will fail.
+
+[endsect] [/move]
+
 [section:fragments Assembling document from fragments]
 
 [#xml_node::append_buffer]
@@ -2438,6 +2459,12 @@ Classes:
     * `xml_node `[link xml_node::prepend_copy prepend_copy]`(const xml_node& proto);`
     * `xml_node `[link xml_node::insert_copy_after insert_copy_after]`(const xml_node& proto, const xml_node& node);`
     * `xml_node `[link xml_node::insert_copy_before insert_copy_before]`(const xml_node& proto, const xml_node& node);`
+    [lbr]
+
+    * `xml_node `[link xml_node::append_move append_move]`(const xml_node& moved);`
+    * `xml_node `[link xml_node::prepend_move prepend_move]`(const xml_node& moved);`
+    * `xml_node `[link xml_node::insert_move_after insert_move_after]`(const xml_node& moved, const xml_node& node);`
+    * `xml_node `[link xml_node::insert_move_before insert_move_before]`(const xml_node& moved, const xml_node& node);`
     [lbr]
 
     * `bool `[link xml_node::remove_attribute remove_attribute]`(const xml_attribute& a);`
