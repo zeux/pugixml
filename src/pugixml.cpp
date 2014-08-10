@@ -602,33 +602,105 @@ PUGI__NS_BEGIN
 		alloc.deallocate_memory(n, sizeof(xml_node_struct), reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask));
 	}
 
-	PUGI__FN_NO_INLINE xml_node_struct* append_node(xml_node_struct* node, xml_allocator& alloc, xml_node_type type = node_element)
+	inline void append_node(xml_node_struct* child, xml_node_struct* node)
 	{
-		xml_node_struct* child = allocate_node(alloc, type);
-		if (!child) return 0;
-
 		child->parent = node;
 
-		xml_node_struct* first_child = node->first_child;
-			
-		if (first_child)
-		{
-			xml_node_struct* last_child = first_child->prev_sibling_c;
+		xml_node_struct* head = node->first_child;
 
-			last_child->next_sibling = child;
-			child->prev_sibling_c = last_child;
-			first_child->prev_sibling_c = child;
+		if (head)
+		{
+			xml_node_struct* tail = head->prev_sibling_c;
+
+			tail->next_sibling = child;
+			child->prev_sibling_c = tail;
+			head->prev_sibling_c = child;
 		}
 		else
 		{
 			node->first_child = child;
 			child->prev_sibling_c = child;
 		}
-			
+	}
+
+	inline void prepend_node(xml_node_struct* child, xml_node_struct* node)
+	{
+		child->parent = node;
+
+		xml_node_struct* head = node->first_child;
+
+		if (head)
+		{
+			child->prev_sibling_c = head->prev_sibling_c;
+			head->prev_sibling_c = child;
+		}
+		else
+			child->prev_sibling_c = child;
+
+		child->next_sibling = head;
+		node->first_child = child;
+	}
+
+	inline void insert_node_before(xml_node_struct* child, xml_node_struct* node)
+	{
+		xml_node_struct* parent = node->parent;
+
+		child->parent = parent;
+
+		if (node->prev_sibling_c->next_sibling)
+			node->prev_sibling_c->next_sibling = child;
+		else
+			parent->first_child = child;
+
+		child->prev_sibling_c = node->prev_sibling_c;
+		child->next_sibling = node;
+
+		node->prev_sibling_c = child;
+	}
+
+	inline void insert_node_after(xml_node_struct* child, xml_node_struct* node)
+	{
+		xml_node_struct* parent = node->parent;
+
+		child->parent = parent;
+
+		if (node->next_sibling)
+			node->next_sibling->prev_sibling_c = child;
+		else
+			parent->first_child->prev_sibling_c = child;
+
+		child->next_sibling = node->next_sibling;
+		child->prev_sibling_c = node;
+
+		node->next_sibling = child;
+	}
+
+	inline void remove_node(xml_node_struct* node)
+	{
+		xml_node_struct* parent = node->parent;
+
+		if (node->next_sibling)
+			node->next_sibling->prev_sibling_c = node->prev_sibling_c;
+		else if (parent->first_child)
+			parent->first_child->prev_sibling_c = node->prev_sibling_c;
+
+		if (node->prev_sibling_c->next_sibling)
+			node->prev_sibling_c->next_sibling = node->next_sibling;
+		else
+			parent->first_child = node->next_sibling;
+	}
+
+	PUGI__FN_NO_INLINE xml_node_struct* append_new_node(xml_node_struct* node, xml_allocator& alloc, xml_node_type type = node_element)
+	{
+		xml_node_struct* child = allocate_node(alloc, type);
+		if (!child) return 0;
+
+		append_node(child, node);
+
 		return child;
 	}
 
-	PUGI__FN_NO_INLINE xml_attribute_struct* append_attribute_ll(xml_node_struct* node, xml_allocator& alloc)
+	PUGI__FN_NO_INLINE xml_attribute_struct* append_new_attribute(xml_node_struct* node, xml_allocator& alloc)
 	{
 		xml_attribute_struct* a = allocate_attribute(alloc);
 		if (!a) return 0;
@@ -2139,7 +2211,7 @@ PUGI__NS_BEGIN
 		// Parser utilities.
 		#define PUGI__SKIPWS()			{ while (PUGI__IS_CHARTYPE(*s, ct_space)) ++s; }
 		#define PUGI__OPTSET(OPT)			( optmsk & (OPT) )
-		#define PUGI__PUSHNODE(TYPE)		{ cursor = append_node(cursor, alloc, TYPE); if (!cursor) PUGI__THROW_ERROR(status_out_of_memory, s); }
+		#define PUGI__PUSHNODE(TYPE)		{ cursor = append_new_node(cursor, alloc, TYPE); if (!cursor) PUGI__THROW_ERROR(status_out_of_memory, s); }
 		#define PUGI__POPNODE()			{ cursor = cursor->parent; }
 		#define PUGI__SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
 		#define PUGI__SCANWHILE(X)		{ while ((X)) ++s; }
@@ -2503,7 +2575,7 @@ PUGI__NS_BEGIN
 						
 								if (PUGI__IS_CHARTYPE(*s, ct_start_symbol)) // <... #...
 								{
-									xml_attribute_struct* a = append_attribute_ll(cursor, alloc); // Make space for this attribute.
+									xml_attribute_struct* a = append_new_attribute(cursor, alloc); // Make space for this attribute.
 									if (!a) PUGI__THROW_ERROR(status_out_of_memory, s);
 
 									a->name = s; // Save the offset.
@@ -4494,7 +4566,7 @@ namespace pugi
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
-		xml_attribute a(impl::append_attribute_ll(_root, impl::get_allocator(_root)));
+		xml_attribute a(impl::append_new_attribute(_root, impl::get_allocator(_root)));
 		a.set_name(name_);
 		
 		return a;
@@ -4625,7 +4697,10 @@ namespace pugi
 	{
 		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
 		
-		xml_node n(impl::append_node(_root, impl::get_allocator(_root), type_));
+		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		if (!n) return xml_node();
+
+		impl::append_node(n._root, _root);
 
 		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
@@ -4639,20 +4714,7 @@ namespace pugi
 		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
 		if (!n) return xml_node();
 
-		n._root->parent = _root;
-
-		xml_node_struct* head = _root->first_child;
-
-		if (head)
-		{
-			n._root->prev_sibling_c = head->prev_sibling_c;
-			head->prev_sibling_c = n._root;
-		}
-		else
-			n._root->prev_sibling_c = n._root;
-		
-		n._root->next_sibling = head;
-		_root->first_child = n._root;
+		impl::prepend_node(n._root, _root);
 				
 		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
@@ -4667,16 +4729,7 @@ namespace pugi
 		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
 		if (!n) return xml_node();
 
-		n._root->parent = _root;
-		
-		if (node._root->prev_sibling_c->next_sibling)
-			node._root->prev_sibling_c->next_sibling = n._root;
-		else
-			_root->first_child = n._root;
-		
-		n._root->prev_sibling_c = node._root->prev_sibling_c;
-		n._root->next_sibling = node._root;
-		node._root->prev_sibling_c = n._root;
+		impl::insert_node_before(n._root, node._root);
 
 		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
@@ -4691,16 +4744,7 @@ namespace pugi
 		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
 		if (!n) return xml_node();
 
-		n._root->parent = _root;
-	
-		if (node._root->next_sibling)
-			node._root->next_sibling->prev_sibling_c = n._root;
-		else
-			_root->first_child->prev_sibling_c = n._root;
-		
-		n._root->next_sibling = node._root->next_sibling;
-		n._root->prev_sibling_c = node._root;
-		node._root->next_sibling = n._root;
+		impl::insert_node_after(n._root, node._root);
 
 		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
 
@@ -4815,12 +4859,8 @@ namespace pugi
 	{
 		if (!_root || !n._root || n._root->parent != _root) return false;
 
-		if (n._root->next_sibling) n._root->next_sibling->prev_sibling_c = n._root->prev_sibling_c;
-		else if (_root->first_child) _root->first_child->prev_sibling_c = n._root->prev_sibling_c;
-		
-		if (n._root->prev_sibling_c->next_sibling) n._root->prev_sibling_c->next_sibling = n._root->next_sibling;
-		else _root->first_child = n._root->next_sibling;
-		
+		impl::remove_node(n._root);
+
 		impl::destroy_node(n._root, impl::get_allocator(_root));
 
 		return true;
