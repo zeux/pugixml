@@ -4593,6 +4593,7 @@ namespace pugi
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
 		xml_attribute a(impl::append_new_attribute(_root, impl::get_allocator(_root)));
+
 		a.set_name(name_);
 		
 		return a;
@@ -4605,8 +4606,6 @@ namespace pugi
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		a.set_name(name_);
-		
 		xml_attribute_struct* head = _root->first_attribute;
 
 		if (head)
@@ -4619,7 +4618,9 @@ namespace pugi
 		
 		a._attr->next_attribute = head;
 		_root->first_attribute = a._attr;
-				
+
+		a.set_name(name_);
+
 		return a;
 	}
 
@@ -4637,8 +4638,6 @@ namespace pugi
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		a.set_name(name_);
-
 		if (attr._attr->prev_attribute_c->next_attribute)
 			attr._attr->prev_attribute_c->next_attribute = a._attr;
 		else
@@ -4648,6 +4647,8 @@ namespace pugi
 		a._attr->next_attribute = attr._attr;
 		attr._attr->prev_attribute_c = a._attr;
 				
+		a.set_name(name_);
+
 		return a;
 	}
 
@@ -4665,8 +4666,6 @@ namespace pugi
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		a.set_name(name_);
-
 		if (attr._attr->next_attribute)
 			attr._attr->next_attribute->prev_attribute_c = a._attr;
 		else
@@ -4675,6 +4674,8 @@ namespace pugi
 		a._attr->next_attribute = attr._attr->next_attribute;
 		a._attr->prev_attribute_c = attr._attr;
 		attr._attr->next_attribute = a._attr;
+
+		a.set_name(name_);
 
 		return a;
 	}
