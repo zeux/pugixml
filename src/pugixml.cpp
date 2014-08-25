@@ -1888,8 +1888,17 @@ PUGI__NS_BEGIN
 		return stre;
 	}
 
-	// Utility macro for last character handling
-	#define PUGI__ENDSWITH(c, e) ((c) == (e) || ((c) == 0 && endch == (e)))
+	// Parser utilities
+	#define PUGI__ENDSWITH(c, e)        ((c) == (e) || ((c) == 0 && endch == (e)))
+	#define PUGI__SKIPWS()              { while (PUGI__IS_CHARTYPE(*s, ct_space)) ++s; }
+	#define PUGI__OPTSET(OPT)           ( optmsk & (OPT) )
+	#define PUGI__PUSHNODE(TYPE)        { cursor = append_new_node(cursor, alloc, TYPE); if (!cursor) PUGI__THROW_ERROR(status_out_of_memory, s); }
+	#define PUGI__POPNODE()             { cursor = cursor->parent; }
+	#define PUGI__SCANFOR(X)            { while (*s != 0 && !(X)) ++s; }
+	#define PUGI__SCANWHILE(X)          { while (X) ++s; }
+	#define PUGI__ENDSEG()              { ch = *s; *s = 0; ++s; }
+	#define PUGI__THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(0)
+	#define PUGI__CHECK_ERROR(err, m)   { if (*s == 0) PUGI__THROW_ERROR(err, m); }
 
 	PUGI__FN char_t* strconv_comment(char_t* s, char_t endch)
 	{
@@ -1897,7 +1906,7 @@ PUGI__NS_BEGIN
 		
 		while (true)
 		{
-			while (!PUGI__IS_CHARTYPE(*s, ct_parse_comment)) ++s;
+			PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_comment));
 		
 			if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
 			{
@@ -1925,7 +1934,7 @@ PUGI__NS_BEGIN
 			
 		while (true)
 		{
-			while (!PUGI__IS_CHARTYPE(*s, ct_parse_cdata)) ++s;
+			PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_cdata));
 			
 			if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
 			{
@@ -1959,8 +1968,8 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				while (!PUGI__IS_CHARTYPE(*s, ct_parse_pcdata)) ++s;
-					
+				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_pcdata));
+
 				if (*s == '<') // PCDATA ends here
 				{
 					char_t* end = g.flush(s);
@@ -2039,7 +2048,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				while (!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws | ct_space)) ++s;
+				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws | ct_space));
 				
 				if (*s == end_quote)
 				{
@@ -2080,7 +2089,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				while (!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws)) ++s;
+				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws));
 				
 				if (*s == end_quote)
 				{
@@ -2116,7 +2125,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				while (!PUGI__IS_CHARTYPE(*s, ct_parse_attr)) ++s;
+				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr));
 				
 				if (*s == end_quote)
 				{
@@ -2148,7 +2157,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				while (!PUGI__IS_CHARTYPE(*s, ct_parse_attr)) ++s;
+				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr));
 				
 				if (*s == end_quote)
 				{
@@ -2209,17 +2218,6 @@ PUGI__NS_BEGIN
 		xml_allocator alloc;
 		char_t* error_offset;
 		xml_parse_status error_status;
-		
-		// Parser utilities.
-		#define PUGI__SKIPWS()			{ while (PUGI__IS_CHARTYPE(*s, ct_space)) ++s; }
-		#define PUGI__OPTSET(OPT)			( optmsk & (OPT) )
-		#define PUGI__PUSHNODE(TYPE)		{ cursor = append_new_node(cursor, alloc, TYPE); if (!cursor) PUGI__THROW_ERROR(status_out_of_memory, s); }
-		#define PUGI__POPNODE()			{ cursor = cursor->parent; }
-		#define PUGI__SCANFOR(X)			{ while (*s != 0 && !(X)) ++s; }
-		#define PUGI__SCANWHILE(X)		{ while ((X)) ++s; }
-		#define PUGI__ENDSEG()			{ ch = *s; *s = 0; ++s; }
-		#define PUGI__THROW_ERROR(err, m)	return error_offset = m, error_status = err, static_cast<char_t*>(0)
-		#define PUGI__CHECK_ERROR(err, m)	{ if (*s == 0) PUGI__THROW_ERROR(err, m); }
 		
 		xml_parser(const xml_allocator& alloc_): alloc(alloc_), error_offset(0), error_status(status_ok)
 		{
