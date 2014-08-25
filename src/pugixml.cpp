@@ -1889,7 +1889,7 @@ PUGI__NS_BEGIN
 	}
 
 	// Utility macro for last character handling
-	#define ENDSWITH(c, e) ((c) == (e) || ((c) == 0 && endch == (e)))
+	#define PUGI__ENDSWITH(c, e) ((c) == (e) || ((c) == 0 && endch == (e)))
 
 	PUGI__FN char_t* strconv_comment(char_t* s, char_t endch)
 	{
@@ -1905,7 +1905,7 @@ PUGI__NS_BEGIN
 				
 				if (*s == '\n') g.push(s, 1);
 			}
-			else if (s[0] == '-' && s[1] == '-' && ENDSWITH(s[2], '>')) // comment ends here
+			else if (s[0] == '-' && s[1] == '-' && PUGI__ENDSWITH(s[2], '>')) // comment ends here
 			{
 				*g.flush(s) = 0;
 				
@@ -1933,7 +1933,7 @@ PUGI__NS_BEGIN
 				
 				if (*s == '\n') g.push(s, 1);
 			}
-			else if (s[0] == ']' && s[1] == ']' && ENDSWITH(s[2], '>')) // CDATA ends here
+			else if (s[0] == ']' && s[1] == ']' && PUGI__ENDSWITH(s[2], '>')) // CDATA ends here
 			{
 				*g.flush(s) = 0;
 				
@@ -2363,7 +2363,7 @@ PUGI__NS_BEGIN
 					else
 					{
 						// Scan for terminating '-->'.
-						PUGI__SCANFOR(s[0] == '-' && s[1] == '-' && ENDSWITH(s[2], '>'));
+						PUGI__SCANFOR(s[0] == '-' && s[1] == '-' && PUGI__ENDSWITH(s[2], '>'));
 						PUGI__CHECK_ERROR(status_bad_comment, s);
 
 						if (PUGI__OPTSET(parse_comments))
@@ -2395,7 +2395,7 @@ PUGI__NS_BEGIN
 						else
 						{
 							// Scan for terminating ']]>'.
-							PUGI__SCANFOR(s[0] == ']' && s[1] == ']' && ENDSWITH(s[2], '>'));
+							PUGI__SCANFOR(s[0] == ']' && s[1] == ']' && PUGI__ENDSWITH(s[2], '>'));
 							PUGI__CHECK_ERROR(status_bad_cdata, s);
 
 							*s++ = 0; // Zero-terminate this segment.
@@ -2404,7 +2404,7 @@ PUGI__NS_BEGIN
 					else // Flagged for discard, but we still have to scan for the terminator.
 					{
 						// Scan for terminating ']]>'.
-						PUGI__SCANFOR(s[0] == ']' && s[1] == ']' && ENDSWITH(s[2], '>'));
+						PUGI__SCANFOR(s[0] == ']' && s[1] == ']' && PUGI__ENDSWITH(s[2], '>'));
 						PUGI__CHECK_ERROR(status_bad_cdata, s);
 
 						++s;
@@ -2414,7 +2414,7 @@ PUGI__NS_BEGIN
 				}
 				else PUGI__THROW_ERROR(status_bad_cdata, s);
 			}
-			else if (s[0] == 'D' && s[1] == 'O' && s[2] == 'C' && s[3] == 'T' && s[4] == 'Y' && s[5] == 'P' && ENDSWITH(s[6], 'E'))
+			else if (s[0] == 'D' && s[1] == 'O' && s[2] == 'C' && s[3] == 'T' && s[4] == 'Y' && s[5] == 'P' && PUGI__ENDSWITH(s[6], 'E'))
 			{
 				s -= 2;
 
@@ -2488,7 +2488,7 @@ PUGI__NS_BEGIN
 				if (ch == '?')
 				{
 					// empty node
-					if (!ENDSWITH(*s, '>')) PUGI__THROW_ERROR(status_bad_pi, s);
+					if (!PUGI__ENDSWITH(*s, '>')) PUGI__THROW_ERROR(status_bad_pi, s);
 					s += (*s == '>');
 
 					PUGI__POPNODE();
@@ -2500,7 +2500,7 @@ PUGI__NS_BEGIN
 					// scan for tag end
 					char_t* value = s;
 
-					PUGI__SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>'));
+					PUGI__SCANFOR(s[0] == '?' && PUGI__ENDSWITH(s[1], '>'));
 					PUGI__CHECK_ERROR(status_bad_pi, s);
 
 					if (declaration)
@@ -2527,7 +2527,7 @@ PUGI__NS_BEGIN
 			else
 			{
 				// scan for tag end
-				PUGI__SCANFOR(s[0] == '?' && ENDSWITH(s[1], '>'));
+				PUGI__SCANFOR(s[0] == '?' && PUGI__ENDSWITH(s[1], '>'));
 				PUGI__CHECK_ERROR(status_bad_pi, s);
 
 				s += (s[1] == '>' ? 2 : 1);
@@ -2654,7 +2654,7 @@ PUGI__NS_BEGIN
 						}
 						else if (ch == '/') // '<#.../'
 						{
-							if (!ENDSWITH(*s, '>')) PUGI__THROW_ERROR(status_bad_start_element, s);
+							if (!PUGI__ENDSWITH(*s, '>')) PUGI__THROW_ERROR(status_bad_start_element, s);
 
 							PUGI__POPNODE(); // Pop.
 
@@ -10718,6 +10718,7 @@ namespace pugi
 #undef PUGI__IS_CHARTYPE_IMPL
 #undef PUGI__IS_CHARTYPE
 #undef PUGI__IS_CHARTYPEX
+#undef PUGI__ENDSWITH
 #undef PUGI__SKIPWS
 #undef PUGI__OPTSET
 #undef PUGI__PUSHNODE
