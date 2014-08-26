@@ -84,6 +84,13 @@
 #	define PUGI__NO_INLINE 
 #endif
 
+// Branch weight controls
+#if defined(__GNUC__)
+#	define PUGI__UNLIKELY(cond) __builtin_expect(cond, 0)
+#else
+#	define PUGI__UNLIKELY(cond) (cond)
+#endif
+
 // Simple static assertion
 #define PUGI__STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
 
@@ -1896,6 +1903,7 @@ PUGI__NS_BEGIN
 	#define PUGI__POPNODE()             { cursor = cursor->parent; }
 	#define PUGI__SCANFOR(X)            { while (*s != 0 && !(X)) ++s; }
 	#define PUGI__SCANWHILE(X)          { while (X) ++s; }
+	#define PUGI__SCANWHILE_UNROLL(X)   { while (X) { ++s; if (PUGI__UNLIKELY(!(X))) break; ++s; if (PUGI__UNLIKELY(!(X))) break; ++s; if (PUGI__UNLIKELY(!(X))) break; ++s; } }
 	#define PUGI__ENDSEG()              { ch = *s; *s = 0; ++s; }
 	#define PUGI__THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(0)
 	#define PUGI__CHECK_ERROR(err, m)   { if (*s == 0) PUGI__THROW_ERROR(err, m); }
@@ -1906,7 +1914,7 @@ PUGI__NS_BEGIN
 		
 		while (true)
 		{
-			PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_comment));
+			PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPE(*s, ct_parse_comment));
 		
 			if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
 			{
@@ -1934,7 +1942,7 @@ PUGI__NS_BEGIN
 			
 		while (true)
 		{
-			PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_cdata));
+			PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPE(*s, ct_parse_cdata));
 			
 			if (*s == '\r') // Either a single 0x0d or 0x0d 0x0a pair
 			{
@@ -1968,7 +1976,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_pcdata));
+				PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPE(*s, ct_parse_pcdata));
 
 				if (*s == '<') // PCDATA ends here
 				{
@@ -2048,7 +2056,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws | ct_space));
+				PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws | ct_space));
 				
 				if (*s == end_quote)
 				{
@@ -2089,7 +2097,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws));
+				PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPE(*s, ct_parse_attr_ws));
 				
 				if (*s == end_quote)
 				{
@@ -2125,7 +2133,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr));
+				PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPE(*s, ct_parse_attr));
 				
 				if (*s == end_quote)
 				{
@@ -2157,7 +2165,7 @@ PUGI__NS_BEGIN
 
 			while (true)
 			{
-				PUGI__SCANWHILE(!PUGI__IS_CHARTYPE(*s, ct_parse_attr));
+				PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPE(*s, ct_parse_attr));
 				
 				if (*s == end_quote)
 				{
@@ -2559,7 +2567,7 @@ PUGI__NS_BEGIN
 
 						cursor->name = s;
 
-						PUGI__SCANWHILE(PUGI__IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
+						PUGI__SCANWHILE_UNROLL(PUGI__IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
 						PUGI__ENDSEG(); // Save char in 'ch', terminate & step over.
 
 						if (ch == '>')
@@ -2580,7 +2588,7 @@ PUGI__NS_BEGIN
 
 									a->name = s; // Save the offset.
 
-									PUGI__SCANWHILE(PUGI__IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
+									PUGI__SCANWHILE_UNROLL(PUGI__IS_CHARTYPE(*s, ct_symbol)); // Scan for a terminator.
 									PUGI__CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 									PUGI__ENDSEG(); // Save char in 'ch', terminate & step over.
@@ -10706,6 +10714,7 @@ namespace pugi
 
 // Undefine all local macros (makes sure we're not leaking macros in header-only mode)
 #undef PUGI__NO_INLINE
+#undef PUGI__UNLIKELY
 #undef PUGI__STATIC_ASSERT
 #undef PUGI__DMC_VOLATILE
 #undef PUGI__MSVC_CRT_VERSION
@@ -10723,6 +10732,7 @@ namespace pugi
 #undef PUGI__POPNODE
 #undef PUGI__SCANFOR
 #undef PUGI__SCANWHILE
+#undef PUGI__SCANWHILE_UNROLL
 #undef PUGI__ENDSEG
 #undef PUGI__THROW_ERROR
 #undef PUGI__CHECK_ERROR
