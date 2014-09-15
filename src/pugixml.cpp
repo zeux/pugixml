@@ -2806,7 +2806,7 @@ PUGI__NS_BEGIN
 		static xml_parse_result parse(char_t* buffer, size_t length, xml_document_struct* xmldoc, xml_node_struct* root, unsigned int optmsk)
 		{
 			// allocator object is a part of document object
-			xml_allocator& alloc = *static_cast<xml_allocator*>(xmldoc);
+			xml_allocator& alloc_ = *static_cast<xml_allocator*>(xmldoc);
 
 			// early-out for empty documents
 			if (length == 0)
@@ -2816,7 +2816,7 @@ PUGI__NS_BEGIN
 			xml_node_struct* last_root_child = root->first_child ? root->first_child->prev_sibling_c : 0;
 	
 			// create parser on stack
-			xml_parser parser(alloc);
+			xml_parser parser(alloc_);
 
 			// save last character and make buffer zero-terminated (speeds up parsing)
 			char_t endch = buffer[length - 1];
@@ -2829,7 +2829,7 @@ PUGI__NS_BEGIN
 			parser.parse_tree(buffer_data, root, optmsk, endch);
 
 			// update allocator state
-			alloc = parser.alloc;
+			alloc_ = parser.alloc;
 
 			xml_parse_result result = make_parse_result(parser.error_status, parser.error_offset ? parser.error_offset - buffer : 0);
 			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
@@ -3818,9 +3818,11 @@ PUGI__NS_BEGIN
 			// free chunk chain
 			while (chunk)
 			{
-				xml_stream_chunk* next = chunk->next;
+				xml_stream_chunk* next_ = chunk->next;
+
 				xml_memory::deallocate(chunk);
-				chunk = next;
+
+				chunk = next_;
 			}
 		}
 
