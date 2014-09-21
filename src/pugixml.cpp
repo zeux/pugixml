@@ -3269,10 +3269,47 @@ PUGI__NS_BEGIN
 		while (*s);
 	}
 
-	PUGI__FN void text_output_indent(xml_buffered_writer& writer, const char_t* indent, unsigned int depth)
+	PUGI__FN void text_output_indent(xml_buffered_writer& writer, const char_t* indent, size_t indent_length, unsigned int depth)
 	{
-		for (unsigned int i = 0; i < depth; ++i)
-			writer.write(indent);
+		switch (indent_length)
+		{
+		case 0:
+			break;
+
+		case 1:
+		{
+			for (unsigned int i = 0; i < depth; ++i)
+				writer.write(indent[0]);
+			break;
+		}
+
+		case 2:
+		{
+			for (unsigned int i = 0; i < depth; ++i)
+				writer.write(indent[0], indent[1]);
+			break;
+		}
+
+		case 3:
+		{
+			for (unsigned int i = 0; i < depth; ++i)
+				writer.write(indent[0], indent[1], indent[2]);
+			break;
+		}
+
+		case 4:
+		{
+			for (unsigned int i = 0; i < depth; ++i)
+				writer.write(indent[0], indent[1], indent[2], indent[3]);
+			break;
+		}
+
+		default:
+		{
+			for (unsigned int i = 0; i < depth; ++i)
+				writer.write(indent, indent_length);
+		}
+		}
 	}
 
 	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, const xml_node& node, unsigned int flags)
@@ -3413,6 +3450,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN void node_output(xml_buffered_writer& writer, const xml_node& root, const char_t* indent, unsigned int flags, unsigned int depth)
 	{
+		size_t indent_length = ((flags & (format_indent | format_raw)) == format_indent) ? strlength(indent) : 0;
+
 		xml_node node = root;
 
 		do
@@ -3420,8 +3459,8 @@ PUGI__NS_BEGIN
 			assert(node);
 
 			// begin writing current node
-			if ((flags & (format_indent | format_raw)) == format_indent)
-				text_output_indent(writer, indent, depth);
+			if (indent_length)
+				text_output_indent(writer, indent, indent_length, depth);
 
 			if (node.type() == node_element)
 			{
@@ -3460,8 +3499,8 @@ PUGI__NS_BEGIN
 				// write closing node
 				if (node.type() == node_element)
 				{
-					if ((flags & (format_indent | format_raw)) == format_indent)
-						text_output_indent(writer, indent, depth);
+					if (indent_length)
+						text_output_indent(writer, indent, indent_length, depth);
 
 					node_output_end(writer, node, flags);
 				}
