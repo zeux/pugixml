@@ -213,7 +213,7 @@ else if ( $(toolset:I=^msvc) )
         }
         else
         {
-            LDFLAGS += "/LIBPATH:\"%WINKITS_PATH%\\lib\\win8\\um$(kits_postfix)\"" ;
+            LDFLAGS += "/LIBPATH:\"%WINKITS_PATH%\\lib\\winv6.3\\um$(kits_postfix)\"" ;
         }
     }
 
