@@ -415,12 +415,12 @@ TEST(write_stackless)
 	std::basic_string<pugi::char_t> data;
 
 	for (unsigned int i = 0; i < count; ++i)
-		data += "<a>";
+		data += STR("<a>");
 
-	data += "text";
+	data += STR("text");
 
 	for (unsigned int i = 0; i < count; ++i)
-		data += "</a>";
+		data += STR("</a>");
 
 	xml_document doc;
 	CHECK(doc.load(data.c_str()));
