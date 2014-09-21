@@ -408,3 +408,22 @@ TEST(write_print_stream_empty_wide)
 	xml_node().print(oss);
 }
 #endif
+
+TEST(write_stackless)
+{
+	unsigned int count = 20000;
+	std::basic_string<pugi::char_t> data;
+
+	for (unsigned int i = 0; i < count; ++i)
+		data += "<a>";
+
+	data += "text";
+
+	for (unsigned int i = 0; i < count; ++i)
+		data += "</a>";
+
+	xml_document doc;
+	CHECK(doc.load(data.c_str()));
+
+	CHECK_NODE(doc, data.c_str());
+}
