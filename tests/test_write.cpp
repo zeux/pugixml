@@ -427,3 +427,13 @@ TEST(write_stackless)
 
 	CHECK_NODE(doc, data.c_str());
 }
+
+TEST_XML(write_indent_custom, "<node attr='1'><child><sub>text</sub></child></node>")
+{
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\n<child>\n<sub>text</sub>\n</child>\n</node>\n"), STR(""), format_indent);
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nA<child>\nAA<sub>text</sub>\nA</child>\n</node>\n"), STR("A"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nAB<child>\nABAB<sub>text</sub>\nAB</child>\n</node>\n"), STR("AB"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nABC<child>\nABCABC<sub>text</sub>\nABC</child>\n</node>\n"), STR("ABC"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nABCD<child>\nABCDABCD<sub>text</sub>\nABCD</child>\n</node>\n"), STR("ABCD"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nABCDE<child>\nABCDEABCDE<sub>text</sub>\nABCDE</child>\n</node>\n"), STR("ABCDE"), format_indent);
+}
