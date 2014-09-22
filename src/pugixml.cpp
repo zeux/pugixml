@@ -3059,45 +3059,55 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void write(const char_t* data, size_t length)
+		void write_direct(const char_t* data, size_t length)
 		{
-			if (bufsize + length > bufcapacity)
+			// flush the remaining buffer contents
+			flush();
+
+			// handle large chunks
+			if (length > bufcapacity)
 			{
-				// flush the remaining buffer contents
-				flush();
-
-				// handle large chunks
-				if (length > bufcapacity)
+				if (encoding == get_write_native_encoding())
 				{
-					if (encoding == get_write_native_encoding())
-					{
-						// fast path, can just write data chunk
-						writer.write(data, length * sizeof(char_t));
-						return;
-					}
-
-					// need to convert in suitable chunks
-					while (length > bufcapacity)
-					{
-						// get chunk size by selecting such number of characters that are guaranteed to fit into scratch buffer
-						// and form a complete codepoint sequence (i.e. discard start of last codepoint if necessary)
-						size_t chunk_size = get_valid_length(data, bufcapacity);
-
-						// convert chunk and write
-						flush(data, chunk_size);
-
-						// iterate
-						data += chunk_size;
-						length -= chunk_size;
-					}
-
-					// small tail is copied below
-					bufsize = 0;
+					// fast path, can just write data chunk
+					writer.write(data, length * sizeof(char_t));
+					return;
 				}
+
+				// need to convert in suitable chunks
+				while (length > bufcapacity)
+				{
+					// get chunk size by selecting such number of characters that are guaranteed to fit into scratch buffer
+					// and form a complete codepoint sequence (i.e. discard start of last codepoint if necessary)
+					size_t chunk_size = get_valid_length(data, bufcapacity);
+
+					// convert chunk and write
+					flush(data, chunk_size);
+
+					// iterate
+					data += chunk_size;
+					length -= chunk_size;
+				}
+
+				// small tail is copied below
+				bufsize = 0;
 			}
 
 			memcpy(buffer + bufsize, data, length * sizeof(char_t));
 			bufsize += length;
+		}
+
+		void write(const char_t* data, size_t length)
+		{
+			if (bufsize + length <= bufcapacity)
+			{
+				memcpy(buffer + bufsize, data, length * sizeof(char_t));
+				bufsize += length;
+			}
+			else
+			{
+				write_direct(data, length);
+			}
 		}
 
 		void write(const char_t* data)
@@ -3336,7 +3346,8 @@ PUGI__NS_BEGIN
 		writer.write('<');
 		writer.write(name);
 
-		node_output_attributes(writer, node, flags);
+		if (node.first_attribute())
+			node_output_attributes(writer, node, flags);
 
 		if (flags & format_raw)
 		{
@@ -3349,26 +3360,31 @@ PUGI__NS_BEGIN
 				return true;
 			}
 		}
-		else if (!node.first_child())
-			writer.write(' ', '/', '>', '\n');
-		else if (node.first_child() == node.last_child() && (node.first_child().type() == node_pcdata || node.first_child().type() == node_cdata))
-		{
-			writer.write('>');
-
-			if (node.first_child().type() == node_pcdata)
-				text_output(writer, node.first_child().value(), ctx_special_pcdata, flags);
-			else
-				text_output_cdata(writer, node.first_child().value());
-
-			writer.write('<', '/');
-			writer.write(name);
-			writer.write('>', '\n');
-		}
 		else
 		{
-			writer.write('>', '\n');
+			xml_node first = node.first_child();
 
-			return true;
+			if (!first)
+				writer.write(' ', '/', '>', '\n');
+			else if (!first.next_sibling() && (first.type() == node_pcdata || first.type() == node_cdata))
+			{
+				writer.write('>');
+
+				if (first.type() == node_pcdata)
+					text_output(writer, first.value(), ctx_special_pcdata, flags);
+				else
+					text_output_cdata(writer, first.value());
+
+				writer.write('<', '/');
+				writer.write(name);
+				writer.write('>', '\n');
+			}
+			else
+			{
+				writer.write('>', '\n');
+
+				return true;
+			}
 		}
 
 		return false;
@@ -3381,10 +3397,11 @@ PUGI__NS_BEGIN
 
 		writer.write('<', '/');
 		writer.write(name);
-		writer.write('>');
 
-		if ((flags & format_raw) == 0)
-			writer.write('\n');
+		if (flags & format_raw)
+			writer.write('>');
+		else
+			writer.write('>', '\n');
 	}
 
 	PUGI__FN void node_output_simple(xml_buffered_writer& writer, const xml_node& node, unsigned int flags)
@@ -4582,10 +4599,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::next_sibling() const
 	{
-		if (!_root) return xml_node();
-		
-		if (_root->next_sibling) return xml_node(_root->next_sibling);
-		else return xml_node();
+		return _root ? xml_node(_root->next_sibling) : xml_node();
 	}
 
 	PUGI__FN xml_node xml_node::previous_sibling(const char_t* name_) const
