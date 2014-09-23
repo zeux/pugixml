@@ -503,4 +503,23 @@ TEST_XML(xpath_paths_needs_sorting, "<node><child/><child/><child><subchild/><su
     CHECK_XPATH_NODESET(doc, STR("(node/child/subchild)[2]")) % 7;
 }
 
+TEST_XML(xpath_paths_descendant_filters, "<node><para><para/><para/><para><para/></para></para><para/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("//para[1]")) % 3 % 4 % 7;
+	CHECK_XPATH_NODESET(doc, STR("/descendant::para[1]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//para[true()][1]")) % 3 % 4 % 7;
+	CHECK_XPATH_NODESET(doc, STR("/descendant::para[true()][1]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//para[1][true()]")) % 3 % 4 % 7;
+	CHECK_XPATH_NODESET(doc, STR("/descendant::para[1][true()]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//para[1][2]"));
+	CHECK_XPATH_NODESET(doc, STR("/descendant::para[1][2]"));
+	CHECK_XPATH_NODESET(doc, STR("//para[true()]")) % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("/descendant::para[true()]")) % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//para[position()=1][true()]")) % 3 % 4 % 7;
+	CHECK_XPATH_NODESET(doc, STR("/descendant::para[position()=1][true()]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//para[true()][position()=1]")) % 3 % 4 % 7;
+	CHECK_XPATH_NODESET(doc, STR("/descendant::para[true()][position()=1]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//node()[self::para]")) % 3 % 4 % 5 % 6 % 7 % 8;
+}
+
 #endif

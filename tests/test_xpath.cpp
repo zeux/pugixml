@@ -399,7 +399,7 @@ TEST_XML(xpath_out_of_memory_evaluate_union, "<node><a/><a/><a/><a/><a/><a/><a/>
 #endif
 }
 
-TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
+TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
 {
 	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
 
