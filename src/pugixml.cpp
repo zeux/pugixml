@@ -9328,8 +9328,26 @@ PUGI__NS_BEGIN
 				return xpath_node_set_raw();
 			}
 		}
+
+		void optimize()
+		{
+			if (_left) _left->optimize();
+			if (_right) _right->optimize();
+			if (_next) _next->optimize();
+
+			// Replace descendant-or-self::node()/child::foo with descendant::foo
+			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
+			// Note that we only replace positionally invariant steps (//foo[1] != /descendant::foo[1])
+			if (_type == ast_step && _axis == axis_child && _left &&
+				_left->_type == ast_step && _left->_axis == axis_descendant_or_self && _left->_test == nodetest_type_node && !_left->_right &&
+				is_posinv_step())
+			{
+				_axis = axis_descendant;
+				_left = _left->_left;
+			}
+		}
 		
-		bool is_posinv()
+		bool is_posinv_expr() const
 		{
 			switch (_type)
 			{
@@ -9351,13 +9369,31 @@ PUGI__NS_BEGIN
 				return true;
 
 			default:
-				if (_left && !_left->is_posinv()) return false;
+				if (_left && !_left->is_posinv_expr()) return false;
 				
 				for (xpath_ast_node* n = _right; n; n = n->_next)
-					if (!n->is_posinv()) return false;
+					if (!n->is_posinv_expr()) return false;
 					
 				return true;
 			}
+		}
+
+		bool is_posinv_step() const
+		{
+			assert(_type == ast_step);
+
+			for (xpath_ast_node* n = _right; n; n = n->_next)
+			{
+				assert(n->_type == ast_predicate);
+
+				xpath_ast_node* expr = n->_left;
+				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv_expr();
+
+				if (!posinv)
+					return false;
+			}
+
+			return true;
 		}
 
 		xpath_value_type rettype() const
@@ -9773,7 +9809,7 @@ PUGI__NS_BEGIN
 
 				if (n->rettype() != xpath_type_node_set) throw_error("Predicate has to be applied to node set");
 
-				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv();
+				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv_expr();
 
 				n = new (alloc_node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, xpath_type_node_set, n, expr);
 
@@ -9930,7 +9966,7 @@ PUGI__NS_BEGIN
 				
 				last = pred;
 			}
-			
+
 			return n;
 		}
 		
@@ -10663,6 +10699,8 @@ namespace pugi
 
 			if (qimpl->root)
 			{
+				qimpl->root->optimize();
+
 				_impl = static_cast<impl::xpath_query_impl*>(impl_holder.release());
 				_result.error = 0;
 			}
