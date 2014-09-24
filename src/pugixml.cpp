@@ -2888,7 +2888,7 @@ PUGI__NS_BEGIN
 #ifdef PUGIXML_WCHAR_MODE
 	PUGI__FN size_t get_valid_length(const char_t* data, size_t length)
 	{
-		assert(length > 0);
+		if (length < 1) return 0;
 
 		// discard last character if it's the lead of a surrogate pair 
 		return (sizeof(wchar_t) == 2 && static_cast<unsigned int>(static_cast<uint16_t>(data[length - 1]) - 0xD800) < 0x400) ? length - 1 : length;
@@ -2960,7 +2960,7 @@ PUGI__NS_BEGIN
 #else
 	PUGI__FN size_t get_valid_length(const char_t* data, size_t length)
 	{
-		assert(length > 4);
+		if (length < 5) return 0;
 
 		for (size_t i = 1; i <= 4; ++i)
 		{
@@ -3080,6 +3080,7 @@ PUGI__NS_BEGIN
 					// get chunk size by selecting such number of characters that are guaranteed to fit into scratch buffer
 					// and form a complete codepoint sequence (i.e. discard start of last codepoint if necessary)
 					size_t chunk_size = get_valid_length(data, bufcapacity);
+					assert(chunk_size);
 
 					// convert chunk and write
 					flush(data, chunk_size);
@@ -3112,7 +3113,27 @@ PUGI__NS_BEGIN
 
 		void write(const char_t* data)
 		{
-			write(data, strlength(data));
+			// write the part of the string that fits in the buffer
+			size_t offset = bufsize;
+
+			while (*data && offset < bufcapacity)
+				buffer[offset++] = *data++;
+
+			// write the rest
+			if (offset < bufcapacity)
+			{
+				bufsize = offset;
+			}
+			else
+			{
+				// backtrack a bit if we have split the codepoint
+				size_t length = offset - bufsize;
+				size_t extra = length - get_valid_length(data - length, length);
+
+				bufsize = offset - extra;
+
+				write_direct(data - extra, strlength(data) + extra);
+			}
 		}
 
 		void write(char_t d0)
@@ -8265,7 +8286,8 @@ PUGI__NS_BEGIN
 			switch (_test)
 			{
 			case nodetest_name:
-				if (strequal(name, _data.nodetest)) ns.push_back(xpath_node(a, parent), alloc);
+				if (strequal(name, _data.nodetest))
+					ns.push_back(xpath_node(a, parent), alloc);
 				break;
 				
 			case nodetest_type_node:
@@ -8290,7 +8312,8 @@ PUGI__NS_BEGIN
 			switch (_test)
 			{
 			case nodetest_name:
-				if (n.type() == node_element && strequal(n.name(), _data.nodetest)) ns.push_back(n, alloc);
+				if (n.type() == node_element && strequal(n.name(), _data.nodetest))
+					ns.push_back(n, alloc);
 				break;
 				
 			case nodetest_type_node:
