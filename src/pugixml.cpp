@@ -3099,7 +3099,7 @@ PUGI__NS_BEGIN
 			bufsize += length;
 		}
 
-		void write(const char_t* data, size_t length)
+		void write_buffer(const char_t* data, size_t length)
 		{
 			size_t offset = bufsize;
 
@@ -3114,7 +3114,7 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void write(const char_t* data)
+		void write_string(const char_t* data)
 		{
 			// write the part of the string that fits in the buffer
 			size_t offset = bufsize;
@@ -3247,7 +3247,7 @@ PUGI__NS_BEGIN
 			// While *s is a usual symbol
 			while (!PUGI__IS_CHARTYPEX(*s, type)) ++s;
 		
-			writer.write(prev, static_cast<size_t>(s - prev));
+			writer.write_buffer(prev, static_cast<size_t>(s - prev));
 
 			switch (*s)
 			{
@@ -3282,7 +3282,7 @@ PUGI__NS_BEGIN
 	PUGI__FN void text_output(xml_buffered_writer& writer, const char_t* s, chartypex_t type, unsigned int flags)
 	{
 		if (flags & format_no_escapes)
-			writer.write(s);
+			writer.write_string(s);
 		else
 			text_output_escaped(writer, s, type);
 	}
@@ -3302,7 +3302,7 @@ PUGI__NS_BEGIN
 			// skip ]] if we stopped at ]]>, > will go to the next CDATA section
 			if (*s) s += 2;
 
-			writer.write(prev, static_cast<size_t>(s - prev));
+			writer.write_buffer(prev, static_cast<size_t>(s - prev));
 
 			writer.write(']', ']', '>');
 		}
@@ -3347,7 +3347,7 @@ PUGI__NS_BEGIN
 		default:
 		{
 			for (unsigned int i = 0; i < depth; ++i)
-				writer.write(indent, indent_length);
+				writer.write_buffer(indent, indent_length);
 		}
 		}
 	}
@@ -3359,7 +3359,7 @@ PUGI__NS_BEGIN
 		for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
 		{
 			writer.write(' ');
-			writer.write(a.name()[0] ? a.name() : default_name);
+			writer.write_string(a.name()[0] ? a.name() : default_name);
 			writer.write('=', '"');
 
 			text_output(writer, a.value(), ctx_special_attr, flags);
@@ -3374,7 +3374,7 @@ PUGI__NS_BEGIN
 		const char_t* name = node.name()[0] ? node.name() : default_name;
 
 		writer.write('<');
-		writer.write(name);
+		writer.write_string(name);
 
 		if (node.first_attribute())
 			node_output_attributes(writer, node, flags);
@@ -3406,7 +3406,7 @@ PUGI__NS_BEGIN
 					text_output_cdata(writer, first.value());
 
 				writer.write('<', '/');
-				writer.write(name);
+				writer.write_string(name);
 				writer.write('>', '\n');
 			}
 			else
@@ -3426,7 +3426,7 @@ PUGI__NS_BEGIN
 		const char_t* name = node.name()[0] ? node.name() : default_name;
 
 		writer.write('<', '/');
-		writer.write(name);
+		writer.write_string(name);
 
 		if (flags & format_raw)
 			writer.write('>');
@@ -3452,7 +3452,7 @@ PUGI__NS_BEGIN
 
 			case node_comment:
 				writer.write('<', '!', '-', '-');
-				writer.write(node.value());
+				writer.write_string(node.value());
 				writer.write('-', '-', '>');
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
@@ -3460,7 +3460,7 @@ PUGI__NS_BEGIN
 			case node_pi:
 			case node_declaration:
 				writer.write('<', '?');
-				writer.write(node.name()[0] ? node.name() : default_name);
+				writer.write_string(node.name()[0] ? node.name() : default_name);
 
 				if (node.type() == node_declaration)
 				{
@@ -3469,7 +3469,7 @@ PUGI__NS_BEGIN
 				else if (node.value()[0])
 				{
 					writer.write(' ');
-					writer.write(node.value());
+					writer.write_string(node.value());
 				}
 
 				writer.write('?', '>');
@@ -3483,7 +3483,7 @@ PUGI__NS_BEGIN
 				if (node.value()[0])
 				{
 					writer.write(' ');
-					writer.write(node.value());
+					writer.write_string(node.value());
 				}
 
 				writer.write('>');
@@ -5960,8 +5960,8 @@ namespace pugi
 
 		if (!(flags & format_no_declaration) && !impl::has_declaration(*this))
 		{
-			buffered_writer.write(PUGIXML_TEXT("<?xml version=\"1.0\""));
-			if (encoding == encoding_latin1) buffered_writer.write(PUGIXML_TEXT(" encoding=\"ISO-8859-1\""));
+			buffered_writer.write_string(PUGIXML_TEXT("<?xml version=\"1.0\""));
+			if (encoding == encoding_latin1) buffered_writer.write_string(PUGIXML_TEXT(" encoding=\"ISO-8859-1\""));
 			buffered_writer.write('?', '>');
 			if (!(flags & format_raw)) buffered_writer.write('\n');
 		}
