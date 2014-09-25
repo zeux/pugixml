@@ -3035,10 +3035,11 @@ PUGI__NS_BEGIN
 			flush();
 		}
 
-		void flush()
+		size_t flush()
 		{
 			flush(buffer, bufsize);
 			bufsize = 0;
+			return 0;
 		}
 
 		void flush(const char_t* data, size_t size)
@@ -3100,10 +3101,12 @@ PUGI__NS_BEGIN
 
 		void write(const char_t* data, size_t length)
 		{
-			if (bufsize + length <= bufcapacity)
+			size_t offset = bufsize;
+
+			if (offset + length <= bufcapacity)
 			{
-				memcpy(buffer + bufsize, data, length * sizeof(char_t));
-				bufsize += length;
+				memcpy(buffer + offset, data, length * sizeof(char_t));
+				bufsize = offset + length;
 			}
 			else
 			{
@@ -3138,65 +3141,71 @@ PUGI__NS_BEGIN
 
 		void write(char_t d0)
 		{
-			if (bufsize + 1 > bufcapacity) flush();
+			size_t offset = bufsize;
+			if (offset > bufcapacity - 1) offset = flush();
 
-			buffer[bufsize + 0] = d0;
-			bufsize += 1;
+			buffer[offset + 0] = d0;
+			bufsize = offset + 1;
 		}
 
 		void write(char_t d0, char_t d1)
 		{
-			if (bufsize + 2 > bufcapacity) flush();
+			size_t offset = bufsize;
+			if (offset > bufcapacity - 2) offset = flush();
 
-			buffer[bufsize + 0] = d0;
-			buffer[bufsize + 1] = d1;
-			bufsize += 2;
+			buffer[offset + 0] = d0;
+			buffer[offset + 1] = d1;
+			bufsize = offset + 2;
 		}
 
 		void write(char_t d0, char_t d1, char_t d2)
 		{
-			if (bufsize + 3 > bufcapacity) flush();
+			size_t offset = bufsize;
+			if (offset > bufcapacity - 3) offset = flush();
 
-			buffer[bufsize + 0] = d0;
-			buffer[bufsize + 1] = d1;
-			buffer[bufsize + 2] = d2;
-			bufsize += 3;
+			buffer[offset + 0] = d0;
+			buffer[offset + 1] = d1;
+			buffer[offset + 2] = d2;
+			bufsize = offset + 3;
 		}
 
 		void write(char_t d0, char_t d1, char_t d2, char_t d3)
 		{
-			if (bufsize + 4 > bufcapacity) flush();
+			size_t offset = bufsize;
+			if (offset > bufcapacity - 4) offset = flush();
 
-			buffer[bufsize + 0] = d0;
-			buffer[bufsize + 1] = d1;
-			buffer[bufsize + 2] = d2;
-			buffer[bufsize + 3] = d3;
-			bufsize += 4;
+			buffer[offset + 0] = d0;
+			buffer[offset + 1] = d1;
+			buffer[offset + 2] = d2;
+			buffer[offset + 3] = d3;
+			bufsize = offset + 4;
 		}
 
 		void write(char_t d0, char_t d1, char_t d2, char_t d3, char_t d4)
 		{
-			if (bufsize + 5 > bufcapacity) flush();
+			size_t offset = bufsize;
+			if (offset > bufcapacity - 5) offset = flush();
 
-			buffer[bufsize + 0] = d0;
-			buffer[bufsize + 1] = d1;
-			buffer[bufsize + 2] = d2;
-			buffer[bufsize + 3] = d3;
-			buffer[bufsize + 4] = d4;
-			bufsize += 5;
+			buffer[offset + 0] = d0;
+			buffer[offset + 1] = d1;
+			buffer[offset + 2] = d2;
+			buffer[offset + 3] = d3;
+			buffer[offset + 4] = d4;
+			bufsize = offset + 5;
 		}
 
 		void write(char_t d0, char_t d1, char_t d2, char_t d3, char_t d4, char_t d5)
 		{
-			if (bufsize + 6 > bufcapacity) flush();
+			size_t offset = bufsize;
+			if (offset > bufcapacity - 6) offset = flush();
 
-			buffer[bufsize + 0] = d0;
-			buffer[bufsize + 1] = d1;
-			buffer[bufsize + 2] = d2;
-			buffer[bufsize + 3] = d3;
-			buffer[bufsize + 4] = d4;
-			buffer[bufsize + 5] = d5;
-			bufsize += 6;
+			buffer[offset + 0] = d0;
+			buffer[offset + 1] = d1;
+			buffer[offset + 2] = d2;
+			buffer[offset + 3] = d3;
+			buffer[offset + 4] = d4;
+			buffer[offset + 5] = d5;
+			bufsize = offset + 6;
 		}
 
 		// utf8 maximum expansion: x4 (-> utf32)
