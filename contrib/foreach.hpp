@@ -7,6 +7,8 @@
 #ifndef HEADER_PUGIXML_FOREACH_HPP
 #define HEADER_PUGIXML_FOREACH_HPP
 
+#include <boost/range/iterator.hpp>
+
 #include "pugixml.hpp"
 
 /*
@@ -17,9 +19,6 @@
 
 namespace boost
 {
-	template <typename> struct range_mutable_iterator;
-	template <typename> struct range_const_iterator;
-
 	template<> struct range_mutable_iterator<pugi::xml_node>
 	{
 		typedef pugi::xml_node::iterator type;
@@ -52,12 +51,12 @@ namespace pugi
 {
 	inline xml_object_range<xml_node_iterator> children(const pugi::xml_node& node)
 	{
-        return node.children();
+		return node.children();
 	}
 
 	inline xml_object_range<xml_attribute_iterator> attributes(const pugi::xml_node& node)
 	{
-        return node.attributes();
+		return node.attributes();
 	}
 }
 
