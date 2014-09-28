@@ -1242,3 +1242,25 @@ TEST_XML(dom_node_move_tree, "<root><n1 a1='v1'><c1/>t1</n1><n2 a2='v2'><c2/>t2<
 	CHECK(n3 == doc.child(STR("n3")));
 	CHECK(n4 == root.child(STR("n4")));
 }
+
+TEST(dom_node_copy_stackless)
+{
+	unsigned int count = 20000;
+	std::basic_string<pugi::char_t> data;
+
+	for (unsigned int i = 0; i < count; ++i)
+		data += STR("<a>");
+
+	data += STR("text");
+
+	for (unsigned int i = 0; i < count; ++i)
+		data += STR("</a>");
+
+	xml_document doc;
+	CHECK(doc.load(data.c_str()));
+
+	xml_document copy;
+	CHECK(copy.append_copy(doc.first_child()));
+
+	CHECK_NODE(doc, data.c_str());
+}
