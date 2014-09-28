@@ -3352,7 +3352,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, const xml_node& node, unsigned int flags)
+	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
@@ -3368,7 +3368,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN bool node_output_start(xml_buffered_writer& writer, const xml_node& node, unsigned int flags)
+	PUGI__FN bool node_output_start(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 		const char_t* name = node.name()[0] ? node.name() : default_name;
@@ -3420,7 +3420,7 @@ PUGI__NS_BEGIN
 		return false;
 	}
 
-	PUGI__FN void node_output_end(xml_buffered_writer& writer, const xml_node& node, unsigned int flags)
+	PUGI__FN void node_output_end(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 		const char_t* name = node.name()[0] ? node.name() : default_name;
@@ -3434,7 +3434,7 @@ PUGI__NS_BEGIN
 			writer.write('>', '\n');
 	}
 
-	PUGI__FN void node_output_simple(xml_buffered_writer& writer, const xml_node& node, unsigned int flags)
+	PUGI__FN void node_output_simple(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
@@ -3495,7 +3495,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_output(xml_buffered_writer& writer, const xml_node& root, const char_t* indent, unsigned int flags, unsigned int depth)
+	PUGI__FN void node_output(xml_buffered_writer& writer, const xml_node root, const char_t* indent, unsigned int flags, unsigned int depth)
 	{
 		size_t indent_length = ((flags & (format_indent | format_raw)) == format_indent) ? strlength(indent) : 0;
 
@@ -3556,7 +3556,7 @@ PUGI__NS_BEGIN
 		while (node != root);
 	}
 
-	inline bool has_declaration(const xml_node& node)
+	inline bool has_declaration(const xml_node node)
 	{
 		for (xml_node child = node.first_child(); child; child = child.next_sibling())
 		{
@@ -3578,7 +3578,7 @@ PUGI__NS_BEGIN
 		return true;
 	}
 
-	PUGI__FN bool allow_move(const xml_node& parent, const xml_node& child)
+	PUGI__FN bool allow_move(const xml_node parent, const xml_node child)
 	{
 		// check that child can be a child of parent
 		if (!allow_insert_child(parent.type(), child.type()))
@@ -3602,7 +3602,7 @@ PUGI__NS_BEGIN
 		return true;
 	}
 
-	PUGI__FN void node_copy_contents(xml_node dest, xml_node source)
+	PUGI__FN void node_copy_contents(xml_node dest, const xml_node source)
 	{
 		assert(dest.type() == source.type());
 
@@ -3635,7 +3635,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_copy_tree(xml_node dest, xml_node source)
+	PUGI__FN void node_copy_tree(xml_node dest, const xml_node source)
 	{
 		node_copy_contents(dest, source);
 
@@ -6733,7 +6733,7 @@ PUGI__NS_BEGIN
 			return xpath_string_const(na.attribute().value());
 		else
 		{
-			const xml_node& n = na.node();
+			xml_node n = na.node();
 
 			switch (n.type())
 			{
@@ -7200,7 +7200,7 @@ PUGI__NS_BEGIN
 			prefix_length = pos ? static_cast<size_t>(pos - name) : 0;
 		}
 
-		bool operator()(const xml_attribute& a) const
+		bool operator()(const xml_attribute a) const
 		{
 			const char_t* name = a.name();
 
@@ -7210,7 +7210,7 @@ PUGI__NS_BEGIN
 		}
 	};
 
-	PUGI__FN const char_t* namespace_uri(const xml_node& node)
+	PUGI__FN const char_t* namespace_uri(const xml_node node)
 	{
 		namespace_uri_predicate pred = node.name();
 		
@@ -7228,7 +7228,7 @@ PUGI__NS_BEGIN
 		return PUGIXML_TEXT("");
 	}
 
-	PUGI__FN const char_t* namespace_uri(const xml_attribute& attr, const xml_node& parent)
+	PUGI__FN const char_t* namespace_uri(const xml_attribute attr, const xml_node parent)
 	{
 		namespace_uri_predicate pred = attr.name();
 		
@@ -8301,7 +8301,7 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void step_push(xpath_node_set_raw& ns, const xml_attribute& a, const xml_node& parent, xpath_allocator* alloc)
+		void step_push(xpath_node_set_raw& ns, const xml_attribute a, const xml_node parent, xpath_allocator* alloc)
 		{
 			if (!a) return;
 
@@ -8333,7 +8333,7 @@ PUGI__NS_BEGIN
 			}
 		}
 		
-		void step_push(xpath_node_set_raw& ns, const xml_node& n, xpath_allocator* alloc)
+		void step_push(xpath_node_set_raw& ns, const xml_node n, xpath_allocator* alloc)
 		{
 			if (!n) return;
 
@@ -8383,7 +8383,7 @@ PUGI__NS_BEGIN
 			} 
 		}
 
-		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_node& n, xpath_allocator* alloc, T)
+		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_node n, xpath_allocator* alloc, T)
 		{
 			const axis_t axis = T::axis;
 
@@ -8553,7 +8553,7 @@ PUGI__NS_BEGIN
 			}
 		}
 		
-		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_attribute& a, const xml_node& p, xpath_allocator* alloc, T v)
+		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_attribute a, const xml_node p, xpath_allocator* alloc, T v)
 		{
 			const axis_t axis = T::axis;
 
