@@ -3602,29 +3602,19 @@ PUGI__NS_BEGIN
 		return true;
 	}
 
-	PUGI__FN void recursive_copy_skip(xml_node& dest, const xml_node& source, const xml_node& skip)
+	PUGI__FN void node_copy_contents(xml_node dest, xml_node source)
 	{
 		assert(dest.type() == source.type());
 
 		switch (source.type())
 		{
 		case node_element:
+		case node_declaration:
 		{
 			dest.set_name(source.name());
 
 			for (xml_attribute a = source.first_attribute(); a; a = a.next_attribute())
 				dest.append_attribute(a.name()).set_value(a.value());
-
-			for (xml_node c = source.first_child(); c; c = c.next_sibling())
-			{
-				if (c == skip) continue;
-
-				xml_node cc = dest.append_child(c.type());
-				assert(cc);
-
-				recursive_copy_skip(cc, c, skip);
-			}
-
 			break;
 		}
 
@@ -3640,18 +3630,47 @@ PUGI__NS_BEGIN
 			dest.set_value(source.value());
 			break;
 
-		case node_declaration:
-		{
-			dest.set_name(source.name());
-
-			for (xml_attribute a = source.first_attribute(); a; a = a.next_attribute())
-				dest.append_attribute(a.name()).set_value(a.value());
-
-			break;
-		}
-
 		default:
 			assert(!"Invalid node type");
+		}
+	}
+
+	PUGI__FN void node_copy_tree(xml_node dest, xml_node source)
+	{
+		node_copy_contents(dest, source);
+
+		xml_node destit = dest;
+		xml_node sourceit = source.first_child();
+
+		while (sourceit && sourceit != source)
+		{
+			if (sourceit != dest)
+			{
+				xml_node copy = destit.append_child(sourceit.type());
+
+				node_copy_contents(copy, sourceit);
+
+				if (sourceit.first_child())
+				{
+					destit = copy;
+					sourceit = sourceit.first_child();
+					continue;
+				}
+			}
+
+			// continue to the next node
+			do
+			{
+				if (sourceit.next_sibling())
+				{
+					sourceit = sourceit.next_sibling();
+					break;
+				}
+
+				sourceit = sourceit.parent();
+				destit = destit.parent();
+			}
+			while (sourceit != source);
 		}
 	}
 
@@ -4965,7 +4984,7 @@ namespace pugi
 	{
 		xml_node result = append_child(proto.type());
 
-		if (result) impl::recursive_copy_skip(result, proto, result);
+		if (result) impl::node_copy_tree(result, proto);
 
 		return result;
 	}
@@ -4974,7 +4993,7 @@ namespace pugi
 	{
 		xml_node result = prepend_child(proto.type());
 
-		if (result) impl::recursive_copy_skip(result, proto, result);
+		if (result) impl::node_copy_tree(result, proto);
 
 		return result;
 	}
@@ -4983,7 +5002,7 @@ namespace pugi
 	{
 		xml_node result = insert_child_after(proto.type(), node);
 
-		if (result) impl::recursive_copy_skip(result, proto, result);
+		if (result) impl::node_copy_tree(result, proto);
 
 		return result;
 	}
@@ -4992,7 +5011,7 @@ namespace pugi
 	{
 		xml_node result = insert_child_before(proto.type(), node);
 
-		if (result) impl::recursive_copy_skip(result, proto, result);
+		if (result) impl::node_copy_tree(result, proto);
 
 		return result;
 	}
