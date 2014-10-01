@@ -266,11 +266,14 @@ PUGI__NS_BEGIN
 	#endif
 		;
 
-	static const uintptr_t xml_memory_page_alignment = 32;
+	static const uintptr_t xml_memory_page_alignment = 64;
 	static const uintptr_t xml_memory_page_pointer_mask = ~(xml_memory_page_alignment - 1);
+	static const uintptr_t xml_memory_page_name_or_value_shared_mask = 32;
 	static const uintptr_t xml_memory_page_name_allocated_mask = 16;
 	static const uintptr_t xml_memory_page_value_allocated_mask = 8;
 	static const uintptr_t xml_memory_page_type_mask = 7;
+	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_name_or_value_shared_mask;
+	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_name_or_value_shared_mask;
 
 	struct xml_allocator;
 
@@ -5334,13 +5337,13 @@ namespace pugi
 		case node_element:
 		case node_declaration:
 		case node_pi:
-			return (_root->header & impl::xml_memory_page_name_allocated_mask) ? -1 : _root->name - buffer;
+			return (_root->header & impl::xml_memory_page_name_allocated_or_shared_mask) ? -1 : _root->name - buffer;
 
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
 		case node_doctype:
-			return (_root->header & impl::xml_memory_page_value_allocated_mask) ? -1 : _root->value - buffer;
+			return (_root->header & impl::xml_memory_page_value_allocated_or_shared_mask) ? -1 : _root->value - buffer;
 
 		default:
 			return -1;
@@ -6830,8 +6833,8 @@ PUGI__NS_BEGIN
 
 		if (node)
 		{
-			if (node->name && (node->header & xml_memory_page_name_allocated_mask) == 0) return node->name;
-			if (node->value && (node->header & xml_memory_page_value_allocated_mask) == 0) return node->value;
+			if (node->name && (node->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return node->name;
+			if (node->value && (node->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return node->value;
 			return 0;
 		}
 
@@ -6839,8 +6842,8 @@ PUGI__NS_BEGIN
 
 		if (attr)
 		{
-			if ((attr->header & xml_memory_page_name_allocated_mask) == 0) return attr->name;
-			if ((attr->header & xml_memory_page_value_allocated_mask) == 0) return attr->value;
+			if ((attr->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return attr->name;
+			if ((attr->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return attr->value;
 			return 0;
 		}
 
