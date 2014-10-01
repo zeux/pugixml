@@ -24,21 +24,21 @@ namespace
 {
 	const size_t PAGE_SIZE = 4096;
 
-    size_t align_to_page(size_t value)
-    {
-        return (value + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
-    }
+	size_t align_to_page(size_t value)
+	{
+		return (value + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+	}
 
 	void* allocate_page_aligned(size_t size)
-    {
-        // We can't use VirtualAlloc because it has 64Kb granularity so we run out of address space quickly
+	{
+		// We can't use VirtualAlloc because it has 64Kb granularity so we run out of address space quickly
 		// We can't use malloc because of occasional problems with CW on CRT termination
 		static HANDLE heap = HeapCreate(0, 0, 0);
 
-        void* result = HeapAlloc(heap, 0, size + PAGE_SIZE);
+		void* result = HeapAlloc(heap, 0, size + PAGE_SIZE);
 
-        return reinterpret_cast<void*>(align_to_page(reinterpret_cast<size_t>(result)));
-    }
+		return reinterpret_cast<void*>(align_to_page(reinterpret_cast<size_t>(result)));
+	}
 
 	void* allocate(size_t size)
 	{
@@ -61,8 +61,8 @@ namespace
 
 		void* rptr = static_cast<char*>(ptr) + size - aligned_size;
 
-        DWORD old_flags;
-        VirtualProtect(rptr, aligned_size + PAGE_SIZE, PAGE_NOACCESS, &old_flags);
+		DWORD old_flags;
+		VirtualProtect(rptr, aligned_size + PAGE_SIZE, PAGE_NOACCESS, &old_flags);
 	}
 }
 #else
