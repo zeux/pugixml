@@ -1,3 +1,4 @@
+#pragma pack(push, 16)
 /**
  * pugixml parser - version 1.4
  * --------------------------------------------------------
@@ -539,13 +540,15 @@ PUGI__NS_BEGIN
 
 	struct xml_document_struct: public xml_node_struct, public xml_allocator
 	{
-		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0)
+		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0), document_buffer_order_valid(true)
 		{
 		}
 
 		const char_t* buffer;
 
 		xml_extra_buffer* extra_buffers;
+
+		bool document_buffer_order_valid;
 	};
 
 	inline xml_allocator& get_allocator(const xml_node_struct* node)
@@ -553,6 +556,13 @@ PUGI__NS_BEGIN
 		assert(node);
 
 		return *reinterpret_cast<xml_memory_page*>(node->header & xml_memory_page_pointer_mask)->allocator;
+	}
+
+	template <typename Object> inline xml_document_struct& get_document(const Object* object)
+	{
+		assert(object);
+
+		return *static_cast<xml_document_struct*>(reinterpret_cast<xml_memory_page*>(object->header & xml_memory_page_pointer_mask)->allocator);
 	}
 PUGI__NS_END
 
@@ -5038,6 +5048,9 @@ namespace pugi
 	{
 		if (!impl::allow_move(*this, moved)) return xml_node();
 
+		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
+		impl::get_document(_root).document_buffer_order_valid = false;
+
 		impl::remove_node(moved._root);
 		impl::append_node(moved._root, _root);
 
@@ -5047,6 +5060,9 @@ namespace pugi
 	PUGI__FN xml_node xml_node::prepend_move(const xml_node& moved)
 	{
 		if (!impl::allow_move(*this, moved)) return xml_node();
+
+		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
+		impl::get_document(_root).document_buffer_order_valid = false;
 
 		impl::remove_node(moved._root);
 		impl::prepend_node(moved._root, _root);
@@ -5060,6 +5076,9 @@ namespace pugi
 		if (!node._root || node._root->parent != _root) return xml_node();
 		if (moved._root == node._root) return xml_node();
 
+		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
+		impl::get_document(_root).document_buffer_order_valid = false;
+
 		impl::remove_node(moved._root);
 		impl::insert_node_after(moved._root, node._root);
 
@@ -5071,6 +5090,9 @@ namespace pugi
 		if (!impl::allow_move(*this, moved)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 		if (moved._root == node._root) return xml_node();
+
+		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
+		impl::get_document(_root).document_buffer_order_valid = false;
 
 		impl::remove_node(moved._root);
 		impl::insert_node_before(moved._root, node._root);
@@ -5129,6 +5151,9 @@ namespace pugi
 		// get document node
 		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(root()._root);
 		assert(doc);
+
+		// disable document_buffer_order optimization since in a document with multiple buffers comparing buffer pointers does not make sense
+		doc->document_buffer_order_valid = false;
 		
 		// get extra buffer element (we'll store the document fragment buffer there so that we can deallocate it later)
 		impl::xml_memory_page* page = 0;
@@ -6842,14 +6867,18 @@ PUGI__NS_BEGIN
 		return parent && node == parent;
 	}
 
-	PUGI__FN const void* document_order(const xpath_node& xnode)
+	PUGI__FN const void* document_buffer_order(const xpath_node& xnode)
 	{
 		xml_node_struct* node = xnode.node().internal_object();
 
 		if (node)
 		{
-			if (node->name && (node->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return node->name;
-			if (node->value && (node->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return node->value;
+			if (get_document(node).document_buffer_order_valid)
+			{
+				if (node->name && (node->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return node->name;
+				if (node->value && (node->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return node->value;
+			}
+
 			return 0;
 		}
 
@@ -6857,8 +6886,12 @@ PUGI__NS_BEGIN
 
 		if (attr)
 		{
-			if ((attr->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return attr->name;
-			if ((attr->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return attr->value;
+			if (get_document(attr).document_buffer_order_valid)
+			{
+				if ((attr->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return attr->name;
+				if ((attr->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return attr->value;
+			}
+
 			return 0;
 		}
 
@@ -6870,8 +6903,8 @@ PUGI__NS_BEGIN
 		bool operator()(const xpath_node& lhs, const xpath_node& rhs) const
 		{
 			// optimized document order based check
-			const void* lo = document_order(lhs);
-			const void* ro = document_order(rhs);
+			const void* lo = document_buffer_order(lhs);
+			const void* ro = document_buffer_order(rhs);
 
 			if (lo && ro) return lo < ro;
 

@@ -926,7 +926,7 @@ namespace pugi
 	private:
 		char_t* _buffer;
 
-		// sizeof(xml_memory_page) + sizeof(xml_document_struct) + xml_memory_page_alignment + 1 void* in case compiler inserts padding
+		// sizeof(xml_memory_page) + sizeof(xml_document_struct) + xml_memory_page_alignment
 		char _memory[sizeof(void*) * 20 + 64];
 		
 		// Non-copyable semantics
