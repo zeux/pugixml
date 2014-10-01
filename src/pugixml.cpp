@@ -3634,38 +3634,31 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_copy_contents(xml_allocator* alloc, xml_node dest, const xml_node source)
+	PUGI__FN void node_copy_contents(xml_node dest, const xml_node source, xml_allocator* shared_alloc)
 	{
 		assert(dest.type() == source.type());
 
 		xml_node_struct* dn = dest.internal_object();
 		xml_node_struct* sn = source.internal_object();
 
-		node_copy_string(dn->name, dn->header, xml_memory_page_name_allocated_mask, sn->name, sn->header, alloc);
-		node_copy_string(dn->value, dn->header, xml_memory_page_value_allocated_mask, sn->value, sn->header, alloc);
+		node_copy_string(dn->name, dn->header, xml_memory_page_name_allocated_mask, sn->name, sn->header, shared_alloc);
+		node_copy_string(dn->value, dn->header, xml_memory_page_value_allocated_mask, sn->value, sn->header, shared_alloc);
 
 		for (xml_attribute_struct* sa = sn->first_attribute; sa; sa = sa->next_attribute)
 		{
-			xml_attribute_struct* da = impl::append_new_attribute(dn, impl::get_allocator(dn));
+			xml_attribute_struct* da = append_new_attribute(dn, get_allocator(dn));
 
-			node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, alloc);
-			node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, alloc);
+			node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
+			node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
 		}
-	}
-
-	PUGI__FN xml_allocator* node_get_shared_allocator(const xml_node lhs, const xml_node rhs)
-	{
-		xml_allocator& la = impl::get_allocator(lhs.internal_object());
-		xml_allocator& ra = impl::get_allocator(rhs.internal_object());
-
-		return (&la == &ra) ? &la : 0;
 	}
 
 	PUGI__FN void node_copy_tree(xml_node dest, const xml_node source)
 	{
-		xml_allocator* alloc = node_get_shared_allocator(dest, source);
+		xml_allocator& alloc = get_allocator(dest.internal_object());
+		xml_allocator* shared_alloc = (&alloc == &get_allocator(source.internal_object())) ? &alloc : 0;
 
-		node_copy_contents(alloc, dest, source);
+		node_copy_contents(dest, source, shared_alloc);
 
 		xml_node destit = dest;
 		xml_node sourceit = source.first_child();
@@ -3674,9 +3667,9 @@ PUGI__NS_BEGIN
 		{
 			if (sourceit != dest)
 			{
-				xml_node copy = destit.append_child(sourceit.type());
+				xml_node copy(append_new_node(destit.internal_object(), alloc, sourceit.type()));
 
-				node_copy_contents(alloc, copy, sourceit);
+				node_copy_contents(copy, sourceit, shared_alloc);
 
 				if (sourceit.first_child())
 				{
