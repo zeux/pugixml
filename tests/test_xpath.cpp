@@ -460,4 +460,50 @@ TEST_XML(xpath_sort_copy_share, "<node><child1 attr1='value1' attr2='value2'/><c
 	xpath_node_set_tester(sorted, "sorted order failed") % 2 % 3 % 4 % 5 % 6 % 7 % 8;
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 8 % 7 % 6 % 5 % 4 % 3 % 2;
 }
+
+TEST_XML(xpath_sort_move_share, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>")
+{
+	// moving changes the relation between name/value data and document order, this can potentially make document order optimization invalid (silently)
+	xml_node node = doc.child(STR("node"));
+	xml_node child1 = node.child(STR("child1"));
+	xml_node child2 = node.child(STR("child2"));
+
+	// swap child1 & child2
+	node.prepend_move(child2);
+	node.append_move(child1);
+
+	// just some random union order, it should not matter probably?
+	xpath_node_set ns = doc.child(STR("node")).select_nodes(STR("child1 | child2 | child1/@* | . | child2/@* | child2/text()"));
+
+	ns.sort(false);
+	xpath_node_set sorted = ns;
+
+	ns.sort(true);
+	xpath_node_set reverse_sorted = ns;
+
+	xpath_node_set_tester(sorted, "sorted order failed") % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 8 % 7 % 6 % 5 % 4 % 3 % 2;
+}
+
+TEST_XML(xpath_sort_append_buffer, "<node /><node />")
+{
+	// append_buffer changes the relation between name/value data and document order, this can potentially make document order optimization invalid (silently)
+	const char* child1 = "<child1 attr1='value1' attr2='value2'/>";
+	const char* child2 = "<child2 attr1='value1'>test   </child2>";
+
+	doc.last_child().append_buffer(child2, strlen(child2));
+	doc.first_child().append_buffer(child1, strlen(child1));
+
+	// just some random union order, it should not matter probably?
+	xpath_node_set ns = doc.select_nodes(STR("node/child1 | node/child2 | node/child1/@* | node/. | node/child2/@* | node/child2/text()"));
+
+	ns.sort(false);
+	xpath_node_set sorted = ns;
+
+	ns.sort(true);
+	xpath_node_set reverse_sorted = ns;
+
+	xpath_node_set_tester(sorted, "sorted order failed") % 2 % 3 % 4 % 5 % 6 % 7 % 8 % 9;
+	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 9 % 8 % 7 % 6 % 5 % 4 % 3 % 2;
+}
 #endif
