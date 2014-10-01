@@ -1654,13 +1654,15 @@ PUGI__NS_BEGIN
 	}
 #endif
 
-	inline bool strcpy_insitu_allow(size_t length, uintptr_t allocated, char_t* target)
+	inline bool strcpy_insitu_allow(size_t length, uintptr_t header, uintptr_t header_mask, char_t* target)
 	{
-		assert(target);
+		// never reuse shared memory
+		if (header & xml_memory_page_name_or_value_shared_mask) return false;
+
 		size_t target_length = strlength(target);
 
 		// always reuse document buffer memory if possible
-		if (!allocated) return target_length >= length;
+		if ((header & header_mask) == 0) return target_length >= length;
 
 		// reuse heap memory if waste is not too great
 		const size_t reuse_threshold = 32;
@@ -1687,7 +1689,7 @@ PUGI__NS_BEGIN
 
 			return true;
 		}
-		else if (dest && strcpy_insitu_allow(source_length, header & header_mask, dest))
+		else if (dest && strcpy_insitu_allow(source_length, header, header_mask, dest))
 		{
 			// we can reuse old buffer, so just copy the new data (including zero terminator)
 			memcpy(dest, source, (source_length + 1) * sizeof(char_t));
@@ -3605,42 +3607,55 @@ PUGI__NS_BEGIN
 		return true;
 	}
 
-	PUGI__FN void node_copy_contents(xml_node dest, const xml_node source)
+	PUGI__FN void node_copy_string(char_t*& dest, uintptr_t& header, uintptr_t header_mask, char_t* source, uintptr_t& source_header, xml_allocator* alloc)
+	{
+		if (source)
+		{
+			if (alloc && (source_header & header_mask) == 0)
+			{
+				dest = source;
+
+				// since strcpy_insitu can reuse document buffer memory we need to mark both source and dest as shared
+				header |= xml_memory_page_name_or_value_shared_mask;
+				source_header |= xml_memory_page_name_or_value_shared_mask;
+			}
+			else
+				strcpy_insitu(dest, header, header_mask, source);
+		}
+	}
+
+	PUGI__FN void node_copy_contents(xml_allocator* alloc, xml_node dest, const xml_node source)
 	{
 		assert(dest.type() == source.type());
 
-		switch (source.type())
+		xml_node_struct* dn = dest.internal_object();
+		xml_node_struct* sn = source.internal_object();
+
+		node_copy_string(dn->name, dn->header, xml_memory_page_name_allocated_mask, sn->name, sn->header, alloc);
+		node_copy_string(dn->value, dn->header, xml_memory_page_value_allocated_mask, sn->value, sn->header, alloc);
+
+		for (xml_attribute_struct* sa = sn->first_attribute; sa; sa = sa->next_attribute)
 		{
-		case node_element:
-		case node_declaration:
-		{
-			dest.set_name(source.name());
+			xml_attribute_struct* da = impl::append_new_attribute(dn, impl::get_allocator(dn));
 
-			for (xml_attribute a = source.first_attribute(); a; a = a.next_attribute())
-				dest.append_attribute(a.name()).set_value(a.value());
-			break;
+			node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, alloc);
+			node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, alloc);
 		}
+	}
 
-		case node_pcdata:
-		case node_cdata:
-		case node_comment:
-		case node_doctype:
-			dest.set_value(source.value());
-			break;
+	PUGI__FN xml_allocator* node_get_shared_allocator(const xml_node lhs, const xml_node rhs)
+	{
+		xml_allocator& la = impl::get_allocator(lhs.internal_object());
+		xml_allocator& ra = impl::get_allocator(rhs.internal_object());
 
-		case node_pi:
-			dest.set_name(source.name());
-			dest.set_value(source.value());
-			break;
-
-		default:
-			assert(!"Invalid node type");
-		}
+		return (&la == &ra) ? &la : 0;
 	}
 
 	PUGI__FN void node_copy_tree(xml_node dest, const xml_node source)
 	{
-		node_copy_contents(dest, source);
+		xml_allocator* alloc = node_get_shared_allocator(dest, source);
+
+		node_copy_contents(alloc, dest, source);
 
 		xml_node destit = dest;
 		xml_node sourceit = source.first_child();
@@ -3651,7 +3666,7 @@ PUGI__NS_BEGIN
 			{
 				xml_node copy = destit.append_child(sourceit.type());
 
-				node_copy_contents(copy, sourceit);
+				node_copy_contents(alloc, copy, sourceit);
 
 				if (sourceit.first_child())
 				{
