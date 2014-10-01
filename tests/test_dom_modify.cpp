@@ -1246,7 +1246,7 @@ TEST_XML(dom_node_move_tree, "<root><n1 a1='v1'><c1/>t1</n1><n2 a2='v2'><c2/>t2<
 TEST(dom_node_copy_stackless)
 {
 	unsigned int count = 20000;
-	std::basic_string<pugi::char_t> data;
+	std::basic_string<char_t> data;
 
 	for (unsigned int i = 0; i < count; ++i)
 		data += STR("<a>");
@@ -1263,4 +1263,81 @@ TEST(dom_node_copy_stackless)
 	CHECK(copy.append_copy(doc.first_child()));
 
 	CHECK_NODE(doc, data.c_str());
+}
+
+TEST(dom_node_copy_copyless)
+{
+	std::basic_string<char_t> data;
+	data += STR("<node>");
+	for (int i = 0; i < 10000; ++i)
+		data += STR("pcdata");
+	data += STR("<?name value?><child attr1=\"\" attr2=\"value2\" /></node>");
+
+	std::basic_string<char_t> datacopy = data;
+
+	// the document is parsed in-place so there should only be 1 page worth of allocations
+	test_runner::_memory_fail_threshold = 32768 + 128;
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(&datacopy[0], datacopy.size() * sizeof(char_t), parse_full));
+
+	// this copy should share all string storage; since there are not a lot of nodes we should not have *any* allocations here (everything will fit in the same page in the document)
+	xml_node copy = doc.append_copy(doc.child(STR("node")));
+	xml_node copy2 = doc.append_copy(copy);
+
+	CHECK_NODE(copy, data.c_str());
+	CHECK_NODE(copy2, data.c_str());
+}
+
+TEST(dom_node_copy_copyless_mix)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<node>pcdata<?name value?><child attr1=\"\" attr2=\"value2\" /></node>"), parse_full));
+
+	xml_node child = doc.child(STR("node")).child(STR("child"));
+
+	child.set_name(STR("copychild"));
+	child.attribute(STR("attr2")).set_name(STR("copyattr2"));
+	child.attribute(STR("attr1")).set_value(STR("copyvalue1"));
+
+	std::basic_string<char_t> data;
+	for (int i = 0; i < 10000; ++i)
+		data += STR("pcdata");
+
+	doc.child(STR("node")).text().set(data.c_str());
+
+	xml_node copy = doc.append_copy(doc.child(STR("node")));
+	xml_node copy2 = doc.append_copy(copy);
+
+	std::basic_string<char_t> dataxml;
+	dataxml += STR("<node>");
+	dataxml += data;
+	dataxml += STR("<?name value?><copychild attr1=\"copyvalue1\" copyattr2=\"value2\" /></node>");
+
+	CHECK_NODE(copy, dataxml.c_str());
+	CHECK_NODE(copy2, dataxml.c_str());
+}
+
+TEST_XML(dom_node_copyless_taint, "<node attr=\"value\" />")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_node copy = doc.append_copy(node);
+
+	CHECK_NODE(doc, STR("<node attr=\"value\" /><node attr=\"value\" />"));
+
+	node.set_name(STR("nod1"));
+
+	CHECK_NODE(doc, STR("<nod1 attr=\"value\" /><node attr=\"value\" />"));
+
+	xml_node copy2 = doc.append_copy(copy);
+
+	CHECK_NODE(doc, STR("<nod1 attr=\"value\" /><node attr=\"value\" /><node attr=\"value\" />"));
+
+	copy.attribute(STR("attr")).set_value(STR("valu2"));
+
+	CHECK_NODE(doc, STR("<nod1 attr=\"value\" /><node attr=\"valu2\" /><node attr=\"value\" />"));
+
+	copy2.attribute(STR("attr")).set_name(STR("att3"));
+
+	CHECK_NODE(doc, STR("<nod1 attr=\"value\" /><node attr=\"valu2\" /><node att3=\"value\" />"));
 }

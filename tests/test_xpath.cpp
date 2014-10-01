@@ -434,4 +434,30 @@ TEST(xpath_memory_concat_massive)
 	CHECK(size == 5001);
 }
 
+TEST_XML(xpath_sort_copy_share, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>")
+{
+	// copy sharing shares the name/value data for nodes that can potentially make document order optimization invalid (silently)
+	xml_node node = doc.child(STR("node"));
+	xml_node child1 = node.child(STR("child1"));
+	xml_node child2 = node.child(STR("child2"));
+
+	// swap child1 & child2
+	node.prepend_copy(child2);
+	node.append_copy(child1);
+
+	node.remove_child(child1);
+	node.remove_child(child2);
+
+	// just some random union order, it should not matter probably?
+	xpath_node_set ns = doc.child(STR("node")).select_nodes(STR("child1 | child2 | child1/@* | . | child2/@* | child2/text()"));
+
+	ns.sort(false);
+	xpath_node_set sorted = ns;
+
+	ns.sort(true);
+	xpath_node_set reverse_sorted = ns;
+
+	xpath_node_set_tester(sorted, "sorted order failed") % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 8 % 7 % 6 % 5 % 4 % 3 % 2;
+}
 #endif
