@@ -451,7 +451,8 @@ TEST(parse_pcdata_trim)
     	{ STR("<node>\r\n\t text \r\n\r\n\r\n\r\n\r\n\r\n\r\n more \r\n\t</node>"), STR("text \n\n\n\n\n\n\n more"), parse_eol },
     	{ STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&amp;&amp;&amp;&amp;&amp;&amp;&amp;"), 0 },
     	{ STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&&&&&&&"), parse_escapes },
-    	{ STR("     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    "), STR("test&&&&&&&"), parse_fragment | parse_escapes }
+        { STR("     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    "), STR("test&&&&&&&"), parse_fragment | parse_escapes },
+        { STR("<node>\r\n\t text \t\n\r m&amp;&amp;e \r\n\t</node>"), STR("text \t\n\n m&&e"), parse_eol | parse_escapes }
     };
 
     for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)

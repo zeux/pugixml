@@ -414,6 +414,13 @@ TEST(xpath_string_substring_after)
 	CHECK_XPATH_FAIL(STR("substring-after('a', 'b', 'c')"));
 }
 
+TEST_XML(xpath_string_substring_after_heap, "<node>foo<child/>bar</node>")
+{
+    CHECK_XPATH_STRING(doc, STR("substring-after(node, 'fo')"), STR("obar"));
+    CHECK_XPATH_STRING(doc, STR("substring-after(node, 'fooba')"), STR("r"));
+    CHECK_XPATH_STRING(doc, STR("substring-after(node, 'foobar')"), STR(""));
+}
+
 TEST(xpath_string_substring)
 {
 	xml_node c;
@@ -472,6 +479,13 @@ TEST(xpath_string_substring)
 
 	// substring with 4 arguments
 	CHECK_XPATH_FAIL(STR("substring('', 1, 2, 3)"));
+}
+
+TEST_XML(xpath_string_substring_heap, "<node>foo<child/>bar</node>")
+{
+    CHECK_XPATH_STRING(doc, STR("substring(node, 3)"), STR("obar"));
+    CHECK_XPATH_STRING(doc, STR("substring(node, 6)"), STR("r"));
+    CHECK_XPATH_STRING(doc, STR("substring(node, 7)"), STR(""));
 }
 
 TEST_XML(xpath_string_string_length, "<node>123</node>")

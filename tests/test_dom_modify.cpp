@@ -1180,8 +1180,9 @@ TEST_XML(dom_node_insert_move_before, "<node>foo<child>bar</child></node>")
 TEST_XML(dom_node_move_recursive, "<root><node>foo<child/></node></root>")
 {
 	xml_node root = doc.child(STR("root"));
-	xml_node node = doc.child(STR("node"));
+	xml_node node = root.child(STR("node"));
 	xml_node foo = node.first_child();
+	xml_node child = node.last_child();
 
 	CHECK(node.prepend_move(node) == xml_node());
 	CHECK(node.prepend_move(root) == xml_node());
@@ -1194,6 +1195,8 @@ TEST_XML(dom_node_move_recursive, "<root><node>foo<child/></node></root>")
 
 	CHECK(node.insert_move_after(node, foo) == xml_node());
 	CHECK(node.insert_move_after(root, foo) == xml_node());
+
+	CHECK(child.append_move(node) == xml_node());
 
 	CHECK_NODE(doc, STR("<root><node>foo<child /></node></root>"));
 }

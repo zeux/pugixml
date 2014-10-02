@@ -1015,4 +1015,31 @@ TEST_XML(dom_node_named_iterator, "<node><node1><child/></node1><node2><child/><
 
 	CHECK(itt-- == r1.end());
 	CHECK(itt == r1.begin());
+
+	CHECK(itt->offset_debug() == 14);
+}
+
+TEST_XML(dom_node_children_attributes, "<node1 attr1='value1' attr2='value2' /><node2 />")
+{
+	xml_object_range<xml_node_iterator> r1 = doc.children();
+
+	CHECK(r1.begin() == doc.begin());
+	CHECK(r1.end() == doc.end());
+
+	xml_object_range<xml_node_iterator> r2 = xml_node().children();
+
+	CHECK(r2.begin() == xml_node_iterator());
+	CHECK(r2.end() == xml_node_iterator());
+
+	xml_node node = doc.child(STR("node1"));
+
+	xml_object_range<xml_attribute_iterator> r3 = node.attributes();
+
+	CHECK(r3.begin() == node.attributes_begin());
+	CHECK(r3.end() == node.attributes_end());
+
+	xml_object_range<xml_attribute_iterator> r4 = xml_node().attributes();
+
+	CHECK(r4.begin() == xml_attribute_iterator());
+	CHECK(r4.end() == xml_attribute_iterator());
 }
