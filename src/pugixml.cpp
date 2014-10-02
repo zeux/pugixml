@@ -1,4 +1,3 @@
-#pragma pack(push, 16)
 /**
  * pugixml parser - version 1.4
  * --------------------------------------------------------
@@ -3666,13 +3665,16 @@ PUGI__NS_BEGIN
 			{
 				xml_node copy(append_new_node(destit.internal_object(), alloc, sourceit.type()));
 
-				node_copy_contents(copy, sourceit, shared_alloc);
-
-				if (sourceit.first_child())
+				if (copy)
 				{
-					destit = copy;
-					sourceit = sourceit.first_child();
-					continue;
+					node_copy_contents(copy, sourceit, shared_alloc);
+
+					if (sourceit.first_child())
+					{
+						destit = copy;
+						sourceit = sourceit.first_child();
+						continue;
+					}
 				}
 			}
 
