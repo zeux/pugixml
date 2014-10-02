@@ -3328,9 +3328,6 @@ PUGI__NS_BEGIN
 	{
 		switch (indent_length)
 		{
-		case 0:
-			break;
-
 		case 1:
 		{
 			for (unsigned int i = 0; i < depth; ++i)
