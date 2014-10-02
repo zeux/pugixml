@@ -1220,3 +1220,18 @@ TEST(document_load_stream_truncated)
 	}
 }
 #endif
+
+TEST(document_alignment)
+{
+	char buf[256 + sizeof(xml_document)];
+
+	for (size_t offset = 0; offset < 256; offset += sizeof(void*))
+	{
+		xml_document* doc = new (buf + offset) xml_document;
+
+		CHECK(doc->load(STR("<node />")));
+		CHECK_NODE(*doc, STR("<node />"));
+
+		doc->~xml_document();
+	}
+}
