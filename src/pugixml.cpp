@@ -5868,7 +5868,7 @@ namespace pugi
 
 	PUGI__FN void xml_document::create()
 	{
-        assert(!_root);
+		assert(!_root);
 
 		// initialize sentinel page
 		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment - sizeof(void*) <= sizeof(_memory));
@@ -5895,7 +5895,7 @@ namespace pugi
 
 	PUGI__FN void xml_document::destroy()
 	{
-        assert(_root);
+		assert(_root);
 
 		// destroy static storage
 		if (_buffer)
@@ -5911,19 +5911,19 @@ namespace pugi
 		}
 
 		// destroy dynamic storage, leave sentinel page (it's in static memory)
-        impl::xml_memory_page* root_page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
-        assert(root_page && !root_page->prev);
+		impl::xml_memory_page* root_page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
+		assert(root_page && !root_page->prev);
 
-        for (impl::xml_memory_page* page = root_page->next; page; )
-        {
-            impl::xml_memory_page* next = page->next;
+		for (impl::xml_memory_page* page = root_page->next; page; )
+		{
+			impl::xml_memory_page* next = page->next;
 
-            impl::xml_allocator::deallocate_page(page);
+			impl::xml_allocator::deallocate_page(page);
 
-            page = next;
-        }
+			page = next;
+		}
 
-        _root = 0;
+		_root = 0;
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -5985,7 +5985,7 @@ namespace pugi
 
 		return impl::load_buffer_impl(static_cast<impl::xml_document_struct*>(_root), _root, contents, size, options, encoding, true, false, &_buffer);
 	}
-		
+
 	PUGI__FN xml_parse_result xml_document::load_buffer_inplace_own(void* contents, size_t size, unsigned int options, xml_encoding encoding)
 	{
 		reset();
@@ -6049,7 +6049,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_document::document_element() const
 	{
-        assert(_root);
+		assert(_root);
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if (PUGI__NODETYPE(i) == node_element)
