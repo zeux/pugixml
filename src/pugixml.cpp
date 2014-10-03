@@ -3631,13 +3631,8 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_copy_contents(xml_node dest, const xml_node source, xml_allocator* shared_alloc)
+	PUGI__FN void node_copy_contents(xml_node_struct* dn, xml_node_struct* sn, xml_allocator* shared_alloc)
 	{
-		assert(dest.type() == source.type());
-
-		xml_node_struct* dn = dest.internal_object();
-		xml_node_struct* sn = source.internal_object();
-
 		node_copy_string(dn->name, dn->header, xml_memory_page_name_allocated_mask, sn->name, sn->header, shared_alloc);
 		node_copy_string(dn->value, dn->header, xml_memory_page_value_allocated_mask, sn->value, sn->header, shared_alloc);
 
@@ -3650,30 +3645,30 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_copy_tree(xml_node dest, const xml_node source)
+	PUGI__FN void node_copy_tree(xml_node_struct* dn, xml_node_struct* sn)
 	{
-		xml_allocator& alloc = get_allocator(dest.internal_object());
-		xml_allocator* shared_alloc = (&alloc == &get_allocator(source.internal_object())) ? &alloc : 0;
+		xml_allocator& alloc = get_allocator(dn);
+		xml_allocator* shared_alloc = (&alloc == &get_allocator(sn)) ? &alloc : 0;
 
-		node_copy_contents(dest, source, shared_alloc);
+		node_copy_contents(dn, sn, shared_alloc);
 
-		xml_node destit = dest;
-		xml_node sourceit = source.first_child();
+		xml_node_struct* dit = dn;
+		xml_node_struct* sit = sn->first_child;
 
-		while (sourceit && sourceit != source)
+		while (sit && sit != sn)
 		{
-			if (sourceit != dest)
+			if (sit != dn)
 			{
-				xml_node copy(append_new_node(destit.internal_object(), alloc, sourceit.type()));
+				xml_node_struct* copy = append_new_node(dit, alloc, PUGI__NODETYPE(sit));
 
 				if (copy)
 				{
-					node_copy_contents(copy, sourceit, shared_alloc);
+					node_copy_contents(copy, sit, shared_alloc);
 
-					if (sourceit.first_child())
+					if (sit->first_child)
 					{
-						destit = copy;
-						sourceit = sourceit.first_child();
+						dit = copy;
+						sit = sit->first_child;
 						continue;
 					}
 				}
@@ -3682,16 +3677,16 @@ PUGI__NS_BEGIN
 			// continue to the next node
 			do
 			{
-				if (sourceit.next_sibling())
+				if (sit->next_sibling)
 				{
-					sourceit = sourceit.next_sibling();
+					sit = sit->next_sibling;
 					break;
 				}
 
-				sourceit = sourceit.parent();
-				destit = destit.parent();
+				sit = sit->parent;
+				dit = dit->parent;
 			}
-			while (sourceit != source);
+			while (sit != sn);
 		}
 	}
 
@@ -5005,7 +5000,7 @@ namespace pugi
 	{
 		xml_node result = append_child(proto.type());
 
-		if (result) impl::node_copy_tree(result, proto);
+		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
 
 		return result;
 	}
@@ -5014,7 +5009,7 @@ namespace pugi
 	{
 		xml_node result = prepend_child(proto.type());
 
-		if (result) impl::node_copy_tree(result, proto);
+		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
 
 		return result;
 	}
@@ -5023,7 +5018,7 @@ namespace pugi
 	{
 		xml_node result = insert_child_after(proto.type(), node);
 
-		if (result) impl::node_copy_tree(result, proto);
+		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
 
 		return result;
 	}
@@ -5032,7 +5027,7 @@ namespace pugi
 	{
 		xml_node result = insert_child_before(proto.type(), node);
 
-		if (result) impl::node_copy_tree(result, proto);
+		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
 
 		return result;
 	}
