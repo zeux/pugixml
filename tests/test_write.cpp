@@ -419,7 +419,7 @@ TEST(write_stackless)
 
 	data += STR("text");
 
-	for (unsigned int i = 0; i < count; ++i)
+	for (unsigned int j = 0; j < count; ++j)
 		data += STR("</a>");
 
 	xml_document doc;
