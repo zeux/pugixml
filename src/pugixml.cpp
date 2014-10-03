@@ -275,6 +275,8 @@ PUGI__NS_BEGIN
 	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_name_or_value_shared_mask;
 	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_name_or_value_shared_mask;
 
+	#define PUGI__NODETYPE(n) static_cast<xml_node_type>(((n)->header & impl::xml_memory_page_type_mask) + 1)
+
 	struct xml_allocator;
 
 	struct xml_memory_page
@@ -2727,7 +2729,7 @@ PUGI__NS_BEGIN
 						if (!s) return s;
 
 						assert(cursor);
-						if ((cursor->header & xml_memory_page_type_mask) + 1 == node_declaration) goto LOC_ATTRIBUTES;
+						if (PUGI__NODETYPE(cursor) == node_declaration) goto LOC_ATTRIBUTES;
 					}
 					else if (*s == '!') // '<!...'
 					{
@@ -2808,8 +2810,7 @@ PUGI__NS_BEGIN
 		{
 			while (node)
 			{
-				xml_node_type type = static_cast<xml_node_type>((node->header & impl::xml_memory_page_type_mask) + 1);
-				if (type == node_element) return true;
+				if (PUGI__NODETYPE(node) == node_element) return true;
 
 				node = node->next_sibling;
 			}
@@ -3696,7 +3697,7 @@ PUGI__NS_BEGIN
 
 	inline bool is_text_node(xml_node_struct* node)
 	{
-		xml_node_type type = static_cast<xml_node_type>((node->header & impl::xml_memory_page_type_mask) + 1);
+		xml_node_type type = PUGI__NODETYPE(node);
 
 		return type == node_pcdata || type == node_cdata;
 	}
@@ -4627,7 +4628,7 @@ namespace pugi
 
 	PUGI__FN xml_node_type xml_node::type() const
 	{
-		return _root ? static_cast<xml_node_type>((_root->header & impl::xml_memory_page_type_mask) + 1) : node_null;
+		return _root ? PUGI__NODETYPE(_root) : node_null;
 	}
 	
 	PUGI__FN const char_t* xml_node::value() const
@@ -6056,7 +6057,7 @@ namespace pugi
         assert(_root);
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if ((i->header & impl::xml_memory_page_type_mask) + 1 == node_element)
+			if (PUGI__NODETYPE(i) == node_element)
 				return xml_node(i);
 
 		return xml_node();
@@ -10965,6 +10966,7 @@ namespace pugi
 #undef PUGI__NS_END
 #undef PUGI__FN
 #undef PUGI__FN_NO_INLINE
+#undef PUGI__NODETYPE
 #undef PUGI__IS_CHARTYPE_IMPL
 #undef PUGI__IS_CHARTYPE
 #undef PUGI__IS_CHARTYPEX
