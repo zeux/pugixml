@@ -926,8 +926,7 @@ namespace pugi
 	private:
 		char_t* _buffer;
 
-		// sizeof(xml_memory_page) + sizeof(xml_document_struct) + xml_memory_page_alignment
-		char _memory[sizeof(void*) * 20 + 64];
+		char _memory[192];
 		
 		// Non-copyable semantics
 		xml_document(const xml_document&);

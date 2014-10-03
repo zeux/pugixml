@@ -288,7 +288,6 @@ PUGI__NS_BEGIN
 			xml_memory_page* result = static_cast<xml_memory_page*>(memory);
 
 			result->allocator = 0;
-			result->memory = 0;
 			result->prev = 0;
 			result->next = 0;
 			result->busy_size = 0;
@@ -299,15 +298,11 @@ PUGI__NS_BEGIN
 
 		xml_allocator* allocator;
 
-		void* memory;
-
 		xml_memory_page* prev;
 		xml_memory_page* next;
 
 		size_t busy_size;
 		size_t freed_size;
-
-		char data[1];
 	};
 
 	struct xml_memory_string_header
@@ -324,28 +319,32 @@ PUGI__NS_BEGIN
 
 		xml_memory_page* allocate_page(size_t data_size)
 		{
-			size_t size = offsetof(xml_memory_page, data) + data_size;
+			size_t size = sizeof(xml_memory_page) + data_size;
 
 			// allocate block with some alignment, leaving memory for worst-case padding
 			void* memory = xml_memory::allocate(size + xml_memory_page_alignment);
 			if (!memory) return 0;
 
-			// align upwards to page boundary
-			void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(memory) + (xml_memory_page_alignment - 1)) & ~(xml_memory_page_alignment - 1));
+			// align upwards to page boundary (note: this guarantees at least 1 usable byte before the page)
+			char* page_memory = reinterpret_cast<char*>((reinterpret_cast<uintptr_t>(memory) + xml_memory_page_alignment) & ~(xml_memory_page_alignment - 1));
 
 			// prepare page structure
 			xml_memory_page* page = xml_memory_page::construct(page_memory);
 			assert(page);
 
-			page->memory = memory;
 			page->allocator = _root->allocator;
+
+			// record the offset for freeing the memory block
+			page_memory[-1] = static_cast<char>(page_memory - static_cast<char*>(memory));
 
 			return page;
 		}
 
 		static void deallocate_page(xml_memory_page* page)
 		{
-			xml_memory::deallocate(page->memory);
+			char* page_memory = reinterpret_cast<char*>(page);
+
+			xml_memory::deallocate(page_memory - page_memory[-1]);
 		}
 
 		void* allocate_memory_oob(size_t size, xml_memory_page*& out_page);
@@ -354,7 +353,7 @@ PUGI__NS_BEGIN
 		{
 			if (_busy_size + size > xml_memory_page_size) return allocate_memory_oob(size, out_page);
 
-			void* buf = _root->data + _busy_size;
+			void* buf = reinterpret_cast<char*>(_root) + sizeof(xml_memory_page) + _busy_size;
 
 			_busy_size += size;
 
@@ -367,7 +366,7 @@ PUGI__NS_BEGIN
 		{
 			if (page == _root) page->busy_size = _busy_size;
 
-			assert(ptr >= page->data && ptr < page->data + page->busy_size);
+			assert(ptr >= reinterpret_cast<char*>(page) + sizeof(xml_memory_page) && ptr < reinterpret_cast<char*>(page) + sizeof(xml_memory_page) + page->busy_size);
 			(void)!ptr;
 
 			page->freed_size += size;
@@ -412,7 +411,7 @@ PUGI__NS_BEGIN
 			if (!header) return 0;
 
 			// setup header
-			ptrdiff_t page_offset = reinterpret_cast<char*>(header) - page->data;
+			ptrdiff_t page_offset = reinterpret_cast<char*>(header) - reinterpret_cast<char*>(page) - sizeof(xml_memory_page);
 
 			assert(page_offset >= 0 && page_offset < (1 << 16));
 			header->page_offset = static_cast<uint16_t>(page_offset);
@@ -435,7 +434,7 @@ PUGI__NS_BEGIN
 			xml_memory_string_header* header = static_cast<xml_memory_string_header*>(static_cast<void*>(string)) - 1;
 
 			// deallocate
-			size_t page_offset = offsetof(xml_memory_page, data) + header->page_offset;
+			size_t page_offset = sizeof(xml_memory_page) + header->page_offset;
 			xml_memory_page* page = reinterpret_cast<xml_memory_page*>(static_cast<void*>(reinterpret_cast<char*>(header) - page_offset));
 
 			// if full_size == 0 then this string occupies the whole page
@@ -484,7 +483,7 @@ PUGI__NS_BEGIN
 		// allocate inside page
 		page->busy_size = size;
 
-		return page->data;
+		return reinterpret_cast<char*>(page) + sizeof(xml_memory_page);
 	}
 PUGI__NS_END
 
@@ -5872,7 +5871,7 @@ namespace pugi
         assert(!_root);
 
 		// initialize sentinel page
-		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment <= sizeof(_memory));
+		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment - sizeof(void*) <= sizeof(_memory));
 
 		// align upwards to page boundary
 		void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(_memory) + (impl::xml_memory_page_alignment - 1)) & ~(impl::xml_memory_page_alignment - 1));
@@ -5884,11 +5883,14 @@ namespace pugi
 		page->busy_size = impl::xml_memory_page_size;
 
 		// allocate new root
-		_root = new (page->data) impl::xml_document_struct(page);
+		_root = new (reinterpret_cast<char*>(page) + sizeof(impl::xml_memory_page)) impl::xml_document_struct(page);
 		_root->prev_sibling_c = _root;
 
 		// setup sentinel page
 		page->allocator = static_cast<impl::xml_document_struct*>(_root);
+
+		// verify the document allocation
+		assert(reinterpret_cast<char*>(_root) + sizeof(impl::xml_document_struct) <= _memory + sizeof(_memory));
 	}
 
 	PUGI__FN void xml_document::destroy()
@@ -5910,7 +5912,7 @@ namespace pugi
 
 		// destroy dynamic storage, leave sentinel page (it's in static memory)
         impl::xml_memory_page* root_page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
-        assert(root_page && !root_page->prev && !root_page->memory);
+        assert(root_page && !root_page->prev);
 
         for (impl::xml_memory_page* page = root_page->next; page; )
         {
