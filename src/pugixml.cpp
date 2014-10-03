@@ -268,12 +268,12 @@ PUGI__NS_BEGIN
 
 	static const uintptr_t xml_memory_page_alignment = 64;
 	static const uintptr_t xml_memory_page_pointer_mask = ~(xml_memory_page_alignment - 1);
-	static const uintptr_t xml_memory_page_name_or_value_shared_mask = 32;
+	static const uintptr_t xml_memory_page_contents_shared_mask = 32;
 	static const uintptr_t xml_memory_page_name_allocated_mask = 16;
 	static const uintptr_t xml_memory_page_value_allocated_mask = 8;
 	static const uintptr_t xml_memory_page_type_mask = 7;
-	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_name_or_value_shared_mask;
-	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_name_or_value_shared_mask;
+	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_contents_shared_mask;
+	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_contents_shared_mask;
 
 	#define PUGI__NODETYPE(n) static_cast<xml_node_type>(((n)->header & impl::xml_memory_page_type_mask) + 1)
 
@@ -541,15 +541,13 @@ PUGI__NS_BEGIN
 
 	struct xml_document_struct: public xml_node_struct, public xml_allocator
 	{
-		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0), document_buffer_order_valid(true)
+		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0)
 		{
 		}
 
 		const char_t* buffer;
 
 		xml_extra_buffer* extra_buffers;
-
-		bool document_buffer_order_valid;
 	};
 
 	inline xml_allocator& get_allocator(const xml_node_struct* node)
@@ -1668,7 +1666,7 @@ PUGI__NS_BEGIN
 	inline bool strcpy_insitu_allow(size_t length, uintptr_t header, uintptr_t header_mask, char_t* target)
 	{
 		// never reuse shared memory
-		if (header & xml_memory_page_name_or_value_shared_mask) return false;
+		if (header & xml_memory_page_contents_shared_mask) return false;
 
 		size_t target_length = strlength(target);
 
@@ -3623,8 +3621,8 @@ PUGI__NS_BEGIN
 				dest = source;
 
 				// since strcpy_insitu can reuse document buffer memory we need to mark both source and dest as shared
-				header |= xml_memory_page_name_or_value_shared_mask;
-				source_header |= xml_memory_page_name_or_value_shared_mask;
+				header |= xml_memory_page_contents_shared_mask;
+				source_header |= xml_memory_page_contents_shared_mask;
 			}
 			else
 				strcpy_insitu(dest, header, header_mask, source);
@@ -5037,7 +5035,7 @@ namespace pugi
 		if (!impl::allow_move(*this, moved)) return xml_node();
 
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
-		impl::get_document(_root).document_buffer_order_valid = false;
+		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
 
 		impl::remove_node(moved._root);
 		impl::append_node(moved._root, _root);
@@ -5050,7 +5048,7 @@ namespace pugi
 		if (!impl::allow_move(*this, moved)) return xml_node();
 
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
-		impl::get_document(_root).document_buffer_order_valid = false;
+		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
 
 		impl::remove_node(moved._root);
 		impl::prepend_node(moved._root, _root);
@@ -5065,7 +5063,7 @@ namespace pugi
 		if (moved._root == node._root) return xml_node();
 
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
-		impl::get_document(_root).document_buffer_order_valid = false;
+		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
 
 		impl::remove_node(moved._root);
 		impl::insert_node_after(moved._root, node._root);
@@ -5080,7 +5078,7 @@ namespace pugi
 		if (moved._root == node._root) return xml_node();
 
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
-		impl::get_document(_root).document_buffer_order_valid = false;
+		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
 
 		impl::remove_node(moved._root);
 		impl::insert_node_before(moved._root, node._root);
@@ -5141,7 +5139,7 @@ namespace pugi
 		assert(doc);
 
 		// disable document_buffer_order optimization since in a document with multiple buffers comparing buffer pointers does not make sense
-		doc->document_buffer_order_valid = false;
+		doc->header |= impl::xml_memory_page_contents_shared_mask;
 		
 		// get extra buffer element (we'll store the document fragment buffer there so that we can deallocate it later)
 		impl::xml_memory_page* page = 0;
@@ -6861,7 +6859,7 @@ PUGI__NS_BEGIN
 
 		if (node)
 		{
-			if (get_document(node).document_buffer_order_valid)
+			if ((get_document(node).header & xml_memory_page_contents_shared_mask) == 0)
 			{
 				if (node->name && (node->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return node->name;
 				if (node->value && (node->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return node->value;
@@ -6874,7 +6872,7 @@ PUGI__NS_BEGIN
 
 		if (attr)
 		{
-			if (get_document(attr).document_buffer_order_valid)
+			if ((get_document(attr).header & xml_memory_page_contents_shared_mask) == 0)
 			{
 				if ((attr->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0) return attr->name;
 				if ((attr->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0) return attr->value;
