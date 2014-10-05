@@ -557,6 +557,16 @@ TEST(xpath_string_translate)
 	CHECK_XPATH_FAIL(STR("translate('a', 'b', 'c', 'd')"));
 }
 
+TEST(xpath_string_translate_table)
+{
+	xml_node c;
+
+	CHECK_XPATH_STRING(c, STR("translate('abcd\xe9 ', 'abc', 'ABC')"), STR("ABCd\xe9 "));
+	CHECK_XPATH_STRING(c, STR("translate('abcd\xe9 ', 'abc\xe9', 'ABC!')"), STR("ABCd! "));
+	CHECK_XPATH_STRING(c, STR("translate('abcde', concat('abc', 'd'), 'ABCD')"), STR("ABCDe"));
+	CHECK_XPATH_STRING(c, STR("translate('abcde', 'abcd', concat('ABC', 'D'))"), STR("ABCDe"));
+}
+
 TEST_XML(xpath_nodeset_last, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
 {
 	xml_node n = doc.child(STR("node"));

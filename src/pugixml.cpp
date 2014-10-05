@@ -432,6 +432,7 @@ PUGI__NS_BEGIN
 
 			// get header
 			xml_memory_string_header* header = static_cast<xml_memory_string_header*>(static_cast<void*>(string)) - 1;
+			assert(header);
 
 			// deallocate
 			size_t page_offset = sizeof(xml_memory_page) + header->page_offset;
@@ -7345,10 +7346,8 @@ PUGI__NS_BEGIN
 		*write = 0;
 	}
 
-	PUGI__FN void translate(char_t* buffer, const char_t* from, const char_t* to)
+	PUGI__FN void translate(char_t* buffer, const char_t* from, const char_t* to, size_t to_length)
 	{
-		size_t to_length = strlength(to);
-
 		char_t* write = buffer;
 
 		while (*buffer)
@@ -7361,6 +7360,65 @@ PUGI__NS_BEGIN
 				*write++ = ch; // do not process
 			else if (static_cast<size_t>(pos - from) < to_length)
 				*write++ = to[pos - from]; // replace
+		}
+
+		// zero-terminate
+		*write = 0;
+	}
+
+	PUGI__FN unsigned char* translate_table_generate(xpath_allocator* alloc, const char_t* from, const char_t* to)
+	{
+		unsigned char table[128] = {};
+
+		while (*from)
+		{
+			unsigned int fc = static_cast<unsigned int>(*from);
+			unsigned int tc = static_cast<unsigned int>(*to);
+
+			if (fc >= 128 || tc >= 128)
+				return 0;
+
+			if (!table[fc])
+				table[fc] = tc ? static_cast<unsigned char>(tc) : 128;
+
+			from++;
+			if (tc) to++;
+		}
+
+		for (int i = 0; i < 128; ++i)
+			if (!table[i])
+				table[i] = static_cast<unsigned char>(i);
+
+		void* result = alloc->allocate_nothrow(sizeof(table));
+
+		if (result)
+		{
+			memcpy(result, table, sizeof(table));
+		}
+
+		return static_cast<unsigned char*>(result);
+	}
+
+	PUGI__FN void translate_table(char_t* buffer, const unsigned char* table)
+	{
+		char_t* write = buffer;
+
+		while (*buffer)
+		{
+			char_t ch = *buffer++;
+			unsigned int index = static_cast<unsigned int>(ch);
+
+			if (index < 128)
+			{
+				unsigned char code = table[index];
+
+				*write = static_cast<char_t>(code);
+				write += 1 - (code >> 7);
+			}
+			else
+			{
+				*write++ = ch;
+			}
 		}
 
 		// zero-terminate
@@ -8111,6 +8169,7 @@ PUGI__NS_BEGIN
 		ast_func_normalize_space_0,		// normalize-space()
 		ast_func_normalize_space_1,		// normalize-space(left)
 		ast_func_translate,				// translate(left, right, third)
+		ast_func_translate_table,		// translate(left, right, third) where right/third are constants
 		ast_func_boolean,				// boolean(left)
 		ast_func_not,					// not(left)
 		ast_func_true,					// true()
@@ -8189,6 +8248,8 @@ PUGI__NS_BEGIN
 			xpath_variable* variable;
 			// node test for ast_step (node name/namespace/node type/pi target)
 			const char_t* nodetest;
+			// table for ast_func_translate_table
+			const unsigned char* table;
 		} _data;
 
 		xpath_ast_node(const xpath_ast_node&);
@@ -9298,7 +9359,16 @@ PUGI__NS_BEGIN
 				xpath_string from = _right->eval_string(c, swapped_stack);
 				xpath_string to = _right->_next->eval_string(c, swapped_stack);
 
-				translate(s.data(stack.result), from.c_str(), to.c_str());
+				translate(s.data(stack.result), from.c_str(), to.c_str(), to.length());
+
+				return s;
+			}
+
+			case ast_func_translate_table:
+			{
+				xpath_string s = _left->eval_string(c, stack);
+
+				translate_table(s.data(stack.result), _data.table);
 
 				return s;
 			}
@@ -9468,11 +9538,11 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void optimize()
+		void optimize(xpath_allocator* alloc)
 		{
-			if (_left) _left->optimize();
-			if (_right) _right->optimize();
-			if (_next) _next->optimize();
+			if (_left) _left->optimize(alloc);
+			if (_right) _right->optimize(alloc);
+			if (_next) _next->optimize(alloc);
 
 			// Replace descendant-or-self::node()/child::foo with descendant::foo
 			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
@@ -9483,6 +9553,18 @@ PUGI__NS_BEGIN
 			{
 				_axis = axis_descendant;
 				_left = _left->_left;
+			}
+
+			// Replace translate() with constant arguments with a table
+			if (_type == ast_func_translate && _right->_type == ast_string_constant && _right->_next->_type == ast_string_constant)
+			{
+				unsigned char* table = translate_table_generate(alloc, _right->_data.string, _right->_next->_data.string);
+
+				if (table)
+				{
+					_type = ast_func_translate_table;
+					_data.table = table;
+				}
 			}
 		}
 		
@@ -10838,7 +10920,7 @@ namespace pugi
 
 			if (qimpl->root)
 			{
-				qimpl->root->optimize();
+				qimpl->root->optimize(&qimpl->alloc);
 
 				_impl = static_cast<impl::xpath_query_impl*>(impl_holder.release());
 				_result.error = 0;
