@@ -6844,7 +6844,7 @@ PUGI__NS_BEGIN
 		for (; ln; ln = ln.next_sibling())
 			if (ln == rn)
 				return true;
-				
+
 		return false;
 	}
 
@@ -7498,15 +7498,38 @@ PUGI__NS_END
 
 // Internal node set class
 PUGI__NS_BEGIN
+	PUGI__FN xpath_node_set::type_t xpath_get_order(const xpath_node* begin, const xpath_node* end)
+	{
+		if (end - begin < 2)
+			return xpath_node_set::type_sorted;
+
+		document_order_comparator cmp;
+
+		bool first = cmp(begin[0], begin[1]);
+
+		for (const xpath_node* it = begin + 1; it + 1 < end; ++it)
+			if (cmp(it[0], it[1]) != first)
+				return xpath_node_set::type_unsorted;
+
+		return first ? xpath_node_set::type_sorted : xpath_node_set::type_sorted_reverse;
+	}
+
 	PUGI__FN xpath_node_set::type_t xpath_sort(xpath_node* begin, xpath_node* end, xpath_node_set::type_t type, bool rev)
 	{
 		xpath_node_set::type_t order = rev ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
 
 		if (type == xpath_node_set::type_unsorted)
 		{
-			sort(begin, end, document_order_comparator());
+			xpath_node_set::type_t sorted = xpath_get_order(begin, end);
 
-			type = xpath_node_set::type_sorted;
+			if (sorted == xpath_node_set::type_unsorted)
+			{
+				sort(begin, end, document_order_comparator());
+
+				type = xpath_node_set::type_sorted;
+			}
+			else
+				type = sorted;
 		}
 		
 		if (type != order) reverse(begin, end);
