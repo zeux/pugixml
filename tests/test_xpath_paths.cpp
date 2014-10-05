@@ -539,4 +539,20 @@ TEST_XML(xpath_paths_precision, "<node><para/><para/><para/><para/><para/></node
 	CHECK_XPATH_NODESET(doc, STR("//para[6 * (1 div 3) - 1]")) % 3;
 }
 
+TEST_XML(xpath_paths_unsorted_child, "<node><foo><bar/></foo><node><foo><bar/></foo></node><foo><bar/></foo></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("//node/foo")) % 3 % 6 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//node/foo/bar")) % 4 % 7 % 9;
+
+	xpath_node_set ns = doc.select_nodes(STR("//node/foo/bar"));
+	CHECK(ns.type() == xpath_node_set::type_unsorted);
+
+	xpath_node_set nss = ns;
+	nss.sort();
+
+	CHECK(ns[0] == nss[0]);
+	CHECK(ns[1] == nss[2]);
+	CHECK(ns[2] == nss[1]);
+}
+
 #endif
