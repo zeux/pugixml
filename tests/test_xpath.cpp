@@ -506,4 +506,82 @@ TEST_XML(xpath_sort_append_buffer, "<node /><node />")
 	xpath_node_set_tester(sorted, "sorted order failed") % 2 % 3 % 4 % 5 % 6 % 7 % 8 % 9;
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 9 % 8 % 7 % 6 % 5 % 4 % 3 % 2;
 }
+
+TEST(xpath_sort_crossdoc)
+{
+	xml_document doc1;
+	CHECK(doc1.load(STR("<node />")));
+
+	xml_document doc2;
+	CHECK(doc2.load(STR("<node />")));
+
+	xpath_node_set ns1 = doc1.select_nodes(STR("*"));
+	CHECK(ns1.size() == 1);
+
+	xpath_node_set ns2 = doc2.select_nodes(STR("*"));
+	CHECK(ns2.size() == 1);
+
+	xpath_variable_set set;
+	set.set(STR("ns1"), ns1);
+	set.set(STR("ns2"), ns2);
+
+	xpath_node_set ns = xpath_query(STR("$ns1 | $ns2"), &set).evaluate_node_set(xpath_node());
+
+	ns.sort();
+
+	CHECK(ns.size() == 2);
+	CHECK((ns[0] == ns1[0] && ns[1] == ns2[0]) || (ns[0] == ns2[0] && ns[1] == ns1[0]));
+}
+
+TEST(xpath_sort_crossdoc_dynamic)
+{
+	xml_document doc1;
+	doc1.append_child(STR("node"));
+
+	xml_document doc2;
+	doc2.append_child(STR("node"));
+
+	xpath_node_set ns1 = doc1.select_nodes(STR("*"));
+	CHECK(ns1.size() == 1);
+
+	xpath_node_set ns2 = doc2.select_nodes(STR("*"));
+	CHECK(ns2.size() == 1);
+
+	xpath_variable_set set;
+	set.set(STR("ns1"), ns1);
+	set.set(STR("ns2"), ns2);
+
+	xpath_node_set ns = xpath_query(STR("$ns1 | $ns2"), &set).evaluate_node_set(xpath_node());
+
+	ns.sort();
+
+	CHECK(ns.size() == 2);
+	CHECK((ns[0] == ns1[0] && ns[1] == ns2[0]) || (ns[0] == ns2[0] && ns[1] == ns1[0]));
+}
+
+TEST(xpath_sort_crossdoc_different_depth)
+{
+	xml_document doc1;
+	doc1.append_child(STR("node"));
+
+	xml_document doc2;
+	doc2.append_child(STR("node")).append_child(STR("node"));
+
+	xpath_node_set ns1 = doc1.select_nodes(STR("*"));
+	CHECK(ns1.size() == 1);
+
+	xpath_node_set ns2 = doc2.select_nodes(STR("*/*"));
+	CHECK(ns2.size() == 1);
+
+	xpath_variable_set set;
+	set.set(STR("ns1"), ns1);
+	set.set(STR("ns2"), ns2);
+
+	xpath_node_set ns = xpath_query(STR("$ns1 | $ns2"), &set).evaluate_node_set(xpath_node());
+
+	ns.sort();
+
+	CHECK(ns.size() == 2);
+	CHECK((ns[0] == ns1[0] && ns[1] == ns2[0]) || (ns[0] == ns2[0] && ns[1] == ns1[0]));
+}
 #endif

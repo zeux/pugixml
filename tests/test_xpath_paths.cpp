@@ -531,4 +531,12 @@ TEST_XML(xpath_paths_descendant_optimize, "<node><para><para/><para/><para><para
 	CHECK_XPATH_NODESET(doc, STR("/descendant-or-self::node()[3]/child::para")) % 4 % 5 % 6;
 }
 
+TEST_XML(xpath_paths_precision, "<node><para/><para/><para/><para/><para/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("//para[1]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//para[3 div 3]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//para[6 div 3 - 1]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//para[6 * (1 div 3) - 1]")) % 3;
+}
+
 #endif
