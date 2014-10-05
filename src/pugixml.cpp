@@ -6595,6 +6595,7 @@ PUGI__NS_BEGIN
 	{
 		const char_t* _buffer;
 		bool _uses_heap;
+		size_t _length_heap;
 
 		static char_t* duplicate_string(const char_t* string, size_t length, xpath_allocator* alloc)
 		{
@@ -6607,36 +6608,34 @@ PUGI__NS_BEGIN
 			return result;
 		}
 
-		static char_t* duplicate_string(const char_t* string, xpath_allocator* alloc)
+		xpath_string(const char_t* buffer, bool uses_heap_, size_t length_heap): _buffer(buffer), _uses_heap(uses_heap_), _length_heap(length_heap)
 		{
-			return duplicate_string(string, strlength(string), alloc);
 		}
 
 	public:
-		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false)
+		static xpath_string from_const(const char_t* str)
 		{
+			return xpath_string(str, false, 0);
 		}
 
-		explicit xpath_string(const char_t* str, xpath_allocator* alloc)
+		static xpath_string from_heap_preallocated(const char_t* begin, const char_t* end)
 		{
-			bool empty_ = (*str == 0);
+			assert(begin <= end && *end == 0);
 
-			_buffer = empty_ ? PUGIXML_TEXT("") : duplicate_string(str, alloc);
-			_uses_heap = !empty_;
+			return xpath_string(begin, true, static_cast<size_t>(end - begin));
 		}
 
-		explicit xpath_string(const char_t* str, bool use_heap): _buffer(str), _uses_heap(use_heap)
-		{
-		}
-
-		xpath_string(const char_t* begin, const char_t* end, xpath_allocator* alloc)
+		static xpath_string from_heap(const char_t* begin, const char_t* end, xpath_allocator* alloc)
 		{
 			assert(begin <= end);
 
-			bool empty_ = (begin == end);
+			size_t length = static_cast<size_t>(end - begin);
 
-			_buffer = empty_ ? PUGIXML_TEXT("") : duplicate_string(begin, static_cast<size_t>(end - begin), alloc);
-			_uses_heap = !empty_;
+			return length == 0 ? xpath_string() : xpath_string(duplicate_string(begin, length, alloc), true, length);
+		}
+
+		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false), _length_heap(0)
+		{
 		}
 
 		void append(const xpath_string& o, xpath_allocator* alloc)
@@ -6652,8 +6651,8 @@ PUGI__NS_BEGIN
 			else
 			{
 				// need to make heap copy
-				size_t target_length = strlength(_buffer);
-				size_t source_length = strlength(o._buffer);
+				size_t target_length = length();
+				size_t source_length = o.length();
 				size_t result_length = target_length + source_length;
 
 				// allocate new buffer
@@ -6670,6 +6669,7 @@ PUGI__NS_BEGIN
 				// finalize
 				_buffer = result;
 				_uses_heap = true;
+				_length_heap = result_length;
 			}
 		}
 
@@ -6680,7 +6680,7 @@ PUGI__NS_BEGIN
 
 		size_t length() const
 		{
-			return strlength(_buffer);
+			return _uses_heap ? _length_heap : strlength(_buffer);
 		}
 		
 		char_t* data(xpath_allocator* alloc)
@@ -6688,8 +6688,11 @@ PUGI__NS_BEGIN
 			// make private heap copy
 			if (!_uses_heap)
 			{
-				_buffer = duplicate_string(_buffer, alloc);
+				size_t length_ = strlength(_buffer);
+
+				_buffer = duplicate_string(_buffer, length_, alloc);
 				_uses_heap = true;
+				_length_heap = length_;
 			}
 
 			return const_cast<char_t*>(_buffer);
@@ -6715,11 +6718,6 @@ PUGI__NS_BEGIN
 			return _uses_heap;
 		}
 	};
-
-	PUGI__FN xpath_string xpath_string_const(const char_t* str)
-	{
-		return xpath_string(str, false);
-	}
 PUGI__NS_END
 
 PUGI__NS_BEGIN
@@ -6762,7 +6760,7 @@ PUGI__NS_BEGIN
 	PUGI__FN xpath_string string_value(const xpath_node& na, xpath_allocator* alloc)
 	{
 		if (na.attribute())
-			return xpath_string_const(na.attribute().value());
+			return xpath_string::from_const(na.attribute().value());
 		else
 		{
 			xml_node n = na.node();
@@ -6773,7 +6771,7 @@ PUGI__NS_BEGIN
 			case node_cdata:
 			case node_comment:
 			case node_pi:
-				return xpath_string_const(n.value());
+				return xpath_string::from_const(n.value());
 			
 			case node_document:
 			case node_element:
@@ -6785,7 +6783,7 @@ PUGI__NS_BEGIN
 				while (cur && cur != n)
 				{
 					if (cur.type() == node_pcdata || cur.type() == node_cdata)
-						result.append(xpath_string_const(cur.value()), alloc);
+						result.append(xpath_string::from_const(cur.value()), alloc);
 
 					if (cur.first_child())
 						cur = cur.first_child();
@@ -7098,7 +7096,7 @@ PUGI__NS_BEGIN
 	{
 		// try special number conversion
 		const char_t* special = convert_number_to_string_special(value);
-		if (special) return xpath_string_const(special);
+		if (special) return xpath_string::from_const(special);
 
 		// get mantissa + exponent form
 		char mantissa_buffer[32];
@@ -7158,7 +7156,7 @@ PUGI__NS_BEGIN
 		assert(s < result + result_size);
 		*s = 0;
 
-		return xpath_string(result, true);
+		return xpath_string::from_heap_preallocated(result, s);
 	}
 	
 	PUGI__FN bool check_string_to_number_format(const char_t* string)
@@ -9181,7 +9179,7 @@ PUGI__NS_BEGIN
 
 			*ri = 0;
 
-			return xpath_string(result, true);
+			return xpath_string::from_heap_preallocated(result, ri);
 		}
 
 		xpath_string eval_string(const xpath_context& c, const xpath_stack& stack)
@@ -9189,13 +9187,13 @@ PUGI__NS_BEGIN
 			switch (_type)
 			{
 			case ast_string_constant:
-				return xpath_string_const(_data.string);
+				return xpath_string::from_const(_data.string);
 			
 			case ast_func_local_name_0:
 			{
 				xpath_node na = c.n;
 				
-				return xpath_string_const(local_name(na));
+				return xpath_string::from_const(local_name(na));
 			}
 
 			case ast_func_local_name_1:
@@ -9205,14 +9203,14 @@ PUGI__NS_BEGIN
 				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				xpath_node na = ns.first();
 				
-				return xpath_string_const(local_name(na));
+				return xpath_string::from_const(local_name(na));
 			}
 
 			case ast_func_name_0:
 			{
 				xpath_node na = c.n;
 				
-				return xpath_string_const(qualified_name(na));
+				return xpath_string::from_const(qualified_name(na));
 			}
 
 			case ast_func_name_1:
@@ -9222,14 +9220,14 @@ PUGI__NS_BEGIN
 				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				xpath_node na = ns.first();
 				
-				return xpath_string_const(qualified_name(na));
+				return xpath_string::from_const(qualified_name(na));
 			}
 
 			case ast_func_namespace_uri_0:
 			{
 				xpath_node na = c.n;
 				
-				return xpath_string_const(namespace_uri(na));
+				return xpath_string::from_const(namespace_uri(na));
 			}
 
 			case ast_func_namespace_uri_1:
@@ -9239,7 +9237,7 @@ PUGI__NS_BEGIN
 				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
 				xpath_node na = ns.first();
 				
-				return xpath_string_const(namespace_uri(na));
+				return xpath_string::from_const(namespace_uri(na));
 			}
 
 			case ast_func_string_0:
@@ -9262,7 +9260,7 @@ PUGI__NS_BEGIN
 
 				const char_t* pos = find_substring(s.c_str(), p.c_str());
 				
-				return pos ? xpath_string(s.c_str(), pos, stack.result) : xpath_string();
+				return pos ? xpath_string::from_heap(s.c_str(), pos, stack.result) : xpath_string();
 			}
 			
 			case ast_func_substring_after:
@@ -9279,7 +9277,7 @@ PUGI__NS_BEGIN
 
 				const char_t* result = pos + p.length();
 
-				return s.uses_heap() ? xpath_string(result, stack.result) : xpath_string_const(result);
+				return s.uses_heap() ? xpath_string::from_heap(result, s.c_str() + s.length(), stack.result) : xpath_string::from_const(result);
 			}
 
 			case ast_func_substring_2:
@@ -9301,7 +9299,7 @@ PUGI__NS_BEGIN
 
 				const char_t* rbegin = s.c_str() + (pos - 1);
 				
-				return s.uses_heap() ? xpath_string(rbegin, stack.result) : xpath_string_const(rbegin);
+				return s.uses_heap() ? xpath_string::from_heap(rbegin, s.c_str() + s.length(), stack.result) : xpath_string::from_const(rbegin);
 			}
 			
 			case ast_func_substring_3:
@@ -9328,7 +9326,7 @@ PUGI__NS_BEGIN
 				const char_t* rbegin = s.c_str() + (pos - 1);
 				const char_t* rend = s.c_str() + (end - 1);
 
-				return (end == s_length + 1 && !s.uses_heap()) ? xpath_string_const(rbegin) : xpath_string(rbegin, rend, stack.result);
+				return (end == s_length + 1 && !s.uses_heap()) ? xpath_string::from_const(rbegin) : xpath_string::from_heap(rbegin, rend, stack.result);
 			}
 
 			case ast_func_normalize_space_0:
@@ -9378,7 +9376,7 @@ PUGI__NS_BEGIN
 				assert(_rettype == _data.variable->type());
 
 				if (_rettype == xpath_type_string)
-					return xpath_string_const(_data.variable->get_string());
+					return xpath_string::from_const(_data.variable->get_string());
 
 				// fallthrough to type conversion
 			}
@@ -9388,7 +9386,7 @@ PUGI__NS_BEGIN
 				switch (_rettype)
 				{
 				case xpath_type_boolean:
-					return xpath_string_const(eval_boolean(c, stack) ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
+					return xpath_string::from_const(eval_boolean(c, stack) ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
 					
 				case xpath_type_number:
 					return convert_number_to_string(eval_number(c, stack), stack.result);
@@ -10973,7 +10971,9 @@ namespace pugi
 	{
 		impl::xpath_stack_data sd;
 
-		return impl::evaluate_string_impl(static_cast<impl::xpath_query_impl*>(_impl), n, sd).c_str();
+		impl::xpath_string r = impl::evaluate_string_impl(static_cast<impl::xpath_query_impl*>(_impl), n, sd);
+
+		return string_t(r.c_str(), r.length());
 	}
 #endif
 
