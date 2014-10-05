@@ -6808,44 +6808,71 @@ PUGI__NS_BEGIN
 		}
 	}
 	
-	PUGI__FN unsigned int node_height(xml_node n)
+	PUGI__FN bool node_is_before_sibling(xml_node_struct* ln, xml_node_struct* rn)
 	{
-		unsigned int result = 0;
-		
-		while (n)
-		{
-			++result;
-			n = n.parent();
-		}
-		
-		return result;
-	}
-	
-	PUGI__FN bool node_is_before(xml_node ln, unsigned int lh, xml_node rn, unsigned int rh)
-	{
-		// normalize heights
-		for (unsigned int i = rh; i < lh; i++) ln = ln.parent();
-		for (unsigned int j = lh; j < rh; j++) rn = rn.parent();
-		
-		// one node is the ancestor of the other
-		if (ln == rn) return lh < rh;
-		
-		// find common ancestor
-		while (ln.parent() != rn.parent())
-		{
-			ln = ln.parent();
-			rn = rn.parent();
-		}
+		assert(ln->parent == rn->parent);
 
 		// there is no common ancestor (the shared parent is null), nodes are from different documents
-		if (!ln.parent()) return ln < rn;
+		if (!ln->parent) return ln < rn;
 
 		// determine sibling order
-		for (; ln; ln = ln.next_sibling())
-			if (ln == rn)
-				return true;
+		xml_node_struct* ls = ln;
+		xml_node_struct* rs = rn;
 
-		return false;
+		while (ls && rs)
+		{
+			if (ls == rn) return true;
+			if (rs == ln) return false;
+
+			ls = ls->next_sibling;
+			rs = rs->next_sibling;
+		}
+
+		// if rn sibling chain ended ln must be before rn
+		return !rs;
+	}
+	
+	PUGI__FN bool node_is_before(xml_node_struct* ln, xml_node_struct* rn)
+	{
+		// find common ancestor at the same depth, if any
+		xml_node_struct* lp = ln;
+		xml_node_struct* rp = rn;
+
+		while (lp && rp && lp->parent != rp->parent)
+		{
+			lp = lp->parent;
+			rp = rp->parent;
+		}
+
+		// parents are the same!
+		if (lp && rp) return node_is_before_sibling(lp, rp);
+
+		// nodes are at different depths, need to normalize heights
+		bool left_higher = !lp;
+
+		while (lp)
+		{
+			lp = lp->parent;
+			ln = ln->parent;
+		}
+
+		while (rp)
+		{
+			rp = rp->parent;
+			rn = rn->parent;
+		}
+
+		// one node is the ancestor of the other
+		if (ln == rn) return left_higher;
+
+		// find common ancestor... again
+		while (ln->parent != rn->parent)
+		{
+			ln = ln->parent;
+			rn = rn->parent;
+		}
+
+		return node_is_before_sibling(ln, rn);
 	}
 
 	PUGI__FN bool node_is_ancestor(xml_node parent, xml_node node)
@@ -6933,11 +6960,10 @@ PUGI__NS_BEGIN
 			}
 
 			if (ln == rn) return false;
+
+			if (!ln || !rn) return ln < rn;
 			
-			unsigned int lh = node_height(ln);
-			unsigned int rh = node_height(rn);
-			
-			return node_is_before(ln, lh, rn, rh);
+			return node_is_before(ln.internal_object(), rn.internal_object());
 		}
 	};
 
