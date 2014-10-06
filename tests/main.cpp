@@ -159,6 +159,20 @@ int main(int, char** argv)
 
 	for (test = test_runner::_tests; test; test = test->_next)
 	{
+	#ifdef PUGIXML_COMPACT
+		if (false
+			|| strcmp(test->_name, "parse_out_of_memory") == 0
+			|| strcmp(test->_name, "parse_out_of_memory_halfway") == 0
+			|| strcmp(test->_name, "dom_node_append_buffer_out_of_memory_extra") == 0
+			|| strcmp(test->_name, "dom_node_out_of_memory") == 0
+			|| strcmp(test->_name, "dom_node_copy_out_of_memory") == 0
+			|| strcmp(test->_name, "dom_node_copy_copyless") == 0
+			|| strcmp(test->_name, "memory_large_allocations") == 0
+			|| strcmp(test->_name, "memory_custom_memory_management") == 0
+			)
+			continue;
+	#endif
+
 		total++;
 		passed += run_test(test);
 	}
