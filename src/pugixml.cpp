@@ -145,13 +145,6 @@ PUGI__NS_BEGIN
 PUGI__NS_END
 #endif
 
-// Micro compact helper
-#ifdef PUGIXML_COMPACT
-#	define PUGI__COMPACT(p) ((p).get())
-#else
-#	define PUGI__COMPACT(p) (p)
-#endif
-
 // Memory allocation
 PUGI__NS_BEGIN
 	PUGI__FN void* default_allocate(size_t size)
@@ -704,7 +697,7 @@ PUGI__NS_BEGIN
 
 		void operator=(const compact_pointer& rhs)
 		{
-			*this = rhs.get();
+			*this = rhs + 0;
 		}
 
 		void operator=(T* value_)
@@ -794,11 +787,6 @@ PUGI__NS_BEGIN
 			return operator T* const();
 		}
 
-		T* get() const
-		{
-			return operator T* const();
-		}
-
 	private:
 		unsigned char _data;
 
@@ -820,7 +808,7 @@ PUGI__NS_BEGIN
 
 		void operator=(const compact_string& rhs)
 		{
-			*this = rhs.get();
+			*this = rhs + 0;
 		}
 
 		void operator=(char_t* value)
@@ -884,11 +872,6 @@ PUGI__NS_BEGIN
 			}
 			else
 				return 0;
-		}
-
-		char_t* get() const
-		{
-			return operator char_t* const();
 		}
 
 	private:
@@ -3299,7 +3282,7 @@ PUGI__NS_BEGIN
 				return make_parse_result(PUGI__OPTSET(parse_fragment) ? status_ok : status_no_document_element);
 
 			// get last child of the root before parsing
-			xml_node_struct* last_root_child = root->first_child ? PUGI__COMPACT(root->first_child->prev_sibling_c) : 0;
+			xml_node_struct* last_root_child = root->first_child ? root->first_child->prev_sibling_c + 0 : 0;
 	
 			// create parser on stack
 			xml_parser parser(alloc_);
@@ -3327,7 +3310,7 @@ PUGI__NS_BEGIN
 					return make_parse_result(status_unrecognized_tag, length - 1);
 
 				// check if there are any element nodes parsed
-				xml_node_struct* first_root_child_parsed = last_root_child ? PUGI__COMPACT(last_root_child->next_sibling) : root->first_child;
+				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling + 0 : root->first_child;
 
 				if (!PUGI__OPTSET(parse_fragment) && !has_element_node_siblings(first_root_child_parsed))
 					return make_parse_result(status_no_document_element, length - 1);
@@ -4842,38 +4825,38 @@ namespace pugi
 
 	PUGI__FN int xml_attribute::as_int(int def) const
 	{
-		return impl::get_value_int(_attr ? PUGI__COMPACT(_attr->value) : 0, def);
+		return impl::get_value_int(_attr ? _attr->value + 0 : 0, def);
 	}
 
 	PUGI__FN unsigned int xml_attribute::as_uint(unsigned int def) const
 	{
-		return impl::get_value_uint(_attr ? PUGI__COMPACT(_attr->value) : 0, def);
+		return impl::get_value_uint(_attr ? _attr->value + 0 : 0, def);
 	}
 
 	PUGI__FN double xml_attribute::as_double(double def) const
 	{
-		return impl::get_value_double(_attr ? PUGI__COMPACT(_attr->value) : 0, def);
+		return impl::get_value_double(_attr ? _attr->value + 0 : 0, def);
 	}
 
 	PUGI__FN float xml_attribute::as_float(float def) const
 	{
-		return impl::get_value_float(_attr ? PUGI__COMPACT(_attr->value) : 0, def);
+		return impl::get_value_float(_attr ? _attr->value + 0 : 0, def);
 	}
 
 	PUGI__FN bool xml_attribute::as_bool(bool def) const
 	{
-		return impl::get_value_bool(_attr ? PUGI__COMPACT(_attr->value) : 0, def);
+		return impl::get_value_bool(_attr ? _attr->value + 0 : 0, def);
 	}
 
 #ifdef PUGIXML_HAS_LONG_LONG
 	PUGI__FN long long xml_attribute::as_llong(long long def) const
 	{
-		return impl::get_value_llong(_attr ? PUGI__COMPACT(_attr->value) : 0, def);
+		return impl::get_value_llong(_attr ? _attr->value + 0 : 0, def);
 	}
 
 	PUGI__FN unsigned long long xml_attribute::as_ullong(unsigned long long def) const
 	{
-		return impl::get_value_ullong(_attr ? PUGI__COMPACT(_attr->value) : 0, def);
+		return impl::get_value_ullong(_attr ? _attr->value + 0 : 0, def);
 	}
 #endif
 
@@ -5040,7 +5023,7 @@ namespace pugi
 
 	PUGI__FN xml_node::iterator xml_node::begin() const
 	{
-		return iterator(_root ? PUGI__COMPACT(_root->first_child) : 0, _root);
+		return iterator(_root ? _root->first_child + 0 : 0, _root);
 	}
 
 	PUGI__FN xml_node::iterator xml_node::end() const
@@ -5050,7 +5033,7 @@ namespace pugi
 	
 	PUGI__FN xml_node::attribute_iterator xml_node::attributes_begin() const
 	{
-		return attribute_iterator(_root ? PUGI__COMPACT(_root->first_attribute) : 0, _root);
+		return attribute_iterator(_root ? _root->first_attribute + 0 : 0, _root);
 	}
 
 	PUGI__FN xml_node::attribute_iterator xml_node::attributes_end() const
@@ -5935,35 +5918,35 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_int(d ? PUGI__COMPACT(d->contents) : 0, def);
+		return impl::get_value_int(d ? d->contents + 0 : 0, def);
 	}
 
 	PUGI__FN unsigned int xml_text::as_uint(unsigned int def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_uint(d ? PUGI__COMPACT(d->contents) : 0, def);
+		return impl::get_value_uint(d ? d->contents + 0 : 0, def);
 	}
 
 	PUGI__FN double xml_text::as_double(double def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_double(d ? PUGI__COMPACT(d->contents) : 0, def);
+		return impl::get_value_double(d ? d->contents + 0 : 0, def);
 	}
 
 	PUGI__FN float xml_text::as_float(float def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_float(d ? PUGI__COMPACT(d->contents) : 0, def);
+		return impl::get_value_float(d ? d->contents + 0 : 0, def);
 	}
 
 	PUGI__FN bool xml_text::as_bool(bool def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_bool(d ? PUGI__COMPACT(d->contents) : 0, def);
+		return impl::get_value_bool(d ? d->contents + 0 : 0, def);
 	}
 
 #ifdef PUGIXML_HAS_LONG_LONG
@@ -5971,14 +5954,14 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_llong(d ? PUGI__COMPACT(d->contents) : 0, def);
+		return impl::get_value_llong(d ? d->contents + 0 : 0, def);
 	}
 
 	PUGI__FN unsigned long long xml_text::as_ullong(unsigned long long def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_ullong(d ? PUGI__COMPACT(d->contents) : 0, def);
+		return impl::get_value_ullong(d ? d->contents + 0 : 0, def);
 	}
 #endif
 
