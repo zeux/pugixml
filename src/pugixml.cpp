@@ -639,6 +639,8 @@ PUGI__NS_BEGIN
 		}
 	};
 
+	static const unsigned int compact_alignment_log2 = 2;
+
 	typedef uint32_t compact_alignment;
 
 	class compact_header
@@ -681,14 +683,24 @@ PUGI__NS_BEGIN
 		unsigned char flags;
 	};
 
-	xml_memory_page* compact_get_page(const void* object, int header_offset)
+	PUGI__FN xml_memory_page* compact_get_page(const void* object, int header_offset)
 	{
 		const compact_header* header = reinterpret_cast<const compact_header*>(static_cast<const char*>(object) - header_offset);
 
 		return header->get_page();
 	}
 
-	template <typename T, int header_offset, int direction, int tag> class compact_pointer
+	template <int header_offset, typename T> PUGI__FN_NO_INLINE T* compact_get_value(const void* object)
+	{
+		return static_cast<T*>(*compact_get_page(object, header_offset)->allocator->_hash->find(object));
+	}
+
+	template <int header_offset, int tag, typename T> PUGI__FN_NO_INLINE void compact_set_value(const void* object, T* value)
+	{
+		*compact_get_page(object, header_offset)->allocator->_hash->insert(object, tag) = value;
+	}
+
+	template <typename T, int header_offset, int tag, int start = -126> class compact_pointer
 	{
 	public:
 		compact_pointer(): _data(0)
@@ -700,6 +712,63 @@ PUGI__NS_BEGIN
 			*this = rhs + 0;
 		}
 
+		void operator=(T* value)
+		{
+			if (value)
+			{
+				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(sizeof(compact_alignment) - 1)) >> compact_alignment_log2) - start;
+
+				if (static_cast<uintptr_t>(offset) <= 253)
+					_data = static_cast<unsigned char>(offset + 1);
+				else
+				{
+					compact_set_value<header_offset, tag>(this, value);
+
+					_data = 255;
+				}
+			}
+			else
+				_data = 0;
+		}
+
+		operator T* const() const
+		{
+			if (_data)
+			{
+				if (_data < 255)
+				{
+					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(sizeof(compact_alignment) - 1);
+
+					return reinterpret_cast<T*>(base + ((_data - (1 - start)) << compact_alignment_log2));
+				}
+				else
+					return compact_get_value<header_offset, T>(this);
+			}
+			else
+				return 0;
+		}
+
+		T* operator->() const
+		{
+			return operator T* const();
+		}
+
+	private:
+		unsigned char _data;
+	};
+
+	template <typename T, int header_offset, int tag> class compact_pointer_parent
+	{
+	public:
+		compact_pointer_parent(): _data(0)
+		{
+		}
+
+		void operator=(const compact_pointer_parent& rhs)
+		{
+			*this = rhs + 0;
+		}
+
 		void operator=(T* value_)
 		{
 			if (value_)
@@ -707,49 +776,24 @@ PUGI__NS_BEGIN
 				compact_alignment* base = get_base();
 				compact_alignment* value = reinterpret_cast<compact_alignment*>(value_);
 
-				if (direction > 0)
-				{
-					if (value >= base && value <= base + 253)
-						_data = static_cast<unsigned char>((value - base) + 1);
-					else
-					{
-						*compact_get_page(this, header_offset)->allocator->_hash->insert(this, tag) = value;
-
-						_data = 255;
-					}
-				}
-				else if (direction < 0)
-				{
-					if (value <= base && value >= base - 252)
-						_data = static_cast<unsigned char>((base - value) + 1);
-					else
-					{
-						xml_memory_page* page = compact_get_page(this, header_offset);
-
-						if (page->compact_parent == 0)
-						{
-							page->compact_parent = value;
-							_data = 254;
-						}
-						else if (page->compact_parent == value)
-						{
-							_data = 254;
-						}
-						else
-						{
-							*page->allocator->_hash->insert(this, tag) = value;
-							_data = 255;
-						}
-					}
-				}
+				if (value <= base && value >= base - 252)
+					_data = static_cast<unsigned char>((base - value) + 1);
 				else
 				{
-					if (value >= base - 126 && value <= base + 127)
-						_data = static_cast<unsigned char>((value - base) + 127);
+					xml_memory_page* page = compact_get_page(this, header_offset);
+
+					if (page->compact_parent == 0)
+					{
+						page->compact_parent = value;
+						_data = 254;
+					}
+					else if (page->compact_parent == value)
+					{
+						_data = 254;
+					}
 					else
 					{
-						*compact_get_page(this, header_offset)->allocator->_hash->insert(this, tag) = value;
-
+						compact_set_value<header_offset, tag>(this, value);
 						_data = 255;
 					}
 				}
@@ -763,19 +807,14 @@ PUGI__NS_BEGIN
 			if (_data)
 			{
 				if (_data == 255)
-					return static_cast<T*>(*compact_get_page(this, header_offset)->allocator->_hash->find(this));
-				else if (direction < 0 && _data == 254)
+					return compact_get_value<header_offset, T>(this);
+				else if (_data == 254)
 					return static_cast<T*>(compact_get_page(this, header_offset)->compact_parent);
 				else
 				{
 					compact_alignment* base = get_base();
 
-					if (direction > 0)
-						return reinterpret_cast<T*>(base + (_data - 1));
-					else if (direction < 0)
-						return reinterpret_cast<T*>(base - (_data - 1));
-					else
-						return reinterpret_cast<T*>(base + (_data - 127));
+					return reinterpret_cast<T*>(base - (_data - 1));
 				}
 			}
 			else
@@ -792,10 +831,7 @@ PUGI__NS_BEGIN
 
 		compact_alignment* get_base() const
 		{
-            if (direction > 0)
-                return reinterpret_cast<compact_alignment*>((reinterpret_cast<uintptr_t>(this) + sizeof(compact_alignment)) & ~(sizeof(compact_alignment) - 1));
-            else
-                return reinterpret_cast<compact_alignment*>(reinterpret_cast<uintptr_t>(this) & ~(sizeof(compact_alignment) - 1));
+			return reinterpret_cast<compact_alignment*>(reinterpret_cast<uintptr_t>(this) & ~(sizeof(compact_alignment) - 1));
 		}
 	};
 
@@ -818,32 +854,20 @@ PUGI__NS_BEGIN
 				xml_memory_page* page = compact_get_page(this, header_offset);
 
 				if (page->compact_string_base == 0)
-				{
 					page->compact_string_base = value;
 
-					_data0 = 1;
-					_data1 = 0;
-					_data2 = 0;
-				}
-				else
+				ptrdiff_t offset = value - page->compact_string_base;
+
+				if (static_cast<uintptr_t>(offset) >= 16777213)
 				{
-					ptrdiff_t offset = value - page->compact_string_base;
+					compact_set_value<header_offset, tag>(this, value);
 
-					if (offset >= 0 && offset <= 1677213)
-					{
-						_data0 = static_cast<unsigned char>(offset + 1);
-						_data1 = static_cast<unsigned char>((offset + 1) >> 8);
-						_data2 = static_cast<unsigned char>((offset + 1) >> 16);
-					}
-					else
-					{
-						*page->allocator->_hash->insert(this, tag) = value;
-
-						_data0 = 255;
-						_data1 = 255;
-						_data2 = 255;
-					}
+					offset = 16777214;
 				}
+
+				_data0 = static_cast<unsigned char>(offset + 1);
+				_data1 = static_cast<unsigned char>((offset + 1) >> 8);
+				_data2 = static_cast<unsigned char>((offset + 1) >> 16);
 			}
 			else
 			{
@@ -862,13 +886,9 @@ PUGI__NS_BEGIN
 				xml_memory_page* page = compact_get_page(this, header_offset);
 
 				if (data < 16777215)
-				{
 					return page->compact_string_base + (data - 1);
-				}
 				else
-				{
-					return static_cast<char_t*>(*page->allocator->_hash->find(this));
-				}
+					return compact_get_value<header_offset, char_t>(this);
 			}
 			else
 				return 0;
@@ -904,8 +924,8 @@ namespace pugi
 		impl::compact_string<4, /*tag*/11> name;	///< Pointer to attribute name.
 		impl::compact_string<7, /*tag*/12> value;	///< Pointer to attribute value.
 
-		impl::compact_pointer<xml_attribute_struct, 10,  0, /*tag*/13> prev_attribute_c;	///< Previous attribute (cyclic list)
-		impl::compact_pointer<xml_attribute_struct, 11, +1, /*tag*/14> next_attribute;	///< Next attribute
+		impl::compact_pointer<xml_attribute_struct, 10, /*tag*/13> prev_attribute_c;	///< Previous attribute (cyclic list)
+		impl::compact_pointer<xml_attribute_struct, 11, /*tag*/14, 0> next_attribute;	///< Next attribute
 	};
 
 	/// An XML document tree node.
@@ -926,14 +946,14 @@ namespace pugi
 
 		impl::compact_string<4, /*tag*/21>								contents;				///< Pointer to element name.
 
-		impl::compact_pointer<xml_node_struct, 7, -1, /*tag*/22>		parent;					///< Pointer to parent
+		impl::compact_pointer_parent<xml_node_struct, 7, /*tag*/22>		parent;					///< Pointer to parent
 
-		impl::compact_pointer<xml_node_struct,  8, +1, /*tag*/23>		first_child;			///< First child
+		impl::compact_pointer<xml_node_struct,  8, /*tag*/23, 0>		first_child;			///< First child
 
-		impl::compact_pointer<xml_node_struct,  9,  0, /*tag*/24>		prev_sibling_c;			///< Left brother (cyclic list)
-		impl::compact_pointer<xml_node_struct, 10, +1, /*tag*/25>		next_sibling;			///< Right brother
+		impl::compact_pointer<xml_node_struct,  9, /*tag*/24>		prev_sibling_c;			///< Left brother (cyclic list)
+		impl::compact_pointer<xml_node_struct, 10, /*tag*/25, 0>		next_sibling;			///< Right brother
 
-		impl::compact_pointer<xml_attribute_struct, 11, +1, /*tag*/26>	first_attribute;		///< First attribute
+		impl::compact_pointer<xml_attribute_struct, 11, /*tag*/26, 0>	first_attribute;		///< First attribute
 	};
 }
 #else
