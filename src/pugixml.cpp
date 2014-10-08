@@ -640,15 +640,14 @@ PUGI__NS_BEGIN
 	};
 
 	static const unsigned int compact_alignment_log2 = 2;
-
-	typedef uint32_t compact_alignment;
+	static const unsigned int compact_alignment = 1 << compact_alignment_log2;
 
 	class compact_header
 	{
 	public:
 		compact_header(xml_memory_page* page, unsigned int flags)
 		{
-			ptrdiff_t page_offset = reinterpret_cast<compact_alignment*>(this) - reinterpret_cast<compact_alignment*>(page);
+			ptrdiff_t page_offset = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(page)) >> compact_alignment_log2;
 			assert(page_offset >= 0 && page_offset < (1 << 16));
 
 			this->page0 = static_cast<unsigned char>(page_offset);
@@ -675,7 +674,7 @@ PUGI__NS_BEGIN
 		{
 			unsigned int page_offset = page0 + (page1 << 8);
 
-			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(reinterpret_cast<const compact_alignment*>(this) - page_offset));
+			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(reinterpret_cast<const char*>(this) - (page_offset << compact_alignment_log2)));
 		}
 
 	private:
@@ -716,7 +715,7 @@ PUGI__NS_BEGIN
 		{
 			if (value)
 			{
-				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(sizeof(compact_alignment) - 1)) >> compact_alignment_log2) - start;
+				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(compact_alignment - 1)) >> compact_alignment_log2) - start;
 
 				if (static_cast<uintptr_t>(offset) <= 253)
 					_data = static_cast<unsigned char>(offset + 1);
@@ -737,7 +736,7 @@ PUGI__NS_BEGIN
 			{
 				if (_data < 255)
 				{
-					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(sizeof(compact_alignment) - 1);
+					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
 
 					return reinterpret_cast<T*>(base + ((_data - (1 - start)) << compact_alignment_log2));
 				}
@@ -769,31 +768,27 @@ PUGI__NS_BEGIN
 			*this = rhs + 0;
 		}
 
-		void operator=(T* value_)
+		void operator=(T* value)
 		{
-			if (value_)
+			if (value)
 			{
-				compact_alignment* base = get_base();
-				compact_alignment* value = reinterpret_cast<compact_alignment*>(value_);
+				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(compact_alignment - 1)) >> compact_alignment_log2) + 253;
 
-				if (value <= base && value >= base - 252)
-					_data = static_cast<unsigned char>((base - value) + 1);
+				if (static_cast<uintptr_t>(offset) <= 253)
+					_data = static_cast<unsigned char>(offset + 1);
 				else
 				{
 					xml_memory_page* page = compact_get_page(this, header_offset);
 
 					if (page->compact_parent == 0)
-					{
 						page->compact_parent = value;
+
+					if (page->compact_parent == value)
 						_data = 254;
-					}
-					else if (page->compact_parent == value)
-					{
-						_data = 254;
-					}
 					else
 					{
 						compact_set_value<header_offset, tag>(this, value);
+
 						_data = 255;
 					}
 				}
@@ -806,16 +801,16 @@ PUGI__NS_BEGIN
 		{
 			if (_data)
 			{
-				if (_data == 255)
-					return compact_get_value<header_offset, T>(this);
+				if (_data < 254)
+				{
+					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
+
+					return reinterpret_cast<T*>(base + ((_data - (1 + 253)) << compact_alignment_log2));
+				}
 				else if (_data == 254)
 					return static_cast<T*>(compact_get_page(this, header_offset)->compact_parent);
 				else
-				{
-					compact_alignment* base = get_base();
-
-					return reinterpret_cast<T*>(base - (_data - 1));
-				}
+					return compact_get_value<header_offset, T>(this);
 			}
 			else
 				return 0;
@@ -828,11 +823,6 @@ PUGI__NS_BEGIN
 
 	private:
 		unsigned char _data;
-
-		compact_alignment* get_base() const
-		{
-			return reinterpret_cast<compact_alignment*>(reinterpret_cast<uintptr_t>(this) & ~(sizeof(compact_alignment) - 1));
-		}
 	};
 
 	template <int header_offset, int tag> class compact_string
