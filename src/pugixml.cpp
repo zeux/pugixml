@@ -297,7 +297,7 @@ PUGI__NS_BEGIN
 
 		#ifdef PUGIXML_COMPACT
 			result->compact_string_base = 0;
-			result->compact_parent = 0;
+			result->compact_shared_parent = 0;
 		#endif
 
 			return result;
@@ -313,7 +313,7 @@ PUGI__NS_BEGIN
 
 	#ifdef PUGIXML_COMPACT
 		char_t* compact_string_base;
-		void* compact_parent;
+		void* compact_shared_parent;
 	#endif
 	};
 
@@ -759,7 +759,7 @@ PUGI__NS_BEGIN
 	template <typename T, int header_offset, int tag> class compact_pointer_parent
 	{
 	public:
-		compact_pointer_parent(): _data(0)
+		compact_pointer_parent(): _data0(0), _data1(0)
 		{
 		}
 
@@ -772,43 +772,55 @@ PUGI__NS_BEGIN
 		{
 			if (value)
 			{
-				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(compact_alignment - 1)) >> compact_alignment_log2) + 253;
+				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(compact_alignment - 1)) >> compact_alignment_log2) + 65533;
 
-				if (static_cast<uintptr_t>(offset) <= 253)
-					_data = static_cast<unsigned char>(offset + 1);
+				if (static_cast<uintptr_t>(offset) <= 65533)
+				{
+					_data0 = static_cast<unsigned char>(offset + 1);
+					_data1 = static_cast<unsigned char>((offset + 1) >> 8);
+				}
 				else
 				{
 					xml_memory_page* page = compact_get_page(this, header_offset);
 
-					if (page->compact_parent == 0)
-						page->compact_parent = value;
+					if (page->compact_shared_parent == 0)
+						page->compact_shared_parent = value;
 
-					if (page->compact_parent == value)
-						_data = 254;
+					if (page->compact_shared_parent == value)
+					{
+						_data0 = 254;
+						_data1 = 255;
+					}
 					else
 					{
 						compact_set_value<header_offset, tag>(this, value);
 
-						_data = 255;
+						_data0 = 255;
+						_data1 = 255;
 					}
 				}
 			}
 			else
-				_data = 0;
+			{
+				_data0 = 0;
+				_data1 = 0;
+			}
 		}
 
 		operator T* const() const
 		{
-			if (_data)
+			unsigned int data = _data0 + (_data1 << 8);
+
+			if (data)
 			{
-				if (_data < 254)
+				if (data < 65534)
 				{
 					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
 
-					return reinterpret_cast<T*>(base + ((_data - (1 + 253)) << compact_alignment_log2));
+					return reinterpret_cast<T*>(base + ((data - (1 + 65533)) << compact_alignment_log2));
 				}
-				else if (_data == 254)
-					return static_cast<T*>(compact_get_page(this, header_offset)->compact_parent);
+				else if (data == 65534)
+					return static_cast<T*>(compact_get_page(this, header_offset)->compact_shared_parent);
 				else
 					return compact_get_value<header_offset, T>(this);
 			}
@@ -822,7 +834,8 @@ PUGI__NS_BEGIN
 		}
 
 	private:
-		unsigned char _data;
+		unsigned char _data0;
+		unsigned char _data1;
 	};
 
 	template <int header_offset, int tag> class compact_string
@@ -932,15 +945,13 @@ namespace pugi
 
 		impl::compact_header header;
 
-		unsigned char padding;
+		impl::compact_string<3, /*tag*/21>								contents;				///< Pointer to element name.
 
-		impl::compact_string<4, /*tag*/21>								contents;				///< Pointer to element name.
-
-		impl::compact_pointer_parent<xml_node_struct, 7, /*tag*/22>		parent;					///< Pointer to parent
+		impl::compact_pointer_parent<xml_node_struct, 6, /*tag*/22>		parent;					///< Pointer to parent
 
 		impl::compact_pointer<xml_node_struct,  8, /*tag*/23, 0>		first_child;			///< First child
 
-		impl::compact_pointer<xml_node_struct,  9, /*tag*/24>		prev_sibling_c;			///< Left brother (cyclic list)
+		impl::compact_pointer<xml_node_struct,  9, /*tag*/24>			prev_sibling_c;			///< Left brother (cyclic list)
 		impl::compact_pointer<xml_node_struct, 10, /*tag*/25, 0>		next_sibling;			///< Right brother
 
 		impl::compact_pointer<xml_attribute_struct, 11, /*tag*/26, 0>	first_attribute;		///< First attribute
