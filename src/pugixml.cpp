@@ -7366,7 +7366,7 @@ PUGI__NS_BEGIN
 
 	PUGI__FN unsigned char* translate_table_generate(xpath_allocator* alloc, const char_t* from, const char_t* to)
 	{
-		unsigned char table[128] = {};
+		unsigned char table[128] = {0};
 
 		while (*from)
 		{
@@ -7377,7 +7377,7 @@ PUGI__NS_BEGIN
 				return 0;
 
 			if (!table[fc])
-				table[fc] = tc ? static_cast<unsigned char>(tc) : 128;
+				table[fc] = static_cast<unsigned char>(tc ? tc : 128);
 
 			from++;
 			if (tc) to++;
