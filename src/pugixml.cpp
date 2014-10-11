@@ -258,8 +258,6 @@ PUGI__NS_END
 #endif
 
 #ifdef PUGIXML_COMPACT
-size_t pugi_compact_stats[128];
-
 PUGI__NS_BEGIN
 	class compact_hash_table
 	{
@@ -306,7 +304,7 @@ PUGI__NS_BEGIN
 			return 0;
 		}
 
-		void** insert(const void* key, size_t tag)
+		void** insert(const void* key)
 		{
 			assert(key);
 			assert(_count < _capacity * 3 / 4);
@@ -320,9 +318,6 @@ PUGI__NS_BEGIN
 
 				if (probe_item.key == 0)
 				{
-					if (tag)
-						pugi_compact_stats[tag]++;
-
 					probe_item.key = key;
 					_count++;
 					return &probe_item.value;
@@ -372,7 +367,7 @@ PUGI__NS_BEGIN
 
 			for (size_t i = 0; i < _capacity; ++i)
 				if (_items[i].key)
-					*rt.insert(_items[i].key, 0) = _items[i].value;
+					*rt.insert(_items[i].key) = _items[i].value;
 
 			if (_items)
 				xml_memory::deallocate(_items);
@@ -383,18 +378,18 @@ PUGI__NS_BEGIN
 			return true;
 		}
 
-		// http://burtleburtle.net/bob/hash/integer.html
 		static unsigned int hash(const void* key)
 		{
-			unsigned int a = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key));
+			unsigned int h = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key));
 
-			a = (a ^ 61) ^ (a >> 16);
-			a = a + (a << 3);
-			a = a ^ (a >> 4);
-			a = a * 0x27d4eb2d;
-			a = a ^ (a >> 15);
+			// MurmurHash3 32-bit finalizer
+			h ^= h >> 16;
+			h *= 0x85ebca6bu;
+			h ^= h >> 13;
+			h *= 0xc2b2ae35u;
+			h ^= h >> 16;
 
-			return a;
+			return h;
 		}
 	};
 PUGI__NS_END
@@ -716,12 +711,12 @@ PUGI__NS_BEGIN
 		return static_cast<T*>(*compact_get_page(object, header_offset)->allocator->_hash->find(object));
 	}
 
-	template <int header_offset, int tag, typename T> PUGI__FN_NO_INLINE void compact_set_value(const void* object, T* value)
+	template <int header_offset, typename T> PUGI__FN_NO_INLINE void compact_set_value(const void* object, T* value)
 	{
-		*compact_get_page(object, header_offset)->allocator->_hash->insert(object, tag) = value;
+		*compact_get_page(object, header_offset)->allocator->_hash->insert(object) = value;
 	}
 
-	template <typename T, int header_offset, int tag, int start = -126> class compact_pointer
+	template <typename T, int header_offset, int start = -126> class compact_pointer
 	{
 	public:
 		compact_pointer(): _data(0)
@@ -743,7 +738,7 @@ PUGI__NS_BEGIN
 					_data = static_cast<unsigned char>(offset + 1);
 				else
 				{
-					compact_set_value<header_offset, tag>(this, value);
+					compact_set_value<header_offset>(this, value);
 
 					_data = 255;
 				}
@@ -778,7 +773,7 @@ PUGI__NS_BEGIN
 		unsigned char _data;
 	};
 
-	template <typename T, int header_offset, int tag> class compact_pointer_parent
+	template <typename T, int header_offset> class compact_pointer_parent
 	{
 	public:
 		compact_pointer_parent(): _data0(0), _data1(0)
@@ -815,7 +810,7 @@ PUGI__NS_BEGIN
 					}
 					else
 					{
-						compact_set_value<header_offset, tag>(this, value);
+						compact_set_value<header_offset>(this, value);
 
 						_data0 = 255;
 						_data1 = 255;
@@ -860,7 +855,7 @@ PUGI__NS_BEGIN
 		unsigned char _data1;
 	};
 
-	template <int header_offset, int tag> class compact_string
+	template <int header_offset> class compact_string
 	{
 	public:
 		compact_string(): _data0(0), _data1(0), _data2(0)
@@ -885,7 +880,7 @@ PUGI__NS_BEGIN
 
 				if (static_cast<uintptr_t>(offset) >= 16777213)
 				{
-					compact_set_value<header_offset, tag>(this, value);
+					compact_set_value<header_offset>(this, value);
 
 					offset = 16777214;
 				}
@@ -938,19 +933,17 @@ namespace pugi
 		xml_attribute_struct(impl::xml_memory_page* page): header(page, 0)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_attribute_struct) == 12);
-
-			pugi_compact_stats[10]++;
 		}
 
 		impl::compact_header header;
 
 		unsigned char padding;
 
-		impl::compact_string<4, /*tag*/11> name;	///< Pointer to attribute name.
-		impl::compact_string<7, /*tag*/12> value;	///< Pointer to attribute value.
+		impl::compact_string<4> name;	///< Pointer to attribute name.
+		impl::compact_string<7> value;	///< Pointer to attribute value.
 
-		impl::compact_pointer<xml_attribute_struct, 10, /*tag*/13> prev_attribute_c;	///< Previous attribute (cyclic list)
-		impl::compact_pointer<xml_attribute_struct, 11, /*tag*/14, 0> next_attribute;	///< Next attribute
+		impl::compact_pointer<xml_attribute_struct, 10> prev_attribute_c;	///< Previous attribute (cyclic list)
+		impl::compact_pointer<xml_attribute_struct, 11, 0> next_attribute;	///< Next attribute
 	};
 
 	/// An XML document tree node.
@@ -961,22 +954,20 @@ namespace pugi
 		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(page, type - 1)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_node_struct) == 12);
-
-			pugi_compact_stats[20]++;
 		}
 
 		impl::compact_header header;
 
-		impl::compact_string<3, /*tag*/21>								contents;				///< Pointer to element name.
+		impl::compact_string<3>								contents;				///< Pointer to element name.
 
-		impl::compact_pointer_parent<xml_node_struct, 6, /*tag*/22>		parent;					///< Pointer to parent
+		impl::compact_pointer_parent<xml_node_struct, 6>	parent;					///< Pointer to parent
 
-		impl::compact_pointer<xml_node_struct,  8, /*tag*/23, 0>		first_child;			///< First child
+		impl::compact_pointer<xml_node_struct,  8, 0>		first_child;			///< First child
 
-		impl::compact_pointer<xml_node_struct,  9, /*tag*/24>			prev_sibling_c;			///< Left brother (cyclic list)
-		impl::compact_pointer<xml_node_struct, 10, /*tag*/25, 0>		next_sibling;			///< Right brother
+		impl::compact_pointer<xml_node_struct,  9>			prev_sibling_c;			///< Left brother (cyclic list)
+		impl::compact_pointer<xml_node_struct, 10, 0>		next_sibling;			///< Right brother
 
-		impl::compact_pointer<xml_attribute_struct, 11, /*tag*/26, 0>	first_attribute;		///< First attribute
+		impl::compact_pointer<xml_attribute_struct, 11, 0>	first_attribute;		///< First attribute
 	};
 }
 #else
@@ -992,7 +983,7 @@ namespace pugi
 
 		uintptr_t header;
 
-		char_t* name;	///< Pointer to attribute name.
+		char_t*	name;	///< Pointer to attribute name.
 		char_t*	value;	///< Pointer to attribute value.
 
 		xml_attribute_struct* prev_attribute_c;	///< Previous attribute (cyclic list)
