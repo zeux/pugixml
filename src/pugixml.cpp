@@ -656,8 +656,8 @@ PUGI__NS_END
 
 #ifdef PUGIXML_COMPACT
 PUGI__NS_BEGIN
-	static const unsigned int compact_alignment_log2 = 2;
-	static const unsigned int compact_alignment = 1 << compact_alignment_log2;
+	static const uintptr_t compact_alignment_log2 = 2;
+	static const uintptr_t compact_alignment = 1 << compact_alignment_log2;
 
 	class compact_header
 	{
@@ -672,12 +672,12 @@ PUGI__NS_BEGIN
 			this->flags = static_cast<unsigned char>(flags);
 		}
 
-		void operator&=(unsigned int modflags)
+		void operator&=(uintptr_t modflags)
 		{
 			flags &= modflags;
 		}
 
-		void operator|=(unsigned int modflags)
+		void operator|=(uintptr_t modflags)
 		{
 			flags |= modflags;
 		}
@@ -826,7 +826,7 @@ PUGI__NS_BEGIN
 
 		operator T* const() const
 		{
-			unsigned int data = _data0 + (_data1 << 8);
+			int data = _data0 + (_data1 << 8);
 
 			if (data)
 			{
