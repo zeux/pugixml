@@ -309,9 +309,7 @@ PUGI__NS_BEGIN
 		void** insert(const void* key, size_t tag)
 		{
 			assert(key);
-
-			if (_count >= _capacity * 3 / 4)
-				rehash();
+			assert(_count < _capacity * 3 / 4);
 
 			size_t hashmod = _capacity - 1;
 			size_t bucket = hash(key) & hashmod;
@@ -341,6 +339,14 @@ PUGI__NS_BEGIN
 			return 0;
 		}
 
+		bool reserve()
+		{
+			if (_count + 16 >= _capacity * 3 / 4)
+				return rehash();
+
+			return true;
+		}
+
 	private:
 		struct item_t
 		{
@@ -353,13 +359,14 @@ PUGI__NS_BEGIN
 
 		size_t _count;
 
-		void rehash()
+		bool rehash()
 		{
 			compact_hash_table rt;
-			rt._capacity = (_capacity == 0) ? 256 : _capacity * 2;
+			rt._capacity = (_capacity == 0) ? 32 : _capacity * 2;
 			rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * rt._capacity));
 
-			assert(rt._items);
+			if (!rt._items)
+				return false;
 
 			memset(rt._items, 0, sizeof(item_t) * rt._capacity);
 
@@ -372,6 +379,8 @@ PUGI__NS_BEGIN
 
 			_capacity = rt._capacity;
 			_items = rt._items;
+
+			return true;
 		}
 
 		// http://burtleburtle.net/bob/hash/integer.html
@@ -591,6 +600,15 @@ PUGI__NS_BEGIN
 			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size;
 
 			deallocate_memory(header, full_size, page);
+		}
+
+		bool reserve()
+		{
+		#ifdef PUGIXML_COMPACT
+			return _hash->reserve();
+		#else
+			return true;
+		#endif
 		}
 
 		xml_memory_page* _root;
@@ -1269,6 +1287,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN_NO_INLINE xml_node_struct* append_new_node(xml_node_struct* node, xml_allocator& alloc, xml_node_type type = node_element)
 	{
+		if (!alloc.reserve()) return 0;
+
 		xml_node_struct* child = allocate_node(alloc, type);
 		if (!child) return 0;
 
@@ -1279,6 +1299,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN_NO_INLINE xml_attribute_struct* append_new_attribute(xml_node_struct* node, xml_allocator& alloc)
 	{
+		if (!alloc.reserve()) return 0;
+
 		xml_attribute_struct* attr = allocate_attribute(alloc);
 		if (!attr) return 0;
 
@@ -2251,6 +2273,8 @@ PUGI__NS_BEGIN
 		else
 		{
 			xml_allocator* alloc = reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask)->allocator;
+
+			if (!alloc->reserve()) return false;
 
 			// allocate new buffer
 			char_t* buf = alloc->allocate_string(source_length + 1);
@@ -5345,7 +5369,10 @@ namespace pugi
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::append_attribute(a._attr, _root);
@@ -5359,7 +5386,10 @@ namespace pugi
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::prepend_attribute(a._attr, _root);
@@ -5374,7 +5404,10 @@ namespace pugi
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 		
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_before(a._attr, attr._attr, _root);
@@ -5389,7 +5422,10 @@ namespace pugi
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 		
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_after(a._attr, attr._attr, _root);
@@ -5443,7 +5479,10 @@ namespace pugi
 	{
 		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
 		
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
+
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::append_node(n._root, _root);
@@ -5456,8 +5495,11 @@ namespace pugi
 	PUGI__FN xml_node xml_node::prepend_child(xml_node_type type_)
 	{
 		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
 		
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::prepend_node(n._root, _root);
@@ -5471,8 +5513,11 @@ namespace pugi
 	{
 		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
 	
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_before(n._root, node._root);
@@ -5486,8 +5531,11 @@ namespace pugi
 	{
 		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
 	
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_after(n._root, node._root);
@@ -5573,6 +5621,9 @@ namespace pugi
 	{
 		if (!impl::allow_move(*this, moved)) return xml_node();
 
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
+
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
 		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
 
@@ -5585,6 +5636,9 @@ namespace pugi
 	PUGI__FN xml_node xml_node::prepend_move(const xml_node& moved)
 	{
 		if (!impl::allow_move(*this, moved)) return xml_node();
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
 
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
 		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
@@ -5601,6 +5655,9 @@ namespace pugi
 		if (!node._root || node._root->parent != _root) return xml_node();
 		if (moved._root == node._root) return xml_node();
 
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
+
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
 		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
 
@@ -5615,6 +5672,9 @@ namespace pugi
 		if (!impl::allow_move(*this, moved)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 		if (moved._root == node._root) return xml_node();
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
 
 		// disable document_buffer_order optimization since moving nodes around changes document order without changing buffer pointers
 		impl::get_document(_root).header |= impl::xml_memory_page_contents_shared_mask;
@@ -5635,8 +5695,11 @@ namespace pugi
 		if (!_root || !a._attr) return false;
 		if (!impl::is_attribute_of(a._attr, _root)) return false;
 
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return false;
+
 		impl::remove_attribute(a._attr, _root);
-		impl::destroy_attribute(a._attr, impl::get_allocator(_root));
+		impl::destroy_attribute(a._attr, alloc);
 
 		return true;
 	}
@@ -5650,8 +5713,11 @@ namespace pugi
 	{
 		if (!_root || !n._root || n._root->parent != _root) return false;
 
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return false;
+
 		impl::remove_node(n._root);
-		impl::destroy_node(n._root, impl::get_allocator(_root));
+		impl::destroy_node(n._root, alloc);
 
 		return true;
 	}
