@@ -257,6 +257,140 @@ PUGI__NS_BEGIN
 PUGI__NS_END
 #endif
 
+#ifdef PUGIXML_COMPACT
+size_t pugi_compact_stats[128];
+
+PUGI__NS_BEGIN
+	class compact_hash_table
+	{
+	public:
+		compact_hash_table(): _items(0), _capacity(0), _count(0)
+		{
+		}
+
+		void clear()
+		{
+			if (_items)
+			{
+				xml_memory::deallocate(_items);
+				_items = 0;
+				_capacity = 0;
+				_count = 0;
+			}
+		}
+
+		void** find(const void* key)
+		{
+			assert(key);
+
+			if (_capacity == 0) return 0;
+
+			size_t hashmod = _capacity - 1;
+			size_t bucket = hash(key) & hashmod;
+
+			for (size_t probe = 0; probe <= hashmod; ++probe)
+			{
+				item_t& probe_item = _items[bucket];
+
+				if (probe_item.key == key)
+					return &probe_item.value;
+
+				if (probe_item.key == 0)
+					return 0;
+
+				// hash collision, quadratic probing
+				bucket = (bucket + probe + 1) & hashmod;
+			}
+
+			assert(!"Hash table is full");
+			return 0;
+		}
+
+		void** insert(const void* key, size_t tag)
+		{
+			assert(key);
+
+			if (_count >= _capacity * 3 / 4)
+				rehash();
+
+			size_t hashmod = _capacity - 1;
+			size_t bucket = hash(key) & hashmod;
+
+			for (size_t probe = 0; probe <= hashmod; ++probe)
+			{
+				item_t& probe_item = _items[bucket];
+
+				if (probe_item.key == 0)
+				{
+					if (tag)
+						pugi_compact_stats[tag]++;
+
+					probe_item.key = key;
+					_count++;
+					return &probe_item.value;
+				}
+
+				if (probe_item.key == key)
+					return &probe_item.value;
+
+				// hash collision, quadratic probing
+				bucket = (bucket + probe + 1) & hashmod;
+			}
+
+			assert(!"Hash table is full");
+			return 0;
+		}
+
+	private:
+		struct item_t
+		{
+			const void* key;
+			void* value;
+		};
+
+		item_t* _items;
+		size_t _capacity;
+
+		size_t _count;
+
+		void rehash()
+		{
+			compact_hash_table rt;
+			rt._capacity = (_capacity == 0) ? 256 : _capacity * 2;
+			rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * rt._capacity));
+
+			assert(rt._items);
+
+			memset(rt._items, 0, sizeof(item_t) * rt._capacity);
+
+			for (size_t i = 0; i < _capacity; ++i)
+				if (_items[i].key)
+					*rt.insert(_items[i].key, 0) = _items[i].value;
+
+			if (_items)
+				xml_memory::deallocate(_items);
+
+			_capacity = rt._capacity;
+			_items = rt._items;
+		}
+
+		// http://burtleburtle.net/bob/hash/integer.html
+		static unsigned int hash(const void* key)
+		{
+			unsigned int a = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key));
+
+			a = (a ^ 61) ^ (a >> 16);
+			a = a + (a << 3);
+			a = a ^ (a >> 4);
+			a = a * 0x27d4eb2d;
+			a = a ^ (a >> 15);
+
+			return a;
+		}
+	};
+PUGI__NS_END
+#endif
+
 PUGI__NS_BEGIN
 	static const size_t xml_memory_page_size =
 	#ifdef PUGIXML_MEMORY_PAGE_SIZE
@@ -463,7 +597,7 @@ PUGI__NS_BEGIN
 		size_t _busy_size;
 
 	#ifdef PUGIXML_COMPACT
-		class compact_hash_table* _hash;
+		compact_hash_table* _hash;
 	#endif
 	};
 
@@ -508,137 +642,7 @@ PUGI__NS_BEGIN
 PUGI__NS_END
 
 #ifdef PUGIXML_COMPACT
-size_t pugi_compact_stats[128];
-
 PUGI__NS_BEGIN
-	class compact_hash_table
-	{
-	public:
-		compact_hash_table(): _items(0), _capacity(0), _count(0)
-		{
-		}
-
-		void clear()
-		{
-			if (_items)
-			{
-				xml_memory::deallocate(_items);
-				_items = 0;
-				_capacity = 0;
-				_count = 0;
-			}
-		}
-
-		void** find(const void* key)
-		{
-			assert(key);
-
-			if (_capacity == 0) return 0;
-
-			size_t hashmod = _capacity - 1;
-			size_t bucket = hash(key) & hashmod;
-
-			for (size_t probe = 0; probe <= hashmod; ++probe)
-			{
-				item_t& probe_item = _items[bucket];
-
-				if (probe_item.key == key)
-					return &probe_item.value;
-
-				if (probe_item.key == 0)
-					return 0;
-
-				// hash collision, quadratic probing
-				bucket = (bucket + probe + 1) & hashmod;
-			}
-
-			assert(!"Hash table is full");
-			return 0;
-		}
-
-		void** insert(const void* key, size_t tag)
-		{
-			assert(key);
-
-			if (_count >= _capacity * 3 / 4)
-				rehash();
-
-			size_t hashmod = _capacity - 1;
-			size_t bucket = hash(key) & hashmod;
-
-			for (size_t probe = 0; probe <= hashmod; ++probe)
-			{
-				item_t& probe_item = _items[bucket];
-
-				if (probe_item.key == 0)
-				{
-					if (tag)
-						pugi_compact_stats[tag]++;
-
-					probe_item.key = key;
-					_count++;
-					return &probe_item.value;
-				}
-
-				if (probe_item.key == key)
-					return &probe_item.value;
-
-				// hash collision, quadratic probing
-				bucket = (bucket + probe + 1) & hashmod;
-			}
-
-			assert(!"Hash table is full");
-			return 0;
-		}
-
-	private:
-		struct item_t
-		{
-			const void* key;
-			void* value;
-		};
-
-		item_t* _items;
-		size_t _capacity;
-
-		size_t _count;
-
-		void rehash()
-		{
-			compact_hash_table rt;
-			rt._capacity = (_capacity == 0) ? 256 : _capacity * 2;
-			rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * rt._capacity));
-
-			assert(rt._items);
-
-			memset(rt._items, 0, sizeof(item_t) * rt._capacity);
-
-			for (size_t i = 0; i < _capacity; ++i)
-				if (_items[i].key)
-					*rt.insert(_items[i].key, 0) = _items[i].value;
-
-			if (_items)
-				xml_memory::deallocate(_items);
-
-			_capacity = rt._capacity;
-			_items = rt._items;
-		}
-
-		// http://burtleburtle.net/bob/hash/integer.html
-		static unsigned int hash(const void* key)
-		{
-			unsigned int a = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key));
-
-			a = (a ^ 61) ^ (a >> 16);
-			a = a + (a << 3);
-			a = a ^ (a >> 4);
-			a = a * 0x27d4eb2d;
-			a = a ^ (a >> 15);
-
-			return a;
-		}
-	};
-
 	static const unsigned int compact_alignment_log2 = 2;
 	static const unsigned int compact_alignment = 1 << compact_alignment_log2;
 
