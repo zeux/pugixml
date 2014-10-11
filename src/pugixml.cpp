@@ -640,8 +640,6 @@ PUGI__NS_BEGIN
 			node->first_child = child;
 			child->prev_sibling_c = child;
 		}
-
-		child->next_sibling = 0;
 	}
 
 	inline void prepend_node(xml_node_struct* child, xml_node_struct* node)
@@ -709,6 +707,84 @@ PUGI__NS_BEGIN
 			node->prev_sibling_c->next_sibling = node->next_sibling;
 		else
 			parent->first_child = node->next_sibling;
+
+		node->prev_sibling_c = 0;
+		node->next_sibling = 0;
+	}
+
+	inline void append_attribute(xml_attribute_struct* attr, xml_node_struct* node)
+	{
+		xml_attribute_struct* head = node->first_attribute;
+
+		if (head)
+		{
+			xml_attribute_struct* tail = head->prev_attribute_c;
+
+			tail->next_attribute = attr;
+			attr->prev_attribute_c = tail;
+			head->prev_attribute_c = attr;
+		}
+		else
+		{
+			node->first_attribute = attr;
+			attr->prev_attribute_c = attr;
+		}
+	}
+
+	inline void prepend_attribute(xml_attribute_struct* attr, xml_node_struct* node)
+	{
+		xml_attribute_struct* head = node->first_attribute;
+
+		if (head)
+		{
+			attr->prev_attribute_c = head->prev_attribute_c;
+			head->prev_attribute_c = attr;
+		}
+		else
+			attr->prev_attribute_c = attr;
+
+		attr->next_attribute = head;
+		node->first_attribute = attr;
+	}
+
+	inline void insert_attribute_before(xml_attribute_struct* attr, xml_attribute_struct* place, xml_node_struct* node)
+	{
+		if (place->prev_attribute_c->next_attribute)
+			place->prev_attribute_c->next_attribute = attr;
+		else
+			node->first_attribute = attr;
+
+		attr->prev_attribute_c = place->prev_attribute_c;
+		attr->next_attribute = place;
+		place->prev_attribute_c = attr;
+	}
+
+	inline void insert_attribute_after(xml_attribute_struct* attr, xml_attribute_struct* place, xml_node_struct* node)
+	{
+		if (place->next_attribute)
+			place->next_attribute->prev_attribute_c = attr;
+		else
+			node->first_attribute->prev_attribute_c = attr;
+
+		attr->next_attribute = place->next_attribute;
+		attr->prev_attribute_c = place;
+		place->next_attribute = attr;
+	}
+
+	inline void remove_attribute(xml_attribute_struct* attr, xml_node_struct* node)
+	{
+		if (attr->next_attribute)
+			attr->next_attribute->prev_attribute_c = attr->prev_attribute_c;
+		else if (node->first_attribute)
+			node->first_attribute->prev_attribute_c = attr->prev_attribute_c;
+
+		if (attr->prev_attribute_c->next_attribute)
+			attr->prev_attribute_c->next_attribute = attr->next_attribute;
+		else
+			node->first_attribute = attr->next_attribute;
+
+		attr->prev_attribute_c = 0;
+		attr->next_attribute = 0;
 	}
 
 	PUGI__FN_NO_INLINE xml_node_struct* append_new_node(xml_node_struct* node, xml_allocator& alloc, xml_node_type type = node_element)
@@ -723,26 +799,12 @@ PUGI__NS_BEGIN
 
 	PUGI__FN_NO_INLINE xml_attribute_struct* append_new_attribute(xml_node_struct* node, xml_allocator& alloc)
 	{
-		xml_attribute_struct* a = allocate_attribute(alloc);
-		if (!a) return 0;
+		xml_attribute_struct* attr = allocate_attribute(alloc);
+		if (!attr) return 0;
 
-		xml_attribute_struct* first_attribute = node->first_attribute;
+		append_attribute(attr, node);
 
-		if (first_attribute)
-		{
-			xml_attribute_struct* last_attribute = first_attribute->prev_attribute_c;
-
-			last_attribute->next_attribute = a;
-			a->prev_attribute_c = last_attribute;
-			first_attribute->prev_attribute_c = a;
-		}
-		else
-		{
-			node->first_attribute = a;
-			a->prev_attribute_c = a;
-		}
-			
-		return a;
+		return attr;
 	}
 PUGI__NS_END
 
@@ -3566,7 +3628,7 @@ PUGI__NS_BEGIN
 		while (node != root);
 	}
 
-	inline bool has_declaration(const xml_node node)
+	PUGI__FN bool has_declaration(const xml_node node)
 	{
 		for (xml_node child = node.first_child(); child; child = child.next_sibling())
 		{
@@ -3579,7 +3641,16 @@ PUGI__NS_BEGIN
 		return false;
 	}
 
-	inline bool allow_insert_child(xml_node_type parent, xml_node_type child)
+	PUGI__FN bool is_attribute_of(xml_attribute_struct* attr, xml_node_struct* node)
+	{
+		for (xml_attribute_struct* a = node->first_attribute; a; a = a->next_attribute)
+			if (a == attr)
+				return true;
+
+		return false;
+	}
+
+	PUGI__FN bool allow_insert_child(xml_node_type parent, xml_node_type child)
 	{
 		if (parent != node_document && parent != node_element) return false;
 		if (child == node_document || child == node_null) return false;
@@ -4772,7 +4843,10 @@ namespace pugi
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
 		
-		xml_attribute a(impl::append_new_attribute(_root, impl::get_allocator(_root)));
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
+
+		impl::append_attribute(a._attr, _root);
 
 		a.set_name(name_);
 		
@@ -4786,18 +4860,7 @@ namespace pugi
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		xml_attribute_struct* head = _root->first_attribute;
-
-		if (head)
-		{
-			a._attr->prev_attribute_c = head->prev_attribute_c;
-			head->prev_attribute_c = a._attr;
-		}
-		else
-			a._attr->prev_attribute_c = a._attr;
-		
-		a._attr->next_attribute = head;
-		_root->first_attribute = a._attr;
+		impl::prepend_attribute(a._attr, _root);
 
 		a.set_name(name_);
 
@@ -4806,27 +4869,14 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_node::insert_attribute_before(const char_t* name_, const xml_attribute& attr)
 	{
-		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
+		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 		
-		// check that attribute belongs to *this
-		xml_attribute_struct* cur = attr._attr;
-
-		while (cur->prev_attribute_c->next_attribute) cur = cur->prev_attribute_c;
-
-		if (cur != _root->first_attribute) return xml_attribute();
-
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		if (attr._attr->prev_attribute_c->next_attribute)
-			attr._attr->prev_attribute_c->next_attribute = a._attr;
-		else
-			_root->first_attribute = a._attr;
-		
-		a._attr->prev_attribute_c = attr._attr->prev_attribute_c;
-		a._attr->next_attribute = attr._attr;
-		attr._attr->prev_attribute_c = a._attr;
-				
+		impl::insert_attribute_before(a._attr, attr._attr, _root);
+
 		a.set_name(name_);
 
 		return a;
@@ -4834,26 +4884,13 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_node::insert_attribute_after(const char_t* name_, const xml_attribute& attr)
 	{
-		if ((type() != node_element && type() != node_declaration) || attr.empty()) return xml_attribute();
+		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 		
-		// check that attribute belongs to *this
-		xml_attribute_struct* cur = attr._attr;
-
-		while (cur->prev_attribute_c->next_attribute) cur = cur->prev_attribute_c;
-
-		if (cur != _root->first_attribute) return xml_attribute();
-
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
 
-		if (attr._attr->next_attribute)
-			attr._attr->next_attribute->prev_attribute_c = a._attr;
-		else
-			_root->first_attribute->prev_attribute_c = a._attr;
-		
-		a._attr->next_attribute = attr._attr->next_attribute;
-		a._attr->prev_attribute_c = attr._attr;
-		attr._attr->next_attribute = a._attr;
+		impl::insert_attribute_after(a._attr, attr._attr, _root);
 
 		a.set_name(name_);
 
@@ -5094,20 +5131,9 @@ namespace pugi
 	PUGI__FN bool xml_node::remove_attribute(const xml_attribute& a)
 	{
 		if (!_root || !a._attr) return false;
+		if (!impl::is_attribute_of(a._attr, _root)) return false;
 
-		// check that attribute belongs to *this
-		xml_attribute_struct* attr = a._attr;
-
-		while (attr->prev_attribute_c->next_attribute) attr = attr->prev_attribute_c;
-
-		if (attr != _root->first_attribute) return false;
-
-		if (a._attr->next_attribute) a._attr->next_attribute->prev_attribute_c = a._attr->prev_attribute_c;
-		else if (_root->first_attribute) _root->first_attribute->prev_attribute_c = a._attr->prev_attribute_c;
-		
-		if (a._attr->prev_attribute_c->next_attribute) a._attr->prev_attribute_c->next_attribute = a._attr->next_attribute;
-		else _root->first_attribute = a._attr->next_attribute;
-
+		impl::remove_attribute(a._attr, _root);
 		impl::destroy_attribute(a._attr, impl::get_allocator(_root));
 
 		return true;
@@ -5123,7 +5149,6 @@ namespace pugi
 		if (!_root || !n._root || n._root->parent != _root) return false;
 
 		impl::remove_node(n._root);
-
 		impl::destroy_node(n._root, impl::get_allocator(_root));
 
 		return true;
@@ -6145,7 +6170,6 @@ namespace std
 #endif
 
 #ifndef PUGIXML_NO_XPATH
-
 // STL replacements
 PUGI__NS_BEGIN
 	struct equal_to
