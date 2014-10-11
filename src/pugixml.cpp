@@ -1245,18 +1245,6 @@ PUGI__NS_BEGIN
 		node->first_attribute = attr;
 	}
 
-	inline void insert_attribute_before(xml_attribute_struct* attr, xml_attribute_struct* place, xml_node_struct* node)
-	{
-		if (place->prev_attribute_c->next_attribute)
-			place->prev_attribute_c->next_attribute = attr;
-		else
-			node->first_attribute = attr;
-
-		attr->prev_attribute_c = place->prev_attribute_c;
-		attr->next_attribute = place;
-		place->prev_attribute_c = attr;
-	}
-
 	inline void insert_attribute_after(xml_attribute_struct* attr, xml_attribute_struct* place, xml_node_struct* node)
 	{
 		if (place->next_attribute)
@@ -1267,6 +1255,18 @@ PUGI__NS_BEGIN
 		attr->next_attribute = place->next_attribute;
 		attr->prev_attribute_c = place;
 		place->next_attribute = attr;
+	}
+
+	inline void insert_attribute_before(xml_attribute_struct* attr, xml_attribute_struct* place, xml_node_struct* node)
+	{
+		if (place->prev_attribute_c->next_attribute)
+			place->prev_attribute_c->next_attribute = attr;
+		else
+			node->first_attribute = attr;
+
+		attr->prev_attribute_c = place->prev_attribute_c;
+		attr->next_attribute = place;
+		place->prev_attribute_c = attr;
 	}
 
 	inline void remove_attribute(xml_attribute_struct* attr, xml_node_struct* node)
@@ -5399,24 +5399,6 @@ namespace pugi
 		return a;
 	}
 
-	PUGI__FN xml_attribute xml_node::insert_attribute_before(const char_t* name_, const xml_attribute& attr)
-	{
-		if (type() != node_element && type() != node_declaration) return xml_attribute();
-		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
-		
-		impl::xml_allocator& alloc = impl::get_allocator(_root);
-		if (!alloc.reserve()) return xml_attribute();
-
-		xml_attribute a(impl::allocate_attribute(alloc));
-		if (!a) return xml_attribute();
-
-		impl::insert_attribute_before(a._attr, attr._attr, _root);
-
-		a.set_name(name_);
-
-		return a;
-	}
-
 	PUGI__FN xml_attribute xml_node::insert_attribute_after(const char_t* name_, const xml_attribute& attr)
 	{
 		if (type() != node_element && type() != node_declaration) return xml_attribute();
@@ -5429,6 +5411,24 @@ namespace pugi
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_after(a._attr, attr._attr, _root);
+
+		a.set_name(name_);
+
+		return a;
+	}
+
+	PUGI__FN xml_attribute xml_node::insert_attribute_before(const char_t* name_, const xml_attribute& attr)
+	{
+		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
+		
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
+		if (!a) return xml_attribute();
+
+		impl::insert_attribute_before(a._attr, attr._attr, _root);
 
 		a.set_name(name_);
 
