@@ -3424,6 +3424,31 @@ PUGI__NS_BEGIN
 		}
 	}
 
+	PUGI__FN void node_output_comment(xml_buffered_writer& writer, const char_t* s)
+	{
+		writer.write('<', '!', '-', '-');
+
+		while (*s)
+		{
+			const char_t* prev = s;
+
+			// look for -\0 or -- sequence - we can't output it since -- is illegal in comment body
+			while (*s && !(s[0] == '-' && (s[1] == '-' || s[1] == 0))) ++s;
+
+			writer.write_buffer(prev, static_cast<size_t>(s - prev));
+
+			if (*s)
+			{
+				assert(*s == '-');
+
+				writer.write('-', ' ');
+				++s;
+			}
+		}
+
+		writer.write('-', '-', '>');
+	}
+
 	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
@@ -3523,27 +3548,28 @@ PUGI__NS_BEGIN
 				break;
 
 			case node_comment:
-				writer.write('<', '!', '-', '-');
-				writer.write_string(node.value());
-				writer.write('-', '-', '>');
+				node_output_comment(writer, node.value());
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_pi:
-			case node_declaration:
 				writer.write('<', '?');
 				writer.write_string(node.name()[0] ? node.name() : default_name);
 
-				if (node.type() == node_declaration)
-				{
-					node_output_attributes(writer, node, flags);
-				}
-				else if (node.value()[0])
+				if (node.value()[0])
 				{
 					writer.write(' ');
 					writer.write_string(node.value());
 				}
 
+				writer.write('?', '>');
+				if ((flags & format_raw) == 0) writer.write('\n');
+				break;
+
+			case node_declaration:
+				writer.write('<', '?');
+				writer.write_string(node.name()[0] ? node.name() : default_name);
+				node_output_attributes(writer, node, flags);
 				writer.write('?', '>');
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
