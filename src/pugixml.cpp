@@ -9621,6 +9621,7 @@ PUGI__NS_BEGIN
 			switch (_type)
 			{
 			case ast_func_position:
+			case ast_func_last:
 				return false;
 
 			case ast_string_constant:
