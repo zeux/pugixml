@@ -7473,6 +7473,11 @@ PUGI__NS_BEGIN
 		*write = 0;
 	}
 
+	inline bool is_xpath_attribute(const char_t* name)
+	{
+		return !(starts_with(name, PUGIXML_TEXT("xmlns")) && (name[5] == 0 || name[5] == ':'));
+	}
+
 	struct xpath_variable_boolean: xpath_variable
 	{
 		xpath_variable_boolean(): value(false)
@@ -8217,7 +8222,6 @@ PUGI__NS_BEGIN
 		ast_func_normalize_space_0,		// normalize-space()
 		ast_func_normalize_space_1,		// normalize-space(left)
 		ast_func_translate,				// translate(left, right, third)
-		ast_func_translate_table,		// translate(left, right, third) where right/third are constants
 		ast_func_boolean,				// boolean(left)
 		ast_func_not,					// not(left)
 		ast_func_true,					// true()
@@ -8230,7 +8234,10 @@ PUGI__NS_BEGIN
 		ast_func_ceiling,				// ceiling(left)
 		ast_func_round,					// round(left)
 		ast_step,						// process set left with step
-		ast_step_root					// select root node
+		ast_step_root,					// select root node
+
+		ast_opt_translate_table,		// translate(left, right, third) where right/third are constants
+		ast_opt_compare_attribute		// @name = 'string'
 	};
 
 	enum axis_t
@@ -8296,7 +8303,7 @@ PUGI__NS_BEGIN
 			xpath_variable* variable;
 			// node test for ast_step (node name/namespace/node type/pi target)
 			const char_t* nodetest;
-			// table for ast_func_translate_table
+			// table for ast_opt_translate_table
 			const unsigned char* table;
 		} _data;
 
@@ -8498,36 +8505,38 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void step_push(xpath_node_set_raw& ns, const xml_attribute a, const xml_node parent, xpath_allocator* alloc)
+		bool step_push(xpath_node_set_raw& ns, const xml_attribute a, const xml_node parent, xpath_allocator* alloc)
 		{
-			if (!a) return;
+			if (!a) return false;
 
 			const char_t* name = a.name();
 
-			// There are no attribute nodes corresponding to attributes that declare namespaces
-			// That is, "xmlns:..." or "xmlns"
-			if (starts_with(name, PUGIXML_TEXT("xmlns")) && (name[5] == 0 || name[5] == ':')) return;
-			
 			switch (_test)
 			{
 			case nodetest_name:
-				if (strequal(name, _data.nodetest))
+				if (strequal(name, _data.nodetest) && is_xpath_attribute(name))
+				{
 					ns.push_back(xpath_node(a, parent), alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_type_node:
 			case nodetest_all:
-				ns.push_back(xpath_node(a, parent), alloc);
+				if (is_xpath_attribute(name))
+					ns.push_back(xpath_node(a, parent), alloc);
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (starts_with(name, _data.nodetest))
+				if (starts_with(name, _data.nodetest) && is_xpath_attribute(name))
 					ns.push_back(xpath_node(a, parent), alloc);
 				break;
 			
 			default:
 				;
 			}
+
+			return false;
 		}
 		
 		void step_push(xpath_node_set_raw& ns, const xml_node n, xpath_allocator* alloc)
@@ -8589,7 +8598,8 @@ PUGI__NS_BEGIN
 			case axis_attribute:
 			{
 				for (xml_attribute a = n.first_attribute(); a; a = a.next_attribute())
-					step_push(ns, a, n, alloc);
+					if (step_push(ns, a, n, alloc))
+						break; // step_push returns true if it found a unique attribute
 				
 				break;
 			}
@@ -9007,6 +9017,15 @@ PUGI__NS_BEGIN
 				return false;
 			}
 
+			case ast_opt_compare_attribute:
+			{
+				const char_t* value = (_right->_type == ast_string_constant) ? _right->_data.string : _right->_data.variable->get_string();
+
+				xml_attribute attr = c.n.node().attribute(_left->_data.nodetest);
+
+				return attr && strequal(attr.value(), value) && is_xpath_attribute(attr.name());
+			}
+
 			case ast_variable:
 			{
 				assert(_rettype == _data.variable->type());
@@ -9412,7 +9431,7 @@ PUGI__NS_BEGIN
 				return s;
 			}
 
-			case ast_func_translate_table:
+			case ast_opt_translate_table:
 			{
 				xpath_string s = _left->eval_string(c, stack);
 
@@ -9610,9 +9629,17 @@ PUGI__NS_BEGIN
 
 				if (table)
 				{
-					_type = ast_func_translate_table;
+					_type = ast_opt_translate_table;
 					_data.table = table;
 				}
+			}
+
+			// Use optimized path for @attr = 'value' or @attr = $value
+			if (_type == ast_op_equal &&
+				_left->_type == ast_step && _left->_axis == axis_attribute && _left->_test == nodetest_name && !_left->_left && !_left->_right &&
+				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->rettype() == xpath_type_string)))
+			{
+				_type = ast_opt_compare_attribute;
 			}
 		}
 		

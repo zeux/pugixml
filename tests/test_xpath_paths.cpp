@@ -561,4 +561,22 @@ TEST_XML(xpath_paths_unsorted_child, "<node><foo><bar/></foo><node><foo><bar/></
 	CHECK(ns[2] == nss[1]);
 }
 
+TEST_XML(xpath_paths_optimize_compare_attribute, "<node id='1' /><node id='2' /><node xmlns='3' />")
+{
+	CHECK_XPATH_NODESET(doc, STR("node[@id = '1']")) % 2;
+	CHECK_XPATH_NODESET(doc, STR("node[@id = '2']")) % 4;
+	CHECK_XPATH_NODESET(doc, STR("node[@id = 2]")) % 4;
+	CHECK_XPATH_NODESET(doc, STR("node[@id[. > 3] = '2']"));
+	CHECK_XPATH_NODESET(doc, STR("node['1' = @id]")) % 2;
+
+	xpath_variable_set set;
+	set.set(STR("var1"), STR("2"));
+	set.set(STR("var2"), 2.0);
+
+	CHECK_XPATH_NODESET_VAR(doc, STR("node[@id = $var1]"), &set) % 4;
+	CHECK_XPATH_NODESET_VAR(doc, STR("node[@id = $var2]"), &set) % 4;
+
+	CHECK_XPATH_NODESET(doc, STR("node[@xmlns = '3']"));
+}
+
 #endif
