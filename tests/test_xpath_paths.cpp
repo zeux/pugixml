@@ -531,6 +531,21 @@ TEST_XML(xpath_paths_descendant_optimize, "<node><para><para/><para/><para><para
 	CHECK_XPATH_NODESET(doc, STR("/descendant-or-self::node()[3]/child::para")) % 4 % 5 % 6;
 }
 
+TEST_XML(xpath_paths_descendant_optimize_axes, "<node><para><para/><para/><para><para/></para></para><para/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("//.")) % 1 % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//descendant::*")) % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//descendant-or-self::*")) % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+
+	CHECK_XPATH_NODESET(doc, STR("//..")) % 1 % 2 % 3 % 6;
+	CHECK_XPATH_NODESET(doc, STR("//ancestor::*")) % 2 % 3 % 6;
+	CHECK_XPATH_NODESET(doc, STR("//ancestor-or-self::*")) % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//preceding-sibling::*")) % 3 % 4 % 5;
+	CHECK_XPATH_NODESET(doc, STR("//following-sibling::*")) % 5 % 6 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//preceding::*")) % 3 % 4 % 5 % 6 % 7;
+	CHECK_XPATH_NODESET(doc, STR("//following::*")) % 5 % 6 % 7 % 8;
+}
+
 TEST_XML(xpath_paths_descendant_optimize_last, "<node><para><para/><para/><para><para/></para></para><para/></node>")
 {
 	CHECK_XPATH_NODESET(doc, STR("//para[last()]")) % 6 % 7 % 8;

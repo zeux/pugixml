@@ -9613,12 +9613,17 @@ PUGI__NS_BEGIN
 
 			// Replace descendant-or-self::node()/child::foo with descendant::foo
 			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
+			// Do a similar kind of replacement for self/descendant/descendant-or-self axes
 			// Note that we only replace positionally invariant steps (//foo[1] != /descendant::foo[1])
-			if (_type == ast_step && _axis == axis_child && _left &&
+			if (_type == ast_step && (_axis == axis_child || _axis == axis_self || _axis == axis_descendant || _axis == axis_descendant_or_self) && _left &&
 				_left->_type == ast_step && _left->_axis == axis_descendant_or_self && _left->_test == nodetest_type_node && !_left->_right &&
 				is_posinv_step())
 			{
-				_axis = axis_descendant;
+				if (_axis == axis_child || _axis == axis_descendant)
+					_axis = axis_descendant;
+				else
+					_axis = axis_descendant_or_self;
+
 				_left = _left->_left;
 			}
 
