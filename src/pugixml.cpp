@@ -3784,7 +3784,19 @@ PUGI__NS_BEGIN
 
 	PUGI__FN float get_value_float(const char_t* value, float def, bool* def_set)
 	{
-		if (!value) return def;
+		if (!value)
+		{
+			if(def_set)
+			{
+				*def_set = true;
+			}
+			return def;
+		}
+
+		if(def_set)
+		{
+			*def_set = false;
+		}
 
 	#ifdef PUGIXML_WCHAR_MODE
 		return static_cast<float>(wcstod(value, 0));
