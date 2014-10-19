@@ -10581,6 +10581,25 @@ PUGI__NS_BEGIN
 
 		return impl->root->eval_string(c, sd.stack);
 	}
+
+	PUGI__FN impl::xpath_ast_node* evaluate_node_set_prepare(xpath_query_impl* impl)
+	{
+		if (!impl) return 0;
+
+		if (impl->root->rettype() != xpath_type_node_set)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return 0;
+		#else
+			xpath_parse_result res;
+			res.error = "Expression does not evaluate to node set";
+
+			throw xpath_exception(res);
+		#endif
+		}
+
+		return impl->root;
+	}
 PUGI__NS_END
 
 namespace pugi
@@ -11082,22 +11101,9 @@ namespace pugi
 
 	PUGI__FN xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const
 	{
-		if (!_impl) return xpath_node_set();
+		impl::xpath_ast_node* root = impl::evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
+		if (!root) return xpath_node_set();
 
-		impl::xpath_ast_node* root = static_cast<impl::xpath_query_impl*>(_impl)->root;
-
-		if (root->rettype() != xpath_type_node_set)
-		{
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			return xpath_node_set();
-		#else
-			xpath_parse_result res;
-			res.error = "Expression does not evaluate to node set";
-
-			throw xpath_exception(res);
-		#endif
-		}
-		
 		impl::xpath_context c(n, 1, 1);
 		impl::xpath_stack_data sd;
 
@@ -11108,6 +11114,23 @@ namespace pugi
 		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack);
 
 		return xpath_node_set(r.begin(), r.end(), r.type());
+	}
+
+	PUGI__FN xpath_node xpath_query::evaluate_node(const xpath_node& n) const
+	{
+		impl::xpath_ast_node* root = impl::evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
+		if (!root) return xpath_node();
+
+		impl::xpath_context c(n, 1, 1);
+		impl::xpath_stack_data sd;
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return xpath_node();
+	#endif
+
+		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack);
+
+		return r.first();
 	}
 
 	PUGI__FN const xpath_parse_result& xpath_query::result() const
@@ -11137,8 +11160,7 @@ namespace pugi
 
 	PUGI__FN xpath_node xml_node::select_single_node(const xpath_query& query) const
 	{
-		xpath_node_set s = query.evaluate_node_set(*this);
-		return s.empty() ? xpath_node() : s.first();
+		return query.evaluate_node(*this);
 	}
 
 	PUGI__FN xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables) const

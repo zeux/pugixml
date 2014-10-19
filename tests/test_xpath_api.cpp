@@ -154,6 +154,9 @@ TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 
 	xpath_node_set ns = q.evaluate_node_set(doc);
 	CHECK(ns.size() == 1 && ns[0].attribute() == doc.child(STR("node")).attribute(STR("attr")));
+
+	xpath_node nr = q.evaluate_node(doc);
+	CHECK(nr.attribute() == doc.child(STR("node")).attribute(STR("attr")));
 }
 
 TEST_XML(xpath_api_evaluate_attr, "<node attr='3'/>")
@@ -173,6 +176,9 @@ TEST_XML(xpath_api_evaluate_attr, "<node attr='3'/>")
 
 	xpath_node_set ns = q.evaluate_node_set(n);
 	CHECK(ns.size() == 1 && ns[0] == n);
+
+	xpath_node nr = q.evaluate_node(n);
+	CHECK(nr == n);
 }
 
 #ifdef PUGIXML_NO_EXCEPTIONS
@@ -190,19 +196,40 @@ TEST_XML(xpath_api_evaluate_fail, "<node attr='3'/>")
 #endif
 
 	CHECK(q.evaluate_node_set(doc).empty());
+
+	CHECK(!q.evaluate_node(doc));
 }
 #endif
 
 TEST(xpath_api_evaluate_node_set_fail)
 {
+	xpath_query q(STR("1"));
+
 #ifdef PUGIXML_NO_EXCEPTIONS
-	CHECK_XPATH_NODESET(xml_node(), STR("1"));
+	CHECK(q.evaluate_node_set(xml_node()).empty());
 #else
 	try
 	{
-		xpath_query q(STR("1"));
-
 		q.evaluate_node_set(xml_node());
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (const xpath_exception&)
+	{
+	}
+#endif
+}
+
+TEST(xpath_api_evaluate_node_fail)
+{
+	xpath_query q(STR("1"));
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(!q.evaluate_node(xml_node()));
+#else
+	try
+	{
+		q.evaluate_node(xml_node());
 
 		CHECK_FORCE_FAIL("Expected exception");
 	}
