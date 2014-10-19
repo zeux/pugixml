@@ -1665,20 +1665,20 @@ The constructor copies the specified range and sets the specified type. The obje
 
 [section:select Selecting nodes via XPath expression]
 
-[#xml_node::select_single_node][#xml_node::select_nodes]
+[#xml_node::select_node][#xml_node::select_nodes]
 If you want to select nodes that match some XPath expression, you can do it with the following functions:
 
-    xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+    xpath_node xml_node::select_node(const char_t* query, xpath_variable_set* variables = 0) const;
     xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
 
-`select_nodes` function compiles the expression and then executes it with the node as a context node, and returns the resulting node set. `select_single_node` returns only the first node in document order from the result, and is equivalent to calling `select_nodes(query).first()`. If the XPath expression does not match anything, or the node handle is null, `select_nodes` returns an empty set, and `select_single_node` returns null XPath node.
+`select_nodes` function compiles the expression and then executes it with the node as a context node, and returns the resulting node set. `select_node` returns only the first node in document order from the result, and is equivalent to calling `select_nodes(query).first()`. If the XPath expression does not match anything, or the node handle is null, `select_nodes` returns an empty set, and `select_node` returns null XPath node.
 
 If exception handling is not disabled, both functions throw [link xpath_exception] if the query can not be compiled or if it returns a value with type other than node set; see [sref manual.xpath.errors] for details.
 
-[#xml_node::select_single_node_precomp][#xml_node::select_nodes_precomp]
+[#xml_node::select_node_precomp][#xml_node::select_nodes_precomp]
 While compiling expressions is fast, the compilation time can introduce a significant overhead if the same expression is used many times on small subtrees. If you're doing many similar queries, consider compiling them into query objects (see [sref manual.xpath.query] for further reference). Once you get a compiled query object, you can pass it to select functions instead of an expression string:
 
-    xpath_node xml_node::select_single_node(const xpath_query& query) const;
+    xpath_node xml_node::select_node(const xpath_query& query) const;
     xpath_node_set xml_node::select_nodes(const xpath_query& query) const;
 
 If exception handling is not disabled, both functions throw [link xpath_exception] if the query returns a value with type other than node set.
@@ -1711,17 +1711,18 @@ The expression is compiled and the compiled representation is stored in the new 
 
     xpath_value_type xpath_query::return_type() const;
 
-[#xpath_query::evaluate_boolean][#xpath_query::evaluate_number][#xpath_query::evaluate_string][#xpath_query::evaluate_node_set]
+[#xpath_query::evaluate_boolean][#xpath_query::evaluate_number][#xpath_query::evaluate_string][#xpath_query::evaluate_node_set][#xpath_query::evaluate_node]
 You can evaluate the query using one of the following functions:
 
     bool xpath_query::evaluate_boolean(const xpath_node& n) const;
     double xpath_query::evaluate_number(const xpath_node& n) const;
     string_t xpath_query::evaluate_string(const xpath_node& n) const;
     xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const;
+    xpath_node xpath_query::evaluate_node(const xpath_node& n) const;
 
-All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. According to XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` results in an error if the return type is not node set (see [sref manual.xpath.errors]).
+All functions take the context node as an argument, compute the expression and return the result, converted to the requested type. According to XPath specification, value of any type can be converted to boolean, number or string value, but no type other than node set can be converted to node set. Because of this, `evaluate_boolean`, `evaluate_number` and `evaluate_string` always return a result, but `evaluate_node_set` and `evaluate_node` result in an error if the return type is not node set (see [sref manual.xpath.errors]).
 
-[note Calling `node.select_nodes("query")` is equivalent to calling `xpath_query("query").evaluate_node_set(node)`.]
+[note Calling `node.select_nodes("query")` is equivalent to calling `xpath_query("query").evaluate_node_set(node)`. Calling `node.select_node("query")` is equivalent to calling `xpath_query("query").evaluate_node(node)`.]
 
 [#xpath_query::evaluate_string_buffer]
 Note that `evaluate_string` function returns the STL string; as such, it's not available in [link PUGIXML_NO_STL] mode and also usually allocates memory. There is another string evaluation function:
@@ -1744,10 +1745,10 @@ This is an example of using query objects ([@samples/xpath_query.cpp]):
 
 XPath queries may contain references to variables; this is useful if you want to use queries that depend on some dynamic parameter without manually preparing the complete query string, or if you want to reuse the same query object for similar queries.
 
-Variable references have the form '''<code><phrase role="identifier">$name</phrase></code>'''; in order to use them, you have to provide a variable set, which includes all variables present in the query with correct types. This set is passed to `xpath_query` constructor or to `select_nodes`/`select_single_node` functions:
+Variable references have the form '''<code><phrase role="identifier">$name</phrase></code>'''; in order to use them, you have to provide a variable set, which includes all variables present in the query with correct types. This set is passed to `xpath_query` constructor or to `select_nodes`/`select_node` functions:
 
     explicit xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables = 0);
-    xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+    xpath_node xml_node::select_node(const char_t* query, xpath_variable_set* variables = 0) const;
     xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
 
 If you're using query objects, you can change the variable values before `evaluate`/`select` calls to change the query behavior.
@@ -2481,8 +2482,8 @@ Classes:
     * `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
     [lbr]
 
-    * `xpath_node `[link xml_node::select_single_node select_single_node]`(const char_t* query, xpath_variable_set* variables = 0) const;`
-    * `xpath_node `[link xml_node::select_single_node_precomp select_single_node]`(const xpath_query& query) const;`
+    * `xpath_node `[link xml_node::select_node select_node]`(const char_t* query, xpath_variable_set* variables = 0) const;`
+    * `xpath_node `[link xml_node::select_node_precomp select_node]`(const xpath_query& query) const;`
     * `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query, xpath_variable_set* variables = 0) const;`
     * `xpath_node_set `[link xml_node::select_nodes_precomp select_nodes]`(const xpath_query& query) const;`
     [lbr]
@@ -2620,6 +2621,7 @@ Classes:
     * `string_t `[link xpath_query::evaluate_string evaluate_string]`(const xpath_node& n) const;`
 	* `size_t `[link xpath_query::evaluate_string_buffer evaluate_string]`(char_t* buffer, size_t capacity, const xpath_node& n) const;`
     * `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xpath_node& n) const;`
+    * `xpath_node `[link xpath_query::evaluate_node evaluate_node]`(const xpath_node& n) const;`
     [lbr]
 
     * `xpath_value_type `[link xpath_query::return_type return_type]`() const;`

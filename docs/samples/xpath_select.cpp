@@ -18,7 +18,7 @@ int main()
         std::cout << node.node().attribute("Filename").value() << "\n";
     }
 
-    pugi::xpath_node build_tool = doc.select_single_node("//Tool[contains(Description, 'build system')]");
+    pugi::xpath_node build_tool = doc.select_node("//Tool[contains(Description, 'build system')]");
 
     if (build_tool)
         std::cout << "Build tool: " << build_tool.node().attribute("Filename").value() << "\n";
