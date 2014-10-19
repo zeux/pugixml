@@ -585,12 +585,17 @@ namespace pugi
 	
 	#ifndef PUGIXML_NO_XPATH
 		// Select single node by evaluating XPath query. Returns first node from the resulting node set.
-		xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
-		xpath_node select_single_node(const xpath_query& query) const;
+		xpath_node select_node(const char_t* query, xpath_variable_set* variables = 0) const;
+		xpath_node select_node(const xpath_query& query) const;
 
 		// Select node set by evaluating XPath query
 		xpath_node_set select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
 		xpath_node_set select_nodes(const xpath_query& query) const;
+
+		// (deprecated: use select_node instead) Select single node by evaluating XPath query.
+		xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+		xpath_node select_single_node(const xpath_query& query) const;
+
 	#endif
 		
 		// Print subtree using a writer object

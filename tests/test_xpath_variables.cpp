@@ -281,7 +281,7 @@ TEST_XML(xpath_variables_select, "<node attr='1'/><node attr='2'/>")
 	xpath_node_set ns = doc.select_nodes(STR("node[@attr=$one+1]"), &set);
 	CHECK(ns.size() == 1 && ns[0].node() == doc.last_child());
 
-	xpath_node n = doc.select_single_node(STR("node[@attr=$one+1]"), &set);
+	xpath_node n = doc.select_node(STR("node[@attr=$one+1]"), &set);
 	CHECK(n == ns[0]);
 }
 

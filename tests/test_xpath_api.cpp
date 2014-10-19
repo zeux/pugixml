@@ -19,22 +19,22 @@ TEST_XML(xpath_api_select_nodes, "<node><head/><foo/><foo/><tail/></node>")
 	xpath_node_set_tester(ns2, "ns2") % 4 % 5;
 }
 
-TEST_XML(xpath_api_select_single_node, "<node><head/><foo id='1'/><foo/><tail/></node>")
+TEST_XML(xpath_api_select_node, "<node><head/><foo id='1'/><foo/><tail/></node>")
 {
-	xpath_node n1 = doc.select_single_node(STR("node/foo"));
+	xpath_node n1 = doc.select_node(STR("node/foo"));
 
 	xpath_query q(STR("node/foo"));
-	xpath_node n2 = doc.select_single_node(q);
+	xpath_node n2 = doc.select_node(q);
 
 	CHECK(n1.node().attribute(STR("id")).as_int() == 1);
 	CHECK(n2.node().attribute(STR("id")).as_int() == 1);
 
-	xpath_node n3 = doc.select_single_node(STR("node/bar"));
+	xpath_node n3 = doc.select_node(STR("node/bar"));
 	
 	CHECK(!n3);
 
-	xpath_node n4 = doc.select_single_node(STR("node/head/following-sibling::foo"));
-	xpath_node n5 = doc.select_single_node(STR("node/tail/preceding-sibling::foo"));
+	xpath_node n4 = doc.select_node(STR("node/head/following-sibling::foo"));
+	xpath_node n5 = doc.select_node(STR("node/tail/preceding-sibling::foo"));
 	
 	CHECK(n4.node().attribute(STR("id")).as_int() == 1);
 	CHECK(n5.node().attribute(STR("id")).as_int() == 1);
@@ -42,20 +42,20 @@ TEST_XML(xpath_api_select_single_node, "<node><head/><foo id='1'/><foo/><tail/><
 
 TEST_XML(xpath_api_node_bool_ops, "<node attr='value'/>")
 {
-	generic_bool_ops_test(doc.select_single_node(STR("node")));
-	generic_bool_ops_test(doc.select_single_node(STR("node/@attr")));
+	generic_bool_ops_test(doc.select_node(STR("node")));
+	generic_bool_ops_test(doc.select_node(STR("node/@attr")));
 }
 
 TEST_XML(xpath_api_node_eq_ops, "<node attr='value'/>")
 {
-	generic_eq_ops_test(doc.select_single_node(STR("node")), doc.select_single_node(STR("node/@attr")));
+	generic_eq_ops_test(doc.select_node(STR("node")), doc.select_node(STR("node/@attr")));
 }
 
 TEST_XML(xpath_api_node_accessors, "<node attr='value'/>")
 {
 	xpath_node null;
-	xpath_node node = doc.select_single_node(STR("node"));
-	xpath_node attr = doc.select_single_node(STR("node/@attr"));
+	xpath_node node = doc.select_node(STR("node"));
+	xpath_node attr = doc.select_node(STR("node/@attr"));
 
 	CHECK(!null.node());
 	CHECK(!null.attribute());
@@ -411,4 +411,14 @@ TEST_XML(xpath_api_node_set_assign_out_of_memory_preserve, "<node><a/><b/></node
 }
 #endif
 
+TEST_XML(xpath_api_deprecated_select_single_node, "<node><head/><foo id='1'/><foo/><tail/></node>")
+{
+	xpath_node n1 = doc.select_single_node(STR("node/foo"));
+
+	xpath_query q(STR("node/foo"));
+	xpath_node n2 = doc.select_single_node(q);
+
+	CHECK(n1.node().attribute(STR("id")).as_int() == 1);
+	CHECK(n2.node().attribute(STR("id")).as_int() == 1);
+}
 #endif
