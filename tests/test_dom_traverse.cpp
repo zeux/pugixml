@@ -1043,3 +1043,19 @@ TEST_XML(dom_node_children_attributes, "<node1 attr1='value1' attr2='value2' /><
 	CHECK(r4.begin() == xml_attribute_iterator());
 	CHECK(r4.end() == xml_attribute_iterator());
 }
+
+TEST_XML(dom_unspecified_bool_coverage, "<node attr='value'>text</node>")
+{
+	xml_node node = doc.first_child();
+
+	node(0);
+	node.first_attribute()(0);
+	node.text()(0);
+
+#ifndef PUGIXML_NO_XPATH
+	xpath_query q(STR("/node"));
+
+	q(0);
+	q.evaluate_node(doc)(0);
+#endif
+}
