@@ -594,4 +594,26 @@ TEST_XML(xpath_paths_optimize_compare_attribute, "<node id='1' /><node id='2' />
 	CHECK_XPATH_NODESET(doc, STR("node[@xmlns = '3']"));
 }
 
+TEST_XML(xpath_paths_optimize_step_once, "<node><para1><para2/><para3/><para4><para5 attr5=''/></para4></para1><para6/></node>")
+{
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para2/following::*"), true);
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para6/following::*"), false);
+
+    CHECK_XPATH_STRING(doc, STR("name(node//para2/following::*)"), STR("para3"));
+    CHECK_XPATH_STRING(doc, STR("name(node//para6/following::*)"), STR(""));
+
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para1/preceding::*"), false);
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para6/preceding::*"), true);
+
+    CHECK_XPATH_STRING(doc, STR("name(node//para1/preceding::*)"), STR(""));
+    CHECK_XPATH_STRING(doc, STR("name(node//para6/preceding::*)"), STR("para1"));
+
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para6/preceding::para4"), true);
+
+    CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/ancestor-or-self::*"), true);
+    CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/ancestor::*"), true);
+
+    CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/following::para6"), true);
+    CHECK_XPATH_STRING(doc, STR("name(//@attr5/following::para6)"), STR("para6"));
+}
 #endif
