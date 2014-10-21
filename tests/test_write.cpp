@@ -57,6 +57,29 @@ TEST_XML_FLAGS(write_comment, "<!--text-->", parse_comments | parse_fragment)
 	CHECK_NODE_EX(doc, STR("<!--text-->\n"), STR(""), 0);
 }
 
+TEST(write_comment_invalid)
+{
+	xml_document doc;
+	xml_node child = doc.append_child(node_comment);
+
+	CHECK_NODE(doc, STR("<!---->"));
+
+	child.set_value(STR("-"));
+	CHECK_NODE(doc, STR("<!--- -->"));
+
+	child.set_value(STR("--"));
+	CHECK_NODE(doc, STR("<!--- - -->"));
+
+	child.set_value(STR("---"));
+	CHECK_NODE(doc, STR("<!--- - - -->"));
+
+	child.set_value(STR("-->"));
+	CHECK_NODE(doc, STR("<!--- ->-->"));
+
+	child.set_value(STR("-->-"));
+	CHECK_NODE(doc, STR("<!--- ->- -->"));
+}
+
 TEST_XML_FLAGS(write_pi, "<?name value?>", parse_pi | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<?name value?>"));

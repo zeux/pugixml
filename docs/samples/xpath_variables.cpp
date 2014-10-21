@@ -27,7 +27,7 @@ int main()
     std::cout << "Local tool: ";
     tools_local[0].node().print(std::cout);
 
-    // You can pass the context directly to select_nodes/select_single_node
+    // You can pass the context directly to select_nodes/select_node
     pugi::xpath_node_set tools_local_imm = doc.select_nodes("/Profile/Tools/Tool[@AllowRemote = string($remote)]", &vars);
 
     std::cout << "Local tool imm: ";

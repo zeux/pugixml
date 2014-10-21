@@ -3920,6 +3920,31 @@ PUGI__NS_BEGIN
 		}
 	}
 
+	PUGI__FN void node_output_comment(xml_buffered_writer& writer, const char_t* s)
+	{
+		writer.write('<', '!', '-', '-');
+
+		while (*s)
+		{
+			const char_t* prev = s;
+
+			// look for -\0 or -- sequence - we can't output it since -- is illegal in comment body
+			while (*s && !(s[0] == '-' && (s[1] == '-' || s[1] == 0))) ++s;
+
+			writer.write_buffer(prev, static_cast<size_t>(s - prev));
+
+			if (*s)
+			{
+				assert(*s == '-');
+
+				writer.write('-', ' ');
+				++s;
+			}
+		}
+
+		writer.write('-', '-', '>');
+	}
+
 	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
@@ -4019,27 +4044,28 @@ PUGI__NS_BEGIN
 				break;
 
 			case node_comment:
-				writer.write('<', '!', '-', '-');
-				writer.write_string(node.value());
-				writer.write('-', '-', '>');
+				node_output_comment(writer, node.value());
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_pi:
-			case node_declaration:
 				writer.write('<', '?');
 				writer.write_string(node.name()[0] ? node.name() : default_name);
 
-				if (node.type() == node_declaration)
-				{
-					node_output_attributes(writer, node, flags);
-				}
-				else if (node.value()[0])
+				if (node.value()[0])
 				{
 					writer.write(' ');
 					writer.write_string(node.value());
 				}
 
+				writer.write('?', '>');
+				if ((flags & format_raw) == 0) writer.write('\n');
+				break;
+
+			case node_declaration:
+				writer.write('<', '?');
+				writer.write_string(node.name()[0] ? node.name() : default_name);
+				node_output_attributes(writer, node, flags);
 				writer.write('?', '>');
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
@@ -7999,6 +8025,11 @@ PUGI__NS_BEGIN
 		*write = 0;
 	}
 
+	inline bool is_xpath_attribute(const char_t* name)
+	{
+		return !(starts_with(name, PUGIXML_TEXT("xmlns")) && (name[5] == 0 || name[5] == ':'));
+	}
+
 	struct xpath_variable_boolean: xpath_variable
 	{
 		xpath_variable_boolean(): value(false)
@@ -8743,7 +8774,6 @@ PUGI__NS_BEGIN
 		ast_func_normalize_space_0,		// normalize-space()
 		ast_func_normalize_space_1,		// normalize-space(left)
 		ast_func_translate,				// translate(left, right, third)
-		ast_func_translate_table,		// translate(left, right, third) where right/third are constants
 		ast_func_boolean,				// boolean(left)
 		ast_func_not,					// not(left)
 		ast_func_true,					// true()
@@ -8756,7 +8786,10 @@ PUGI__NS_BEGIN
 		ast_func_ceiling,				// ceiling(left)
 		ast_func_round,					// round(left)
 		ast_step,						// process set left with step
-		ast_step_root					// select root node
+		ast_step_root,					// select root node
+
+		ast_opt_translate_table,		// translate(left, right, third) where right/third are constants
+		ast_opt_compare_attribute		// @name = 'string'
 	};
 
 	enum axis_t
@@ -8787,6 +8820,13 @@ PUGI__NS_BEGIN
 		nodetest_pi,
 		nodetest_all,
 		nodetest_all_in_namespace
+	};
+
+	enum nodeset_eval_t
+	{
+		nodeset_eval_all,
+		nodeset_eval_any,
+		nodeset_eval_first
 	};
 
 	template <axis_t N> struct axis_to_type
@@ -8822,7 +8862,7 @@ PUGI__NS_BEGIN
 			xpath_variable* variable;
 			// node test for ast_step (node name/namespace/node type/pi target)
 			const char_t* nodetest;
-			// table for ast_func_translate_table
+			// table for ast_opt_translate_table
 			const unsigned char* table;
 		} _data;
 
@@ -8853,8 +8893,8 @@ PUGI__NS_BEGIN
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				xpath_node_set_raw ls = lhs->eval_node_set(c, stack);
-				xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+				xpath_node_set_raw ls = lhs->eval_node_set(c, stack, nodeset_eval_all);
+				xpath_node_set_raw rs = rhs->eval_node_set(c, stack, nodeset_eval_all);
 
 				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
 					for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
@@ -8882,7 +8922,7 @@ PUGI__NS_BEGIN
 					xpath_allocator_capture cr(stack.result);
 
 					double l = lhs->eval_number(c, stack);
-					xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+					xpath_node_set_raw rs = rhs->eval_node_set(c, stack, nodeset_eval_all);
 
 					for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 					{
@@ -8899,7 +8939,7 @@ PUGI__NS_BEGIN
 					xpath_allocator_capture cr(stack.result);
 
 					xpath_string l = lhs->eval_string(c, stack);
-					xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+					xpath_node_set_raw rs = rhs->eval_node_set(c, stack, nodeset_eval_all);
 
 					for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 					{
@@ -8927,8 +8967,8 @@ PUGI__NS_BEGIN
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				xpath_node_set_raw ls = lhs->eval_node_set(c, stack);
-				xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+				xpath_node_set_raw ls = lhs->eval_node_set(c, stack, nodeset_eval_all);
+				xpath_node_set_raw rs = rhs->eval_node_set(c, stack, nodeset_eval_all);
 
 				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
 				{
@@ -8952,7 +8992,7 @@ PUGI__NS_BEGIN
 				xpath_allocator_capture cr(stack.result);
 
 				double l = lhs->eval_number(c, stack);
-				xpath_node_set_raw rs = rhs->eval_node_set(c, stack);
+				xpath_node_set_raw rs = rhs->eval_node_set(c, stack, nodeset_eval_all);
 
 				for (const xpath_node* ri = rs.begin(); ri != rs.end(); ++ri)
 				{
@@ -8968,7 +9008,7 @@ PUGI__NS_BEGIN
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				xpath_node_set_raw ls = lhs->eval_node_set(c, stack);
+				xpath_node_set_raw ls = lhs->eval_node_set(c, stack, nodeset_eval_all);
 				double r = rhs->eval_number(c, stack);
 
 				for (const xpath_node* li = ls.begin(); li != ls.end(); ++li)
@@ -8988,7 +9028,7 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void apply_predicate(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
+		static void apply_predicate(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
 		{
 			assert(ns.size() >= first);
 
@@ -9024,89 +9064,120 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void step_push(xpath_node_set_raw& ns, const xml_attribute a, const xml_node parent, xpath_allocator* alloc)
+		bool step_push(xpath_node_set_raw& ns, const xml_attribute a, const xml_node parent, xpath_allocator* alloc)
 		{
-			if (!a) return;
+			if (!a) return false;
 
 			const char_t* name = a.name();
 
-			// There are no attribute nodes corresponding to attributes that declare namespaces
-			// That is, "xmlns:..." or "xmlns"
-			if (starts_with(name, PUGIXML_TEXT("xmlns")) && (name[5] == 0 || name[5] == ':')) return;
-			
 			switch (_test)
 			{
 			case nodetest_name:
-				if (strequal(name, _data.nodetest))
+				if (strequal(name, _data.nodetest) && is_xpath_attribute(name))
+				{
 					ns.push_back(xpath_node(a, parent), alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_type_node:
 			case nodetest_all:
-				ns.push_back(xpath_node(a, parent), alloc);
+				if (is_xpath_attribute(name))
+				{
+					ns.push_back(xpath_node(a, parent), alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (starts_with(name, _data.nodetest))
+				if (starts_with(name, _data.nodetest) && is_xpath_attribute(name))
+				{
 					ns.push_back(xpath_node(a, parent), alloc);
+					return true;
+				}
 				break;
 			
 			default:
 				;
 			}
+
+			return false;
 		}
 		
-		void step_push(xpath_node_set_raw& ns, const xml_node n, xpath_allocator* alloc)
+		bool step_push(xpath_node_set_raw& ns, const xml_node n, xpath_allocator* alloc)
 		{
-			if (!n) return;
+			if (!n) return false;
 
 			switch (_test)
 			{
 			case nodetest_name:
 				if (n.type() == node_element && strequal(n.name(), _data.nodetest))
+				{
 					ns.push_back(n, alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_type_node:
 				ns.push_back(n, alloc);
-				break;
+				return true;
 				
 			case nodetest_type_comment:
 				if (n.type() == node_comment)
+				{
 					ns.push_back(n, alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_type_text:
 				if (n.type() == node_pcdata || n.type() == node_cdata)
+				{
 					ns.push_back(n, alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_type_pi:
 				if (n.type() == node_pi)
+				{
 					ns.push_back(n, alloc);
+					return true;
+				}
 				break;
 									
 			case nodetest_pi:
 				if (n.type() == node_pi && strequal(n.name(), _data.nodetest))
+				{
 					ns.push_back(n, alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_all:
 				if (n.type() == node_element)
+				{
 					ns.push_back(n, alloc);
+					return true;
+				}
 				break;
 				
 			case nodetest_all_in_namespace:
 				if (n.type() == node_element && starts_with(n.name(), _data.nodetest))
+				{
 					ns.push_back(n, alloc);
+					return true;
+				}
 				break;
 
 			default:
 				assert(!"Unknown axis");
-			} 
+			}
+
+			return false;
 		}
 
-		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_node n, xpath_allocator* alloc, T)
+		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_node n, xpath_allocator* alloc, bool once, T)
 		{
 			const axis_t axis = T::axis;
 
@@ -9115,7 +9186,8 @@ PUGI__NS_BEGIN
 			case axis_attribute:
 			{
 				for (xml_attribute a = n.first_attribute(); a; a = a.next_attribute())
-					step_push(ns, a, n, alloc);
+					if (step_push(ns, a, n, alloc) & once)
+						return;
 				
 				break;
 			}
@@ -9123,7 +9195,8 @@ PUGI__NS_BEGIN
 			case axis_child:
 			{
 				for (xml_node c = n.first_child(); c; c = c.next_sibling())
-					step_push(ns, c, alloc);
+					if (step_push(ns, c, alloc) & once)
+						return;
 					
 				break;
 			}
@@ -9132,13 +9205,15 @@ PUGI__NS_BEGIN
 			case axis_descendant_or_self:
 			{
 				if (axis == axis_descendant_or_self)
-					step_push(ns, n, alloc);
+					if (step_push(ns, n, alloc) & once)
+						return;
 					
 				xml_node cur = n.first_child();
 				
 				while (cur && cur != n)
 				{
-					step_push(ns, cur, alloc);
+					if (step_push(ns, cur, alloc) & once)
+						return;
 					
 					if (cur.first_child())
 						cur = cur.first_child();
@@ -9159,7 +9234,8 @@ PUGI__NS_BEGIN
 			case axis_following_sibling:
 			{
 				for (xml_node c = n.next_sibling(); c; c = c.next_sibling())
-					step_push(ns, c, alloc);
+					if (step_push(ns, c, alloc) & once)
+						return;
 				
 				break;
 			}
@@ -9167,7 +9243,8 @@ PUGI__NS_BEGIN
 			case axis_preceding_sibling:
 			{
 				for (xml_node c = n.previous_sibling(); c; c = c.previous_sibling())
-					step_push(ns, c, alloc);
+					if (step_push(ns, c, alloc) & once)
+						return;
 				
 				break;
 			}
@@ -9180,9 +9257,10 @@ PUGI__NS_BEGIN
 				while (cur && !cur.next_sibling()) cur = cur.parent();
 				cur = cur.next_sibling();
 
-				for (;;)
+				while (cur)
 				{
-					step_push(ns, cur, alloc);
+					if (step_push(ns, cur, alloc) & once)
+						return;
 
 					if (cur.first_child())
 						cur = cur.first_child();
@@ -9207,14 +9285,15 @@ PUGI__NS_BEGIN
 				while (cur && !cur.previous_sibling()) cur = cur.parent();
 				cur = cur.previous_sibling();
 
-				for (;;)
+				while (cur)
 				{
 					if (cur.last_child())
 						cur = cur.last_child();
 					else
 					{
 						// leaf node, can't be ancestor
-						step_push(ns, cur, alloc);
+						if (step_push(ns, cur, alloc) & once)
+							return;
 
 						if (cur.previous_sibling())
 							cur = cur.previous_sibling();
@@ -9225,7 +9304,9 @@ PUGI__NS_BEGIN
 								cur = cur.parent();
 								if (!cur) break;
 
-								if (!node_is_ancestor(cur, n)) step_push(ns, cur, alloc);
+								if (!node_is_ancestor(cur, n))
+									if (step_push(ns, cur, alloc) & once)
+										return;
 							}
 							while (!cur.previous_sibling());
 
@@ -9243,13 +9324,15 @@ PUGI__NS_BEGIN
 			case axis_ancestor_or_self:
 			{
 				if (axis == axis_ancestor_or_self)
-					step_push(ns, n, alloc);
+					if (step_push(ns, n, alloc) & once)
+						return;
 
 				xml_node cur = n.parent();
 				
 				while (cur)
 				{
-					step_push(ns, cur, alloc);
+					if (step_push(ns, cur, alloc) & once)
+						return;
 					
 					cur = cur.parent();
 				}
@@ -9276,7 +9359,7 @@ PUGI__NS_BEGIN
 			}
 		}
 		
-		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_attribute a, const xml_node p, xpath_allocator* alloc, T v)
+		template <class T> void step_fill(xpath_node_set_raw& ns, const xml_attribute a, const xml_node p, xpath_allocator* alloc, bool once, T v)
 		{
 			const axis_t axis = T::axis;
 
@@ -9286,13 +9369,15 @@ PUGI__NS_BEGIN
 			case axis_ancestor_or_self:
 			{
 				if (axis == axis_ancestor_or_self && _test == nodetest_type_node) // reject attributes based on principal node type test
-					step_push(ns, a, p, alloc);
+					if (step_push(ns, a, p, alloc) & once)
+						return;
 
 				xml_node cur = p;
 				
 				while (cur)
 				{
-					step_push(ns, cur, alloc);
+					if (step_push(ns, cur, alloc) & once)
+						return;
 					
 					cur = cur.parent();
 				}
@@ -9327,7 +9412,8 @@ PUGI__NS_BEGIN
 						if (!cur) break;
 					}
 
-					step_push(ns, cur, alloc);
+					if (step_push(ns, cur, alloc) & once)
+						return;
 				}
 
 				break;
@@ -9343,7 +9429,7 @@ PUGI__NS_BEGIN
 			case axis_preceding:
 			{
 				// preceding:: axis does not include attribute nodes and attribute ancestors (they are the same as parent's ancestors), so we can reuse node preceding
-				step_fill(ns, p, alloc, v);
+				step_fill(ns, p, alloc, once, v);
 				break;
 			}
 			
@@ -9351,18 +9437,24 @@ PUGI__NS_BEGIN
 				assert(!"Unimplemented axis");
 			}
 		}
-		
-		template <class T> xpath_node_set_raw step_do(const xpath_context& c, const xpath_stack& stack, T v)
+
+		template <class T> xpath_node_set_raw step_do(const xpath_context& c, const xpath_stack& stack, nodeset_eval_t eval, T v)
 		{
 			const axis_t axis = T::axis;
-			bool attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
+			bool axis_has_attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
+			bool axis_reverse = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling);
+
+			bool once =
+				(axis == axis_attribute && _test == nodetest_name)
+				? true
+				: !_right && (axis_reverse ? eval == nodeset_eval_any : eval != nodeset_eval_all);
 
 			xpath_node_set_raw ns;
-			ns.set_type((axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling) ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted);
+			ns.set_type(axis_reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted);
 
 			if (_left)
 			{
-				xpath_node_set_raw s = _left->eval_node_set(c, stack);
+				xpath_node_set_raw s = _left->eval_node_set(c, stack, nodeset_eval_all);
 
 				// self axis preserves the original order
 				if (axis == axis_self) ns.set_type(s.type());
@@ -9375,9 +9467,9 @@ PUGI__NS_BEGIN
 					if (axis != axis_self && size != 0) ns.set_type(xpath_node_set::type_unsorted);
 					
 					if (it->node())
-						step_fill(ns, it->node(), stack.result, v);
-					else if (attributes)
-						step_fill(ns, it->attribute(), it->parent(), stack.result, v);
+						step_fill(ns, it->node(), stack.result, once, v);
+					else if (axis_has_attributes && it->attribute() && it->parent())
+						step_fill(ns, it->attribute(), it->parent(), stack.result, once, v);
 						
 					apply_predicates(ns, size, stack);
 				}
@@ -9385,9 +9477,9 @@ PUGI__NS_BEGIN
 			else
 			{
 				if (c.n.node())
-					step_fill(ns, c.n.node(), stack.result, v);
-				else if (attributes)
-					step_fill(ns, c.n.attribute(), c.n.parent(), stack.result, v);
+					step_fill(ns, c.n.node(), stack.result, once, v);
+				else if (axis_has_attributes && c.n.attribute() && c.n.parent())
+					step_fill(ns, c.n.attribute(), c.n.parent(), stack.result, once, v);
 				
 				apply_predicates(ns, 0, stack);
 			}
@@ -9533,6 +9625,15 @@ PUGI__NS_BEGIN
 				return false;
 			}
 
+			case ast_opt_compare_attribute:
+			{
+				const char_t* value = (_right->_type == ast_string_constant) ? _right->_data.string : _right->_data.variable->get_string();
+
+				xml_attribute attr = c.n.node().attribute(_left->_data.nodetest);
+
+				return attr && strequal(attr.value(), value) && is_xpath_attribute(attr.name());
+			}
+
 			case ast_variable:
 			{
 				assert(_rettype == _data.variable->type());
@@ -9561,7 +9662,7 @@ PUGI__NS_BEGIN
 				{
 					xpath_allocator_capture cr(stack.result);
 
-					return !eval_node_set(c, stack).empty();
+					return !eval_node_set(c, stack, nodeset_eval_any).empty();
 				}
 
 				default:
@@ -9607,7 +9708,7 @@ PUGI__NS_BEGIN
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				return static_cast<double>(_left->eval_node_set(c, stack).size());
+				return static_cast<double>(_left->eval_node_set(c, stack, nodeset_eval_all).size());
 			}
 			
 			case ast_func_string_length_0:
@@ -9640,7 +9741,7 @@ PUGI__NS_BEGIN
 
 				double r = 0;
 				
-				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack, nodeset_eval_all);
 				
 				for (const xpath_node* it = ns.begin(); it != ns.end(); ++it)
 				{
@@ -9776,7 +9877,7 @@ PUGI__NS_BEGIN
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack, nodeset_eval_first);
 				xpath_node na = ns.first();
 				
 				return xpath_string::from_const(local_name(na));
@@ -9793,7 +9894,7 @@ PUGI__NS_BEGIN
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack, nodeset_eval_first);
 				xpath_node na = ns.first();
 				
 				return xpath_string::from_const(qualified_name(na));
@@ -9810,7 +9911,7 @@ PUGI__NS_BEGIN
 			{
 				xpath_allocator_capture cr(stack.result);
 
-				xpath_node_set_raw ns = _left->eval_node_set(c, stack);
+				xpath_node_set_raw ns = _left->eval_node_set(c, stack, nodeset_eval_first);
 				xpath_node na = ns.first();
 				
 				return xpath_string::from_const(namespace_uri(na));
@@ -9938,7 +10039,7 @@ PUGI__NS_BEGIN
 				return s;
 			}
 
-			case ast_func_translate_table:
+			case ast_opt_translate_table:
 			{
 				xpath_string s = _left->eval_string(c, stack);
 
@@ -9973,7 +10074,7 @@ PUGI__NS_BEGIN
 
 					xpath_stack swapped_stack = {stack.temp, stack.result};
 
-					xpath_node_set_raw ns = eval_node_set(c, swapped_stack);
+					xpath_node_set_raw ns = eval_node_set(c, swapped_stack, nodeset_eval_first);
 					return ns.empty() ? xpath_string() : string_value(ns.first(), stack.result);
 				}
 				
@@ -9985,7 +10086,7 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		xpath_node_set_raw eval_node_set(const xpath_context& c, const xpath_stack& stack)
+		xpath_node_set_raw eval_node_set(const xpath_context& c, const xpath_stack& stack, nodeset_eval_t eval)
 		{
 			switch (_type)
 			{
@@ -9995,8 +10096,8 @@ PUGI__NS_BEGIN
 
 				xpath_stack swapped_stack = {stack.temp, stack.result};
 
-				xpath_node_set_raw ls = _left->eval_node_set(c, swapped_stack);
-				xpath_node_set_raw rs = _right->eval_node_set(c, stack);
+				xpath_node_set_raw ls = _left->eval_node_set(c, swapped_stack, eval);
+				xpath_node_set_raw rs = _right->eval_node_set(c, stack, eval);
 				
 				// we can optimize merging two sorted sets, but this is a very rare operation, so don't bother
 				rs.set_type(xpath_node_set::type_unsorted);
@@ -10010,7 +10111,7 @@ PUGI__NS_BEGIN
 			case ast_filter:
 			case ast_filter_posinv:
 			{
-				xpath_node_set_raw set = _left->eval_node_set(c, stack);
+				xpath_node_set_raw set = _left->eval_node_set(c, stack, nodeset_eval_all);
 
 				// either expression is a number or it contains position() call; sort by document order
 				if (_type == ast_filter) set.sort_do();
@@ -10028,44 +10129,44 @@ PUGI__NS_BEGIN
 				switch (_axis)
 				{
 				case axis_ancestor:
-					return step_do(c, stack, axis_to_type<axis_ancestor>());
+					return step_do(c, stack, eval, axis_to_type<axis_ancestor>());
 					
 				case axis_ancestor_or_self:
-					return step_do(c, stack, axis_to_type<axis_ancestor_or_self>());
+					return step_do(c, stack, eval, axis_to_type<axis_ancestor_or_self>());
 
 				case axis_attribute:
-					return step_do(c, stack, axis_to_type<axis_attribute>());
+					return step_do(c, stack, eval, axis_to_type<axis_attribute>());
 
 				case axis_child:
-					return step_do(c, stack, axis_to_type<axis_child>());
+					return step_do(c, stack, eval, axis_to_type<axis_child>());
 				
 				case axis_descendant:
-					return step_do(c, stack, axis_to_type<axis_descendant>());
+					return step_do(c, stack, eval, axis_to_type<axis_descendant>());
 
 				case axis_descendant_or_self:
-					return step_do(c, stack, axis_to_type<axis_descendant_or_self>());
+					return step_do(c, stack, eval, axis_to_type<axis_descendant_or_self>());
 
 				case axis_following:
-					return step_do(c, stack, axis_to_type<axis_following>());
+					return step_do(c, stack, eval, axis_to_type<axis_following>());
 				
 				case axis_following_sibling:
-					return step_do(c, stack, axis_to_type<axis_following_sibling>());
+					return step_do(c, stack, eval, axis_to_type<axis_following_sibling>());
 				
 				case axis_namespace:
 					// namespaced axis is not supported
 					return xpath_node_set_raw();
 				
 				case axis_parent:
-					return step_do(c, stack, axis_to_type<axis_parent>());
+					return step_do(c, stack, eval, axis_to_type<axis_parent>());
 				
 				case axis_preceding:
-					return step_do(c, stack, axis_to_type<axis_preceding>());
+					return step_do(c, stack, eval, axis_to_type<axis_preceding>());
 
 				case axis_preceding_sibling:
-					return step_do(c, stack, axis_to_type<axis_preceding_sibling>());
+					return step_do(c, stack, eval, axis_to_type<axis_preceding_sibling>());
 				
 				case axis_self:
-					return step_do(c, stack, axis_to_type<axis_self>());
+					return step_do(c, stack, eval, axis_to_type<axis_self>());
 
 				default:
 					assert(!"Unknown axis");
@@ -10120,12 +10221,17 @@ PUGI__NS_BEGIN
 
 			// Replace descendant-or-self::node()/child::foo with descendant::foo
 			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
+			// Do a similar kind of replacement for self/descendant/descendant-or-self axes
 			// Note that we only replace positionally invariant steps (//foo[1] != /descendant::foo[1])
-			if (_type == ast_step && _axis == axis_child && _left &&
+			if (_type == ast_step && (_axis == axis_child || _axis == axis_self || _axis == axis_descendant || _axis == axis_descendant_or_self) && _left &&
 				_left->_type == ast_step && _left->_axis == axis_descendant_or_self && _left->_test == nodetest_type_node && !_left->_right &&
 				is_posinv_step())
 			{
-				_axis = axis_descendant;
+				if (_axis == axis_child || _axis == axis_descendant)
+					_axis = axis_descendant;
+				else
+					_axis = axis_descendant_or_self;
+
 				_left = _left->_left;
 			}
 
@@ -10136,9 +10242,17 @@ PUGI__NS_BEGIN
 
 				if (table)
 				{
-					_type = ast_func_translate_table;
+					_type = ast_opt_translate_table;
 					_data.table = table;
 				}
+			}
+
+			// Use optimized path for @attr = 'value' or @attr = $value
+			if (_type == ast_op_equal &&
+				_left->_type == ast_step && _left->_axis == axis_attribute && _left->_test == nodetest_name && !_left->_left && !_left->_right &&
+				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->rettype() == xpath_type_string)))
+			{
+				_type = ast_opt_compare_attribute;
 			}
 		}
 		
@@ -10147,6 +10261,7 @@ PUGI__NS_BEGIN
 			switch (_type)
 			{
 			case ast_func_position:
+			case ast_func_last:
 				return false;
 
 			case ast_string_constant:
@@ -11074,6 +11189,25 @@ PUGI__NS_BEGIN
 
 		return impl->root->eval_string(c, sd.stack);
 	}
+
+	PUGI__FN impl::xpath_ast_node* evaluate_node_set_prepare(xpath_query_impl* impl)
+	{
+		if (!impl) return 0;
+
+		if (impl->root->rettype() != xpath_type_node_set)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return 0;
+		#else
+			xpath_parse_result res;
+			res.error = "Expression does not evaluate to node set";
+
+			throw xpath_exception(res);
+		#endif
+		}
+
+		return impl->root;
+	}
 PUGI__NS_END
 
 namespace pugi
@@ -11575,22 +11709,9 @@ namespace pugi
 
 	PUGI__FN xpath_node_set xpath_query::evaluate_node_set(const xpath_node& n) const
 	{
-		if (!_impl) return xpath_node_set();
+		impl::xpath_ast_node* root = impl::evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
+		if (!root) return xpath_node_set();
 
-		impl::xpath_ast_node* root = static_cast<impl::xpath_query_impl*>(_impl)->root;
-
-		if (root->rettype() != xpath_type_node_set)
-		{
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			return xpath_node_set();
-		#else
-			xpath_parse_result res;
-			res.error = "Expression does not evaluate to node set";
-
-			throw xpath_exception(res);
-		#endif
-		}
-		
 		impl::xpath_context c(n, 1, 1);
 		impl::xpath_stack_data sd;
 
@@ -11598,9 +11719,26 @@ namespace pugi
 		if (setjmp(sd.error_handler)) return xpath_node_set();
 	#endif
 
-		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack);
+		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_all);
 
 		return xpath_node_set(r.begin(), r.end(), r.type());
+	}
+
+	PUGI__FN xpath_node xpath_query::evaluate_node(const xpath_node& n) const
+	{
+		impl::xpath_ast_node* root = impl::evaluate_node_set_prepare(static_cast<impl::xpath_query_impl*>(_impl));
+		if (!root) return xpath_node();
+
+		impl::xpath_context c(n, 1, 1);
+		impl::xpath_stack_data sd;
+
+	#ifdef PUGIXML_NO_EXCEPTIONS
+		if (setjmp(sd.error_handler)) return xpath_node();
+	#endif
+
+		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_first);
+
+		return r.first();
 	}
 
 	PUGI__FN const xpath_parse_result& xpath_query::result() const
@@ -11622,16 +11760,15 @@ namespace pugi
 		return !_impl;
 	}
 
-	PUGI__FN xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables) const
+	PUGI__FN xpath_node xml_node::select_node(const char_t* query, xpath_variable_set* variables) const
 	{
 		xpath_query q(query, variables);
-		return select_single_node(q);
+		return select_node(q);
 	}
 
-	PUGI__FN xpath_node xml_node::select_single_node(const xpath_query& query) const
+	PUGI__FN xpath_node xml_node::select_node(const xpath_query& query) const
 	{
-		xpath_node_set s = query.evaluate_node_set(*this);
-		return s.empty() ? xpath_node() : s.first();
+		return query.evaluate_node(*this);
 	}
 
 	PUGI__FN xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables) const
@@ -11643,6 +11780,17 @@ namespace pugi
 	PUGI__FN xpath_node_set xml_node::select_nodes(const xpath_query& query) const
 	{
 		return query.evaluate_node_set(*this);
+	}
+
+	PUGI__FN xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables) const
+	{
+		xpath_query q(query, variables);
+		return select_single_node(q);
+	}
+
+	PUGI__FN xpath_node xml_node::select_single_node(const xpath_query& query) const
+	{
+		return query.evaluate_node(*this);
 	}
 }
 

@@ -19,22 +19,22 @@ TEST_XML(xpath_api_select_nodes, "<node><head/><foo/><foo/><tail/></node>")
 	xpath_node_set_tester(ns2, "ns2") % 4 % 5;
 }
 
-TEST_XML(xpath_api_select_single_node, "<node><head/><foo id='1'/><foo/><tail/></node>")
+TEST_XML(xpath_api_select_node, "<node><head/><foo id='1'/><foo/><tail/></node>")
 {
-	xpath_node n1 = doc.select_single_node(STR("node/foo"));
+	xpath_node n1 = doc.select_node(STR("node/foo"));
 
 	xpath_query q(STR("node/foo"));
-	xpath_node n2 = doc.select_single_node(q);
+	xpath_node n2 = doc.select_node(q);
 
 	CHECK(n1.node().attribute(STR("id")).as_int() == 1);
 	CHECK(n2.node().attribute(STR("id")).as_int() == 1);
 
-	xpath_node n3 = doc.select_single_node(STR("node/bar"));
+	xpath_node n3 = doc.select_node(STR("node/bar"));
 	
 	CHECK(!n3);
 
-	xpath_node n4 = doc.select_single_node(STR("node/head/following-sibling::foo"));
-	xpath_node n5 = doc.select_single_node(STR("node/tail/preceding-sibling::foo"));
+	xpath_node n4 = doc.select_node(STR("node/head/following-sibling::foo"));
+	xpath_node n5 = doc.select_node(STR("node/tail/preceding-sibling::foo"));
 	
 	CHECK(n4.node().attribute(STR("id")).as_int() == 1);
 	CHECK(n5.node().attribute(STR("id")).as_int() == 1);
@@ -42,20 +42,20 @@ TEST_XML(xpath_api_select_single_node, "<node><head/><foo id='1'/><foo/><tail/><
 
 TEST_XML(xpath_api_node_bool_ops, "<node attr='value'/>")
 {
-	generic_bool_ops_test(doc.select_single_node(STR("node")));
-	generic_bool_ops_test(doc.select_single_node(STR("node/@attr")));
+	generic_bool_ops_test(doc.select_node(STR("node")));
+	generic_bool_ops_test(doc.select_node(STR("node/@attr")));
 }
 
 TEST_XML(xpath_api_node_eq_ops, "<node attr='value'/>")
 {
-	generic_eq_ops_test(doc.select_single_node(STR("node")), doc.select_single_node(STR("node/@attr")));
+	generic_eq_ops_test(doc.select_node(STR("node")), doc.select_node(STR("node/@attr")));
 }
 
 TEST_XML(xpath_api_node_accessors, "<node attr='value'/>")
 {
 	xpath_node null;
-	xpath_node node = doc.select_single_node(STR("node"));
-	xpath_node attr = doc.select_single_node(STR("node/@attr"));
+	xpath_node node = doc.select_node(STR("node"));
+	xpath_node attr = doc.select_node(STR("node/@attr"));
 
 	CHECK(!null.node());
 	CHECK(!null.attribute());
@@ -154,6 +154,9 @@ TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
 
 	xpath_node_set ns = q.evaluate_node_set(doc);
 	CHECK(ns.size() == 1 && ns[0].attribute() == doc.child(STR("node")).attribute(STR("attr")));
+
+	xpath_node nr = q.evaluate_node(doc);
+	CHECK(nr.attribute() == doc.child(STR("node")).attribute(STR("attr")));
 }
 
 TEST_XML(xpath_api_evaluate_attr, "<node attr='3'/>")
@@ -173,6 +176,9 @@ TEST_XML(xpath_api_evaluate_attr, "<node attr='3'/>")
 
 	xpath_node_set ns = q.evaluate_node_set(n);
 	CHECK(ns.size() == 1 && ns[0] == n);
+
+	xpath_node nr = q.evaluate_node(n);
+	CHECK(nr == n);
 }
 
 #ifdef PUGIXML_NO_EXCEPTIONS
@@ -190,19 +196,40 @@ TEST_XML(xpath_api_evaluate_fail, "<node attr='3'/>")
 #endif
 
 	CHECK(q.evaluate_node_set(doc).empty());
+
+	CHECK(!q.evaluate_node(doc));
 }
 #endif
 
 TEST(xpath_api_evaluate_node_set_fail)
 {
+	xpath_query q(STR("1"));
+
 #ifdef PUGIXML_NO_EXCEPTIONS
-	CHECK_XPATH_NODESET(xml_node(), STR("1"));
+	CHECK(q.evaluate_node_set(xml_node()).empty());
 #else
 	try
 	{
-		xpath_query q(STR("1"));
-
 		q.evaluate_node_set(xml_node());
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (const xpath_exception&)
+	{
+	}
+#endif
+}
+
+TEST(xpath_api_evaluate_node_fail)
+{
+	xpath_query q(STR("1"));
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(!q.evaluate_node(xml_node()));
+#else
+	try
+	{
+		q.evaluate_node(xml_node());
 
 		CHECK_FORCE_FAIL("Expected exception");
 	}
@@ -384,4 +411,14 @@ TEST_XML(xpath_api_node_set_assign_out_of_memory_preserve, "<node><a/><b/></node
 }
 #endif
 
+TEST_XML(xpath_api_deprecated_select_single_node, "<node><head/><foo id='1'/><foo/><tail/></node>")
+{
+	xpath_node n1 = doc.select_single_node(STR("node/foo"));
+
+	xpath_query q(STR("node/foo"));
+	xpath_node n2 = doc.select_single_node(q);
+
+	CHECK(n1.node().attribute(STR("id")).as_int() == 1);
+	CHECK(n2.node().attribute(STR("id")).as_int() == 1);
+}
 #endif

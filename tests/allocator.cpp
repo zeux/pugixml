@@ -1,6 +1,7 @@
 #include "allocator.hpp"
 
 #include <string.h>
+#include <assert.h>
 
 // Low-level allocation functions
 #if defined(_WIN32) || defined(_WIN64)
@@ -97,6 +98,8 @@ void* memory_allocate(size_t size)
 
 size_t memory_size(void* ptr)
 {
+	assert(ptr);
+
 	size_t result;
 	memcpy(&result, static_cast<size_t*>(ptr) - 1, sizeof(size_t));
 

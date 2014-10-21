@@ -531,6 +531,27 @@ TEST_XML(xpath_paths_descendant_optimize, "<node><para><para/><para/><para><para
 	CHECK_XPATH_NODESET(doc, STR("/descendant-or-self::node()[3]/child::para")) % 4 % 5 % 6;
 }
 
+TEST_XML(xpath_paths_descendant_optimize_axes, "<node><para><para/><para/><para><para/></para></para><para/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("//.")) % 1 % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//descendant::*")) % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//descendant-or-self::*")) % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+
+	CHECK_XPATH_NODESET(doc, STR("//..")) % 1 % 2 % 3 % 6;
+	CHECK_XPATH_NODESET(doc, STR("//ancestor::*")) % 2 % 3 % 6;
+	CHECK_XPATH_NODESET(doc, STR("//ancestor-or-self::*")) % 2 % 3 % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//preceding-sibling::*")) % 3 % 4 % 5;
+	CHECK_XPATH_NODESET(doc, STR("//following-sibling::*")) % 5 % 6 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//preceding::*")) % 3 % 4 % 5 % 6 % 7;
+	CHECK_XPATH_NODESET(doc, STR("//following::*")) % 5 % 6 % 7 % 8;
+}
+
+TEST_XML(xpath_paths_descendant_optimize_last, "<node><para><para/><para/><para><para/></para></para><para/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("//para[last()]")) % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(doc, STR("//para[last() = 1]")) % 7;
+}
+
 TEST_XML(xpath_paths_precision, "<node><para/><para/><para/><para/><para/></node>")
 {
 	CHECK_XPATH_NODESET(doc, STR("//para[1]")) % 3;
@@ -555,4 +576,67 @@ TEST_XML(xpath_paths_unsorted_child, "<node><foo><bar/></foo><node><foo><bar/></
 	CHECK(ns[2] == nss[1]);
 }
 
+TEST_XML(xpath_paths_optimize_compare_attribute, "<node id='1' /><node id='2' /><node xmlns='3' />")
+{
+	CHECK_XPATH_NODESET(doc, STR("node[@id = '1']")) % 2;
+	CHECK_XPATH_NODESET(doc, STR("node[@id = '2']")) % 4;
+	CHECK_XPATH_NODESET(doc, STR("node[@id = 2]")) % 4;
+	CHECK_XPATH_NODESET(doc, STR("node[@id[. > 3] = '2']"));
+	CHECK_XPATH_NODESET(doc, STR("node['1' = @id]")) % 2;
+
+	xpath_variable_set set;
+	set.set(STR("var1"), STR("2"));
+	set.set(STR("var2"), 2.0);
+
+	CHECK_XPATH_NODESET_VAR(doc, STR("node[@id = $var1]"), &set) % 4;
+	CHECK_XPATH_NODESET_VAR(doc, STR("node[@id = $var2]"), &set) % 4;
+
+	CHECK_XPATH_NODESET(doc, STR("node[@xmlns = '3']"));
+}
+
+TEST_XML(xpath_paths_optimize_step_once, "<node><para1><para2/><para3/><para4><para5 attr5=''/></para4></para1><para6/></node>")
+{
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para2/following::*"), true);
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para6/following::*"), false);
+
+    CHECK_XPATH_STRING(doc, STR("name(node//para2/following::*)"), STR("para3"));
+    CHECK_XPATH_STRING(doc, STR("name(node//para6/following::*)"), STR(""));
+
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para1/preceding::*"), false);
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para6/preceding::*"), true);
+
+    CHECK_XPATH_STRING(doc, STR("name(node//para1/preceding::*)"), STR(""));
+    CHECK_XPATH_STRING(doc, STR("name(node//para6/preceding::*)"), STR("para1"));
+
+    CHECK_XPATH_BOOLEAN(doc, STR("node//para6/preceding::para4"), true);
+
+    CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/ancestor-or-self::*"), true);
+    CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/ancestor::*"), true);
+
+    CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/following::para6"), true);
+    CHECK_XPATH_STRING(doc, STR("name(//@attr5/following::para6)"), STR("para6"));
+}
+
+TEST_XML(xpath_paths_null_nodeset_entries, "<node attr='value'/>")
+{
+    xpath_node nodes[] =
+    {
+        xpath_node(doc.first_child()),
+        xpath_node(xml_node()),
+        xpath_node(doc.first_child().first_attribute(), doc.first_child()),
+        xpath_node(xml_attribute(), doc.first_child()),
+        xpath_node(xml_attribute(), xml_node()),
+    };
+
+    xpath_node_set ns(nodes, nodes + sizeof(nodes) / sizeof(nodes[0]));
+
+    xpath_variable_set vars;
+    vars.set(STR("x"), ns);
+
+    xpath_node_set rs = xpath_query("$x/.", &vars).evaluate_node_set(xml_node());
+
+    CHECK(rs.size() == 2);
+    CHECK(rs[0] == nodes[0]);
+    CHECK(rs[1] == nodes[2]);
+}
 #endif

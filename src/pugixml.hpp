@@ -585,12 +585,17 @@ namespace pugi
 	
 	#ifndef PUGIXML_NO_XPATH
 		// Select single node by evaluating XPath query. Returns first node from the resulting node set.
-		xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
-		xpath_node select_single_node(const xpath_query& query) const;
+		xpath_node select_node(const char_t* query, xpath_variable_set* variables = 0) const;
+		xpath_node select_node(const xpath_query& query) const;
 
 		// Select node set by evaluating XPath query
 		xpath_node_set select_nodes(const char_t* query, xpath_variable_set* variables = 0) const;
 		xpath_node_set select_nodes(const xpath_query& query) const;
+
+		// (deprecated: use select_node instead) Select single node by evaluating XPath query.
+		xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+		xpath_node select_single_node(const xpath_query& query) const;
+
 	#endif
 		
 		// Print subtree using a writer object
@@ -1133,6 +1138,12 @@ namespace pugi
 		// If PUGIXML_NO_EXCEPTIONS is not defined, throws xpath_exception on type mismatch and std::bad_alloc on out of memory errors.
 		// If PUGIXML_NO_EXCEPTIONS is defined, returns empty node set instead.
 		xpath_node_set evaluate_node_set(const xpath_node& n) const;
+
+		// Evaluate expression as node set in the specified context.
+		// Return first node in document order, or empty node if node set is empty.
+		// If PUGIXML_NO_EXCEPTIONS is not defined, throws xpath_exception on type mismatch and std::bad_alloc on out of memory errors.
+		// If PUGIXML_NO_EXCEPTIONS is defined, returns empty node instead.
+		xpath_node evaluate_node(const xpath_node& n) const;
 
 		// Get parsing result (used to get compilation errors in PUGIXML_NO_EXCEPTIONS mode)
 		const xpath_parse_result& result() const;

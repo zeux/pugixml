@@ -4,7 +4,7 @@
 
 TEST_XML(xpath_xalan_axes_1, "<far-north><north-north-west1/><north-north-west2/><north><near-north><far-west/><west/><near-west/><center center-attr-1='c1' center-attr-2='c2' center-attr-3='c3'><near-south-west/><near-south><south><far-south/></south></near-south><near-south-east/></center><near-east/><east/><far-east/></near-north></north><north-north-east1/><north-north-east2/></far-north>")
 {
-	xml_node center = doc.select_single_node(STR("//center")).node();
+	xml_node center = doc.select_node(STR("//center")).node();
 
 	CHECK_XPATH_NODESET(center, STR("self::*[near-south]")) % 10;
 	CHECK_XPATH_NODESET(center, STR("self::*[@center-attr-2]")) % 10;
@@ -35,7 +35,7 @@ TEST_XML(xpath_xalan_axes_1, "<far-north><north-north-west1/><north-north-west2/
 
 TEST_XML_FLAGS(xpath_xalan_axes_2, "<far-north> Level-1<north-north-west1/><north-north-west2/><!-- Comment-2 --> Level-2<?a-pi pi-2?><north><!-- Comment-3 --> Level-3<?a-pi pi-3?><near-north><far-west/><west/><near-west/><!-- Comment-4 --> Level-4<?a-pi pi-4?><center center-attr-1='c1' center-attr-2='c2' center-attr-3='c3'><near-south-west/><!--Comment-5-->   Level-5<?a-pi pi-5?><near-south><!--Comment-6-->   Level-6<?a-pi pi-6?><south attr1='First' attr2='Last'> <far-south/></south></near-south><near-south-east/></center><near-east/><east/><far-east/></near-north></north><north-north-east1/><north-north-east2/></far-north>", parse_default | parse_comments | parse_pi)
 {
-	xml_node center = doc.select_single_node(STR("//center")).node();
+	xml_node center = doc.select_node(STR("//center")).node();
 
 	CHECK_XPATH_NODESET(center, STR("@*")) % 21 % 22 % 23;
 	CHECK_XPATH_NODESET(center, STR("@*/child::*"));
@@ -65,7 +65,7 @@ TEST_XML_FLAGS(xpath_xalan_axes_2, "<far-north> Level-1<north-north-west1/><nort
 
 TEST_XML(xpath_xalan_axes_3, "<far-north><north><near-north><far-west/><west/><near-west/><center><near-south><south><far-south/></south></near-south></center><near-east/><east/><far-east/></near-north></north></far-north>")
 {
-	xml_node center = doc.select_single_node(STR("//center")).node();
+	xml_node center = doc.select_node(STR("//center")).node();
 
 	CHECK_XPATH_NODESET(center, STR("ancestor-or-self::*")) % 8 % 4 % 3 % 2;
 	CHECK_XPATH_NODESET(center, STR("ancestor::*[3]")) % 2;
@@ -99,7 +99,7 @@ TEST_XML(xpath_xalan_axes_3, "<far-north><north><near-north><far-west/><west/><n
 
 TEST_XML(xpath_xalan_axes_4, "<far-north><north><near-north><far-west/><west/><near-west/><center><near-south><south><far-south/></south></near-south></center><near-east/><east/><far-east/></near-north></north></far-north>")
 {
-	xml_node north = doc.select_single_node(STR("//north")).node();
+	xml_node north = doc.select_node(STR("//north")).node();
 
 	CHECK_XPATH_STRING(north, STR("name(/descendant-or-self::north)"), STR("north"));
 	CHECK_XPATH_STRING(north, STR("name(/descendant::near-north)"), STR("near-north"));
@@ -166,7 +166,7 @@ TEST_XML(xpath_xalan_axes_6, "<doc><T>Test for source tree depth</T><a><T>A</T><
 
 TEST_XML(xpath_xalan_axes_7, "<far-north><north><near-north><far-west/><west/><near-west/><center center-attr-1='c1' center-attr-2='c2' center-attr-3='c3'><near-south><south><far-south/></south></near-south></center><near-east/><east/><far-east/></near-north></north></far-north>")
 {
-	xml_node center = doc.select_single_node(STR("//center")).node();
+	xml_node center = doc.select_node(STR("//center")).node();
 
 	CHECK_XPATH_NODESET(center, STR("attribute::*[2]")) % 10;
 	CHECK_XPATH_NODESET(center, STR("@*")) % 9 % 10 % 11;
@@ -177,7 +177,7 @@ TEST_XML(xpath_xalan_axes_7, "<far-north><north><near-north><far-west/><west/><n
 
 TEST_XML(xpath_xalan_axes_8, "<far-north><north><near-north><far-west/><west/><near-west/><center center-attr-1='c1' center-attr-2='c2' center-attr-3='c3'><near-south-east/><near-south><south><far-south/></south></near-south><near-south-west/></center><near-east/><east/><far-east/></near-north></north></far-north>")
 {
-	xml_node near_north = doc.select_single_node(STR("//near-north")).node();
+	xml_node near_north = doc.select_node(STR("//near-north")).node();
 
 	CHECK_XPATH_NODESET(near_north, STR("center//child::*")) % 12 % 13 % 14 % 15 % 16;
 	CHECK_XPATH_NODESET(near_north, STR("center//descendant::*")) % 12 % 13 % 14 % 15 % 16;
@@ -188,7 +188,7 @@ TEST_XML(xpath_xalan_axes_8, "<far-north><north><near-north><far-west/><west/><n
 
 TEST_XML(xpath_xalan_axes_9, "<doc><foo att1='c'><foo att1='b'><foo att1='a'><baz/></foo></foo></foo><bar/></doc>")
 {
-	xml_node baz = doc.select_single_node(STR("//baz")).node();
+	xml_node baz = doc.select_node(STR("//baz")).node();
 
 	CHECK_XPATH_NODESET(baz, STR("ancestor-or-self::*[@att1][1]/@att1")) % 8;
     CHECK_XPATH_NODESET(baz, STR("(ancestor-or-self::*)[@att1][1]/@att1")) % 4;
@@ -243,7 +243,7 @@ TEST_XML_FLAGS(xpath_xalan_axes_12, "<far-north><north>north-text1<near-north><f
 TEST_XML(xpath_xalan_axes_13, "<doc att1='e'><foo att1='d'><foo att1='c'><foo att1='b'><baz att1='a'/></foo></foo></foo></doc>")
 {
 	xml_node d = doc.child(STR("doc"));
-	xml_node baz = doc.select_single_node(STR("//baz")).node();
+	xml_node baz = doc.select_node(STR("//baz")).node();
 
 	CHECK_XPATH_NUMBER(d, STR("count(descendant-or-self::*/@att1)"), 5);
 	CHECK_XPATH_NODESET(d, STR("descendant-or-self::*/@att1[last()]")) % 3 % 5 % 7 % 9 % 11;
