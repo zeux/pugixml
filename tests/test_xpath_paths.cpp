@@ -616,4 +616,27 @@ TEST_XML(xpath_paths_optimize_step_once, "<node><para1><para2/><para3/><para4><p
     CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/following::para6"), true);
     CHECK_XPATH_STRING(doc, STR("name(//@attr5/following::para6)"), STR("para6"));
 }
+
+TEST_XML(xpath_paths_null_nodeset_entries, "<node attr='value'/>")
+{
+    xpath_node nodes[] =
+    {
+        xpath_node(doc.first_child()),
+        xpath_node(xml_node()),
+        xpath_node(doc.first_child().first_attribute(), doc.first_child()),
+        xpath_node(xml_attribute(), doc.first_child()),
+        xpath_node(xml_attribute(), xml_node()),
+    };
+
+    xpath_node_set ns(nodes, nodes + sizeof(nodes) / sizeof(nodes[0]));
+
+    xpath_variable_set vars;
+    vars.set(STR("x"), ns);
+
+    xpath_node_set rs = xpath_query("$x/.", &vars).evaluate_node_set(xml_node());
+
+    CHECK(rs.size() == 2);
+    CHECK(rs[0] == nodes[0]);
+    CHECK(rs[1] == nodes[2]);
+}
 #endif

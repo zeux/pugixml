@@ -8705,7 +8705,7 @@ PUGI__NS_BEGIN
 				while (cur && !cur.next_sibling()) cur = cur.parent();
 				cur = cur.next_sibling();
 
-				for (;;)
+				while (cur)
 				{
 					if (step_push(ns, cur, alloc) & once)
 						return;
@@ -8733,7 +8733,7 @@ PUGI__NS_BEGIN
 				while (cur && !cur.previous_sibling()) cur = cur.parent();
 				cur = cur.previous_sibling();
 
-				for (;;)
+				while (cur)
 				{
 					if (cur.last_child())
 						cur = cur.last_child();
@@ -8916,7 +8916,7 @@ PUGI__NS_BEGIN
 					
 					if (it->node())
 						step_fill(ns, it->node(), stack.result, once, v);
-					else if (axis_has_attributes)
+					else if (axis_has_attributes && it->attribute() && it->parent())
 						step_fill(ns, it->attribute(), it->parent(), stack.result, once, v);
 						
 					apply_predicates(ns, size, stack);
@@ -8926,7 +8926,7 @@ PUGI__NS_BEGIN
 			{
 				if (c.n.node())
 					step_fill(ns, c.n.node(), stack.result, once, v);
-				else if (axis_has_attributes)
+				else if (axis_has_attributes && c.n.attribute() && c.n.parent())
 					step_fill(ns, c.n.attribute(), c.n.parent(), stack.result, once, v);
 				
 				apply_predicates(ns, 0, stack);
