@@ -633,7 +633,7 @@ TEST_XML(xpath_paths_null_nodeset_entries, "<node attr='value'/>")
     xpath_variable_set vars;
     vars.set(STR("x"), ns);
 
-    xpath_node_set rs = xpath_query("$x/.", &vars).evaluate_node_set(xml_node());
+    xpath_node_set rs = xpath_query(STR("$x/."), &vars).evaluate_node_set(xml_node());
 
     CHECK(rs.size() == 2);
     CHECK(rs[0] == nodes[0]);
