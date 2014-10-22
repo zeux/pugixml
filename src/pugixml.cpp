@@ -8405,6 +8405,11 @@ PUGI__NS_BEGIN
 			return false;
 		}
 
+		static bool eval_once(bool forward, nodeset_eval_t eval)
+		{
+			return forward ? eval != nodeset_eval_all : eval == nodeset_eval_any;
+		}
+
 		template <class Comp> static bool compare_rel(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const xpath_stack& stack, const Comp& comp)
 		{
 			xpath_value_type lt = lhs->rettype(), rt = rhs->rettype();
@@ -8476,7 +8481,7 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		static void apply_predicate(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
+		static void apply_predicate(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack, bool once)
 		{
 			assert(ns.size() >= first);
 
@@ -8493,22 +8498,32 @@ PUGI__NS_BEGIN
 				if (expr->rettype() == xpath_type_number)
 				{
 					if (expr->eval_number(c, stack) == i)
+					{
 						*last++ = *it;
+
+						if (once) break;
+					}
 				}
 				else if (expr->eval_boolean(c, stack))
+				{
 					*last++ = *it;
+
+					if (once) break;
+				}
 			}
 			
 			ns.truncate(last);
 		}
 
-		void apply_predicates(xpath_node_set_raw& ns, size_t first, const xpath_stack& stack)
+		void apply_predicates(xpath_node_set_raw& ns, size_t first, const xpath_stack& stack, nodeset_eval_t eval)
 		{
 			if (ns.size() == first) return;
 			
+			bool last_once = eval_once(ns.type() == xpath_node_set::type_sorted, eval);
+
 			for (xpath_ast_node* pred = _right; pred; pred = pred->_next)
 			{
-				apply_predicate(ns, first, pred->_left, stack);
+				apply_predicate(ns, first, pred->_left, stack, !pred->_next && last_once);
 			}
 		}
 
@@ -8920,7 +8935,7 @@ PUGI__NS_BEGIN
 			bool once =
 				(axis == axis_attribute && _test == nodetest_name)
 				? true
-				: !_right && (axis_reverse ? eval == nodeset_eval_any : eval != nodeset_eval_all);
+				: !_right && eval_once(!axis_reverse, eval);
 
 			xpath_node_set_raw ns;
 			ns.set_type(axis_reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted);
@@ -8940,13 +8955,13 @@ PUGI__NS_BEGIN
 					if (axis != axis_self && size != 0) ns.set_type(xpath_node_set::type_unsorted);
 					
 					step_fill(ns, *it, stack.result, once, v);
-					apply_predicates(ns, size, stack);
+					apply_predicates(ns, size, stack, eval);
 				}
 			}
 			else
 			{
 				step_fill(ns, c.n, stack.result, once, v);
-				apply_predicates(ns, 0, stack);
+				apply_predicates(ns, 0, stack, eval);
 			}
 
 			// child, attribute and self axes always generate unique set of nodes
@@ -9581,7 +9596,9 @@ PUGI__NS_BEGIN
 				// either expression is a number or it contains position() call; sort by document order
 				if (_type == ast_filter) set.sort_do();
 
-				apply_predicate(set, 0, _right, stack);
+				bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
+
+				apply_predicate(set, 0, _right, stack, once);
 			
 				return set;
 			}
