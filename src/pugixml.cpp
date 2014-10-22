@@ -5004,12 +5004,12 @@ namespace pugi
 
 	PUGI__FN const char_t* xml_attribute::name() const
 	{
-		return (_attr && _attr->name) ? _attr->name : PUGIXML_TEXT("");
+		return (_attr && _attr->name) ? _attr->name + 0 : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN const char_t* xml_attribute::value() const
 	{
-		return (_attr && _attr->value) ? _attr->value : PUGIXML_TEXT("");
+		return (_attr && _attr->value) ? _attr->value + 0 : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN size_t xml_attribute::hash_value() const
@@ -5230,7 +5230,7 @@ namespace pugi
 	
 	PUGI__FN const char_t* xml_node::name() const
 	{
-		return (_root && impl::has_name(_root) && _root->contents) ? _root->contents : PUGIXML_TEXT("");
+		return (_root && impl::has_name(_root) && _root->contents) ? _root->contents + 0 : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN xml_node_type xml_node::type() const
@@ -5240,7 +5240,7 @@ namespace pugi
 	
 	PUGI__FN const char_t* xml_node::value() const
 	{
-		return (_root && impl::has_value(_root) && _root->contents) ? _root->contents : PUGIXML_TEXT("");
+		return (_root && impl::has_value(_root) && _root->contents) ? _root->contents + 0 : PUGIXML_TEXT("");
 	}
 	
 	PUGI__FN xml_node xml_node::child(const char_t* name_) const
@@ -5785,7 +5785,7 @@ namespace pugi
 			if (impl::has_name(i) && i->contents && impl::strequal(name_, i->contents))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : PUGIXML_TEXT("")))
+					if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value + 0 : PUGIXML_TEXT("")))
 						return xml_node(i);
 			}
 
@@ -5798,7 +5798,7 @@ namespace pugi
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value : PUGIXML_TEXT("")))
+				if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value + 0 : PUGIXML_TEXT("")))
 					return xml_node(i);
 
 		return xml_node();
@@ -6037,7 +6037,7 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return (d && d->contents) ? d->contents : PUGIXML_TEXT("");
+		return (d && d->contents) ? d->contents + 0 : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN const char_t* xml_text::as_string(const char_t* def) const
@@ -9083,7 +9083,7 @@ PUGI__NS_BEGIN
 		{
             assert(a);
 
-			const char_t* name = a->name ? a->name : PUGIXML_TEXT("");
+			const char_t* name = a->name ? a->name + 0 : PUGIXML_TEXT("");
 
 			switch (_test)
 			{
@@ -9128,7 +9128,7 @@ PUGI__NS_BEGIN
 			switch (_test)
 			{
 			case nodetest_name:
-				if (type == node_element && n->name && strequal(n->name, _data.nodetest))
+				if (type == node_element && n->contents && strequal(n->contents, _data.nodetest))
 				{
 					ns.push_back(xml_node(n), alloc);
 					return true;
@@ -9164,7 +9164,7 @@ PUGI__NS_BEGIN
 				break;
 									
 			case nodetest_pi:
-				if (type == node_pi && n->name && strequal(n->name, _data.nodetest))
+				if (type == node_pi && n->contents && strequal(n->contents, _data.nodetest))
 				{
 					ns.push_back(xml_node(n), alloc);
 					return true;
@@ -9180,7 +9180,7 @@ PUGI__NS_BEGIN
 				break;
 				
 			case nodetest_all_in_namespace:
-				if (type == node_element && n->name && starts_with(n->name, _data.nodetest))
+				if (type == node_element && n->contents && starts_with(n->contents, _data.nodetest))
 				{
 					ns.push_back(xml_node(n), alloc);
 					return true;
