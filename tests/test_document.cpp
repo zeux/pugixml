@@ -1235,3 +1235,37 @@ TEST(document_alignment)
 		doc->~xml_document();
 	}
 }
+
+TEST(document_convert_out_of_memory)
+{
+	file_data_t files[] =
+	{
+		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
+		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
+		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
+		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
+		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0},
+		{"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}
+	};
+
+	// load files in memory
+	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
+	{
+		CHECK(load_file_in_memory(files[i].path, files[i].data, files[i].size));
+	}
+
+	// disallow allocations
+	test_runner::_memory_fail_threshold = 1;
+
+	for (unsigned int src = 0; src < sizeof(files) / sizeof(files[0]); ++src)
+	{
+		xml_document doc;
+		CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default, files[src].encoding).status == status_out_of_memory);
+	}
+
+	// cleanup
+	for (unsigned int j = 0; j < sizeof(files) / sizeof(files[0]); ++j)
+	{
+		delete[] files[j].data;
+	}
+}

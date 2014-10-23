@@ -1354,3 +1354,38 @@ TEST_XML(dom_node_copy_out_of_memory, "<node><child1 attr1='value1' attr2='value
     for (int i = 0; i < 100; ++i)
         copy.append_copy(doc.first_child());
 }
+
+TEST_XML(dom_node_remove_deallocate, "<node attr='value'>text</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	xml_attribute attr = node.attribute(STR("attr"));
+	attr.set_name(STR("longattr"));
+	attr.set_value(STR("longvalue"));
+
+	node.set_name(STR("longnode"));
+	node.text().set(STR("longtext"));
+
+	node.remove_attribute(attr);
+	doc.remove_child(node);
+
+	CHECK_NODE(doc, STR(""));
+}
+
+TEST_XML(dom_node_set_deallocate, "<node attr='value'>text</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	xml_attribute attr = node.attribute(STR("attr"));
+
+	attr.set_name(STR("longattr"));
+	attr.set_value(STR("longvalue"));
+	node.set_name(STR("longnode"));
+
+	attr.set_name(STR(""));
+	attr.set_value(STR(""));
+	node.set_name(STR(""));
+	node.text().set(STR(""));
+
+	CHECK_NODE(doc, STR("<:anonymous :anonymous=\"\"></:anonymous>"));
+}

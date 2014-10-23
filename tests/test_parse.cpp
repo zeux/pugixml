@@ -876,7 +876,7 @@ TEST(parse_out_of_memory)
 	CHECK(!doc.first_child());
 }
 
-TEST(parse_out_of_memory_halfway)
+TEST(parse_out_of_memory_halfway_node)
 {
 	const unsigned int count = 10000;
 	static char_t text[count * 4];
@@ -894,6 +894,35 @@ TEST(parse_out_of_memory_halfway)
 	xml_document doc;
 	CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory);
 	CHECK_NODE(doc.first_child(), STR("<n />"));
+}
+
+TEST(parse_out_of_memory_halfway_attr)
+{
+	const unsigned int count = 10000;
+	static char_t text[count * 5 + 4];
+
+	text[0] = '<';
+	text[1] = 'n';
+
+	for (unsigned int i = 0; i < count; ++i)
+	{
+		text[5*i + 2] = ' ';
+		text[5*i + 3] = 'a';
+		text[5*i + 4] = '=';
+		text[5*i + 5] = '"';
+		text[5*i + 6] = '"';
+	}
+
+	text[5 * count + 2] = '/';
+	text[5 * count + 3] = '>';
+
+	test_runner::_memory_fail_threshold = 65536;
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(text, count * 5 + 4).status == status_out_of_memory);
+	CHECK_STRING(doc.first_child().name(), STR("n"));
+	CHECK_STRING(doc.first_child().first_attribute().name(), STR("a"));
+	CHECK_STRING(doc.first_child().last_attribute().name(), STR("a"));
 }
 
 static bool test_offset(const char_t* contents, unsigned int options, pugi::xml_parse_status status, ptrdiff_t offset)

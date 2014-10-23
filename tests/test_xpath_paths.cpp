@@ -615,6 +615,9 @@ TEST_XML(xpath_paths_optimize_step_once, "<node><para1><para2/><para3/><para4><p
 
     CHECK_XPATH_BOOLEAN(doc, STR("//@attr5/following::para6"), true);
     CHECK_XPATH_STRING(doc, STR("name(//@attr5/following::para6)"), STR("para6"));
+
+    CHECK_XPATH_BOOLEAN(doc, STR("//para5/ancestor-or-self::*"), true);
+    CHECK_XPATH_BOOLEAN(doc, STR("//para5/ancestor::*"), true);
 }
 
 TEST_XML(xpath_paths_null_nodeset_entries, "<node attr='value'/>")
