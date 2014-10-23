@@ -606,4 +606,27 @@ TEST(xpath_sort_crossdoc_different_depth)
 	CHECK(ns.size() == 2);
 	CHECK((ns[0] == ns1[0] && ns[1] == ns2[0]) || (ns[0] == ns2[0] && ns[1] == ns1[0]));
 }
+
+TEST(xpath_allocate_string_out_of_memory)
+{
+	std::basic_string<char_t> query;
+
+	for (int i = 0; i < 1024; ++i) query += STR("abcdefgh");
+
+	test_runner::_memory_fail_threshold = 8*1024;
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	CHECK(!xpath_query(query.c_str()));
+#else
+	try
+	{
+		xpath_query q(query.c_str());
+
+		CHECK_FORCE_FAIL("Expected out of memory exception");
+	}
+	catch (const std::bad_alloc&)
+	{
+	}
+#endif
+}
 #endif

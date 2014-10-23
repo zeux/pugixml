@@ -1068,3 +1068,25 @@ TEST(parse_pcdata_gap_fragment)
 	CHECK(doc.load(STR("a&amp;b"), parse_fragment | parse_escapes));
 	CHECK_STRING(doc.text().get(), STR("a&b"));
 }
+
+TEST(parse_name_end_eof)
+{
+	char_t test[] = STR("<node>");
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(test, 6 * sizeof(char_t)).status == status_end_element_mismatch);
+	CHECK_STRING(doc.first_child().name(), STR("node"));
+}
+
+TEST(parse_close_tag_eof)
+{
+	char_t test1[] = STR("<node></node");
+	char_t test2[] = STR("<node></nodx");
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(test1, 12 * sizeof(char_t)).status == status_bad_end_element);
+	CHECK_STRING(doc.first_child().name(), STR("node"));
+
+	CHECK(doc.load_buffer_inplace(test2, 12 * sizeof(char_t)).status == status_end_element_mismatch);
+	CHECK_STRING(doc.first_child().name(), STR("node"));
+}

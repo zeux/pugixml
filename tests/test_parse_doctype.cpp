@@ -313,3 +313,12 @@ TEST(parse_doctype_error_toplevel)
     CHECK(doc.load(STR("<node><!DOCTYPE></node>")).status == status_bad_doctype);
     CHECK(doc.load(STR("<node><!DOCTYPE></node>"), parse_doctype).status == status_bad_doctype);
 }
+
+TEST(parse_doctype_error_ignore)
+{
+    xml_document doc;
+	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ ")).status == status_bad_doctype);
+	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ "), parse_doctype).status == status_bad_doctype);
+	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE[")).status == status_bad_doctype);
+	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE["), parse_doctype).status == status_bad_doctype);
+}

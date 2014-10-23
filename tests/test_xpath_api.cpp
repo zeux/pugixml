@@ -128,6 +128,11 @@ TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 	copy4 = copy1;
 	CHECK(copy4.size() == 2);
 	CHECK_STRING(copy4[0].node().name(), STR("foo"));
+
+	xpath_node_set copy5;
+	copy5 = set;
+	copy5 = xpath_node_set();
+	CHECK(copy5.size() == 0);
 }
 
 TEST(xpath_api_nodeset_copy_empty)

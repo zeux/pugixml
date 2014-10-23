@@ -88,6 +88,9 @@ TEST(xpath_variables_type_string)
 	CHECK_DOUBLE_NAN(var->get_number());
 	CHECK_STRING(var->get_string(), STR("abc"));
 	CHECK(var->get_node_set().empty());
+
+	CHECK(var->set(STR("abcdef")));
+	CHECK_STRING(var->get_string(), STR("abcdef"));
 }
 
 TEST_XML(xpath_variables_type_node_set, "<node/>")
