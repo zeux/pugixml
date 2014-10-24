@@ -276,6 +276,29 @@ TEST(xpath_variables_long_name)
 	CHECK_XPATH_BOOLEAN_VAR(xml_node(), STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set, true);
 }
 
+TEST(xpath_variables_long_name_out_of_memory)
+{
+	xpath_variable_set set;
+	set.set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), true);
+
+	test_runner::_memory_fail_threshold = 4096 + 128;
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	xpath_query q(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set);
+	CHECK(!q);
+#else
+	try
+	{
+		xpath_query q(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set);
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (const xpath_exception&)
+	{
+	}
+#endif
+}
+
 TEST_XML(xpath_variables_select, "<node attr='1'/><node attr='2'/>")
 {
 	xpath_variable_set set;

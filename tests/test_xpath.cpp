@@ -110,7 +110,7 @@ TEST_XML(xpath_sort_attributes, "<node/>")
 	n.append_attribute(STR("attr3"));
 	n.insert_attribute_before(STR("attr1"), n.attribute(STR("attr2")));
 
-	xpath_node_set ns = n.select_nodes(STR("@*"));
+	xpath_node_set ns = n.select_nodes(STR("@* | @*"));
 
 	ns.sort(true);
 	xpath_node_set reverse_sorted = ns;
@@ -120,6 +120,25 @@ TEST_XML(xpath_sort_attributes, "<node/>")
 
 	xpath_node_set_tester(sorted, "sorted order failed") % 3 % 4 % 5;
 	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 5 % 4 % 3;
+}
+
+TEST_XML(xpath_sort_attributes_docorder, "<node attr1='' attr2='value' attr4='value' />")
+{
+	xml_node n = doc.child(STR("node"));
+
+	n.first_attribute().set_name(STR("attribute1"));
+	n.insert_attribute_after(STR("attr3"), n.attribute(STR("attr2")));
+
+	xpath_node_set ns = n.select_nodes(STR("@* | @*"));
+
+	ns.sort(true);
+	xpath_node_set reverse_sorted = ns;
+
+	ns.sort(false);
+	xpath_node_set sorted = ns;
+
+	xpath_node_set_tester(sorted, "sorted order failed") % 3 % 4 % 5 % 6;
+	xpath_node_set_tester(reverse_sorted, "reverse sorted order failed") % 6 % 5 % 4 % 3;
 }
 
 TEST(xpath_sort_random_medium)
@@ -628,5 +647,27 @@ TEST(xpath_allocate_string_out_of_memory)
 	{
 	}
 #endif
+}
+
+TEST(xpath_remove_duplicates)
+{
+	xml_document doc;
+
+	for (int i = 0; i < 20; ++i)
+	{
+		doc.append_child(STR("node2"));
+		doc.prepend_child(STR("node1"));
+	}
+
+	xpath_node_set ns = doc.select_nodes(STR("/node2/preceding::* | //node1 | /node() | /* | /node1/following-sibling::*"));
+
+	ns.sort();
+
+	{
+		xpath_node_set_tester tester(ns, "sorted order failed");
+
+		for (int i = 0; i < 40; ++i)
+			tester % (2 + i);
+	}
 }
 #endif
