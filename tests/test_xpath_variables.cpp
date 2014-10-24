@@ -281,7 +281,7 @@ TEST(xpath_variables_long_name_out_of_memory)
 	xpath_variable_set set;
 	set.set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), true);
 
-	test_runner::_memory_fail_threshold = 4096 + 128;
+	test_runner::_memory_fail_threshold = 4096 + 64 + 52 * sizeof(char_t);
 
 #ifdef PUGIXML_NO_EXCEPTIONS
 	xpath_query q(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set);
