@@ -164,6 +164,8 @@ PUGI__NS_BEGIN
 		static deallocation_function deallocate;
 	};
 
+	// Global allocation functions are stored in class statics so that in header mode linker deduplicates them
+	// Without a template<> we'll get multiple definitions of the same static
 	template <typename T> allocation_function xml_memory_management_function_storage<T>::allocate = default_allocate;
 	template <typename T> deallocation_function xml_memory_management_function_storage<T>::deallocate = default_deallocate;
 
@@ -3735,8 +3737,11 @@ PUGI__NS_BEGIN
 		{
 			xml_attribute_struct* da = append_new_attribute(dn, get_allocator(dn));
 
-			node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
-			node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+			if (da)
+			{
+				node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
+				node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+			}
 		}
 	}
 

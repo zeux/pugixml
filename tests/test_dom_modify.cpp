@@ -1361,13 +1361,22 @@ TEST_XML(dom_node_copyless_taint, "<node attr=\"value\" />")
 	CHECK_NODE(doc, STR("<nod1 attr=\"value\" /><node attr=\"valu2\" /><node att3=\"value\" />"));
 }
 
-TEST_XML(dom_node_copy_out_of_memory, "<node><child1 attr1='value1' attr2='value2' /><child2 /><child3>text1<child4 />text2</child3></node>")
+TEST_XML(dom_node_copy_out_of_memory_node, "<node><child1 /><child2 /><child3>text1<child4 />text2</child3></node>")
 {
 	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
 
-    xml_document copy;
-    for (int i = 0; i < 100; ++i)
-        copy.append_copy(doc.first_child());
+	xml_document copy;
+	for (int i = 0; i < 1000; ++i)
+		copy.append_copy(doc.first_child());
+}
+
+TEST_XML(dom_node_copy_out_of_memory_attr, "<node attr1='' attr2='' attr3='' attr4='' attr5='' attr6='' attr7='' attr8='' attr9='' attr10='' attr11='' attr12='' attr13='' attr14='' attr15='' />")
+{
+	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
+
+	xml_document copy;
+	for (int i = 0; i < 1000; ++i)
+		copy.append_copy(doc.first_child());
 }
 
 TEST_XML(dom_node_remove_deallocate, "<node attr='value'>text</node>")
