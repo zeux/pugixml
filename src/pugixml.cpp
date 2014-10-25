@@ -700,7 +700,7 @@ PUGI__NS_BEGIN
 
 		if (node->next_sibling)
 			node->next_sibling->prev_sibling_c = node->prev_sibling_c;
-		else if (parent->first_child)
+		else
 			parent->first_child->prev_sibling_c = node->prev_sibling_c;
 
 		if (node->prev_sibling_c->next_sibling)
@@ -775,7 +775,7 @@ PUGI__NS_BEGIN
 	{
 		if (attr->next_attribute)
 			attr->next_attribute->prev_attribute_c = attr->prev_attribute_c;
-		else if (node->first_attribute)
+		else
 			node->first_attribute->prev_attribute_c = attr->prev_attribute_c;
 
 		if (attr->prev_attribute_c->next_attribute)
