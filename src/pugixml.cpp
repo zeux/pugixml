@@ -8581,9 +8581,9 @@ PUGI__NS_BEGIN
 				assert(pred->_type == ast_predicate);
 
 				if (pred->_test == predicate_constant || pred->_test == predicate_constant_one)
-					apply_predicate_const(ns, first, pred->_left, stack);
+					apply_predicate_const(ns, first, pred->_right, stack);
 				else
-					apply_predicate(ns, first, pred->_left, stack, !pred->_next && last_once);
+					apply_predicate(ns, first, pred->_right, stack, !pred->_next && last_once);
 			}
 		}
 
@@ -9064,6 +9064,12 @@ PUGI__NS_BEGIN
 		{
 			assert(type == ast_step);
 			_data.nodetest = contents;
+		}
+
+		xpath_ast_node(ast_type_t type, xpath_ast_node* left, xpath_ast_node* right, predicate_t test):
+			_type(static_cast<char>(type)), _rettype(xpath_type_node_set), _axis(0), _test(static_cast<char>(test)), _left(left), _right(right), _next(0)
+		{
+			assert(type == ast_filter || type == ast_predicate);
 		}
 
 		void set_next(xpath_ast_node* value)
@@ -9771,16 +9777,14 @@ PUGI__NS_BEGIN
 			// Classify filter/predicate ops to perform various optimizations during evaluation
 			if (_type == ast_filter || _type == ast_predicate)
 			{
-				xpath_ast_node* expr = (_type == ast_filter) ? _right : _left;
+				assert(_test == predicate_default);
 
-				if (expr->_type == ast_number_constant && expr->_data.number == 1.0)
+				if (_right->_type == ast_number_constant && _right->_data.number == 1.0)
 					_test = predicate_constant_one;
-				else if (expr->_type == ast_number_constant || expr->_type == ast_variable)
+				else if (_right->_type == ast_number_constant || _right->_type == ast_variable)
 					_test = predicate_constant;
-				else if (expr->rettype() != xpath_type_number && expr->is_posinv_expr())
+				else if (_right->_rettype != xpath_type_number && _right->is_posinv_expr())
 					_test = predicate_posinv;
-				else
-					_test = predicate_default;
 			}
 
 			// Replace descendant-or-self::node()/child::foo with descendant::foo
@@ -9814,7 +9818,7 @@ PUGI__NS_BEGIN
 			// Use optimized path for @attr = 'value' or @attr = $value
 			if (_type == ast_op_equal &&
 				_left->_type == ast_step && _left->_axis == axis_attribute && _left->_test == nodetest_name && !_left->_left && !_left->_right &&
-				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->rettype() == xpath_type_string)))
+				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->_rettype == xpath_type_string)))
 			{
 				_type = ast_opt_compare_attribute;
 			}
@@ -9859,10 +9863,7 @@ PUGI__NS_BEGIN
 			{
 				assert(n->_type == ast_predicate);
 
-				xpath_ast_node* expr = n->_left;
-				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv_expr();
-
-				if (!posinv)
+				if (n->_test != predicate_posinv)
 					return false;
 			}
 
@@ -10282,7 +10283,7 @@ PUGI__NS_BEGIN
 
 				if (n->rettype() != xpath_type_node_set) throw_error("Predicate has to be applied to node set");
 
-				n = new (alloc_node()) xpath_ast_node(ast_filter, xpath_type_node_set, n, expr);
+				n = new (alloc_node()) xpath_ast_node(ast_filter, n, expr, predicate_default);
 
 				if (_lexer.current() != lex_close_square_brace)
 					throw_error("Unmatched square brace");
@@ -10426,7 +10427,7 @@ PUGI__NS_BEGIN
 				
 				xpath_ast_node* expr = parse_expression();
 
-				xpath_ast_node* pred = new (alloc_node()) xpath_ast_node(ast_predicate, xpath_type_node_set, expr);
+				xpath_ast_node* pred = new (alloc_node()) xpath_ast_node(ast_predicate, 0, expr, predicate_default);
 				
 				if (_lexer.current() != lex_close_square_brace)
 					throw_error("Unmatched square brace");
