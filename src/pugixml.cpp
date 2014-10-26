@@ -8536,6 +8536,7 @@ PUGI__NS_BEGIN
 		static void apply_predicate_const(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
 		{
 			assert(ns.size() >= first);
+			assert(expr->rettype() == xpath_type_number);
 
 			size_t size = ns.size() - first;
 
@@ -8543,27 +8544,17 @@ PUGI__NS_BEGIN
 
 			xpath_context c(xpath_node(), 1, size);
 
-			if (expr->rettype() == xpath_type_number)
+			double er = expr->eval_number(c, stack);
+
+			if (er >= 1.0 && er <= size)
 			{
-				double er = expr->eval_number(c, stack);
+				size_t eri = static_cast<size_t>(er);
 
-				if (er >= 1.0 && er <= size)
+				if (er == eri)
 				{
-					size_t eri = static_cast<size_t>(er);
+					xpath_node r = last[eri - 1];
 
-					if (er == eri)
-					{
-						xpath_node r = last[eri - 1];
-
-						*last++ = r;
-					}
-				}
-			}
-			else
-			{
-				if (expr->eval_boolean(c, stack))
-				{
-					last += size;
+					*last++ = r;
 				}
 			}
 
@@ -9781,16 +9772,16 @@ PUGI__NS_BEGIN
 
 				if (_right->_type == ast_number_constant && _right->_data.number == 1.0)
 					_test = predicate_constant_one;
-				else if (_right->_type == ast_number_constant || _right->_type == ast_variable)
+				else if (_right->_rettype == xpath_type_number && (_right->_type == ast_number_constant || _right->_type == ast_variable))
 					_test = predicate_constant;
 				else if (_right->_rettype != xpath_type_number && _right->is_posinv_expr())
 					_test = predicate_posinv;
 			}
 
-			// Replace descendant-or-self::node()/child::foo with descendant::foo
+			// Rewrite descendant-or-self::node()/child::foo with descendant::foo
 			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
-			// Do a similar kind of replacement for self/descendant/descendant-or-self axes
-			// Note that we only replace positionally invariant steps (//foo[1] != /descendant::foo[1])
+			// Do a similar kind of rewrite for self/descendant/descendant-or-self axes
+			// Note that we only rewrite positionally invariant steps (//foo[1] != /descendant::foo[1])
 			if (_type == ast_step && (_axis == axis_child || _axis == axis_self || _axis == axis_descendant || _axis == axis_descendant_or_self) && _left &&
 				_left->_type == ast_step && _left->_axis == axis_descendant_or_self && _left->_test == nodetest_type_node && !_left->_right &&
 				is_posinv_step())
@@ -9803,7 +9794,7 @@ PUGI__NS_BEGIN
 				_left = _left->_left;
 			}
 
-			// Replace translate() with constant arguments with a table
+			// Use optimized lookup table implementation for translate() with constant arguments
 			if (_type == ast_func_translate && _right->_type == ast_string_constant && _right->_next->_type == ast_string_constant)
 			{
 				unsigned char* table = translate_table_generate(alloc, _right->_data.string, _right->_next->_data.string);
