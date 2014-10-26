@@ -1,4 +1,5 @@
 /**
+{
  * pugixml parser - version 1.4
  * --------------------------------------------------------
  * Copyright (C) 2006-2014, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
@@ -8199,7 +8200,6 @@ PUGI__NS_BEGIN
 		ast_op_union,					// left | right
 		ast_predicate,					// apply predicate to set; next points to next predicate
 		ast_filter,						// select * from left where right
-		ast_filter_posinv,				// select * from left where right; proximity position invariant
 		ast_string_constant,			// string constant
 		ast_number_constant,			// number constant
 		ast_variable,					// variable
@@ -8275,6 +8275,14 @@ PUGI__NS_BEGIN
 		nodetest_all_in_namespace
 	};
 
+	enum predicate_t
+	{
+		predicate_default,
+		predicate_posinv,
+		predicate_constant,
+		predicate_constant_one
+	};
+
 	enum nodeset_eval_t
 	{
 		nodeset_eval_all,
@@ -8296,8 +8304,10 @@ PUGI__NS_BEGIN
 		char _type;
 		char _rettype;
 
-		// for ast_step / ast_predicate
+		// for ast_step
 		char _axis;
+
+		// for ast_step/ast_predicate/ast_filter
 		char _test;
 
 		// tree node structure
@@ -8494,7 +8504,7 @@ PUGI__NS_BEGIN
 			size_t size = ns.size() - first;
 				
 			xpath_node* last = ns.begin() + first;
-				
+
 			// remove_if... or well, sort of
 			for (xpath_node* it = last; it != ns.end(); ++it, ++i)
 			{
@@ -8509,14 +8519,54 @@ PUGI__NS_BEGIN
 						if (once) break;
 					}
 				}
-				else if (expr->eval_boolean(c, stack))
+				else
 				{
-					*last++ = *it;
+					if (expr->eval_boolean(c, stack))
+					{
+						*last++ = *it;
 
-					if (once) break;
+						if (once) break;
+					}
 				}
 			}
 			
+			ns.truncate(last);
+		}
+
+		static void apply_predicate_const(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
+		{
+			assert(ns.size() >= first);
+
+			size_t size = ns.size() - first;
+
+			xpath_node* last = ns.begin() + first;
+
+			xpath_context c(xpath_node(), 1, size);
+
+			if (expr->rettype() == xpath_type_number)
+			{
+				double er = expr->eval_number(c, stack);
+
+				if (er >= 1.0 && er <= size)
+				{
+					size_t eri = static_cast<size_t>(er);
+
+					if (er == eri)
+					{
+						xpath_node r = last[eri - 1];
+
+						*last++ = r;
+					}
+				}
+			}
+			else
+			{
+				if (expr->eval_boolean(c, stack))
+				{
+					last += size;
+				}
+			}
+
 			ns.truncate(last);
 		}
 
@@ -8528,7 +8578,12 @@ PUGI__NS_BEGIN
 
 			for (xpath_ast_node* pred = _right; pred; pred = pred->_next)
 			{
-				apply_predicate(ns, first, pred->_left, stack, !pred->_next && last_once);
+				assert(pred->_type == ast_predicate);
+
+				if (pred->_test == predicate_constant || pred->_test == predicate_constant_one)
+					apply_predicate_const(ns, first, pred->_left, stack);
+				else
+					apply_predicate(ns, first, pred->_left, stack, !pred->_next && last_once);
 			}
 		}
 
@@ -8938,9 +8993,9 @@ PUGI__NS_BEGIN
 			bool axis_reverse = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling);
 
 			bool once =
-				(axis == axis_attribute && _test == nodetest_name)
-				? true
-				: !_right && eval_once(!axis_reverse, eval);
+				(axis == axis_attribute && _test == nodetest_name) ||
+				(!_right && eval_once(!axis_reverse, eval)) ||
+				(_right && !_right->_next && _right->_test == predicate_constant_one);
 
 			xpath_node_set_raw ns;
 			ns.set_type(axis_reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted);
@@ -9007,6 +9062,7 @@ PUGI__NS_BEGIN
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const char_t* contents):
 			_type(static_cast<char>(type)), _rettype(xpath_type_node_set), _axis(static_cast<char>(axis)), _test(static_cast<char>(test)), _left(left), _right(0), _next(0)
 		{
+			assert(type == ast_step);
 			_data.nodetest = contents;
 		}
 
@@ -9583,27 +9639,33 @@ PUGI__NS_BEGIN
 
 				xpath_node_set_raw ls = _left->eval_node_set(c, swapped_stack, eval);
 				xpath_node_set_raw rs = _right->eval_node_set(c, stack, eval);
-				
+
 				// we can optimize merging two sorted sets, but this is a very rare operation, so don't bother
 				rs.set_type(xpath_node_set::type_unsorted);
 
 				rs.append(ls.begin(), ls.end(), stack.result);
 				rs.remove_duplicates();
-				
+
 				return rs;
 			}
 
 			case ast_filter:
-			case ast_filter_posinv:
 			{
-				xpath_node_set_raw set = _left->eval_node_set(c, stack, nodeset_eval_all);
+				xpath_node_set_raw set = _left->eval_node_set(c, stack, _test == predicate_constant_one ? nodeset_eval_first : nodeset_eval_all);
 
 				// either expression is a number or it contains position() call; sort by document order
-				if (_type == ast_filter) set.sort_do();
+				if (_test != predicate_posinv) set.sort_do();
 
-				bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
+				if (_test == predicate_constant || _test == predicate_constant_one)
+				{
+					apply_predicate_const(set, 0, _right, stack);
+				}
+				else
+				{
+					bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
 
-				apply_predicate(set, 0, _right, stack, once);
+					apply_predicate(set, 0, _right, stack, once);
+				}
 			
 				return set;
 			}
@@ -9706,6 +9768,21 @@ PUGI__NS_BEGIN
 			if (_right) _right->optimize(alloc);
 			if (_next) _next->optimize(alloc);
 
+			// Classify filter/predicate ops to perform various optimizations during evaluation
+			if (_type == ast_filter || _type == ast_predicate)
+			{
+				xpath_ast_node* expr = (_type == ast_filter) ? _right : _left;
+
+				if (expr->_type == ast_number_constant && expr->_data.number == 1.0)
+					_test = predicate_constant_one;
+				else if (expr->_type == ast_number_constant || expr->_type == ast_variable)
+					_test = predicate_constant;
+				else if (expr->rettype() != xpath_type_number && expr->is_posinv_expr())
+					_test = predicate_posinv;
+				else
+					_test = predicate_default;
+			}
+
 			// Replace descendant-or-self::node()/child::foo with descendant::foo
 			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
 			// Do a similar kind of replacement for self/descendant/descendant-or-self axes
@@ -9762,7 +9839,6 @@ PUGI__NS_BEGIN
 
 			case ast_predicate:
 			case ast_filter:
-			case ast_filter_posinv:
 				return true;
 
 			default:
@@ -10206,9 +10282,7 @@ PUGI__NS_BEGIN
 
 				if (n->rettype() != xpath_type_node_set) throw_error("Predicate has to be applied to node set");
 
-				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv_expr();
-
-				n = new (alloc_node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, xpath_type_node_set, n, expr);
+				n = new (alloc_node()) xpath_ast_node(ast_filter, xpath_type_node_set, n, expr);
 
 				if (_lexer.current() != lex_close_square_brace)
 					throw_error("Unmatched square brace");

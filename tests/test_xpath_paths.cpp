@@ -437,6 +437,44 @@ TEST_XML(xpath_paths_predicate_number, "<node><chapter/><chapter/><chapter/><cha
 	CHECK_XPATH_NODESET(n, STR("preceding-sibling::chapter[2]")) % 3;
 }
 
+TEST_XML(xpath_paths_predicate_number_boundary, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[0.999999999999999]"));
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[1]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[1.000000000000001]"));
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[1.999999999999999]"));
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[2]")) % 4;
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[2.000000000000001]"));
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[4.999999999999999]"));
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[5]")) % 7;
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[5.000000000000001]"));
+}
+
+TEST_XML(xpath_paths_predicate_number_out_of_range, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+{
+	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
+
+	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[0]"));
+	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[-1]"));
+	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[-1000000000000]"));
+	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[-1 div 0]"));
+	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[1000000000000]"));
+	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[1 div 0]"));
+	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[0 div 0]"));
+}
+
+TEST_XML(xpath_paths_predicate_constant_boolean, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
+{
+	xml_node n = doc.child(STR("node")).child(STR("chapter")).next_sibling().next_sibling();
+
+	xpath_variable_set set;
+	set.set(STR("true"), true);
+	set.set(STR("false"), false);
+
+	CHECK_XPATH_NODESET_VAR(n, STR("following-sibling::chapter[$false]"), &set);
+	CHECK_XPATH_NODESET_VAR(n, STR("following-sibling::chapter[$true]"), &set) % 6 % 7;
+}
+
 TEST_XML(xpath_paths_predicate_several, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")
 {
 	xml_node n = doc.child(STR("node"));
