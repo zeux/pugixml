@@ -9765,6 +9765,14 @@ PUGI__NS_BEGIN
 			if (_right) _right->optimize(alloc);
 			if (_next) _next->optimize(alloc);
 
+			// Rewrite [position()=expr] with [expr]
+			// Note that this step has to go before classification to recognize [position()=1]
+			if ((_type == ast_filter || _type == ast_predicate) &&
+				_right->_type == ast_op_equal && _right->_left->_type == ast_func_position && _right->_right->_rettype == xpath_type_number)
+			{
+				_right = _right->_right;
+			}
+
 			// Classify filter/predicate ops to perform various optimizations during evaluation
 			if (_type == ast_filter || _type == ast_predicate)
 			{
@@ -9772,7 +9780,7 @@ PUGI__NS_BEGIN
 
 				if (_right->_type == ast_number_constant && _right->_data.number == 1.0)
 					_test = predicate_constant_one;
-				else if (_right->_rettype == xpath_type_number && (_right->_type == ast_number_constant || _right->_type == ast_variable))
+				else if (_right->_rettype == xpath_type_number && (_right->_type == ast_number_constant || _right->_type == ast_variable || _right->_type == ast_func_last))
 					_test = predicate_constant;
 				else if (_right->_rettype != xpath_type_number && _right->is_posinv_expr())
 					_test = predicate_posinv;

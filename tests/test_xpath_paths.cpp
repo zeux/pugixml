@@ -475,6 +475,14 @@ TEST_XML(xpath_paths_predicate_constant_boolean, "<node><chapter/><chapter/><cha
 	CHECK_XPATH_NODESET_VAR(n, STR("following-sibling::chapter[$true]"), &set) % 6 % 7;
 }
 
+TEST_XML(xpath_paths_predicate_position_eq, "<node><chapter/><chapter/><chapter>3</chapter><chapter/><chapter/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=1]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=2+2]")) % 7;
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=last()]")) % 8;
+	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=string()]")) % 5;
+}
+
 TEST_XML(xpath_paths_predicate_several, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")
 {
 	xml_node n = doc.child(STR("node"));
