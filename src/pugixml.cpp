@@ -3968,7 +3968,7 @@ PUGI__NS_BEGIN
 	PUGI__FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
-		const char_t* name = node->name ? node->name : default_name;
+		const char_t* name = node->contents ? node->contents : default_name;
 
 		writer.write('<');
 		writer.write_string(name);
@@ -3997,7 +3997,7 @@ PUGI__NS_BEGIN
 			{
 				writer.write('>');
 
-				const char_t* value = first->value ? first->value : PUGIXML_TEXT("");
+				const char_t* value = first->contents ? first->contents : PUGIXML_TEXT("");
 
 				if (PUGI__NODETYPE(first) == node_pcdata)
 					text_output(writer, value, ctx_special_pcdata, flags);
@@ -4022,7 +4022,7 @@ PUGI__NS_BEGIN
 	PUGI__FN void node_output_end(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
-		const char_t* name = node->name ? node->name : default_name;
+		const char_t* name = node->contents ? node->contents : default_name;
 
 		writer.write('<', '/');
 		writer.write_string(name);
@@ -4040,28 +4040,28 @@ PUGI__NS_BEGIN
 		switch (PUGI__NODETYPE(node))
 		{
 			case node_pcdata:
-				text_output(writer, node->value ? node->value : PUGIXML_TEXT(""), ctx_special_pcdata, flags);
+				text_output(writer, node->contents ? node->contents : PUGIXML_TEXT(""), ctx_special_pcdata, flags);
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_cdata:
-				text_output_cdata(writer, node->value ? node->value : PUGIXML_TEXT(""));
+				text_output_cdata(writer, node->contents ? node->contents : PUGIXML_TEXT(""));
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_comment:
-				node_output_comment(writer, node->value ? node->value : PUGIXML_TEXT(""));
+				node_output_comment(writer, node->contents ? node->contents : PUGIXML_TEXT(""));
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_pi:
 				writer.write('<', '?');
-				writer.write_string(node->name ? node->name : default_name);
+				writer.write_string(node->contents ? node->contents : default_name);
 
-				if (node->value)
+				if (node->contents)
 				{
 					writer.write(' ');
-					writer.write_string(node->value);
+					writer.write_string(node->contents);
 				}
 
 				writer.write('?', '>');
@@ -4070,7 +4070,7 @@ PUGI__NS_BEGIN
 
 			case node_declaration:
 				writer.write('<', '?');
-				writer.write_string(node->name ? node->name : default_name);
+				writer.write_string(node->contents ? node->contents : default_name);
 				node_output_attributes(writer, node, flags);
 				writer.write('?', '>');
 				if ((flags & format_raw) == 0) writer.write('\n');
@@ -4080,10 +4080,10 @@ PUGI__NS_BEGIN
 				writer.write('<', '!', 'D', 'O', 'C');
 				writer.write('T', 'Y', 'P', 'E');
 
-				if (node->value)
+				if (node->contents)
 				{
 					writer.write(' ');
-					writer.write_string(node->value);
+					writer.write_string(node->contents);
 				}
 
 				writer.write('>');
