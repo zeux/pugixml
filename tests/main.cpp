@@ -20,6 +20,7 @@
 
 test_runner* test_runner::_tests = 0;
 size_t test_runner::_memory_fail_threshold = 0;
+bool test_runner::_memory_fail_triggered = false;
 jmp_buf test_runner::_failure_buffer;
 const char* test_runner::_failure_message;
 const char* test_runner::_temp_path;
@@ -30,7 +31,11 @@ static size_t g_memory_total_count = 0;
 static void* custom_allocate(size_t size)
 {
 	if (test_runner::_memory_fail_threshold > 0 && test_runner::_memory_fail_threshold < g_memory_total_size + size)
+	{
+		test_runner::_memory_fail_triggered = true;
+
 		return 0;
+	}
 	else
 	{
 		void* ptr = memory_allocate(size);
@@ -84,6 +89,7 @@ static bool run_test(test_runner* test)
 		g_memory_total_size = 0;
 		g_memory_total_count = 0;
 		test_runner::_memory_fail_threshold = 0;
+		test_runner::_memory_fail_triggered = false;
 	
 		pugi::set_memory_management_functions(custom_allocate, custom_deallocate);
 		

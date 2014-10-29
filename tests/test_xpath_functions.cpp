@@ -216,7 +216,7 @@ TEST(xpath_boolean_false)
 	CHECK_XPATH_FAIL(STR("false(1)"));
 }
 
-TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='zh-UK'><subchild/></child></node><foo><bar/></foo>")
+TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='zh-UK'><subchild attr=''/></child></node><foo><bar/></foo>")
 {
 	xml_node c;
 	
@@ -243,6 +243,9 @@ TEST_XML(xpath_boolean_lang, "<node xml:lang='en'><child xml:lang='zh-UK'><subch
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('zh-gb')"), false);
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")), STR("lang('r')"), false);
 	CHECK_XPATH_BOOLEAN(doc.child(STR("node")).child(STR("child")).child(STR("subchild")), STR("lang('en')"), false);
+
+	// lang with 1 attribute argument
+	CHECK_XPATH_NODESET(doc, STR("//@*[lang('en')]"));
 
 	// lang with 2 arguments
 	CHECK_XPATH_FAIL(STR("lang(1, 2)"));
@@ -771,6 +774,16 @@ TEST_XML_FLAGS(xpath_string_value, "<node><c1>pcdata</c1><c2><child/></c2><c3 at
 	CHECK_XPATH_STRING(n, STR("string(c4/node())"), STR("pivalue"));
 	CHECK_XPATH_STRING(n, STR("string(c5/node())"), STR("comment"));
 	CHECK_XPATH_STRING(n, STR("string(c6/node())"), STR("cdata"));
+}
+
+TEST(xpath_string_value_empty)
+{
+	xml_document doc;
+	doc.append_child(node_pcdata).set_value(STR("head"));
+	doc.append_child(node_pcdata);
+	doc.append_child(node_pcdata).set_value(STR("tail"));
+
+	CHECK_XPATH_STRING(doc, STR("string()"), STR("headtail"));
 }
 
 TEST_XML(xpath_string_concat_translate, "<node>foobar</node>")

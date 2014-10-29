@@ -88,6 +88,9 @@ TEST(xpath_variables_type_string)
 	CHECK_DOUBLE_NAN(var->get_number());
 	CHECK_STRING(var->get_string(), STR("abc"));
 	CHECK(var->get_node_set().empty());
+
+	CHECK(var->set(STR("abcdef")));
+	CHECK_STRING(var->get_string(), STR("abcdef"));
 }
 
 TEST_XML(xpath_variables_type_node_set, "<node/>")
@@ -271,6 +274,29 @@ TEST(xpath_variables_long_name)
 	set.set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), true);
 
 	CHECK_XPATH_BOOLEAN_VAR(xml_node(), STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set, true);
+}
+
+TEST(xpath_variables_long_name_out_of_memory)
+{
+	xpath_variable_set set;
+	set.set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), true);
+
+	test_runner::_memory_fail_threshold = 4096 + 64 + 52 * sizeof(char_t);
+
+#ifdef PUGIXML_NO_EXCEPTIONS
+	xpath_query q(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set);
+	CHECK(!q);
+#else
+	try
+	{
+		xpath_query q(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set);
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (const xpath_exception&)
+	{
+	}
+#endif
 }
 
 TEST_XML(xpath_variables_select, "<node attr='1'/><node attr='2'/>")

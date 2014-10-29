@@ -1,4 +1,5 @@
 /**
+{
  * pugixml parser - version 1.4
  * --------------------------------------------------------
  * Copyright (C) 2006-2014, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
@@ -164,6 +165,8 @@ PUGI__NS_BEGIN
 		static deallocation_function deallocate;
 	};
 
+	// Global allocation functions are stored in class statics so that in header mode linker deduplicates them
+	// Without a template<> we'll get multiple definitions of the same static
 	template <typename T> allocation_function xml_memory_management_function_storage<T>::allocate = default_allocate;
 	template <typename T> deallocation_function xml_memory_management_function_storage<T>::deallocate = default_deallocate;
 
@@ -1189,7 +1192,7 @@ PUGI__NS_BEGIN
 
 		if (node->next_sibling)
 			node->next_sibling->prev_sibling_c = node->prev_sibling_c;
-		else if (parent->first_child)
+		else
 			parent->first_child->prev_sibling_c = node->prev_sibling_c;
 
 		if (node->prev_sibling_c->next_sibling)
@@ -1264,7 +1267,7 @@ PUGI__NS_BEGIN
 	{
 		if (attr->next_attribute)
 			attr->next_attribute->prev_attribute_c = attr->prev_attribute_c;
-		else if (node->first_attribute)
+		else
 			node->first_attribute->prev_attribute_c = attr->prev_attribute_c;
 
 		if (attr->prev_attribute_c->next_attribute)
@@ -3945,36 +3948,37 @@ PUGI__NS_BEGIN
 		writer.write('-', '-', '>');
 	}
 
-	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
+	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
-		for (xml_attribute a = node.first_attribute(); a; a = a.next_attribute())
+		for (xml_attribute_struct* a = node->first_attribute; a; a = a->next_attribute)
 		{
 			writer.write(' ');
-			writer.write_string(a.name()[0] ? a.name() : default_name);
+			writer.write_string(a->name ? a->name : default_name);
 			writer.write('=', '"');
 
-			text_output(writer, a.value(), ctx_special_attr, flags);
+			if (a->value)
+				text_output(writer, a->value, ctx_special_attr, flags);
 
 			writer.write('"');
 		}
 	}
 
-	PUGI__FN bool node_output_start(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
+	PUGI__FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
-		const char_t* name = node.name()[0] ? node.name() : default_name;
+		const char_t* name = node->name ? node->name : default_name;
 
 		writer.write('<');
 		writer.write_string(name);
 
-		if (node.first_attribute())
+		if (node->first_attribute)
 			node_output_attributes(writer, node, flags);
 
 		if (flags & format_raw)
 		{
-			if (!node.first_child())
+			if (!node->first_child)
 				writer.write(' ', '/', '>');
 			else
 			{
@@ -3985,18 +3989,20 @@ PUGI__NS_BEGIN
 		}
 		else
 		{
-			xml_node first = node.first_child();
+			xml_node_struct* first = node->first_child;
 
 			if (!first)
 				writer.write(' ', '/', '>', '\n');
-			else if (!first.next_sibling() && (first.type() == node_pcdata || first.type() == node_cdata))
+			else if (!first->next_sibling && (PUGI__NODETYPE(first) == node_pcdata || PUGI__NODETYPE(first) == node_cdata))
 			{
 				writer.write('>');
 
-				if (first.type() == node_pcdata)
-					text_output(writer, first.value(), ctx_special_pcdata, flags);
+				const char_t* value = first->value ? first->value : PUGIXML_TEXT("");
+
+				if (PUGI__NODETYPE(first) == node_pcdata)
+					text_output(writer, value, ctx_special_pcdata, flags);
 				else
-					text_output_cdata(writer, first.value());
+					text_output_cdata(writer, value);
 
 				writer.write('<', '/');
 				writer.write_string(name);
@@ -4013,10 +4019,10 @@ PUGI__NS_BEGIN
 		return false;
 	}
 
-	PUGI__FN void node_output_end(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
+	PUGI__FN void node_output_end(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
-		const char_t* name = node.name()[0] ? node.name() : default_name;
+		const char_t* name = node->name ? node->name : default_name;
 
 		writer.write('<', '/');
 		writer.write_string(name);
@@ -4027,35 +4033,35 @@ PUGI__NS_BEGIN
 			writer.write('>', '\n');
 	}
 
-	PUGI__FN void node_output_simple(xml_buffered_writer& writer, const xml_node node, unsigned int flags)
+	PUGI__FN void node_output_simple(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
-		switch (node.type())
+		switch (PUGI__NODETYPE(node))
 		{
 			case node_pcdata:
-				text_output(writer, node.value(), ctx_special_pcdata, flags);
+				text_output(writer, node->value ? node->value : PUGIXML_TEXT(""), ctx_special_pcdata, flags);
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_cdata:
-				text_output_cdata(writer, node.value());
+				text_output_cdata(writer, node->value ? node->value : PUGIXML_TEXT(""));
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_comment:
-				node_output_comment(writer, node.value());
+				node_output_comment(writer, node->value ? node->value : PUGIXML_TEXT(""));
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_pi:
 				writer.write('<', '?');
-				writer.write_string(node.name()[0] ? node.name() : default_name);
+				writer.write_string(node->name ? node->name : default_name);
 
-				if (node.value()[0])
+				if (node->value)
 				{
 					writer.write(' ');
-					writer.write_string(node.value());
+					writer.write_string(node->value);
 				}
 
 				writer.write('?', '>');
@@ -4064,7 +4070,7 @@ PUGI__NS_BEGIN
 
 			case node_declaration:
 				writer.write('<', '?');
-				writer.write_string(node.name()[0] ? node.name() : default_name);
+				writer.write_string(node->name ? node->name : default_name);
 				node_output_attributes(writer, node, flags);
 				writer.write('?', '>');
 				if ((flags & format_raw) == 0) writer.write('\n');
@@ -4074,10 +4080,10 @@ PUGI__NS_BEGIN
 				writer.write('<', '!', 'D', 'O', 'C');
 				writer.write('T', 'Y', 'P', 'E');
 
-				if (node.value()[0])
+				if (node->value)
 				{
 					writer.write(' ');
-					writer.write_string(node.value());
+					writer.write_string(node->value);
 				}
 
 				writer.write('>');
@@ -4089,11 +4095,11 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_output(xml_buffered_writer& writer, const xml_node root, const char_t* indent, unsigned int flags, unsigned int depth)
+	PUGI__FN void node_output(xml_buffered_writer& writer, xml_node_struct* root, const char_t* indent, unsigned int flags, unsigned int depth)
 	{
 		size_t indent_length = ((flags & (format_indent | format_raw)) == format_indent) ? strlength(indent) : 0;
 
-		xml_node node = root;
+		xml_node_struct* node = root;
 
 		do
 		{
@@ -4103,20 +4109,20 @@ PUGI__NS_BEGIN
 			if (indent_length)
 				text_output_indent(writer, indent, indent_length, depth);
 
-			if (node.type() == node_element)
+			if (PUGI__NODETYPE(node) == node_element)
 			{
 				if (node_output_start(writer, node, flags))
 				{
-					node = node.first_child();
+					node = node->first_child;
 					depth++;
 					continue;
 				}
 			}
-			else if (node.type() == node_document)
+			else if (PUGI__NODETYPE(node) == node_document)
 			{
-				if (node.first_child())
+				if (node->first_child)
 				{
-					node = node.first_child();
+					node = node->first_child;
 					continue;
 				}
 			}
@@ -4128,17 +4134,17 @@ PUGI__NS_BEGIN
 			// continue to the next node
 			while (node != root)
 			{
-				if (node.next_sibling())
+				if (node->next_sibling)
 				{
-					node = node.next_sibling();
+					node = node->next_sibling;
 					break;
 				}
 
-				node = node.parent();
+				node = node->parent;
 				depth--;
 
 				// write closing node
-				if (node.type() == node_element)
+				if (PUGI__NODETYPE(node) == node_element)
 				{
 					if (indent_length)
 						text_output_indent(writer, indent, indent_length, depth);
@@ -4231,8 +4237,11 @@ PUGI__NS_BEGIN
 		{
 			xml_attribute_struct* da = append_new_attribute(dn, get_allocator(dn));
 
-			node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
-			node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+			if (da)
+			{
+				node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
+				node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+			}
 		}
 	}
 
@@ -5936,7 +5945,7 @@ namespace pugi
 
 		impl::xml_buffered_writer buffered_writer(writer, encoding);
 
-		impl::node_output(buffered_writer, *this, indent, flags, depth);
+		impl::node_output(buffered_writer, _root, indent, flags, depth);
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -6621,7 +6630,7 @@ namespace pugi
 			if (!(flags & format_raw)) buffered_writer.write('\n');
 		}
 
-		impl::node_output(buffered_writer, *this, indent, flags, 0);
+		impl::node_output(buffered_writer, _root, indent, flags, 0);
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -8746,7 +8755,6 @@ PUGI__NS_BEGIN
 		ast_op_union,					// left | right
 		ast_predicate,					// apply predicate to set; next points to next predicate
 		ast_filter,						// select * from left where right
-		ast_filter_posinv,				// select * from left where right; proximity position invariant
 		ast_string_constant,			// string constant
 		ast_number_constant,			// number constant
 		ast_variable,					// variable
@@ -8822,6 +8830,14 @@ PUGI__NS_BEGIN
 		nodetest_all_in_namespace
 	};
 
+	enum predicate_t
+	{
+		predicate_default,
+		predicate_posinv,
+		predicate_constant,
+		predicate_constant_one
+	};
+
 	enum nodeset_eval_t
 	{
 		nodeset_eval_all,
@@ -8843,8 +8859,10 @@ PUGI__NS_BEGIN
 		char _type;
 		char _rettype;
 
-		// for ast_step / ast_predicate
+		// for ast_step
 		char _axis;
+
+		// for ast_step/ast_predicate/ast_filter
 		char _test;
 
 		// tree node structure
@@ -9041,7 +9059,7 @@ PUGI__NS_BEGIN
 			size_t size = ns.size() - first;
 				
 			xpath_node* last = ns.begin() + first;
-				
+
 			// remove_if... or well, sort of
 			for (xpath_node* it = last; it != ns.end(); ++it, ++i)
 			{
@@ -9056,14 +9074,45 @@ PUGI__NS_BEGIN
 						if (once) break;
 					}
 				}
-				else if (expr->eval_boolean(c, stack))
+				else
 				{
-					*last++ = *it;
+					if (expr->eval_boolean(c, stack))
+					{
+						*last++ = *it;
 
-					if (once) break;
+						if (once) break;
+					}
 				}
 			}
 			
+			ns.truncate(last);
+		}
+
+		static void apply_predicate_const(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
+		{
+			assert(ns.size() >= first);
+			assert(expr->rettype() == xpath_type_number);
+
+			size_t size = ns.size() - first;
+
+			xpath_node* last = ns.begin() + first;
+
+			xpath_context c(xpath_node(), 1, size);
+
+			double er = expr->eval_number(c, stack);
+
+			if (er >= 1.0 && er <= size)
+			{
+				size_t eri = static_cast<size_t>(er);
+
+				if (er == eri)
+				{
+					xpath_node r = last[eri - 1];
+
+					*last++ = r;
+				}
+			}
+
 			ns.truncate(last);
 		}
 
@@ -9075,7 +9124,12 @@ PUGI__NS_BEGIN
 
 			for (xpath_ast_node* pred = _right; pred; pred = pred->_next)
 			{
-				apply_predicate(ns, first, pred->_left, stack, !pred->_next && last_once);
+				assert(pred->_type == ast_predicate);
+
+				if (pred->_test == predicate_constant || pred->_test == predicate_constant_one)
+					apply_predicate_const(ns, first, pred->_right, stack);
+				else
+					apply_predicate(ns, first, pred->_right, stack, !pred->_next && last_once);
 			}
 		}
 
@@ -9485,9 +9539,9 @@ PUGI__NS_BEGIN
 			bool axis_reverse = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling);
 
 			bool once =
-				(axis == axis_attribute && _test == nodetest_name)
-				? true
-				: !_right && eval_once(!axis_reverse, eval);
+				(axis == axis_attribute && _test == nodetest_name) ||
+				(!_right && eval_once(!axis_reverse, eval)) ||
+				(_right && !_right->_next && _right->_test == predicate_constant_one);
 
 			xpath_node_set_raw ns;
 			ns.set_type(axis_reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted);
@@ -9554,7 +9608,14 @@ PUGI__NS_BEGIN
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const char_t* contents):
 			_type(static_cast<char>(type)), _rettype(xpath_type_node_set), _axis(static_cast<char>(axis)), _test(static_cast<char>(test)), _left(left), _right(0), _next(0)
 		{
+			assert(type == ast_step);
 			_data.nodetest = contents;
+		}
+
+		xpath_ast_node(ast_type_t type, xpath_ast_node* left, xpath_ast_node* right, predicate_t test):
+			_type(static_cast<char>(type)), _rettype(xpath_type_node_set), _axis(0), _test(static_cast<char>(test)), _left(left), _right(right), _next(0)
+		{
+			assert(type == ast_filter || type == ast_predicate);
 		}
 
 		void set_next(xpath_ast_node* value)
@@ -10130,27 +10191,33 @@ PUGI__NS_BEGIN
 
 				xpath_node_set_raw ls = _left->eval_node_set(c, swapped_stack, eval);
 				xpath_node_set_raw rs = _right->eval_node_set(c, stack, eval);
-				
+
 				// we can optimize merging two sorted sets, but this is a very rare operation, so don't bother
 				rs.set_type(xpath_node_set::type_unsorted);
 
 				rs.append(ls.begin(), ls.end(), stack.result);
 				rs.remove_duplicates();
-				
+
 				return rs;
 			}
 
 			case ast_filter:
-			case ast_filter_posinv:
 			{
-				xpath_node_set_raw set = _left->eval_node_set(c, stack, nodeset_eval_all);
+				xpath_node_set_raw set = _left->eval_node_set(c, stack, _test == predicate_constant_one ? nodeset_eval_first : nodeset_eval_all);
 
 				// either expression is a number or it contains position() call; sort by document order
-				if (_type == ast_filter) set.sort_do();
+				if (_test != predicate_posinv) set.sort_do();
 
-				bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
+				if (_test == predicate_constant || _test == predicate_constant_one)
+				{
+					apply_predicate_const(set, 0, _right, stack);
+				}
+				else
+				{
+					bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
 
-				apply_predicate(set, 0, _right, stack, once);
+					apply_predicate(set, 0, _right, stack, once);
+				}
 			
 				return set;
 			}
@@ -10253,10 +10320,31 @@ PUGI__NS_BEGIN
 			if (_right) _right->optimize(alloc);
 			if (_next) _next->optimize(alloc);
 
-			// Replace descendant-or-self::node()/child::foo with descendant::foo
+			// Rewrite [position()=expr] with [expr]
+			// Note that this step has to go before classification to recognize [position()=1]
+			if ((_type == ast_filter || _type == ast_predicate) &&
+				_right->_type == ast_op_equal && _right->_left->_type == ast_func_position && _right->_right->_rettype == xpath_type_number)
+			{
+				_right = _right->_right;
+			}
+
+			// Classify filter/predicate ops to perform various optimizations during evaluation
+			if (_type == ast_filter || _type == ast_predicate)
+			{
+				assert(_test == predicate_default);
+
+				if (_right->_type == ast_number_constant && _right->_data.number == 1.0)
+					_test = predicate_constant_one;
+				else if (_right->_rettype == xpath_type_number && (_right->_type == ast_number_constant || _right->_type == ast_variable || _right->_type == ast_func_last))
+					_test = predicate_constant;
+				else if (_right->_rettype != xpath_type_number && _right->is_posinv_expr())
+					_test = predicate_posinv;
+			}
+
+			// Rewrite descendant-or-self::node()/child::foo with descendant::foo
 			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
-			// Do a similar kind of replacement for self/descendant/descendant-or-self axes
-			// Note that we only replace positionally invariant steps (//foo[1] != /descendant::foo[1])
+			// Do a similar kind of rewrite for self/descendant/descendant-or-self axes
+			// Note that we only rewrite positionally invariant steps (//foo[1] != /descendant::foo[1])
 			if (_type == ast_step && (_axis == axis_child || _axis == axis_self || _axis == axis_descendant || _axis == axis_descendant_or_self) && _left &&
 				_left->_type == ast_step && _left->_axis == axis_descendant_or_self && _left->_test == nodetest_type_node && !_left->_right &&
 				is_posinv_step())
@@ -10269,7 +10357,7 @@ PUGI__NS_BEGIN
 				_left = _left->_left;
 			}
 
-			// Replace translate() with constant arguments with a table
+			// Use optimized lookup table implementation for translate() with constant arguments
 			if (_type == ast_func_translate && _right->_type == ast_string_constant && _right->_next->_type == ast_string_constant)
 			{
 				unsigned char* table = translate_table_generate(alloc, _right->_data.string, _right->_next->_data.string);
@@ -10284,7 +10372,7 @@ PUGI__NS_BEGIN
 			// Use optimized path for @attr = 'value' or @attr = $value
 			if (_type == ast_op_equal &&
 				_left->_type == ast_step && _left->_axis == axis_attribute && _left->_test == nodetest_name && !_left->_left && !_left->_right &&
-				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->rettype() == xpath_type_string)))
+				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->_rettype == xpath_type_string)))
 			{
 				_type = ast_opt_compare_attribute;
 			}
@@ -10309,7 +10397,6 @@ PUGI__NS_BEGIN
 
 			case ast_predicate:
 			case ast_filter:
-			case ast_filter_posinv:
 				return true;
 
 			default:
@@ -10330,10 +10417,7 @@ PUGI__NS_BEGIN
 			{
 				assert(n->_type == ast_predicate);
 
-				xpath_ast_node* expr = n->_left;
-				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv_expr();
-
-				if (!posinv)
+				if (n->_test != predicate_posinv)
 					return false;
 			}
 
@@ -10753,9 +10837,7 @@ PUGI__NS_BEGIN
 
 				if (n->rettype() != xpath_type_node_set) throw_error("Predicate has to be applied to node set");
 
-				bool posinv = expr->rettype() != xpath_type_number && expr->is_posinv_expr();
-
-				n = new (alloc_node()) xpath_ast_node(posinv ? ast_filter_posinv : ast_filter, xpath_type_node_set, n, expr);
+				n = new (alloc_node()) xpath_ast_node(ast_filter, n, expr, predicate_default);
 
 				if (_lexer.current() != lex_close_square_brace)
 					throw_error("Unmatched square brace");
@@ -10899,7 +10981,7 @@ PUGI__NS_BEGIN
 				
 				xpath_ast_node* expr = parse_expression();
 
-				xpath_ast_node* pred = new (alloc_node()) xpath_ast_node(ast_predicate, xpath_type_node_set, expr);
+				xpath_ast_node* pred = new (alloc_node()) xpath_ast_node(ast_predicate, 0, expr, predicate_default);
 				
 				if (_lexer.current() != lex_close_square_brace)
 					throw_error("Unmatched square brace");

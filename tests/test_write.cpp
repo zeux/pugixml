@@ -51,6 +51,15 @@ TEST_XML(write_cdata_inner, "<node><![CDATA[value]]></node>")
 	CHECK_NODE_EX(doc, STR("<node><![CDATA[value]]></node>\n"), STR(""), 0);
 }
 
+TEST(write_cdata_null)
+{
+	xml_document doc;
+	doc.append_child(node_cdata);
+	doc.append_child(STR("node")).append_child(node_cdata);
+
+	CHECK_NODE(doc, STR("<![CDATA[]]><node><![CDATA[]]></node>"));
+}
+
 TEST_XML_FLAGS(write_comment, "<!--text-->", parse_comments | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<!--text-->"));
@@ -80,10 +89,30 @@ TEST(write_comment_invalid)
 	CHECK_NODE(doc, STR("<!--- ->- -->"));
 }
 
+TEST(write_comment_null)
+{
+	xml_document doc;
+	doc.append_child(node_comment);
+
+	CHECK_NODE(doc, STR("<!---->"));
+}
+
 TEST_XML_FLAGS(write_pi, "<?name value?>", parse_pi | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<?name value?>"));
 	CHECK_NODE_EX(doc, STR("<?name value?>\n"), STR(""), 0);
+}
+
+TEST(write_pi_null)
+{
+	xml_document doc;
+	xml_node node = doc.append_child(node_pi);
+
+	CHECK_NODE(doc, STR("<?:anonymous?>"));
+
+	node.set_value(STR("value"));
+
+	CHECK_NODE(doc, STR("<?:anonymous value?>"));
 }
 
 TEST_XML_FLAGS(write_declaration, "<?xml version='2.0'?>", parse_declaration | parse_fragment)
@@ -96,6 +125,14 @@ TEST_XML_FLAGS(write_doctype, "<!DOCTYPE id [ foo ]>", parse_doctype | parse_fra
 {
 	CHECK_NODE(doc, STR("<!DOCTYPE id [ foo ]>"));
 	CHECK_NODE_EX(doc, STR("<!DOCTYPE id [ foo ]>\n"), STR(""), 0);
+}
+
+TEST(write_doctype_null)
+{
+	xml_document doc;
+	doc.append_child(node_doctype);
+
+	CHECK_NODE(doc, STR("<!DOCTYPE>"));
 }
 
 TEST_XML(write_escape, "<node attr=''>text</node>")
@@ -459,4 +496,17 @@ TEST_XML(write_indent_custom, "<node attr='1'><child><sub>text</sub></child></no
 	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nABC<child>\nABCABC<sub>text</sub>\nABC</child>\n</node>\n"), STR("ABC"), format_indent);
 	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nABCD<child>\nABCDABCD<sub>text</sub>\nABCD</child>\n</node>\n"), STR("ABCD"), format_indent);
 	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\nABCDE<child>\nABCDEABCDE<sub>text</sub>\nABCDE</child>\n</node>\n"), STR("ABCDE"), format_indent);
+}
+
+TEST(write_pcdata_null)
+{
+	xml_document doc;
+	doc.append_child(STR("node")).append_child(node_pcdata);
+
+	CHECK_NODE(doc, STR("<node></node>"));
+	CHECK_NODE_EX(doc, STR("<node></node>\n"), STR("\t"), format_indent);
+
+	doc.first_child().append_child(node_pcdata);
+
+	CHECK_NODE_EX(doc, STR("<node>\n\t\n\t\n</node>\n"), STR("\t"), format_indent);
 }

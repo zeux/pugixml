@@ -27,6 +27,16 @@ TEST_XML(dom_attr_assign, "<node/>")
 	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"true\" />"));
 }
 
+TEST_XML(dom_attr_set_name, "<node attr='value' />")
+{
+	xml_attribute attr = doc.child(STR("node")).attribute(STR("attr"));
+
+	CHECK(attr.set_name(STR("n")));
+	CHECK(!xml_attribute().set_name(STR("n")));
+
+	CHECK_NODE(doc, STR("<node n=\"value\" />"));
+}
+
 TEST_XML(dom_attr_set_value, "<node/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -758,8 +768,9 @@ TEST(dom_node_declaration_name)
 
 	doc.insert_child_after(node_declaration, doc.first_child());
 	doc.insert_child_before(node_declaration, doc.first_child());
+	doc.prepend_child(node_declaration);
 
-	CHECK_NODE(doc, STR("<?xml?><?xml?><?xml?>"));
+	CHECK_NODE(doc, STR("<?xml?><?xml?><?xml?><?xml?>"));
 }
 
 TEST(dom_node_declaration_attributes)
@@ -867,17 +878,21 @@ TEST(dom_node_out_of_memory)
 
 	// verify all node modification operations
 	CHECK(!n.append_child());
+	CHECK(!n.prepend_child());
 	CHECK(!n.insert_child_after(node_element, n.first_child()));
 	CHECK(!n.insert_child_before(node_element, n.first_child()));
 	CHECK(!n.append_attribute(STR("")));
+	CHECK(!n.prepend_attribute(STR("")));
 	CHECK(!n.insert_attribute_after(STR(""), a));
 	CHECK(!n.insert_attribute_before(STR(""), a));
 
 	// verify node copy operations
 	CHECK(!n.append_copy(n.first_child()));
+	CHECK(!n.prepend_copy(n.first_child()));
 	CHECK(!n.insert_copy_after(n.first_child(), n.first_child()));
 	CHECK(!n.insert_copy_before(n.first_child(), n.first_child()));
 	CHECK(!n.append_copy(a));
+	CHECK(!n.prepend_copy(a));
 	CHECK(!n.insert_copy_after(a, a));
 	CHECK(!n.insert_copy_before(a, a));
 }
@@ -1346,11 +1361,55 @@ TEST_XML(dom_node_copyless_taint, "<node attr=\"value\" />")
 	CHECK_NODE(doc, STR("<nod1 attr=\"value\" /><node attr=\"valu2\" /><node att3=\"value\" />"));
 }
 
-TEST_XML(dom_node_copy_out_of_memory, "<node><child1 attr1='value1' attr2='value2' /><child2 /><child3>text1<child4 />text2</child3></node>")
+TEST_XML(dom_node_copy_out_of_memory_node, "<node><child1 /><child2 /><child3>text1<child4 />text2</child3></node>")
 {
 	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
 
-    xml_document copy;
-    for (int i = 0; i < 100; ++i)
-        copy.append_copy(doc.first_child());
+	xml_document copy;
+	for (int i = 0; i < 1000; ++i)
+		copy.append_copy(doc.first_child());
+}
+
+TEST_XML(dom_node_copy_out_of_memory_attr, "<node attr1='' attr2='' attr3='' attr4='' attr5='' attr6='' attr7='' attr8='' attr9='' attr10='' attr11='' attr12='' attr13='' attr14='' attr15='' />")
+{
+	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
+
+	xml_document copy;
+	for (int i = 0; i < 1000; ++i)
+		copy.append_copy(doc.first_child());
+}
+
+TEST_XML(dom_node_remove_deallocate, "<node attr='value'>text</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	xml_attribute attr = node.attribute(STR("attr"));
+	attr.set_name(STR("longattr"));
+	attr.set_value(STR("longvalue"));
+
+	node.set_name(STR("longnode"));
+	node.text().set(STR("longtext"));
+
+	node.remove_attribute(attr);
+	doc.remove_child(node);
+
+	CHECK_NODE(doc, STR(""));
+}
+
+TEST_XML(dom_node_set_deallocate, "<node attr='value'>text</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	xml_attribute attr = node.attribute(STR("attr"));
+
+	attr.set_name(STR("longattr"));
+	attr.set_value(STR("longvalue"));
+	node.set_name(STR("longnode"));
+
+	attr.set_name(STR(""));
+	attr.set_value(STR(""));
+	node.set_name(STR(""));
+	node.text().set(STR(""));
+
+	CHECK_NODE(doc, STR("<:anonymous :anonymous=\"\"></:anonymous>"));
 }

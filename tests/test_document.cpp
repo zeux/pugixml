@@ -227,6 +227,34 @@ TEST(document_load_stream_nonseekable_large)
     CHECK(doc.load(in));
     CHECK_NODE(doc, str.c_str());
 }
+
+TEST(document_load_stream_nonseekable_out_of_memory)
+{
+    char contents[] = "<node />";
+    char_array_buffer<char> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+    std::istream in(&buffer);
+
+    test_runner::_memory_fail_threshold = 1;
+
+    pugi::xml_document doc;
+    CHECK(doc.load(in).status == status_out_of_memory);
+}
+
+TEST(document_load_stream_nonseekable_out_of_memory_large)
+{
+	std::basic_string<pugi::char_t> str;
+	str += STR("<node>");
+	for (int i = 0; i < 10000; ++i) str += STR("<node />");
+	str += STR("</node>");
+
+    char_array_buffer<pugi::char_t> buffer(&str[0], &str[0] + str.length());
+    std::basic_istream<pugi::char_t> in(&buffer);
+
+    test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
+
+    pugi::xml_document doc;
+    CHECK(doc.load(in).status == status_out_of_memory);
+}
 #endif
 
 TEST(document_load_string)
@@ -293,6 +321,17 @@ TEST(document_load_file_wide_ascii)
 
 	CHECK(doc.load_file(L"tests/data/small.xml"));
 	CHECK_NODE(doc, STR("<node />"));
+}
+
+TEST(document_load_file_wide_out_of_memory)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	pugi::xml_document doc;
+
+	pugi::xml_parse_result result = doc.load_file(L"tests/data/small.xml");
+
+	CHECK(result.status == status_out_of_memory || result.status == status_file_not_found);
 }
 
 TEST_XML(document_save, "<node/>")
@@ -1233,5 +1272,39 @@ TEST(document_alignment)
 		CHECK_NODE(*doc, STR("<node />"));
 
 		doc->~xml_document();
+	}
+}
+
+TEST(document_convert_out_of_memory)
+{
+	file_data_t files[] =
+	{
+		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
+		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
+		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
+		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
+		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0},
+		{"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}
+	};
+
+	// load files in memory
+	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
+	{
+		CHECK(load_file_in_memory(files[i].path, files[i].data, files[i].size));
+	}
+
+	// disallow allocations
+	test_runner::_memory_fail_threshold = 1;
+
+	for (unsigned int src = 0; src < sizeof(files) / sizeof(files[0]); ++src)
+	{
+		xml_document doc;
+		CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default, files[src].encoding).status == status_out_of_memory);
+	}
+
+	// cleanup
+	for (unsigned int j = 0; j < sizeof(files) / sizeof(files[0]); ++j)
+	{
+		delete[] files[j].data;
 	}
 }

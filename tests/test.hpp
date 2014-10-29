@@ -23,6 +23,7 @@ struct test_runner
 
 	static test_runner* _tests;
 	static size_t _memory_fail_threshold;
+	static bool _memory_fail_triggered;
 	static jmp_buf _failure_buffer;
 	static const char* _failure_message;
 
