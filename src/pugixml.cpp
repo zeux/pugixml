@@ -2520,8 +2520,6 @@ PUGI__NS_BEGIN
 					PUGI__PUSHNODE(node_doctype);
 
 					cursor->value = mark;
-
-					PUGI__POPNODE();
 				}
 			}
 			else if (*s == 0 && endch == '-') PUGI__THROW_ERROR(status_bad_comment, s);
@@ -3660,7 +3658,7 @@ PUGI__NS_BEGIN
 		while (node != root);
 	}
 
-	PUGI__FN bool has_declaration(const xml_node node)
+	PUGI__FN bool has_declaration(xml_node node)
 	{
 		for (xml_node child = node.first_child(); child; child = child.next_sibling())
 		{
@@ -3691,7 +3689,7 @@ PUGI__NS_BEGIN
 		return true;
 	}
 
-	PUGI__FN bool allow_move(const xml_node parent, const xml_node child)
+	PUGI__FN bool allow_move(xml_node parent, xml_node child)
 	{
 		// check that child can be a child of parent
 		if (!allow_insert_child(parent.type(), child.type()))
@@ -7323,7 +7321,7 @@ PUGI__NS_BEGIN
 			prefix_length = pos ? static_cast<size_t>(pos - name) : 0;
 		}
 
-		bool operator()(const xml_attribute a) const
+		bool operator()(xml_attribute a) const
 		{
 			const char_t* name = a.name();
 
@@ -7333,7 +7331,7 @@ PUGI__NS_BEGIN
 		}
 	};
 
-	PUGI__FN const char_t* namespace_uri(const xml_node node)
+	PUGI__FN const char_t* namespace_uri(xml_node node)
 	{
 		namespace_uri_predicate pred = node.name();
 		
@@ -7351,7 +7349,7 @@ PUGI__NS_BEGIN
 		return PUGIXML_TEXT("");
 	}
 
-	PUGI__FN const char_t* namespace_uri(const xml_attribute attr, const xml_node parent)
+	PUGI__FN const char_t* namespace_uri(xml_attribute attr, xml_node parent)
 	{
 		namespace_uri_predicate pred = attr.name();
 		
