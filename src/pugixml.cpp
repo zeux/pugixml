@@ -4292,7 +4292,12 @@ PUGI__NS_BEGIN
 	PUGI__FN xml_parse_result load_buffer_impl(xml_document_struct* doc, xml_node_struct* root, void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own, char_t** out_buffer)
 	{
 		// check input buffer
-		assert(contents || size == 0);
+                if ((contents==NULL) && (size!=0)) {
+                  xml_parse_result result;
+                  result.status = status_no_document_element;
+                  return result;
+                }
+
 
 		// get actual encoding
 		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);

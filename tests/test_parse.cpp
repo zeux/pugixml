@@ -865,6 +865,8 @@ TEST(parse_empty)
 	xml_document doc;
 	CHECK(doc.load(STR("")).status == status_no_document_element && !doc.first_child());
 	CHECK(doc.load(STR(""), parse_fragment) && !doc.first_child());
+        CHECK(doc.load_buffer(NULL, 12).status == status_no_document_element);
+        CHECK(doc.load_buffer("foo", 0).status == status_no_document_element);
 }
 
 TEST(parse_out_of_memory)
