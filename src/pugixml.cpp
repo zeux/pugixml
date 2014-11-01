@@ -7764,6 +7764,8 @@ PUGI__NS_BEGIN
 
 		void append(const xpath_node* begin_, const xpath_node* end_, xpath_allocator* alloc)
 		{
+			if (begin_ == end_) return;
+
 			size_t size_ = static_cast<size_t>(_end - _begin);
 			size_t capacity = static_cast<size_t>(_eos - _begin);
 			size_t count = static_cast<size_t>(end_ - begin_);
