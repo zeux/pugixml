@@ -1352,7 +1352,11 @@ PUGI__NS_BEGIN
 			char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
 			if (!buffer) return false;
 
-			memcpy(buffer, contents, length * sizeof(char_t));
+			if (contents)
+				memcpy(buffer, contents, length * sizeof(char_t));
+			else
+				assert(length == 0);
+
 			buffer[length] = 0;
 
 			out_buffer = buffer;
