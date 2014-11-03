@@ -481,4 +481,52 @@ TEST(xpath_operators_associativity_arithmetic)
 	CHECK_XPATH_NUMBER(c, STR("1-1+1"), 1);
 }
 
+TEST(xpath_operators_mod)
+{
+	// Check that mod operator conforms to Java spec (since this is the only concrete source of information about XPath mod)
+	xml_node c;
+
+	// Basic tests from spec
+	CHECK_XPATH_NUMBER(c, STR("5 mod 3"), 2);
+	CHECK_XPATH_NUMBER(c, STR("5 mod -3"), 2);
+	CHECK_XPATH_NUMBER(c, STR("-5 mod 3"), -2);
+	CHECK_XPATH_NUMBER(c, STR("-5 mod -3"), -2);
+
+	// If either operand is NaN, the result is NaN
+	CHECK_XPATH_NUMBER_NAN(c, STR("(0 div 0) mod 3"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("3 mod (0 div 0)"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("(0 div 0) mod (0 div 0)"));
+
+	// If the dividend is an infinity, or the divisor is a zero, or both, the result is NaN
+	CHECK_XPATH_NUMBER_NAN(c, STR("(1 div 0) mod 3"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("(1 div 0) mod -3"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("(-1 div 0) mod 3"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("1 mod 0"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("-1 mod 0"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("(1 div 0) mod 0"));
+	CHECK_XPATH_NUMBER_NAN(c, STR("(-1 div 0) mod 0"));
+
+	// If the dividend is finite and the divisor is an infinity, the result equals the dividend
+	CHECK_XPATH_NUMBER(c, STR("1 mod (1 div 0)"), 1);
+	CHECK_XPATH_NUMBER(c, STR("1 mod (-1 div 0)"), 1);
+	CHECK_XPATH_NUMBER(c, STR("-1 mod (1 div 0)"), -1);
+	CHECK_XPATH_NUMBER(c, STR("0 mod (1 div 0)"), 0);
+	CHECK_XPATH_NUMBER(c, STR("0 mod (-1 div 0)"), 0);
+	CHECK_XPATH_NUMBER(c, STR("100000 mod (1 div 0)"), 100000);
+
+	// If the dividend is a zero and the divisor is finite, the result equals the dividend.
+	CHECK_XPATH_NUMBER(c, STR("0 mod 1000000"), 0);
+	CHECK_XPATH_NUMBER(c, STR("0 mod -1000000"), 0);
+
+	// In the remaining cases ...  the floating-point remainder r from the division of a dividend n by a divisor d
+	// is defined by the mathematical relation r = n - (d * q) where q is an integer that is negative only if n/d is
+	// negative and positive only if n/d is positive, and whose magnitude is as large as possible without exceeding the magnitude of the true
+	// mathematical quotient of n and d.
+	CHECK_XPATH_NUMBER(c, STR("9007199254740991 mod 2"), 1);
+	CHECK_XPATH_NUMBER(c, STR("9007199254740991 mod 3"), 1);
+	CHECK_XPATH_NUMBER(c, STR("18446744073709551615 mod 2"), 0);
+	CHECK_XPATH_NUMBER(c, STR("18446744073709551615 mod 3"), 1);
+	CHECK_XPATH_NUMBER(c, STR("115792089237316195423570985008687907853269984665640564039457584007913129639935 mod 2"), 0);
+	CHECK_XPATH_NUMBER(c, STR("115792089237316195423570985008687907853269984665640564039457584007913129639935 mod 3"), 1);
+}
 #endif
