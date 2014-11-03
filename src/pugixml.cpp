@@ -8503,44 +8503,59 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		static void apply_predicate(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack, bool once)
+		static void apply_predicate_boolean(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack, bool once)
 		{
 			assert(ns.size() >= first);
+			assert(expr->rettype() != xpath_type_number);
 
 			size_t i = 1;
 			size_t size = ns.size() - first;
-				
+
 			xpath_node* last = ns.begin() + first;
 
 			// remove_if... or well, sort of
 			for (xpath_node* it = last; it != ns.end(); ++it, ++i)
 			{
 				xpath_context c(*it, i, size);
-			
-				if (expr->rettype() == xpath_type_number)
-				{
-					if (expr->eval_number(c, stack) == i)
-					{
-						*last++ = *it;
 
-						if (once) break;
-					}
-				}
-				else
+				if (expr->eval_boolean(c, stack))
 				{
-					if (expr->eval_boolean(c, stack))
-					{
-						*last++ = *it;
+					*last++ = *it;
 
-						if (once) break;
-					}
+					if (once) break;
 				}
 			}
-			
+
 			ns.truncate(last);
 		}
 
-		static void apply_predicate_const(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
+		static void apply_predicate_number(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack, bool once)
+		{
+			assert(ns.size() >= first);
+			assert(expr->rettype() == xpath_type_number);
+
+			size_t i = 1;
+			size_t size = ns.size() - first;
+
+			xpath_node* last = ns.begin() + first;
+
+			// remove_if... or well, sort of
+			for (xpath_node* it = last; it != ns.end(); ++it, ++i)
+			{
+				xpath_context c(*it, i, size);
+
+				if (expr->eval_number(c, stack) == i)
+				{
+					*last++ = *it;
+
+					if (once) break;
+				}
+			}
+
+			ns.truncate(last);
+		}
+
+		static void apply_predicate_number_const(xpath_node_set_raw& ns, size_t first, xpath_ast_node* expr, const xpath_stack& stack)
 		{
 			assert(ns.size() >= first);
 			assert(expr->rettype() == xpath_type_number);
@@ -8568,21 +8583,28 @@ PUGI__NS_BEGIN
 			ns.truncate(last);
 		}
 
+		void apply_predicate(xpath_node_set_raw& ns, size_t first, const xpath_stack& stack, bool once)
+		{
+			if (ns.size() == first) return;
+
+			assert(_type == ast_filter || _type == ast_predicate);
+
+			if (_test == predicate_constant || _test == predicate_constant_one)
+				apply_predicate_number_const(ns, first, _right, stack);
+			else if (_right->rettype() == xpath_type_number)
+				apply_predicate_number(ns, first, _right, stack, once);
+			else
+				apply_predicate_boolean(ns, first, _right, stack, once);
+		}
+
 		void apply_predicates(xpath_node_set_raw& ns, size_t first, const xpath_stack& stack, nodeset_eval_t eval)
 		{
 			if (ns.size() == first) return;
-			
+
 			bool last_once = eval_once(ns.type() == xpath_node_set::type_sorted, eval);
 
 			for (xpath_ast_node* pred = _right; pred; pred = pred->_next)
-			{
-				assert(pred->_type == ast_predicate);
-
-				if (pred->_test == predicate_constant || pred->_test == predicate_constant_one)
-					apply_predicate_const(ns, first, pred->_right, stack);
-				else
-					apply_predicate(ns, first, pred->_right, stack, !pred->_next && last_once);
-			}
+				pred->apply_predicate(ns, first, stack, !pred->_next && last_once);
 		}
 
 		bool step_push(xpath_node_set_raw& ns, xml_attribute_struct* a, xml_node_struct* parent, xpath_allocator* alloc)
@@ -9660,16 +9682,9 @@ PUGI__NS_BEGIN
 				// either expression is a number or it contains position() call; sort by document order
 				if (_test != predicate_posinv) set.sort_do();
 
-				if (_test == predicate_constant || _test == predicate_constant_one)
-				{
-					apply_predicate_const(set, 0, _right, stack);
-				}
-				else
-				{
-					bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
+				bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
 
-					apply_predicate(set, 0, _right, stack, once);
-				}
+				apply_predicate(set, 0, stack, once);
 			
 				return set;
 			}
