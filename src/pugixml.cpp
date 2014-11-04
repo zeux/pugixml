@@ -685,7 +685,7 @@ PUGI__NS_BEGIN
 			flags |= modflags;
 		}
 
-		operator uintptr_t const() const
+		operator uintptr_t() const
 		{
 			return reinterpret_cast<uintptr_t>(get_page()) | flags;
 		}
@@ -750,7 +750,7 @@ PUGI__NS_BEGIN
 				_data = 0;
 		}
 
-		operator T* const() const
+		operator T*() const
 		{
 			if (_data)
 			{
@@ -769,7 +769,7 @@ PUGI__NS_BEGIN
 
 		T* operator->() const
 		{
-			return operator T* const();
+			return operator T*();
 		}
 
 	private:
@@ -827,7 +827,7 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		operator T* const() const
+		operator T*() const
 		{
 			int data = _data0 + (_data1 << 8);
 
@@ -850,7 +850,7 @@ PUGI__NS_BEGIN
 
 		T* operator->() const
 		{
-			return operator T* const();
+			return operator T*();
 		}
 
 	private:
@@ -900,7 +900,7 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		operator char_t* const() const
+		operator char_t*() const
 		{
 			unsigned int data = _data0 + (_data1 << 8) + (_data2 << 16);
 
