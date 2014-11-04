@@ -1091,6 +1091,19 @@ TEST_XML(dom_node_append_buffer_fragment, "<node />")
 	CHECK_NODE(doc, STR("<node>1234</node>"));
 }
 
+TEST_XML(dom_node_append_buffer_empty, "<node />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.append_buffer("", 0).status == status_no_document_element);
+	CHECK(node.append_buffer("", 0, parse_fragment).status == status_ok);
+
+	CHECK(node.append_buffer(0, 0).status == status_no_document_element);
+	CHECK(node.append_buffer(0, 0, parse_fragment).status == status_ok);
+
+	CHECK_NODE(doc, STR("<node />"));
+}
+
 TEST_XML(dom_node_prepend_move, "<node>foo<child/></node>")
 {
 	xml_node child = doc.child(STR("node")).child(STR("child"));
