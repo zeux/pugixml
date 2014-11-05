@@ -286,8 +286,6 @@ PUGI__NS_BEGIN
 	{
 		static xml_memory_page* construct(void* memory)
 		{
-			if (!memory) return 0; //$ redundant, left for performance
-
 			xml_memory_page* result = static_cast<xml_memory_page*>(memory);
 
 			result->allocator = 0;
@@ -2670,15 +2668,11 @@ PUGI__NS_BEGIN
 									a->name = s; // Save the offset.
 
 									PUGI__SCANWHILE_UNROLL(PUGI__IS_CHARTYPE(ss, ct_symbol)); // Scan for a terminator.
-									PUGI__CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
-
 									PUGI__ENDSEG(); // Save char in 'ch', terminate & step over.
-									PUGI__CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 									if (PUGI__IS_CHARTYPE(ch, ct_space))
 									{
 										PUGI__SKIPWS(); // Eat any whitespace.
-										PUGI__CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 										ch = *s;
 										++s;
