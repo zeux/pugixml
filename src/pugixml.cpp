@@ -5402,8 +5402,8 @@ namespace pugi
 
 		impl::xml_document_struct& doc = impl::get_document(_root);
 
-		const char_t* buffer = doc.buffer;
-		if (!buffer) return -1;
+		// we can determine the offset reliably only if there is exactly once parse buffer
+		if (!doc.buffer || doc.extra_buffers) return -1;
 
 		switch (type())
 		{
@@ -5413,13 +5413,13 @@ namespace pugi
 		case node_element:
 		case node_declaration:
 		case node_pi:
-			return (_root->header & impl::xml_memory_page_name_allocated_or_shared_mask) ? -1 : _root->name - buffer;
+			return _root->name && (_root->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0 ? _root->name - doc.buffer : -1;
 
 		case node_pcdata:
 		case node_cdata:
 		case node_comment:
 		case node_doctype:
-			return (_root->header & impl::xml_memory_page_value_allocated_or_shared_mask) ? -1 : _root->value - buffer;
+			return _root->value && (_root->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0 ? _root->value - doc.buffer : -1;
 
 		default:
 			return -1;
