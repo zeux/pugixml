@@ -400,6 +400,8 @@ PUGI__NS_BEGIN
 
 		char_t* allocate_string(size_t length)
 		{
+			PUGI__STATIC_ASSERT(xml_memory_page_size <= (1 << 16));
+
 			// allocate memory for string and header block
 			size_t size = sizeof(xml_memory_string_header) + length * sizeof(char_t);
 			
