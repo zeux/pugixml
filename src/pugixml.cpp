@@ -4792,11 +4792,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::root() const
 	{
-		if (!_root) return xml_node();
-
-		impl::xml_memory_page* page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
-
-		return xml_node(static_cast<impl::xml_document_struct*>(page->allocator));
+		return _root ? xml_node(&impl::get_document(_root)) : xml_node();
 	}
 
 	PUGI__FN xml_text xml_node::text() const
@@ -5191,8 +5187,7 @@ namespace pugi
 		if (!impl::allow_insert_child(type(), node_element)) return impl::make_parse_result(status_append_invalid_root);
 
 		// get document node
-		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(root()._root);
-		assert(doc);
+		impl::xml_document_struct* doc = &impl::get_document(_root);
 
 		// disable document_buffer_order optimization since in a document with multiple buffers comparing buffer pointers does not make sense
 		doc->header |= impl::xml_memory_page_contents_shared_mask;
@@ -5403,12 +5398,11 @@ namespace pugi
 
 	PUGI__FN ptrdiff_t xml_node::offset_debug() const
 	{
-		xml_node_struct* r = root()._root;
+		if (!_root) return -1;
 
-		if (!r) return -1;
+		impl::xml_document_struct& doc = impl::get_document(_root);
 
-		const char_t* buffer = static_cast<impl::xml_document_struct*>(r)->buffer;
-
+		const char_t* buffer = doc.buffer;
 		if (!buffer) return -1;
 
 		switch (type())
