@@ -667,6 +667,8 @@ PUGI__NS_BEGIN
 	public:
 		compact_header(xml_memory_page* page, unsigned int flags)
 		{
+			PUGI__STATIC_ASSERT(sizeof(xml_memory_page) + xml_memory_page_size <= (1 << (16 + compact_alignment_log2)));
+
 			ptrdiff_t page_offset = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(page)) >> compact_alignment_log2;
 			assert(page_offset >= 0 && page_offset < (1 << 16));
 
