@@ -1310,6 +1310,11 @@ TEST(dom_node_copy_copyless)
 	// the document is parsed in-place so there should only be 1 page worth of allocations
 	test_runner::_memory_fail_threshold = 32768 + 128;
 
+#ifdef PUGIXML_COMPACT
+	// ... and some space for hash table
+	test_runner::_memory_fail_threshold += 2048;
+#endif
+
 	xml_document doc;
 	CHECK(doc.load_buffer_inplace(&datacopy[0], datacopy.size() * sizeof(char_t), parse_full));
 
