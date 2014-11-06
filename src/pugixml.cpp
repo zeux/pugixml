@@ -972,6 +972,19 @@ namespace pugi
 
 		impl::compact_pointer<xml_attribute_struct, 11, 0>	first_attribute;		///< First attribute
 	};
+
+	struct xml_node_pi_struct: xml_node_struct
+	{
+		xml_node_pi_struct(impl::xml_memory_page* page): xml_node_struct(page, node_pi), pi_header(page, 0)
+		{
+			PUGI__STATIC_ASSERT(sizeof(xml_node_pi_struct) == 20);
+		}
+
+		impl::compact_header pi_header;
+		impl::compact_string<3> pi_value;
+
+		unsigned char padding[2];
+	};
 }
 #else
 namespace pugi
@@ -1014,6 +1027,16 @@ namespace pugi
 		xml_node_struct*		next_sibling;			///< Right brother
 		
 		xml_attribute_struct*	first_attribute;		///< First attribute
+	};
+
+	struct xml_node_pi_struct: xml_node_struct
+	{
+		xml_node_pi_struct(impl::xml_memory_page* page): xml_node_struct(page, node_pi), pi_header(reinterpret_cast<uintptr_t>(page)), pi_value(0)
+		{
+		}
+
+		uintptr_t pi_header;
+		char_t* pi_value;
 	};
 }
 #endif
@@ -1070,10 +1093,20 @@ PUGI__NS_BEGIN
 
 	inline xml_node_struct* allocate_node(xml_allocator& alloc, xml_node_type type)
 	{
-		xml_memory_page* page;
-		void* memory = alloc.allocate_memory(sizeof(xml_node_struct), page);
+		if (type != node_pi)
+		{
+			xml_memory_page* page;
+			void* memory = alloc.allocate_memory(sizeof(xml_node_struct), page);
 
-		return new (memory) xml_node_struct(page, type);
+			return new (memory) xml_node_struct(page, type);
+		}
+		else
+		{
+			xml_memory_page* page;
+			void* memory = alloc.allocate_memory(sizeof(xml_node_pi_struct), page);
+
+			return new (memory) xml_node_pi_struct(page);
+		}
 	}
 
 	inline void destroy_attribute(xml_attribute_struct* a, xml_allocator& alloc)
@@ -3097,7 +3130,8 @@ PUGI__NS_BEGIN
 					else
 					{
 						// store value and step over >
-						// TODO: node_pi value:cursor->value = value;
+						static_cast<xml_node_pi_struct*>(cursor)->pi_value = value;
+
 						PUGI__POPNODE();
 
 						PUGI__ENDSEG();
@@ -4060,10 +4094,10 @@ PUGI__NS_BEGIN
 				writer.write('<', '?');
 				writer.write_string(node->contents ? node->contents : default_name);
 
-				if (node->contents)
+				if (static_cast<xml_node_pi_struct*>(node)->pi_value)
 				{
 					writer.write(' ');
-					writer.write_string(node->contents);
+					writer.write_string(static_cast<xml_node_pi_struct*>(node)->pi_value);
 				}
 
 				writer.write('?', '>');
@@ -4234,6 +4268,14 @@ PUGI__NS_BEGIN
 	PUGI__FN void node_copy_contents(xml_node_struct* dn, xml_node_struct* sn, xml_allocator* shared_alloc)
 	{
 		node_copy_string(dn->contents, dn->header, xml_memory_page_contents_allocated_mask, sn->contents, sn->header, shared_alloc);
+
+		if (PUGI__NODETYPE(dn) == node_pi)
+		{
+			xml_node_pi_struct* dnp = static_cast<xml_node_pi_struct*>(dn);
+			xml_node_pi_struct* snp = static_cast<xml_node_pi_struct*>(sn);
+
+			node_copy_string(dnp->pi_value, dnp->pi_header, xml_memory_page_contents_allocated_mask, snp->pi_value, snp->pi_header, shared_alloc);
+		}
 
 		for (xml_attribute_struct* sa = sn->first_attribute; sa; sa = sa->next_attribute)
 		{
@@ -5251,7 +5293,16 @@ namespace pugi
 	
 	PUGI__FN const char_t* xml_node::value() const
 	{
-		return (_root && impl::has_value(_root) && _root->contents) ? _root->contents + 0 : PUGIXML_TEXT("");
+		if (_root)
+		{
+			if (impl::has_value(_root) && _root->contents)
+				return _root->contents;
+
+			if (PUGI__NODETYPE(_root) == node_pi && static_cast<xml_node_pi_struct*>(_root)->pi_value)
+				return static_cast<xml_node_pi_struct*>(_root)->pi_value;
+		}
+
+		return PUGIXML_TEXT("");
 	}
 	
 	PUGI__FN xml_node xml_node::child(const char_t* name_) const
@@ -5382,6 +5433,12 @@ namespace pugi
 		switch (type())
 		{
 		case node_pi:
+		{
+			xml_node_pi_struct* pn = static_cast<xml_node_pi_struct*>(_root);
+
+			return impl::strcpy_insitu(pn->pi_value, pn->pi_header, impl::xml_memory_page_contents_allocated_mask, rhs);
+		}
+
 		case node_cdata:
 		case node_pcdata:
 		case node_comment:
