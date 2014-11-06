@@ -4035,7 +4035,7 @@ PUGI__NS_BEGIN
 			{
 				writer.write('>');
 
-				const char_t* value = first->contents ? first->contents : PUGIXML_TEXT("");
+				const char_t* value = first->contents ? first->contents + 0 : PUGIXML_TEXT("");
 
 				if (PUGI__NODETYPE(first) == node_pcdata)
 					text_output(writer, value, ctx_special_pcdata, flags);
@@ -4078,17 +4078,17 @@ PUGI__NS_BEGIN
 		switch (PUGI__NODETYPE(node))
 		{
 			case node_pcdata:
-				text_output(writer, node->contents ? node->contents : PUGIXML_TEXT(""), ctx_special_pcdata, flags);
+				text_output(writer, node->contents ? node->contents + 0 : PUGIXML_TEXT(""), ctx_special_pcdata, flags);
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_cdata:
-				text_output_cdata(writer, node->contents ? node->contents : PUGIXML_TEXT(""));
+				text_output_cdata(writer, node->contents ? node->contents + 0 : PUGIXML_TEXT(""));
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_comment:
-				node_output_comment(writer, node->contents ? node->contents : PUGIXML_TEXT(""));
+				node_output_comment(writer, node->contents ? node->contents + 0 : PUGIXML_TEXT(""));
 				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
