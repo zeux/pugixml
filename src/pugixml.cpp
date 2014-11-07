@@ -9025,13 +9025,13 @@ PUGI__NS_BEGIN
 					if (axis != axis_self && size != 0) ns.set_type(xpath_node_set::type_unsorted);
 					
 					step_fill(ns, *it, stack.result, once, v);
-					apply_predicates(ns, size, stack, eval);
+					if (_right) apply_predicates(ns, size, stack, eval);
 				}
 			}
 			else
 			{
 				step_fill(ns, c.n, stack.result, once, v);
-				apply_predicates(ns, 0, stack, eval);
+				if (_right) apply_predicates(ns, 0, stack, eval);
 			}
 
 			// child, attribute and self axes always generate unique set of nodes
