@@ -426,8 +426,6 @@ PUGI__NS_BEGIN
 	{
 		static xml_memory_page* construct(void* memory)
 		{
-			if (!memory) return 0; //$ redundant, left for performance
-
 			xml_memory_page* result = static_cast<xml_memory_page*>(memory);
 
 			result->allocator = 0;
@@ -555,6 +553,8 @@ PUGI__NS_BEGIN
 
 		char_t* allocate_string(size_t length)
 		{
+			PUGI__STATIC_ASSERT(xml_memory_page_size <= (1 << 16));
+
 			// allocate memory for string and header block
 			size_t size = sizeof(xml_memory_string_header) + length * sizeof(char_t);
 			
@@ -3202,15 +3202,11 @@ PUGI__NS_BEGIN
 									a->name = s; // Save the offset.
 
 									PUGI__SCANWHILE_UNROLL(PUGI__IS_CHARTYPE(ss, ct_symbol)); // Scan for a terminator.
-									PUGI__CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
-
 									PUGI__ENDSEG(); // Save char in 'ch', terminate & step over.
-									PUGI__CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 									if (PUGI__IS_CHARTYPE(ch, ct_space))
 									{
 										PUGI__SKIPWS(); // Eat any whitespace.
-										PUGI__CHECK_ERROR(status_bad_attribute, s); //$ redundant, left for performance
 
 										ch = *s;
 										++s;
@@ -5368,11 +5364,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::root() const
 	{
-		if (!_root) return xml_node();
-
-		impl::xml_memory_page* page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
-
-		return xml_node(static_cast<impl::xml_document_struct*>(page->allocator));
+		return _root ? xml_node(&impl::get_document(_root)) : xml_node();
 	}
 
 	PUGI__FN xml_text xml_node::text() const
@@ -5815,8 +5807,7 @@ namespace pugi
 		if (!impl::allow_insert_child(type(), node_element)) return impl::make_parse_result(status_append_invalid_root);
 
 		// get document node
-		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(root()._root);
-		assert(doc);
+		impl::xml_document_struct* doc = &impl::get_document(_root);
 
 		// disable document_buffer_order optimization since in a document with multiple buffers comparing buffer pointers does not make sense
 		doc->header |= impl::xml_memory_page_contents_shared_mask;
@@ -6027,22 +6018,17 @@ namespace pugi
 
 	PUGI__FN ptrdiff_t xml_node::offset_debug() const
 	{
-		xml_node_struct* r = root()._root;
+		if (!_root) return -1;
 
-		if (!r) return -1;
+		impl::xml_document_struct& doc = impl::get_document(_root);
 
-		const char_t* buffer = static_cast<impl::xml_document_struct*>(r)->buffer;
+		// we can determine the offset reliably only if there is exactly once parse buffer
+		if (!doc.buffer || doc.extra_buffers) return -1;
 
-		if (!buffer) return -1;
+		// document node always has an offset of 0
+		if (_root == &doc) return 0;
 
-		switch (type())
-		{
-		case node_document:
-			return 0;
-
-		default:
-			return (_root->header & impl::xml_memory_page_contents_allocated_or_shared_mask) ? -1 : _root->contents - buffer;
-		}
+		return _root->contents && (_root->header & impl::xml_memory_page_contents_allocated_or_shared_mask) == 0 ? _root->contents - doc.buffer : -1;
 	}
 
 #ifdef __BORLANDC__
@@ -8355,26 +8341,14 @@ PUGI__NS_BEGIN
 			return xpath_first(_begin, _end, _type);
 		}
 
+		void push_back_grow(const xpath_node& node, xpath_allocator* alloc);
+
 		void push_back(const xpath_node& node, xpath_allocator* alloc)
 		{
-			if (_end == _eos)
-			{
-				size_t capacity = static_cast<size_t>(_eos - _begin);
-
-				// get new capacity (1.5x rule)
-				size_t new_capacity = capacity + capacity / 2 + 1;
-
-				// reallocate the old array or allocate a new one
-				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
-				assert(data);
-
-				// finalize
-				_begin = data;
-				_end = data + capacity;
-				_eos = data + new_capacity;
-			}
-
-			*_end++ = node;
+			if (_end != _eos)
+				*_end++ = node;
+			else
+				push_back_grow(node, alloc);
 		}
 
 		void append(const xpath_node* begin_, const xpath_node* end_, xpath_allocator* alloc)
@@ -8431,6 +8405,26 @@ PUGI__NS_BEGIN
 			_type = value;
 		}
 	};
+
+	PUGI__FN_NO_INLINE void xpath_node_set_raw::push_back_grow(const xpath_node& node, xpath_allocator* alloc)
+	{
+		size_t capacity = static_cast<size_t>(_eos - _begin);
+
+		// get new capacity (1.5x rule)
+		size_t new_capacity = capacity + capacity / 2 + 1;
+
+		// reallocate the old array or allocate a new one
+		xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
+		assert(data);
+
+		// finalize
+		_begin = data;
+		_end = data + capacity;
+		_eos = data + new_capacity;
+
+		// push
+		*_end++ = node;
+	}
 PUGI__NS_END
 
 PUGI__NS_BEGIN
@@ -9646,13 +9640,13 @@ PUGI__NS_BEGIN
 					if (axis != axis_self && size != 0) ns.set_type(xpath_node_set::type_unsorted);
 					
 					step_fill(ns, *it, stack.result, once, v);
-					apply_predicates(ns, size, stack, eval);
+					if (_right) apply_predicates(ns, size, stack, eval);
 				}
 			}
 			else
 			{
 				step_fill(ns, c.n, stack.result, once, v);
-				apply_predicates(ns, 0, stack, eval);
+				if (_right) apply_predicates(ns, 0, stack, eval);
 			}
 
 			// child, attribute and self axes always generate unique set of nodes

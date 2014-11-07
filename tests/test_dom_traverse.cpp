@@ -924,6 +924,43 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><!DOCTYPE><?pi?><!--comment--><node>pcd
 	CHECK((cit++)->offset_debug() == 58);
 }
 
+TEST(dom_offset_debug_encoding)
+{
+	char buf[] = { 0, '<', 0, 'n', 0, '/', 0, '>' };
+
+	xml_document doc;
+	CHECK(doc.load_buffer(buf, sizeof(buf)));
+
+	CHECK(doc.offset_debug() == 0);
+	CHECK(doc.first_child().offset_debug() == 1);
+}
+
+TEST_XML(dom_offset_debug_append, "<node/>")
+{
+	xml_node c1 = doc.first_child();
+	xml_node c2 = doc.append_child(STR("node"));
+	xml_node c3 = doc.append_child(node_pcdata);
+
+	CHECK(doc.offset_debug() == 0);
+	CHECK(c1.offset_debug() == 1);
+	CHECK(c2.offset_debug() == -1);
+	CHECK(c3.offset_debug() == -1);
+
+	c1.set_name(STR("nodenode"));
+	CHECK(c1.offset_debug() == -1);
+}
+
+TEST_XML(dom_offset_debug_append_buffer, "<node/>")
+{
+	CHECK(doc.offset_debug() == 0);
+	CHECK(doc.first_child().offset_debug() == 1);
+
+	CHECK(doc.append_buffer("<node/>", 7));
+	CHECK(doc.offset_debug() == -1);
+	CHECK(doc.first_child().offset_debug() == -1);
+	CHECK(doc.last_child().offset_debug() == -1);
+}
+
 TEST_XML(dom_internal_object, "<node attr='value'>value</node>")
 {
 	xml_node node = doc.child(STR("node"));
