@@ -7734,26 +7734,14 @@ PUGI__NS_BEGIN
 			return xpath_first(_begin, _end, _type);
 		}
 
+		void push_back_grow(const xpath_node& node, xpath_allocator* alloc);
+
 		void push_back(const xpath_node& node, xpath_allocator* alloc)
 		{
-			if (_end == _eos)
-			{
-				size_t capacity = static_cast<size_t>(_eos - _begin);
-
-				// get new capacity (1.5x rule)
-				size_t new_capacity = capacity + capacity / 2 + 1;
-
-				// reallocate the old array or allocate a new one
-				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
-				assert(data);
-
-				// finalize
-				_begin = data;
-				_end = data + capacity;
-				_eos = data + new_capacity;
-			}
-
-			*_end++ = node;
+			if (_end != _eos)
+				*_end++ = node;
+			else
+				push_back_grow(node, alloc);
 		}
 
 		void append(const xpath_node* begin_, const xpath_node* end_, xpath_allocator* alloc)
@@ -7810,6 +7798,26 @@ PUGI__NS_BEGIN
 			_type = value;
 		}
 	};
+
+	PUGI__FN_NO_INLINE void xpath_node_set_raw::push_back_grow(const xpath_node& node, xpath_allocator* alloc)
+	{
+		size_t capacity = static_cast<size_t>(_eos - _begin);
+
+		// get new capacity (1.5x rule)
+		size_t new_capacity = capacity + capacity / 2 + 1;
+
+		// reallocate the old array or allocate a new one
+		xpath_node* data = static_cast<xpath_node*>(alloc->reallocate(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
+		assert(data);
+
+		// finalize
+		_begin = data;
+		_end = data + capacity;
+		_eos = data + new_capacity;
+
+		// push
+		*_end++ = node;
+	}
 PUGI__NS_END
 
 PUGI__NS_BEGIN
