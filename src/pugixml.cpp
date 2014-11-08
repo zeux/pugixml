@@ -407,13 +407,19 @@ PUGI__NS_BEGIN
 	#endif
 		;
 
-	static const uintptr_t xml_memory_page_alignment = 64;
+	static const uintptr_t xml_memory_page_alignment = 32;
 	static const uintptr_t xml_memory_page_pointer_mask = ~(xml_memory_page_alignment - 1);
-	static const uintptr_t xml_memory_page_contents_shared_mask = 32;
-	static const uintptr_t xml_memory_page_contents_allocated_mask = 16;
-	static const uintptr_t xml_memory_page_name_allocated_mask = 16;
-	static const uintptr_t xml_memory_page_value_allocated_mask = 8;
+
+	// extra metadata bits for xml_node_struct
+	static const uintptr_t xml_memory_page_contents_shared_mask = 16;
+	static const uintptr_t xml_memory_page_contents_allocated_mask = 8;
 	static const uintptr_t xml_memory_page_type_mask = 7;
+
+	// extra metadata bits for xml_attribute_struct
+	static const uintptr_t xml_memory_page_name_allocated_mask = 2;
+	static const uintptr_t xml_memory_page_value_allocated_mask = 1;
+
+	// combined masks for string uniqueness
 	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_contents_allocated_or_shared_mask = xml_memory_page_contents_allocated_mask | xml_memory_page_contents_shared_mask;
