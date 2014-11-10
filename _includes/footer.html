@@ -4,16 +4,34 @@
 			<p><small>Hosted on GitHub &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
 		</footer>
 	</div>
-	<script src="/javascripts/scale.fix.js"></script>
 	<script type="text/javascript">
-		var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-		document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+		// scale.fix.js
+		var metas = document.getElementsByTagName('meta');
+		var i;
+		if (navigator.userAgent.match(/iPhone/i)) {
+			for (i=0; i<metas.length; i++) {
+				if (metas[i].name == "viewport") {
+					metas[i].content = "width=device-width, minimum-scale=1.0, maximum-scale=1.0";
+				}
+			}
+			document.addEventListener("gesturestart", gestureStart, false);
+		}
+		function gestureStart() {
+			for (i=0; i<metas.length; i++) {
+				if (metas[i].name == "viewport") {
+					metas[i].content = "width=device-width, minimum-scale=0.25, maximum-scale=1.6";
+				}
+			}
+		}
 	</script>
 	<script type="text/javascript">
-		try {
-			var pageTracker = _gat._getTracker("UA-954596-3");
-			pageTracker._trackPageview();
-		} catch(err) {}
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-954596-3', 'auto');
+		ga('send', 'pageview');
 	</script>
 </body>
 </html>
