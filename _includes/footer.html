@@ -32,6 +32,10 @@
 
 		ga('create', 'UA-954596-3', 'auto');
 		ga('send', 'pageview');
+
+		function trackDownload(name) {
+			ga('send', 'event', 'download', 'click', name);
+		}
 	</script>
 </body>
 </html>
