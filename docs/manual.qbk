@@ -99,7 +99,7 @@ pugixml is Copyright (C) 2006-2014 Arseny Kapoulkine.
 
 [section:getting Getting pugixml]
 
-pugixml is distributed in source form. You can either download a source distribution or checkout the Subversion repository.
+pugixml is distributed in source form. You can either download a source distribution or clone the Git repository.
 
 [section:source Source distributions]
 
@@ -112,33 +112,35 @@ You can download the latest source distribution via one of the following links:
 
 The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
 
-If you need an older version, you can download it from the [@http://code.google.com/p/pugixml/downloads/list version archive].
+If you need an older version, you can download it from the [@https://github.com/zeux/pugixml/releases version archive].
 
 [endsect] [/source]
 
-[section:subversion Subversion repository]
+[section:git Git repository]
 
-The Subversion repository is located at [@http://pugixml.googlecode.com/svn/]. There is a Subversion tag "release-{version}" for each version; also there is the "latest" tag, which always points to the latest stable release.
+The Git repository is located at [@https://github.com/zeux/pugixml/]. There is a Git tag "v{version}" for each version; also there is the "latest" tag, which always points to the latest stable release.
 
 For example, to checkout the current version, you can use this command:
 
-[pre svn checkout http://pugixml.googlecode.com/svn/tags/release-1.4 pugixml]
-
-To checkout the latest version, you can use this command:
-
-[pre svn checkout http://pugixml.googlecode.com/svn/tags/latest pugixml]
+[pre
+git clone https://github.com/zeux/pugixml
+cd pugixml
+git checkout v1.4
+]
 
 The repository contains library source, documentation, code examples and full unit test suite.
 
-Use latest version tag if you want to automatically get new versions via =svn update=. Use other tags if you want to switch to new versions only explicitly (for example, using =svn switch= command). Also please note that Subversion trunk contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from trunk without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
-
-[endsect] [/subversion]
-
-[section:git Git repository]
-
-The Subversion repository is mirrored by a Git repository at [@https://github.com/zeux/pugixml]. The mirror is frequently updated and has the same structure in terms of tags and contents as Subversion repository.
+Use latest version tag if you want to automatically get new versions. Use other tags if you want to switch to new versions only explicitly. Also please note that the master branch contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from master without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
 
 [endsect] [/git]
+
+[section:subversion Subversion repository]
+
+You can access the Git repository via Subversion using [@https://github.com/zeux/pugixml] URL. For example, to checkout the current version, you can use this command:
+
+[pre svn checkout https://github.com/zeux/pugixml/tags/v1.4 pugixml]
+
+[endsect] [/subversion]
 
 [endsect] [/getting]
 
