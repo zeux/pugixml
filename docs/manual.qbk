@@ -1,7 +1,7 @@
 [book pugixml
     [quickbook 1.5]
 
-    [version 1.4]
+    [version 1.5]
     [id manual]
     [copyright 2014 Arseny Kapoulkine]
     [license Distributed under the MIT License]
@@ -106,8 +106,8 @@ pugixml is distributed in source form. You can either download a source distribu
 You can download the latest source distribution via one of the following links:
 
 [pre
-[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.zip]
-[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.tar.gz]
+[@https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.zip]
+[@https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.tar.gz]
 ]
 
 The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
@@ -125,7 +125,7 @@ For example, to checkout the current version, you can use this command:
 [pre
 git clone https://github.com/zeux/pugixml
 cd pugixml
-git checkout v1.4
+git checkout v1.5
 ]
 
 The repository contains library source, documentation, code examples and full unit test suite.
@@ -138,7 +138,7 @@ Use latest version tag if you want to automatically get new versions. Use other 
 
 You can access the Git repository via Subversion using [@https://github.com/zeux/pugixml] URL. For example, to checkout the current version, you can use this command:
 
-[pre svn checkout https://github.com/zeux/pugixml/tags/v1.4 pugixml]
+[pre svn checkout https://github.com/zeux/pugixml/tags/v1.5 pugixml]
 
 [endsect] [/subversion]
 

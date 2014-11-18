@@ -22,7 +22,7 @@ else()
     add_library(pugixml STATIC ${SOURCES})
 endif()
 
-set_target_properties(pugixml PROPERTIES VERSION 1.4 SOVERSION 1)
+set_target_properties(pugixml PROPERTIES VERSION 1.5 SOVERSION 1)
 
 install(TARGETS pugixml EXPORT pugixml-config 
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
