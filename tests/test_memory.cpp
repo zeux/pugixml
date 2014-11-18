@@ -39,7 +39,7 @@ TEST(memory_custom_memory_management)
 
 		CHECK(allocate_count == 0 && deallocate_count == 0);
 
-		CHECK(doc.load(STR("<node />")));
+		CHECK(doc.load_string(STR("<node />")));
 	
 		CHECK(allocate_count == 2 && deallocate_count == 0);
 

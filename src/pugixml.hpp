@@ -959,8 +959,11 @@ namespace pugi
 		xml_parse_result load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options = parse_default);
 	#endif
 
-		// Load document from zero-terminated string. No encoding conversions are applied.
+		// (deprecated: use load_string instead) Load document from zero-terminated string. No encoding conversions are applied.
 		xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
+
+		// Load document from zero-terminated string. No encoding conversions are applied.
+		xml_parse_result load_string(const char_t* contents, unsigned int options = parse_default);
 
 		// Load document from file
 		xml_parse_result load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);

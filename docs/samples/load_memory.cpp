@@ -55,7 +55,7 @@ int main()
     {
     //[code_load_memory_string
         // You can use load to load document from null-terminated strings, for example literals:
-        pugi::xml_parse_result result = doc.load("<mesh name='sphere'><bounds>0 0 1 1</bounds></mesh>");
+        pugi::xml_parse_result result = doc.load_string("<mesh name='sphere'><bounds>0 0 1 1</bounds></mesh>");
     //]
 
         std::cout << "Load result: " << result.description() << ", mesh name: " << doc.child("mesh").attribute("name").value() << std::endl;

@@ -602,7 +602,7 @@ The best way from the performance/memory point of view is to load document using
 [#xml_document::load_string]
 There is also a simple helper function for cases when you want to load the XML document from null-terminated character string:
 
-    xml_parse_result xml_document::load(const char_t* contents, unsigned int options = parse_default);
+    xml_parse_result xml_document::load_string(const char_t* contents, unsigned int options = parse_default);
 
 It is equivalent to calling `load_buffer` with `size` being either `strlen(contents)` or `wcslen(contents) * sizeof(wchar_t)`, depending on the character type. This function assumes native encoding for input data, so it does not do any encoding conversion. In general, this function is fine for loading small documents from string literals, but has more overhead and less functionality than the buffer loading functions.
 
@@ -2503,7 +2503,7 @@ Classes:
     * `xml_parse_result `[link xml_document::load_stream load]`(std::wistream& stream, unsigned int options = parse_default);`
     [lbr]
 
-    * `xml_parse_result `[link xml_document::load_string load]`(const char_t* contents, unsigned int options = parse_default);`
+    * `xml_parse_result `[link xml_document::load_string load_string]`(const char_t* contents, unsigned int options = parse_default);`
     [lbr]
 
     * `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`

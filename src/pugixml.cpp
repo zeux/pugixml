@@ -5995,7 +5995,7 @@ namespace pugi
 	}
 #endif
 
-	PUGI__FN xml_parse_result xml_document::load(const char_t* contents, unsigned int options)
+	PUGI__FN xml_parse_result xml_document::load_string(const char_t* contents, unsigned int options)
 	{
 		// Force native encoding (skip autodetection)
 	#ifdef PUGIXML_WCHAR_MODE
@@ -6005,6 +6005,11 @@ namespace pugi
 	#endif
 
 		return load_buffer(contents, impl::strlength(contents) * sizeof(char_t), options, encoding);
+	}
+
+	PUGI__FN xml_parse_result xml_document::load(const char_t* contents, unsigned int options)
+	{
+		return load_string(contents, options);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load_file(const char* path_, unsigned int options, xml_encoding encoding)

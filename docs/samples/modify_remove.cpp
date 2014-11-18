@@ -5,7 +5,7 @@
 int main()
 {
     pugi::xml_document doc;
-    if (!doc.load("<node><description>Simple node</description><param name='id' value='123'/></node>")) return -1;
+    if (!doc.load_string("<node><description>Simple node</description><param name='id' value='123'/></node>")) return -1;
 
     //[code_modify_remove
     // remove description node with the whole subtree

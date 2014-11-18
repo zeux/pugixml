@@ -13,7 +13,7 @@
 static void load_document_copy(xml_document& doc, const char_t* text)
 {
 	xml_document source;
-	CHECK(source.load(text));
+	CHECK(source.load_string(text));
 
 	doc.append_copy(source.first_child());
 }
@@ -551,10 +551,10 @@ TEST_XML(xpath_sort_append_buffer, "<node /><node />")
 TEST(xpath_sort_crossdoc)
 {
 	xml_document doc1;
-	CHECK(doc1.load(STR("<node />")));
+	CHECK(doc1.load_string(STR("<node />")));
 
 	xml_document doc2;
-	CHECK(doc2.load(STR("<node />")));
+	CHECK(doc2.load_string(STR("<node />")));
 
 	xpath_node_set ns1 = doc1.select_nodes(STR("*"));
 	CHECK(ns1.size() == 1);

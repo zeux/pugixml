@@ -6,7 +6,7 @@
 int main()
 {
     pugi::xml_document doc;
-    if (!doc.load("<node id='123'>text</node><!-- comment -->", pugi::parse_default | pugi::parse_comments)) return -1;
+    if (!doc.load_string("<node id='123'>text</node><!-- comment -->", pugi::parse_default | pugi::parse_comments)) return -1;
 
     //[code_modify_base_node
     pugi::xml_node node = doc.child("node");
