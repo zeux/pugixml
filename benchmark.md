@@ -48,32 +48,25 @@ Benchmark results are visualized using [Google Charts](https://developers.google
 		bfiles[file] = file
 	}
 
-	function drawChartRatio(bd, chartid, logscale) {
+	function drawChartRatio(bd, chartid, haxis) {
 		var data = new google.visualization.DataTable()
 		
 		data.addColumn('string', 'parser')
-		data.addColumn('number', 'ratio')
 	
 		for (var file in bfiles) {
-			data.addColumn({id: file, type: 'number', role: 'interval'})
+			data.addColumn('number', file)
 		}
 
 		for (var parser in bd) {
-			var row = []
-
-			var sum = 0
-			var sumw = 0
+			var row = [parser]
 
 			for (var file in bfiles) {
 				var ratio = bd[parser][file] / bd['pugixml'][file]
 
 				row.push(ratio)
-
-				sum += ratio
-				sumw += 1
 			}
 
-			data.addRow([parser, sum / sumw].concat(row))
+			data.addRow(row)
 		}
 
 		var chartdiv = document.getElementById(chartid)
@@ -82,10 +75,10 @@ Benchmark results are visualized using [Google Charts](https://developers.google
 			legend: 'none',
 			orientation: 'vertical',
 			title: chartdiv.innerHTML,
-            lineWidth: 0,
-            chartArea: {width: '65%', height: '90%'},
-            intervals: { style: 'points', pointSize: 5 },
-            hAxis: { logScale: true }
+			lineWidth: 0,
+			pointSize: 5,
+			chartArea: {width: '65%', height: '90%'},
+			hAxis: haxis
 		};
 
 		var chart = new google.visualization.LineChart(chartdiv)
@@ -98,9 +91,21 @@ Benchmark results are visualized using [Google Charts](https://developers.google
 	google.setOnLoadCallback(function () {
 		benchmark(benchmark_data)
 
-		drawChartRatio(bdata.speed.x86, 'chart_speed_x86')
-		drawChartRatio(bdata.memory.x86, 'chart_memory_x86')
-		drawChartRatio(bdata.speed.x64, 'chart_speed_x64')
-		drawChartRatio(bdata.memory.x64, 'chart_memory_x64')
+		var hAxisSpeed = {
+			logScale: true,
+			minValue: 0.75,
+			ticks: [1, 3, 9, 27, 81]
+		}
+
+		var hAxisMemory = {
+			logScale: true,
+			minValue: 0.25,
+			ticks: [0.5, 1, 2, 4, 8]
+		}
+
+		drawChartRatio(bdata.speed.x86, 'chart_speed_x86', hAxisSpeed)
+		drawChartRatio(bdata.memory.x86, 'chart_memory_x86', hAxisMemory)
+		drawChartRatio(bdata.speed.x64, 'chart_speed_x64', hAxisSpeed)
+		drawChartRatio(bdata.memory.x64, 'chart_memory_x64', hAxisMemory)
 	})
 </script>
