@@ -4,15 +4,15 @@
 <title>Modifying document data</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
-<link rel="home" href="../manual.html" title="pugixml 1.4">
-<link rel="up" href="../manual.html" title="pugixml 1.4">
+<link rel="home" href="../manual.html" title="pugixml 1.5">
+<link rel="up" href="../manual.html" title="pugixml 1.5">
 <link rel="prev" href="access.html" title="Accessing document data">
 <link rel="next" href="saving.html" title="Saving document">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.4</a> manual |
+<a href="http://pugixml.org/">pugixml 1.5</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -28,16 +28,17 @@
 <hr>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="manual.modify"></a><a class="link" href="modify.html" title="Modifying document data">Modifying document data</a>
+<a name="manual.modify"></a><a class="link" href="modify.html" title="Modifying document data"> Modifying document data</a>
 </h2></div></div></div>
 <div class="toc"><dl class="toc">
-<dt><span class="section"><a href="modify.html#manual.modify.nodedata">Setting node data</a></span></dt>
-<dt><span class="section"><a href="modify.html#manual.modify.attrdata">Setting attribute data</a></span></dt>
-<dt><span class="section"><a href="modify.html#manual.modify.add">Adding nodes/attributes</a></span></dt>
-<dt><span class="section"><a href="modify.html#manual.modify.remove">Removing nodes/attributes</a></span></dt>
-<dt><span class="section"><a href="modify.html#manual.modify.text">Working with text contents</a></span></dt>
-<dt><span class="section"><a href="modify.html#manual.modify.clone">Cloning nodes/attributes</a></span></dt>
-<dt><span class="section"><a href="modify.html#manual.modify.fragments">Assembling document from fragments</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.nodedata"> Setting node data</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.attrdata"> Setting attribute data</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.add"> Adding nodes/attributes</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.remove"> Removing nodes/attributes</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.text"> Working with text contents</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.clone"> Cloning nodes/attributes</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.move"> Moving nodes</a></span></dt>
+<dt><span class="section"><a href="modify.html#manual.modify.fragments"> Assembling document from fragments</a></span></dt>
 </dl></div>
 <p>
       The document in pugixml is fully mutable: you can completely change the document
@@ -61,12 +62,11 @@
     </p>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.modify.nodedata"></a><a class="link" href="modify.html#manual.modify.nodedata" title="Setting node data">Setting node data</a>
+<a name="manual.modify.nodedata"></a><a class="link" href="modify.html#manual.modify.nodedata" title="Setting node data"> Setting node data</a>
 </h3></div></div></div>
-<p>
-        <a name="xml_node::set_name"></a><a name="xml_node::set_value"></a>As discussed
-        before, nodes can have name and value, both of which are strings. Depending
-        on node type, name or value may be absent. <a class="link" href="dom.html#node_document">node_document</a>
+<a name="xml_node::set_name"></a><a name="xml_node::set_value"></a><p>
+        As discussed before, nodes can have name and value, both of which are strings.
+        Depending on node type, name or value may be absent. <a class="link" href="dom.html#node_document">node_document</a>
         nodes do not have a name or value, <a class="link" href="dom.html#node_element">node_element</a>
         and <a class="link" href="dom.html#node_declaration">node_declaration</a> nodes always
         have a name but never have a value, <a class="link" href="dom.html#node_pcdata">node_pcdata</a>,
@@ -98,31 +98,31 @@
         This is an example of setting node name and value (<a href="../samples/modify_base.cpp" target="_top">samples/modify_base.cpp</a>):
       </p>
 <p>
+        
 </p>
 <pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 
-<span class="comment">// change node name</span>
-<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"notnode"</span><span class="special">);</span>
+<span class="comment">// change node name
+</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"notnode"</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">", new node name: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">name</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// change comment text</span>
-<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"useless comment"</span><span class="special">);</span>
+<span class="comment">// change comment text
+</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"useless comment"</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">", new comment text: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// we can't change value of the element or name of the comment</span>
-<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"1"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"2"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+<span class="comment">// we can't change value of the element or name of the comment
+</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"1"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">last_child</span><span class="special">().</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"2"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 </pre>
 <p>
       </p>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.modify.attrdata"></a><a class="link" href="modify.html#manual.modify.attrdata" title="Setting attribute data">Setting attribute data</a>
+<a name="manual.modify.attrdata"></a><a class="link" href="modify.html#manual.modify.attrdata" title="Setting attribute data"> Setting attribute data</a>
 </h3></div></div></div>
-<p>
-        <a name="xml_attribute::set_name"></a><a name="xml_attribute::set_value"></a>All
-        attributes have name and value, both of which are strings (value may be empty).
-        You can set them with the following functions:
+<a name="xml_attribute::set_name"></a><a name="xml_attribute::set_value"></a><p>
+        All attributes have name and value, both of which are strings (value may
+        be empty). You can set them with the following functions:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_name</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -177,8 +177,8 @@
           including string conversions.
         </p></td></tr>
 </table></div>
-<p>
-        <a name="xml_attribute::assign"></a>For convenience, all <code class="computeroutput"><span class="identifier">set_value</span></code>
+<a name="xml_attribute::assign"></a><p>
+        For convenience, all <code class="computeroutput"><span class="identifier">set_value</span></code>
         functions have the corresponding assignment operators:
       </p>
 <pre class="programlisting"><span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -199,19 +199,20 @@
         This is an example of setting attribute name and value (<a href="../samples/modify_base.cpp" target="_top">samples/modify_base.cpp</a>):
       </p>
 <p>
+        
 </p>
 <pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">attr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"id"</span><span class="special">);</span>
 
-<span class="comment">// change attribute name/value</span>
-<span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"key"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"345"</span><span class="special">);</span>
+<span class="comment">// change attribute name/value
+</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_name</span><span class="special">(</span><span class="string">"key"</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"345"</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">", new attribute: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">name</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"="</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// we can use numbers or booleans</span>
-<span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="number">1.234</span><span class="special">);</span>
+<span class="comment">// we can use numbers or booleans
+</span><span class="identifier">attr</span><span class="special">.</span><span class="identifier">set_value</span><span class="special">(</span><span class="number">1.234</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"new attribute value: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// we can also use assignment operators for more concise code</span>
-<span class="identifier">attr</span> <span class="special">=</span> <span class="keyword">true</span><span class="special">;</span>
+<span class="comment">// we can also use assignment operators for more concise code
+</span><span class="identifier">attr</span> <span class="special">=</span> <span class="keyword">true</span><span class="special">;</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"final attribute value: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">attr</span><span class="special">.</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 </pre>
 <p>
@@ -219,11 +220,10 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.modify.add"></a><a class="link" href="modify.html#manual.modify.add" title="Adding nodes/attributes">Adding nodes/attributes</a>
+<a name="manual.modify.add"></a><a class="link" href="modify.html#manual.modify.add" title="Adding nodes/attributes"> Adding nodes/attributes</a>
 </h3></div></div></div>
-<p>
-        <a name="xml_node::prepend_attribute"></a><a name="xml_node::append_attribute"></a><a name="xml_node::insert_attribute_after"></a><a name="xml_node::insert_attribute_before"></a><a name="xml_node::prepend_child"></a><a name="xml_node::append_child"></a><a name="xml_node::insert_child_after"></a><a name="xml_node::insert_child_before"></a>Nodes
-        and attributes do not exist without a document tree, so you can't create
+<a name="xml_node::prepend_attribute"></a><a name="xml_node::append_attribute"></a><a name="xml_node::insert_attribute_after"></a><a name="xml_node::insert_attribute_before"></a><a name="xml_node::prepend_child"></a><a name="xml_node::append_child"></a><a name="xml_node::insert_child_after"></a><a name="xml_node::insert_child_before"></a><p>
+        Nodes and attributes do not exist without a document tree, so you can't create
         them without adding them to some document. A node or attribute can be created
         at the end of node/attribute list or before/after some other node:
       </p>
@@ -317,19 +317,20 @@
         This is an example of adding new attributes/nodes to the document (<a href="../samples/modify_add.cpp" target="_top">samples/modify_add.cpp</a>):
       </p>
 <p>
+        
 </p>
-<pre class="programlisting"><span class="comment">// add node with some name</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
+<pre class="programlisting"><span class="comment">// add node with some name
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 
-<span class="comment">// add description node with text child</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">descr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
+<span class="comment">// add description node with text child
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">descr</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
 <span class="identifier">descr</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">node_pcdata</span><span class="special">).</span><span class="identifier">set_value</span><span class="special">(</span><span class="string">"Simple node"</span><span class="special">);</span>
 
-<span class="comment">// add param node before the description</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="string">"param"</span><span class="special">,</span> <span class="identifier">descr</span><span class="special">);</span>
+<span class="comment">// add param node before the description
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="string">"param"</span><span class="special">,</span> <span class="identifier">descr</span><span class="special">);</span>
 
-<span class="comment">// add attributes to param node</span>
-<span class="identifier">param</span><span class="special">.</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">)</span> <span class="special">=</span> <span class="string">"version"</span><span class="special">;</span>
+<span class="comment">// add attributes to param node
+</span><span class="identifier">param</span><span class="special">.</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">)</span> <span class="special">=</span> <span class="string">"version"</span><span class="special">;</span>
 <span class="identifier">param</span><span class="special">.</span><span class="identifier">append_attribute</span><span class="special">(</span><span class="string">"value"</span><span class="special">)</span> <span class="special">=</span> <span class="number">1.1</span><span class="special">;</span>
 <span class="identifier">param</span><span class="special">.</span><span class="identifier">insert_attribute_after</span><span class="special">(</span><span class="string">"type"</span><span class="special">,</span> <span class="identifier">param</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">))</span> <span class="special">=</span> <span class="string">"float"</span><span class="special">;</span>
 </pre>
@@ -338,11 +339,10 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.modify.remove"></a><a class="link" href="modify.html#manual.modify.remove" title="Removing nodes/attributes">Removing nodes/attributes</a>
+<a name="manual.modify.remove"></a><a class="link" href="modify.html#manual.modify.remove" title="Removing nodes/attributes"> Removing nodes/attributes</a>
 </h3></div></div></div>
-<p>
-        <a name="xml_node::remove_attribute"></a><a name="xml_node::remove_child"></a>If
-        you do not want your document to contain some node or attribute, you can
+<a name="xml_node::remove_attribute"></a><a name="xml_node::remove_child"></a><p>
+        If you do not want your document to contain some node or attribute, you can
         remove it with one of the following functions:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">remove_attribute</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">a</span><span class="special">);</span>
@@ -394,17 +394,18 @@
         This is an example of removing attributes/nodes from the document (<a href="../samples/modify_remove.cpp" target="_top">samples/modify_remove.cpp</a>):
       </p>
 <p>
+        
 </p>
-<pre class="programlisting"><span class="comment">// remove description node with the whole subtree</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
+<pre class="programlisting"><span class="comment">// remove description node with the whole subtree
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">node</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"node"</span><span class="special">);</span>
 <span class="identifier">node</span><span class="special">.</span><span class="identifier">remove_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">);</span>
 
-<span class="comment">// remove id attribute</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"param"</span><span class="special">);</span>
+<span class="comment">// remove id attribute
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">param</span> <span class="special">=</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"param"</span><span class="special">);</span>
 <span class="identifier">param</span><span class="special">.</span><span class="identifier">remove_attribute</span><span class="special">(</span><span class="string">"value"</span><span class="special">);</span>
 
-<span class="comment">// we can also remove nodes/attributes by handles</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">id</span> <span class="special">=</span> <span class="identifier">param</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">);</span>
+<span class="comment">// we can also remove nodes/attributes by handles
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_attribute</span> <span class="identifier">id</span> <span class="special">=</span> <span class="identifier">param</span><span class="special">.</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"name"</span><span class="special">);</span>
 <span class="identifier">param</span><span class="special">.</span><span class="identifier">remove_attribute</span><span class="special">(</span><span class="identifier">id</span><span class="special">);</span>
 </pre>
 <p>
@@ -412,7 +413,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.modify.text"></a><a class="link" href="modify.html#manual.modify.text" title="Working with text contents">Working with text contents</a>
+<a name="manual.modify.text"></a><a class="link" href="modify.html#manual.modify.text" title="Working with text contents"> Working with text contents</a>
 </h3></div></div></div>
 <p>
         pugixml provides a special class, <code class="computeroutput"><span class="identifier">xml_text</span></code>,
@@ -421,8 +422,8 @@
         documentation for accessing document data</a>; this section describes
         the modification interface of <code class="computeroutput"><span class="identifier">xml_text</span></code>.
       </p>
-<p>
-        <a name="xml_text::set"></a>Once you have an <code class="computeroutput"><span class="identifier">xml_text</span></code>
+<a name="xml_text::set"></a><p>
+        Once you have an <code class="computeroutput"><span class="identifier">xml_text</span></code>
         object, you can set the text contents using the following function:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -439,9 +440,9 @@
         an element node, this function creates the PCDATA child node if necessary
         (i.e. if the element node does not have a PCDATA/CDATA child already).
       </p>
-<p>
-        <a name="xml_text::set_value"></a>In addition to a string function, several
-        functions are provided for handling text with numbers and booleans as contents:
+<a name="xml_text::set_value"></a><p>
+        In addition to a string function, several functions are provided for handling
+        text with numbers and booleans as contents:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -457,8 +458,8 @@
         functions. You can <a class="link" href="modify.html#xml_attribute::set_value">refer to documentation
         for the attribute functions</a> for details.
       </p>
-<p>
-        <a name="xml_text::assign"></a>For convenience, all <code class="computeroutput"><span class="identifier">set</span></code>
+<a name="xml_text::assign"></a><p>
+        For convenience, all <code class="computeroutput"><span class="identifier">set</span></code>
         functions have the corresponding assignment operators:
       </p>
 <pre class="programlisting"><span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -480,29 +481,30 @@
         object to modify text contents (<a href="../samples/text.cpp" target="_top">samples/text.cpp</a>):
       </p>
 <p>
+        
 </p>
-<pre class="programlisting"><span class="comment">// change project version</span>
-<span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"version"</span><span class="special">).</span><span class="identifier">text</span><span class="special">()</span> <span class="special">=</span> <span class="number">1.2</span><span class="special">;</span>
+<pre class="programlisting"><span class="comment">// change project version
+</span><span class="identifier">project</span><span class="special">.</span><span class="identifier">child</span><span class="special">(</span><span class="string">"version"</span><span class="special">).</span><span class="identifier">text</span><span class="special">()</span> <span class="special">=</span> <span class="number">1.2</span><span class="special">;</span>
 
-<span class="comment">// add description element and set the contents</span>
-<span class="comment">// note that we do not have to explicitly add the node_pcdata child</span>
-<span class="identifier">project</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">set</span><span class="special">(</span><span class="string">"a test project"</span><span class="special">);</span>
+<span class="comment">// add description element and set the contents
+</span><span class="comment">// note that we do not have to explicitly add the node_pcdata child
+</span><span class="identifier">project</span><span class="special">.</span><span class="identifier">append_child</span><span class="special">(</span><span class="string">"description"</span><span class="special">).</span><span class="identifier">text</span><span class="special">().</span><span class="identifier">set</span><span class="special">(</span><span class="string">"a test project"</span><span class="special">);</span>
 </pre>
 <p>
       </p>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.modify.clone"></a><a class="link" href="modify.html#manual.modify.clone" title="Cloning nodes/attributes">Cloning nodes/attributes</a>
+<a name="manual.modify.clone"></a><a class="link" href="modify.html#manual.modify.clone" title="Cloning nodes/attributes"> Cloning nodes/attributes</a>
 </h3></div></div></div>
-<p>
-        <a name="xml_node::prepend_copy"></a><a name="xml_node::append_copy"></a><a name="xml_node::insert_copy_after"></a><a name="xml_node::insert_copy_before"></a>With
-        the help of previously described functions, it is possible to create trees
-        with any contents and structure, including cloning the existing data. However
-        since this is an often needed operation, pugixml provides built-in node/attribute
-        cloning facilities. Since nodes and attributes do not exist without a document
-        tree, you can't create a standalone copy - you have to immediately insert
-        it somewhere in the tree. For this, you can use one of the following functions:
+<a name="xml_node::prepend_copy"></a><a name="xml_node::append_copy"></a><a name="xml_node::insert_copy_after"></a><a name="xml_node::insert_copy_before"></a><p>
+        With the help of previously described functions, it is possible to create
+        trees with any contents and structure, including cloning the existing data.
+        However since this is an often needed operation, pugixml provides built-in
+        node/attribute cloning facilities. Since nodes and attributes do not exist
+        without a document tree, you can't create a standalone copy - you have to
+        immediately insert it somewhere in the tree. For this, you can use one of
+        the following functions:
       </p>
 <pre class="programlisting"><span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">append_copy</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">prepend_copy</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">proto</span><span class="special">);</span>
@@ -559,6 +561,7 @@
         node cloning and usage of other document modification functions:
       </p>
 <p>
+        
 </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">load_preprocess</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span><span class="special">&amp;</span> <span class="identifier">doc</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">);</span>
 
@@ -570,23 +573,23 @@
         <span class="special">{</span>
             <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">include</span> <span class="special">=</span> <span class="identifier">child</span><span class="special">;</span>
 
-            <span class="comment">// load new preprocessed document (note: ideally this should handle relative paths)</span>
-            <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span> <span class="special">=</span> <span class="identifier">include</span><span class="special">.</span><span class="identifier">value</span><span class="special">();</span>
+            <span class="comment">// load new preprocessed document (note: ideally this should handle relative paths)
+</span>            <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span> <span class="special">=</span> <span class="identifier">include</span><span class="special">.</span><span class="identifier">value</span><span class="special">();</span>
 
             <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span> <span class="identifier">doc</span><span class="special">;</span>
             <span class="keyword">if</span> <span class="special">(!</span><span class="identifier">load_preprocess</span><span class="special">(</span><span class="identifier">doc</span><span class="special">,</span> <span class="identifier">path</span><span class="special">))</span> <span class="keyword">return</span> <span class="keyword">false</span><span class="special">;</span>
 
-            <span class="comment">// insert the comment marker above include directive</span>
-            <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">node_comment</span><span class="special">,</span> <span class="identifier">include</span><span class="special">).</span><span class="identifier">set_value</span><span class="special">(</span><span class="identifier">path</span><span class="special">);</span>
+            <span class="comment">// insert the comment marker above include directive
+</span>            <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_child_before</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">node_comment</span><span class="special">,</span> <span class="identifier">include</span><span class="special">).</span><span class="identifier">set_value</span><span class="special">(</span><span class="identifier">path</span><span class="special">);</span>
 
-            <span class="comment">// copy the document above the include directive (this retains the original order!)</span>
-            <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">ic</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_child</span><span class="special">();</span> <span class="identifier">ic</span><span class="special">;</span> <span class="identifier">ic</span> <span class="special">=</span> <span class="identifier">ic</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">())</span>
+            <span class="comment">// copy the document above the include directive (this retains the original order!)
+</span>            <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">ic</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_child</span><span class="special">();</span> <span class="identifier">ic</span><span class="special">;</span> <span class="identifier">ic</span> <span class="special">=</span> <span class="identifier">ic</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">())</span>
             <span class="special">{</span>
                 <span class="identifier">node</span><span class="special">.</span><span class="identifier">insert_copy_before</span><span class="special">(</span><span class="identifier">ic</span><span class="special">,</span> <span class="identifier">include</span><span class="special">);</span>
             <span class="special">}</span>
 
-            <span class="comment">// remove the include node and move to the next child</span>
-            <span class="identifier">child</span> <span class="special">=</span> <span class="identifier">child</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">();</span>
+            <span class="comment">// remove the include node and move to the next child
+</span>            <span class="identifier">child</span> <span class="special">=</span> <span class="identifier">child</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">();</span>
 
             <span class="identifier">node</span><span class="special">.</span><span class="identifier">remove_child</span><span class="special">(</span><span class="identifier">include</span><span class="special">);</span>
         <span class="special">}</span>
@@ -603,8 +606,8 @@
 
 <span class="keyword">bool</span> <span class="identifier">load_preprocess</span><span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_document</span><span class="special">&amp;</span> <span class="identifier">doc</span><span class="special">,</span> <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">path</span><span class="special">)</span>
 <span class="special">{</span>
-    <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_file</span><span class="special">(</span><span class="identifier">path</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_default</span> <span class="special">|</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_pi</span><span class="special">);</span> <span class="comment">// for &lt;?include?&gt;</span>
-
+    <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_parse_result</span> <span class="identifier">result</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">load_file</span><span class="special">(</span><span class="identifier">path</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_default</span> <span class="special">|</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">parse_pi</span><span class="special">);</span> <span class="comment">// for &lt;?include?&gt;
+</span>    
     <span class="keyword">return</span> <span class="identifier">result</span> <span class="special">?</span> <span class="identifier">preprocess</span><span class="special">(</span><span class="identifier">doc</span><span class="special">)</span> <span class="special">:</span> <span class="keyword">false</span><span class="special">;</span>
 <span class="special">}</span>
 </pre>
@@ -613,13 +616,64 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.modify.fragments"></a><a class="link" href="modify.html#manual.modify.fragments" title="Assembling document from fragments">Assembling document from fragments</a>
+<a name="manual.modify.move"></a><a class="link" href="modify.html#manual.modify.move" title="Moving nodes"> Moving nodes</a>
 </h3></div></div></div>
+<a name="xml_node::prepend_move"></a><a name="xml_node::append_move"></a><a name="xml_node::insert_move_after"></a><a name="xml_node::insert_move_before"></a><p>
+        Sometimes instead of cloning a node you need to move an existing node to
+        a different position in a tree. This can be accomplished by copying the node
+        and removing the original; however, this is expensive since it results in
+        a lot of extra operations. For moving nodes within the same document tree,
+        you can use of the following functions instead:
+      </p>
+<pre class="programlisting"><span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">append_move</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">moved</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">prepend_move</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">moved</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_move_after</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">moved</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
+<span class="identifier">xml_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">insert_move_before</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">moved</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">xml_node</span><span class="special">&amp;</span> <span class="identifier">node</span><span class="special">);</span>
+</pre>
 <p>
-        <a name="xml_node::append_buffer"></a>pugixml provides several ways to assemble
-        an XML document from other XML documents. Assuming there is a set of document
-        fragments, represented as in-memory buffers, the implementation choices are
-        as follows:
+        These functions mirror the structure of <code class="computeroutput"><span class="identifier">append_copy</span></code>,
+        <code class="computeroutput"><span class="identifier">prepend_copy</span></code>, <code class="computeroutput"><span class="identifier">insert_copy_before</span></code> and <code class="computeroutput"><span class="identifier">insert_copy_after</span></code>
+        - they take the handle to the moved object and move it to the appropriate
+        place with all attributes and/or child nodes. The functions return the handle
+        to the resulting object (which is the same as the moved object), or null
+        handle on failure.
+      </p>
+<p>
+        The failure conditions resemble those of <code class="computeroutput"><span class="identifier">append_child</span></code>,
+        <code class="computeroutput"><span class="identifier">insert_child_before</span></code> and related
+        functions, <a class="link" href="modify.html#xml_node::append_child">consult their documentation
+        for more information</a>. There are additional caveats specific to moving
+        functions:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+            Moving null handles results in operation failure;
+          </li>
+<li class="listitem">
+            Moving is only possible for nodes that belong to the same document; attempting
+            to move nodes between documents will fail.
+          </li>
+<li class="listitem">
+            <code class="computeroutput"><span class="identifier">insert_move_after</span></code> and
+            <code class="computeroutput"><span class="identifier">insert_move_before</span></code> functions
+            fail if the moved node is the same as the <code class="computeroutput"><span class="identifier">node</span></code>
+            argument (this operation would be a no-op otherwise).
+          </li>
+<li class="listitem">
+            It is impossible to move a subtree to a child of some node inside this
+            subtree, i.e. <code class="computeroutput"><span class="identifier">node</span><span class="special">.</span><span class="identifier">append_move</span><span class="special">(</span><span class="identifier">node</span><span class="special">.</span><span class="identifier">parent</span><span class="special">().</span><span class="identifier">parent</span><span class="special">());</span></code>
+            will fail.
+          </li>
+</ul></div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="manual.modify.fragments"></a><a class="link" href="modify.html#manual.modify.fragments" title="Assembling document from fragments"> Assembling document from fragments</a>
+</h3></div></div></div>
+<a name="xml_node::append_buffer"></a><p>
+        pugixml provides several ways to assemble an XML document from other XML
+        documents. Assuming there is a set of document fragments, represented as
+        in-memory buffers, the implementation choices are as follows:
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem">
             Use a temporary document to parse the data from a string, then clone
@@ -668,10 +722,10 @@
         - the input buffer is a byte buffer, with size in bytes; the buffer is not
         modified and can be freed after the function returns.
       </p>
-<p>
-        <a name="status_append_invalid_root"></a>Since <code class="computeroutput"><span class="identifier">append_buffer</span></code>
-        needs to append child nodes to the current node, it only works if the current
-        node is either document or element node. Calling <code class="computeroutput"><span class="identifier">append_buffer</span></code>
+<a name="status_append_invalid_root"></a><p>
+        Since <code class="computeroutput"><span class="identifier">append_buffer</span></code> needs
+        to append child nodes to the current node, it only works if the current node
+        is either document or element node. Calling <code class="computeroutput"><span class="identifier">append_buffer</span></code>
         on a node with any other type results in an error with <code class="computeroutput"><span class="identifier">status_append_invalid_root</span></code>
         status.
       </p>
@@ -687,7 +741,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.4</a> manual |
+<a href="http://pugixml.org/">pugixml 1.5</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

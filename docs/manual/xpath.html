@@ -4,15 +4,15 @@
 <title>XPath</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
-<link rel="home" href="../manual.html" title="pugixml 1.4">
-<link rel="up" href="../manual.html" title="pugixml 1.4">
+<link rel="home" href="../manual.html" title="pugixml 1.5">
+<link rel="up" href="../manual.html" title="pugixml 1.5">
 <link rel="prev" href="saving.html" title="Saving document">
 <link rel="next" href="changes.html" title="Changelog">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.4</a> manual |
+<a href="http://pugixml.org/">pugixml 1.5</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -28,15 +28,15 @@
 <hr>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="manual.xpath"></a><a class="link" href="xpath.html" title="XPath">XPath</a>
+<a name="manual.xpath"></a><a class="link" href="xpath.html" title="XPath"> XPath</a>
 </h2></div></div></div>
 <div class="toc"><dl class="toc">
-<dt><span class="section"><a href="xpath.html#manual.xpath.types">XPath types</a></span></dt>
-<dt><span class="section"><a href="xpath.html#manual.xpath.select">Selecting nodes via XPath expression</a></span></dt>
-<dt><span class="section"><a href="xpath.html#manual.xpath.query">Using query objects</a></span></dt>
-<dt><span class="section"><a href="xpath.html#manual.xpath.variables">Using variables</a></span></dt>
-<dt><span class="section"><a href="xpath.html#manual.xpath.errors">Error handling</a></span></dt>
-<dt><span class="section"><a href="xpath.html#manual.xpath.w3c">Conformance to W3C specification</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.types"> XPath types</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.select"> Selecting nodes via XPath expression</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.query"> Using query objects</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.variables"> Using variables</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.errors"> Error handling</a></span></dt>
+<dt><span class="section"><a href="xpath.html#manual.xpath.w3c"> Conformance to W3C specification</a></span></dt>
 </dl></div>
 <p>
       If the task at hand is to select a subset of document nodes that match some
@@ -48,7 +48,7 @@
       for these cases. pugixml implements an almost complete subset of XPath 1.0.
       Because of differences in document object model and some performance implications,
       there are minor violations of the official specifications, which can be found
-      in <a class="xref" href="xpath.html#manual.xpath.w3c" title="Conformance to W3C specification">Conformance to W3C specification</a>. The rest of this section describes the interface for XPath
+      in <a class="xref" href="xpath.html#manual.xpath.w3c" title="Conformance to W3C specification"> Conformance to W3C specification</a>. The rest of this section describes the interface for XPath
       functionality. Please note that if you wish to learn to use XPath language,
       you have to look for other tutorials or manuals; for example, you can read
       <a href="http://www.w3schools.com/xpath/" target="_top">W3Schools XPath tutorial</a>,
@@ -58,12 +58,11 @@
     </p>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.xpath.types"></a><a class="link" href="xpath.html#manual.xpath.types" title="XPath types">XPath types</a>
+<a name="manual.xpath.types"></a><a class="link" href="xpath.html#manual.xpath.types" title="XPath types"> XPath types</a>
 </h3></div></div></div>
-<p>
-        <a name="xpath_value_type"></a><a name="xpath_type_number"></a><a name="xpath_type_string"></a><a name="xpath_type_boolean"></a><a name="xpath_type_node_set"></a><a name="xpath_type_none"></a>Each
-        XPath expression can have one of the following types: boolean, number, string
-        or node set. Boolean type corresponds to <code class="computeroutput"><span class="keyword">bool</span></code>
+<a name="xpath_value_type"></a><a name="xpath_type_number"></a><a name="xpath_type_string"></a><a name="xpath_type_boolean"></a><a name="xpath_type_node_set"></a><a name="xpath_type_none"></a><p>
+        Each XPath expression can have one of the following types: boolean, number,
+        string or node set. Boolean type corresponds to <code class="computeroutput"><span class="keyword">bool</span></code>
         type, number type corresponds to <code class="computeroutput"><span class="keyword">double</span></code>
         type, string type corresponds to either <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span></code>
         or <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">wstring</span></code>, depending on whether <a class="link" href="dom.html#manual.dom.unicode" title="Unicode interface">wide
@@ -73,11 +72,11 @@
         <code class="computeroutput"><span class="identifier">xpath_type_number</span></code>, <code class="computeroutput"><span class="identifier">xpath_type_string</span></code> or <code class="computeroutput"><span class="identifier">xpath_type_node_set</span></code>,
         accordingly.
       </p>
-<p>
-        <a name="xpath_node"></a><a name="xpath_node::node"></a><a name="xpath_node::attribute"></a><a name="xpath_node::parent"></a>Because an XPath node can be either a node or an
-        attribute, there is a special type, <code class="computeroutput"><span class="identifier">xpath_node</span></code>,
-        which is a discriminated union of these types. A value of this type contains
-        two node handles, one of <code class="computeroutput"><span class="identifier">xml_node</span></code>
+<a name="xpath_node"></a><a name="xpath_node::node"></a><a name="xpath_node::attribute"></a><a name="xpath_node::parent"></a><p>
+        Because an XPath node can be either a node or an attribute, there is a special
+        type, <code class="computeroutput"><span class="identifier">xpath_node</span></code>, which is
+        a discriminated union of these types. A value of this type contains two node
+        handles, one of <code class="computeroutput"><span class="identifier">xml_node</span></code>
         type, and another one of <code class="computeroutput"><span class="identifier">xml_attribute</span></code>
         type; at most one of them can be non-null. The accessors to get these handles
         are available:
@@ -102,33 +101,30 @@
         handle. For null nodes, <code class="computeroutput"><span class="identifier">parent</span></code>
         returns null handle.
       </p>
-<p>
-        <a name="xpath_node::unspecified_bool_type"></a><a name="xpath_node::comparison"></a>Like
-        node and attribute handles, XPath node handles can be implicitly cast to
-        boolean-like object to check if it is a null node, and also can be compared
+<a name="xpath_node::unspecified_bool_type"></a><a name="xpath_node::comparison"></a><p>
+        Like node and attribute handles, XPath node handles can be implicitly cast
+        to boolean-like object to check if it is a null node, and also can be compared
         for equality with each other.
       </p>
-<p>
-        <a name="xpath_node::ctor"></a>You can also create XPath nodes with one of
-        the three constructors: the default constructor, the constructor that takes
-        node argument, and the constructor that takes attribute and node arguments
-        (in which case the attribute must belong to the attribute list of the node).
-        The constructor from <code class="computeroutput"><span class="identifier">xml_node</span></code>
-        is implicit, so you can usually pass <code class="computeroutput"><span class="identifier">xml_node</span></code>
-        to functions that expect <code class="computeroutput"><span class="identifier">xpath_node</span></code>.
-        Apart from that you usually don't need to create your own XPath node objects,
-        since they are returned to you via selection functions.
+<a name="xpath_node::ctor"></a><p>
+        You can also create XPath nodes with one of the three constructors: the default
+        constructor, the constructor that takes node argument, and the constructor
+        that takes attribute and node arguments (in which case the attribute must
+        belong to the attribute list of the node). The constructor from <code class="computeroutput"><span class="identifier">xml_node</span></code> is implicit, so you can usually
+        pass <code class="computeroutput"><span class="identifier">xml_node</span></code> to functions
+        that expect <code class="computeroutput"><span class="identifier">xpath_node</span></code>. Apart
+        from that you usually don't need to create your own XPath node objects, since
+        they are returned to you via selection functions.
       </p>
-<p>
-        <a name="xpath_node_set"></a>XPath expressions operate not on single nodes,
-        but instead on node sets. A node set is a collection of nodes, which can
-        be optionally ordered in either a forward document order or a reverse one.
-        Document order is defined in XPath specification; an XPath node is before
-        another node in document order if it appears before it in XML representation
-        of the corresponding document.
+<a name="xpath_node_set"></a><p>
+        XPath expressions operate not on single nodes, but instead on node sets.
+        A node set is a collection of nodes, which can be optionally ordered in either
+        a forward document order or a reverse one. Document order is defined in XPath
+        specification; an XPath node is before another node in document order if
+        it appears before it in XML representation of the corresponding document.
       </p>
-<p>
-        <a name="xpath_node_set::const_iterator"></a><a name="xpath_node_set::begin"></a><a name="xpath_node_set::end"></a>Node sets are represented by <code class="computeroutput"><span class="identifier">xpath_node_set</span></code>
+<a name="xpath_node_set::const_iterator"></a><a name="xpath_node_set::begin"></a><a name="xpath_node_set::end"></a><p>
+        Node sets are represented by <code class="computeroutput"><span class="identifier">xpath_node_set</span></code>
         object, which has an interface that resembles one of sequential random-access
         containers. It has an iterator type along with usual begin/past-the-end iterator
         accessors:
@@ -137,9 +133,8 @@
 <span class="identifier">const_iterator</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">begin</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">const_iterator</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">end</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
-<p>
-        <a name="xpath_node_set::index"></a><a name="xpath_node_set::size"></a><a name="xpath_node_set::empty"></a>And it also can be iterated via indices, just
-        like <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>:
+<a name="xpath_node_set::index"></a><a name="xpath_node_set::size"></a><a name="xpath_node_set::empty"></a><p>
+        And it also can be iterated via indices, just like <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="keyword">operator</span><span class="special">[](</span><span class="identifier">size_t</span> <span class="identifier">index</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">size_t</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">size</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -152,9 +147,9 @@
         set size results in undefined behavior. You can use both iterator-based and
         index-based access for iteration, however the iterator-based one can be faster.
       </p>
-<p>
-        <a name="xpath_node_set::type"></a><a name="xpath_node_set::type_unsorted"></a><a name="xpath_node_set::type_sorted"></a><a name="xpath_node_set::type_sorted_reverse"></a><a name="xpath_node_set::sort"></a>The order of iteration depends on the order of
-        nodes inside the set; the order can be queried via the following function:
+<a name="xpath_node_set::type"></a><a name="xpath_node_set::type_unsorted"></a><a name="xpath_node_set::type_sorted"></a><a name="xpath_node_set::type_sorted_reverse"></a><a name="xpath_node_set::sort"></a><p>
+        The order of iteration depends on the order of nodes inside the set; the
+        order can be queried via the following function:
       </p>
 <pre class="programlisting"><span class="keyword">enum</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">type_t</span> <span class="special">{</span><span class="identifier">type_unsorted</span><span class="special">,</span> <span class="identifier">type_sorted</span><span class="special">,</span> <span class="identifier">type_sorted_reverse</span><span class="special">};</span>
 <span class="identifier">type_t</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">type</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -178,10 +173,9 @@
         will return <code class="computeroutput"><span class="identifier">type_sorted</span></code> or
         <code class="computeroutput"><span class="identifier">type_sorted_reverse</span></code>.
       </p>
-<p>
-        <a name="xpath_node_set::first"></a>Often the actual iteration is not needed;
-        instead, only the first element in document order is required. For this,
-        a special accessor is provided:
+<a name="xpath_node_set::first"></a><p>
+        Often the actual iteration is not needed; instead, only the first element
+        in document order is required. For this, a special accessor is provided:
       </p>
 <pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">first</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
@@ -193,11 +187,10 @@
         the complexity does - if the set is sorted, the complexity is constant, otherwise
         it is linear in the number of elements or worse.
       </p>
-<p>
-        <a name="xpath_node_set::ctor"></a>While in the majority of cases the node
-        set is returned by XPath functions, sometimes there is a need to manually
-        construct a node set. For such cases, a constructor is provided which takes
-        an iterator range (<code class="computeroutput"><span class="identifier">const_iterator</span></code>
+<a name="xpath_node_set::ctor"></a><p>
+        While in the majority of cases the node set is returned by XPath functions,
+        sometimes there is a need to manually construct a node set. For such cases,
+        a constructor is provided which takes an iterator range (<code class="computeroutput"><span class="identifier">const_iterator</span></code>
         is a typedef for <code class="computeroutput"><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">*</span></code>), and an optional type:
       </p>
 <pre class="programlisting"><span class="identifier">xpath_node_set</span><span class="special">::</span><span class="identifier">xpath_node_set</span><span class="special">(</span><span class="identifier">const_iterator</span> <span class="identifier">begin</span><span class="special">,</span> <span class="identifier">const_iterator</span> <span class="identifier">end</span><span class="special">,</span> <span class="identifier">type_t</span> <span class="identifier">type</span> <span class="special">=</span> <span class="identifier">type_unsorted</span><span class="special">);</span>
@@ -212,41 +205,40 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.xpath.select"></a><a class="link" href="xpath.html#manual.xpath.select" title="Selecting nodes via XPath expression">Selecting nodes via XPath expression</a>
+<a name="manual.xpath.select"></a><a class="link" href="xpath.html#manual.xpath.select" title="Selecting nodes via XPath expression"> Selecting nodes via XPath expression</a>
 </h3></div></div></div>
-<p>
-        <a name="xml_node::select_single_node"></a><a name="xml_node::select_nodes"></a>If
-        you want to select nodes that match some XPath expression, you can do it
-        with the following functions:
+<a name="xml_node::select_node"></a><a name="xml_node::select_nodes"></a><p>
+        If you want to select nodes that match some XPath expression, you can do
+        it with the following functions:
       </p>
-<pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xpath_node_set</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
         <code class="computeroutput"><span class="identifier">select_nodes</span></code> function compiles
         the expression and then executes it with the node as a context node, and
-        returns the resulting node set. <code class="computeroutput"><span class="identifier">select_single_node</span></code>
+        returns the resulting node set. <code class="computeroutput"><span class="identifier">select_node</span></code>
         returns only the first node in document order from the result, and is equivalent
         to calling <code class="computeroutput"><span class="identifier">select_nodes</span><span class="special">(</span><span class="identifier">query</span><span class="special">).</span><span class="identifier">first</span><span class="special">()</span></code>.
         If the XPath expression does not match anything, or the node handle is null,
         <code class="computeroutput"><span class="identifier">select_nodes</span></code> returns an empty
-        set, and <code class="computeroutput"><span class="identifier">select_single_node</span></code>
-        returns null XPath node.
+        set, and <code class="computeroutput"><span class="identifier">select_node</span></code> returns
+        null XPath node.
       </p>
 <p>
         If exception handling is not disabled, both functions throw <a class="link" href="xpath.html#xpath_exception">xpath_exception</a>
         if the query can not be compiled or if it returns a value with type other
-        than node set; see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling">Error handling</a> for details.
+        than node set; see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a> for details.
       </p>
-<p>
-        <a name="xml_node::select_single_node_precomp"></a><a name="xml_node::select_nodes_precomp"></a>While
-        compiling expressions is fast, the compilation time can introduce a significant
-        overhead if the same expression is used many times on small subtrees. If
-        you're doing many similar queries, consider compiling them into query objects
-        (see <a class="xref" href="xpath.html#manual.xpath.query" title="Using query objects">Using query objects</a> for further reference). Once you get a compiled query
-        object, you can pass it to select functions instead of an expression string:
+<a name="xml_node::select_node_precomp"></a><a name="xml_node::select_nodes_precomp"></a><p>
+        While compiling expressions is fast, the compilation time can introduce a
+        significant overhead if the same expression is used many times on small subtrees.
+        If you're doing many similar queries, consider compiling them into query
+        objects (see <a class="xref" href="xpath.html#manual.xpath.query" title="Using query objects"> Using query objects</a> for further reference). Once you get a compiled
+        query object, you can pass it to select functions instead of an expression
+        string:
       </p>
-<pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_query</span><span class="special">&amp;</span> <span class="identifier">query</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<pre class="programlisting"><span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_query</span><span class="special">&amp;</span> <span class="identifier">query</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xpath_node_set</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_query</span><span class="special">&amp;</span> <span class="identifier">query</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
@@ -257,6 +249,7 @@
         This is an example of selecting nodes using XPath expressions (<a href="../samples/xpath_select.cpp" target="_top">samples/xpath_select.cpp</a>):
       </p>
 <p>
+        
 </p>
 <pre class="programlisting"><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote='true' and @DeriveCaptionFrom='lastparam']"</span><span class="special">);</span>
 
@@ -268,7 +261,7 @@
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">node</span><span class="special">.</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
 <span class="special">}</span>
 
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node</span> <span class="identifier">build_tool</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="string">"//Tool[contains(Description, 'build system')]"</span><span class="special">);</span>
+<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node</span> <span class="identifier">build_tool</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_node</span><span class="special">(</span><span class="string">"//Tool[contains(Description, 'build system')]"</span><span class="special">);</span>
 
 <span class="keyword">if</span> <span class="special">(</span><span class="identifier">build_tool</span><span class="special">)</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Build tool: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">build_tool</span><span class="special">.</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">attribute</span><span class="special">(</span><span class="string">"Filename"</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span><span class="special">;</span>
@@ -278,10 +271,10 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.xpath.query"></a><a class="link" href="xpath.html#manual.xpath.query" title="Using query objects">Using query objects</a>
+<a name="manual.xpath.query"></a><a class="link" href="xpath.html#manual.xpath.query" title="Using query objects"> Using query objects</a>
 </h3></div></div></div>
-<p>
-        <a name="xpath_query"></a>When you call <code class="computeroutput"><span class="identifier">select_nodes</span></code>
+<a name="xpath_query"></a><p>
+        When you call <code class="computeroutput"><span class="identifier">select_nodes</span></code>
         with an expression string as an argument, a query object is created behind
         the scenes. A query object represents a compiled XPath expression. Query
         objects can be needed in the following circumstances:
@@ -307,30 +300,29 @@
         operator and store pointers to <code class="computeroutput"><span class="identifier">xpath_query</span></code>
         in the container.
       </p>
-<p>
-        <a name="xpath_query::ctor"></a>You can create a query object with the constructor
-        that takes XPath expression as an argument:
+<a name="xpath_query::ctor"></a><p>
+        You can create a query object with the constructor that takes XPath expression
+        as an argument:
       </p>
 <pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">xpath_query</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">);</span>
 </pre>
-<p>
-        <a name="xpath_query::return_type"></a>The expression is compiled and the
-        compiled representation is stored in the new query object. If compilation
-        fails, <a class="link" href="xpath.html#xpath_exception">xpath_exception</a> is thrown if
-        exception handling is not disabled (see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling">Error handling</a> for details).
-        After the query is created, you can query the type of the evaluation result
-        using the following function:
+<a name="xpath_query::return_type"></a><p>
+        The expression is compiled and the compiled representation is stored in the
+        new query object. If compilation fails, <a class="link" href="xpath.html#xpath_exception">xpath_exception</a>
+        is thrown if exception handling is not disabled (see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a> for
+        details). After the query is created, you can query the type of the evaluation
+        result using the following function:
       </p>
 <pre class="programlisting"><span class="identifier">xpath_value_type</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">return_type</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
-<p>
-        <a name="xpath_query::evaluate_boolean"></a><a name="xpath_query::evaluate_number"></a><a name="xpath_query::evaluate_string"></a><a name="xpath_query::evaluate_node_set"></a>You
-        can evaluate the query using one of the following functions:
+<a name="xpath_query::evaluate_boolean"></a><a name="xpath_query::evaluate_number"></a><a name="xpath_query::evaluate_string"></a><a name="xpath_query::evaluate_node_set"></a><a name="xpath_query::evaluate_node"></a><p>
+        You can evaluate the query using one of the following functions:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_boolean</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="keyword">double</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_number</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">string_t</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_string</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xpath_node_set</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xpath_node</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">evaluate_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">xpath_node</span><span class="special">&amp;</span> <span class="identifier">n</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
         All functions take the context node as an argument, compute the expression
@@ -339,8 +331,9 @@
         value, but no type other than node set can be converted to node set. Because
         of this, <code class="computeroutput"><span class="identifier">evaluate_boolean</span></code>,
         <code class="computeroutput"><span class="identifier">evaluate_number</span></code> and <code class="computeroutput"><span class="identifier">evaluate_string</span></code> always return a result,
-        but <code class="computeroutput"><span class="identifier">evaluate_node_set</span></code> results
-        in an error if the return type is not node set (see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling">Error handling</a>).
+        but <code class="computeroutput"><span class="identifier">evaluate_node_set</span></code> and
+        <code class="computeroutput"><span class="identifier">evaluate_node</span></code> result in an
+        error if the return type is not node set (see <a class="xref" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a>).
       </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
@@ -349,12 +342,12 @@
 </tr>
 <tr><td align="left" valign="top"><p>
           Calling <code class="computeroutput"><span class="identifier">node</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"query"</span><span class="special">)</span></code>
-          is equivalent to calling <code class="computeroutput"><span class="identifier">xpath_query</span><span class="special">(</span><span class="string">"query"</span><span class="special">).</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="identifier">node</span><span class="special">)</span></code>.
+          is equivalent to calling <code class="computeroutput"><span class="identifier">xpath_query</span><span class="special">(</span><span class="string">"query"</span><span class="special">).</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="identifier">node</span><span class="special">)</span></code>. Calling <code class="computeroutput"><span class="identifier">node</span><span class="special">.</span><span class="identifier">select_node</span><span class="special">(</span><span class="string">"query"</span><span class="special">)</span></code> is equivalent to calling <code class="computeroutput"><span class="identifier">xpath_query</span><span class="special">(</span><span class="string">"query"</span><span class="special">).</span><span class="identifier">evaluate_node</span><span class="special">(</span><span class="identifier">node</span><span class="special">)</span></code>.
         </p></td></tr>
 </table></div>
-<p>
-        <a name="xpath_query::evaluate_string_buffer"></a>Note that <code class="computeroutput"><span class="identifier">evaluate_string</span></code> function returns the STL
-        string; as such, it's not available in <a class="link" href="install.html#PUGIXML_NO_STL">PUGIXML_NO_STL</a>
+<a name="xpath_query::evaluate_string_buffer"></a><p>
+        Note that <code class="computeroutput"><span class="identifier">evaluate_string</span></code>
+        function returns the STL string; as such, it's not available in <a class="link" href="install.html#PUGIXML_NO_STL">PUGIXML_NO_STL</a>
         mode and also usually allocates memory. There is another string evaluation
         function:
       </p>
@@ -386,20 +379,21 @@
         This is an example of using query objects (<a href="../samples/xpath_query.cpp" target="_top">samples/xpath_query.cpp</a>):
       </p>
 <p>
+        
 </p>
-<pre class="programlisting"><span class="comment">// Select nodes via compiled query</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_remote_tools</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote='true']"</span><span class="special">);</span>
+<pre class="programlisting"><span class="comment">// Select nodes via compiled query
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_remote_tools</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote='true']"</span><span class="special">);</span>
 
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools</span> <span class="special">=</span> <span class="identifier">query_remote_tools</span><span class="special">.</span><span class="identifier">evaluate_node_set</span><span class="special">(</span><span class="identifier">doc</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Remote tool: "</span><span class="special">;</span>
 <span class="identifier">tools</span><span class="special">[</span><span class="number">2</span><span class="special">].</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">);</span>
 
-<span class="comment">// Evaluate numbers via compiled query</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_timeouts</span><span class="special">(</span><span class="string">"sum(//Tool/@Timeout)"</span><span class="special">);</span>
+<span class="comment">// Evaluate numbers via compiled query
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_timeouts</span><span class="special">(</span><span class="string">"sum(//Tool/@Timeout)"</span><span class="special">);</span>
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">query_timeouts</span><span class="special">.</span><span class="identifier">evaluate_number</span><span class="special">(</span><span class="identifier">doc</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
-<span class="comment">// Evaluate strings via compiled query for different context nodes</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_name_valid</span><span class="special">(</span><span class="string">"string-length(substring-before(@Filename, '_')) &gt; 0 and @OutputFileMasks"</span><span class="special">);</span>
+<span class="comment">// Evaluate strings via compiled query for different context nodes
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_name_valid</span><span class="special">(</span><span class="string">"string-length(substring-before(@Filename, '_')) &gt; 0 and @OutputFileMasks"</span><span class="special">);</span>
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_name</span><span class="special">(</span><span class="string">"concat(substring-before(@Filename, '_'), ' produces ', @OutputFileMasks)"</span><span class="special">);</span>
 
 <span class="keyword">for</span> <span class="special">(</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xml_node</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">first_element_by_path</span><span class="special">(</span><span class="string">"Profile/Tools/Tool"</span><span class="special">);</span> <span class="identifier">tool</span><span class="special">;</span> <span class="identifier">tool</span> <span class="special">=</span> <span class="identifier">tool</span><span class="special">.</span><span class="identifier">next_sibling</span><span class="special">())</span>
@@ -414,7 +408,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.xpath.variables"></a><a class="link" href="xpath.html#manual.xpath.variables" title="Using variables">Using variables</a>
+<a name="manual.xpath.variables"></a><a class="link" href="xpath.html#manual.xpath.variables" title="Using variables"> Using variables</a>
 </h3></div></div></div>
 <p>
         XPath queries may contain references to variables; this is useful if you
@@ -426,10 +420,10 @@
         Variable references have the form <code class="computeroutput"><span class="identifier">$name</span></code>; in order to use them, you have to provide
         a variable set, which includes all variables present in the query with correct
         types. This set is passed to <code class="computeroutput"><span class="identifier">xpath_query</span></code>
-        constructor or to <code class="computeroutput"><span class="identifier">select_nodes</span></code>/<code class="computeroutput"><span class="identifier">select_single_node</span></code> functions:
+        constructor or to <code class="computeroutput"><span class="identifier">select_nodes</span></code>/<code class="computeroutput"><span class="identifier">select_node</span></code> functions:
       </p>
 <pre class="programlisting"><span class="keyword">explicit</span> <span class="identifier">xpath_query</span><span class="special">::</span><span class="identifier">xpath_query</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">);</span>
-<span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_single_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="identifier">xpath_node</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_node</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xpath_node_set</span> <span class="identifier">xml_node</span><span class="special">::</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">query</span><span class="special">,</span> <span class="identifier">xpath_variable_set</span><span class="special">*</span> <span class="identifier">variables</span> <span class="special">=</span> <span class="number">0</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
 <p>
@@ -447,13 +441,12 @@
           that the lifetime of the set exceeds that of query object.
         </p></td></tr>
 </table></div>
-<p>
-        <a name="xpath_variable_set"></a>Variable sets correspond to <code class="computeroutput"><span class="identifier">xpath_variable_set</span></code> type, which is essentially
-        a variable container.
+<a name="xpath_variable_set"></a><p>
+        Variable sets correspond to <code class="computeroutput"><span class="identifier">xpath_variable_set</span></code>
+        type, which is essentially a variable container.
       </p>
-<p>
-        <a name="xpath_variable_set::add"></a>You can add new variables with the
-        following function:
+<a name="xpath_variable_set::add"></a><p>
+        You can add new variables with the following function:
       </p>
 <pre class="programlisting"><span class="identifier">xpath_variable</span><span class="special">*</span> <span class="identifier">xpath_variable_set</span><span class="special">::</span><span class="identifier">add</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="identifier">xpath_value_type</span> <span class="identifier">type</span><span class="special">);</span>
 </pre>
@@ -470,9 +463,8 @@
         <code class="computeroutput"><span class="number">0</span></code> for numbers, <code class="computeroutput"><span class="keyword">false</span></code> for booleans, empty string for strings
         and empty set for node sets.
       </p>
-<p>
-        <a name="xpath_variable_set::get"></a>You can get the existing variables
-        with the following functions:
+<a name="xpath_variable_set::get"></a><p>
+        You can get the existing variables with the following functions:
       </p>
 <pre class="programlisting"><span class="identifier">xpath_variable</span><span class="special">*</span> <span class="identifier">xpath_variable_set</span><span class="special">::</span><span class="identifier">get</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">);</span>
 <span class="keyword">const</span> <span class="identifier">xpath_variable</span><span class="special">*</span> <span class="identifier">xpath_variable_set</span><span class="special">::</span><span class="identifier">get</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
@@ -481,14 +473,13 @@
         The functions return the variable handle, or null pointer if the variable
         with the specified name is not found.
       </p>
-<p>
-        <a name="xpath_variable_set::set"></a>Additionally, there are the helper
-        functions for setting the variable value by name; they try to add the variable
-        with the corresponding type, if it does not exist, and to set the value.
-        If the variable with the same name but with different type is already present,
-        they return <code class="computeroutput"><span class="keyword">false</span></code>; they also
-        return <code class="computeroutput"><span class="keyword">false</span></code> on allocation failure.
-        Note that these functions do not perform any type conversions.
+<a name="xpath_variable_set::set"></a><p>
+        Additionally, there are the helper functions for setting the variable value
+        by name; they try to add the variable with the corresponding type, if it
+        does not exist, and to set the value. If the variable with the same name
+        but with different type is already present, they return <code class="computeroutput"><span class="keyword">false</span></code>;
+        they also return <code class="computeroutput"><span class="keyword">false</span></code> on allocation
+        failure. Note that these functions do not perform any type conversions.
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xpath_variable_set</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="keyword">bool</span> <span class="identifier">value</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xpath_variable_set</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">name</span><span class="special">,</span> <span class="keyword">double</span> <span class="identifier">value</span><span class="special">);</span>
@@ -499,15 +490,14 @@
         The variable values are copied to the internal variable storage, so you can
         modify or destroy them after the functions return.
       </p>
-<p>
-        <a name="xpath_variable"></a>If setting variables by name is not efficient
-        enough, or if you have to inspect variable information or get variable values,
-        you can use variable handles. A variable corresponds to the <code class="computeroutput"><span class="identifier">xpath_variable</span></code> type, and a variable handle
-        is simply a pointer to <code class="computeroutput"><span class="identifier">xpath_variable</span></code>.
+<a name="xpath_variable"></a><p>
+        If setting variables by name is not efficient enough, or if you have to inspect
+        variable information or get variable values, you can use variable handles.
+        A variable corresponds to the <code class="computeroutput"><span class="identifier">xpath_variable</span></code>
+        type, and a variable handle is simply a pointer to <code class="computeroutput"><span class="identifier">xpath_variable</span></code>.
       </p>
-<p>
-        <a name="xpath_variable::type"></a><a name="xpath_variable::name"></a>In
-        order to get variable information, you can use one of the following functions:
+<a name="xpath_variable::type"></a><a name="xpath_variable::name"></a><p>
+        In order to get variable information, you can use one of the following functions:
       </p>
 <pre class="programlisting"><span class="keyword">const</span> <span class="identifier">char_t</span><span class="special">*</span> <span class="identifier">xpath_variable</span><span class="special">::</span><span class="identifier">name</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="identifier">xpath_value_type</span> <span class="identifier">xpath_variable</span><span class="special">::</span><span class="identifier">type</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -516,9 +506,8 @@
         Note that each variable has a distinct type which is specified upon variable
         creation and can not be changed later.
       </p>
-<p>
-        <a name="xpath_variable::get_boolean"></a><a name="xpath_variable::get_number"></a><a name="xpath_variable::get_string"></a><a name="xpath_variable::get_node_set"></a>In
-        order to get variable value, you should use one of the following functions,
+<a name="xpath_variable::get_boolean"></a><a name="xpath_variable::get_number"></a><a name="xpath_variable::get_string"></a><a name="xpath_variable::get_node_set"></a><p>
+        In order to get variable value, you should use one of the following functions,
         depending on the variable type:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xpath_variable</span><span class="special">::</span><span class="identifier">get_boolean</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
@@ -531,9 +520,9 @@
         are performed; if the type mismatch occurs, a dummy value is returned (<code class="computeroutput"><span class="keyword">false</span></code> for booleans, <code class="computeroutput"><span class="identifier">NaN</span></code>
         for numbers, empty string for strings and empty set for node sets).
       </p>
-<p>
-        <a name="xpath_variable::set"></a>In order to set variable value, you should
-        use one of the following functions, depending on the variable type:
+<a name="xpath_variable::set"></a><p>
+        In order to set variable value, you should use one of the following functions,
+        depending on the variable type:
       </p>
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xpath_variable</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">value</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xpath_variable</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">value</span><span class="special">);</span>
@@ -550,9 +539,10 @@
         This is an example of using variables in XPath queries (<a href="../samples/xpath_variables.cpp" target="_top">samples/xpath_variables.cpp</a>):
       </p>
 <p>
+        
 </p>
-<pre class="programlisting"><span class="comment">// Select nodes via compiled query</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_variable_set</span> <span class="identifier">vars</span><span class="special">;</span>
+<pre class="programlisting"><span class="comment">// Select nodes via compiled query
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_variable_set</span> <span class="identifier">vars</span><span class="special">;</span>
 <span class="identifier">vars</span><span class="special">.</span><span class="identifier">add</span><span class="special">(</span><span class="string">"remote"</span><span class="special">,</span> <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_type_boolean</span><span class="special">);</span>
 
 <span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_query</span> <span class="identifier">query_remote_tools</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote = string($remote)]"</span><span class="special">,</span> <span class="special">&amp;</span><span class="identifier">vars</span><span class="special">);</span>
@@ -569,8 +559,8 @@
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Local tool: "</span><span class="special">;</span>
 <span class="identifier">tools_local</span><span class="special">[</span><span class="number">0</span><span class="special">].</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">);</span>
 
-<span class="comment">// You can pass the context directly to select_nodes/select_single_node</span>
-<span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools_local_imm</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote = string($remote)]"</span><span class="special">,</span> <span class="special">&amp;</span><span class="identifier">vars</span><span class="special">);</span>
+<span class="comment">// You can pass the context directly to select_nodes/select_node
+</span><span class="identifier">pugi</span><span class="special">::</span><span class="identifier">xpath_node_set</span> <span class="identifier">tools_local_imm</span> <span class="special">=</span> <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"/Profile/Tools/Tool[@AllowRemote = string($remote)]"</span><span class="special">,</span> <span class="special">&amp;</span><span class="identifier">vars</span><span class="special">);</span>
 
 <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Local tool imm: "</span><span class="special">;</span>
 <span class="identifier">tools_local_imm</span><span class="special">[</span><span class="number">0</span><span class="special">].</span><span class="identifier">node</span><span class="special">().</span><span class="identifier">print</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">);</span>
@@ -580,7 +570,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.xpath.errors"></a><a class="link" href="xpath.html#manual.xpath.errors" title="Error handling">Error handling</a>
+<a name="manual.xpath.errors"></a><a class="link" href="xpath.html#manual.xpath.errors" title="Error handling"> Error handling</a>
 </h3></div></div></div>
 <p>
         There are two different mechanisms for error handling in XPath implementation;
@@ -588,23 +578,21 @@
         is controlled with <a class="link" href="install.html#PUGIXML_NO_EXCEPTIONS">PUGIXML_NO_EXCEPTIONS</a>
         define).
       </p>
-<p>
-        <a name="xpath_exception"></a><a name="xpath_exception::result"></a><a name="xpath_exception::what"></a>By default, XPath functions throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code> object in case of errors;
-        additionally, in the event any memory allocation fails, an <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">bad_alloc</span></code>
-        exception is thrown. Also <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
-        is thrown if the query is evaluated to a node set, but the return type is
-        not node set. If the query constructor succeeds (i.e. no exception is thrown),
-        the query object is valid. Otherwise you can get the error details via one
-        of the following functions:
+<a name="xpath_exception"></a><a name="xpath_exception::result"></a><a name="xpath_exception::what"></a><p>
+        By default, XPath functions throw <code class="computeroutput"><span class="identifier">xpath_exception</span></code>
+        object in case of errors; additionally, in the event any memory allocation
+        fails, an <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">bad_alloc</span></code> exception is thrown. Also <code class="computeroutput"><span class="identifier">xpath_exception</span></code> is thrown if the query
+        is evaluated to a node set, but the return type is not node set. If the query
+        constructor succeeds (i.e. no exception is thrown), the query object is valid.
+        Otherwise you can get the error details via one of the following functions:
       </p>
 <pre class="programlisting"><span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">xpath_exception</span><span class="special">::</span><span class="identifier">what</span><span class="special">()</span> <span class="keyword">const</span> <span class="keyword">throw</span><span class="special">();</span>
 <span class="keyword">const</span> <span class="identifier">xpath_parse_result</span><span class="special">&amp;</span> <span class="identifier">xpath_exception</span><span class="special">::</span><span class="identifier">result</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 </pre>
-<p>
-        <a name="xpath_query::unspecified_bool_type"></a><a name="xpath_query::result"></a>If
-        exceptions are disabled, then in the event of parsing failure the query is
-        initialized to invalid state; you can test if the query object is valid by
-        using it in a boolean expression: <code class="computeroutput"><span class="keyword">if</span>
+<a name="xpath_query::unspecified_bool_type"></a><a name="xpath_query::result"></a><p>
+        If exceptions are disabled, then in the event of parsing failure the query
+        is initialized to invalid state; you can test if the query object is valid
+        by using it in a boolean expression: <code class="computeroutput"><span class="keyword">if</span>
         <span class="special">(</span><span class="identifier">query</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span>
         <span class="special">}</span></code>. Additionally, you can get parsing
         result via the result() accessor:
@@ -617,9 +605,8 @@
         a query as a node set results in an empty node set if the return type is
         not node set.
       </p>
-<p>
-        <a name="xpath_parse_result"></a>The information about parsing result is
-        returned via <code class="computeroutput"><span class="identifier">xpath_parse_result</span></code>
+<a name="xpath_parse_result"></a><p>
+        The information about parsing result is returned via <code class="computeroutput"><span class="identifier">xpath_parse_result</span></code>
         object. It contains parsing status and the offset of last successfully parsed
         character from the beginning of the source stream:
       </p>
@@ -632,39 +619,39 @@
     <span class="keyword">const</span> <span class="keyword">char</span><span class="special">*</span> <span class="identifier">description</span><span class="special">()</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">};</span>
 </pre>
-<p>
-        <a name="xpath_parse_result::error"></a>Parsing result is represented as
-        the error message; it is either a null pointer, in case there is no error,
-        or the error message in the form of ASCII zero-terminated string.
+<a name="xpath_parse_result::error"></a><p>
+        Parsing result is represented as the error message; it is either a null pointer,
+        in case there is no error, or the error message in the form of ASCII zero-terminated
+        string.
       </p>
-<p>
-        <a name="xpath_parse_result::description"></a><code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> member function can be used to get the
-        error message; it never returns the null pointer, so you can safely use
+<a name="xpath_parse_result::description"></a><p>
         <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code>
-        even if query parsing succeeded. Note that <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> returns a <code class="computeroutput"><span class="keyword">char</span></code>
-        string even in <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code>;
-        you'll have to call <a class="link" href="dom.html#as_wide">as_wide</a> to get the <code class="computeroutput"><span class="keyword">wchar_t</span></code> string.
+        member function can be used to get the error message; it never returns the
+        null pointer, so you can safely use <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code> even if query parsing succeeded. Note that
+        <code class="computeroutput"><span class="identifier">description</span><span class="special">()</span></code>
+        returns a <code class="computeroutput"><span class="keyword">char</span></code> string even in
+        <code class="computeroutput"><span class="identifier">PUGIXML_WCHAR_MODE</span></code>; you'll
+        have to call <a class="link" href="dom.html#as_wide">as_wide</a> to get the <code class="computeroutput"><span class="keyword">wchar_t</span></code> string.
       </p>
-<p>
-        <a name="xpath_parse_result::offset"></a>In addition to the error message,
-        parsing result has an <code class="computeroutput"><span class="identifier">offset</span></code>
+<a name="xpath_parse_result::offset"></a><p>
+        In addition to the error message, parsing result has an <code class="computeroutput"><span class="identifier">offset</span></code>
         member, which contains the offset of last successfully parsed character.
         This offset is in units of <a class="link" href="dom.html#char_t">pugi::char_t</a> (bytes
         for character mode, wide characters for wide character mode).
       </p>
-<p>
-        <a name="xpath_parse_result::bool"></a>Parsing result object can be implicitly
-        converted to <code class="computeroutput"><span class="keyword">bool</span></code> like this:
-        <code class="computeroutput"><span class="keyword">if</span> <span class="special">(</span><span class="identifier">result</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span> <span class="special">}</span>
+<a name="xpath_parse_result::bool"></a><p>
+        Parsing result object can be implicitly converted to <code class="computeroutput"><span class="keyword">bool</span></code>
+        like this: <code class="computeroutput"><span class="keyword">if</span> <span class="special">(</span><span class="identifier">result</span><span class="special">)</span> <span class="special">{</span> <span class="special">...</span> <span class="special">}</span>
         <span class="keyword">else</span> <span class="special">{</span> <span class="special">...</span> <span class="special">}</span></code>.
       </p>
 <p>
         This is an example of XPath error handling (<a href="../samples/xpath_error.cpp" target="_top">samples/xpath_error.cpp</a>):
       </p>
 <p>
+        
 </p>
-<pre class="programlisting"><span class="comment">// Exception is thrown for incorrect query syntax</span>
-<span class="keyword">try</span>
+<pre class="programlisting"><span class="comment">// Exception is thrown for incorrect query syntax
+</span><span class="keyword">try</span>
 <span class="special">{</span>
     <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"//nodes[#true()]"</span><span class="special">);</span>
 <span class="special">}</span>
@@ -673,8 +660,8 @@
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Select failed: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">e</span><span class="special">.</span><span class="identifier">what</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 <span class="special">}</span>
 
-<span class="comment">// Exception is thrown for incorrect query semantics</span>
-<span class="keyword">try</span>
+<span class="comment">// Exception is thrown for incorrect query semantics
+</span><span class="keyword">try</span>
 <span class="special">{</span>
     <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"(123)/next"</span><span class="special">);</span>
 <span class="special">}</span>
@@ -683,8 +670,8 @@
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"Select failed: "</span> <span class="special">&lt;&lt;</span> <span class="identifier">e</span><span class="special">.</span><span class="identifier">what</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 <span class="special">}</span>
 
-<span class="comment">// Exception is thrown for query with incorrect return type</span>
-<span class="keyword">try</span>
+<span class="comment">// Exception is thrown for query with incorrect return type
+</span><span class="keyword">try</span>
 <span class="special">{</span>
     <span class="identifier">doc</span><span class="special">.</span><span class="identifier">select_nodes</span><span class="special">(</span><span class="string">"123"</span><span class="special">);</span>
 <span class="special">}</span>
@@ -698,7 +685,7 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="manual.xpath.w3c"></a><a class="link" href="xpath.html#manual.xpath.w3c" title="Conformance to W3C specification">Conformance to W3C specification</a>
+<a name="manual.xpath.w3c"></a><a class="link" href="xpath.html#manual.xpath.w3c" title="Conformance to W3C specification"> Conformance to W3C specification</a>
 </h3></div></div></div>
 <p>
         Because of the differences in document object models, performance considerations
@@ -745,7 +732,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.4</a> manual |
+<a href="http://pugixml.org/">pugixml 1.5</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
