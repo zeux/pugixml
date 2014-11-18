@@ -1892,6 +1892,37 @@ Because of the differences in document object models, performance considerations
 
 [section:changes Changelog]
 
+[h5 27.11.2014 - version 1.5]
+
+Major release, featuring a lot of performance improvements and some new features.
+
+* Specification changes:
+    # xml_document::load(const char_t*) was renamed to load_string; the old method is still available and will be deprecated in a future release
+    # xml_node::select_single_node was renamed to select_node; the old method is still available and will be deprecated in a future release.
+
+* New features:
+    # Added xml_node::append_move and other functions for moving nodes within a document
+    # Added xpath_query::evaluate_node for evaluating queries with a single node as a result
+
+* Performance improvements:
+    # Optimized XML parsing (10-40% faster with clang/gcc, up to 10% faster with MSVC)
+    # Optimized memory consumption when copying nodes in the same document (string contents is now shared)
+    # Optimized node copying (10% faster for cross-document copies, 3x faster for inter-document copies; also it now consumes a constant amount of stack space)
+    # Optimized node output (60% faster; also it now consumes a constant amount of stack space)
+    # Optimized XPath allocation (query evaluation now results in fewer temporary allocations)
+    # Optimized XPath sorting (node set sorting is 2-3x faster in some cases)
+    # Optimized XPath evaluation (XPathMark suite is 100x faster; some commonly used queries are 3-4x faster)
+
+* Compatibility improvements:
+    # Fixed xml_node::offset_debug for corner cases
+    # Fixed undefined behavior while calling memcpy in some cases
+    # Fixed MSVC 2015 compilation warnings
+    # Fixed contrib/foreach.hpp for Boost 1.56.0
+
+* Bug fixes
+    # Adjusted comment output to avoid malformed documents if the comment value contains "--"
+    # Fix XPath sorting for documents that were constructed using append_buffer
+
 [h5 27.02.2014 - version 1.4]
 
 Major release, featuring various new features, bug fixes and compatibility improvements.
