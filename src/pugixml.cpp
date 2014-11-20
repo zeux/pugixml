@@ -4970,7 +4970,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::append_child(xml_node_type type_)
 	{
-		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 		
 		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
 		if (!n) return xml_node();
@@ -4984,7 +4984,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::prepend_child(xml_node_type type_)
 	{
-		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 		
 		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
 		if (!n) return xml_node();
@@ -4998,7 +4998,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::insert_child_before(xml_node_type type_, const xml_node& node)
 	{
-		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 	
 		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
@@ -5013,7 +5013,7 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::insert_child_after(xml_node_type type_, const xml_node& node)
 	{
-		if (!impl::allow_insert_child(this->type(), type_)) return xml_node();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 	
 		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
@@ -5066,7 +5066,7 @@ namespace pugi
 	{
 		xml_node result = append_child(proto.type());
 
-		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
+		if (result) impl::node_copy_tree(result._root, proto._root);
 
 		return result;
 	}
@@ -5075,7 +5075,7 @@ namespace pugi
 	{
 		xml_node result = prepend_child(proto.type());
 
-		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
+		if (result) impl::node_copy_tree(result._root, proto._root);
 
 		return result;
 	}
@@ -5084,7 +5084,7 @@ namespace pugi
 	{
 		xml_node result = insert_child_after(proto.type(), node);
 
-		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
+		if (result) impl::node_copy_tree(result._root, proto._root);
 
 		return result;
 	}
@@ -5093,7 +5093,7 @@ namespace pugi
 	{
 		xml_node result = insert_child_before(proto.type(), node);
 
-		if (result) impl::node_copy_tree(result.internal_object(), proto.internal_object());
+		if (result) impl::node_copy_tree(result._root, proto._root);
 
 		return result;
 	}
