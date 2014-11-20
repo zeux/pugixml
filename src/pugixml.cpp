@@ -3658,11 +3658,11 @@ PUGI__NS_BEGIN
 		while (node != root);
 	}
 
-	PUGI__FN bool has_declaration(xml_node node)
+	PUGI__FN bool has_declaration(xml_node_struct* node)
 	{
-		for (xml_node child = node.first_child(); child; child = child.next_sibling())
+		for (xml_node_struct* child = node->first_child; child; child = child->next_sibling)
 		{
-			xml_node_type type = child.type();
+			xml_node_type type = PUGI__NODETYPE(child);
 
 			if (type == node_declaration) return true;
 			if (type == node_element) return false;
@@ -6066,7 +6066,7 @@ namespace pugi
 		#endif
 		}
 
-		if (!(flags & format_no_declaration) && !impl::has_declaration(*this))
+		if (!(flags & format_no_declaration) && !impl::has_declaration(_root))
 		{
 			buffered_writer.write_string(PUGIXML_TEXT("<?xml version=\"1.0\""));
 			if (encoding == encoding_latin1) buffered_writer.write_string(PUGIXML_TEXT(" encoding=\"ISO-8859-1\""));
