@@ -8436,9 +8436,9 @@ PUGI__NS_BEGIN
 			return false;
 		}
 
-		static bool eval_once(bool forward, nodeset_eval_t eval)
+		static bool eval_once(xpath_node_set::type_t type, nodeset_eval_t eval)
 		{
-			return forward ? eval != nodeset_eval_all : eval == nodeset_eval_any;
+			return type == xpath_node_set::type_sorted ? eval != nodeset_eval_all : eval == nodeset_eval_any;
 		}
 
 		template <class Comp> static bool compare_rel(xpath_ast_node* lhs, xpath_ast_node* rhs, const xpath_context& c, const xpath_stack& stack, const Comp& comp)
@@ -8610,7 +8610,7 @@ PUGI__NS_BEGIN
 		{
 			if (ns.size() == first) return;
 
-			bool last_once = eval_once(ns.type() == xpath_node_set::type_sorted, eval);
+			bool last_once = eval_once(ns.type(), eval);
 
 			for (xpath_ast_node* pred = _right; pred; pred = pred->_next)
 				pred->apply_predicate(ns, first, stack, !pred->_next && last_once);
@@ -9008,7 +9008,7 @@ PUGI__NS_BEGIN
 		template <class T> void step_fill(xpath_node_set_raw& ns, const xpath_node& xn, xpath_allocator* alloc, bool once, T v)
 		{
 			const axis_t axis = T::axis;
-			bool axis_has_attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
+			const bool axis_has_attributes = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_descendant_or_self || axis == axis_following || axis == axis_parent || axis == axis_preceding || axis == axis_self);
 
 			if (xn.node())
 				step_fill(ns, xn.node().internal_object(), alloc, once, v);
@@ -9019,15 +9019,16 @@ PUGI__NS_BEGIN
 		template <class T> xpath_node_set_raw step_do(const xpath_context& c, const xpath_stack& stack, nodeset_eval_t eval, T v)
 		{
 			const axis_t axis = T::axis;
-			bool axis_reverse = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling);
+			const bool axis_reverse = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling);
+			const xpath_node_set::type_t axis_type = axis_reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
 
 			bool once =
 				(axis == axis_attribute && _test == nodetest_name) ||
-				(!_right && eval_once(!axis_reverse, eval)) ||
+				(!_right && eval_once(axis_type, eval)) ||
 				(_right && !_right->_next && _right->_test == predicate_constant_one);
 
 			xpath_node_set_raw ns;
-			ns.set_type(axis_reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted);
+			ns.set_type(axis_type);
 
 			if (_left)
 			{
@@ -9693,7 +9694,7 @@ PUGI__NS_BEGIN
 				// either expression is a number or it contains position() call; sort by document order
 				if (_test != predicate_posinv) set.sort_do();
 
-				bool once = eval_once(set.type() == xpath_node_set::type_sorted, eval);
+				bool once = eval_once(set.type(), eval);
 
 				apply_predicate(set, 0, stack, once);
 			
