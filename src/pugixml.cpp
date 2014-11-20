@@ -711,6 +711,7 @@ PUGI__NS_BEGIN
 		else
 			parent->first_child = node->next_sibling;
 
+		node->parent = 0;
 		node->prev_sibling_c = 0;
 		node->next_sibling = 0;
 	}
