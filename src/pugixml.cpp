@@ -7435,6 +7435,7 @@ PUGI__NS_BEGIN
 			if (fc >= 128 || tc >= 128)
 				return 0;
 
+			// code=128 means "skip character"
 			if (!table[fc])
 				table[fc] = static_cast<unsigned char>(tc ? tc : 128);
 
@@ -7469,6 +7470,8 @@ PUGI__NS_BEGIN
 			{
 				unsigned char code = table[index];
 
+				// code=128 means "skip character" (table size is 128 so 128 can be a special value)
+				// this code skips these characters without extra branches
 				*write = static_cast<char_t>(code);
 				write += 1 - (code >> 7);
 			}
@@ -9525,9 +9528,10 @@ PUGI__NS_BEGIN
 				const char_t* pos = find_substring(s.c_str(), p.c_str());
 				if (!pos) return xpath_string();
 
-				const char_t* result = pos + p.length();
+				const char_t* rbegin = pos + p.length();
+				const char_t* rend = s.c_str() + s.length();
 
-				return s.uses_heap() ? xpath_string::from_heap(result, s.c_str() + s.length(), stack.result) : xpath_string::from_const(result);
+				return s.uses_heap() ? xpath_string::from_heap(rbegin, rend, stack.result) : xpath_string::from_const(rbegin);
 			}
 
 			case ast_func_substring_2:
@@ -9548,8 +9552,9 @@ PUGI__NS_BEGIN
 				assert(1 <= pos && pos <= s_length + 1);
 
 				const char_t* rbegin = s.c_str() + (pos - 1);
+				const char_t* rend = s.c_str() + s.length();
 				
-				return s.uses_heap() ? xpath_string::from_heap(rbegin, s.c_str() + s.length(), stack.result) : xpath_string::from_const(rbegin);
+				return s.uses_heap() ? xpath_string::from_heap(rbegin, rend, stack.result) : xpath_string::from_const(rbegin);
 			}
 			
 			case ast_func_substring_3:
