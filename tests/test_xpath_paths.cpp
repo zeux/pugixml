@@ -460,7 +460,10 @@ TEST_XML(xpath_paths_predicate_number_out_of_range, "<node><chapter/><chapter/><
 	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[-1 div 0]"));
 	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[1000000000000]"));
 	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[1 div 0]"));
+
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_NODESET(n, STR("following-sibling::chapter[0 div 0]"));
+#endif
 }
 
 TEST_XML(xpath_paths_predicate_constant_boolean, "<node><chapter/><chapter/><chapter/><chapter/><chapter/></node>")
@@ -480,7 +483,10 @@ TEST_XML(xpath_paths_predicate_position_eq, "<node><chapter/><chapter/><chapter>
 	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=1]")) % 3;
 	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=2+2]")) % 7;
 	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=last()]")) % 8;
+
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_NODESET(doc, STR("node/chapter[position()=string()]")) % 5;
+#endif
 }
 
 TEST_XML(xpath_paths_predicate_several, "<node><employee/><employee secretary=''/><employee assistant=''/><employee secretary='' assistant=''/><employee assistant='' secretary=''/></node>")

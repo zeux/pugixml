@@ -639,9 +639,11 @@ TEST(xpath_allocate_string_out_of_memory)
 #else
 	try
 	{
+	#ifndef __DMC__ // DigitalMars exception handling crashes instead of catching the exception...
 		xpath_query q(query.c_str());
 
 		CHECK_FORCE_FAIL("Expected out of memory exception");
+	#endif
 	}
 	catch (const std::bad_alloc&)
 	{
