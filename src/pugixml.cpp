@@ -3643,11 +3643,12 @@ PUGI__NS_BEGIN
 				}
 
 				node = node->parent;
-				depth--;
 
 				// write closing node
 				if (PUGI__NODETYPE(node) == node_element)
 				{
+					depth--;
+
 					if (indent_length)
 						text_output_indent(writer, indent, indent_length, depth);
 
