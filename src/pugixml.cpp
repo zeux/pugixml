@@ -1,5 +1,4 @@
 /**
-{
  * pugixml parser - version 1.5
  * --------------------------------------------------------
  * Copyright (C) 2006-2014, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
@@ -326,7 +325,7 @@ PUGI__NS_BEGIN
 			void* memory = xml_memory::allocate(size + xml_memory_page_alignment);
 			if (!memory) return 0;
 
-			// align upwards to page boundary (note: this guarantees at least 1 usable byte before the page)
+			// align to next page boundary (note: this guarantees at least 1 usable byte before the page)
 			char* page_memory = reinterpret_cast<char*>((reinterpret_cast<uintptr_t>(memory) + xml_memory_page_alignment) & ~(xml_memory_page_alignment - 1));
 
 			// prepare page structure
@@ -336,6 +335,7 @@ PUGI__NS_BEGIN
 			page->allocator = _root->allocator;
 
 			// record the offset for freeing the memory block
+			assert(page_memory > memory && page_memory - static_cast<char*>(memory) <= 127);
 			page_memory[-1] = static_cast<char>(page_memory - static_cast<char*>(memory));
 
 			return page;
@@ -5966,6 +5966,7 @@ namespace pugi
 		// destroy dynamic storage, leave sentinel page (it's in static memory)
 		impl::xml_memory_page* root_page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
 		assert(root_page && !root_page->prev);
+		assert(reinterpret_cast<char*>(root_page) >= _memory && reinterpret_cast<char*>(root_page) < _memory + sizeof(_memory));
 
 		for (impl::xml_memory_page* page = root_page->next; page; )
 		{
