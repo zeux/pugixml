@@ -95,7 +95,7 @@ struct dummy_fixture {};
 		\
 		test_fixture_##name() \
 		{ \
-			CHECK(doc.load(PUGIXML_TEXT(xml), flags)); \
+			CHECK(doc.load_string(PUGIXML_TEXT(xml), flags)); \
 		} \
 		\
 	private: \

@@ -6,7 +6,7 @@ void check_xml(const char* source)
 {
 //[code_load_error_handling
     pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load(source);
+    pugi::xml_parse_result result = doc.load_string(source);
 
     if (result)
         std::cout << "XML [" << source << "] parsed without errors, attr value: [" << doc.child("node").attribute("attr").value() << "]\n\n";

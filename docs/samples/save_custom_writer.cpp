@@ -94,7 +94,7 @@ int main()
 {
     // get a test document
     pugi::xml_document doc;
-    doc.load("<foo bar='baz'>hey</foo>");
+    doc.load_string("<foo bar='baz'>hey</foo>");
 
     // get contents as std::string (single pass)
     std::cout << "contents: [" << node_to_string(doc) << "]\n";

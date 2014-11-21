@@ -20,7 +20,7 @@ static xml_parse_result load_concat(xml_document& doc, const char_t* a, const ch
 	strcat(buffer, c);
 #endif
 
-	return doc.load(buffer, parse_fragment);
+	return doc.load_string(buffer, parse_fragment);
 }
 
 static bool test_doctype_wf(const char_t* decl)
@@ -41,7 +41,7 @@ static bool test_doctype_wf(const char_t* decl)
 	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
 
     // check load-store contents preservation
-    CHECK(doc.load(decl, parse_doctype | parse_fragment));
+    CHECK(doc.load_string(decl, parse_doctype | parse_fragment));
     CHECK_NODE(doc, decl);
 
 	return true;
@@ -281,8 +281,8 @@ TEST(parse_doctype_xmlconf_oasis_1)
 
     // not actually a doctype :)
     xml_document doc;
-    CHECK(doc.load(STR("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"), parse_full | parse_fragment) && doc.first_child().type() == node_comment && doc.last_child().type() == node_comment && doc.first_child().next_sibling() == doc.last_child());
-	CHECK(doc.load(STR("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"), parse_full | parse_fragment) && doc.first_child().type() == node_pi && doc.first_child() == doc.last_child());
+    CHECK(doc.load_string(STR("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"), parse_full | parse_fragment) && doc.first_child().type() == node_comment && doc.last_child().type() == node_comment && doc.first_child().next_sibling() == doc.last_child());
+	CHECK(doc.load_string(STR("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"), parse_full | parse_fragment) && doc.first_child().type() == node_pi && doc.first_child() == doc.last_child());
 }
 
 TEST(parse_doctype_xmlconf_xmltest_1)
@@ -310,15 +310,15 @@ TEST_XML_FLAGS(parse_doctype_value, "<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!
 TEST(parse_doctype_error_toplevel)
 {
     xml_document doc;
-    CHECK(doc.load(STR("<node><!DOCTYPE></node>")).status == status_bad_doctype);
-    CHECK(doc.load(STR("<node><!DOCTYPE></node>"), parse_doctype).status == status_bad_doctype);
+    CHECK(doc.load_string(STR("<node><!DOCTYPE></node>")).status == status_bad_doctype);
+    CHECK(doc.load_string(STR("<node><!DOCTYPE></node>"), parse_doctype).status == status_bad_doctype);
 }
 
 TEST(parse_doctype_error_ignore)
 {
     xml_document doc;
-	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ ")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ "), parse_doctype).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE[")).status == status_bad_doctype);
-	CHECK(doc.load(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE["), parse_doctype).status == status_bad_doctype);
+	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ ")).status == status_bad_doctype);
+	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ "), parse_doctype).status == status_bad_doctype);
+	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE[")).status == status_bad_doctype);
+	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE["), parse_doctype).status == status_bad_doctype);
 }

@@ -7,7 +7,7 @@ int main()
     //[code_save_subtree
     // get a test document
     pugi::xml_document doc;
-    doc.load("<foo bar='baz'><call>hey</call></foo>");
+    doc.load_string("<foo bar='baz'><call>hey</call></foo>");
 
     // print document to standard output (prints <?xml version="1.0"?><foo bar="baz"><call>hey</call></foo>)
     doc.save(std::cout, "", pugi::format_raw);

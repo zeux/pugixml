@@ -6,7 +6,7 @@ int main()
 {
     // get a test document
     pugi::xml_document doc;
-    doc.load("<foo bar='baz'>hey</foo>");
+    doc.load_string("<foo bar='baz'>hey</foo>");
 
     //[code_save_file
     // save document to file

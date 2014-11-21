@@ -21,7 +21,7 @@ int main()
 //]
 
     pugi::xml_document doc;
-    doc.load("<node/>");
+    doc.load_string("<node/>");
 }
 
 // vim:et

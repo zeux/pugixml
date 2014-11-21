@@ -483,7 +483,7 @@ TEST(write_stackless)
 		data += STR("</a>");
 
 	xml_document doc;
-	CHECK(doc.load(data.c_str()));
+	CHECK(doc.load_string(data.c_str()));
 
 	CHECK_NODE(doc, data.c_str());
 }

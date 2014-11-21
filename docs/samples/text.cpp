@@ -7,7 +7,7 @@ int main()
     pugi::xml_document doc;
 
     // get a test document
-    doc.load("<project><name>test</name><version>1.1</version><public>yes</public></project>");
+    doc.load_string("<project><name>test</name><version>1.1</version><public>yes</public></project>");
 
     pugi::xml_node project = doc.child("project");
 

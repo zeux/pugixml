@@ -492,6 +492,7 @@ TEST(xpath_operators_mod)
 	CHECK_XPATH_NUMBER(c, STR("-5 mod 3"), -2);
 	CHECK_XPATH_NUMBER(c, STR("-5 mod -3"), -2);
 
+#if !defined(__BORLANDC__)
 	// If either operand is NaN, the result is NaN
 	CHECK_XPATH_NUMBER_NAN(c, STR("(0 div 0) mod 3"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("3 mod (0 div 0)"));
@@ -505,14 +506,17 @@ TEST(xpath_operators_mod)
 	CHECK_XPATH_NUMBER_NAN(c, STR("-1 mod 0"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("(1 div 0) mod 0"));
 	CHECK_XPATH_NUMBER_NAN(c, STR("(-1 div 0) mod 0"));
+#endif
 
 	// If the dividend is finite and the divisor is an infinity, the result equals the dividend
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 	CHECK_XPATH_NUMBER(c, STR("1 mod (1 div 0)"), 1);
 	CHECK_XPATH_NUMBER(c, STR("1 mod (-1 div 0)"), 1);
 	CHECK_XPATH_NUMBER(c, STR("-1 mod (1 div 0)"), -1);
 	CHECK_XPATH_NUMBER(c, STR("0 mod (1 div 0)"), 0);
 	CHECK_XPATH_NUMBER(c, STR("0 mod (-1 div 0)"), 0);
 	CHECK_XPATH_NUMBER(c, STR("100000 mod (1 div 0)"), 100000);
+#endif
 
 	// If the dividend is a zero and the divisor is finite, the result equals the dividend.
 	CHECK_XPATH_NUMBER(c, STR("0 mod 1000000"), 0);

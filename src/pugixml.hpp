@@ -1,5 +1,5 @@
 /**
- * pugixml parser - version 1.4
+ * pugixml parser - version 1.5
  * --------------------------------------------------------
  * Copyright (C) 2006-2014, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at http://pugixml.org/
@@ -13,7 +13,7 @@
 
 #ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 100 + minor so that it's safe to use in less-than comparisons
-#	define PUGIXML_VERSION 140
+#	define PUGIXML_VERSION 150
 #endif
 
 // Include user configuration file (this can define various configuration macros)
@@ -959,8 +959,11 @@ namespace pugi
 		xml_parse_result load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options = parse_default);
 	#endif
 
-		// Load document from zero-terminated string. No encoding conversions are applied.
+		// (deprecated: use load_string instead) Load document from zero-terminated string. No encoding conversions are applied.
 		xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
+
+		// Load document from zero-terminated string. No encoding conversions are applied.
+		xml_parse_result load_string(const char_t* contents, unsigned int options = parse_default);
 
 		// Load document from file
 		xml_parse_result load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);

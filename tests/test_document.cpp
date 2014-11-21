@@ -158,7 +158,7 @@ TEST(document_load_stream_exceptions)
 TEST(document_load_stream_error_previous)
 {
 	pugi::xml_document doc;
-	CHECK(doc.load(STR("<node/>")));
+	CHECK(doc.load_string(STR("<node/>")));
 	CHECK(doc.first_child());
 
 	std::ifstream fs1("filedoesnotexist");
@@ -169,7 +169,7 @@ TEST(document_load_stream_error_previous)
 TEST(document_load_stream_wide_error_previous)
 {
 	pugi::xml_document doc;
-	CHECK(doc.load(STR("<node/>")));
+	CHECK(doc.load_string(STR("<node/>")));
 	CHECK(doc.first_child());
 
 	std::basic_ifstream<wchar_t> fs1("filedoesnotexist");
@@ -261,7 +261,7 @@ TEST(document_load_string)
 {
 	pugi::xml_document doc;
 
-	CHECK(doc.load(STR("<node/>")));
+	CHECK(doc.load_string(STR("<node/>")));
 	CHECK_NODE(doc, STR("<node />"));
 }
 
@@ -301,10 +301,6 @@ TEST(document_load_file_error)
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
 
-#ifndef _WIN32
-	CHECK(doc.load_file("/dev/tty").status == status_io_error);
-#endif
-
 	test_runner::_memory_fail_threshold = 1;
 	CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory);
 }
@@ -312,7 +308,7 @@ TEST(document_load_file_error)
 TEST(document_load_file_error_previous)
 {
 	pugi::xml_document doc;
-	CHECK(doc.load(STR("<node/>")));
+	CHECK(doc.load_string(STR("<node/>")));
 	CHECK(doc.first_child());
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
@@ -594,7 +590,7 @@ TEST(document_parse_result_description)
 TEST(document_load_fail)
 {
 	xml_document doc;
-	CHECK(!doc.load(STR("<foo><bar/>")));
+	CHECK(!doc.load_string(STR("<foo><bar/>")));
 	CHECK(doc.child(STR("foo")).child(STR("bar")));
 }
 
@@ -1083,7 +1079,7 @@ TEST(document_load_exceptions)
     try
     {
         pugi::xml_document doc;
-        if (!doc.load(STR("<node attribute='value"))) throw std::bad_alloc();
+        if (!doc.load_string(STR("<node attribute='value"))) throw std::bad_alloc();
 
         CHECK_FORCE_FAIL("Expected parsing failure");
     }
@@ -1118,7 +1114,7 @@ TEST_XML(document_reset, "<node><child/></node>")
     CHECK(!doc.first_child());
     CHECK_NODE(doc, STR(""));
 
-    CHECK(doc.load(STR("<node/>")));
+    CHECK(doc.load_string(STR("<node/>")));
     CHECK(doc.first_child());
     CHECK_NODE(doc, STR("<node />"));
 
@@ -1272,7 +1268,7 @@ TEST(document_alignment)
 	{
 		xml_document* doc = new (buf + offset) xml_document;
 
-		CHECK(doc->load(STR("<node />")));
+		CHECK(doc->load_string(STR("<node />")));
 		CHECK_NODE(*doc, STR("<node />"));
 
 		doc->~xml_document();
@@ -1311,4 +1307,11 @@ TEST(document_convert_out_of_memory)
 	{
 		delete[] files[j].data;
 	}
+}
+
+TEST(document_deprecated_load)
+{
+	xml_document doc;
+	CHECK(doc.load(STR("<node/>")));
+	CHECK_NODE(doc, STR("<node />"));
 }

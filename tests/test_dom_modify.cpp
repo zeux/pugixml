@@ -1289,7 +1289,7 @@ TEST(dom_node_copy_stackless)
 		data += STR("</a>");
 
 	xml_document doc;
-	CHECK(doc.load(data.c_str()));
+	CHECK(doc.load_string(data.c_str()));
 
 	xml_document copy;
 	CHECK(copy.append_copy(doc.first_child()));
@@ -1329,7 +1329,7 @@ TEST(dom_node_copy_copyless)
 TEST(dom_node_copy_copyless_mix)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>pcdata<?name value?><child attr1=\"\" attr2=\"value2\" /></node>"), parse_full));
+	CHECK(doc.load_string(STR("<node>pcdata<?name value?><child attr1=\"\" attr2=\"value2\" /></node>"), parse_full));
 
 	xml_node child = doc.child(STR("node")).child(STR("child"));
 
@@ -1430,4 +1430,16 @@ TEST_XML(dom_node_set_deallocate, "<node attr='value'>text</node>")
 	node.text().set(STR(""));
 
 	CHECK_NODE(doc, STR("<:anonymous :anonymous=\"\"></:anonymous>"));
+}
+
+TEST(dom_node_copy_declaration_empty_name)
+{
+	xml_document doc1;
+	xml_node decl1 = doc1.append_child(node_declaration);
+	decl1.set_name(STR(""));
+
+	xml_document doc2;
+	xml_node decl2 = doc2.append_copy(decl1);
+
+	CHECK_STRING(decl2.name(), STR(""));
 }

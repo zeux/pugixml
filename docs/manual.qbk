@@ -1,7 +1,7 @@
 [book pugixml
     [quickbook 1.5]
 
-    [version 1.4]
+    [version 1.5]
     [id manual]
     [copyright 2014 Arseny Kapoulkine]
     [license Distributed under the MIT License]
@@ -99,46 +99,48 @@ pugixml is Copyright (C) 2006-2014 Arseny Kapoulkine.
 
 [section:getting Getting pugixml]
 
-pugixml is distributed in source form. You can either download a source distribution or checkout the Subversion repository.
+pugixml is distributed in source form. You can either download a source distribution or clone the Git repository.
 
 [section:source Source distributions]
 
 You can download the latest source distribution via one of the following links:
 
 [pre
-[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.zip]
-[@https://github.com/zeux/pugixml/releases/download/v1.4/pugixml-1.4.tar.gz]
+[@https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.zip]
+[@https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.tar.gz]
 ]
 
 The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
 
-If you need an older version, you can download it from the [@http://code.google.com/p/pugixml/downloads/list version archive].
+If you need an older version, you can download it from the [@https://github.com/zeux/pugixml/releases version archive].
 
 [endsect] [/source]
 
-[section:subversion Subversion repository]
+[section:git Git repository]
 
-The Subversion repository is located at [@http://pugixml.googlecode.com/svn/]. There is a Subversion tag "release-{version}" for each version; also there is the "latest" tag, which always points to the latest stable release.
+The Git repository is located at [@https://github.com/zeux/pugixml/]. There is a Git tag "v{version}" for each version; also there is the "latest" tag, which always points to the latest stable release.
 
 For example, to checkout the current version, you can use this command:
 
-[pre svn checkout http://pugixml.googlecode.com/svn/tags/release-1.4 pugixml]
-
-To checkout the latest version, you can use this command:
-
-[pre svn checkout http://pugixml.googlecode.com/svn/tags/latest pugixml]
+[pre
+git clone https://github.com/zeux/pugixml
+cd pugixml
+git checkout v1.5
+]
 
 The repository contains library source, documentation, code examples and full unit test suite.
 
-Use latest version tag if you want to automatically get new versions via =svn update=. Use other tags if you want to switch to new versions only explicitly (for example, using =svn switch= command). Also please note that Subversion trunk contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from trunk without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
-
-[endsect] [/subversion]
-
-[section:git Git repository]
-
-The Subversion repository is mirrored by a Git repository at [@https://github.com/zeux/pugixml]. The mirror is frequently updated and has the same structure in terms of tags and contents as Subversion repository.
+Use latest version tag if you want to automatically get new versions. Use other tags if you want to switch to new versions only explicitly. Also please note that the master branch contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from master without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
 
 [endsect] [/git]
+
+[section:subversion Subversion repository]
+
+You can access the Git repository via Subversion using [@https://github.com/zeux/pugixml] URL. For example, to checkout the current version, you can use this command:
+
+[pre svn checkout https://github.com/zeux/pugixml/tags/v1.5 pugixml]
+
+[endsect] [/subversion]
 
 [endsect] [/getting]
 
@@ -600,7 +602,7 @@ The best way from the performance/memory point of view is to load document using
 [#xml_document::load_string]
 There is also a simple helper function for cases when you want to load the XML document from null-terminated character string:
 
-    xml_parse_result xml_document::load(const char_t* contents, unsigned int options = parse_default);
+    xml_parse_result xml_document::load_string(const char_t* contents, unsigned int options = parse_default);
 
 It is equivalent to calling `load_buffer` with `size` being either `strlen(contents)` or `wcslen(contents) * sizeof(wchar_t)`, depending on the character type. This function assumes native encoding for input data, so it does not do any encoding conversion. In general, this function is fine for loading small documents from string literals, but has more overhead and less functionality than the buffer loading functions.
 
@@ -1890,6 +1892,37 @@ Because of the differences in document object models, performance considerations
 
 [section:changes Changelog]
 
+[h5 27.11.2014 - version 1.5]
+
+Major release, featuring a lot of performance improvements and some new features.
+
+* Specification changes:
+    # xml_document::load(const char_t*) was renamed to load_string; the old method is still available and will be deprecated in a future release
+    # xml_node::select_single_node was renamed to select_node; the old method is still available and will be deprecated in a future release.
+
+* New features:
+    # Added xml_node::append_move and other functions for moving nodes within a document
+    # Added xpath_query::evaluate_node for evaluating queries with a single node as a result
+
+* Performance improvements:
+    # Optimized XML parsing (10-40% faster with clang/gcc, up to 10% faster with MSVC)
+    # Optimized memory consumption when copying nodes in the same document (string contents is now shared)
+    # Optimized node copying (10% faster for cross-document copies, 3x faster for inter-document copies; also it now consumes a constant amount of stack space)
+    # Optimized node output (60% faster; also it now consumes a constant amount of stack space)
+    # Optimized XPath allocation (query evaluation now results in fewer temporary allocations)
+    # Optimized XPath sorting (node set sorting is 2-3x faster in some cases)
+    # Optimized XPath evaluation (XPathMark suite is 100x faster; some commonly used queries are 3-4x faster)
+
+* Compatibility improvements:
+    # Fixed xml_node::offset_debug for corner cases
+    # Fixed undefined behavior while calling memcpy in some cases
+    # Fixed MSVC 2015 compilation warnings
+    # Fixed contrib/foreach.hpp for Boost 1.56.0
+
+* Bug fixes
+    # Adjusted comment output to avoid malformed documents if the comment value contains "--"
+    # Fix XPath sorting for documents that were constructed using append_buffer
+
 [h5 27.02.2014 - version 1.4]
 
 Major release, featuring various new features, bug fixes and compatibility improvements.
@@ -2501,7 +2534,7 @@ Classes:
     * `xml_parse_result `[link xml_document::load_stream load]`(std::wistream& stream, unsigned int options = parse_default);`
     [lbr]
 
-    * `xml_parse_result `[link xml_document::load_string load]`(const char_t* contents, unsigned int options = parse_default);`
+    * `xml_parse_result `[link xml_document::load_string load_string]`(const char_t* contents, unsigned int options = parse_default);`
     [lbr]
 
     * `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`

@@ -12,10 +12,10 @@ TEST(parse_pi_skip)
 	{
 		unsigned int flags = flag_sets[i];
 
-		CHECK(doc.load(STR("<?pi?><?pi value?>"), flags));
+		CHECK(doc.load_string(STR("<?pi?><?pi value?>"), flags));
 		CHECK(!doc.first_child());
 
-		CHECK(doc.load(STR("<?pi <tag/> value?>"), flags));
+		CHECK(doc.load_string(STR("<?pi <tag/> value?>"), flags));
 		CHECK(!doc.first_child());
 	}
 }
@@ -23,7 +23,7 @@ TEST(parse_pi_skip)
 TEST(parse_pi_parse)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<?pi1?><?pi2 value?>"), parse_fragment | parse_pi));
+	CHECK(doc.load_string(STR("<?pi1?><?pi2 value?>"), parse_fragment | parse_pi));
 
 	xml_node pi1 = doc.first_child();
 	xml_node pi2 = doc.last_child();
@@ -40,7 +40,7 @@ TEST(parse_pi_parse)
 TEST(parse_pi_parse_spaces)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<?target  \r\n\t  value ?>"), parse_fragment | parse_pi));
+	CHECK(doc.load_string(STR("<?target  \r\n\t  value ?>"), parse_fragment | parse_pi));
 
 	xml_node pi = doc.first_child();
 
@@ -59,46 +59,46 @@ TEST(parse_pi_error)
 	{
 		unsigned int flags = flag_sets[i];
 
-		CHECK(doc.load(STR("<?"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<??"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?>"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?#?>"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name>"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name ?"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name?"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name? "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name?  "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name  "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name   "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name value"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name value "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name value  "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name value  ?"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name value  ? "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name value  ? >"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name value  ? > "), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name&"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?name&?"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<??"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?>"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?#?>"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name>"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name ?"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name?"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name? "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name?  "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name  "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name   "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name value"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name value "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name value  "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name value  ?"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name value  ? "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name value  ? >"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name value  ? > "), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name&"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?name&?"), flags).status == status_bad_pi);
 	}
 	
-	CHECK(doc.load(STR("<?xx#?>"), parse_fragment | parse_pi).status == status_bad_pi);
-	CHECK(doc.load(STR("<?name&?>"), parse_fragment | parse_pi).status == status_bad_pi);
-	CHECK(doc.load(STR("<?name& x?>"), parse_fragment | parse_pi).status == status_bad_pi);
+	CHECK(doc.load_string(STR("<?xx#?>"), parse_fragment | parse_pi).status == status_bad_pi);
+	CHECK(doc.load_string(STR("<?name&?>"), parse_fragment | parse_pi).status == status_bad_pi);
+	CHECK(doc.load_string(STR("<?name& x?>"), parse_fragment | parse_pi).status == status_bad_pi);
 }
 
 TEST(parse_comments_skip)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<!----><!--value-->"), parse_fragment));
+	CHECK(doc.load_string(STR("<!----><!--value-->"), parse_fragment));
 	CHECK(!doc.first_child());
 }
 
 TEST(parse_comments_parse)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<!----><!--value-->"), parse_fragment | parse_comments));
+	CHECK(doc.load_string(STR("<!----><!--value-->"), parse_fragment | parse_comments));
 
 	xml_node c1 = doc.first_child();
 	xml_node c2 = doc.last_child();
@@ -115,7 +115,7 @@ TEST(parse_comments_parse)
 TEST(parse_comments_parse_no_eol)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<!--\r\rval1\rval2\r\nval3\nval4\r\r-->"), parse_fragment | parse_comments));
+	CHECK(doc.load_string(STR("<!--\r\rval1\rval2\r\nval3\nval4\r\r-->"), parse_fragment | parse_comments));
 
 	xml_node c = doc.first_child();
 	CHECK(c.type() == node_comment);
@@ -125,7 +125,7 @@ TEST(parse_comments_parse_no_eol)
 TEST(parse_comments_parse_eol)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<!--\r\rval1\rval2\r\nval3\nval4\r\r-->"), parse_fragment | parse_comments | parse_eol));
+	CHECK(doc.load_string(STR("<!--\r\rval1\rval2\r\nval3\nval4\r\r-->"), parse_fragment | parse_comments | parse_eol));
 
 	xml_node c = doc.first_child();
 	CHECK(c.type() == node_comment);
@@ -142,33 +142,33 @@ TEST(parse_comments_error)
 	{
 		unsigned int flags = flag_sets[i];
 
-		CHECK(doc.load(STR("<!-"), flags).status == status_bad_comment);
-		CHECK(doc.load(STR("<!--"), flags).status == status_bad_comment);
-		CHECK(doc.load(STR("<!--v"), flags).status == status_bad_comment);
-		CHECK(doc.load(STR("<!-->"), flags).status == status_bad_comment);
-		CHECK(doc.load(STR("<!--->"), flags).status == status_bad_comment);
-		CHECK(doc.load(STR("<!-- <!-- --><!- -->"), flags).status == status_bad_comment);
+		CHECK(doc.load_string(STR("<!-"), flags).status == status_bad_comment);
+		CHECK(doc.load_string(STR("<!--"), flags).status == status_bad_comment);
+		CHECK(doc.load_string(STR("<!--v"), flags).status == status_bad_comment);
+		CHECK(doc.load_string(STR("<!-->"), flags).status == status_bad_comment);
+		CHECK(doc.load_string(STR("<!--->"), flags).status == status_bad_comment);
+		CHECK(doc.load_string(STR("<!-- <!-- --><!- -->"), flags).status == status_bad_comment);
 	}
 }
 
 TEST(parse_cdata_skip)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<![CDATA[]]><![CDATA[value]]>"), parse_fragment));
+	CHECK(doc.load_string(STR("<![CDATA[]]><![CDATA[value]]>"), parse_fragment));
 	CHECK(!doc.first_child());
 }
 
 TEST(parse_cdata_skip_contents)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node><![CDATA[]]>hello<![CDATA[value]]>, world!</node>"), parse_fragment));
+	CHECK(doc.load_string(STR("<node><![CDATA[]]>hello<![CDATA[value]]>, world!</node>"), parse_fragment));
 	CHECK_NODE(doc, STR("<node>hello, world!</node>"));
 }
 
 TEST(parse_cdata_parse)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<![CDATA[]]><![CDATA[value]]>"), parse_fragment | parse_cdata));
+	CHECK(doc.load_string(STR("<![CDATA[]]><![CDATA[value]]>"), parse_fragment | parse_cdata));
 
 	xml_node c1 = doc.first_child();
 	xml_node c2 = doc.last_child();
@@ -185,7 +185,7 @@ TEST(parse_cdata_parse)
 TEST(parse_cdata_parse_no_eol)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<![CDATA[\r\rval1\rval2\r\nval3\nval4\r\r]]>"), parse_fragment | parse_cdata));
+	CHECK(doc.load_string(STR("<![CDATA[\r\rval1\rval2\r\nval3\nval4\r\r]]>"), parse_fragment | parse_cdata));
 
 	xml_node c = doc.first_child();
 	CHECK(c.type() == node_cdata);
@@ -195,7 +195,7 @@ TEST(parse_cdata_parse_no_eol)
 TEST(parse_cdata_parse_eol)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<![CDATA[\r\rval1\rval2\r\nval3\nval4\r\r]]>"), parse_fragment | parse_cdata | parse_eol));
+	CHECK(doc.load_string(STR("<![CDATA[\r\rval1\rval2\r\nval3\nval4\r\r]]>"), parse_fragment | parse_cdata | parse_eol));
 
 	xml_node c = doc.first_child();
 	CHECK(c.type() == node_cdata);
@@ -212,29 +212,29 @@ TEST(parse_cdata_error)
 	{
 		unsigned int flags = flag_sets[i];
 
-		CHECK(doc.load(STR("<!["), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![C"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CD"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDA"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDAT"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA["), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA[]"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA[data"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA[data]"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA[data]]"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA[>"), flags).status == status_bad_cdata);
-		CHECK(doc.load(STR("<![CDATA[ <![CDATA[]]><![CDATA ]]>"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<!["), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![C"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CD"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDA"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDAT"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA["), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA[]"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA[data"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA[data]"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA[data]]"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA[>"), flags).status == status_bad_cdata);
+		CHECK(doc.load_string(STR("<![CDATA[ <![CDATA[]]><![CDATA ]]>"), flags).status == status_bad_cdata);
 	}
 }
 
 TEST(parse_ws_pcdata_skip)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("  "), parse_fragment));
+	CHECK(doc.load_string(STR("  "), parse_fragment));
 	CHECK(!doc.first_child());
 
-	CHECK(doc.load(STR("<root>  <node>  </node>  </root>"), parse_minimal));
+	CHECK(doc.load_string(STR("<root>  <node>  </node>  </root>"), parse_minimal));
 	
 	xml_node root = doc.child(STR("root"));
 	
@@ -245,7 +245,7 @@ TEST(parse_ws_pcdata_skip)
 TEST(parse_ws_pcdata_parse)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<root>  <node>  </node>  </root>"), parse_minimal | parse_ws_pcdata));
+	CHECK(doc.load_string(STR("<root>  <node>  </node>  </root>"), parse_minimal | parse_ws_pcdata));
 
 	xml_node root = doc.child(STR("root"));
 
@@ -334,7 +334,7 @@ TEST(parse_ws_pcdata_permutations)
                 unsigned int flags[] = {parse_default, parse_default | parse_ws_pcdata, parse_default | parse_ws_pcdata_single};
 
                 xml_document doc;
-                CHECK((td.nodes > 0) == doc.load(td.source, flags[flag]));
+                CHECK((td.nodes > 0) == doc.load_string(td.source, flags[flag]));
                 CHECK_NODE(doc, td.result);
 
                 int nodes = get_tree_node_count(doc);
@@ -385,7 +385,7 @@ TEST(parse_ws_pcdata_fragment_permutations)
                 unsigned int flags[] = {parse_default, parse_default | parse_ws_pcdata, parse_default | parse_ws_pcdata_single};
 
                 xml_document doc;
-                CHECK((td.nodes > 0) == doc.load(td.source, flags[flag] | parse_fragment));
+                CHECK((td.nodes > 0) == doc.load_string(td.source, flags[flag] | parse_fragment));
                 CHECK_NODE(doc, td.result);
 
                 int nodes = get_tree_node_count(doc);
@@ -398,7 +398,7 @@ TEST(parse_ws_pcdata_fragment_permutations)
 TEST(parse_pcdata_no_eol)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<root>\r\rval1\rval2\r\nval3\nval4\r\r</root>"), parse_minimal));
+	CHECK(doc.load_string(STR("<root>\r\rval1\rval2\r\nval3\nval4\r\r</root>"), parse_minimal));
 
 	CHECK_STRING(doc.child_value(STR("root")), STR("\r\rval1\rval2\r\nval3\nval4\r\r"));
 }
@@ -406,7 +406,7 @@ TEST(parse_pcdata_no_eol)
 TEST(parse_pcdata_eol)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<root>\r\rval1\rval2\r\nval3\nval4\r\r</root>"), parse_minimal | parse_eol));
+	CHECK(doc.load_string(STR("<root>\r\rval1\rval2\r\nval3\nval4\r\r</root>"), parse_minimal | parse_eol));
 
 	CHECK_STRING(doc.child_value(STR("root")), STR("\n\nval1\nval2\nval3\nval4\n\n"));
 }
@@ -414,7 +414,7 @@ TEST(parse_pcdata_eol)
 TEST(parse_pcdata_skip_ext)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("pre<root/>post"), parse_minimal));
+	CHECK(doc.load_string(STR("pre<root/>post"), parse_minimal));
 	CHECK(doc.first_child() == doc.last_child());
 	CHECK(doc.first_child().type() == node_element);
 }
@@ -422,7 +422,7 @@ TEST(parse_pcdata_skip_ext)
 TEST(parse_pcdata_error)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<root>pcdata"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("<root>pcdata"), parse_minimal).status == status_end_element_mismatch);
 }
 
 TEST(parse_pcdata_trim)
@@ -460,7 +460,7 @@ TEST(parse_pcdata_trim)
         const test_data_t& td = test_data[i];
 
         xml_document doc;
-        CHECK(doc.load(td.source, td.flags | parse_trim_pcdata));
+        CHECK(doc.load_string(td.source, td.flags | parse_trim_pcdata));
 
         const pugi::char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
         CHECK_STRING(value, td.result);
@@ -474,7 +474,7 @@ TEST(parse_pcdata_trim_empty)
 	for (size_t i = 0; i < sizeof(flags) / sizeof(flags[0]); ++i)
 	{
 		xml_document doc;
-		CHECK(doc.load(STR("<node>   </node>"), flags[i] | parse_trim_pcdata));
+		CHECK(doc.load_string(STR("<node>   </node>"), flags[i] | parse_trim_pcdata));
 
 		xml_node node = doc.child(STR("node"));
 		CHECK(node);
@@ -485,14 +485,14 @@ TEST(parse_pcdata_trim_empty)
 TEST(parse_escapes_skip)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id='&lt;&gt;&amp;&apos;&quot;'>&lt;&gt;&amp;&apos;&quot;</node>"), parse_minimal));
+	CHECK(doc.load_string(STR("<node id='&lt;&gt;&amp;&apos;&quot;'>&lt;&gt;&amp;&apos;&quot;</node>"), parse_minimal));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("&lt;&gt;&amp;&apos;&quot;"));
 }
 
 TEST(parse_escapes_parse)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id='&lt;&gt;&amp;&apos;&quot;'>&lt;&gt;&amp;&apos;&quot;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node id='&lt;&gt;&amp;&apos;&quot;'>&lt;&gt;&amp;&apos;&quot;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("<>&'\""));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("<>&'\""));
 }
@@ -500,28 +500,28 @@ TEST(parse_escapes_parse)
 TEST(parse_escapes_code)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>&#1;&#32;&#x20;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&#1;&#32;&#x20;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("\01  "));
 }
 
 TEST(parse_escapes_code_exhaustive_dec)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>&#/;&#01;&#2;&#3;&#4;&#5;&#6;&#7;&#8;&#9;&#:;&#a;&#A;&#XA;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&#/;&#01;&#2;&#3;&#4;&#5;&#6;&#7;&#8;&#9;&#:;&#a;&#A;&#XA;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#:;&#a;&#A;&#XA;"));
 }
 
 TEST(parse_escapes_code_exhaustive_hex)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>&#x/;&#x01;&#x2;&#x3;&#x4;&#x5;&#x6;&#x7;&#x8;&#x9;&#x:;&#x@;&#xA;&#xB;&#xC;&#xD;&#xE;&#xF;&#xG;&#x`;&#xa;&#xb;&#xc;&#xd;&#xe;&#xf;&#xg;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&#x/;&#x01;&#x2;&#x3;&#x4;&#x5;&#x6;&#x7;&#x8;&#x9;&#x:;&#x@;&#xA;&#xB;&#xC;&#xD;&#xE;&#xF;&#xG;&#x`;&#xa;&#xb;&#xc;&#xd;&#xe;&#xf;&#xg;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#x/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#x:;&#x@;\xa\xb\xc\xd\xe\xf&#xG;&#x`;\xa\xb\xc\xd\xe\xf&#xg;"));
 }
 
 TEST(parse_escapes_code_restore)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>&#1&#32;&#x1&#32;&#1-&#32;&#x1-&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&#1&#32;&#x1&#32;&#1-&#32;&#x1-&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#1 &#x1 &#1- &#x1- "));
 }
 
@@ -529,26 +529,26 @@ TEST(parse_escapes_char_restore)
 {
 	xml_document doc;
 
-	CHECK(doc.load(STR("<node>&q&#32;&qu&#32;&quo&#32;&quot&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&q&#32;&qu&#32;&quo&#32;&quot&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&q &qu &quo &quot "));
 
-	CHECK(doc.load(STR("<node>&a&#32;&ap&#32;&apo&#32;&apos&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&a&#32;&ap&#32;&apo&#32;&apos&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&a &ap &apo &apos "));
 
-	CHECK(doc.load(STR("<node>&a&#32;&am&#32;&amp&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&a&#32;&am&#32;&amp&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&a &am &amp "));
 
-	CHECK(doc.load(STR("<node>&l&#32;&lt&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&l&#32;&lt&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&l &lt "));
 
-	CHECK(doc.load(STR("<node>&g&#32;&gt&#32;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&g&#32;&gt&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&g &gt "));
 }
 
 TEST(parse_escapes_unicode)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>&#x03B3;&#x03b3;&#x24B62;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&#x03B3;&#x03b3;&#x24B62;</node>"), parse_minimal | parse_escapes));
 
 #ifdef PUGIXML_WCHAR_MODE
 	const pugi::char_t* v = doc.child_value(STR("node"));
@@ -564,23 +564,23 @@ TEST(parse_escapes_unicode)
 TEST(parse_escapes_error)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>&#x03g;&#ab;&quot</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&#x03g;&#ab;&quot</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#x03g;&#ab;&quot"));
 
-	CHECK(!doc.load(STR("<node id='&#x12")));
-	CHECK(!doc.load(STR("<node id='&g")));
-	CHECK(!doc.load(STR("<node id='&gt")));
-	CHECK(!doc.load(STR("<node id='&l")));
-	CHECK(!doc.load(STR("<node id='&lt")));
-	CHECK(!doc.load(STR("<node id='&a")));
-	CHECK(!doc.load(STR("<node id='&amp")));
-	CHECK(!doc.load(STR("<node id='&apos")));
+	CHECK(!doc.load_string(STR("<node id='&#x12")));
+	CHECK(!doc.load_string(STR("<node id='&g")));
+	CHECK(!doc.load_string(STR("<node id='&gt")));
+	CHECK(!doc.load_string(STR("<node id='&l")));
+	CHECK(!doc.load_string(STR("<node id='&lt")));
+	CHECK(!doc.load_string(STR("<node id='&a")));
+	CHECK(!doc.load_string(STR("<node id='&amp")));
+	CHECK(!doc.load_string(STR("<node id='&apos")));
 }
 
 TEST(parse_escapes_code_invalid)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node>&#;&#x;&;&#x-;&#-;</node>"), parse_minimal | parse_escapes));
+	CHECK(doc.load_string(STR("<node>&#;&#x;&;&#x-;&#-;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#;&#x;&;&#x-;&#-;"));
 }
 
@@ -598,7 +598,7 @@ TEST(parse_escapes_attribute)
 				flags |= (eol ? parse_eol : 0);
 				flags |= (wconv ? parse_wconv_attribute : 0);
 
-				CHECK(doc.load(STR("<node id='&quot;'/>"), flags));
+				CHECK(doc.load_string(STR("<node id='&quot;'/>"), flags));
 				CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("\""));
 			}
 }
@@ -606,7 +606,7 @@ TEST(parse_escapes_attribute)
 TEST(parse_attribute_spaces)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id1='v1' id2 ='v2' id3= 'v3' id4 = 'v4' id5 \n\r\t = \r\t\n 'v5' />"), parse_minimal));
+	CHECK(doc.load_string(STR("<node id1='v1' id2 ='v2' id3= 'v3' id4 = 'v4' id5 \n\r\t = \r\t\n 'v5' />"), parse_minimal));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id1")).value(), STR("v1"));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id2")).value(), STR("v2"));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id3")).value(), STR("v3"));
@@ -617,7 +617,7 @@ TEST(parse_attribute_spaces)
 TEST(parse_attribute_quot)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id1='v1' id2=\"v2\"/>"), parse_minimal));
+	CHECK(doc.load_string(STR("<node id1='v1' id2=\"v2\"/>"), parse_minimal));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id1")).value(), STR("v1"));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id2")).value(), STR("v2"));
 }
@@ -625,28 +625,28 @@ TEST(parse_attribute_quot)
 TEST(parse_attribute_no_eol_no_wconv)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal));
+	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR(" \t\r\rval1  \rval2\r\nval3\nval4\r\r"));
 }
 
 TEST(parse_attribute_eol_no_wconv)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_eol));
+	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_eol));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR(" \t\n\nval1  \nval2\nval3\nval4\n\n"));
 }
 
 TEST(parse_attribute_no_eol_wconv)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_wconv_attribute));
+	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_wconv_attribute));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("    val1   val2 val3 val4  "));
 }
 
 TEST(parse_attribute_eol_wconv)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_eol | parse_wconv_attribute));
+	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_eol | parse_wconv_attribute));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("    val1   val2 val3 val4  "));
 }
 
@@ -658,7 +658,7 @@ TEST(parse_attribute_wnorm)
 		for (int wconv = 0; wconv < 2; ++wconv)
 		{
 			unsigned int flags = parse_minimal | parse_wnorm_attribute | (eol ? parse_eol : 0) | (wconv ? parse_wconv_attribute : 0);
-			CHECK(doc.load(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), flags));
+			CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), flags));
 			CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("val1 val2 val3 val4"));
 		}
 }
@@ -679,7 +679,7 @@ TEST(parse_attribute_variations)
 					flags |= (wconv ? parse_wconv_attribute : 0);
 					flags |= (escapes ? parse_escapes : 0);
 
-					CHECK(doc.load(STR("<node id='1'/>"), flags));
+					CHECK(doc.load_string(STR("<node id='1'/>"), flags));
 					CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
 				}
 }
@@ -688,24 +688,24 @@ TEST(parse_attribute_variations)
 TEST(parse_attribute_error)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node id"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id "), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id  "), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id   "), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id/"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id?/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id=/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id='/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id=\"/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id=\"'/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id='\"/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id='\"/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node #/>"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node#/>"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node id1='1'id2='2'/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node id&='1'/>"), parse_minimal).status == status_bad_attribute);
-	CHECK(doc.load(STR("<node &='1'/>"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node id"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id "), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id  "), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id   "), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id/"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id?/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id=/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id='/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id=\"/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id=\"'/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id='\"/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id='\"/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node #/>"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node#/>"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node id1='1'id2='2'/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node id&='1'/>"), parse_minimal).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<node &='1'/>"), parse_minimal).status == status_bad_start_element);
 }
 
 TEST(parse_attribute_termination_error)
@@ -722,7 +722,7 @@ TEST(parse_attribute_termination_error)
 				flags |= (eol ? parse_eol : 0);
 				flags |= (wconv ? parse_wconv_attribute : 0);
 
-				CHECK(doc.load(STR("<node id='value"), flags).status == status_bad_attribute);
+				CHECK(doc.load_string(STR("<node id='value"), flags).status == status_bad_attribute);
 			}
 }
 
@@ -740,7 +740,7 @@ TEST(parse_attribute_quot_inside)
 				flags |= (eol ? parse_eol : 0);
 				flags |= (wconv ? parse_wconv_attribute : 0);
 
-				CHECK(doc.load(STR("<node id1='\"' id2=\"'\"/>"), flags));
+				CHECK(doc.load_string(STR("<node id1='\"' id2=\"'\"/>"), flags));
 				CHECK_STRING(doc.child(STR("node")).attribute(STR("id1")).value(), STR("\""));
 				CHECK_STRING(doc.child(STR("node")).attribute(STR("id2")).value(), STR("'"));
 			}
@@ -749,60 +749,60 @@ TEST(parse_attribute_quot_inside)
 TEST(parse_tag_single)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node/><node /><node\n/>"), parse_minimal));
+	CHECK(doc.load_string(STR("<node/><node /><node\n/>"), parse_minimal));
 	CHECK_NODE(doc, STR("<node /><node /><node />"));
 }
 
 TEST(parse_tag_hierarchy)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<node><n1><n2/></n1><n3><n4><n5></n5></n4></n3 \r\n></node>"), parse_minimal));
+	CHECK(doc.load_string(STR("<node><n1><n2/></n1><n3><n4><n5></n5></n4></n3 \r\n></node>"), parse_minimal));
 	CHECK_NODE(doc, STR("<node><n1><n2 /></n1><n3><n4><n5 /></n4></n3></node>"));
 }
 
 TEST(parse_tag_error)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<"), parse_minimal).status == status_unrecognized_tag);
-	CHECK(doc.load(STR("<!"), parse_minimal).status == status_unrecognized_tag);
-	CHECK(doc.load(STR("<!D"), parse_minimal).status == status_unrecognized_tag);
-	CHECK(doc.load(STR("<#"), parse_minimal).status == status_unrecognized_tag);
-	CHECK(doc.load(STR("<node#"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node/"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node /"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node / "), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node / >"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node/ >"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("</ node>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("</node"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("</node "), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("<node></ node>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("<node></node"), parse_minimal).status == status_bad_end_element);
-	CHECK(doc.load(STR("<node></node "), parse_minimal).status == status_bad_end_element);
-	CHECK(doc.load(STR("<node></nodes>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("<node>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("<node/><"), parse_minimal).status == status_unrecognized_tag);
-	CHECK(doc.load(STR("<node attr='value'>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("</></node>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("</node>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("</>"), parse_minimal).status == status_end_element_mismatch);
-	CHECK(doc.load(STR("<node></node v>"), parse_minimal).status == status_bad_end_element);
-	CHECK(doc.load(STR("<node&/>"), parse_minimal).status == status_bad_start_element);
-	CHECK(doc.load(STR("<node& v='1'/>"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<"), parse_minimal).status == status_unrecognized_tag);
+	CHECK(doc.load_string(STR("<!"), parse_minimal).status == status_unrecognized_tag);
+	CHECK(doc.load_string(STR("<!D"), parse_minimal).status == status_unrecognized_tag);
+	CHECK(doc.load_string(STR("<#"), parse_minimal).status == status_unrecognized_tag);
+	CHECK(doc.load_string(STR("<node#"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node/"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node /"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node / "), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node / >"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node/ >"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("</ node>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("</node"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("</node "), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("<node></ node>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("<node></node"), parse_minimal).status == status_bad_end_element);
+	CHECK(doc.load_string(STR("<node></node "), parse_minimal).status == status_bad_end_element);
+	CHECK(doc.load_string(STR("<node></nodes>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("<node>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("<node/><"), parse_minimal).status == status_unrecognized_tag);
+	CHECK(doc.load_string(STR("<node attr='value'>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("</></node>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("</node>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("</>"), parse_minimal).status == status_end_element_mismatch);
+	CHECK(doc.load_string(STR("<node></node v>"), parse_minimal).status == status_bad_end_element);
+	CHECK(doc.load_string(STR("<node&/>"), parse_minimal).status == status_bad_start_element);
+	CHECK(doc.load_string(STR("<node& v='1'/>"), parse_minimal).status == status_bad_start_element);
 }
 
 TEST(parse_declaration_cases)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<?xml?><?xmL?><?xMl?><?xML?><?Xml?><?XmL?><?XMl?><?XML?>"), parse_fragment | parse_pi));
+	CHECK(doc.load_string(STR("<?xml?><?xmL?><?xMl?><?xML?><?Xml?><?XmL?><?XMl?><?XML?>"), parse_fragment | parse_pi));
 	CHECK(!doc.first_child());
 }
 
 TEST(parse_declaration_attr_cases)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<?xml ?><?xmL ?><?xMl ?><?xML ?><?Xml ?><?XmL ?><?XMl ?><?XML ?>"), parse_fragment | parse_pi));
+	CHECK(doc.load_string(STR("<?xml ?><?xmL ?><?xMl ?><?xML ?><?Xml ?><?XmL ?><?XMl ?><?XML ?>"), parse_fragment | parse_pi));
 	CHECK(!doc.first_child());
 }
 
@@ -816,10 +816,10 @@ TEST(parse_declaration_skip)
 	{
 		unsigned int flags = flag_sets[i];
 
-		CHECK(doc.load(STR("<?xml?><?xml version='1.0'?>"), flags));
+		CHECK(doc.load_string(STR("<?xml?><?xml version='1.0'?>"), flags));
 		CHECK(!doc.first_child());
 
-		CHECK(doc.load(STR("<?xml <tag/> ?>"), flags));
+		CHECK(doc.load_string(STR("<?xml <tag/> ?>"), flags));
 		CHECK(!doc.first_child());
 	}
 }
@@ -827,7 +827,7 @@ TEST(parse_declaration_skip)
 TEST(parse_declaration_parse)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("<?xml?><?xml version='1.0'?>"), parse_fragment | parse_declaration));
+	CHECK(doc.load_string(STR("<?xml?><?xml version='1.0'?>"), parse_fragment | parse_declaration));
 
 	xml_node d1 = doc.first_child();
 	xml_node d2 = doc.last_child();
@@ -850,21 +850,21 @@ TEST(parse_declaration_error)
 	{
 		unsigned int flags = flag_sets[i];
 
-		CHECK(doc.load(STR("<?xml"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?xml?"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?xml>"), flags).status == status_bad_pi);
-		CHECK(doc.load(STR("<?xml version='1>"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?xml"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?xml?"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?xml>"), flags).status == status_bad_pi);
+		CHECK(doc.load_string(STR("<?xml version='1>"), flags).status == status_bad_pi);
 	}
 	
-	CHECK(doc.load(STR("<?xml version='1?>"), parse_fragment | parse_declaration).status == status_bad_attribute);
-	CHECK(doc.load(STR("<foo><?xml version='1'?></foo>"), parse_fragment | parse_declaration).status == status_bad_pi);
+	CHECK(doc.load_string(STR("<?xml version='1?>"), parse_fragment | parse_declaration).status == status_bad_attribute);
+	CHECK(doc.load_string(STR("<foo><?xml version='1'?></foo>"), parse_fragment | parse_declaration).status == status_bad_pi);
 }
 
 TEST(parse_empty)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("")).status == status_no_document_element && !doc.first_child());
-	CHECK(doc.load(STR(""), parse_fragment) && !doc.first_child());
+	CHECK(doc.load_string(STR("")).status == status_no_document_element && !doc.first_child());
+	CHECK(doc.load_string(STR(""), parse_fragment) && !doc.first_child());
 }
 
 TEST(parse_out_of_memory)
@@ -872,7 +872,7 @@ TEST(parse_out_of_memory)
 	test_runner::_memory_fail_threshold = 256;
 
 	xml_document doc;
-	CHECK(doc.load(STR("<foo a='1'/>")).status == status_out_of_memory);
+	CHECK(doc.load_string(STR("<foo a='1'/>")).status == status_out_of_memory);
 	CHECK(!doc.first_child());
 }
 
@@ -928,7 +928,7 @@ TEST(parse_out_of_memory_halfway_attr)
 static bool test_offset(const char_t* contents, unsigned int options, pugi::xml_parse_status status, ptrdiff_t offset)
 {
 	xml_document doc;
-	xml_parse_result res = doc.load(contents, options);
+	xml_parse_result res = doc.load_string(contents, options);
 
 	return res.status == status && res.offset == offset;
 }
@@ -1065,7 +1065,7 @@ TEST(parse_bom_fragment_invalid_utf32)
 TEST(parse_pcdata_gap_fragment)
 {
 	xml_document doc;
-	CHECK(doc.load(STR("a&amp;b"), parse_fragment | parse_escapes));
+	CHECK(doc.load_string(STR("a&amp;b"), parse_fragment | parse_escapes));
 	CHECK_STRING(doc.text().get(), STR("a&b"));
 }
 
