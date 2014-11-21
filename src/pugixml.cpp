@@ -3722,6 +3722,8 @@ PUGI__NS_BEGIN
 
 	PUGI__FN void node_copy_string(char_t*& dest, uintptr_t& header, uintptr_t header_mask, char_t* source, uintptr_t& source_header, xml_allocator* alloc)
 	{
+		assert(!dest && (header & header_mask) == 0);
+
 		if (source)
 		{
 			if (alloc && (source_header & header_mask) == 0)
@@ -5069,38 +5071,60 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::append_copy(const xml_node& proto)
 	{
-		xml_node result = append_child(proto.type());
+		xml_node_type type_ = proto.type();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 
-		if (result) impl::node_copy_tree(result._root, proto._root);
+		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		if (!n) return xml_node();
 
-		return result;
+		impl::append_node(n._root, _root);
+		impl::node_copy_tree(n._root, proto._root);
+
+		return n;
 	}
 
 	PUGI__FN xml_node xml_node::prepend_copy(const xml_node& proto)
 	{
-		xml_node result = prepend_child(proto.type());
+		xml_node_type type_ = proto.type();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 
-		if (result) impl::node_copy_tree(result._root, proto._root);
+		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		if (!n) return xml_node();
 
-		return result;
+		impl::prepend_node(n._root, _root);
+		impl::node_copy_tree(n._root, proto._root);
+
+		return n;
 	}
 
 	PUGI__FN xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node)
 	{
-		xml_node result = insert_child_after(proto.type(), node);
+		xml_node_type type_ = proto.type();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
+		if (!node._root || node._root->parent != _root) return xml_node();
 
-		if (result) impl::node_copy_tree(result._root, proto._root);
+		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		if (!n) return xml_node();
 
-		return result;
+		impl::insert_node_after(n._root, node._root);
+		impl::node_copy_tree(n._root, proto._root);
+
+		return n;
 	}
 
 	PUGI__FN xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node)
 	{
-		xml_node result = insert_child_before(proto.type(), node);
+		xml_node_type type_ = proto.type();
+		if (!impl::allow_insert_child(type(), type_)) return xml_node();
+		if (!node._root || node._root->parent != _root) return xml_node();
 
-		if (result) impl::node_copy_tree(result._root, proto._root);
+		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		if (!n) return xml_node();
 
-		return result;
+		impl::insert_node_before(n._root, node._root);
+		impl::node_copy_tree(n._root, proto._root);
+
+		return n;
 	}
 
 	PUGI__FN xml_node xml_node::append_move(const xml_node& moved)

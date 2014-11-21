@@ -1426,3 +1426,15 @@ TEST_XML(dom_node_set_deallocate, "<node attr='value'>text</node>")
 
 	CHECK_NODE(doc, STR("<:anonymous :anonymous=\"\"></:anonymous>"));
 }
+
+TEST(dom_node_copy_declaration_empty_name)
+{
+	xml_document doc1;
+	xml_node decl1 = doc1.append_child(node_declaration);
+	decl1.set_name(STR(""));
+
+	xml_document doc2;
+	xml_node decl2 = doc2.append_copy(decl1);
+
+	CHECK_STRING(decl2.name(), STR(""));
+}
