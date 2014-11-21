@@ -5680,7 +5680,10 @@ namespace pugi
 		xml_node_type type_ = proto.type();
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
+
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::append_node(n._root, _root);
@@ -5694,7 +5697,10 @@ namespace pugi
 		xml_node_type type_ = proto.type();
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
+
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::prepend_node(n._root, _root);
@@ -5709,7 +5715,10 @@ namespace pugi
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
+
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_after(n._root, node._root);
@@ -5724,7 +5733,10 @@ namespace pugi
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
 		if (!node._root || node._root->parent != _root) return xml_node();
 
-		xml_node n(impl::allocate_node(impl::get_allocator(_root), type_));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_node();
+
+		xml_node n(impl::allocate_node(alloc, type_));
 		if (!n) return xml_node();
 
 		impl::insert_node_before(n._root, node._root);
