@@ -3682,6 +3682,11 @@ PUGI__NS_BEGIN
 		return false;
 	}
 
+	PUGI__FN bool allow_insert_attribute(xml_node_type parent)
+	{
+		return parent == node_element || parent == node_declaration;
+	}
+
 	PUGI__FN bool allow_insert_child(xml_node_type parent, xml_node_type child)
 	{
 		if (parent != node_document && parent != node_element) return false;
@@ -4872,7 +4877,7 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_node::append_attribute(const char_t* name_)
 	{
-		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
@@ -4886,7 +4891,7 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_node::prepend_attribute(const char_t* name_)
 	{
-		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
 		if (!a) return xml_attribute();
@@ -4900,7 +4905,7 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_node::insert_attribute_after(const char_t* name_, const xml_attribute& attr)
 	{
-		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 		
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
@@ -4915,7 +4920,7 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_node::insert_attribute_before(const char_t* name_, const xml_attribute& attr)
 	{
-		if (type() != node_element && type() != node_declaration) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 		
 		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
