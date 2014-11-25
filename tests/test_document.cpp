@@ -323,6 +323,16 @@ TEST(document_load_file_wide_ascii)
 	CHECK_NODE(doc, STR("<node />"));
 }
 
+#if !defined(__DMC__) && !defined(__MWERKS__)
+TEST(document_load_file_wide_unicode)
+{
+	pugi::xml_document doc;
+
+	CHECK(doc.load_file(L"tests/data/\x0442\x0435\x0441\x0442.xml"));
+	CHECK_NODE(doc, STR("<node />"));
+}
+#endif
+
 TEST(document_load_file_wide_out_of_memory)
 {
 	test_runner::_memory_fail_threshold = 1;
