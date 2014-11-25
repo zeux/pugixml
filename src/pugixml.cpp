@@ -3995,7 +3995,7 @@ PUGI__NS_BEGIN
 		_fseeki64(file, 0, SEEK_END);
 		length_type length = _ftelli64(file);
 		_fseeki64(file, 0, SEEK_SET);
-	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS) && !defined(__STRICT_ANSI__)
+	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS) && !(defined(__STRICT_ANSI__) && __GNUC__ * 100 + __GNUC_MINOR__ <= 405)
 		// there are 64-bit versions of fseek/ftell, let's use them
 		typedef off64_t length_type;
 
@@ -4240,7 +4240,7 @@ PUGI__NS_BEGIN
 	}
 #endif
 
-#if defined(PUGI__MSVC_CRT_VERSION) || defined(__BORLANDC__) || (defined(__MINGW32__) && !defined(__STRICT_ANSI__))
+#if defined(PUGI__MSVC_CRT_VERSION) || defined(__BORLANDC__) || (defined(__MINGW32__) && !(defined(__STRICT_ANSI__) && __GNUC__ * 100 + __GNUC_MINOR__ <= 405))
 	PUGI__FN FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
 	{
 		return _wfopen(path, mode);
