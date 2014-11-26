@@ -21,10 +21,10 @@ Due to a number of test files all results are normalized by pugixml results - th
 
 Benchmark results are visualized using [Google Charts](https://developers.google.com/chart/) and require JavaScript and SVG support to render.
 
-<div id="chart_speed_x86" style="width: 600px; height: 500px;">Parsing time (x86) relative to pugixml, lower is better</div>
-<div id="chart_memory_x86" style="width: 600px; height: 500px;">Parsing memory (x86) relative to pugixml, lower is better</div>
-<div id="chart_speed_x64" style="width: 600px; height: 500px;">Parsing time (x64) relative to pugixml, lower is better</div>
-<div id="chart_memory_x64" style="width: 600px; height: 500px;">Parsing memory (x64) relative to pugixml, lower is better</div>
+<div id="chart_speed_x86" style="width: 600px; height: 500px; padding: 10px;">Parsing time (x86) relative to pugixml, lower is better</div>
+<div id="chart_memory_x86" style="width: 600px; height: 350px; padding: 10px;">Parsing memory (x86) relative to pugixml, lower is better</div>
+<div id="chart_speed_x64" style="width: 600px; height: 500px; padding: 10px;">Parsing time (x64) relative to pugixml, lower is better</div>
+<div id="chart_memory_x64" style="width: 600px; height: 350px; padding: 10px;">Parsing memory (x64) relative to pugixml, lower is better</div>
 
 <script type="text/javascript" src="benchmark-data.js"></script>
 
