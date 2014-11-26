@@ -1922,6 +1922,7 @@ Major release, featuring a lot of performance improvements and some new features
 * Bug fixes
     # Adjusted comment output to avoid malformed documents if the comment value contains "--"
     # Fix XPath sorting for documents that were constructed using append_buffer
+    # Fix load_file for wide-character paths with non-ASCII characters in MinGW with C++11 mode enabled
 
 [h5 27.02.2014 - version 1.4]
 
