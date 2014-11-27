@@ -36,7 +36,6 @@ data("speed", "x86", "pugxml", "data/house.dae", 3.62563);
 data("memory", "x86", "pugxml", "data/house.dae", 6.84106);
 // qtxml_dom: 22.38 us/byte, 43 Mb/s, 0 Kb, 0 allocations
 data("speed", "x86", "qtxml_dom", "data/house.dae", 22.3757);
-data("memory", "x86", "qtxml_dom", "data/house.dae", 17.4414);
 // qtxml_sax: 18.14 us/byte, 53 Mb/s, 0 Kb, 0 allocations
 data("speed", "x86", "qtxml_sax", "data/house.dae", 18.1392);
 // rapidxml: 0.69 us/byte, 1380 Mb/s, 6778 Kb, 9 allocations
@@ -347,7 +346,6 @@ data("speed", "x86", "pugxml", "data/employees-big.xml", 22.2553);
 data("memory", "x86", "pugxml", "data/employees-big.xml", 42.1592);
 // qtxml_dom: 64.42 us/byte, 15 Mb/s, 0 Kb, 0 allocations
 data("speed", "x86", "qtxml_dom", "data/employees-big.xml", 64.4159);
-data("memory", "x86", "qtxml_dom", "data/employees-big.xml", 31.625);
 // qtxml_sax: 37.65 us/byte, 25 Mb/s, 0 Kb, 0 allocations
 data("speed", "x86", "qtxml_sax", "data/employees-big.xml", 37.6547);
 // rapidxml: 1.68 us/byte, 567 Mb/s, 32773 Kb, 353 allocations
@@ -410,7 +408,6 @@ data("speed", "x86", "pugxml", "data/terrover.xml", 9.51339);
 data("memory", "x86", "pugxml", "data/terrover.xml", 34.7016);
 // qtxml_dom: 69.42 us/byte, 14 Mb/s, 0 Kb, 0 allocations
 data("speed", "x86", "qtxml_dom", "data/terrover.xml", 69.4201);
-data("memory", "x86", "qtxml_dom", "data/terrover.xml", 31.625);
 // qtxml_sax: 52.90 us/byte, 18 Mb/s, 0 Kb, 0 allocations
 data("speed", "x86", "qtxml_sax", "data/terrover.xml", 52.8973);
 // rapidxml: 1.16 us/byte, 824 Mb/s, 30041 Kb, 218 allocations
@@ -594,7 +591,6 @@ data("speed", "x64", "pugxml", "data/house.dae", 3.35624);
 data("memory", "x64", "pugxml", "data/house.dae", 7.40063);
 // qtxml_dom: 22.88 us/byte, 42 Mb/s, 0 Kb, 0 allocations
 data("speed", "x64", "qtxml_dom", "data/house.dae", 22.8821);
-data("memory", "x64", "qtxml_dom", "data/house.dae", 15.8125);
 // qtxml_sax: 18.95 us/byte, 50 Mb/s, 0 Kb, 0 allocations
 data("speed", "x64", "qtxml_sax", "data/house.dae", 18.9526);
 // rapidxml: 0.73 us/byte, 1312 Mb/s, 7290 Kb, 17 allocations
@@ -890,7 +886,6 @@ data("speed", "x64", "pugxml", "data/employees-big.xml", 28.529);
 data("memory", "x64", "pugxml", "data/employees-big.xml", 64.4239);
 // qtxml_dom: 55.62 us/byte, 17 Mb/s, 0 Kb, 0 allocations
 data("speed", "x64", "qtxml_dom", "data/employees-big.xml", 55.6155);
-data("memory", "x64", "qtxml_dom", "data/employees-big.xml", 15.8125);
 // qtxml_sax: 31.16 us/byte, 31 Mb/s, 0 Kb, 0 allocations
 data("speed", "x64", "qtxml_sax", "data/employees-big.xml", 31.1586);
 // rapidxml: 1.62 us/byte, 590 Mb/s, 55385 Kb, 706 allocations
@@ -950,7 +945,6 @@ data("speed", "x64", "pugxml", "data/terrover.xml", 8.81888);
 data("memory", "x64", "pugxml", "data/terrover.xml", 49.915);
 // qtxml_dom: 47.96 us/byte, 20 Mb/s, 0 Kb, 0 allocations
 data("speed", "x64", "qtxml_dom", "data/terrover.xml", 47.9648);
-data("memory", "x64", "qtxml_dom", "data/terrover.xml", 31.625);
 // qtxml_sax: 31.39 us/byte, 30 Mb/s, 0 Kb, 0 allocations
 data("speed", "x64", "qtxml_sax", "data/terrover.xml", 31.3913);
 // rapidxml: 1.19 us/byte, 804 Mb/s, 44006 Kb, 436 allocations
