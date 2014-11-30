@@ -3,6 +3,8 @@ layout: default
 title: Home
 ---
 
+> If you use pugixml, please [star it on GitHub](https://github.com/zeux/pugixml/stargazers)!
+
 pugixml is a light-weight C++ XML processing library. It features:
 
 * DOM-like interface with rich traversal/modification capabilities
