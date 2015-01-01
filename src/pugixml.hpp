@@ -19,6 +19,10 @@
 // Include user configuration file (this can define various configuration macros)
 #include "pugiconfig.hpp"
 
+#ifdef PUGIXML_HEADER_ONLY
+#include "pugixml.cpp"
+#endif
+
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
