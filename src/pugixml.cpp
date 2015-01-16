@@ -4553,6 +4553,12 @@ namespace pugi
 		return *this;
 	}
 	
+	PUGI__FN xml_attribute& xml_attribute::operator=(float rhs)
+	{
+		set_value(rhs);
+		return *this;
+	}
+	
 	PUGI__FN xml_attribute& xml_attribute::operator=(bool rhs)
 	{
 		set_value(rhs);
@@ -5674,6 +5680,12 @@ namespace pugi
 	}
 
 	PUGI__FN xml_text& xml_text::operator=(double rhs)
+	{
+		set(rhs);
+		return *this;
+	}
+
+	PUGI__FN xml_text& xml_text::operator=(float rhs)
 	{
 		set(rhs);
 		return *this;

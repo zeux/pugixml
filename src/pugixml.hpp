@@ -365,6 +365,7 @@ namespace pugi
 		xml_attribute& operator=(int rhs);
 		xml_attribute& operator=(unsigned int rhs);
 		xml_attribute& operator=(double rhs);
+		xml_attribute& operator=(float rhs);
 		xml_attribute& operator=(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
@@ -708,6 +709,7 @@ namespace pugi
 		xml_text& operator=(int rhs);
 		xml_text& operator=(unsigned int rhs);
 		xml_text& operator=(double rhs);
+		xml_text& operator=(float rhs);
 		xml_text& operator=(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
