@@ -4608,6 +4608,13 @@ namespace pugi
 		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
 	}
 	
+	PUGI__FN bool xml_attribute::set_value(float rhs)
+	{
+		if (!_attr) return false;
+
+		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
+	}
+	
 	PUGI__FN bool xml_attribute::set_value(bool rhs)
 	{
 		if (!_attr) return false;

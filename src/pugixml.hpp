@@ -352,6 +352,7 @@ namespace pugi
 		bool set_value(int rhs);
 		bool set_value(unsigned int rhs);
 		bool set_value(double rhs);
+        bool set_value(float rhs);
 		bool set_value(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
