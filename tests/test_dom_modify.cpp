@@ -21,10 +21,13 @@ TEST_XML(dom_attr_assign, "<node/>")
 	node.append_attribute(STR("attr6")) = 0.5;
 	xml_attribute() = 0.5;
 
-	node.append_attribute(STR("attr7")) = true;
+	node.append_attribute(STR("attr7")) = 0.25f;
+	xml_attribute() = 0.25f;
+
+	node.append_attribute(STR("attr8")) = true;
 	xml_attribute() = true;
 
-	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"true\" />"));
+	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" />"));
 }
 
 TEST_XML(dom_attr_set_name, "<node attr='value' />")
@@ -55,10 +58,13 @@ TEST_XML(dom_attr_set_value, "<node/>")
 	CHECK(node.append_attribute(STR("attr6")).set_value(0.5));
 	CHECK(!xml_attribute().set_value(0.5));
 
-	CHECK(node.append_attribute(STR("attr7")).set_value(true));
+	CHECK(node.append_attribute(STR("attr7")).set_value(0.25f));
+	CHECK(!xml_attribute().set_value(0.25f));
+
+	CHECK(node.append_attribute(STR("attr8")).set_value(true));
 	CHECK(!xml_attribute().set_value(true));
 
-	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"true\" />"));
+	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" />"));
 }
 
 #ifdef PUGIXML_HAS_LONG_LONG
@@ -753,7 +759,7 @@ TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
 	node.attribute(STR("attr1")) = std::numeric_limits<float>::max();
 	node.attribute(STR("attr2")) = std::numeric_limits<double>::max();
 
-	CHECK(test_node(node, STR("<node attr1=\"3.40282347e+038\" attr2=\"1.7976931348623157ee+308\" />"), STR(""), pugi::format_raw) ||
+	CHECK(test_node(node, STR("<node attr1=\"3.40282347e+038\" attr2=\"1.7976931348623157e+308\" />"), STR(""), pugi::format_raw) ||
 		  test_node(node, STR("<node attr1=\"3.40282347e+38\" attr2=\"1.7976931348623157e+308\" />"), STR(""), pugi::format_raw));
 }
 
