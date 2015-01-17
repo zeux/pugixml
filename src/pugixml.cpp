@@ -3954,10 +3954,18 @@ PUGI__NS_BEGIN
 		return set_value_buffer(dest, header, header_mask, buf);
 	}
 
+	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, float value)
+	{
+		char buf[128];
+		sprintf(buf, "%.9g", value);
+
+		return set_value_buffer(dest, header, header_mask, buf);
+	}
+	
 	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, double value)
 	{
 		char buf[128];
-		sprintf(buf, "%g", value);
+		sprintf(buf, "%.17g", value);
 
 		return set_value_buffer(dest, header, header_mask, buf);
 	}
@@ -4545,6 +4553,12 @@ namespace pugi
 		return *this;
 	}
 	
+	PUGI__FN xml_attribute& xml_attribute::operator=(float rhs)
+	{
+		set_value(rhs);
+		return *this;
+	}
+	
 	PUGI__FN xml_attribute& xml_attribute::operator=(bool rhs)
 	{
 		set_value(rhs);
@@ -4594,6 +4608,13 @@ namespace pugi
 	}
 
 	PUGI__FN bool xml_attribute::set_value(double rhs)
+	{
+		if (!_attr) return false;
+
+		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
+	}
+	
+	PUGI__FN bool xml_attribute::set_value(float rhs)
 	{
 		if (!_attr) return false;
 
@@ -5603,6 +5624,13 @@ namespace pugi
 		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
 	}
 
+	PUGI__FN bool xml_text::set(float rhs)
+	{
+		xml_node_struct* dn = _data_new();
+
+		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs) : false;
+	}
+
 	PUGI__FN bool xml_text::set(double rhs)
 	{
 		xml_node_struct* dn = _data_new();
@@ -5652,6 +5680,12 @@ namespace pugi
 	}
 
 	PUGI__FN xml_text& xml_text::operator=(double rhs)
+	{
+		set(rhs);
+		return *this;
+	}
+
+	PUGI__FN xml_text& xml_text::operator=(float rhs)
 	{
 		set(rhs);
 		return *this;
