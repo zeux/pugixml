@@ -695,8 +695,8 @@ namespace pugi
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set(int rhs);
 		bool set(unsigned int rhs);
-		bool set(float rhs);
 		bool set(double rhs);
+		bool set(float rhs);
 		bool set(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
