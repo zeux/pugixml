@@ -8681,7 +8681,7 @@ PUGI__NS_BEGIN
 
 		bool step_push(xpath_node_set_raw& ns, xml_attribute_struct* a, xml_node_struct* parent, xpath_allocator* alloc)
 		{
-            assert(a);
+			assert(a);
 
 			const char_t* name = a->name ? a->name : PUGIXML_TEXT("");
 
@@ -8721,7 +8721,7 @@ PUGI__NS_BEGIN
 		
 		bool step_push(xpath_node_set_raw& ns, xml_node_struct* n, xpath_allocator* alloc)
 		{
-            assert(n);
+			assert(n);
 
 			xml_node_type type = PUGI__NODETYPE(n);
 

@@ -352,7 +352,7 @@ namespace pugi
 		bool set_value(int rhs);
 		bool set_value(unsigned int rhs);
 		bool set_value(double rhs);
-        bool set_value(float rhs);
+		bool set_value(float rhs);
 		bool set_value(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
@@ -433,7 +433,7 @@ namespace pugi
 		const char_t* name() const;
 
 		// Get node value, or "" if node is empty or it has no value
-        // Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
+		// Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
 		const char_t* value() const;
 	
 		// Get attribute list
@@ -695,7 +695,7 @@ namespace pugi
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set(int rhs);
 		bool set(unsigned int rhs);
-        bool set(float rhs);
+		bool set(float rhs);
 		bool set(double rhs);
 		bool set(bool rhs);
 
