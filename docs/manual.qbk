@@ -1190,6 +1190,7 @@ In addition to string functions, several functions are provided for handling att
     bool xml_attribute::set_value(int rhs);
     bool xml_attribute::set_value(unsigned int rhs);
     bool xml_attribute::set_value(double rhs);
+    bool xml_attribute::set_value(float rhs);
     bool xml_attribute::set_value(bool rhs);
     bool xml_attribute::set_value(long long rhs);
     bool xml_attribute::set_value(unsigned long long rhs);
@@ -1208,6 +1209,7 @@ For convenience, all `set_value` functions have the corresponding assignment ope
     xml_attribute& xml_attribute::operator=(int rhs);
     xml_attribute& xml_attribute::operator=(unsigned int rhs);
     xml_attribute& xml_attribute::operator=(double rhs);
+    xml_attribute& xml_attribute::operator=(float rhs);
     xml_attribute& xml_attribute::operator=(bool rhs);
     xml_attribute& xml_attribute::operator=(long long rhs);
     xml_attribute& xml_attribute::operator=(unsigned long long rhs);
@@ -1312,6 +1314,7 @@ In addition to a string function, several functions are provided for handling te
     bool xml_text::set(int rhs);
     bool xml_text::set(unsigned int rhs);
     bool xml_text::set(double rhs);
+    bool xml_text::set(float rhs);
     bool xml_text::set(bool rhs);
     bool xml_text::set(long long rhs);
     bool xml_text::set(unsigned long long rhs);
@@ -1326,6 +1329,7 @@ For convenience, all `set` functions have the corresponding assignment operators
     xml_text& xml_text::operator=(int rhs);
     xml_text& xml_text::operator=(unsigned int rhs);
     xml_text& xml_text::operator=(double rhs);
+    xml_text& xml_text::operator=(float rhs);
     xml_text& xml_text::operator=(bool rhs);
     xml_text& xml_text::operator=(long long rhs);
     xml_text& xml_text::operator=(unsigned long long rhs);
@@ -2369,6 +2373,7 @@ Classes:
     * `bool `[link xml_attribute::set_value set_value]`(int rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(unsigned int rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(double rhs);`
+    * `bool `[link xml_attribute::set_value set_value]`(float rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(bool rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(long long rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(unsigned long long rhs);`
@@ -2378,6 +2383,7 @@ Classes:
     * `xml_attribute& `[link xml_attribute::assign operator=]`(int rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(unsigned int rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(double rhs);`
+    * `xml_attribute& `[link xml_attribute::assign operator=]`(float rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(bool rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(long long rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(unsnigned long long rhs);`
@@ -2608,6 +2614,7 @@ Classes:
     * `bool `[link xml_text::set set]`(int rhs);`
     * `bool `[link xml_text::set set]`(unsigned int rhs);`
     * `bool `[link xml_text::set set]`(double rhs);`
+    * `bool `[link xml_text::set set]`(float rhs);`
     * `bool `[link xml_text::set set]`(bool rhs);`
     * `bool `[link xml_text::set set]`(long long rhs);`
     * `bool `[link xml_text::set set]`(unsigned long long rhs);`
@@ -2617,6 +2624,7 @@ Classes:
     * `xml_text& `[link xml_text::assign operator=]`(int rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(unsigned int rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(double rhs);`
+    * `xml_text& `[link xml_text::assign operator=]`(float rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(bool rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(long long rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(unsigned long long rhs);`

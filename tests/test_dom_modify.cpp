@@ -2,6 +2,7 @@
 
 #include <limits>
 #include <string>
+#include <cmath>
 
 TEST_XML(dom_attr_assign, "<node/>")
 {
@@ -21,10 +22,13 @@ TEST_XML(dom_attr_assign, "<node/>")
 	node.append_attribute(STR("attr6")) = 0.5;
 	xml_attribute() = 0.5;
 
-	node.append_attribute(STR("attr7")) = true;
+	node.append_attribute(STR("attr7")) = 0.25f;
+	xml_attribute() = 0.25f;
+
+	node.append_attribute(STR("attr8")) = true;
 	xml_attribute() = true;
 
-	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"true\" />"));
+	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" />"));
 }
 
 TEST_XML(dom_attr_set_name, "<node attr='value' />")
@@ -55,10 +59,13 @@ TEST_XML(dom_attr_set_value, "<node/>")
 	CHECK(node.append_attribute(STR("attr6")).set_value(0.5));
 	CHECK(!xml_attribute().set_value(0.5));
 
-	CHECK(node.append_attribute(STR("attr7")).set_value(true));
+	CHECK(node.append_attribute(STR("attr7")).set_value(0.25f));
+	CHECK(!xml_attribute().set_value(0.25f));
+
+	CHECK(node.append_attribute(STR("attr8")).set_value(true));
 	CHECK(!xml_attribute().set_value(true));
 
-	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"true\" />"));
+	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" />"));
 }
 
 #ifdef PUGIXML_HAS_LONG_LONG
@@ -92,6 +99,17 @@ TEST_XML(dom_attr_set_value_llong, "<node/>")
 	CHECK_NODE(node, STR("<node attr1=\"-9223372036854775807\" attr2=\"-9223372036854775808\" attr3=\"18446744073709551615\" attr4=\"18446744073709551614\" />"));
 }
 #endif
+
+TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	node.attribute(STR("attr1")) = std::numeric_limits<float>::max();
+	node.attribute(STR("attr2")) = std::numeric_limits<double>::max();
+
+	CHECK(test_node(node, STR("<node attr1=\"3.40282347e+038\" attr2=\"1.7976931348623157e+308\" />"), STR(""), pugi::format_raw) ||
+		  test_node(node, STR("<node attr1=\"3.40282347e+38\" attr2=\"1.7976931348623157e+308\" />"), STR(""), pugi::format_raw));
+}
 
 TEST_XML(dom_node_set_name, "<node>text</node>")
 {
@@ -744,17 +762,6 @@ TEST_XML_FLAGS(dom_node_copy_types, "<?xml version='1.0'?><!DOCTYPE id><root><?p
 
 	doc.insert_copy_after(doc.first_child().next_sibling().next_sibling(), doc.first_child());
 	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><!DOCTYPE id><?xml version=\"1.0\"?><!DOCTYPE id><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root><root><?pi value?><!--comment--><node id=\"1\">pcdata<![CDATA[cdata]]></node></root>"));
-}
-
-TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
-{
-	xml_node node = doc.child(STR("node"));
-
-	node.attribute(STR("attr1")) = std::numeric_limits<float>::max();
-	node.attribute(STR("attr2")) = std::numeric_limits<double>::max();
-
-	CHECK(test_node(node, STR("<node attr1=\"3.40282e+038\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw) ||
-		  test_node(node, STR("<node attr1=\"3.40282e+38\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw));
 }
 
 TEST(dom_node_declaration_name)
@@ -1442,4 +1449,65 @@ TEST(dom_node_copy_declaration_empty_name)
 	xml_node decl2 = doc2.append_copy(decl1);
 
 	CHECK_STRING(decl2.name(), STR(""));
+}
+
+TEST(dom_fp_roundtrip_min_max)
+{
+	xml_document doc;
+	xml_node node = doc.append_child(STR("node"));
+	xml_attribute attr = node.append_attribute(STR("attr"));
+
+	node.text().set(std::numeric_limits<float>::min());
+	CHECK(node.text().as_float() == std::numeric_limits<float>::min());
+
+	attr.set_value(std::numeric_limits<float>::max());
+	CHECK(attr.as_float() == std::numeric_limits<float>::max());
+
+	attr.set_value(std::numeric_limits<double>::min());
+	CHECK(attr.as_double() == std::numeric_limits<double>::min());
+
+	node.text().set(std::numeric_limits<double>::max());
+	CHECK(node.text().as_double() == std::numeric_limits<double>::max());
+}
+
+const double fp_roundtrip_base[] =
+{
+	0.31830988618379067154,
+	0.43429448190325182765,
+	0.57721566490153286061,
+	0.69314718055994530942,
+	0.70710678118654752440,
+	0.78539816339744830962,
+};
+
+TEST(dom_fp_roundtrip_float)
+{
+	xml_document doc;
+
+	for (int e = -125; e <= 128; ++e)
+	{
+		for (size_t i = 0; i < sizeof(fp_roundtrip_base) / sizeof(fp_roundtrip_base[0]); ++i)
+		{
+			float value = ldexpf(fp_roundtrip_base[i], e);
+
+			doc.text().set(value);
+			CHECK(doc.text().as_float() == value);
+		}
+	}
+}
+
+TEST(dom_fp_roundtrip_double)
+{
+	xml_document doc;
+
+	for (int e = -1021; e <= 1024; ++e)
+	{
+		for (size_t i = 0; i < sizeof(fp_roundtrip_base) / sizeof(fp_roundtrip_base[0]); ++i)
+		{
+			double value = ldexp(fp_roundtrip_base[i], e);
+
+			doc.text().set(value);
+			CHECK(doc.text().as_double() == value);
+		}
+	}
 }

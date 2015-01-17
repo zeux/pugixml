@@ -323,7 +323,7 @@ TEST(document_load_file_wide_ascii)
 	CHECK_NODE(doc, STR("<node />"));
 }
 
-#if !defined(__DMC__) && !defined(__MWERKS__) && !(defined(__MINGW32__) && defined(__STRICT_ANSI__) && __GNUC__ * 100 + __GNUC_MINOR__ <= 405)
+#if !defined(__DMC__) && !defined(__MWERKS__) && !(defined(__MINGW32__) && defined(__STRICT_ANSI__) && !defined(__MINGW64_VERSION_MAJOR))
 TEST(document_load_file_wide_unicode)
 {
 	pugi::xml_document doc;

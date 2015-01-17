@@ -4504,10 +4504,19 @@ PUGI__NS_BEGIN
 	}
 
 	template <typename String, typename Header>
+	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, float value)
+	{
+		char buf[128];
+		sprintf(buf, "%.9g", value);
+
+		return set_value_buffer(dest, header, header_mask, buf);
+	}
+
+	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, double value)
 	{
 		char buf[128];
-		sprintf(buf, "%g", value);
+		sprintf(buf, "%.17g", value);
 
 		return set_value_buffer(dest, header, header_mask, buf);
 	}
@@ -4548,7 +4557,7 @@ PUGI__NS_BEGIN
 		_fseeki64(file, 0, SEEK_END);
 		length_type length = _ftelli64(file);
 		_fseeki64(file, 0, SEEK_SET);
-	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS) && !(defined(__STRICT_ANSI__) && __GNUC__ * 100 + __GNUC_MINOR__ <= 405)
+	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS) && (!defined(__STRICT_ANSI__) || defined(__MINGW64_VERSION_MAJOR))
 		// there are 64-bit versions of fseek/ftell, let's use them
 		typedef off64_t length_type;
 
@@ -4793,7 +4802,7 @@ PUGI__NS_BEGIN
 	}
 #endif
 
-#if defined(PUGI__MSVC_CRT_VERSION) || defined(__BORLANDC__) || (defined(__MINGW32__) && !(defined(__STRICT_ANSI__) && __GNUC__ * 100 + __GNUC_MINOR__ <= 405))
+#if defined(PUGI__MSVC_CRT_VERSION) || defined(__BORLANDC__) || (defined(__MINGW32__) && (!defined(__STRICT_ANSI__) || defined(__MINGW64_VERSION_MAJOR)))
 	PUGI__FN FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
 	{
 		return _wfopen(path, mode);
@@ -5112,6 +5121,12 @@ namespace pugi
 		return *this;
 	}
 	
+	PUGI__FN xml_attribute& xml_attribute::operator=(float rhs)
+	{
+		set_value(rhs);
+		return *this;
+	}
+
 	PUGI__FN xml_attribute& xml_attribute::operator=(bool rhs)
 	{
 		set_value(rhs);
@@ -5167,6 +5182,13 @@ namespace pugi
 		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
 	}
 	
+	PUGI__FN bool xml_attribute::set_value(float rhs)
+	{
+		if (!_attr) return false;
+
+		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs);
+	}
+
 	PUGI__FN bool xml_attribute::set_value(bool rhs)
 	{
 		if (!_attr) return false;
@@ -6224,6 +6246,13 @@ namespace pugi
 		return dn ? impl::set_value_convert(dn->contents, dn->header, impl::xml_memory_page_contents_allocated_mask, rhs) : false;
 	}
 
+	PUGI__FN bool xml_text::set(float rhs)
+	{
+		xml_node_struct* dn = _data_new();
+
+		return dn ? impl::set_value_convert(dn->contents, dn->header, impl::xml_memory_page_contents_allocated_mask, rhs) : false;
+	}
+
 	PUGI__FN bool xml_text::set(double rhs)
 	{
 		xml_node_struct* dn = _data_new();
@@ -6273,6 +6302,12 @@ namespace pugi
 	}
 
 	PUGI__FN xml_text& xml_text::operator=(double rhs)
+	{
+		set(rhs);
+		return *this;
+	}
+
+	PUGI__FN xml_text& xml_text::operator=(float rhs)
 	{
 		set(rhs);
 		return *this;
@@ -9272,7 +9307,7 @@ PUGI__NS_BEGIN
 
 		bool step_push(xpath_node_set_raw& ns, xml_attribute_struct* a, xml_node_struct* parent, xpath_allocator* alloc)
 		{
-            assert(a);
+			assert(a);
 
 			const char_t* name = a->name ? a->name + 0 : PUGIXML_TEXT("");
 
@@ -9312,7 +9347,7 @@ PUGI__NS_BEGIN
 		
 		bool step_push(xpath_node_set_raw& ns, xml_node_struct* n, xpath_allocator* alloc)
 		{
-            assert(n);
+			assert(n);
 
 			xml_node_type type = PUGI__NODETYPE(n);
 
