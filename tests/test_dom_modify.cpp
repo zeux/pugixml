@@ -753,8 +753,8 @@ TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
 	node.attribute(STR("attr1")) = std::numeric_limits<float>::max();
 	node.attribute(STR("attr2")) = std::numeric_limits<double>::max();
 
-	CHECK(test_node(node, STR("<node attr1=\"3.40282e+038\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw) ||
-		  test_node(node, STR("<node attr1=\"3.40282e+38\" attr2=\"1.79769e+308\" />"), STR(""), pugi::format_raw));
+	CHECK(test_node(node, STR("<node attr1=\"3.40282347e+038\" attr2=\"1.7976931348623157ee+308\" />"), STR(""), pugi::format_raw) ||
+		  test_node(node, STR("<node attr1=\"3.40282347e+38\" attr2=\"1.7976931348623157e+308\" />"), STR(""), pugi::format_raw));
 }
 
 TEST(dom_node_declaration_name)
