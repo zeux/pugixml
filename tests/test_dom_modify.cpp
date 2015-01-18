@@ -2,7 +2,8 @@
 
 #include <limits>
 #include <string>
-#include <cmath>
+
+#include <math.h>
 
 TEST_XML(dom_attr_assign, "<node/>")
 {
@@ -1483,7 +1484,7 @@ TEST(dom_fp_roundtrip_float)
 	{
 		for (size_t i = 0; i < sizeof(fp_roundtrip_base) / sizeof(fp_roundtrip_base[0]); ++i)
 		{
-			float value = ldexpf(fp_roundtrip_base[i], e);
+			float value = ldexpf(static_cast<float>(fp_roundtrip_base[i]), e);
 
 			doc.text().set(value);
 			CHECK(doc.text().as_float() == value);
