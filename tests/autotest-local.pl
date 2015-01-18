@@ -65,8 +65,8 @@ if ($fast)
 
 print "### autotest begin " . scalar localtime() . "\n";
 
-# print SVN revision info
-print "### autotest revision $1\n" if (`svn info` =~ /Revision:\s+(\d+)/);
+# print Git revision info
+print "### autotest revision $1\n" if (`git rev-parse HEAD` =~ /(.+)/);
 
 # get CPU info
 $cpucount = &getcpucount();
