@@ -171,7 +171,7 @@ struct test_writer: xml_writer
 	virtual void write(const void* data, size_t size)
 	{
 		CHECK(size % sizeof(pugi::char_t) == 0);
-		contents += std::basic_string<pugi::char_t>(static_cast<const pugi::char_t*>(data), static_cast<const pugi::char_t*>(data) + size / sizeof(pugi::char_t));
+		contents.append(static_cast<const pugi::char_t*>(data), size / sizeof(pugi::char_t));
 	}
 };
 
