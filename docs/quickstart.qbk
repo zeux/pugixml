@@ -219,7 +219,7 @@ While the previously described functions save the whole document to the destinat
 
 [section:feedback Feedback]
 
-If you believe you've found a bug in pugixml, please file an issue via [@http://code.google.com/p/pugixml/issues/entry issue submission form]. Be sure to include the relevant information so that the bug can be reproduced: the version of pugixml, compiler version and target architecture, the code that uses pugixml and exhibits the bug, etc. Feature requests and contributions can be filed as issues, too.
+If you believe you've found a bug in pugixml, please file an issue via [@https://github.com/zeux/pugixml/issues/new issue submission form]. Be sure to include the relevant information so that the bug can be reproduced: the version of pugixml, compiler version and target architecture, the code that uses pugixml and exhibits the bug, etc. Feature requests and contributions can be filed as issues, too.
 
 [#email]
 If filing an issue is not possible due to privacy or other concerns, you can contact pugixml author by e-mail directly: [@mailto:arseny.kapoulkine@gmail.com arseny.kapoulkine@gmail.com].
