@@ -329,7 +329,7 @@ TEST(parse_doctype_stackless_group)
 
 	int count = 100000;
 
-	str += "<!DOCTYPE ";
+	str += STR("<!DOCTYPE ");
 
 	for (int i = 0; i < count; ++i)
 		str += STR("<!G ");
@@ -337,7 +337,7 @@ TEST(parse_doctype_stackless_group)
 	for (int j = 0; j < count; ++j)
 		str += STR(">");
 
-	str += ">";
+	str += STR(">");
 
 	xml_document doc;
 	CHECK(doc.load_string(str.c_str(), parse_fragment));
@@ -349,7 +349,7 @@ TEST(parse_doctype_stackless_ignore)
 
 	int count = 100000;
 
-	str += "<!DOCTYPE ";
+	str += STR("<!DOCTYPE ");
 
 	for (int i = 0; i < count; ++i)
 		str += STR("<![IGNORE[ ");
@@ -357,7 +357,7 @@ TEST(parse_doctype_stackless_ignore)
 	for (int j = 0; j < count; ++j)
 		str += STR("]]>");
 
-	str += ">";
+	str += STR(">");
 
 	xml_document doc;
 	CHECK(doc.load_string(str.c_str(), parse_fragment));
