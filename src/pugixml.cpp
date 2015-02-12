@@ -2357,23 +2357,28 @@ PUGI__NS_BEGIN
 
 		char_t* parse_doctype_ignore(char_t* s)
 		{
+			size_t depth = 0;
+
 			assert(s[0] == '<' && s[1] == '!' && s[2] == '[');
-			s++;
+			s += 3;
 
 			while (*s)
 			{
 				if (s[0] == '<' && s[1] == '!' && s[2] == '[')
 				{
 					// nested ignore section
-					s = parse_doctype_ignore(s);
-					if (!s) return s;
+					s += 3;
+					depth++;
 				}
 				else if (s[0] == ']' && s[1] == ']' && s[2] == '>')
 				{
 					// ignore section end
 					s += 3;
 
-					return s;
+					if (depth == 0)
+						return s;
+
+					depth--;
 				}
 				else s++;
 			}
@@ -2381,10 +2386,12 @@ PUGI__NS_BEGIN
 			PUGI__THROW_ERROR(status_bad_doctype, s);
 		}
 
-		char_t* parse_doctype_group(char_t* s, char_t endch, bool toplevel)
+		char_t* parse_doctype_group(char_t* s, char_t endch)
 		{
+			size_t depth = 0;
+
 			assert((s[0] == '<' || s[0] == 0) && s[1] == '!');
-			s++;
+			s += 2;
 
 			while (*s)
 			{
@@ -2399,12 +2406,8 @@ PUGI__NS_BEGIN
 					else
 					{
 						// some control group
-						s = parse_doctype_group(s, endch, false);
-						if (!s) return s;
-
-						// skip >
-						assert(*s == '>');
-						s++;
+						s += 2;
+						depth++;
 					}
 				}
 				else if (s[0] == '<' || s[0] == '"' || s[0] == '\'')
@@ -2415,12 +2418,16 @@ PUGI__NS_BEGIN
 				}
 				else if (*s == '>')
 				{
-					return s;
+					if (depth == 0)
+						return s;
+
+					depth--;
+					s++;
 				}
 				else s++;
 			}
 
-			if (!toplevel || endch != '>') PUGI__THROW_ERROR(status_bad_doctype, s);
+			if (depth != 0 || endch != '>') PUGI__THROW_ERROR(status_bad_doctype, s);
 
 			return s;
 		}
@@ -2512,7 +2519,7 @@ PUGI__NS_BEGIN
 
 				char_t* mark = s + 9;
 
-				s = parse_doctype_group(s, endch, true);
+				s = parse_doctype_group(s, endch);
 				if (!s) return s;
 
 				assert((*s == 0 && endch == '>') || *s == '>');
