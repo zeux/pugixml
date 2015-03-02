@@ -66,6 +66,50 @@ namespace
 		VirtualProtect(rptr, aligned_size + PAGE_SIZE, PAGE_NOACCESS, &old_flags);
 	}
 }
+#elif defined(__APPLE__) || defined(__linux__)
+#	include <sys/mman.h>
+
+namespace
+{
+	const size_t PAGE_SIZE = 4096;
+
+	size_t align_to_page(size_t value)
+	{
+		return (value + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+	}
+
+	void* allocate_page_aligned(size_t size)
+	{
+		return mmap(0, size + PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+	}
+
+	void* allocate(size_t size)
+	{
+		size_t aligned_size = align_to_page(size);
+
+		void* ptr = allocate_page_aligned(aligned_size + PAGE_SIZE);
+		if (!ptr) return 0;
+
+		char* end = static_cast<char*>(ptr) + aligned_size;
+
+		int res = mprotect(end, PAGE_SIZE, PROT_NONE);
+		assert(res == 0);
+		(void)!res;
+
+		return end - size;
+	}
+
+	void deallocate(void* ptr, size_t size)
+	{
+		size_t aligned_size = align_to_page(size);
+
+		void* rptr = static_cast<char*>(ptr) + size - aligned_size;
+
+		int res = mprotect(rptr, aligned_size + PAGE_SIZE, PROT_NONE);
+		assert(res == 0);
+		(void)!res;
+	}
+}
 #else
 #	include <stdlib.h>
 
