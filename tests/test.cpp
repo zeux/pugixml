@@ -71,6 +71,15 @@ bool test_double_nan(double value)
 }
 
 #ifndef PUGIXML_NO_XPATH
+static size_t strlength(const pugi::char_t* s)
+{
+#ifdef PUGIXML_WCHAR_MODE
+	return wcslen(s);
+#else
+	return strlen(s);
+#endif
+}
+
 bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, const pugi::char_t* expected)
 {
 	pugi::xpath_query q(query, variables);
@@ -81,7 +90,11 @@ bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, 
 
 	size_t size = q.evaluate_string(result, capacity, node);
 
-	if (size <= capacity) return test_string_equal(result, expected);
+	if (size != strlength(expected) + 1)
+		return false;
+
+	if (size <= capacity)
+		return test_string_equal(result, expected);
 
 	std::basic_string<pugi::char_t> buffer(size, ' ');
 
