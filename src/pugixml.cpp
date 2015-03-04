@@ -7447,7 +7447,7 @@ PUGI__NS_BEGIN
 		return node.attribute() ? namespace_uri(node.attribute(), node.parent()) : namespace_uri(node.node());
 	}
 
-	PUGI__FN void normalize_space(char_t* buffer)
+	PUGI__FN char_t* normalize_space(char_t* buffer)
 	{
 		char_t* write = buffer;
 
@@ -7471,9 +7471,11 @@ PUGI__NS_BEGIN
 
 		// zero-terminate
 		*write = 0;
+
+		return write;
 	}
 
-	PUGI__FN void translate(char_t* buffer, const char_t* from, const char_t* to, size_t to_length)
+	PUGI__FN char_t* translate(char_t* buffer, const char_t* from, const char_t* to, size_t to_length)
 	{
 		char_t* write = buffer;
 
@@ -7491,6 +7493,8 @@ PUGI__NS_BEGIN
 
 		// zero-terminate
 		*write = 0;
+
+		return write;
 	}
 
 	PUGI__FN unsigned char* translate_table_generate(xpath_allocator* alloc, const char_t* from, const char_t* to)
@@ -7527,7 +7531,7 @@ PUGI__NS_BEGIN
 		return static_cast<unsigned char*>(result);
 	}
 
-	PUGI__FN void translate_table(char_t* buffer, const unsigned char* table)
+	PUGI__FN char_t* translate_table(char_t* buffer, const unsigned char* table)
 	{
 		char_t* write = buffer;
 
@@ -7553,6 +7557,8 @@ PUGI__NS_BEGIN
 
 		// zero-terminate
 		*write = 0;
+
+		return write;
 	}
 
 	inline bool is_xpath_attribute(const char_t* name)
@@ -9659,18 +9665,20 @@ PUGI__NS_BEGIN
 			{
 				xpath_string s = string_value(c.n, stack.result);
 
-				normalize_space(s.data(stack.result));
+				char_t* begin = s.data(stack.result);
+				char_t* end = normalize_space(begin);
 
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_func_normalize_space_1:
 			{
 				xpath_string s = _left->eval_string(c, stack);
 
-				normalize_space(s.data(stack.result));
+				char_t* begin = s.data(stack.result);
+				char_t* end = normalize_space(begin);
 			
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_func_translate:
@@ -9683,18 +9691,20 @@ PUGI__NS_BEGIN
 				xpath_string from = _right->eval_string(c, swapped_stack);
 				xpath_string to = _right->_next->eval_string(c, swapped_stack);
 
-				translate(s.data(stack.result), from.c_str(), to.c_str(), to.length());
+				char_t* begin = s.data(stack.result);
+				char_t* end = translate(begin, from.c_str(), to.c_str(), to.length());
 
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_opt_translate_table:
 			{
 				xpath_string s = _left->eval_string(c, stack);
 
-				translate_table(s.data(stack.result), _data.table);
+				char_t* begin = s.data(stack.result);
+				char_t* end = translate_table(begin, _data.table);
 
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_variable:
