@@ -990,6 +990,17 @@ TEST(document_load_buffer_empty_fragment)
 	}
 }
 
+TEST(document_load_buffer_null)
+{
+	xml_document doc;
+
+	CHECK(doc.load_buffer(0, 12).status == status_io_error && !doc.first_child());
+	CHECK(doc.load_buffer(0, 12, parse_fragment).status == status_io_error && !doc.first_child());
+
+	CHECK(doc.load_buffer_inplace(0, 12).status == status_io_error && !doc.first_child());
+	CHECK(doc.load_buffer_inplace_own(0, 12).status == status_io_error && !doc.first_child());
+}
+
 TEST(document_progressive_truncation)
 {
 	char* original_data;

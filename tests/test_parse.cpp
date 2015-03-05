@@ -868,22 +868,6 @@ TEST(parse_empty)
 	CHECK(doc.load_string(STR(""), parse_fragment) && !doc.first_child());
 }
 
-TEST(parse_load_buffer_null)
-{
-	xml_document doc;
-
-	CHECK(doc.load_buffer(0, 12).status == status_io_error && !doc.first_child());
-	CHECK(doc.load_buffer(0, 12, parse_fragment).status == status_io_error && !doc.first_child());
-}
-
-TEST(parse_load_buffer_empty)
-{
-	xml_document doc;
-
-	CHECK(doc.load_buffer("foo", 0).status == status_no_document_element && !doc.first_child());
-	CHECK(doc.load_buffer("foo", 0, parse_fragment) && !doc.first_child());
-}
-
 TEST(parse_out_of_memory)
 {
 	test_runner::_memory_fail_threshold = 256;
