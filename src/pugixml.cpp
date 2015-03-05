@@ -400,7 +400,9 @@ PUGI__NS_BEGIN
 
 		char_t* allocate_string(size_t length)
 		{
-			PUGI__STATIC_ASSERT(xml_memory_page_size <= (1 << 16));
+			static const size_t max_encoded_offset = (1 << 16) * sizeof(void*);
+
+			PUGI__STATIC_ASSERT(xml_memory_page_size <= max_encoded_offset);
 
 			// allocate memory for string and header block
 			size_t size = sizeof(xml_memory_string_header) + length * sizeof(char_t);
@@ -416,12 +418,14 @@ PUGI__NS_BEGIN
 			// setup header
 			ptrdiff_t page_offset = reinterpret_cast<char*>(header) - reinterpret_cast<char*>(page) - sizeof(xml_memory_page);
 
-			assert(page_offset >= 0 && page_offset < (1 << 16));
-			header->page_offset = static_cast<uint16_t>(page_offset);
+			assert(page_offset % sizeof(void*) == 0);
+			assert(page_offset >= 0 && static_cast<size_t>(page_offset) < max_encoded_offset);
+			header->page_offset = static_cast<uint16_t>(static_cast<size_t>(page_offset) / sizeof(void*));
 
 			// full_size == 0 for large strings that occupy the whole page
-			assert(full_size < (1 << 16) || (page->busy_size == full_size && page_offset == 0));
-			header->full_size = static_cast<uint16_t>(full_size < (1 << 16) ? full_size : 0);
+			assert(full_size % sizeof(void*) == 0);
+			assert(full_size < max_encoded_offset || (page->busy_size == full_size && page_offset == 0));
+			header->full_size = static_cast<uint16_t>(full_size < max_encoded_offset ? full_size / sizeof(void*) : 0);
 
 			// round-trip through void* to avoid 'cast increases required alignment of target type' warning
 			// header is guaranteed a pointer-sized alignment, which should be enough for char_t
@@ -438,11 +442,11 @@ PUGI__NS_BEGIN
 			assert(header);
 
 			// deallocate
-			size_t page_offset = sizeof(xml_memory_page) + header->page_offset;
+			size_t page_offset = sizeof(xml_memory_page) + header->page_offset * sizeof(void*);
 			xml_memory_page* page = reinterpret_cast<xml_memory_page*>(static_cast<void*>(reinterpret_cast<char*>(header) - page_offset));
 
 			// if full_size == 0 then this string occupies the whole page
-			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size;
+			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size * sizeof(void*);
 
 			deallocate_memory(header, full_size, page);
 		}
