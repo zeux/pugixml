@@ -115,6 +115,25 @@ TEST(write_pi_null)
 	CHECK_NODE(doc, STR("<?:anonymous value?>"));
 }
 
+TEST(write_pi_invalid)
+{
+	xml_document doc;
+	xml_node node = doc.append_child(node_pi);
+
+	node.set_name(STR("test"));
+	node.set_value(STR("?"));
+
+	CHECK_NODE(doc, STR("<?test ?" "?>"));
+
+	node.set_value(STR("?>"));
+
+	CHECK_NODE(doc, STR("<?test ? >?>"));
+
+	node.set_value(STR("<?foo?>"));
+
+	CHECK_NODE(doc, STR("<?test <?foo? >?>"));
+}
+
 TEST_XML_FLAGS(write_declaration, "<?xml version='2.0'?>", parse_declaration | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<?xml version=\"2.0\"?>"));

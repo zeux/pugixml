@@ -3462,6 +3462,27 @@ PUGI__NS_BEGIN
 		writer.write('-', '-', '>');
 	}
 
+	PUGI__FN void node_output_pi_value(xml_buffered_writer& writer, const char_t* s)
+	{
+		while (*s)
+		{
+			const char_t* prev = s;
+
+			// look for ?> sequence - we can't output it since ?> terminates PI
+			while (*s && !(s[0] == '?' && s[1] == '>')) ++s;
+
+			writer.write_buffer(prev, static_cast<size_t>(s - prev));
+
+			if (*s)
+			{
+				assert(s[0] == '?' && s[1] == '>');
+
+				writer.write('?', ' ', '>');
+				s += 2;
+			}
+		}
+	}
+
 	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
@@ -3575,7 +3596,7 @@ PUGI__NS_BEGIN
 				if (node->value)
 				{
 					writer.write(' ');
-					writer.write_string(node->value);
+					node_output_pi_value(writer, node->value);
 				}
 
 				writer.write('?', '>');
