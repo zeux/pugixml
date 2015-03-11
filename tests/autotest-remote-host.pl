@@ -32,6 +32,6 @@ exit unless $client;
 
 select $client;
 
-&execprint('svn up') == 0 || die "error updating from repo\n";
+&execprint('git pull') == 0 || die "error updating from repo\n";
 &execprint('perl tests/autotest-local.pl') == 0 || die "error launching tests\n";
 system($exitcmd);

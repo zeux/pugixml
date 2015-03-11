@@ -570,6 +570,14 @@ TEST(xpath_string_translate_table)
 	CHECK_XPATH_STRING(c, STR("translate('abcde', 'abcd', concat('ABC', 'D'))"), STR("ABCDe"));
 }
 
+TEST(xpath_string_translate_remove)
+{
+	xml_node c;
+
+	CHECK_XPATH_STRING(c, STR("translate('000000755', '0', '')"), STR("755"));
+	CHECK_XPATH_STRING(c, STR("translate('000000755', concat('0', ''), '')"), STR("755"));
+}
+
 TEST_XML(xpath_nodeset_last, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
 {
 	xml_node n = doc.child(STR("node"));

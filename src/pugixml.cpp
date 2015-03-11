@@ -559,7 +559,9 @@ PUGI__NS_BEGIN
 
 		char_t* allocate_string(size_t length)
 		{
-			PUGI__STATIC_ASSERT(xml_memory_page_size <= (1 << 16));
+			static const size_t max_encoded_offset = (1 << 16) * sizeof(void*);
+
+			PUGI__STATIC_ASSERT(xml_memory_page_size <= max_encoded_offset);
 
 			// allocate memory for string and header block
 			size_t size = sizeof(xml_memory_string_header) + length * sizeof(char_t);
@@ -575,12 +577,14 @@ PUGI__NS_BEGIN
 			// setup header
 			ptrdiff_t page_offset = reinterpret_cast<char*>(header) - reinterpret_cast<char*>(page) - sizeof(xml_memory_page);
 
-			assert(page_offset >= 0 && page_offset < (1 << 16));
-			header->page_offset = static_cast<uint16_t>(page_offset);
+			assert(page_offset % sizeof(void*) == 0);
+			assert(page_offset >= 0 && static_cast<size_t>(page_offset) < max_encoded_offset);
+			header->page_offset = static_cast<uint16_t>(static_cast<size_t>(page_offset) / sizeof(void*));
 
 			// full_size == 0 for large strings that occupy the whole page
-			assert(full_size < (1 << 16) || (page->busy_size == full_size && page_offset == 0));
-			header->full_size = static_cast<uint16_t>(full_size < (1 << 16) ? full_size : 0);
+			assert(full_size % sizeof(void*) == 0);
+			assert(full_size < max_encoded_offset || (page->busy_size == full_size && page_offset == 0));
+			header->full_size = static_cast<uint16_t>(full_size < max_encoded_offset ? full_size / sizeof(void*) : 0);
 
 			// round-trip through void* to avoid 'cast increases required alignment of target type' warning
 			// header is guaranteed a pointer-sized alignment, which should be enough for char_t
@@ -597,11 +601,11 @@ PUGI__NS_BEGIN
 			assert(header);
 
 			// deallocate
-			size_t page_offset = sizeof(xml_memory_page) + header->page_offset;
+			size_t page_offset = sizeof(xml_memory_page) + header->page_offset * sizeof(void*);
 			xml_memory_page* page = reinterpret_cast<xml_memory_page*>(static_cast<void*>(reinterpret_cast<char*>(header) - page_offset));
 
 			// if full_size == 0 then this string occupies the whole page
-			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size;
+			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size * sizeof(void*);
 
 			deallocate_memory(header, full_size, page);
 		}
@@ -2894,23 +2898,28 @@ PUGI__NS_BEGIN
 
 		char_t* parse_doctype_ignore(char_t* s)
 		{
+			size_t depth = 0;
+
 			assert(s[0] == '<' && s[1] == '!' && s[2] == '[');
-			s++;
+			s += 3;
 
 			while (*s)
 			{
 				if (s[0] == '<' && s[1] == '!' && s[2] == '[')
 				{
 					// nested ignore section
-					s = parse_doctype_ignore(s);
-					if (!s) return s;
+					s += 3;
+					depth++;
 				}
 				else if (s[0] == ']' && s[1] == ']' && s[2] == '>')
 				{
 					// ignore section end
 					s += 3;
 
-					return s;
+					if (depth == 0)
+						return s;
+
+					depth--;
 				}
 				else s++;
 			}
@@ -2918,10 +2927,12 @@ PUGI__NS_BEGIN
 			PUGI__THROW_ERROR(status_bad_doctype, s);
 		}
 
-		char_t* parse_doctype_group(char_t* s, char_t endch, bool toplevel)
+		char_t* parse_doctype_group(char_t* s, char_t endch)
 		{
+			size_t depth = 0;
+
 			assert((s[0] == '<' || s[0] == 0) && s[1] == '!');
-			s++;
+			s += 2;
 
 			while (*s)
 			{
@@ -2936,12 +2947,8 @@ PUGI__NS_BEGIN
 					else
 					{
 						// some control group
-						s = parse_doctype_group(s, endch, false);
-						if (!s) return s;
-
-						// skip >
-						assert(*s == '>');
-						s++;
+						s += 2;
+						depth++;
 					}
 				}
 				else if (s[0] == '<' || s[0] == '"' || s[0] == '\'')
@@ -2952,12 +2959,16 @@ PUGI__NS_BEGIN
 				}
 				else if (*s == '>')
 				{
-					return s;
+					if (depth == 0)
+						return s;
+
+					depth--;
+					s++;
 				}
 				else s++;
 			}
 
-			if (!toplevel || endch != '>') PUGI__THROW_ERROR(status_bad_doctype, s);
+			if (depth != 0 || endch != '>') PUGI__THROW_ERROR(status_bad_doctype, s);
 
 			return s;
 		}
@@ -3049,7 +3060,7 @@ PUGI__NS_BEGIN
 
 				char_t* mark = s + 9;
 
-				s = parse_doctype_group(s, endch, true);
+				s = parse_doctype_group(s, endch);
 				if (!s) return s;
 
 				assert((*s == 0 && endch == '>') || *s == '>');
@@ -3989,6 +4000,27 @@ PUGI__NS_BEGIN
 		writer.write('-', '-', '>');
 	}
 
+	PUGI__FN void node_output_pi_value(xml_buffered_writer& writer, const char_t* s)
+	{
+		while (*s)
+		{
+			const char_t* prev = s;
+
+			// look for ?> sequence - we can't output it since ?> terminates PI
+			while (*s && !(s[0] == '?' && s[1] == '>')) ++s;
+
+			writer.write_buffer(prev, static_cast<size_t>(s - prev));
+
+			if (*s)
+			{
+				assert(s[0] == '?' && s[1] == '>');
+
+				writer.write('?', ' ', '>');
+				s += 2;
+			}
+		}
+	}
+
 	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
@@ -4102,7 +4134,7 @@ PUGI__NS_BEGIN
 				if (static_cast<xml_node_pi_struct*>(node)->pi_value)
 				{
 					writer.write(' ');
-					writer.write_string(static_cast<xml_node_pi_struct*>(node)->pi_value);
+					node_output_pi_value(writer, static_cast<xml_node_pi_struct*>(node)->pi_value);
 				}
 
 				writer.write('?', '>');
@@ -4863,7 +4895,7 @@ PUGI__NS_BEGIN
 	PUGI__FN xml_parse_result load_buffer_impl(xml_document_struct* doc, xml_node_struct* root, void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own, char_t** out_buffer)
 	{
 		// check input buffer
-		assert(contents || size == 0);
+		if (!contents && size) return make_parse_result(status_io_error);
 
 		// get actual encoding
 		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);
@@ -8066,7 +8098,7 @@ PUGI__NS_BEGIN
 		return node.attribute() ? namespace_uri(node.attribute(), node.parent()) : namespace_uri(node.node());
 	}
 
-	PUGI__FN void normalize_space(char_t* buffer)
+	PUGI__FN char_t* normalize_space(char_t* buffer)
 	{
 		char_t* write = buffer;
 
@@ -8090,9 +8122,11 @@ PUGI__NS_BEGIN
 
 		// zero-terminate
 		*write = 0;
+
+		return write;
 	}
 
-	PUGI__FN void translate(char_t* buffer, const char_t* from, const char_t* to, size_t to_length)
+	PUGI__FN char_t* translate(char_t* buffer, const char_t* from, const char_t* to, size_t to_length)
 	{
 		char_t* write = buffer;
 
@@ -8110,6 +8144,8 @@ PUGI__NS_BEGIN
 
 		// zero-terminate
 		*write = 0;
+
+		return write;
 	}
 
 	PUGI__FN unsigned char* translate_table_generate(xpath_allocator* alloc, const char_t* from, const char_t* to)
@@ -8146,7 +8182,7 @@ PUGI__NS_BEGIN
 		return static_cast<unsigned char*>(result);
 	}
 
-	PUGI__FN void translate_table(char_t* buffer, const unsigned char* table)
+	PUGI__FN char_t* translate_table(char_t* buffer, const unsigned char* table)
 	{
 		char_t* write = buffer;
 
@@ -8172,6 +8208,8 @@ PUGI__NS_BEGIN
 
 		// zero-terminate
 		*write = 0;
+
+		return write;
 	}
 
 	inline bool is_xpath_attribute(const char_t* name)
@@ -10278,18 +10316,20 @@ PUGI__NS_BEGIN
 			{
 				xpath_string s = string_value(c.n, stack.result);
 
-				normalize_space(s.data(stack.result));
+				char_t* begin = s.data(stack.result);
+				char_t* end = normalize_space(begin);
 
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_func_normalize_space_1:
 			{
 				xpath_string s = _left->eval_string(c, stack);
 
-				normalize_space(s.data(stack.result));
+				char_t* begin = s.data(stack.result);
+				char_t* end = normalize_space(begin);
 			
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_func_translate:
@@ -10302,18 +10342,20 @@ PUGI__NS_BEGIN
 				xpath_string from = _right->eval_string(c, swapped_stack);
 				xpath_string to = _right->_next->eval_string(c, swapped_stack);
 
-				translate(s.data(stack.result), from.c_str(), to.c_str(), to.length());
+				char_t* begin = s.data(stack.result);
+				char_t* end = translate(begin, from.c_str(), to.c_str(), to.length());
 
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_opt_translate_table:
 			{
 				xpath_string s = _left->eval_string(c, stack);
 
-				translate_table(s.data(stack.result), _data.table);
+				char_t* begin = s.data(stack.result);
+				char_t* end = translate_table(begin, _data.table);
 
-				return s;
+				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
 			case ast_variable:

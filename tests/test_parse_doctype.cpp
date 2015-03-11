@@ -322,3 +322,43 @@ TEST(parse_doctype_error_ignore)
 	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE[")).status == status_bad_doctype);
 	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE["), parse_doctype).status == status_bad_doctype);
 }
+
+TEST(parse_doctype_stackless_group)
+{
+	std::basic_string<char_t> str;
+
+	int count = 100000;
+
+	str += STR("<!DOCTYPE ");
+
+	for (int i = 0; i < count; ++i)
+		str += STR("<!G ");
+
+	for (int j = 0; j < count; ++j)
+		str += STR(">");
+
+	str += STR(">");
+
+	xml_document doc;
+	CHECK(doc.load_string(str.c_str(), parse_fragment));
+}
+
+TEST(parse_doctype_stackless_ignore)
+{
+	std::basic_string<char_t> str;
+
+	int count = 100000;
+
+	str += STR("<!DOCTYPE ");
+
+	for (int i = 0; i < count; ++i)
+		str += STR("<![IGNORE[ ");
+
+	for (int j = 0; j < count; ++j)
+		str += STR("]]>");
+
+	str += STR(">");
+
+	xml_document doc;
+	CHECK(doc.load_string(str.c_str(), parse_fragment));
+}

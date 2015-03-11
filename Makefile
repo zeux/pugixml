@@ -30,7 +30,7 @@ all: $(EXECUTABLE)
 
 ifeq ($(config),coverage)
 test: $(EXECUTABLE)
-	@find $(BUILD) -name '*.gcda' | xargs -r rm
+	-@find $(BUILD) -name '*.gcda' | xargs rm
 	./$(EXECUTABLE)
 	@gcov -b -c $(BUILD)/src/pugixml.cpp.gcda | sed -e '/./{H;$!d;}' -e 'x;/pugixml.cpp/!d;'
 	@ls *.gcov | grep -v pugixml.cpp.gcov | xargs rm

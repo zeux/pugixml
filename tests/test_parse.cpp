@@ -863,6 +863,7 @@ TEST(parse_declaration_error)
 TEST(parse_empty)
 {
 	xml_document doc;
+
 	CHECK(doc.load_string(STR("")).status == status_no_document_element && !doc.first_child());
 	CHECK(doc.load_string(STR(""), parse_fragment) && !doc.first_child());
 }

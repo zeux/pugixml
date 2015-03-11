@@ -15,7 +15,7 @@ static bool test_narrow(const std::string& result, const char* expected, size_t 
 
 void xml_writer_string::write(const void* data, size_t size)
 {
-	contents += std::string(static_cast<const char*>(data), size);
+	contents.append(static_cast<const char*>(data), size);
 }
 
 std::string xml_writer_string::as_narrow() const

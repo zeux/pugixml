@@ -128,7 +128,7 @@ while (<>)
 		$defines{$_} = 1 foreach (split /,/, $defineset);
 		&insertindex(\%configurations, $fullconf);
 	}
-	elsif (/^### autotest revision (\d+)/)
+	elsif (/^### autotest revision (.+)/)
 	{
 		if (defined $revision && $revision != $1)
 		{
@@ -224,6 +224,6 @@ $date = localtime;
 
 print <<END;
 </table><br>
-Generated on $date from Subversion r$revision
+Generated on $date from Git $revision
 </body></html>
 END
