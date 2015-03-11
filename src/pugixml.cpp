@@ -423,6 +423,15 @@ PUGI__NS_BEGIN
 	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_contents_allocated_or_shared_mask = xml_memory_page_contents_allocated_mask | xml_memory_page_contents_shared_mask;
 
+	// all allocated blocks have a certain guaranteed alignment
+	static const uintptr_t xml_memory_block_alignment =
+	#ifdef PUGIXML_COMPACT
+		4
+	#else
+		sizeof(void*)
+	#endif
+		;
+
 	#define PUGI__NODETYPE(n) static_cast<xml_node_type>(((n)->header & impl::xml_memory_page_type_mask) + 1)
 
 	struct xml_allocator;
@@ -559,15 +568,15 @@ PUGI__NS_BEGIN
 
 		char_t* allocate_string(size_t length)
 		{
-			static const size_t max_encoded_offset = (1 << 16) * sizeof(void*);
+			static const size_t max_encoded_offset = (1 << 16) * xml_memory_block_alignment;
 
 			PUGI__STATIC_ASSERT(xml_memory_page_size <= max_encoded_offset);
 
 			// allocate memory for string and header block
 			size_t size = sizeof(xml_memory_string_header) + length * sizeof(char_t);
 			
-			// round size up to pointer alignment boundary
-			size_t full_size = (size + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1);
+			// round size up to block alignment boundary
+			size_t full_size = (size + (xml_memory_block_alignment - 1)) & ~(xml_memory_block_alignment - 1);
 
 			xml_memory_page* page;
 			xml_memory_string_header* header = static_cast<xml_memory_string_header*>(allocate_memory(full_size, page));
@@ -577,14 +586,14 @@ PUGI__NS_BEGIN
 			// setup header
 			ptrdiff_t page_offset = reinterpret_cast<char*>(header) - reinterpret_cast<char*>(page) - sizeof(xml_memory_page);
 
-			assert(page_offset % sizeof(void*) == 0);
+			assert(page_offset % xml_memory_block_alignment == 0);
 			assert(page_offset >= 0 && static_cast<size_t>(page_offset) < max_encoded_offset);
-			header->page_offset = static_cast<uint16_t>(static_cast<size_t>(page_offset) / sizeof(void*));
+			header->page_offset = static_cast<uint16_t>(static_cast<size_t>(page_offset) / xml_memory_block_alignment);
 
 			// full_size == 0 for large strings that occupy the whole page
-			assert(full_size % sizeof(void*) == 0);
+			assert(full_size % xml_memory_block_alignment == 0);
 			assert(full_size < max_encoded_offset || (page->busy_size == full_size && page_offset == 0));
-			header->full_size = static_cast<uint16_t>(full_size < max_encoded_offset ? full_size / sizeof(void*) : 0);
+			header->full_size = static_cast<uint16_t>(full_size < max_encoded_offset ? full_size / xml_memory_block_alignment : 0);
 
 			// round-trip through void* to avoid 'cast increases required alignment of target type' warning
 			// header is guaranteed a pointer-sized alignment, which should be enough for char_t
@@ -601,11 +610,11 @@ PUGI__NS_BEGIN
 			assert(header);
 
 			// deallocate
-			size_t page_offset = sizeof(xml_memory_page) + header->page_offset * sizeof(void*);
+			size_t page_offset = sizeof(xml_memory_page) + header->page_offset * xml_memory_block_alignment;
 			xml_memory_page* page = reinterpret_cast<xml_memory_page*>(static_cast<void*>(reinterpret_cast<char*>(header) - page_offset));
 
 			// if full_size == 0 then this string occupies the whole page
-			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size * sizeof(void*);
+			size_t full_size = header->full_size == 0 ? page->busy_size : header->full_size * xml_memory_block_alignment;
 
 			deallocate_memory(header, full_size, page);
 		}
@@ -677,6 +686,7 @@ PUGI__NS_BEGIN
 	public:
 		compact_header(xml_memory_page* page, unsigned int flags)
 		{
+			PUGI__STATIC_ASSERT(xml_memory_block_alignment == compact_alignment);
 			PUGI__STATIC_ASSERT(sizeof(xml_memory_page) + xml_memory_page_size <= (1 << (16 + compact_alignment_log2)));
 
 			ptrdiff_t page_offset = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(page)) >> compact_alignment_log2;
