@@ -2899,7 +2899,7 @@ PUGI__NS_BEGIN
 				PUGI__SCANFOR(s[0] == '-' && s[1] == '-' && s[2] == '>'); // no need for ENDSWITH because --> can't terminate proper doctype
 				if (!*s) PUGI__THROW_ERROR(status_bad_doctype, s);
 
-				s += 4;
+				s += 3;
 			}
 			else PUGI__THROW_ERROR(status_bad_doctype, s);
 
