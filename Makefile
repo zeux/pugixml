@@ -3,10 +3,10 @@ defines=standard
 
 BUILD=build/make-$(CXX)-$(config)-$(defines)
 
-SOURCES=src/pugixml.cpp $(wildcard tests/*.cpp)
+SOURCES=src/pugixml.cpp tests/main.cpp tests/allocator.cpp tests/test.cpp tests/writer_string.cpp $(wildcard tests/test_*.cpp)
 EXECUTABLE=$(BUILD)/test
 
-CXXFLAGS=-c -g -Wall -Wextra -Werror -pedantic
+CXXFLAGS=-g -Wall -Wextra -Werror -pedantic
 LDFLAGS=
 
 ifeq ($(config),release)
@@ -39,6 +39,11 @@ test: $(EXECUTABLE)
 	./$(EXECUTABLE)
 endif
 
+fuzz:
+	@mkdir -p $(BUILD)
+	$(AFL)/afl-clang++ tests/fuzz_parse.cpp tests/allocator.cpp src/pugixml.cpp $(CXXFLAGS) -o $(BUILD)/fuzz_parse
+	$(AFL)/afl-fuzz -i tests/data_fuzz_parse -o $(BUILD)/fuzz_parse_out -x $(AFL)/testcases/_extras/xml/ -- $(BUILD)/fuzz_parse @@
+
 clean:
 	rm -rf $(BUILD)
 
@@ -47,7 +52,7 @@ $(EXECUTABLE): $(OBJECTS)
 
 $(BUILD)/%.o: %
 	@mkdir -p $(dir $@)
-	$(CXX) $< $(CXXFLAGS) -MMD -MP -o $@
+	$(CXX) $< $(CXXFLAGS) -c -MMD -MP -o $@
 
 -include $(OBJECTS:.o=.d)
 
