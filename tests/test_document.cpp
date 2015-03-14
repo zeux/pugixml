@@ -1010,7 +1010,7 @@ TEST(document_progressive_truncation)
 
 	char* buffer = new char[original_size];
 
-	for (size_t i = 1; i < original_size; ++i)
+	for (size_t i = 1; i <= original_size; ++i)
 	{
 		char* truncated_data = buffer + original_size - i;
 
@@ -1022,7 +1022,7 @@ TEST(document_progressive_truncation)
 			bool result = doc.load_buffer_inplace(truncated_data, i);
 
 			// only eof is parseable
-			CHECK((i >= 3325) ? result : !result);
+			CHECK((i == original_size) ? result : !result);
 		}
 
 		// fragment mode
@@ -1033,7 +1033,7 @@ TEST(document_progressive_truncation)
 			bool result = doc.load_buffer_inplace(truncated_data, i, parse_default | parse_fragment);
 
 			// some truncate locations are parseable - those that come after declaration, declaration + doctype, declaration + doctype + comment and eof
-			CHECK(((i - 21) < 3 || (i - 66) < 3 || (i - 95) < 3 || i >= 3325) ? result : !result);
+			CHECK(((i - 21) < 3 || (i - 66) < 3 || (i - 95) < 3 || i == original_size) ? result : !result);
 		}
 	}
 
