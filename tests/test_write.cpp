@@ -22,19 +22,19 @@ TEST_XML(write_indent, "<node attr='1'><child><sub>text</sub></child></node>")
 
 TEST_XML(write_pcdata, "<node attr='1'><child><sub/>text</child></node>")
 {
-	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\n\t<child>\n\t\t<sub />\n\t\ttext\n\t</child>\n</node>\n"), STR("\t"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\n\t<child>\n\t\t<sub />text</child>\n</node>\n"), STR("\t"), format_indent);
 }
 
 TEST_XML_FLAGS(write_cdata, "<![CDATA[value]]>", parse_cdata | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<![CDATA[value]]>"));
-	CHECK_NODE_EX(doc, STR("<![CDATA[value]]>\n"), STR(""), 0);
+	CHECK_NODE_EX(doc, STR("<![CDATA[value]]>"), STR(""), 0);
 }
 
 TEST_XML_FLAGS(write_cdata_empty, "<![CDATA[]]>", parse_cdata | parse_fragment)
 {
 	CHECK_NODE(doc, STR("<![CDATA[]]>"));
-	CHECK_NODE_EX(doc, STR("<![CDATA[]]>\n"), STR(""), 0);
+	CHECK_NODE_EX(doc, STR("<![CDATA[]]>"), STR(""), 0);
 }
 
 TEST_XML_FLAGS(write_cdata_escape, "<![CDATA[value]]>", parse_cdata | parse_fragment)
@@ -527,5 +527,50 @@ TEST(write_pcdata_null)
 
 	doc.first_child().append_child(node_pcdata);
 
-	CHECK_NODE_EX(doc, STR("<node>\n\t\n\t\n</node>\n"), STR("\t"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node></node>\n"), STR("\t"), format_indent);
+}
+
+TEST(write_pcdata_whitespace_fixedpoint)
+{
+	const char_t* data = STR("<node>  test  <child>\n  <sub/>\n   </child>\n</node>");
+
+	static const unsigned int flags_parse[] =
+	{
+		0,
+		parse_ws_pcdata,
+		parse_ws_pcdata_single,
+		parse_trim_pcdata
+	};
+
+	static const unsigned int flags_format[] =
+	{
+		0,
+		format_raw,
+		format_indent
+	};
+
+	for (unsigned int i = 0; i < sizeof(flags_parse) / sizeof(flags_parse[0]); ++i)
+	{
+		xml_document doc;
+		CHECK(doc.load_string(data, flags_parse[i]));
+
+		for (unsigned int j = 0; j < sizeof(flags_format) / sizeof(flags_format[0]); ++j)
+		{
+			std::string saved = write_narrow(doc, flags_format[j], encoding_auto);
+
+			xml_document rdoc;
+			CHECK(rdoc.load_buffer(&saved[0], saved.size(), flags_parse[i]));
+
+			std::string rsaved = write_narrow(rdoc, flags_format[j], encoding_auto);
+
+			CHECK(saved == rsaved);
+		}
+	}
+}
+
+TEST_XML_FLAGS(write_mixed, "<node><child1/><child2>pre<![CDATA[data]]>mid<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>", parse_full)
+{
+	CHECK_NODE(doc, "<node><child1 /><child2>pre<![CDATA[data]]>mid<!--comment--><test />post<?pi value?>fin</child2><child3 /></node>");
+	CHECK_NODE_EX(doc, "<node>\n<child1 />\n<child2>pre<![CDATA[data]]>mid<!--comment-->\n<test />post<?pi value?>fin</child2>\n<child3 />\n</node>\n", STR("\t"), 0);
+	CHECK_NODE_EX(doc, "<node>\n\t<child1 />\n\t<child2>pre<![CDATA[data]]>mid<!--comment-->\n\t\t<test />post<?pi value?>fin</child2>\n\t<child3 />\n</node>\n", STR("\t"), format_indent);
 }

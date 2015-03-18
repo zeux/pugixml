@@ -45,7 +45,7 @@ std::string save_narrow(const pugi::xml_document& doc, unsigned int flags, pugi:
 {
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), flags, encoding);
+	doc.save(writer, STR("\t"), flags, encoding);
 
 	return writer.as_narrow();
 }
@@ -59,7 +59,7 @@ std::string write_narrow(pugi::xml_node node, unsigned int flags, pugi::xml_enco
 {
 	xml_writer_string writer;
 
-	node.print(writer, STR(""), flags, encoding);
+	node.print(writer, STR("\t"), flags, encoding);
 
 	return writer.as_narrow();
 }
@@ -73,7 +73,7 @@ std::basic_string<wchar_t> write_wide(pugi::xml_node node, unsigned int flags, p
 {
 	xml_writer_string writer;
 
-	node.print(writer, STR(""), flags, encoding);
+	node.print(writer, STR("\t"), flags, encoding);
 
 	return writer.as_wide();
 }
