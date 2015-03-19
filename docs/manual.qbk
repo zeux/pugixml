@@ -1901,8 +1901,14 @@ Because of the differences in document object models, performance considerations
 Maintenance release. Changes:
 
 * Specification changes:
+    # Attribute/text values now use more digits when printing floating point numbers to guarantee round-tripping.
+    # Text nodes no longer get extra surrounding whitespace when pretty-printing nodes with mixed contents
 
 * Bug fixes:
+    # Fixed translate and normalize-space XPath functions to no longer return internal NUL characters
+    # Fixed buffer overrun on malformed comments inside DOCTYPE sections
+    # DOCTYPE parsing can no longer run out of stack space on malformed inputs (XML parsing is now using bounded stack space)
+    # Adjusted processing instruction output to avoid malformed documents if the PI value contains "?>"
 
 [h5 27.11.2014 - version 1.5]
 
