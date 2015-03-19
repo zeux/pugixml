@@ -1,7 +1,7 @@
 [article pugixml
     [quickbook 1.5]
 
-    [version 1.5]
+    [version 1.6]
     [id quickstart]
     [copyright 2014 Arseny Kapoulkine]
     [license Distributed under the MIT License]
@@ -11,7 +11,7 @@
 [template sref[name]'''<xref linkend="quickstart.main.'''[name]'''" xrefstyle="select:title" />''']
 [template ftnt[id text]'''<footnote id="'''[id]'''"><para>'''[text]'''</para></footnote>''']
 
-[section:main pugixml 1.5 quick start guide]
+[section:main pugixml 1.6 quick start guide]
 
 [section:introduction Introduction]
 
@@ -30,7 +30,7 @@ This is the quick start guide for pugixml, which purpose is to enable you to sta
 pugixml is distributed in source form. You can download a source distribution via one of the following links:
 
 [pre
-[@https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.zip]
+[@https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.5.zip]
 [@https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.tar.gz]
 ]
 
