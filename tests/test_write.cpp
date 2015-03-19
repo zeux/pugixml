@@ -570,7 +570,7 @@ TEST(write_pcdata_whitespace_fixedpoint)
 
 TEST_XML_FLAGS(write_mixed, "<node><child1/><child2>pre<![CDATA[data]]>mid<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>", parse_full)
 {
-	CHECK_NODE(doc, "<node><child1 /><child2>pre<![CDATA[data]]>mid<!--comment--><test />post<?pi value?>fin</child2><child3 /></node>");
-	CHECK_NODE_EX(doc, "<node>\n<child1 />\n<child2>pre<![CDATA[data]]>mid<!--comment-->\n<test />post<?pi value?>fin</child2>\n<child3 />\n</node>\n", STR("\t"), 0);
-	CHECK_NODE_EX(doc, "<node>\n\t<child1 />\n\t<child2>pre<![CDATA[data]]>mid<!--comment-->\n\t\t<test />post<?pi value?>fin</child2>\n\t<child3 />\n</node>\n", STR("\t"), format_indent);
+	CHECK_NODE(doc, STR("<node><child1 /><child2>pre<![CDATA[data]]>mid<!--comment--><test />post<?pi value?>fin</child2><child3 /></node>"));
+	CHECK_NODE_EX(doc, STR("<node>\n<child1 />\n<child2>pre<![CDATA[data]]>mid<!--comment-->\n<test />post<?pi value?>fin</child2>\n<child3 />\n</node>\n"), STR("\t"), 0);
+	CHECK_NODE_EX(doc, STR("<node>\n\t<child1 />\n\t<child2>pre<![CDATA[data]]>mid<!--comment-->\n\t\t<test />post<?pi value?>fin</child2>\n\t<child3 />\n</node>\n"), STR("\t"), format_indent);
 }
