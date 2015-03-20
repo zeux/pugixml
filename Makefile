@@ -9,6 +9,9 @@ BUILD=build/make-$(CXX)-$(config)-$(defines)
 SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
 
+VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
+RELEASE=$(shell git ls-files src docs/*.html docs/*.css docs/samples docs/images docs/manual scripts contrib readme.txt)
+
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic
 LDFLAGS=
 
@@ -50,6 +53,11 @@ fuzz:
 clean:
 	rm -rf $(BUILD)
 
+release: build/pugixml-$(VERSION).tar.gz build/pugixml-$(VERSION).zip
+
+build/pugixml-%: .FORCE | $(RELEASE)
+	perl tests/archive.pl $@ $|
+
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
@@ -59,4 +67,4 @@ $(BUILD)/%.o: %
 
 -include $(OBJECTS:.o=.d)
 
-.PHONY: all test clean
+.PHONY: all test clean release .FORCE
