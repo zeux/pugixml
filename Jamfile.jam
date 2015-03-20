@@ -88,7 +88,9 @@ for CONFIG in $(CONFIGURATIONS)
 
 		# build tests
 		local TESTS = $(CFGBUILD)/tests.exe ;
-		Application $(TESTS) : [ Glob tests : *.cpp ] : $(CFGFLAGS) : $(PUGIXML) ;
+		local TEST_SOURCES = [ Glob tests : *.cpp ] ;
+		TEST_SOURCES -= [ Glob tests : fuzz_*.cpp ] ;
+		Application $(TESTS) : $(TEST_SOURCES) : $(CFGFLAGS) : $(PUGIXML) ;
 		Alias tests : $(TESTS) ;
 
 		# run tests
