@@ -1,16 +1,16 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>pugixml 1.5</title>
+<title>pugixml 1.6</title>
 <link rel="stylesheet" href="pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
-<link rel="home" href="quickstart.html" title="pugixml 1.5">
+<link rel="home" href="quickstart.html" title="pugixml 1.6">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="article">
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="quickstart.main"></a><a class="link" href="quickstart.html#quickstart.main" title="pugixml 1.5 quick start guide"> pugixml 1.5 quick start guide</a>
+<a name="quickstart.main"></a><a class="link" href="quickstart.html#quickstart.main" title="pugixml 1.6 quick start guide"> pugixml 1.6 quick start guide</a>
 </h2></div></div></div>
 <div class="toc"><dl class="toc">
 <dt><span class="section"><a href="quickstart.html#quickstart.main.introduction"> Introduction</a></span></dt>
@@ -75,8 +75,8 @@
         pugixml is distributed in source form. You can download a source distribution
         via one of the following links:
       </p>
-<pre class="programlisting"><a href="https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.zip" target="_top">https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.zip</a>
-<a href="https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.tar.gz" target="_top">https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.tar.gz</a>
+<pre class="programlisting"><a href="https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.zip" target="_top">https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.zip</a>
+<a href="https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.tar.gz" target="_top">https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.tar.gz</a>
 </pre>
 <p>
         The distribution contains library source, documentation (the guide you're
@@ -791,7 +791,7 @@
 
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">write</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">void</span><span class="special">*</span> <span class="identifier">data</span><span class="special">,</span> <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">)</span>
     <span class="special">{</span>
-        <span class="identifier">result</span> <span class="special">+=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">(</span><span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">data</span><span class="special">),</span> <span class="identifier">size</span><span class="special">);</span>
+        <span class="identifier">result</span><span class="special">.</span><span class="identifier">append</span><span class="special">(</span><span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">data</span><span class="special">),</span> <span class="identifier">size</span><span class="special">);</span>
     <span class="special">}</span>
 <span class="special">};</span>
 </pre>
@@ -811,7 +811,7 @@
 <a name="quickstart.main.feedback"></a><a class="link" href="quickstart.html#quickstart.main.feedback" title="Feedback"> Feedback</a>
 </h3></div></div></div>
 <p>
-        If you believe you've found a bug in pugixml, please file an issue via <a href="http://code.google.com/p/pugixml/issues/entry" target="_top">issue submission form</a>.
+        If you believe you've found a bug in pugixml, please file an issue via <a href="https://github.com/zeux/pugixml/issues/new" target="_top">issue submission form</a>.
         Be sure to include the relevant information so that the bug can be reproduced:
         the version of pugixml, compiler version and target architecture, the code
         that uses pugixml and exhibits the bug, etc. Feature requests and contributions
@@ -873,7 +873,7 @@ pugixml
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: November 18, 2014 at 17:25:31 GMT</small></p></td>
+<td align="left"><p><small>Last revised: March 20, 2015 at 07:16:25 GMT</small></p></td>
 <td align="right"><div class="copyright-footer"></div></td>
 </tr></table>
 </body>

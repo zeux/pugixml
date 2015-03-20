@@ -4,15 +4,15 @@
 <title>Modifying document data</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
-<link rel="home" href="../manual.html" title="pugixml 1.5">
-<link rel="up" href="../manual.html" title="pugixml 1.5">
+<link rel="home" href="../manual.html" title="pugixml 1.6">
+<link rel="up" href="../manual.html" title="pugixml 1.6">
 <link rel="prev" href="access.html" title="Accessing document data">
 <link rel="next" href="saving.html" title="Saving document">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.5</a> manual |
+<a href="http://pugixml.org/">pugixml 1.6</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -143,6 +143,7 @@
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">float</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="identifier">set_value</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -185,6 +186,7 @@
 <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">double</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">float</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_attribute</span><span class="special">&amp;</span> <span class="identifier">xml_attribute</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -447,6 +449,7 @@
 <pre class="programlisting"><span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">double</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">float</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="keyword">bool</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="identifier">set</span><span class="special">(</span><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -466,6 +469,7 @@
 <span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">double</span> <span class="identifier">rhs</span><span class="special">);</span>
+<span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">float</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">bool</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
 <span class="identifier">xml_text</span><span class="special">&amp;</span> <span class="identifier">xml_text</span><span class="special">::</span><span class="keyword">operator</span><span class="special">=(</span><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> <span class="identifier">rhs</span><span class="special">);</span>
@@ -741,7 +745,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.5</a> manual |
+<a href="http://pugixml.org/">pugixml 1.6</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:

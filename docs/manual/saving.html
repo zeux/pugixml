@@ -4,15 +4,15 @@
 <title>Saving document</title>
 <link rel="stylesheet" href="../pugixml.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
-<link rel="home" href="../manual.html" title="pugixml 1.5">
-<link rel="up" href="../manual.html" title="pugixml 1.5">
+<link rel="home" href="../manual.html" title="pugixml 1.6">
+<link rel="up" href="../manual.html" title="pugixml 1.6">
 <link rel="prev" href="modify.html" title="Modifying document data">
 <link rel="next" href="xpath.html" title="XPath">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.5</a> manual |
+<a href="http://pugixml.org/">pugixml 1.6</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
@@ -211,7 +211,7 @@
 
     <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="identifier">write</span><span class="special">(</span><span class="keyword">const</span> <span class="keyword">void</span><span class="special">*</span> <span class="identifier">data</span><span class="special">,</span> <span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">)</span>
     <span class="special">{</span>
-        <span class="identifier">result</span> <span class="special">+=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">(</span><span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">data</span><span class="special">),</span> <span class="identifier">size</span><span class="special">);</span>
+        <span class="identifier">result</span><span class="special">.</span><span class="identifier">append</span><span class="special">(</span><span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">const</span> <span class="keyword">char</span><span class="special">*&gt;(</span><span class="identifier">data</span><span class="special">),</span> <span class="identifier">size</span><span class="special">);</span>
     <span class="special">}</span>
 <span class="special">};</span>
 </pre>
@@ -526,7 +526,7 @@
 <hr>
 <table width="100%"><tr>
 <td>
-<a href="http://pugixml.org/">pugixml 1.5</a> manual |
+<a href="http://pugixml.org/">pugixml 1.6</a> manual |
 		<a href="../manual.html">Overview</a> |
 		<a href="install.html">Installation</a> |
 		Document:
