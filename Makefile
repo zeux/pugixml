@@ -1,9 +1,12 @@
+.SUFFIXES:
+MAKEFLAGS+=-r
+
 config=debug
 defines=standard
 
 BUILD=build/make-$(CXX)-$(config)-$(defines)
 
-SOURCES=src/pugixml.cpp tests/main.cpp tests/allocator.cpp tests/test.cpp tests/writer_string.cpp $(wildcard tests/test_*.cpp)
+SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
 
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic
@@ -56,4 +59,4 @@ $(BUILD)/%.o: %
 
 -include $(OBJECTS:.o=.d)
 
-.PHONY: all test clean	
+.PHONY: all test clean
