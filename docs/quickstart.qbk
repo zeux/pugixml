@@ -30,8 +30,8 @@ This is the quick start guide for pugixml, which purpose is to enable you to sta
 pugixml is distributed in source form. You can download a source distribution via one of the following links:
 
 [pre
-[@https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.5.zip]
-[@https://github.com/zeux/pugixml/releases/download/v1.5/pugixml-1.5.tar.gz]
+[@https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.zip]
+[@https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.tar.gz]
 ]
 
 The distribution contains library source, documentation (the guide you're reading now and the manual) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - [file .zip] archive has Windows line endings, [file .tar.gz] archive has Unix line endings. Otherwise the files in both archives are identical.
