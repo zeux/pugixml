@@ -23,11 +23,11 @@
 
 namespace
 {
-	const size_t PAGE_SIZE = 4096;
+	const size_t page_size = 4096;
 
 	size_t align_to_page(size_t value)
 	{
-		return (value + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+		return (value + page_size - 1) & ~(page_size - 1);
 	}
 
 	void* allocate_page_aligned(size_t size)
@@ -36,7 +36,7 @@ namespace
 		// We can't use malloc because of occasional problems with CW on CRT termination
 		static HANDLE heap = HeapCreate(0, 0, 0);
 
-		void* result = HeapAlloc(heap, 0, size + PAGE_SIZE);
+		void* result = HeapAlloc(heap, 0, size + page_size);
 
 		return reinterpret_cast<void*>(align_to_page(reinterpret_cast<size_t>(result)));
 	}
@@ -45,13 +45,13 @@ namespace
 	{
 		size_t aligned_size = align_to_page(size);
 
-		void* ptr = allocate_page_aligned(aligned_size + PAGE_SIZE);
+		void* ptr = allocate_page_aligned(aligned_size + page_size);
 		if (!ptr) return 0;
 
 		char* end = static_cast<char*>(ptr) + aligned_size;
 
 		DWORD old_flags;
-		VirtualProtect(end, PAGE_SIZE, PAGE_NOACCESS, &old_flags);
+		VirtualProtect(end, page_size, PAGE_NOACCESS, &old_flags);
 
 		return end - size;
 	}
@@ -63,7 +63,7 @@ namespace
 		void* rptr = static_cast<char*>(ptr) + size - aligned_size;
 
 		DWORD old_flags;
-		VirtualProtect(rptr, aligned_size + PAGE_SIZE, PAGE_NOACCESS, &old_flags);
+		VirtualProtect(rptr, aligned_size + page_size, PAGE_NOACCESS, &old_flags);
 	}
 }
 #elif defined(__APPLE__) || defined(__linux__)
@@ -71,28 +71,28 @@ namespace
 
 namespace
 {
-	const size_t PAGE_SIZE = 4096;
+	const size_t page_size = 4096;
 
 	size_t align_to_page(size_t value)
 	{
-		return (value + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+		return (value + page_size - 1) & ~(page_size - 1);
 	}
 
 	void* allocate_page_aligned(size_t size)
 	{
-		return mmap(0, size + PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+		return mmap(0, size + page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 	}
 
 	void* allocate(size_t size)
 	{
 		size_t aligned_size = align_to_page(size);
 
-		void* ptr = allocate_page_aligned(aligned_size + PAGE_SIZE);
+		void* ptr = allocate_page_aligned(aligned_size + page_size);
 		if (!ptr) return 0;
 
 		char* end = static_cast<char*>(ptr) + aligned_size;
 
-		int res = mprotect(end, PAGE_SIZE, PROT_NONE);
+		int res = mprotect(end, page_size, PROT_NONE);
 		assert(res == 0);
 		(void)!res;
 
@@ -105,7 +105,7 @@ namespace
 
 		void* rptr = static_cast<char*>(ptr) + size - aligned_size;
 
-		int res = mprotect(rptr, aligned_size + PAGE_SIZE, PROT_NONE);
+		int res = mprotect(rptr, aligned_size + page_size, PROT_NONE);
 		assert(res == 0);
 		(void)!res;
 	}

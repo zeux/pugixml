@@ -123,7 +123,7 @@ TEST(write_pi_invalid)
 	node.set_name(STR("test"));
 	node.set_value(STR("?"));
 
-	CHECK_NODE(doc, STR("<?test ?" "?>"));
+	CHECK_NODE(doc, STR("<?test ?") STR("?>"));
 
 	node.set_value(STR("?>"));
 
