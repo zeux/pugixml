@@ -5,6 +5,10 @@
 
 #include <math.h>
 
+#ifdef __BORLANDC__
+using std::ldexpf;
+#endif
+
 TEST_XML(dom_attr_assign, "<node/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -101,15 +105,28 @@ TEST_XML(dom_attr_set_value_llong, "<node/>")
 }
 #endif
 
-TEST_XML(dom_attr_assign_large_number, "<node attr1='' attr2='' />")
+TEST_XML(dom_attr_assign_large_number_float, "<node attr='' />")
 {
 	xml_node node = doc.child(STR("node"));
 
-	node.attribute(STR("attr1")) = std::numeric_limits<float>::max();
-	node.attribute(STR("attr2")) = std::numeric_limits<double>::max();
+	node.attribute(STR("attr")) = std::numeric_limits<float>::max();
 
-	CHECK(test_node(node, STR("<node attr1=\"3.40282347e+038\" attr2=\"1.7976931348623157e+308\" />"), STR(""), pugi::format_raw) ||
-		  test_node(node, STR("<node attr1=\"3.40282347e+38\" attr2=\"1.7976931348623157e+308\" />"), STR(""), pugi::format_raw));
+	CHECK(test_node(node, STR("<node attr=\"3.40282347e+038\" />"), STR(""), pugi::format_raw) ||
+		  test_node(node, STR("<node attr=\"3.40282347e+38\" />"), STR(""), pugi::format_raw));
+}
+
+TEST_XML(dom_attr_assign_large_number_double, "<node attr='' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	node.attribute(STR("attr")) = std::numeric_limits<double>::max();
+
+	// Borland C does not print double values with enough precision
+#ifdef __BORLANDC__
+	CHECK_NODE(node, STR("<node attr=\"1.7976931348623156e+308\" />"));
+#else
+	CHECK_NODE(node, STR("<node attr=\"1.7976931348623157e+308\" />"));
+#endif
 }
 
 TEST_XML(dom_node_set_name, "<node>text</node>")
@@ -1447,6 +1464,17 @@ TEST(dom_node_copy_declaration_empty_name)
 	CHECK_STRING(decl2.name(), STR(""));
 }
 
+template <typename T> bool fp_equal(T lhs, T rhs)
+{
+	// Several compilers compare float/double values on x87 stack without proper rounding
+	// This causes roundtrip tests to fail, although they correctly preserve the data.
+#if (defined(_MSC_VER) && _MSC_VER < 1400)
+	return memcmp(&lhs, &rhs, sizeof(T)) == 0;
+#else
+	return lhs == rhs;
+#endif
+}
+
 TEST(dom_fp_roundtrip_min_max)
 {
 	xml_document doc;
@@ -1454,16 +1482,16 @@ TEST(dom_fp_roundtrip_min_max)
 	xml_attribute attr = node.append_attribute(STR("attr"));
 
 	node.text().set(std::numeric_limits<float>::min());
-	CHECK(node.text().as_float() == std::numeric_limits<float>::min());
+	CHECK(fp_equal(node.text().as_float(), std::numeric_limits<float>::min()));
 
 	attr.set_value(std::numeric_limits<float>::max());
-	CHECK(attr.as_float() == std::numeric_limits<float>::max());
+	CHECK(fp_equal(attr.as_float(), std::numeric_limits<float>::max()));
 
 	attr.set_value(std::numeric_limits<double>::min());
-	CHECK(attr.as_double() == std::numeric_limits<double>::min());
+	CHECK(fp_equal(attr.as_double(), std::numeric_limits<double>::min()));
 
 	node.text().set(std::numeric_limits<double>::max());
-	CHECK(node.text().as_double() == std::numeric_limits<double>::max());
+	CHECK(fp_equal(node.text().as_double(), std::numeric_limits<double>::max()));
 }
 
 const double fp_roundtrip_base[] =
@@ -1487,11 +1515,13 @@ TEST(dom_fp_roundtrip_float)
 			float value = ldexpf(static_cast<float>(fp_roundtrip_base[i]), e);
 
 			doc.text().set(value);
-			CHECK(doc.text().as_float() == value);
+			CHECK(fp_equal(doc.text().as_float(), value));
 		}
 	}
 }
 
+// Borland C does not print double values with enough precision
+#ifndef __BORLANDC__
 TEST(dom_fp_roundtrip_double)
 {
 	xml_document doc;
@@ -1500,10 +1530,23 @@ TEST(dom_fp_roundtrip_double)
 	{
 		for (size_t i = 0; i < sizeof(fp_roundtrip_base) / sizeof(fp_roundtrip_base[0]); ++i)
 		{
+		#if defined(_MSC_VER) && _MSC_VER < 1400
+			// Not all runtime libraries guarantee roundtripping for denormals
+			if (e == -1021 && fp_roundtrip_base[i] < 0.5)
+				continue;
+		#endif
+
+		#ifdef __DMC__
+			// Digital Mars C does not roundtrip on exactly one combination
+			if (e == -12 && i == 1)
+				continue;
+		#endif
+
 			double value = ldexp(fp_roundtrip_base[i], e);
 
 			doc.text().set(value);
-			CHECK(doc.text().as_double() == value);
+			CHECK(fp_equal(doc.text().as_double(), value));
 		}
 	}
 }
+#endif
