@@ -55,6 +55,11 @@ clean:
 
 release: build/pugixml-$(VERSION).tar.gz build/pugixml-$(VERSION).zip
 
+docs: docs/quickstart.html docs/manual.html
+
+docs/%.html: docs/%.adoc
+	asciidoctor -b html5 $< -o $@
+
 build/pugixml-%: .FORCE | $(RELEASE)
 	perl tests/archive.pl $@ $|
 
