@@ -4,6 +4,7 @@
 #include <string>
 
 #include <math.h>
+#include <string.h>
 
 #ifdef __BORLANDC__
 using std::ldexpf;
@@ -1468,7 +1469,7 @@ template <typename T> bool fp_equal(T lhs, T rhs)
 {
 	// Several compilers compare float/double values on x87 stack without proper rounding
 	// This causes roundtrip tests to fail, although they correctly preserve the data.
-#if (defined(_MSC_VER) && _MSC_VER < 1400)
+#if (defined(_MSC_VER) && _MSC_VER < 1400) || defined(__MWERKS__)
 	return memcmp(&lhs, &rhs, sizeof(T)) == 0;
 #else
 	return lhs == rhs;
@@ -1530,7 +1531,7 @@ TEST(dom_fp_roundtrip_double)
 	{
 		for (size_t i = 0; i < sizeof(fp_roundtrip_base) / sizeof(fp_roundtrip_base[0]); ++i)
 		{
-		#if defined(_MSC_VER) && _MSC_VER < 1400
+		#if (defined(_MSC_VER) && _MSC_VER < 1400) || defined(__MWERKS__)
 			// Not all runtime libraries guarantee roundtripping for denormals
 			if (e == -1021 && fp_roundtrip_base[i] < 0.5)
 				continue;
