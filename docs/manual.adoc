@@ -30,7 +30,7 @@ If you believe you've found a bug in pugixml (bugs include compilation problems 
 
 Feature requests can be reported the same way as bugs, so if you're missing some functionality in pugixml or if the API is rough in some places and you can suggest an improvement, https://github.com/zeux/pugixml/issues/new[file an issue]. However please note that there are many factors when considering API changes (compatibility with previous versions, API redundancy, etc.), so generally features that can be implemented via a small function without pugixml modification are not accepted. However, all rules have exceptions.
 
-If you have a contribution to pugixml, such as build script for some build system/IDE, or a well-designed set of helper functions, or a binding to some language other than C{plus}{plus}, please https://github.com/zeux/pugixml/issues/new[file an issue]. You can include the relevant patches as issue attachments. Your contribution has to be distributed under the terms of a license that's compatible with pugixml license; i.e. GPL/LGPL licensed code is not accepted.
+If you have a contribution to pugixml, such as build script for some build system/IDE, or a well-designed set of helper functions, or a binding to some language other than C{plus}{plus}, please https://github.com/zeux/pugixml/issues/new[file an issue or open a pull request]. Your contribution has to be distributed under the terms of a license that's compatible with pugixml license; i.e. GPL/LGPL licensed code is not accepted.
 
 If filing an issue is not possible due to privacy or other concerns, you can contact pugixml author by e-mail directly: arseny.kapoulkine@gmail.com.
 
@@ -111,10 +111,11 @@ The Git repository is located at https://github.com/zeux/pugixml/. There is a Gi
 
 For example, to checkout the current version, you can use this command:
 
+[source,bash,subs="attributes"]
 ----
 git clone https://github.com/zeux/pugixml
 cd pugixml
-git checkout v{version} TODO
+git checkout v{version}
 ----
 
 The repository contains library source, documentation, code examples and full unit test suite.
@@ -122,12 +123,13 @@ The repository contains library source, documentation, code examples and full un
 Use `latest` tag if you want to automatically get new versions. Use other tags if you want to switch to new versions only explicitly. Also please note that the master branch contains the work-in-progress version of the code; while this means that you can get new features and bug fixes from master without waiting for a new release, this also means that occasionally the code can be broken in some configurations.
 
 [[install.getting.subversion]]
-===== Subversion repository
+==== Subversion repository
 
 You can access the Git repository via Subversion using https://github.com/zeux/pugixml URL. For example, to checkout the current version, you can use this command:
 
+[source,bash,subs="attributes"]
 ----
-svn checkout https://github.com/zeux/pugixml/tags/v{version} pugixml TODO
+svn checkout https://github.com/zeux/pugixml/tags/v{version} pugixml
 ----
 
 [[install.building]]
@@ -140,7 +142,7 @@ The complete pugixml source consists of three files - one source file, `pugixml.
 [[install.building.embed]]
 ==== Building pugixml as a part of another static library/executable
 
-The easiest way to build pugixml is to compile the source file, `pugixml.cpp`, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio[ftnt trademarks All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add `pugixml.cpp` to one of your projects.
+The easiest way to build pugixml is to compile the source file, `pugixml.cpp`, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio footnote:[All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add `pugixml.cpp` to one of your projects.
 
 If you're using Microsoft Visual Studio and the project has precompiled headers turned on, you'll see the following error messages:
 
@@ -710,7 +712,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 * [anchor status_out_of_memory] means that there was not enough memory during some allocation; any allocation failure during parsing results in this error.
 * [anchor status_internal_error] means that something went horribly wrong; currently this error does not occur
 
-* [anchor status_unrecognized_tag] means that parsing stopped due to a tag with either an empty name or a name which starts with incorrect character, such as [^#].
+* [anchor status_unrecognized_tag] means that parsing stopped due to a tag with either an empty name or a name which starts with incorrect character, such as #.
 * [anchor status_bad_pi] means that parsing stopped due to incorrect document declaration/processing instruction
 * [anchor status_bad_comment], [anchor status_bad_cdata], [anchor status_bad_doctype] and [anchor status_bad_pcdata] mean that parsing stopped due to the invalid construct of the respective type
 * [anchor status_bad_start_element] means that parsing stopped because starting tag either had no closing `>` symbol or contained some incorrect symbol
@@ -722,7 +724,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 [#xml_parse_result::description]
 `description()` member function can be used to convert parsing status to a string; the returned message is always in English, so you'll have to write your own function if you need a localized string. However please note that the exact messages returned by `description()` function may change from version to version, so any complex status handling should be based on `status` value. Note that `description()` returns a `char` string even in `PUGIXML_WCHAR_MODE`; you'll have to call [link as_wide] to get the `wchar_t` string.
 
-If parsing failed because the source data was not a valid XML, the resulting tree is not destroyed - despite the fact that load function returns error, you can use the part of the tree that was successfully parsed. Obviously, the last element may have an unexpected name/value; for example, if the attribute value does not end with the necessary quotation mark, like in [^<node attr="value>some data</node>] example, the value of attribute `attr` will contain the string `value>some data</node>`.
+If parsing failed because the source data was not a valid XML, the resulting tree is not destroyed - despite the fact that load function returns error, you can use the part of the tree that was successfully parsed. Obviously, the last element may have an unexpected name/value; for example, if the attribute value does not end with the necessary quotation mark, like in `<node attr="value>some data</node>` example, the value of attribute `attr` will contain the string `value>some data</node>`.
 
 [#xml_parse_result::offset]
 In addition to the status code, parsing result has an `offset` member, which contains the offset of last successfully parsed character if parsing failed because of an error in source data; otherwise `offset` is 0. For parsing efficiency reasons, pugixml does not track the current line during parsing; this offset is in units of [link char_t pugi::char_t] (bytes for character mode, wide characters for wide character mode). Many text editors support 'Go To Position' feature - you can use it to locate the exact error position. Alternatively, if you're loading the document from memory, you can display the error chunk along with the error description (see the example code below).
@@ -773,7 +775,7 @@ CAUTION: Using in-place parsing ([link xml_document::load_buffer_inplace load_bu
 
 These flags control the transformation of tree element contents:
 
-* [anchor parse_escapes] determines if character and entity references are to be expanded during the parsing process. Character references have the form [^&#...;] or [^&#x...;] ([^...] is Unicode numeric representation of character in either decimal ([^&#...;]) or hexadecimal ([^&#x...;]) form), entity references are [^&lt;], [^&gt;], [^&amp;], [^&apos;] and [^&quot;] (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed on attribute values and PCDATA content. This flag is *on* by default.
+* [anchor parse_escapes] determines if character and entity references are to be expanded during the parsing process. Character references have the form `&#...;` or `&#x...;` (`...` is Unicode numeric representation of character in either decimal (`&#...;`) or hexadecimal (`&#x...;`) form), entity references are `&lt;`, `&gt;`, `&amp;`, `&apos;` and `&quot;` (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed on attribute values and PCDATA content. This flag is *on* by default.
 
 * [anchor parse_eol] determines if EOL handling (that is, replacing sequences `0x0d 0x0a` by a single `0x0a` character, and replacing all standalone `0x0d` characters by `0x0a`) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values). This flag is *on* by default.
 
@@ -781,7 +783,7 @@ These flags control the transformation of tree element contents:
 
 * [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if [link parse_wconv_attribute] was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. [link parse_wconv_attribute] has no effect if this flag is on. This flag is *off* by default.
 
-NOTE: `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as [^CDATA]; [link parse_wnorm_attribute] performs transformations required for [^NMTOKENS] attributes. In the absence of document type declaration all attributes should behave as if they are declared as [^CDATA], thus [link parse_wconv_attribute] is the default option.
+NOTE: `parse_wconv_attribute` option performs transformations that are required by W3C specification for attributes that are declared as CDATA; [link parse_wnorm_attribute] performs transformations required for NMTOKENS attributes. In the absence of document type declaration all attributes should behave as if they are declared as CDATA, thus [link parse_wconv_attribute] is the default option.
 
 Additionally there are three predefined option masks:
 
@@ -808,9 +810,9 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
 ** If first four bytes match UTF-32 BOM (Byte Order Mark), encoding is assumed to be UTF-32 with the endianness equal to that of BOM;
 ** If first two bytes match UTF-16 BOM, encoding is assumed to be UTF-16 with the endianness equal to that of BOM;
 ** If first three bytes match UTF-8 BOM, encoding is assumed to be UTF-8;
-** If first four bytes match UTF-32 representation of [^<], encoding is assumed to be UTF-32 with the corresponding endianness;
-** If first four bytes match UTF-16 representation of [^<?], encoding is assumed to be UTF-16 with the corresponding endianness;
-** If first two bytes match UTF-16 representation of [^<], encoding is assumed to be UTF-16 with the corresponding endianness (this guess may yield incorrect result, but it's better than UTF-8);
+** If first four bytes match UTF-32 representation of `<`, encoding is assumed to be UTF-32 with the corresponding endianness;
+** If first four bytes match UTF-16 representation of `<?`, encoding is assumed to be UTF-16 with the corresponding endianness;
+** If first two bytes match UTF-16 representation of `<`, encoding is assumed to be UTF-16 with the corresponding endianness (this guess may yield incorrect result, but it's better than UTF-8);
 ** Otherwise encoding is assumed to be UTF-8.
 
 * [anchor encoding_utf8] corresponds to UTF-8 encoding as defined in the Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
@@ -823,7 +825,7 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
 * [anchor encoding_wchar] corresponds to the encoding of `wchar_t` type; it has the same meaning as either `encoding_utf16` or `encoding_utf32`, depending on `wchar_t` size.
 * [anchor encoding_latin1] corresponds to ISO-8859-1 encoding (also known as Latin-1).
 
-The algorithm used for `encoding_auto` correctly detects any supported Unicode encoding for all well-formed XML documents (since they start with document declaration) and for all other XML documents that start with [^<]; if your XML document does not start with [^<] and has encoding that is different from UTF-8, use the specific encoding.
+The algorithm used for `encoding_auto` correctly detects any supported Unicode encoding for all well-formed XML documents (since they start with document declaration) and for all other XML documents that start with `<`; if your XML document does not start with `<` and has encoding that is different from UTF-8, use the specific encoding.
 
 NOTE: The current behavior for Unicode conversion is to skip all invalid UTF sequences during conversion. This behavior should not be relied upon; moreover, in case no encoding conversion is performed, the invalid sequences are not removed, so you'll get them as is in node/attribute contents.
 
@@ -838,9 +840,9 @@ As for rejecting invalid XML documents, there are a number of incompatibilities 
 
 * Multiple attributes of the same node can have equal names.
 * All non-ASCII characters are treated in the same way as symbols of English alphabet, so some invalid tag names are not rejected.
-* Attribute values which contain [^<] are not rejected.
+* Attribute values which contain `<` are not rejected.
 * Invalid entity/character references are not rejected and are instead left as is.
-* Comment values can contain [^--].
+* Comment values can contain `--`.
 * XML data is not required to begin with document declaration; additionally, document declaration can appear after comments and other nodes.
 * Invalid document type declarations are silently ignored in some cases.
 
@@ -1019,12 +1021,11 @@ include::samples/traverse_base.cpp[tags=contents]
 [#xml_node::children][#xml_node::attributes]
 If your C{plus}{plus} compiler supports range-based for-loop (this is a C{plus}{plus}11 feature, at the time of writing it's supported by Microsoft Visual Studio 11 Beta, GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with http://www.boost.org/libs/foreach/[Boost Foreach], and possibly other pre-C{plus}{plus}11 foreach facilities.
 
-[source]
+[source,subs="+quotes"]
 ----
-TODO
-``/implementation-defined type/`` xml_node::children() const;
-``/implementation-defined type/`` xml_node::children(const char_t* name) const;
-``/implementation-defined type/`` xml_node::attributes() const;
+_implementation-defined-type_ xml_node::children() const;
+_implementation-defined-type_ xml_node::children(const char_t* name) const;
+_implementation-defined-type_ xml_node::attributes() const;
 ----
 
 `children` function allows you to enumerate all child nodes; `children` function with `name` argument allows you to enumerate all child nodes with a specific name; `attributes` function allows you to enumerate all attributes of the node. Note that you can also use node object itself in a range-based for construct, which is equivalent to using `children()`.
@@ -2500,451 +2501,469 @@ This is the reference for all macros, types, enumerations, classes and functions
 
 Macros:
 
-* `#define `[link PUGIXML_WCHAR_MODE]
-* `#define `[link PUGIXML_NO_XPATH]
-* `#define `[link PUGIXML_NO_STL]
-* `#define `[link PUGIXML_NO_EXCEPTIONS]
-* `#define `[link PUGIXML_API]
-* `#define `[link PUGIXML_CLASS]
-* `#define `[link PUGIXML_FUNCTION]
-* `#define `[link PUGIXML_MEMORY_PAGE_SIZE]
-* `#define `[link PUGIXML_MEMORY_OUTPUT_STACK]
-* `#define `[link PUGIXML_MEMORY_XPATH_PAGE_SIZE]
-* `#define `[link PUGIXML_HEADER_ONLY]
-* `#define `[link PUGIXML_HAS_LONG_LONG]
+[source,subs="+macros"]
+----
+#define [link PUGIXML_WCHAR_MODE]
+#define [link PUGIXML_NO_XPATH]
+#define [link PUGIXML_NO_STL]
+#define [link PUGIXML_NO_EXCEPTIONS]
+#define [link PUGIXML_API]
+#define [link PUGIXML_CLASS]
+#define [link PUGIXML_FUNCTION]
+#define [link PUGIXML_MEMORY_PAGE_SIZE]
+#define [link PUGIXML_MEMORY_OUTPUT_STACK]
+#define [link PUGIXML_MEMORY_XPATH_PAGE_SIZE]
+#define [link PUGIXML_HEADER_ONLY]
+#define [link PUGIXML_HAS_LONG_LONG]
+----
 
 Types:
 
-* `typedef `/configuration-defined type/` `[link char_t]`;`
-* `typedef `/configuration-defined type/` `[link string_t]`;`
-* `typedef void* (*`[link allocation_function]`)(size_t size);`
-* `typedef void (*`[link deallocation_function]`)(void* ptr);`
+[source,subs="+macros,+quotes"]
+----
+typedef _configuration-defined-type_ [link char_t];
+typedef _configuration-defined-type_ [link string_t];
+typedef void* (*[link allocation_function])(size_t size);
+typedef void (*[link deallocation_function])(void* ptr);
+----
 
 Enumerations:
 
-* `enum `[link xml_node_type]
-    * [link node_null]
-    * [link node_document]
-    * [link node_element]
-    * [link node_pcdata]
-    * [link node_cdata]
-    * [link node_comment]
-    * [link node_pi]
-    * [link node_declaration]
-    * [link node_doctype]
+[source,subs="+macros"]
+----
+enum [link xml_node_type]
+    [link node_null]
+    [link node_document]
+    [link node_element]
+    [link node_pcdata]
+    [link node_cdata]
+    [link node_comment]
+    [link node_pi]
+    [link node_declaration]
+    [link node_doctype]
 
-* `enum `[link xml_parse_status]
-    * [link status_ok]
-    * [link status_file_not_found]
-    * [link status_io_error]
-    * [link status_out_of_memory]
-    * [link status_internal_error]
-    * [link status_unrecognized_tag]
-    * [link status_bad_pi]
-    * [link status_bad_comment]
-    * [link status_bad_cdata]
-    * [link status_bad_doctype]
-    * [link status_bad_pcdata]
-    * [link status_bad_start_element]
-    * [link status_bad_attribute]
-    * [link status_bad_end_element]
-    * [link status_end_element_mismatch]
-    * [link status_append_invalid_root]
-    * [link status_no_document_element]
+enum [link xml_parse_status]
+    [link status_ok]
+    [link status_file_not_found]
+    [link status_io_error]
+    [link status_out_of_memory]
+    [link status_internal_error]
+    [link status_unrecognized_tag]
+    [link status_bad_pi]
+    [link status_bad_comment]
+    [link status_bad_cdata]
+    [link status_bad_doctype]
+    [link status_bad_pcdata]
+    [link status_bad_start_element]
+    [link status_bad_attribute]
+    [link status_bad_end_element]
+    [link status_end_element_mismatch]
+    [link status_append_invalid_root]
+    [link status_no_document_element]
 
-* `enum `[link xml_encoding]
-    * [link encoding_auto]
-    * [link encoding_utf8]
-    * [link encoding_utf16_le]
-    * [link encoding_utf16_be]
-    * [link encoding_utf16]
-    * [link encoding_utf32_le]
-    * [link encoding_utf32_be]
-    * [link encoding_utf32]
-    * [link encoding_wchar]
-    * [link encoding_latin1]
+enum [link xml_encoding]
+    [link encoding_auto]
+    [link encoding_utf8]
+    [link encoding_utf16_le]
+    [link encoding_utf16_be]
+    [link encoding_utf16]
+    [link encoding_utf32_le]
+    [link encoding_utf32_be]
+    [link encoding_utf32]
+    [link encoding_wchar]
+    [link encoding_latin1]
 
-* `enum `[link xpath_value_type]
-    * [link xpath_type_none]
-    * [link xpath_type_node_set]
-    * [link xpath_type_number]
-    * [link xpath_type_string]
-    * [link xpath_type_boolean]
+enum [link xpath_value_type]
+    [link xpath_type_none]
+    [link xpath_type_node_set]
+    [link xpath_type_number]
+    [link xpath_type_string]
+    [link xpath_type_boolean]
+----
 
 Constants:
 
-* Formatting options bit flags:
-    * [link format_default]
-    * [link format_indent]
-    * [link format_no_declaration]
-    * [link format_no_escapes]
-    * [link format_raw]
-    * [link format_save_file_text]
-    * [link format_write_bom]
+[source,subs="+macros"]
+----
+// Formatting options bit flags:
+    [link format_default]
+    [link format_indent]
+    [link format_no_declaration]
+    [link format_no_escapes]
+    [link format_raw]
+    [link format_save_file_text]
+    [link format_write_bom]
 
-* Parsing options bit flags:
-    * [link parse_cdata]
-    * [link parse_comments]
-    * [link parse_declaration]
-    * [link parse_default]
-    * [link parse_doctype]
-    * [link parse_eol]
-    * [link parse_escapes]
-    * [link parse_fragment]
-    * [link parse_full]
-    * [link parse_minimal]
-    * [link parse_pi]
-    * [link parse_trim_pcdata]
-    * [link parse_ws_pcdata]
-    * [link parse_ws_pcdata_single]
-    * [link parse_wconv_attribute]
-    * [link parse_wnorm_attribute]
+// Parsing options bit flags:
+    [link parse_cdata]
+    [link parse_comments]
+    [link parse_declaration]
+    [link parse_default]
+    [link parse_doctype]
+    [link parse_eol]
+    [link parse_escapes]
+    [link parse_fragment]
+    [link parse_full]
+    [link parse_minimal]
+    [link parse_pi]
+    [link parse_trim_pcdata]
+    [link parse_ws_pcdata]
+    [link parse_ws_pcdata_single]
+    [link parse_wconv_attribute]
+    [link parse_wnorm_attribute]
+----
         
 Classes:
 
-* `class `[link xml_attribute]
-    * [link xml_attribute::ctor xml_attribute]`();`
-
-    * `bool `[link xml_attribute::empty empty]`() const;`
-    * `operator `[link xml_attribute::unspecified_bool_type unspecified_bool_type]`() const;`
-
-    * `bool `[link xml_attribute::comparison operator==]`(const xml_attribute& r) const;`
-    * `bool `[link xml_attribute::comparison operator!=]`(const xml_attribute& r) const;`
-    * `bool `[link xml_attribute::comparison operator<]`(const xml_attribute& r) const;`
-    * `bool `[link xml_attribute::comparison operator>]`(const xml_attribute& r) const;`
-    * `bool `[link xml_attribute::comparison operator<=]`(const xml_attribute& r) const;`
-    * `bool `[link xml_attribute::comparison operator>=]`(const xml_attribute& r) const;`
-
-    * `size_t `[link xml_attribute::hash_value hash_value]`() const;`
-
-    * `xml_attribute `[link xml_attribute::next_attribute next_attribute]`() const;`
-    * `xml_attribute `[link xml_attribute::previous_attribute previous_attribute]`() const;`
-
-    * `const char_t* `[link xml_attribute::name name]`() const;`
-    * `const char_t* `[link xml_attribute::value value]`() const;`
-
-    * `const char_t* `[link xml_attribute::as_string as_string]`(const char_t* def = "") const;`
-    * `int `[link xml_attribute::as_int as_int]`(int def = 0) const;`
-    * `unsigned int `[link xml_attribute::as_uint as_uint]`(unsigned int def = 0) const;`
-    * `double `[link xml_attribute::as_double as_double]`(double def = 0) const;`
-    * `float `[link xml_attribute::as_float as_float]`(float def = 0) const;`
-    * `bool `[link xml_attribute::as_bool as_bool]`(bool def = false) const;`
-    * `long long `[link xml_attribute::as_llong as_llong]`(long long def = 0) const;`
-    * `unsigned long long `[link xml_attribute::as_ullong as_ullong]`(unsigned long long def = 0) const;`
-
-    * `bool `[link xml_attribute::set_name set_name]`(const char_t* rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(const char_t* rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(int rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(unsigned int rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(double rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(float rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(bool rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(long long rhs);`
-    * `bool `[link xml_attribute::set_value set_value]`(unsigned long long rhs);`
-
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(const char_t* rhs);`
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(int rhs);`
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(unsigned int rhs);`
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(double rhs);`
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(float rhs);`
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(bool rhs);`
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(long long rhs);`
-    * `xml_attribute& `[link xml_attribute::assign operator=]`(unsnigned long long rhs);`
-
-* `class `[link xml_node]
-    * [link xml_node::ctor xml_node]`();`
-
-    * `bool `[link xml_node::empty empty]`() const;`
-    * `operator `[link xml_node::unspecified_bool_type unspecified_bool_type]`() const;`
-
-    * `bool `[link xml_node::comparison operator==]`(const xml_node& r) const;`
-    * `bool `[link xml_node::comparison operator!=]`(const xml_node& r) const;`
-    * `bool `[link xml_node::comparison operator<]`(const xml_node& r) const;`
-    * `bool `[link xml_node::comparison operator>]`(const xml_node& r) const;`
-    * `bool `[link xml_node::comparison operator<=]`(const xml_node& r) const;`
-    * `bool `[link xml_node::comparison operator>=]`(const xml_node& r) const;`
-
-    * `size_t `[link xml_node::hash_value hash_value]`() const;`
-
-    * `xml_node_type `[link xml_node::type type]`() const;`
-
-    * `const char_t* `[link xml_node::name name]`() const;`
-    * `const char_t* `[link xml_node::value value]`() const;`
-
-    * `xml_node `[link xml_node::parent parent]`() const;`
-    * `xml_node `[link xml_node::first_child first_child]`() const;`
-    * `xml_node `[link xml_node::last_child last_child]`() const;`
-    * `xml_node `[link xml_node::next_sibling next_sibling]`() const;`
-    * `xml_node `[link xml_node::previous_sibling previous_sibling]`() const;`
-
-    * `xml_attribute `[link xml_node::first_attribute first_attribute]`() const;`
-    * `xml_attribute `[link xml_node::last_attribute last_attribute]`() const;`
-
-    * /implementation-defined type/ [link xml_node::children children]`() const;`
-    * /implementation-defined type/ [link xml_node::children children]`(const char_t* name) const;`
-    * /implementation-defined type/ [link xml_node::attributes attributes]`() const;`
-
-    * `xml_node `[link xml_node::child child]`(const char_t* name) const;`
-    * `xml_attribute `[link xml_node::attribute attribute]`(const char_t* name) const;`
-    * `xml_node `[link xml_node::next_sibling_name next_sibling]`(const char_t* name) const;`
-    * `xml_node `[link xml_node::previous_sibling_name previous_sibling]`(const char_t* name) const;`
-    * `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;`
-    * `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* attr_name, const char_t* attr_value) const;`
-
-    * `const char_t* `[link xml_node::child_value child_value]`() const;`
-    * `const char_t* `[link xml_node::child_value child_value]`(const char_t* name) const;`
-    * `xml_text `[link xml_node::text text]`() const;`
-
-    * `typedef xml_node_iterator `[link xml_node_iterator iterator]`;`
-    * `iterator `[link xml_node::begin begin]`() const;`
-    * `iterator `[link xml_node::end end]`() const;`
-
-    * `typedef xml_attribute_iterator `[link xml_attribute_iterator attribute_iterator]`;`
-    * `attribute_iterator `[link xml_node::attributes_begin attributes_begin]`() const;`
-    * `attribute_iterator `[link xml_node::attributes_end attributes_end]`() const;`
-
-    * `bool `[link xml_node::traverse traverse]`(xml_tree_walker& walker);`
+[source,subs="+macros"]
+----
+class [link xml_attribute]
+    [link xml_attribute::ctor xml_attribute]();
+
+    bool [link xml_attribute::empty empty]() const;
+    operator [link xml_attribute::unspecified_bool_type unspecified_bool_type]() const;
+
+    bool [link xml_attribute::comparison operator==](const xml_attribute& r) const;
+    bool [link xml_attribute::comparison operator!=](const xml_attribute& r) const;
+    bool [link xml_attribute::comparison operator<](const xml_attribute& r) const;
+    bool [link xml_attribute::comparison operator>](const xml_attribute& r) const;
+    bool [link xml_attribute::comparison operator<=](const xml_attribute& r) const;
+    bool [link xml_attribute::comparison operator>=](const xml_attribute& r) const;
+
+    size_t [link xml_attribute::hash_value hash_value]() const;
+
+    xml_attribute [link xml_attribute::next_attribute next_attribute]() const;
+    xml_attribute [link xml_attribute::previous_attribute previous_attribute]() const;
+
+    const char_t* [link xml_attribute::name name]() const;
+    const char_t* [link xml_attribute::value value]() const;
+
+    const char_t* [link xml_attribute::as_string as_string](const char_t* def = "") const;
+    int [link xml_attribute::as_int as_int](int def = 0) const;
+    unsigned int [link xml_attribute::as_uint as_uint](unsigned int def = 0) const;
+    double [link xml_attribute::as_double as_double](double def = 0) const;
+    float [link xml_attribute::as_float as_float](float def = 0) const;
+    bool [link xml_attribute::as_bool as_bool](bool def = false) const;
+    long long [link xml_attribute::as_llong as_llong](long long def = 0) const;
+    unsigned long long [link xml_attribute::as_ullong as_ullong](unsigned long long def = 0) const;
+
+    bool [link xml_attribute::set_name set_name](const char_t* rhs);
+    bool [link xml_attribute::set_value set_value](const char_t* rhs);
+    bool [link xml_attribute::set_value set_value](int rhs);
+    bool [link xml_attribute::set_value set_value](unsigned int rhs);
+    bool [link xml_attribute::set_value set_value](double rhs);
+    bool [link xml_attribute::set_value set_value](float rhs);
+    bool [link xml_attribute::set_value set_value](bool rhs);
+    bool [link xml_attribute::set_value set_value](long long rhs);
+    bool [link xml_attribute::set_value set_value](unsigned long long rhs);
+
+    xml_attribute& [link xml_attribute::assign operator=](const char_t* rhs);
+    xml_attribute& [link xml_attribute::assign operator=](int rhs);
+    xml_attribute& [link xml_attribute::assign operator=](unsigned int rhs);
+    xml_attribute& [link xml_attribute::assign operator=](double rhs);
+    xml_attribute& [link xml_attribute::assign operator=](float rhs);
+    xml_attribute& [link xml_attribute::assign operator=](bool rhs);
+    xml_attribute& [link xml_attribute::assign operator=](long long rhs);
+    xml_attribute& [link xml_attribute::assign operator=](unsnigned long long rhs);
+
+class [link xml_node]
+    [link xml_node::ctor xml_node]();
+
+    bool [link xml_node::empty empty]() const;
+    operator [link xml_node::unspecified_bool_type unspecified_bool_type]() const;
+
+    bool [link xml_node::comparison operator==](const xml_node& r) const;
+    bool [link xml_node::comparison operator!=](const xml_node& r) const;
+    bool [link xml_node::comparison operator<](const xml_node& r) const;
+    bool [link xml_node::comparison operator>](const xml_node& r) const;
+    bool [link xml_node::comparison operator<=](const xml_node& r) const;
+    bool [link xml_node::comparison operator>=](const xml_node& r) const;
+
+    size_t [link xml_node::hash_value hash_value]() const;
+
+    xml_node_type [link xml_node::type type]() const;
+
+    const char_t* [link xml_node::name name]() const;
+    const char_t* [link xml_node::value value]() const;
+
+    xml_node [link xml_node::parent parent]() const;
+    xml_node [link xml_node::first_child first_child]() const;
+    xml_node [link xml_node::last_child last_child]() const;
+    xml_node [link xml_node::next_sibling next_sibling]() const;
+    xml_node [link xml_node::previous_sibling previous_sibling]() const;
+
+    xml_attribute [link xml_node::first_attribute first_attribute]() const;
+    xml_attribute [link xml_node::last_attribute last_attribute]() const;
+
+    /implementation-defined type/ [link xml_node::children children]() const;
+    /implementation-defined type/ [link xml_node::children children](const char_t* name) const;
+    /implementation-defined type/ [link xml_node::attributes attributes]() const;
+
+    xml_node [link xml_node::child child](const char_t* name) const;
+    xml_attribute [link xml_node::attribute attribute](const char_t* name) const;
+    xml_node [link xml_node::next_sibling_name next_sibling](const char_t* name) const;
+    xml_node [link xml_node::previous_sibling_name previous_sibling](const char_t* name) const;
+    xml_node [link xml_node::find_child_by_attribute find_child_by_attribute](const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
+    xml_node [link xml_node::find_child_by_attribute find_child_by_attribute](const char_t* attr_name, const char_t* attr_value) const;
+
+    const char_t* [link xml_node::child_value child_value]() const;
+    const char_t* [link xml_node::child_value child_value](const char_t* name) const;
+    xml_text [link xml_node::text text]() const;
+
+    typedef xml_node_iterator [link xml_node_iterator iterator];
+    iterator [link xml_node::begin begin]() const;
+    iterator [link xml_node::end end]() const;
+
+    typedef xml_attribute_iterator [link xml_attribute_iterator attribute_iterator];
+    attribute_iterator [link xml_node::attributes_begin attributes_begin]() const;
+    attribute_iterator [link xml_node::attributes_end attributes_end]() const;
 
-    * `template <typename Predicate> xml_attribute `[link xml_node::find_attribute find_attribute]`(Predicate pred) const;`
-    * `template <typename Predicate> xml_node `[link xml_node::find_child find_child]`(Predicate pred) const;`
-    * `template <typename Predicate> xml_node `[link xml_node::find_node find_node]`(Predicate pred) const;`
+    bool [link xml_node::traverse traverse](xml_tree_walker& walker);
 
-    * `string_t `[link xml_node::path path]`(char_t delimiter = '/') const;`
-    * `xml_node `[link xml_node::first_element_by_path]`(const char_t* path, char_t delimiter = '/') const;`
-    * `xml_node `[link xml_node::root root]`() const;`
-    * `ptrdiff_t `[link xml_node::offset_debug offset_debug]`() const;`
+    template <typename Predicate> xml_attribute [link xml_node::find_attribute find_attribute](Predicate pred) const;
+    template <typename Predicate> xml_node [link xml_node::find_child find_child](Predicate pred) const;
+    template <typename Predicate> xml_node [link xml_node::find_node find_node](Predicate pred) const;
 
-    * `bool `[link xml_node::set_name set_name]`(const char_t* rhs);`
-    * `bool `[link xml_node::set_value set_value]`(const char_t* rhs);`
+    string_t [link xml_node::path path](char_t delimiter = '/') const;
+    xml_node [link xml_node::first_element_by_path](const char_t* path, char_t delimiter = '/') const;
+    xml_node [link xml_node::root root]() const;
+    ptrdiff_t [link xml_node::offset_debug offset_debug]() const;
 
-    * `xml_attribute `[link xml_node::append_attribute append_attribute]`(const char_t* name);`
-    * `xml_attribute `[link xml_node::prepend_attribute prepend_attribute]`(const char_t* name);`
-    * `xml_attribute `[link xml_node::insert_attribute_after insert_attribute_after]`(const char_t* name, const xml_attribute& attr);`
-    * `xml_attribute `[link xml_node::insert_attribute_before insert_attribute_before]`(const char_t* name, const xml_attribute& attr);`
+    bool [link xml_node::set_name set_name](const char_t* rhs);
+    bool [link xml_node::set_value set_value](const char_t* rhs);
 
-    * `xml_node `[link xml_node::append_child append_child]`(xml_node_type type = node_element);`
-    * `xml_node `[link xml_node::prepend_child prepend_child]`(xml_node_type type = node_element);`
-    * `xml_node `[link xml_node::insert_child_after insert_child_after]`(xml_node_type type, const xml_node& node);`
-    * `xml_node `[link xml_node::insert_child_before insert_child_before]`(xml_node_type type, const xml_node& node);`
+    xml_attribute [link xml_node::append_attribute append_attribute](const char_t* name);
+    xml_attribute [link xml_node::prepend_attribute prepend_attribute](const char_t* name);
+    xml_attribute [link xml_node::insert_attribute_after insert_attribute_after](const char_t* name, const xml_attribute& attr);
+    xml_attribute [link xml_node::insert_attribute_before insert_attribute_before](const char_t* name, const xml_attribute& attr);
 
-    * `xml_node `[link xml_node::append_child append_child]`(const char_t* name);`
-    * `xml_node `[link xml_node::prepend_child prepend_child]`(const char_t* name);`
-    * `xml_node `[link xml_node::insert_child_after insert_child_after]`(const char_t* name, const xml_node& node);`
-    * `xml_node `[link xml_node::insert_child_before insert_child_before]`(const char_t* name, const xml_node& node);`
+    xml_node [link xml_node::append_child append_child](xml_node_type type = node_element);
+    xml_node [link xml_node::prepend_child prepend_child](xml_node_type type = node_element);
+    xml_node [link xml_node::insert_child_after insert_child_after](xml_node_type type, const xml_node& node);
+    xml_node [link xml_node::insert_child_before insert_child_before](xml_node_type type, const xml_node& node);
 
-    * `xml_attribute `[link xml_node::append_copy append_copy]`(const xml_attribute& proto);`
-    * `xml_attribute `[link xml_node::prepend_copy prepend_copy]`(const xml_attribute& proto);`
-    * `xml_attribute `[link xml_node::insert_copy_after insert_copy_after]`(const xml_attribute& proto, const xml_attribute& attr);`
-    * `xml_attribute `[link xml_node::insert_copy_before insert_copy_before]`(const xml_attribute& proto, const xml_attribute& attr);`
+    xml_node [link xml_node::append_child append_child](const char_t* name);
+    xml_node [link xml_node::prepend_child prepend_child](const char_t* name);
+    xml_node [link xml_node::insert_child_after insert_child_after](const char_t* name, const xml_node& node);
+    xml_node [link xml_node::insert_child_before insert_child_before](const char_t* name, const xml_node& node);
 
-    * `xml_node `[link xml_node::append_copy append_copy]`(const xml_node& proto);`
-    * `xml_node `[link xml_node::prepend_copy prepend_copy]`(const xml_node& proto);`
-    * `xml_node `[link xml_node::insert_copy_after insert_copy_after]`(const xml_node& proto, const xml_node& node);`
-    * `xml_node `[link xml_node::insert_copy_before insert_copy_before]`(const xml_node& proto, const xml_node& node);`
+    xml_attribute [link xml_node::append_copy append_copy](const xml_attribute& proto);
+    xml_attribute [link xml_node::prepend_copy prepend_copy](const xml_attribute& proto);
+    xml_attribute [link xml_node::insert_copy_after insert_copy_after](const xml_attribute& proto, const xml_attribute& attr);
+    xml_attribute [link xml_node::insert_copy_before insert_copy_before](const xml_attribute& proto, const xml_attribute& attr);
 
-    * `xml_node `[link xml_node::append_move append_move]`(const xml_node& moved);`
-    * `xml_node `[link xml_node::prepend_move prepend_move]`(const xml_node& moved);`
-    * `xml_node `[link xml_node::insert_move_after insert_move_after]`(const xml_node& moved, const xml_node& node);`
-    * `xml_node `[link xml_node::insert_move_before insert_move_before]`(const xml_node& moved, const xml_node& node);`
+    xml_node [link xml_node::append_copy append_copy](const xml_node& proto);
+    xml_node [link xml_node::prepend_copy prepend_copy](const xml_node& proto);
+    xml_node [link xml_node::insert_copy_after insert_copy_after](const xml_node& proto, const xml_node& node);
+    xml_node [link xml_node::insert_copy_before insert_copy_before](const xml_node& proto, const xml_node& node);
+
+    xml_node [link xml_node::append_move append_move](const xml_node& moved);
+    xml_node [link xml_node::prepend_move prepend_move](const xml_node& moved);
+    xml_node [link xml_node::insert_move_after insert_move_after](const xml_node& moved, const xml_node& node);
+    xml_node [link xml_node::insert_move_before insert_move_before](const xml_node& moved, const xml_node& node);
 
-    * `bool `[link xml_node::remove_attribute remove_attribute]`(const xml_attribute& a);`
-    * `bool `[link xml_node::remove_attribute remove_attribute]`(const char_t* name);`
-    * `bool `[link xml_node::remove_child remove_child]`(const xml_node& n);`
-    * `bool `[link xml_node::remove_child remove_child]`(const char_t* name);`
+    bool [link xml_node::remove_attribute remove_attribute](const xml_attribute& a);
+    bool [link xml_node::remove_attribute remove_attribute](const char_t* name);
+    bool [link xml_node::remove_child remove_child](const xml_node& n);
+    bool [link xml_node::remove_child remove_child](const char_t* name);
 
-    * `xml_parse_result `[link xml_node::append_buffer append_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    xml_parse_result [link xml_node::append_buffer append_buffer](const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
-    * `void `[link xml_node::print print]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
-    * `void `[link xml_node::print_stream print]`(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
-    * `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
+    void [link xml_node::print print](xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+    void [link xml_node::print_stream print](std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;
+    void [link xml_node::print_stream print](std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;
 
-    * `xpath_node `[link xml_node::select_node select_node]`(const char_t* query, xpath_variable_set* variables = 0) const;`
-    * `xpath_node `[link xml_node::select_node_precomp select_node]`(const xpath_query& query) const;`
-    * `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query, xpath_variable_set* variables = 0) const;`
-    * `xpath_node_set `[link xml_node::select_nodes_precomp select_nodes]`(const xpath_query& query) const;`
+    xpath_node [link xml_node::select_node select_node](const char_t* query, xpath_variable_set* variables = 0) const;
+    xpath_node [link xml_node::select_node_precomp select_node](const xpath_query& query) const;
+    xpath_node_set [link xml_node::select_nodes select_nodes](const char_t* query, xpath_variable_set* variables = 0) const;
+    xpath_node_set [link xml_node::select_nodes_precomp select_nodes](const xpath_query& query) const;
 
-* `class `[link xml_document]
-    * [link xml_document::ctor xml_document]`();`
-    * `~`[link xml_document::dtor xml_document]`();`
+class [link xml_document]
+    [link xml_document::ctor xml_document]();
+    ~[link xml_document::dtor xml_document]();
 
-    * `void `[link xml_document::reset reset]`();`
-    * `void `[link xml_document::reset reset]`(const xml_document& proto);`
+    void [link xml_document::reset reset]();
+    void [link xml_document::reset reset](const xml_document& proto);
 
-    * `xml_parse_result `[link xml_document::load_stream load]`(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-    * `xml_parse_result `[link xml_document::load_stream load]`(std::wistream& stream, unsigned int options = parse_default);`
+    xml_parse_result [link xml_document::load_stream load](std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result [link xml_document::load_stream load](std::wistream& stream, unsigned int options = parse_default);
 
-    * `xml_parse_result `[link xml_document::load_string load_string]`(const char_t* contents, unsigned int options = parse_default);`
+    xml_parse_result [link xml_document::load_string load_string](const char_t* contents, unsigned int options = parse_default);
 
-    * `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-    * `xml_parse_result `[link xml_document::load_file_wide load_file]`(const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    xml_parse_result [link xml_document::load_file load_file](const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result [link xml_document::load_file_wide load_file](const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
-    * `xml_parse_result `[link xml_document::load_buffer load_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-    * `xml_parse_result `[link xml_document::load_buffer_inplace load_buffer_inplace]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-    * `xml_parse_result `[link xml_document::load_buffer_inplace_own load_buffer_inplace_own]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
+    xml_parse_result [link xml_document::load_buffer load_buffer](const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result [link xml_document::load_buffer_inplace load_buffer_inplace](void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
+    xml_parse_result [link xml_document::load_buffer_inplace_own load_buffer_inplace_own](void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
-    * `bool `[link xml_document::save_file save_file]`(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
-    * `bool `[link xml_document::save_file_wide save_file]`(const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+    bool [link xml_document::save_file save_file](const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+    bool [link xml_document::save_file_wide save_file](const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
-    * `void `[link xml_document::save_stream save]`(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
-    * `void `[link xml_document::save_stream save]`(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;`
+    void [link xml_document::save_stream save](std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
+    void [link xml_document::save_stream save](std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
 
-    * `void `[link xml_document::save save]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
+    void [link xml_document::save save](xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 
-    * `xml_node `[link xml_document::document_element document_element]`() const;`
+    xml_node [link xml_document::document_element document_element]() const;
 
-* `struct `[link xml_parse_result]
-    * `xml_parse_status `[link xml_parse_result::status status]`;`
-    * `ptrdiff_t `[link xml_parse_result::offset offset]`;`
-    * `xml_encoding `[link xml_parse_result::encoding encoding]`;`
+struct [link xml_parse_result]
+    xml_parse_status [link xml_parse_result::status status];
+    ptrdiff_t [link xml_parse_result::offset offset];
+    xml_encoding [link xml_parse_result::encoding encoding];
 
-    * `operator `[link xml_parse_result::bool bool]`() const;`
-    * `const char* `[link xml_parse_result::description description]`() const;`
+    operator [link xml_parse_result::bool bool]() const;
+    const char* [link xml_parse_result::description description]() const;
 
-* `class `[link xml_node_iterator]
-* `class `[link xml_attribute_iterator]
+class [link xml_node_iterator]
+class [link xml_attribute_iterator]
 
-* `class `[link xml_tree_walker]
-    * `virtual bool `[link xml_tree_walker::begin begin]`(xml_node& node);`
-    * `virtual bool `[link xml_tree_walker::for_each for_each]`(xml_node& node) = 0;`
-    * `virtual bool `[link xml_tree_walker::end end]`(xml_node& node);`
+class [link xml_tree_walker]
+    virtual bool [link xml_tree_walker::begin begin](xml_node& node);
+    virtual bool [link xml_tree_walker::for_each for_each](xml_node& node) = 0;
+    virtual bool [link xml_tree_walker::end end](xml_node& node);
 
-    * `int `[link xml_tree_walker::depth depth]`() const;`
+    int [link xml_tree_walker::depth depth]() const;
 
-* `class `[link xml_text]
-    * `bool `[link xml_text::empty empty]`() const;`
-    * `operator `[link xml_text::unspecified_bool_type]`() const;`
+class [link xml_text]
+    bool [link xml_text::empty empty]() const;
+    operator [link xml_text::unspecified_bool_type]() const;
 
-    * `const char_t* `[link xml_text::get]`() const;`
+    const char_t* [link xml_text::get]() const;
 
-    * `const char_t* `[link xml_text::as_string as_string]`(const char_t* def = "") const;`
-    * `int `[link xml_text::as_int as_int]`(int def = 0) const;`
-    * `unsigned int `[link xml_text::as_uint as_uint]`(unsigned int def = 0) const;`
-    * `double `[link xml_text::as_double as_double]`(double def = 0) const;`
-    * `float `[link xml_text::as_float as_float]`(float def = 0) const;`
-    * `bool `[link xml_text::as_bool as_bool]`(bool def = false) const;`
-    * `long long `[link xml_text::as_llong as_llong]`(long long def = 0) const;`
-    * `unsigned long long `[link xml_text::as_ullong as_ullong]`(unsigned long long def = 0) const;`
+    const char_t* [link xml_text::as_string as_string](const char_t* def = "") const;
+    int [link xml_text::as_int as_int](int def = 0) const;
+    unsigned int [link xml_text::as_uint as_uint](unsigned int def = 0) const;
+    double [link xml_text::as_double as_double](double def = 0) const;
+    float [link xml_text::as_float as_float](float def = 0) const;
+    bool [link xml_text::as_bool as_bool](bool def = false) const;
+    long long [link xml_text::as_llong as_llong](long long def = 0) const;
+    unsigned long long [link xml_text::as_ullong as_ullong](unsigned long long def = 0) const;
 
-    * `bool `[link xml_text::set set]`(const char_t* rhs);`
+    bool [link xml_text::set set](const char_t* rhs);
 
-    * `bool `[link xml_text::set set]`(int rhs);`
-    * `bool `[link xml_text::set set]`(unsigned int rhs);`
-    * `bool `[link xml_text::set set]`(double rhs);`
-    * `bool `[link xml_text::set set]`(float rhs);`
-    * `bool `[link xml_text::set set]`(bool rhs);`
-    * `bool `[link xml_text::set set]`(long long rhs);`
-    * `bool `[link xml_text::set set]`(unsigned long long rhs);`
+    bool [link xml_text::set set](int rhs);
+    bool [link xml_text::set set](unsigned int rhs);
+    bool [link xml_text::set set](double rhs);
+    bool [link xml_text::set set](float rhs);
+    bool [link xml_text::set set](bool rhs);
+    bool [link xml_text::set set](long long rhs);
+    bool [link xml_text::set set](unsigned long long rhs);
 
-    * `xml_text& `[link xml_text::assign operator=]`(const char_t* rhs);`
-    * `xml_text& `[link xml_text::assign operator=]`(int rhs);`
-    * `xml_text& `[link xml_text::assign operator=]`(unsigned int rhs);`
-    * `xml_text& `[link xml_text::assign operator=]`(double rhs);`
-    * `xml_text& `[link xml_text::assign operator=]`(float rhs);`
-    * `xml_text& `[link xml_text::assign operator=]`(bool rhs);`
-    * `xml_text& `[link xml_text::assign operator=]`(long long rhs);`
-    * `xml_text& `[link xml_text::assign operator=]`(unsigned long long rhs);`
+    xml_text& [link xml_text::assign operator=](const char_t* rhs);
+    xml_text& [link xml_text::assign operator=](int rhs);
+    xml_text& [link xml_text::assign operator=](unsigned int rhs);
+    xml_text& [link xml_text::assign operator=](double rhs);
+    xml_text& [link xml_text::assign operator=](float rhs);
+    xml_text& [link xml_text::assign operator=](bool rhs);
+    xml_text& [link xml_text::assign operator=](long long rhs);
+    xml_text& [link xml_text::assign operator=](unsigned long long rhs);
 
-    * `xml_node `[link xml_text::data data]`() const;`
+    xml_node [link xml_text::data data]() const;
 
-* `class `[link xml_writer]
-    * `virtual void `[link xml_writer::write write]`(const void* data, size_t size) = 0;`
+class [link xml_writer]
+    virtual void [link xml_writer::write write](const void* data, size_t size) = 0;
 
-* `class `[link xml_writer_file]`: public xml_writer`
-    * [link xml_writer_file]`(void* file);`
+class [link xml_writer_file]: public xml_writer
+    [link xml_writer_file](void* file);
 
-* `class `[link xml_writer_stream]`: public xml_writer`
-    * [link xml_writer_stream]`(std::ostream& stream);`
-    * [link xml_writer_stream]`(std::wostream& stream);`
+class [link xml_writer_stream]: public xml_writer
+    [link xml_writer_stream](std::ostream& stream);
+    [link xml_writer_stream](std::wostream& stream);
 
-* `struct `[link xpath_parse_result]
-    * `const char* `[link xpath_parse_result::error error]`;`
-    * `ptrdiff_t `[link xpath_parse_result::offset offset]`;`
+struct [link xpath_parse_result]
+    const char* [link xpath_parse_result::error error];
+    ptrdiff_t [link xpath_parse_result::offset offset];
 
-    * `operator `[link xpath_parse_result::bool bool]`() const;`
-    * `const char* `[link xpath_parse_result::description description]`() const;`
+    operator [link xpath_parse_result::bool bool]() const;
+    const char* [link xpath_parse_result::description description]() const;
 
-* `class `[link xpath_query]
-    * `explicit `[link xpath_query::ctor xpath_query]`(const char_t* query, xpath_variable_set* variables = 0);`
+class [link xpath_query]
+    explicit [link xpath_query::ctor xpath_query](const char_t* query, xpath_variable_set* variables = 0);
 
-    * `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xpath_node& n) const;`
-    * `double `[link xpath_query::evaluate_number evaluate_number]`(const xpath_node& n) const;`
-    * `string_t `[link xpath_query::evaluate_string evaluate_string]`(const xpath_node& n) const;`
-    * `size_t `[link xpath_query::evaluate_string_buffer evaluate_string]`(char_t* buffer, size_t capacity, const xpath_node& n) const;`
-    * `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xpath_node& n) const;`
-    * `xpath_node `[link xpath_query::evaluate_node evaluate_node]`(const xpath_node& n) const;`
+    bool [link xpath_query::evaluate_boolean evaluate_boolean](const xpath_node& n) const;
+    double [link xpath_query::evaluate_number evaluate_number](const xpath_node& n) const;
+    string_t [link xpath_query::evaluate_string evaluate_string](const xpath_node& n) const;
+    size_t [link xpath_query::evaluate_string_buffer evaluate_string](char_t* buffer, size_t capacity, const xpath_node& n) const;
+    xpath_node_set [link xpath_query::evaluate_node_set evaluate_node_set](const xpath_node& n) const;
+    xpath_node [link xpath_query::evaluate_node evaluate_node](const xpath_node& n) const;
 
-    * `xpath_value_type `[link xpath_query::return_type return_type]`() const;`
+    xpath_value_type [link xpath_query::return_type return_type]() const;
 
-    * `const xpath_parse_result& `[link xpath_query::result result]`() const;`
-    * `operator `[link xpath_query::unspecified_bool_type unspecified_bool_type]`() const;`
+    const xpath_parse_result& [link xpath_query::result result]() const;
+    operator [link xpath_query::unspecified_bool_type unspecified_bool_type]() const;
 
-* `class `[link xpath_exception]`: public std::exception`
-    * `virtual const char* `[link xpath_exception::what what]`() const throw();`
+class [link xpath_exception]: public std::exception
+    virtual const char* [link xpath_exception::what what]() const throw();
 
-    * `const xpath_parse_result& `[link xpath_exception::result result]`() const;`
+    const xpath_parse_result& [link xpath_exception::result result]() const;
 
-* `class `[link xpath_node]
-    * [link xpath_node::ctor xpath_node]`();`
-    * [link xpath_node::ctor xpath_node]`(const xml_node& node);`
-    * [link xpath_node::ctor xpath_node]`(const xml_attribute& attribute, const xml_node& parent);`
+class [link xpath_node]
+    [link xpath_node::ctor xpath_node]();
+    [link xpath_node::ctor xpath_node](const xml_node& node);
+    [link xpath_node::ctor xpath_node](const xml_attribute& attribute, const xml_node& parent);
 
-    * `xml_node `[link xpath_node::node node]`() const;`
-    * `xml_attribute `[link xpath_node::attribute attribute]`() const;`
-    * `xml_node `[link xpath_node::parent parent]`() const;`
+    xml_node [link xpath_node::node node]() const;
+    xml_attribute [link xpath_node::attribute attribute]() const;
+    xml_node [link xpath_node::parent parent]() const;
 
-    * `operator `[link xpath_node::unspecified_bool_type unspecified_bool_type]`() const;`
-    * `bool `[link xpath_node::comparison operator==]`(const xpath_node& n) const;`
-    * `bool `[link xpath_node::comparison operator!=]`(const xpath_node& n) const;`
+    operator [link xpath_node::unspecified_bool_type unspecified_bool_type]() const;
+    bool [link xpath_node::comparison operator==](const xpath_node& n) const;
+    bool [link xpath_node::comparison operator!=](const xpath_node& n) const;
 
-* `class `[link xpath_node_set]
-    * [link xpath_node_set::ctor xpath_node_set]`();`
-    * [link xpath_node_set::ctor xpath_node_set]`(const_iterator begin, const_iterator end, type_t type = type_unsorted);`
+class [link xpath_node_set]
+    [link xpath_node_set::ctor xpath_node_set]();
+    [link xpath_node_set::ctor xpath_node_set](const_iterator begin, const_iterator end, type_t type = type_unsorted);
 
-    * `typedef const xpath_node* `[link xpath_node_set::const_iterator const_iterator]`;`
-    * `const_iterator `[link xpath_node_set::begin begin]`() const;`
-    * `const_iterator `[link xpath_node_set::end end]`() const;`
+    typedef const xpath_node* [link xpath_node_set::const_iterator const_iterator];
+    const_iterator [link xpath_node_set::begin begin]() const;
+    const_iterator [link xpath_node_set::end end]() const;
 
-    * `const xpath_node& `[link xpath_node_set::index operator[]]`(size_t index) const;`
-    * `size_t `[link xpath_node_set::size size]`() const;`
-    * `bool `[link xpath_node_set::empty empty]`() const;`
+    const xpath_node& [link xpath_node_set::index operator[]](size_t index) const;
+    size_t [link xpath_node_set::size size]() const;
+    bool [link xpath_node_set::empty empty]() const;
 
-    * `xpath_node `[link xpath_node_set::first first]`() const;`
+    xpath_node [link xpath_node_set::first first]() const;
 
-    * `enum type_t {`[link xpath_node_set::type_unsorted type_unsorted], [link xpath_node_set::type_sorted type_sorted], [link xpath_node_set::type_sorted_reverse type_sorted_reverse]`};`
-    * `type_t `[link xpath_node_set::type type]`() const;`
-    * `void `[link xpath_node_set::sort sort]`(bool reverse = false);`
+    enum type_t {[link xpath_node_set::type_unsorted type_unsorted], [link xpath_node_set::type_sorted type_sorted], [link xpath_node_set::type_sorted_reverse type_sorted_reverse]};
+    type_t [link xpath_node_set::type type]() const;
+    void [link xpath_node_set::sort sort](bool reverse = false);
 
-* `class `[link xpath_variable]
-    * `const char_t* `[link xpath_variable::name name]`() const;`
-    * `xpath_value_type `[link xpath_variable::type type]`() const;`
+class [link xpath_variable]
+    const char_t* [link xpath_variable::name name]() const;
+    xpath_value_type [link xpath_variable::type type]() const;
 
-    * `bool `[link xpath_variable::get_boolean get_boolean]`() const;`
-    * `double `[link xpath_variable::get_number get_number]`() const;`
-    * `const char_t* `[link xpath_variable::get_string get_string]`() const;`
-    * `const xpath_node_set& `[link xpath_variable::get_node_set get_node_set]`() const;`
+    bool [link xpath_variable::get_boolean get_boolean]() const;
+    double [link xpath_variable::get_number get_number]() const;
+    const char_t* [link xpath_variable::get_string get_string]() const;
+    const xpath_node_set& [link xpath_variable::get_node_set get_node_set]() const;
 
-    * `bool `[link xpath_variable::set set]`(bool value);`
-    * `bool `[link xpath_variable::set set]`(double value);`
-    * `bool `[link xpath_variable::set set]`(const char_t* value);`
-    * `bool `[link xpath_variable::set set]`(const xpath_node_set& value);`
+    bool [link xpath_variable::set set](bool value);
+    bool [link xpath_variable::set set](double value);
+    bool [link xpath_variable::set set](const char_t* value);
+    bool [link xpath_variable::set set](const xpath_node_set& value);
 
-* `class `[link xpath_variable_set]
-    * `xpath_variable* `[link xpath_variable_set::add add]`(const char_t* name, xpath_value_type type);`
+class [link xpath_variable_set]
+    xpath_variable* [link xpath_variable_set::add add](const char_t* name, xpath_value_type type);
 
-    * `bool `[link xpath_variable_set::set set]`(const char_t* name, bool value);`
-    * `bool `[link xpath_variable_set::set set]`(const char_t* name, double value);`
-    * `bool `[link xpath_variable_set::set set]`(const char_t* name, const char_t* value);`
-    * `bool `[link xpath_variable_set::set set]`(const char_t* name, const xpath_node_set& value);`
+    bool [link xpath_variable_set::set set](const char_t* name, bool value);
+    bool [link xpath_variable_set::set set](const char_t* name, double value);
+    bool [link xpath_variable_set::set set](const char_t* name, const char_t* value);
+    bool [link xpath_variable_set::set set](const char_t* name, const xpath_node_set& value);
 
-    * `xpath_variable* `[link xpath_variable_set::get get]`(const char_t* name);`
-    * `const xpath_variable* `[link xpath_variable_set::get get]`(const char_t* name) const;`
+    xpath_variable* [link xpath_variable_set::get get](const char_t* name);
+    const xpath_variable* [link xpath_variable_set::get get](const char_t* name) const;
+----
 
 Functions:
 
-* `std::string `[link as_utf8]`(const wchar_t* str);`
-* `std::string `[link as_utf8]`(const std::wstring& str);`
-* `std::wstring `[link as_wide]`(const char* str);`
-* `std::wstring `[link as_wide]`(const std::string& str);`
-* `void `[link set_memory_management_functions]`(allocation_function allocate, deallocation_function deallocate);`
-* `allocation_function `[link get_memory_allocation_function]`();`
-* `deallocation_function `[link get_memory_deallocation_function]`();`
+[source,subs="+macros"]
+----
+std::string [link as_utf8](const wchar_t* str);
+std::string [link as_utf8](const std::wstring& str);
+std::wstring [link as_wide](const char* str);
+std::wstring [link as_wide](const std::string& str);
+void [link set_memory_management_functions](allocation_function allocate, deallocation_function deallocate);
+allocation_function [link get_memory_allocation_function]();
+deallocation_function [link get_memory_deallocation_function]();
+----
