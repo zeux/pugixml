@@ -3,7 +3,7 @@
 #include <string.h>
 #include <iostream>
 
-//[code_traverse_predicate_decl
+// tag::decl[]
 bool small_timeout(pugi::xml_node node)
 {
     return node.attribute("Timeout").as_int() < 20;
@@ -21,7 +21,7 @@ struct allow_remote_predicate
         return node.attribute("AllowRemote").as_bool();
     }
 };
-//]
+// end::decl[]
 
 int main()
 {
@@ -30,7 +30,7 @@ int main()
 
     pugi::xml_node tools = doc.child("Profile").child("Tools");
 
-    //[code_traverse_predicate_find
+    // tag::find[]
     // Find child via predicate (looks for direct children only)
     std::cout << tools.find_child(allow_remote_predicate()).attribute("Filename").value() << std::endl;
 
@@ -42,7 +42,7 @@ int main()
 
     // We can use simple functions instead of function objects
     std::cout << tools.find_child(small_timeout).attribute("Filename").value() << std::endl;
-    //]
+    // end::find[]
 }
 
 // vim:et

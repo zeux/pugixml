@@ -9,7 +9,7 @@ int main()
 
     pugi::xml_node tools = doc.child("Profile").child("Tools");
 
-    //[code_traverse_rangefor
+    // tag::code[]
     for (pugi::xml_node tool: tools.children("Tool"))
     {
         std::cout << "Tool:";
@@ -26,7 +26,7 @@ int main()
 
         std::cout << std::endl;
     }
-    //]
+    // end::code[]
 }
 
 // vim:et

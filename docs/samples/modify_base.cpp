@@ -8,7 +8,7 @@ int main()
     pugi::xml_document doc;
     if (!doc.load_string("<node id='123'>text</node><!-- comment -->", pugi::parse_default | pugi::parse_comments)) return -1;
 
-    //[code_modify_base_node
+    // tag::node[]
     pugi::xml_node node = doc.child("node");
 
     // change node name
@@ -21,9 +21,9 @@ int main()
 
     // we can't change value of the element or name of the comment
     std::cout << node.set_value("1") << ", " << doc.last_child().set_name("2") << std::endl;
-    //]
+    // end::node[]
 
-    //[code_modify_base_attr
+    // tag::attr[]
     pugi::xml_attribute attr = node.attribute("id");
 
     // change attribute name/value
@@ -37,7 +37,7 @@ int main()
     // we can also use assignment operators for more concise code
     attr = true;
     std::cout << "final attribute value: " << attr.value() << std::endl;
-    //]
+    // end::attr[]
 }
 
 // vim:et

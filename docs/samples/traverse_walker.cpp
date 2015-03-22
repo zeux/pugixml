@@ -7,7 +7,7 @@ const char* node_types[] =
     "null", "document", "element", "pcdata", "cdata", "comment", "pi", "declaration"
 };
 
-//[code_traverse_walker_impl
+// tag::impl[]
 struct simple_walker: pugi::xml_tree_walker
 {
     virtual bool for_each(pugi::xml_node& node)
@@ -19,17 +19,17 @@ struct simple_walker: pugi::xml_tree_walker
         return true; // continue traversal
     }
 };
-//]
+// end::impl[]
 
 int main()
 {
     pugi::xml_document doc;
     if (!doc.load_file("tree.xml")) return -1;
 
-    //[code_traverse_walker_traverse
+    // tag::traverse[]
     simple_walker walker;
     doc.traverse(walker);
-    //]
+    // end::traverse[]
 }
 
 // vim:et

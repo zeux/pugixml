@@ -33,10 +33,10 @@ int main()
     pugi::xml_document doc;
 
     {
-    //[code_load_stream
+    // tag::code[]
         std::ifstream stream("weekly-utf-8.xml");
         pugi::xml_parse_result result = doc.load(stream);
-    //]
+    // end::code[]
 
         // first character of root name: U+9031, year: 1997
         print_doc("UTF8 file from narrow stream", doc, result);

@@ -4,7 +4,7 @@
 
 int main()
 {
-    //[code_save_options
+    // tag::code[]
     // get a test document
     pugi::xml_document doc;
     doc.load_string("<foo bar='baz'><call>hey</call></foo>");
@@ -42,7 +42,7 @@ int main()
     // <foo bar="baz"><call>hey</call></foo>
     doc.save(std::cout, "\t", pugi::format_raw | pugi::format_no_declaration);
     std::cout << std::endl;
-    //]
+    // end::code[]
 }
 
 // vim:et

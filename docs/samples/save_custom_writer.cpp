@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstring>
 
-//[code_save_custom_writer
+// tag::code[]
 struct xml_string_writer: pugi::xml_writer
 {
     std::string result;
@@ -14,7 +14,7 @@ struct xml_string_writer: pugi::xml_writer
         result.append(static_cast<const char*>(data), size);
     }
 };
-//]
+// end::code[]
 
 struct xml_memory_writer: pugi::xml_writer
 {
