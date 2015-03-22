@@ -4,6 +4,8 @@ Arseny Kapoulkine <arseny.kapoulkine@gmail.com>
 :toc: right
 :source-highlighter: pygments
 :source-language: c++
+:sectanchors:
+:sectlinks:
 
 [[introduction]]
 == Introduction

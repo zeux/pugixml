@@ -4,7 +4,10 @@ Arseny Kapoulkine <arseny.kapoulkine@gmail.com>
 :toc: right
 :source-highlighter: pygments
 :source-language: c++
+:sectanchors:
+:sectlinks:
 :numbered:
+:imagesdir: images
 
 [[overview]]
 == Overview
@@ -147,16 +150,13 @@ pugixml.cpp(3477) : fatal error C1010: unexpected end of file while looking for 
 
 The correct way to resolve this is to disable precompiled headers for `pugixml.cpp`; you have to set "Create/Use Precompiled Header" option (Properties dialog -> C/C{plus}{plus} -> Precompiled Headers -> Create/Use Precompiled Header) to "Not Using Precompiled Headers". You'll have to do it for all project configurations/platforms (you can select Configuration "All Configurations" and Platform "All Platforms" before editing the option):
 
-[table
-[[
-[@images/vs2005_pch1.png [$images/vs2005_pch1_thumb.png]]
-[$images/next.png]
-[@images/vs2005_pch2.png [$images/vs2005_pch2_thumb.png]]
-[$images/next.png]
-[@images/vs2005_pch3.png [$images/vs2005_pch3_thumb.png]]
-[$images/next.png]
-[@images/vs2005_pch4.png [$images/vs2005_pch4_thumb.png]]
-]] ]
+[cols="4*a",frame=none]
+|===
+| image::vs2005_pch1.png[link="images/vs2005_pch1.png"]
+| image::vs2005_pch2.png[link="images/vs2005_pch2.png"]
+| image::vs2005_pch3.png[link="images/vs2005_pch3.png"]
+| image::vs2005_pch4.png[link="images/vs2005_pch4.png"]
+|===
  
 [[install.building.static]]
 ==== Building pugixml as a standalone static library
@@ -167,17 +167,15 @@ There are two projects for each version of Microsoft Visual Studio: one for dyna
 
 In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2005/2008, you can add a dependency from your application project to pugixml one. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead. For other IDEs/systems, consult the relevant documentation.
 
-[table
-[[Microsoft Visual Studio 2005/2008][Microsoft Visual Studio 2010]]
-[[
-[@images/vs2005_link1.png [$images/vs2005_link1_thumb.png]]
-[$images/next.png]
-[@images/vs2005_link2.png [$images/vs2005_link2_thumb.png]]
-][
-[@images/vs2010_link1.png [$images/vs2010_link1_thumb.png]]
-[$images/next.png]
-[@images/vs2010_link2.png [$images/vs2010_link2_thumb.png]]
-]] ]
+[cols="4*a",frame=none,options=header]
+|===
+2+| Microsoft Visual Studio 2005/2008
+2+| Microsoft Visual Studio 2010
+| image::vs2005_link1.png[link="images/vs2005_link1.png"]
+| image::vs2005_link2.png[link="images/vs2005_link2.png"]
+| image::vs2010_link1.png[link="images/vs2010_link1.png"]
+| image::vs2010_link2.png[link="images/vs2010_link2.png"]
+|===
 
 [[install.building.shared]]
 ==== Building pugixml as a standalone shared library
@@ -285,87 +283,86 @@ The XML document is represented with a tree data structure. The root of the tree
 The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
 
 * Document node ([anchor node_document]) - this is the root of the tree, which consists of several child nodes. This node corresponds to [link xml_document] class; note that [link xml_document] is a sub-class of [link xml_node], so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation.
-[lbr]
 
 * Element/tag node ([anchor node_element]) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element nodes is as follows:
-
++
 ----
 <node attr="value"><child/></node>
 ----
-
-[:There are two element nodes here: one has name `"node"`, single attribute `"attr"` and single child `"child"`, another has name `"child"` and does not have any attributes or child nodes.]
++
+There are two element nodes here: one has name `"node"`, single attribute `"attr"` and single child `"child"`, another has name `"child"` and does not have any attributes or child nodes.
 
 * Plain character data nodes ([anchor node_pcdata]) represent plain text in XML. PCDATA nodes have a value, but do not have a name or children/attributes. Note that *plain character data is not a part of the element node but instead has its own node*; an element node can have several child PCDATA nodes. The example XML representation of text nodes is as follows:
-
++
 ----
 <node> text1 <child/> text2 </node>
 ----
-
-[:Here `"node"` element has three children, two of which are PCDATA nodes with values `" text1 "` and `" text2 "`.]
++
+Here `"node"` element has three children, two of which are PCDATA nodes with values `" text1 "` and `" text2 "`.
 
 * Character data nodes ([anchor node_cdata]) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
-
++
 ----
 <node> <![CDATA[[text1]]> <child/> <![CDATA[[text2]]> </node>
 ----
-
-[:CDATA nodes make it easy to include non-escaped <, & and > characters in plain text. CDATA value can not contain the character sequence ]]>, since it is used to determine the end of node contents.]
++
+CDATA nodes make it easy to include non-escaped <, & and > characters in plain text. CDATA value can not contain the character sequence ]]>, since it is used to determine the end of node contents.
 
 * Comment nodes ([anchor node_comment]) represent comments in XML. Comment nodes have a value, but do not have a name or children/attributes. The example XML representation of a comment node is as follows:
-
++
 ----
 <!-- comment text -->
 ----
-
-[:Here the comment node has value `"comment text"`. By default comment nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_comments] flag.]
++
+Here the comment node has value `"comment text"`. By default comment nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_comments] flag.
 
 * Processing instruction node ([anchor node_pi]) represent processing instructions (PI) in XML. PI nodes have a name and an optional value, but do not have children/attributes. The example XML representation of a PI node is as follows:
-
++
 ----
 <?name value?>
 ----
-
-[:Here the name (also called PI target) is `"name"`, and the value is `"value"`. By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_pi] flag.]
++
+Here the name (also called PI target) is `"name"`, and the value is `"value"`. By default PI nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_pi] flag.
 
 * Declaration node ([anchor node_declaration]) represents document declarations in XML. Declaration nodes have a name (`"xml"`) and an optional collection of attributes, but do not have value or children. There can be only one declaration node in a document; moreover, it should be the topmost node (its parent should be the document). The example XML representation of a declaration node is as follows:
-
++
 ----
 <?xml version="1.0"?>
 ----
-
-[:Here the node has name `"xml"` and a single attribute with name `"version"` and value `"1.0"`. By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_declaration] flag. Also, by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this with [link format_no_declaration] flag.]
++
+Here the node has name `"xml"` and a single attribute with name `"version"` and value `"1.0"`. By default declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_declaration] flag. Also, by default a dummy declaration is output when XML document is saved unless there is already a declaration in the document; you can disable this with [link format_no_declaration] flag.
 
 * Document type declaration node ([anchor node_doctype]) represents document type declarations in XML. Document type declaration nodes have a value, which corresponds to the entire document type contents; no additional nodes are created for inner elements like `<!ENTITY>`. There can be only one document type declaration node in a document; moreover, it should be the topmost node (its parent should be the document). The example XML representation of a document type declaration node is as follows:
-
++
 ----
 <!DOCTYPE greeting [ <!ELEMENT greeting (#PCDATA)> ]>
 ----
-
-[:Here the node has value `"greeting [ <!ELEMENT greeting (#PCDATA)> ]"`. By default document type declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_doctype] flag.]
++
+Here the node has value `"greeting [ <!ELEMENT greeting (#PCDATA)> ]"`. By default document type declaration nodes are treated as non-essential part of XML markup and are not loaded during XML parsing. You can override this behavior with [link parse_doctype] flag.
 
 Finally, here is a complete example of XML document and the corresponding tree representation (link:samples/tree.xml[]):
 
-[table
-
-[[
-``
-    <?xml version="1.0"?>
-    <mesh name="mesh_root">
-        <!-- here is a mesh node -->
-        some text
-        <![CDATA[someothertext]]>
-        some more text
-        <node attr1="value1" attr2="value2" />
-        <node attr1="value2">
-            <innernode/>
-        </node>
-    </mesh>
-    <?include somedata?>
-``
-][
-[@images/dom_tree.png [$images/dom_tree_thumb.png]]
-]]]
-
+[cols="2*a",frame=none]
+|===
+|
+[source,xml]
+----
+<?xml version="1.0"?>
+<mesh name="mesh_root">
+    <!-- here is a mesh node -->
+    some text
+    <![CDATA[someothertext]]>
+    some more text
+    <node attr1="value1" attr2="value2" />
+    <node attr1="value2">
+        <innernode/>
+    </node>
+</mesh>
+<?include somedata?>
+----
+|
+image::dom_tree.png[link="images/dom_tree.png"]
+|===
 
 [[dom.cpp]]
 === C{plus}{plus} interface
@@ -556,10 +553,8 @@ There are several important buffering optimizations in pugixml that rely on pred
 These constants can be tuned via configuration defines, as discussed in <<install.building.config>>; it is recommended to set them in `pugiconfig.hpp`.
 
 * `PUGIXML_MEMORY_PAGE_SIZE` controls the page size for document memory allocation. Memory for node/attribute objects is allocated in pages of the specified size. The default size is 32 Kb; for some applications the size is too large (i.e. embedded systems with little heap space or applications that keep lots of XML documents in memory). A minimum size of 1 Kb is recommended.
-[lbr]
 
 * `PUGIXML_MEMORY_OUTPUT_STACK` controls the cumulative stack space required to output the node. Any output operation (i.e. saving a subtree to file) uses an internal buffering scheme for performance reasons. The default size is 10 Kb; if you're using node output from threads with little stack space, decreasing this value can prevent stack overflows. A minimum size of 1 Kb is recommended.
-[lbr]
 
 * `PUGIXML_MEMORY_XPATH_PAGE_SIZE` controls the page size for XPath memory allocation. Memory for XPath query objects as well as internal memory for XPath evaluation is allocated in pages of the specified size. The default size is 4 Kb; if you have a lot of resident XPath query objects, you might need to decrease the size to improve memory consumption. A minimum size of 256 bytes is recommended.
 
@@ -709,13 +704,11 @@ struct xml_parse_result
 Parsing status is represented as the `xml_parse_status` enumeration and can be one of the following:
 
 * [anchor status_ok] means that no error was encountered during parsing; the source stream represents the valid XML document which was fully parsed and converted to a tree.
-[lbr]
 
 * [anchor status_file_not_found] is only returned by `load_file` function and means that file could not be opened.
 * [anchor status_io_error] is returned by `load_file` function and by `load` functions with `std::istream`/`std::wstream` arguments; it means that some I/O error has occurred during reading the file/stream.
 * [anchor status_out_of_memory] means that there was not enough memory during some allocation; any allocation failure during parsing results in this error.
 * [anchor status_internal_error] means that something went horribly wrong; currently this error does not occur
-[lbr]
 
 * [anchor status_unrecognized_tag] means that parsing stopped due to a tag with either an empty name or a name which starts with incorrect character, such as [^#].
 * [anchor status_bad_pi] means that parsing stopped due to incorrect document declaration/processing instruction
@@ -759,28 +752,20 @@ NOTE: You should use the usual bitwise arithmetics to manipulate the bitmask: to
 These flags control the resulting tree contents:
 
 * [anchor parse_declaration] determines if XML document declaration (node with type [link node_declaration]) is to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness. This flag is *off* by default.
-[lbr]
 
 * [anchor parse_doctype] determines if XML document type declaration (node with type [link node_doctype]) is to be put in DOM tree. If this flag is off, it is not put in the tree, but is still parsed and checked for correctness. This flag is *off* by default.
-[lbr]
 
 * [anchor parse_pi] determines if processing instructions (nodes with type [link node_pi]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. Note that `<?xml ...?>` (document declaration) is not considered to be a PI. This flag is *off* by default.
-[lbr]
 
 * [anchor parse_comments] determines if comments (nodes with type [link node_comment]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *off* by default.
-[lbr]
 
 * [anchor parse_cdata] determines if CDATA sections (nodes with type [link node_cdata]) are to be put in DOM tree. If this flag is off, they are not put in the tree, but are still parsed and checked for correctness. This flag is *on* by default.
-[lbr]
 
 * [anchor parse_trim_pcdata] determines if leading and trailing whitespace characters are to be removed from PCDATA nodes. While for some applications leading/trailing whitespace is significant, often the application only cares about the non-whitespace contents so it's easier to trim whitespace from text during parsing. This flag is *off* by default.
-[lbr]
 
 * [anchor parse_ws_pcdata] determines if PCDATA nodes (nodes with type [link node_pcdata]) that consist only of whitespace characters are to be put in DOM tree. Often whitespace-only data is not significant for the application, and the cost of allocating and storing such nodes (both memory and speed-wise) can be significant. For example, after parsing XML string `<node> <a/> </node>`, `<node>` element will have three children when `parse_ws_pcdata` is set (child with type [link node_pcdata] and value `" "`, child with type [link node_element] and name `"a"`, and another child with type [link node_pcdata] and value `" "`), and only one child when `parse_ws_pcdata` is not set. This flag is *off* by default.
-[lbr]
 
 * [anchor parse_ws_pcdata_single] determines if whitespace-only PCDATA nodes that have no sibling nodes are to be put in DOM tree. In some cases application needs to parse the whitespace-only contents of nodes, i.e. `<node>  </node>`, but is not interested in whitespace markup elsewhere. It is possible to use [link parse_ws_pcdata] flag in this case, but it results in excessive allocations and complicates document processing in some cases; this flag is intended to avoid that. As an example, after parsing XML string `<node> <a>  </a> </node>` with `parse_ws_pcdata_single` flag set, `<node>` element will have one child `<a>`, and `<a>` element will have one child with type [link node_pcdata] and value `"  "`. This flag has no effect if [link parse_ws_pcdata] is enabled. This flag is *off* by default.
-[lbr]
 
 * [anchor parse_fragment] determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid. This flag is *off* by default.
 
@@ -789,13 +774,10 @@ CAUTION: Using in-place parsing ([link xml_document::load_buffer_inplace load_bu
 These flags control the transformation of tree element contents:
 
 * [anchor parse_escapes] determines if character and entity references are to be expanded during the parsing process. Character references have the form [^&#...;] or [^&#x...;] ([^...] is Unicode numeric representation of character in either decimal ([^&#...;]) or hexadecimal ([^&#x...;]) form), entity references are [^&lt;], [^&gt;], [^&amp;], [^&apos;] and [^&quot;] (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed on attribute values and PCDATA content. This flag is *on* by default.
-[lbr]
 
 * [anchor parse_eol] determines if EOL handling (that is, replacing sequences `0x0d 0x0a` by a single `0x0a` character, and replacing all standalone `0x0d` characters by `0x0a`) is to be performed on input data (that is, comments contents, PCDATA/CDATA contents and attribute values). This flag is *on* by default.
-[lbr]
 
 * [anchor parse_wconv_attribute] determines if attribute value normalization should be performed for all attributes. This means, that whitespace characters (new line, tab and space) are replaced with space (`' '`). New line characters are always treated as if [link parse_eol] is set, i.e. `\r\n` is converted to a single space.  This flag is *on* by default.
-[lbr]
 
 * [anchor parse_wnorm_attribute] determines if extended attribute value normalization should be performed for all attributes. This means, that after attribute values are normalized as if [link parse_wconv_attribute] was set, leading and trailing space characters are removed, and all sequences of space characters are replaced by a single space character. [link parse_wconv_attribute] has no effect if this flag is on. This flag is *off* by default.
 
@@ -804,10 +786,8 @@ NOTE: `parse_wconv_attribute` option performs transformations that are required 
 Additionally there are three predefined option masks:
 
 * [anchor parse_minimal] has all options turned off. This option mask means that pugixml does not add declaration nodes, document type declaration nodes, PI nodes, CDATA sections and comments to the resulting tree and does not perform any conversion for input data, so theoretically it is the fastest mode. However, as mentioned above, in practice [link parse_default] is usually equally fast.
-[lbr]
 
 * [anchor parse_default] is the default set of flags, i.e. it has all options set to their default values. It includes parsing CDATA sections (comments/PIs are not parsed), performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed (by default) for performance reasons.
-[lbr]
 
 * [anchor parse_full] is the set of flags which adds nodes of all types to the resulting tree and performs default conversions for input data. It includes parsing CDATA sections, comments, PI nodes, document declaration node and document type declaration node, performing character and entity reference expansion, replacing whitespace characters with spaces in attribute values and performing EOL handling. Note, that PCDATA sections consisting only of whitespace characters are not parsed in this mode.
 
@@ -825,7 +805,6 @@ include::samples/load_options.cpp[tags=code]
 pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions. Most loading functions accept the optional parameter `encoding`. This is a value of enumeration type `xml_encoding`, that can have the following values:
 
 * [anchor encoding_auto] means that pugixml will try to guess the encoding based on source XML data. The algorithm is a modified version of the one presented in Appendix F.1 of XML recommendation; it tries to match the first few bytes of input data with the following patterns in strict order:
-[lbr]
     * If first four bytes match UTF-32 BOM (Byte Order Mark), encoding is assumed to be UTF-32 with the endianness equal to that of BOM;
     * If first two bytes match UTF-16 BOM, encoding is assumed to be UTF-16 with the endianness equal to that of BOM;
     * If first three bytes match UTF-8 BOM, encoding is assumed to be UTF-8;
@@ -833,7 +812,6 @@ pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little en
     * If first four bytes match UTF-16 representation of [^<?], encoding is assumed to be UTF-16 with the corresponding endianness;
     * If first two bytes match UTF-16 representation of [^<], encoding is assumed to be UTF-16 with the corresponding endianness (this guess may yield incorrect result, but it's better than UTF-8);
     * Otherwise encoding is assumed to be UTF-8.
-    [lbr]
 
 * [anchor encoding_utf8] corresponds to UTF-8 encoding as defined in the Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
 * [anchor encoding_utf16_le] corresponds to little-endian UTF-16 encoding as defined in the Unicode standard; surrogate pairs are supported.
@@ -910,7 +888,7 @@ include::samples/traverse_base.cpp[tags=basic]
 === Getting node data
 
 [#xml_node::name][#xml_node::value]
-Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. [link node_document] nodes do not have a name or value, [link node_element] and [link node_declaration] nodes always have a name but never have a value, [link node_pcdata], [link node_cdata], [link node_comment] and [link node_doctype] nodes never have a name but always have a value (it may be empty though), [link node_pi] nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
+Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. <<node_document>> nodes do not have a name or value, [link node_element] and [link node_declaration] nodes always have a name but never have a value, [link node_pcdata], [link node_cdata], [link node_comment] and [link node_doctype] nodes never have a name but always have a value (it may be empty though), [link node_pi] nodes always have a name and a value (again, value may be empty). In order to get node's name or value, you can use the following functions:
 
 [source]
 ----
@@ -1733,17 +1711,14 @@ NOTE: You should use the usual bitwise arithmetics to manipulate the bitmask: to
 These flags control the resulting tree contents:
 
 * [anchor format_indent] determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is `"\t"` by default). If this flag is on, before every node the indentation string is output several times, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if [link format_raw] is enabled. This flag is *on* by default.
-[lbr]
 
 * [anchor format_raw] switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with [link parse_ws_pcdata] flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
-[lbr]
 
 * [anchor format_no_escapes] disables output escaping for attribute values and PCDATA contents. If this flag is off, special symbols (', &, <, >) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. &amp;) during output. If this flag is on, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray < in the PCDATA will make the output malformed). This flag is *off* by default.
 
 These flags control the additional output information:
 
 * [anchor format_no_declaration] disables default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.
-[lbr]
 
 * [anchor format_write_bom] enables Byte Order Mark (BOM) output. By default, no BOM is output, so in case of non UTF-8 encodings the resulting document's encoding may not be recognized by some parsers and text editors, if they do not implement sophisticated encoding detection. Enabling this flag adds an encoding-specific BOM to the output. This flag has no effect in `xml_node::print` functions: they never output the BOM. This flag is *off* by default.
 
@@ -2539,7 +2514,6 @@ Enumerations:
     * [link node_pi]
     * [link node_declaration]
     * [link node_doctype]
-    [lbr]
 
 * `enum `[link xml_parse_status]
     * [link status_ok]
@@ -2559,7 +2533,6 @@ Enumerations:
     * [link status_end_element_mismatch]
     * [link status_append_invalid_root]
     * [link status_no_document_element]
-    [lbr]
 
 * `enum `[link xml_encoding]
     * [link encoding_auto]
@@ -2572,7 +2545,6 @@ Enumerations:
     * [link encoding_utf32]
     * [link encoding_wchar]
     * [link encoding_latin1]
-    [lbr]
 
 * `enum `[link xpath_value_type]
     * [link xpath_type_none]
@@ -2591,7 +2563,6 @@ Constants:
     * [link format_raw]
     * [link format_save_file_text]
     * [link format_write_bom]
-    [lbr]
 
 * Parsing options bit flags:
     * [link parse_cdata]
@@ -2615,11 +2586,9 @@ Classes:
 
 * `class `[link xml_attribute]
     * [link xml_attribute::ctor xml_attribute]`();`
-    [lbr]
 
     * `bool `[link xml_attribute::empty empty]`() const;`
     * `operator `[link xml_attribute::unspecified_bool_type unspecified_bool_type]`() const;`
-    [lbr]
 
     * `bool `[link xml_attribute::comparison operator==]`(const xml_attribute& r) const;`
     * `bool `[link xml_attribute::comparison operator!=]`(const xml_attribute& r) const;`
@@ -2627,18 +2596,14 @@ Classes:
     * `bool `[link xml_attribute::comparison operator>]`(const xml_attribute& r) const;`
     * `bool `[link xml_attribute::comparison operator<=]`(const xml_attribute& r) const;`
     * `bool `[link xml_attribute::comparison operator>=]`(const xml_attribute& r) const;`
-    [lbr]
 
     * `size_t `[link xml_attribute::hash_value hash_value]`() const;`
-    [lbr]
 
     * `xml_attribute `[link xml_attribute::next_attribute next_attribute]`() const;`
     * `xml_attribute `[link xml_attribute::previous_attribute previous_attribute]`() const;`
-    [lbr]
 
     * `const char_t* `[link xml_attribute::name name]`() const;`
     * `const char_t* `[link xml_attribute::value value]`() const;`
-    [lbr]
 
     * `const char_t* `[link xml_attribute::as_string as_string]`(const char_t* def = "") const;`
     * `int `[link xml_attribute::as_int as_int]`(int def = 0) const;`
@@ -2648,7 +2613,6 @@ Classes:
     * `bool `[link xml_attribute::as_bool as_bool]`(bool def = false) const;`
     * `long long `[link xml_attribute::as_llong as_llong]`(long long def = 0) const;`
     * `unsigned long long `[link xml_attribute::as_ullong as_ullong]`(unsigned long long def = 0) const;`
-    [lbr]
 
     * `bool `[link xml_attribute::set_name set_name]`(const char_t* rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(const char_t* rhs);`
@@ -2659,7 +2623,6 @@ Classes:
     * `bool `[link xml_attribute::set_value set_value]`(bool rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(long long rhs);`
     * `bool `[link xml_attribute::set_value set_value]`(unsigned long long rhs);`
-    [lbr]
 
     * `xml_attribute& `[link xml_attribute::assign operator=]`(const char_t* rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(int rhs);`
@@ -2669,15 +2632,12 @@ Classes:
     * `xml_attribute& `[link xml_attribute::assign operator=]`(bool rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(long long rhs);`
     * `xml_attribute& `[link xml_attribute::assign operator=]`(unsnigned long long rhs);`
-    [lbr]
 
 * `class `[link xml_node]
     * [link xml_node::ctor xml_node]`();`
-    [lbr]
 
     * `bool `[link xml_node::empty empty]`() const;`
     * `operator `[link xml_node::unspecified_bool_type unspecified_bool_type]`() const;`
-    [lbr]
 
     * `bool `[link xml_node::comparison operator==]`(const xml_node& r) const;`
     * `bool `[link xml_node::comparison operator!=]`(const xml_node& r) const;`
@@ -2685,33 +2645,26 @@ Classes:
     * `bool `[link xml_node::comparison operator>]`(const xml_node& r) const;`
     * `bool `[link xml_node::comparison operator<=]`(const xml_node& r) const;`
     * `bool `[link xml_node::comparison operator>=]`(const xml_node& r) const;`
-    [lbr]
 
     * `size_t `[link xml_node::hash_value hash_value]`() const;`
-    [lbr]
 
     * `xml_node_type `[link xml_node::type type]`() const;`
-    [lbr]
 
     * `const char_t* `[link xml_node::name name]`() const;`
     * `const char_t* `[link xml_node::value value]`() const;`
-    [lbr]
 
     * `xml_node `[link xml_node::parent parent]`() const;`
     * `xml_node `[link xml_node::first_child first_child]`() const;`
     * `xml_node `[link xml_node::last_child last_child]`() const;`
     * `xml_node `[link xml_node::next_sibling next_sibling]`() const;`
     * `xml_node `[link xml_node::previous_sibling previous_sibling]`() const;`
-    [lbr]
 
     * `xml_attribute `[link xml_node::first_attribute first_attribute]`() const;`
     * `xml_attribute `[link xml_node::last_attribute last_attribute]`() const;`
-    [lbr]
 
     * /implementation-defined type/ [link xml_node::children children]`() const;`
     * /implementation-defined type/ [link xml_node::children children]`(const char_t* name) const;`
     * /implementation-defined type/ [link xml_node::attributes attributes]`() const;`
-    [lbr]
 
     * `xml_node `[link xml_node::child child]`(const char_t* name) const;`
     * `xml_attribute `[link xml_node::attribute attribute]`(const char_t* name) const;`
@@ -2719,166 +2672,131 @@ Classes:
     * `xml_node `[link xml_node::previous_sibling_name previous_sibling]`(const char_t* name) const;`
     * `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;`
     * `xml_node `[link xml_node::find_child_by_attribute find_child_by_attribute]`(const char_t* attr_name, const char_t* attr_value) const;`
-    [lbr]
 
     * `const char_t* `[link xml_node::child_value child_value]`() const;`
     * `const char_t* `[link xml_node::child_value child_value]`(const char_t* name) const;`
     * `xml_text `[link xml_node::text text]`() const;`
-    [lbr]
 
     * `typedef xml_node_iterator `[link xml_node_iterator iterator]`;`
     * `iterator `[link xml_node::begin begin]`() const;`
     * `iterator `[link xml_node::end end]`() const;`
-    [lbr]
 
     * `typedef xml_attribute_iterator `[link xml_attribute_iterator attribute_iterator]`;`
     * `attribute_iterator `[link xml_node::attributes_begin attributes_begin]`() const;`
     * `attribute_iterator `[link xml_node::attributes_end attributes_end]`() const;`
-    [lbr]
 
     * `bool `[link xml_node::traverse traverse]`(xml_tree_walker& walker);`
-    [lbr]
 
     * `template <typename Predicate> xml_attribute `[link xml_node::find_attribute find_attribute]`(Predicate pred) const;`
     * `template <typename Predicate> xml_node `[link xml_node::find_child find_child]`(Predicate pred) const;`
     * `template <typename Predicate> xml_node `[link xml_node::find_node find_node]`(Predicate pred) const;`
-    [lbr]
 
     * `string_t `[link xml_node::path path]`(char_t delimiter = '/') const;`
     * `xml_node `[link xml_node::first_element_by_path]`(const char_t* path, char_t delimiter = '/') const;`
     * `xml_node `[link xml_node::root root]`() const;`
     * `ptrdiff_t `[link xml_node::offset_debug offset_debug]`() const;`
-    [lbr]
 
     * `bool `[link xml_node::set_name set_name]`(const char_t* rhs);`
     * `bool `[link xml_node::set_value set_value]`(const char_t* rhs);`
-    [lbr]
 
     * `xml_attribute `[link xml_node::append_attribute append_attribute]`(const char_t* name);`
     * `xml_attribute `[link xml_node::prepend_attribute prepend_attribute]`(const char_t* name);`
     * `xml_attribute `[link xml_node::insert_attribute_after insert_attribute_after]`(const char_t* name, const xml_attribute& attr);`
     * `xml_attribute `[link xml_node::insert_attribute_before insert_attribute_before]`(const char_t* name, const xml_attribute& attr);`
-    [lbr]
 
     * `xml_node `[link xml_node::append_child append_child]`(xml_node_type type = node_element);`
     * `xml_node `[link xml_node::prepend_child prepend_child]`(xml_node_type type = node_element);`
     * `xml_node `[link xml_node::insert_child_after insert_child_after]`(xml_node_type type, const xml_node& node);`
     * `xml_node `[link xml_node::insert_child_before insert_child_before]`(xml_node_type type, const xml_node& node);`
-    [lbr]
 
     * `xml_node `[link xml_node::append_child append_child]`(const char_t* name);`
     * `xml_node `[link xml_node::prepend_child prepend_child]`(const char_t* name);`
     * `xml_node `[link xml_node::insert_child_after insert_child_after]`(const char_t* name, const xml_node& node);`
     * `xml_node `[link xml_node::insert_child_before insert_child_before]`(const char_t* name, const xml_node& node);`
-    [lbr]
 
     * `xml_attribute `[link xml_node::append_copy append_copy]`(const xml_attribute& proto);`
     * `xml_attribute `[link xml_node::prepend_copy prepend_copy]`(const xml_attribute& proto);`
     * `xml_attribute `[link xml_node::insert_copy_after insert_copy_after]`(const xml_attribute& proto, const xml_attribute& attr);`
     * `xml_attribute `[link xml_node::insert_copy_before insert_copy_before]`(const xml_attribute& proto, const xml_attribute& attr);`
-    [lbr]
 
     * `xml_node `[link xml_node::append_copy append_copy]`(const xml_node& proto);`
     * `xml_node `[link xml_node::prepend_copy prepend_copy]`(const xml_node& proto);`
     * `xml_node `[link xml_node::insert_copy_after insert_copy_after]`(const xml_node& proto, const xml_node& node);`
     * `xml_node `[link xml_node::insert_copy_before insert_copy_before]`(const xml_node& proto, const xml_node& node);`
-    [lbr]
 
     * `xml_node `[link xml_node::append_move append_move]`(const xml_node& moved);`
     * `xml_node `[link xml_node::prepend_move prepend_move]`(const xml_node& moved);`
     * `xml_node `[link xml_node::insert_move_after insert_move_after]`(const xml_node& moved, const xml_node& node);`
     * `xml_node `[link xml_node::insert_move_before insert_move_before]`(const xml_node& moved, const xml_node& node);`
-    [lbr]
 
     * `bool `[link xml_node::remove_attribute remove_attribute]`(const xml_attribute& a);`
     * `bool `[link xml_node::remove_attribute remove_attribute]`(const char_t* name);`
     * `bool `[link xml_node::remove_child remove_child]`(const xml_node& n);`
     * `bool `[link xml_node::remove_child remove_child]`(const char_t* name);`
-    [lbr]
 
     * `xml_parse_result `[link xml_node::append_buffer append_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-    [lbr]
 
     * `void `[link xml_node::print print]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
     * `void `[link xml_node::print_stream print]`(std::ostream& os, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto, unsigned int depth = 0) const;`
     * `void `[link xml_node::print_stream print]`(std::wostream& os, const char_t* indent = "\t", unsigned int flags = format_default, unsigned int depth = 0) const;`
-    [lbr]
 
     * `xpath_node `[link xml_node::select_node select_node]`(const char_t* query, xpath_variable_set* variables = 0) const;`
     * `xpath_node `[link xml_node::select_node_precomp select_node]`(const xpath_query& query) const;`
     * `xpath_node_set `[link xml_node::select_nodes select_nodes]`(const char_t* query, xpath_variable_set* variables = 0) const;`
     * `xpath_node_set `[link xml_node::select_nodes_precomp select_nodes]`(const xpath_query& query) const;`
-    [lbr]
 
 * `class `[link xml_document]
     * [link xml_document::ctor xml_document]`();`
     * `~`[link xml_document::dtor xml_document]`();`
-    [lbr]
 
     * `void `[link xml_document::reset reset]`();`
     * `void `[link xml_document::reset reset]`(const xml_document& proto);`
-    [lbr]
 
     * `xml_parse_result `[link xml_document::load_stream load]`(std::istream& stream, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
     * `xml_parse_result `[link xml_document::load_stream load]`(std::wistream& stream, unsigned int options = parse_default);`
-    [lbr]
 
     * `xml_parse_result `[link xml_document::load_string load_string]`(const char_t* contents, unsigned int options = parse_default);`
-    [lbr]
 
     * `xml_parse_result `[link xml_document::load_file load_file]`(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
     * `xml_parse_result `[link xml_document::load_file_wide load_file]`(const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-    [lbr]
 
     * `xml_parse_result `[link xml_document::load_buffer load_buffer]`(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
     * `xml_parse_result `[link xml_document::load_buffer_inplace load_buffer_inplace]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
     * `xml_parse_result `[link xml_document::load_buffer_inplace_own load_buffer_inplace_own]`(void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);`
-    [lbr]
 
     * `bool `[link xml_document::save_file save_file]`(const char* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
     * `bool `[link xml_document::save_file_wide save_file]`(const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
-    [lbr]
 
     * `void `[link xml_document::save_stream save]`(std::ostream& stream, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
     * `void `[link xml_document::save_stream save]`(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;`
-    [lbr]
 
     * `void `[link xml_document::save save]`(xml_writer& writer, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;`
-    [lbr]
 
     * `xml_node `[link xml_document::document_element document_element]`() const;`
-    [lbr]
 
 * `struct `[link xml_parse_result]
     * `xml_parse_status `[link xml_parse_result::status status]`;`
     * `ptrdiff_t `[link xml_parse_result::offset offset]`;`
     * `xml_encoding `[link xml_parse_result::encoding encoding]`;`
-    [lbr]
 
     * `operator `[link xml_parse_result::bool bool]`() const;`
     * `const char* `[link xml_parse_result::description description]`() const;`
-    [lbr]
 
 * `class `[link xml_node_iterator]
 * `class `[link xml_attribute_iterator]
-[lbr]
 
 * `class `[link xml_tree_walker]
     * `virtual bool `[link xml_tree_walker::begin begin]`(xml_node& node);`
     * `virtual bool `[link xml_tree_walker::for_each for_each]`(xml_node& node) = 0;`
     * `virtual bool `[link xml_tree_walker::end end]`(xml_node& node);`
-    [lbr]
 
     * `int `[link xml_tree_walker::depth depth]`() const;`
-    [lbr]
 
 * `class `[link xml_text]
     * `bool `[link xml_text::empty empty]`() const;`
     * `operator `[link xml_text::unspecified_bool_type]`() const;`
-    [lbr]
 
     * `const char_t* `[link xml_text::get]`() const;`
-    [lbr]
 
     * `const char_t* `[link xml_text::as_string as_string]`(const char_t* def = "") const;`
     * `int `[link xml_text::as_int as_int]`(int def = 0) const;`
@@ -2888,10 +2806,8 @@ Classes:
     * `bool `[link xml_text::as_bool as_bool]`(bool def = false) const;`
     * `long long `[link xml_text::as_llong as_llong]`(long long def = 0) const;`
     * `unsigned long long `[link xml_text::as_ullong as_ullong]`(unsigned long long def = 0) const;`
-    [lbr]
 
     * `bool `[link xml_text::set set]`(const char_t* rhs);`
-    [lbr]
 
     * `bool `[link xml_text::set set]`(int rhs);`
     * `bool `[link xml_text::set set]`(unsigned int rhs);`
@@ -2900,7 +2816,6 @@ Classes:
     * `bool `[link xml_text::set set]`(bool rhs);`
     * `bool `[link xml_text::set set]`(long long rhs);`
     * `bool `[link xml_text::set set]`(unsigned long long rhs);`
-    [lbr]
 
     * `xml_text& `[link xml_text::assign operator=]`(const char_t* rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(int rhs);`
@@ -2910,23 +2825,18 @@ Classes:
     * `xml_text& `[link xml_text::assign operator=]`(bool rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(long long rhs);`
     * `xml_text& `[link xml_text::assign operator=]`(unsigned long long rhs);`
-    [lbr]
 
     * `xml_node `[link xml_text::data data]`() const;`
-    [lbr]
 
 * `class `[link xml_writer]
     * `virtual void `[link xml_writer::write write]`(const void* data, size_t size) = 0;`
-    [lbr]
 
 * `class `[link xml_writer_file]`: public xml_writer`
     * [link xml_writer_file]`(void* file);`
-    [lbr]
 
 * `class `[link xml_writer_stream]`: public xml_writer`
     * [link xml_writer_stream]`(std::ostream& stream);`
     * [link xml_writer_stream]`(std::wostream& stream);`
-    [lbr]
 
 * `struct `[link xpath_parse_result]
     * `const char* `[link xpath_parse_result::error error]`;`
@@ -2934,11 +2844,9 @@ Classes:
 
     * `operator `[link xpath_parse_result::bool bool]`() const;`
     * `const char* `[link xpath_parse_result::description description]`() const;`
-    [lbr]
 
 * `class `[link xpath_query]
     * `explicit `[link xpath_query::ctor xpath_query]`(const char_t* query, xpath_variable_set* variables = 0);`
-    [lbr]
 
     * `bool `[link xpath_query::evaluate_boolean evaluate_boolean]`(const xpath_node& n) const;`
     * `double `[link xpath_query::evaluate_number evaluate_number]`(const xpath_node& n) const;`
@@ -2946,91 +2854,72 @@ Classes:
     * `size_t `[link xpath_query::evaluate_string_buffer evaluate_string]`(char_t* buffer, size_t capacity, const xpath_node& n) const;`
     * `xpath_node_set `[link xpath_query::evaluate_node_set evaluate_node_set]`(const xpath_node& n) const;`
     * `xpath_node `[link xpath_query::evaluate_node evaluate_node]`(const xpath_node& n) const;`
-    [lbr]
 
     * `xpath_value_type `[link xpath_query::return_type return_type]`() const;`
-    [lbr]
 
     * `const xpath_parse_result& `[link xpath_query::result result]`() const;`
     * `operator `[link xpath_query::unspecified_bool_type unspecified_bool_type]`() const;`
-    [lbr]
 
 * `class `[link xpath_exception]`: public std::exception`
     * `virtual const char* `[link xpath_exception::what what]`() const throw();`
-    [lbr]
 
     * `const xpath_parse_result& `[link xpath_exception::result result]`() const;`
-    [lbr]
 
 * `class `[link xpath_node]
     * [link xpath_node::ctor xpath_node]`();`
     * [link xpath_node::ctor xpath_node]`(const xml_node& node);`
     * [link xpath_node::ctor xpath_node]`(const xml_attribute& attribute, const xml_node& parent);`
-    [lbr]
 
     * `xml_node `[link xpath_node::node node]`() const;`
     * `xml_attribute `[link xpath_node::attribute attribute]`() const;`
     * `xml_node `[link xpath_node::parent parent]`() const;`
-    [lbr]
 
     * `operator `[link xpath_node::unspecified_bool_type unspecified_bool_type]`() const;`
     * `bool `[link xpath_node::comparison operator==]`(const xpath_node& n) const;`
     * `bool `[link xpath_node::comparison operator!=]`(const xpath_node& n) const;`
-    [lbr]
 
 * `class `[link xpath_node_set]
     * [link xpath_node_set::ctor xpath_node_set]`();`
     * [link xpath_node_set::ctor xpath_node_set]`(const_iterator begin, const_iterator end, type_t type = type_unsorted);`
-    [lbr]
 
     * `typedef const xpath_node* `[link xpath_node_set::const_iterator const_iterator]`;`
     * `const_iterator `[link xpath_node_set::begin begin]`() const;`
     * `const_iterator `[link xpath_node_set::end end]`() const;`
-    [lbr]
 
     * `const xpath_node& `[link xpath_node_set::index operator[]]`(size_t index) const;`
     * `size_t `[link xpath_node_set::size size]`() const;`
     * `bool `[link xpath_node_set::empty empty]`() const;`
-    [lbr]
 
     * `xpath_node `[link xpath_node_set::first first]`() const;`
-    [lbr]
 
     * `enum type_t {`[link xpath_node_set::type_unsorted type_unsorted], [link xpath_node_set::type_sorted type_sorted], [link xpath_node_set::type_sorted_reverse type_sorted_reverse]`};`
     * `type_t `[link xpath_node_set::type type]`() const;`
     * `void `[link xpath_node_set::sort sort]`(bool reverse = false);`
-    [lbr]
 
 * `class `[link xpath_variable]
     * `const char_t* `[link xpath_variable::name name]`() const;`
     * `xpath_value_type `[link xpath_variable::type type]`() const;`
-    [lbr]
 
     * `bool `[link xpath_variable::get_boolean get_boolean]`() const;`
     * `double `[link xpath_variable::get_number get_number]`() const;`
     * `const char_t* `[link xpath_variable::get_string get_string]`() const;`
     * `const xpath_node_set& `[link xpath_variable::get_node_set get_node_set]`() const;`
-    [lbr]
 
     * `bool `[link xpath_variable::set set]`(bool value);`
     * `bool `[link xpath_variable::set set]`(double value);`
     * `bool `[link xpath_variable::set set]`(const char_t* value);`
     * `bool `[link xpath_variable::set set]`(const xpath_node_set& value);`
-    [lbr]
 
 * `class `[link xpath_variable_set]
     * `xpath_variable* `[link xpath_variable_set::add add]`(const char_t* name, xpath_value_type type);`
-    [lbr]
 
     * `bool `[link xpath_variable_set::set set]`(const char_t* name, bool value);`
     * `bool `[link xpath_variable_set::set set]`(const char_t* name, double value);`
     * `bool `[link xpath_variable_set::set set]`(const char_t* name, const char_t* value);`
     * `bool `[link xpath_variable_set::set set]`(const char_t* name, const xpath_node_set& value);`
-    [lbr]
 
     * `xpath_variable* `[link xpath_variable_set::get get]`(const char_t* name);`
     * `const xpath_variable* `[link xpath_variable_set::get get]`(const char_t* name) const;`
-    [lbr]
 
 Functions:
 
@@ -3041,5 +2930,3 @@ Functions:
 * `void `[link set_memory_management_functions]`(allocation_function allocate, deallocation_function deallocate);`
 * `allocation_function `[link get_memory_allocation_function]`();`
 * `deallocation_function `[link get_memory_deallocation_function]`();`
-
-[/ vim:et ]
