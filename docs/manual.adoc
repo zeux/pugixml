@@ -1113,7 +1113,7 @@ include::samples/traverse_predicate.cpp[tags=find]
 === Working with text contents
 
 [[xml_text]]
-It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type <<node_pcdata,node_pcdata>> with value `"This is a node"`. pugixml provides a special class, `xml_text`, to work with such data. Working with text objects to modify data is described in <<manual.modify.text,the documentation for modifying document data>>; this section describes the access interface of `xml_text`.
+It is common to store data as text contents of some node - i.e. `<node><description>This is a node</description></node>`. In this case, `<description>` node does not have a value, but instead has a child of type <<node_pcdata,node_pcdata>> with value `"This is a node"`. pugixml provides a special class, `xml_text`, to work with such data. Working with text objects to modify data is described in <<modify.text,the documentation for modifying document data>>; this section describes the access interface of `xml_text`.
 
 [[xml_node::text]]
 You can get the text object from a node by using `text()` method:
@@ -1394,7 +1394,7 @@ include::samples/modify_remove.cpp[tags=code]
 [[modify.text]]
 === Working with text contents
 
-pugixml provides a special class, `xml_text`, to work with text contents stored as a value of some node, i.e. `<node><description>This is a node</description></node>`. Working with text objects to retrieve data is described in <<manual.access.text,the documentation for accessing document data>>; this section describes the modification interface of `xml_text`.
+pugixml provides a special class, `xml_text`, to work with text contents stored as a value of some node, i.e. `<node><description>This is a node</description></node>`. Working with text objects to retrieve data is described in <<access.text,the documentation for accessing document data>>; this section describes the modification interface of `xml_text`.
 
 [[xml_text::set]]
 Once you have an `xml_text` object, you can set the text contents using the following function:
@@ -1731,7 +1731,7 @@ If the task at hand is to select a subset of document nodes that match some crit
 === XPath types
 
 [[xpath_value_type]][[xpath_type_number]][[xpath_type_string]][[xpath_type_boolean]][[xpath_type_node_set]][[xpath_type_none]]
-Each XPath expression can have one of the following types: boolean, number, string or node set. Boolean type corresponds to `bool` type, number type corresponds to `double` type, string type corresponds to either `std::string` or `std::wstring`, depending on whether <<manual.dom.unicode,wide character interface is enabled>>, and node set corresponds to <<xpath_node_set,xpath_node_set>> type. There is an enumeration, `xpath_value_type`, which can take the values `xpath_type_boolean`, `xpath_type_number`, `xpath_type_string` or `xpath_type_node_set`, accordingly.
+Each XPath expression can have one of the following types: boolean, number, string or node set. Boolean type corresponds to `bool` type, number type corresponds to `double` type, string type corresponds to either `std::string` or `std::wstring`, depending on whether <<dom.unicode,wide character interface is enabled>>, and node set corresponds to <<xpath_node_set,xpath_node_set>> type. There is an enumeration, `xpath_value_type`, which can take the values `xpath_type_boolean`, `xpath_type_number`, `xpath_type_string` or `xpath_type_node_set`, accordingly.
 
 [[xpath_node]][[xpath_node::node]][[xpath_node::attribute]][[xpath_node::parent]]
 Because an XPath node can be either a node or an attribute, there is a special type, `xpath_node`, which is a discriminated union of these types. A value of this type contains two node handles, one of `xml_node` type, and another one of `xml_attribute` type; at most one of them can be non-null. The accessors to get these handles are available:
