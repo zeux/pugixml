@@ -2454,7 +2454,8 @@ First private release for testing purposes
 
 This is the reference for all macros, types, enumerations, classes and functions in pugixml. Each symbol is a link that leads to the relevant section of the manual.
 
-Macros:
+[[apiref.macros]]
+=== Macros
 
 [source,subs="+macros"]
 ----
@@ -2472,7 +2473,8 @@ Macros:
 #define +++<a href="#PUGIXML_HAS_LONG_LONG">PUGIXML_HAS_LONG_LONG</a>+++
 ----
 
-Types:
+[[apiref.types]]
+=== Types
 
 [source,subs="+macros"]
 ----
@@ -2482,7 +2484,8 @@ typedef void* (*+++<a href="#allocation_function">allocation_function</a>+++)(si
 typedef void (*+++<a href="#deallocation_function">deallocation_function</a>+++)(void* ptr);
 ----
 
-Enumerations:
+[[apiref.enums]]
+=== Enumerations
 
 [source,subs="+macros"]
 ----
@@ -2536,39 +2539,41 @@ enum +++<a href="#xpath_value_type">xpath_value_type</a>+++
     +++<a href="#xpath_type_boolean">xpath_type_boolean</a>+++
 ----
 
-Constants:
+[[apiref.constants]]
+=== Constants
 
 [source,subs="+macros"]
 ----
 // Formatting options bit flags:
-    +++<a href="#format_default">format_default</a>+++
-    +++<a href="#format_indent">format_indent</a>+++
-    +++<a href="#format_no_declaration">format_no_declaration</a>+++
-    +++<a href="#format_no_escapes">format_no_escapes</a>+++
-    +++<a href="#format_raw">format_raw</a>+++
-    +++<a href="#format_save_file_text">format_save_file_text</a>+++
-    +++<a href="#format_write_bom">format_write_bom</a>+++
+const unsigned int +++<a href="#format_default">format_default</a>+++
+const unsigned int +++<a href="#format_indent">format_indent</a>+++
+const unsigned int +++<a href="#format_no_declaration">format_no_declaration</a>+++
+const unsigned int +++<a href="#format_no_escapes">format_no_escapes</a>+++
+const unsigned int +++<a href="#format_raw">format_raw</a>+++
+const unsigned int +++<a href="#format_save_file_text">format_save_file_text</a>+++
+const unsigned int +++<a href="#format_write_bom">format_write_bom</a>+++
 
 // Parsing options bit flags:
-    +++<a href="#parse_cdata">parse_cdata</a>+++
-    +++<a href="#parse_comments">parse_comments</a>+++
-    +++<a href="#parse_declaration">parse_declaration</a>+++
-    +++<a href="#parse_default">parse_default</a>+++
-    +++<a href="#parse_doctype">parse_doctype</a>+++
-    +++<a href="#parse_eol">parse_eol</a>+++
-    +++<a href="#parse_escapes">parse_escapes</a>+++
-    +++<a href="#parse_fragment">parse_fragment</a>+++
-    +++<a href="#parse_full">parse_full</a>+++
-    +++<a href="#parse_minimal">parse_minimal</a>+++
-    +++<a href="#parse_pi">parse_pi</a>+++
-    +++<a href="#parse_trim_pcdata">parse_trim_pcdata</a>+++
-    +++<a href="#parse_ws_pcdata">parse_ws_pcdata</a>+++
-    +++<a href="#parse_ws_pcdata_single">parse_ws_pcdata_single</a>+++
-    +++<a href="#parse_wconv_attribute">parse_wconv_attribute</a>+++
-    +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>+++
+const unsigned int +++<a href="#parse_cdata">parse_cdata</a>+++
+const unsigned int +++<a href="#parse_comments">parse_comments</a>+++
+const unsigned int +++<a href="#parse_declaration">parse_declaration</a>+++
+const unsigned int +++<a href="#parse_default">parse_default</a>+++
+const unsigned int +++<a href="#parse_doctype">parse_doctype</a>+++
+const unsigned int +++<a href="#parse_eol">parse_eol</a>+++
+const unsigned int +++<a href="#parse_escapes">parse_escapes</a>+++
+const unsigned int +++<a href="#parse_fragment">parse_fragment</a>+++
+const unsigned int +++<a href="#parse_full">parse_full</a>+++
+const unsigned int +++<a href="#parse_minimal">parse_minimal</a>+++
+const unsigned int +++<a href="#parse_pi">parse_pi</a>+++
+const unsigned int +++<a href="#parse_trim_pcdata">parse_trim_pcdata</a>+++
+const unsigned int +++<a href="#parse_ws_pcdata">parse_ws_pcdata</a>+++
+const unsigned int +++<a href="#parse_ws_pcdata_single">parse_ws_pcdata_single</a>+++
+const unsigned int +++<a href="#parse_wconv_attribute">parse_wconv_attribute</a>+++
+const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>+++
 ----
         
-Classes:
+[[apiref.classes]]
+=== Classes
 
 [source,subs="+macros"]
 ----
@@ -2910,7 +2915,8 @@ class +++<a href="#xpath_variable_set">xpath_variable_set</a>+++
     const xpath_variable* +++<a href="#xpath_variable_set::get">get</a>+++(const char_t* name) const;
 ----
 
-Functions:
+[[apiref.functions]]
+=== Functions
 
 [source,subs="+macros"]
 ----
