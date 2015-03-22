@@ -14,7 +14,7 @@ pugixml enables very fast, convenient and memory-efficient XML document processi
 
 This is the complete manual for pugixml, which describes all features of the library in detail. If you want to start writing code as quickly as possible, you are advised to link:quickstart.html[read the quick start guide first].
 
-NOTE: No documentation is perfect; neither is this one. If you encounter a description that is unclear, a statement that is incorrect or a syntactic error, please file an issue as described in <<overview.feedback>>.
+NOTE: No documentation is perfect; neither is this one. If you find errors or omissions, please don’t hesitate to https://github.com/zeux/pugixml/issues/new[submit an issue or open a pull request] with a fix.
 
 [[overview.feedback]]
 === Feedback

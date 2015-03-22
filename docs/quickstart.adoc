@@ -10,7 +10,7 @@ pugixml enables very fast, convenient and memory-efficient XML document processi
 
 This is the quick start guide for pugixml, which purpose is to enable you to start using the library quickly. Many important library features are either not described at all or only mentioned briefly; for more complete information you link:manual.html[should read the complete manual].
 
-NOTE: No documentation is perfect; neither is this one. If you encounter a description that is unclear, a statement that is incorrect or a syntactic error, please file an issue as described in <<feedback>>.
+NOTE: No documentation is perfect; neither is this one. If you find errors or omissions, please don’t hesitate to https://github.com/zeux/pugixml/issues/new[submit an issue or open a pull request] with a fix.
 
 [[install]]
 == Installation
