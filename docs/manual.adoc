@@ -88,12 +88,13 @@ pugixml is distributed in source form. You can either download a source distribu
 [[install.getting.source]]
 ==== Source distributions
 
-You can download the latest source distribution via one of the following links:
+You can download the latest source distribution as an archive:
 
-* https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.zip
-* https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.tar.gz
+https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.zip[pugixml-{version}.zip] (Windows line endings)
+/
+https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.tar.gz[pugixml-{version}.tar.gz] (Unix line endings)
 
-The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - `.zip` archive has Windows line endings, `.tar.gz` archive has Unix line endings. Otherwise the files in both archives are identical.
+The distribution contains library source, documentation (the manual you're reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.
 
 If you need an older version, you can download it from the https://github.com/zeux/pugixml/releases[version archive].
 
@@ -156,16 +157,16 @@ The correct way to resolve this is to disable precompiled headers for `pugixml.c
 [[install.building.static]]
 ==== Building pugixml as a standalone static library
  
-It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode3, Code::Blocks, Codelite, Microsoft Visual Studio 2005, 2008, 2010, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see <<overview.feedback>>. 
+It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode, Code::Blocks, Codelite, Microsoft Visual Studio 2005, 2008, 2010+, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see <<overview.feedback>>. 
 
 There are two projects for each version of Microsoft Visual Studio: one for dynamically linked CRT, which has a name like `pugixml_vs2008.vcproj`, and another one for statically linked CRT, which has a name like `pugixml_vs2008_static.vcproj`. You should select the version that matches the CRT used in your application; the default option for new projects created by Microsoft Visual Studio is dynamically linked CRT, so unless you changed the defaults, you should use the version with dynamic CRT (i.e. `pugixml_vs2008.vcproj` for Microsoft Visual Studio 2008).
 
-In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2005/2008, you can add a dependency from your application project to pugixml one. If you're using Microsoft Visual Studio 2010, you'll have to add a reference to your application project instead. For other IDEs/systems, consult the relevant documentation.
+In addition to adding pugixml project to your workspace, you'll have to make sure that your application links with pugixml library. If you're using Microsoft Visual Studio 2005/2008, you can add a dependency from your application project to pugixml one. If you're using Microsoft Visual Studio 2010+, you'll have to add a reference to your application project instead. For other IDEs/systems, consult the relevant documentation.
 
 [cols="4*a",frame=none,options=header]
 |===
 2+| Microsoft Visual Studio 2005/2008
-2+| Microsoft Visual Studio 2010
+2+| Microsoft Visual Studio 2010+
 | image::vs2005_link1.png[link="images/vs2005_link1.png"]
 | image::vs2005_link2.png[link="images/vs2005_link2.png"]
 | image::vs2010_link1.png[link="images/vs2010_link1.png"]
@@ -186,7 +187,7 @@ It's possible to compile pugixml as a standalone shared library. The process is 
 #endif
 ----
 
-CAUTION: If you're using STL-related functions, you should use the shared runtime library to ensure that a single heap is used for STL allocations in your application and in pugixml; in MSVC, this means selecting the 'Multithreaded DLL' or 'Multithreaded Debug DLL' to 'Runtime library' property (/MD or /MDd linker switch). You should also make sure that your runtime library choice is consistent between different projects.
+CAUTION: If you're using STL-related functions, you should use the shared runtime library to ensure that a single heap is used for STL allocations in your application and in pugixml; in MSVC, this means selecting the 'Multithreaded DLL' or 'Multithreaded Debug DLL' to 'Runtime library' property (`/MD` or `/MDd` linker switch). You should also make sure that your runtime library choice is consistent between different projects.
 
 [[install.building.header]]
 ==== Using pugixml in header-only mode
@@ -227,7 +228,7 @@ NOTE: In that example `PUGIXML_API` is inconsistent between several source files
 
 [[PUGIXML_MEMORY_PAGE_SIZE]]`PUGIXML_MEMORY_PAGE_SIZE`, [[PUGIXML_MEMORY_OUTPUT_STACK]]`PUGIXML_MEMORY_OUTPUT_STACK` and [[PUGIXML_MEMORY_XPATH_PAGE_SIZE]]`PUGIXML_MEMORY_XPATH_PAGE_SIZE` can be used to customize certain important sizes to optimize memory usage for the application-specific patterns. For details see <<dom.memory.tuning>>.
 
-[[PUGIXML_HAS_LONG_LONG]]`PUGIXML_HAS_LONG_LONG` define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C{plus}{plus}-11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
+[[PUGIXML_HAS_LONG_LONG]]`PUGIXML_HAS_LONG_LONG` define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C{plus}{plus}11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
  
 [[install.portability]]
 === Portability
@@ -289,7 +290,7 @@ Here `"node"` element has three children, two of which are PCDATA nodes with val
 <node> <![CDATA[[text1]]> <child/> <![CDATA[[text2]]> </node>
 ----
 +
-CDATA nodes make it easy to include non-escaped <, & and > characters in plain text. CDATA value can not contain the character sequence ]]>, since it is used to determine the end of node contents.
+CDATA nodes make it easy to include non-escaped `<`, `&` and `>` characters in plain text. CDATA value can not contain the character sequence `]]>`, since it is used to determine the end of node contents.
 
 * Comment nodes ([[node_comment]]`node_comment`) represent comments in XML. Comment nodes have a value, but do not have a name or children/attributes. The example XML representation of a comment node is as follows:
 +
@@ -442,7 +443,7 @@ Most examples in this documentation assume char interface and therefore will not
 
 `xml_node node = doc.child("bookstore").find_child_by_attribute("book", "id", "12345");`
 
-you'll have to do
+you'll have to use
 
 `xml_node node = doc.child(L"bookstore").find_child_by_attribute(L"book", L"id", L"12345");`
 ====
@@ -533,7 +534,7 @@ Constructing a document object using the default constructor does not result in 
 
 When the document is loaded from file/buffer, unless an inplace loading function is used (see <<loading.memory>>), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the <<xml_document,xml_document>> object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
 
-All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 kilobytes; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
+All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 Kb; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
 
 [[loading]]
 == Loading document
@@ -571,7 +572,7 @@ include::samples/load_file.cpp[tags=code]
 === Loading document from memory
 
 [[xml_document::load_buffer]][[xml_document::load_buffer_inplace]][[xml_document::load_buffer_inplace_own]]
-Sometimes XML data should be loaded from some other source than a file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from gzip-compressed files. All these scenarios require loading document from memory. First you should prepare a contiguous memory block with all XML data; then you have to invoke one of buffer loading functions. These functions will handle the necessary encoding conversions, if any, and then will parse the data into the corresponding XML tree. There are several buffer loading functions, which differ in the behavior and thus in performance/memory usage:
+Sometimes XML data should be loaded from some other source than a file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from GZip-compressed files. All these scenarios require loading document from memory. First you should prepare a contiguous memory block with all XML data; then you have to invoke one of buffer loading functions. These functions will handle the necessary encoding conversions, if any, and then will parse the data into the corresponding XML tree. There are several buffer loading functions, which differ in the behavior and thus in performance/memory usage:
 
 [source]
 ----
@@ -673,7 +674,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 * [[status_out_of_memory]]`status_out_of_memory` means that there was not enough memory during some allocation; any allocation failure during parsing results in this error.
 * [[status_internal_error]]`status_internal_error` means that something went horribly wrong; currently this error does not occur
 
-* [[status_unrecognized_tag]]`status_unrecognized_tag` means that parsing stopped due to a tag with either an empty name or a name which starts with incorrect character, such as #.
+* [[status_unrecognized_tag]]`status_unrecognized_tag` means that parsing stopped due to a tag with either an empty name or a name which starts with incorrect character, such as `#`.
 * [[status_bad_pi]]`status_bad_pi` means that parsing stopped due to incorrect document declaration/processing instruction
 * [[status_bad_comment]]`status_bad_comment`, [[status_bad_cdata]]`status_bad_cdata`, [[status_bad_doctype]]`status_bad_doctype` and [[status_bad_pcdata]]`status_bad_pcdata` mean that parsing stopped due to the invalid construct of the respective type
 * [[status_bad_start_element]]`status_bad_start_element` means that parsing stopped because starting tag either had no closing `>` symbol or contained some incorrect symbol
@@ -736,7 +737,7 @@ CAUTION: Using in-place parsing (<<xml_document::load_buffer_inplace,load_buffer
 
 These flags control the transformation of tree element contents:
 
-* [[parse_escapes]]`parse_escapes` determines if character and entity references are to be expanded during the parsing process. Character references have the form `&#...;` or `&#x...;` (`...` is Unicode numeric representation of character in either decimal (`&#...;`) or hexadecimal (`&#x...;`) form), entity references are `&lt;`, `&gt;`, `&amp;`, `&apos;` and `&quot;` (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed on attribute values and PCDATA content. This flag is *on* by default.
+* [[parse_escapes]]`parse_escapes` determines if character and entity references are to be expanded during the parsing process. Character references have the form `&#...;` or `&#x...;` (`...` is Unicode numeric representation of character in either decimal (`&#...;`) or hexadecimal (`&#x...;`) form), entity references are `&amp;lt;`, `&amp;gt;`, `&amp;amp;`, `&amp;apos;` and `&amp;quot;` (note that as pugixml does not handle DTD, the only allowed entities are predefined ones). If character/entity reference can not be expanded, it is left as is, so you can do additional processing later. Reference expansion is performed on attribute values and PCDATA content. This flag is *on* by default.
 
 * [[parse_eol]]`parse_eol` determines if EOL handling (that is, replacing sequences `\r\n` by a single `\n` character, and replacing all standalone `\r` characters by `\n`) is to be performed on input data (that is, comment contents, PCDATA/CDATA contents and attribute values). This flag is *on* by default.
 
@@ -980,7 +981,7 @@ include::samples/traverse_base.cpp[tags=contents]
 === Range-based for-loop support
 
 [[xml_node::children]][[xml_node::attributes]]
-If your C{plus}{plus} compiler supports range-based for-loop (this is a C{plus}{plus}11 feature, at the time of writing it's supported by Microsoft Visual Studio 11 Beta, GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with http://www.boost.org/libs/foreach/[Boost Foreach], and possibly other pre-C{plus}{plus}11 foreach facilities.
+If your C{plus}{plus} compiler supports range-based for-loop (this is a C{plus}{plus}11 feature, at the time of writing it's supported by Microsoft Visual Studio 2012+, GCC 4.6+ and Clang 3.0+), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with http://www.boost.org/libs/foreach/[Boost Foreach], and possibly other pre-C{plus}{plus}11 foreach facilities.
 
 [source,subs="+quotes"]
 ----
@@ -1031,7 +1032,7 @@ Here is an example of using iterators for document traversal (link:samples/trave
 include::samples/traverse_iter.cpp[tags=code] 
 ----
 
-CAUTION: Node and attribute iterators are somewhere in the middle between const and non-const iterators. While dereference operation yields a non-constant reference to the object, so that you can use it for tree modification operations, modifying this reference by assignment - i.e. passing iterators to a function like `std::sort` - will not give expected results, as assignment modifies local handle that's stored in the iterator.
+CAUTION: Node and attribute iterators are somewhere in the middle between const and non-const iterators. While dereference operation yields a non-constant reference to the object, so that you can use it for tree modification operations, modifying this reference using assignment - i.e. passing iterators to a function like `std::sort` - will not give expected results, as assignment modifies local handle that's stored in the iterator.
 
 [[access.walker]]
 === Recursive traversal with xml_tree_walker
@@ -1237,8 +1238,6 @@ bool xml_node::set_value(const char_t* rhs);
 ----
 
 Both functions try to set the name/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a <<node_pcdata,node_pcdata>> node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
-
-There is no equivalent of <<xml_node::child_value,child_value>> function for modifying text children of the node.
 
 This is an example of setting node name and value (link:samples/modify_base.cpp[]):
 
@@ -1556,7 +1555,7 @@ Since `append_buffer` needs to append child nodes to the current node, it only w
 
 Often after creating a new document or loading the existing one and processing it, it is necessary to save the result back to file. Also it is occasionally useful to output the whole document or a subtree to some stream; use cases include debug printing, serialization via network or other text-oriented medium, etc. pugixml provides several functions to output any subtree of the document to a file, stream or another generic transport interface; these functions allow to customize the output format (see <<saving.options>>), and also perform necessary encoding conversions (see <<saving.encoding>>). This section documents the relevant functionality.
 
-Before writing to the destination the node/attribute data is properly formatted according to the node type; all special XML symbols, such as < and &, are properly escaped (unless <<format_no_escapes,format_no_escapes>> flag is set). In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For well-formed output, make sure all node and attribute names are set to meaningful values.
+Before writing to the destination the node/attribute data is properly formatted according to the node type; all special XML symbols, such as `<` and `&`, are properly escaped (unless <<format_no_escapes,format_no_escapes>> flag is set). In order to guard against forgotten node/attribute names, empty node/attribute names are printed as `":anonymous"`. For well-formed output, make sure all node and attribute names are set to meaningful values.
 
 CDATA sections with values that contain `"]]>"` are split into several sections as follows: section with value `"pre]]>post"` is written as `<![CDATA[pre]]]]><![CDATA[>post]]>`. While this alters the structure of the document (if you load the document after saving it, there will be two CDATA sections instead of one), this is the only way to escape CDATA contents.
 
@@ -1673,7 +1672,7 @@ These flags control the resulting tree contents:
 
 * [[format_raw]]`format_raw` switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with <<parse_ws_pcdata,parse_ws_pcdata>> flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
 
-* [[format_no_escapes]]`format_no_escapes` disables output escaping for attribute values and PCDATA contents. If this flag is off, special symbols (', &, <, >) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. &amp;) during output. If this flag is on, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray < in the PCDATA will make the output malformed). This flag is *off* by default.
+* [[format_no_escapes]]`format_no_escapes` disables output escaping for attribute values and PCDATA contents. If this flag is off, special symbols (`"`, `&`, `<`, `>`) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. `&amp;amp;`) during output. If this flag is on, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray `<` in the PCDATA will make the output malformed). This flag is *off* by default.
 
 These flags control the additional output information:
 
@@ -2046,7 +2045,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 const xpath_parse_result& xpath_query::result() const;
 ----
     
-Without exceptions, evaluating invalid query results in `false`, empty string, NaN or an empty node set, depending on the type; evaluating a query as a node set results in an empty node set if the return type is not node set.
+Without exceptions, evaluating invalid query results in `false`, empty string, `NaN` or an empty node set, depending on the type; evaluating a query as a node set results in an empty node set if the return type is not node set.
 
 [[xpath_parse_result]]
 The information about parsing result is returned via `xpath_parse_result` object. It contains parsing status and the offset of last successfully parsed character from the beginning of the source stream:
@@ -2089,7 +2088,7 @@ Because of the differences in document object models, performance considerations
 
 * Consecutive text nodes sharing the same parent are not merged, i.e. in `<node>text1 <![CDATA[data]]> text2</node>` node should have one text node child, but instead has three.
 * Since the document type declaration is not used for parsing, `id()` function always returns an empty node set.
-* Namespace nodes are not supported (affects namespace:: axis).
+* Namespace nodes are not supported (affects `namespace::` axis).
 * Name tests are performed on QNames in XML document instead of expanded names; for `<foo xmlns:ns1='uri' xmlns:ns2='uri'><ns1:child/><ns2:child/></foo>`, query `foo/ns1:*` will return only the first child, not both of them. Compliant XPath implementations can return both nodes if the user provides appropriate namespace declarations.
 * String functions consider a character to be either a single `char` value or a single `wchar_t` value, depending on the library configuration; this means that some string functions are not fully Unicode-aware. This affects `substring()`, `string-length()` and `translate()` functions.
 
@@ -2577,7 +2576,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
 [source,subs="+macros"]
 ----
-class +++<a href="#xml_attribute">xml_attribute</a>+++
++++<span class="tok-k">class</span> <a href="#xml_attribute">xml_attribute</a>+++
     +++<a href="#xml_attribute::ctor">xml_attribute</a>+++();
 
     bool +++<a href="#xml_attribute::empty">empty</a>+++() const;
@@ -2626,7 +2625,7 @@ class +++<a href="#xml_attribute">xml_attribute</a>+++
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(long long rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(unsnigned long long rhs);
 
-class +++<a href="#xml_node">xml_node</a>+++
++++<span class="tok-k">class</span> <a href="#xml_node">xml_node</a>+++
     +++<a href="#xml_node::ctor">xml_node</a>+++();
 
     bool +++<a href="#xml_node::empty">empty</a>+++() const;
@@ -2738,7 +2737,7 @@ class +++<a href="#xml_node">xml_node</a>+++
     xpath_node_set +++<a href="#xml_node::select_nodes">select_nodes</a>+++(const char_t* query, xpath_variable_set* variables = 0) const;
     xpath_node_set +++<a href="#xml_node::select_nodes_precomp">select_nodes</a>+++(const xpath_query& query) const;
 
-class +++<a href="#xml_document">xml_document</a>+++
++++<span class="tok-k">class</span> <a href="#xml_document">xml_document</a>+++
     +++<a href="#xml_document::ctor">xml_document</a>+++();
     ~+++<a href="#xml_document::dtor">xml_document</a>+++();
 
@@ -2767,7 +2766,7 @@ class +++<a href="#xml_document">xml_document</a>+++
 
     xml_node +++<a href="#xml_document::document_element">document_element</a>+++() const;
 
-struct +++<a href="#xml_parse_result">xml_parse_result</a>+++
++++<span class="tok-k">struct</span> <a href="#xml_parse_result">xml_parse_result</a>+++
     xml_parse_status +++<a href="#xml_parse_result::status">status</a>+++;
     ptrdiff_t +++<a href="#xml_parse_result::offset">offset</a>+++;
     xml_encoding +++<a href="#xml_parse_result::encoding">encoding</a>+++;
@@ -2775,17 +2774,17 @@ struct +++<a href="#xml_parse_result">xml_parse_result</a>+++
     operator +++<a href="#xml_parse_result::bool">bool</a>+++() const;
     const char* +++<a href="#xml_parse_result::description">description</a>+++() const;
 
-class +++<a href="#xml_node_iterator">xml_node_iterator</a>+++
-class +++<a href="#xml_attribute_iterator">xml_attribute_iterator</a>+++
++++<span class="tok-k">class</span> <a href="#xml_node_iterator">xml_node_iterator</a>+++
++++<span class="tok-k">class</span> <a href="#xml_attribute_iterator">xml_attribute_iterator</a>+++
 
-class +++<a href="#xml_tree_walker">xml_tree_walker</a>+++
++++<span class="tok-k">class</span> <a href="#xml_tree_walker">xml_tree_walker</a>+++
     virtual bool +++<a href="#xml_tree_walker::begin">begin</a>+++(xml_node& node);
     virtual bool +++<a href="#xml_tree_walker::for_each">for_each</a>+++(xml_node& node) = 0;
     virtual bool +++<a href="#xml_tree_walker::end">end</a>+++(xml_node& node);
 
     int +++<a href="#xml_tree_walker::depth">depth</a>+++() const;
 
-class +++<a href="#xml_text">xml_text</a>+++
++++<span class="tok-k">class</span> <a href="#xml_text">xml_text</a>+++
     bool +++<a href="#xml_text::empty">empty</a>+++() const;
     operator +++<a href="#xml_text::unspecified_bool_type">xml_text::unspecified_bool_type</a>+++() const;
 
@@ -2821,24 +2820,24 @@ class +++<a href="#xml_text">xml_text</a>+++
 
     xml_node +++<a href="#xml_text::data">data</a>+++() const;
 
-class +++<a href="#xml_writer">xml_writer</a>+++
++++<span class="tok-k">class</span> <a href="#xml_writer">xml_writer</a>+++
     virtual void +++<a href="#xml_writer::write">write</a>+++(const void* data, size_t size) = 0;
 
-class +++<a href="#xml_writer_file">xml_writer_file</a>+++: public xml_writer
++++<span class="tok-k">class</span> <a href="#xml_writer_file">xml_writer_file</a>+++: public xml_writer
     +++<a href="#xml_writer_file">xml_writer_file</a>+++(void* file);
 
-class +++<a href="#xml_writer_stream">xml_writer_stream</a>+++: public xml_writer
++++<span class="tok-k">class</span> <a href="#xml_writer_stream">xml_writer_stream</a>+++: public xml_writer
     +++<a href="#xml_writer_stream">xml_writer_stream</a>+++(std::ostream& stream);
     +++<a href="#xml_writer_stream">xml_writer_stream</a>+++(std::wostream& stream);
 
-struct +++<a href="#xpath_parse_result">xpath_parse_result</a>+++
++++<span class="tok-k">struct</span> <a href="#xpath_parse_result">xpath_parse_result</a>+++
     const char* +++<a href="#xpath_parse_result::error">error</a>+++;
     ptrdiff_t +++<a href="#xpath_parse_result::offset">offset</a>+++;
 
     operator +++<a href="#xpath_parse_result::bool">bool</a>+++() const;
     const char* +++<a href="#xpath_parse_result::description">description</a>+++() const;
 
-class +++<a href="#xpath_query">xpath_query</a>+++
++++<span class="tok-k">class</span> <a href="#xpath_query">xpath_query</a>+++
     explicit +++<a href="#xpath_query::ctor">xpath_query</a>+++(const char_t* query, xpath_variable_set* variables = 0);
 
     bool +++<a href="#xpath_query::evaluate_boolean">evaluate_boolean</a>+++(const xpath_node& n) const;
@@ -2853,12 +2852,12 @@ class +++<a href="#xpath_query">xpath_query</a>+++
     const xpath_parse_result& +++<a href="#xpath_query::result">result</a>+++() const;
     operator +++<a href="#xpath_query::unspecified_bool_type">unspecified_bool_type</a>+++() const;
 
-class +++<a href="#xpath_exception">xpath_exception</a>+++: public std::exception
++++<span class="tok-k">class</span> <a href="#xpath_exception">xpath_exception</a>+++: public std::exception
     virtual const char* +++<a href="#xpath_exception::what">what</a>+++() const throw();
 
     const xpath_parse_result& +++<a href="#xpath_exception::result">result</a>+++() const;
 
-class +++<a href="#xpath_node">xpath_node</a>+++
++++<span class="tok-k">class</span> <a href="#xpath_node">xpath_node</a>+++
     +++<a href="#xpath_node::ctor">xpath_node</a>+++();
     +++<a href="#xpath_node::ctor">xpath_node</a>+++(const xml_node& node);
     +++<a href="#xpath_node::ctor">xpath_node</a>+++(const xml_attribute& attribute, const xml_node& parent);
@@ -2871,7 +2870,7 @@ class +++<a href="#xpath_node">xpath_node</a>+++
     bool +++<a href="#xpath_node::comparison">operator==</a>+++(const xpath_node& n) const;
     bool +++<a href="#xpath_node::comparison">operator!=</a>+++(const xpath_node& n) const;
 
-class +++<a href="#xpath_node_set">xpath_node_set</a>+++
++++<span class="tok-k">class</span> <a href="#xpath_node_set">xpath_node_set</a>+++
     +++<a href="#xpath_node_set::ctor">xpath_node_set</a>+++();
     +++<a href="#xpath_node_set::ctor">xpath_node_set</a>+++(const_iterator begin, const_iterator end, type_t type = type_unsorted);
 
@@ -2889,7 +2888,7 @@ class +++<a href="#xpath_node_set">xpath_node_set</a>+++
     type_t +++<a href="#xpath_node_set::type">type</a>+++() const;
     void +++<a href="#xpath_node_set::sort">sort</a>+++(bool reverse = false);
 
-class +++<a href="#xpath_variable">xpath_variable</a>+++
++++<span class="tok-k">class</span> <a href="#xpath_variable">xpath_variable</a>+++
     const char_t* +++<a href="#xpath_variable::name">name</a>+++() const;
     xpath_value_type +++<a href="#xpath_variable::type">type</a>+++() const;
 
@@ -2903,7 +2902,7 @@ class +++<a href="#xpath_variable">xpath_variable</a>+++
     bool +++<a href="#xpath_variable::set">set</a>+++(const char_t* value);
     bool +++<a href="#xpath_variable::set">set</a>+++(const xpath_node_set& value);
 
-class +++<a href="#xpath_variable_set">xpath_variable_set</a>+++
++++<span class="tok-k">class</span> <a href="#xpath_variable_set">xpath_variable_set</a>+++
     xpath_variable* +++<a href="#xpath_variable_set::add">add</a>+++(const char_t* name, xpath_value_type type);
 
     bool +++<a href="#xpath_variable_set::set">set</a>+++(const char_t* name, bool value);

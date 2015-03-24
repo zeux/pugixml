@@ -15,12 +15,13 @@ NOTE: No documentation is perfect; neither is this one. If you find errors or om
 [[install]]
 == Installation
 
-pugixml is distributed in source form. You can download a source distribution via one of the following links:
+You can download the latest source distribution as an archive:
 
-* https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.zip
-* https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.tar.gz
+https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.zip[pugixml-{version}.zip] (Windows line endings)
+/
+https://github.com/zeux/pugixml/releases/download/v{version}/pugixml-{version}.tar.gz[pugixml-{version}.tar.gz] (Unix line endings)
 
-The distribution contains library source, documentation (the guide you're reading now and the manual) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive. The files have different line endings depending on the archive format - `.zip` archive has Windows line endings, `.tar.gz` archive has Unix line endings. Otherwise the files in both archives are identical.
+The distribution contains library source, documentation (the guide you're reading now and the manual) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.
 
 The complete pugixml source consists of three files - one source file, `pugixml.cpp`, and two header files, `pugixml.hpp` and `pugiconfig.hpp`. `pugixml.hpp` is the primary header which you need to include in order to use pugixml classes/functions. The rest of this guide assumes that `pugixml.hpp` is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
  
