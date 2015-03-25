@@ -10,7 +10,7 @@ SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
 
 VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
-RELEASE=$(shell git ls-files src docs/*.html docs/*.css docs/samples docs/images docs/manual scripts contrib readme.txt)
+RELEASE=$(shell git ls-files src docs/*.html docs/*.css docs/samples docs/images scripts contrib readme.txt)
 
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic
 LDFLAGS=
