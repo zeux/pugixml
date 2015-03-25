@@ -71,6 +71,6 @@ $(BUILD)/%.o: %
 
 .SECONDEXPANSION:
 docs/%.html: docs/%.adoc $$(shell sed -n 's/include\:\:\(.*\)\[.*/docs\/\1/p' docs/%.adoc)
-	asciidoctor -b html5 $< -o $@
+	asciidoctor -b html5 -a version=$(VERSION) $< -o $@
 
 .PHONY: all test clean release .FORCE
