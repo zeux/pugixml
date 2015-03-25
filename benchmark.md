@@ -17,7 +17,7 @@ All tests were performed with Microsoft Visual Studio 2015, with all optimizatio
 
 Benchmarks are performed on nine different test files; all of them are in 1-20 Mb range and display a different range of markup/content ratios - e.g. there's a COLLADA file that has little markup, there's a book file that has almost no markup, there are some files where there is a lot of markup and almost no content, etc. The test files include a 10 Mb [XMark](http://www.xml-benchmark.org) test file.
 
-Due to a number of test files all results are normalized by pugixml results - the ratio between time or memory for a particular parser to pugixml is displayed (so if it's 1 or more then the parser is slower or takes more memory than pugixml). Note that the horizontal axis is using logarithmic scale.
+Due to a number of test files all results are normalized using pugixml results as a baseline - the ratio between time or memory for a particular parser to pugixml is displayed (so if it's 1 or more then the parser is slower or takes more memory than pugixml). Note that the horizontal axis is using logarithmic scale.
 
 Benchmark results are visualized using [Google Charts](https://developers.google.com/chart/) and require JavaScript and SVG support to render.
 
