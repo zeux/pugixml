@@ -1,3 +1,3 @@
-[submodule "_main"]
-	path = _main
+[submodule "main"]
+	path = main
 	url = https://github.com/zeux/pugixml.git
