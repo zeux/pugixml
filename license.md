@@ -7,7 +7,7 @@ title: License
 
 This library is available to anybody free of charge, under the terms of MIT License:
 
-> Copyright (c) 2006-2014 Arseny Kapoulkine
+> Copyright (c) 2006-2015 Arseny Kapoulkine
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 >
@@ -18,4 +18,4 @@ This library is available to anybody free of charge, under the terms of MIT Lice
 This means that you can freely use pugixml in your applications, both open-source and proprietary. If you use pugixml in a product, it is sufficient to add an acknowledgment like this to the product distribution:
 
 > This software is based on pugixml library (http://pugixml.org).
-> pugixml is Copyright (C) 2006-2014 Arseny Kapoulkine.
+> pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
