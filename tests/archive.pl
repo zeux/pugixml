@@ -2,11 +2,12 @@
 
 use Archive::Tar;
 use Archive::Zip;
+use File::Basename;
 
 my $target = shift @ARGV;
 my @sources = @ARGV;
 
-my $basedir = ($target =~ /^(.*)(\.zip|\.tar.gz|\.tgz)$/) ? "$1/" : '';
+my $basedir = basename($target, ('.zip', '.tar.gz', '.tgz')) . '/';
 
 my $zip = $target =~ /\.zip$/;
 my $arch = $zip ? Archive::Zip->new : Archive::Tar->new;
