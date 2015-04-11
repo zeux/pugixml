@@ -12,15 +12,15 @@ pugixml is used by a lot of projects, both open-source and proprietary, for perf
 
 Documentation for the current release of pugixml is available on-line as two separate documents:
 
-* [Quick-start guide](http://cdn.rawgit.com/zeux/pugixml/v1.5/docs/quickstart.html), that aims to provide enough information to start using the library;
-* [Complete reference manual](http://cdn.rawgit.com/zeux/pugixml/v1.5/docs/manual.html), that describes all features of the library in detail.
+* [Quick-start guide](http://pugixml.org/docs/quickstart.html), that aims to provide enough information to start using the library;
+* [Complete reference manual](http://pugixml.org/docs/manual.html), that describes all features of the library in detail.
 
 You’re advised to start with the quick-start guide; however, many important library features are either not described in it at all or only mentioned briefly; if you require more information you should read the complete manual.
 
 ## License
 This library is available to anybody free of charge, under the terms of MIT License:
 
-Copyright (c) 2006-2014 Arseny Kapoulkine
+Copyright (c) 2006-2015 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

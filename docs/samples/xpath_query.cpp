@@ -8,7 +8,7 @@ int main()
     pugi::xml_document doc;
     if (!doc.load_file("xgconsole.xml")) return -1;
 
-//[code_xpath_query
+// tag::code[]
     // Select nodes via compiled query
     pugi::xpath_query query_remote_tools("/Profile/Tools/Tool[@AllowRemote='true']");
 
@@ -30,7 +30,7 @@ int main()
 
         if (query_name_valid.evaluate_boolean(tool)) std::cout << s << std::endl;
     }
-//]
+// end::code[]
 }
 
 // vim:et

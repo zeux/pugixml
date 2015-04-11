@@ -6,7 +6,7 @@ int main()
 {
     pugi::xml_document doc;
 
-    //[code_modify_add
+    // tag::code[]
     // add node with some name
     pugi::xml_node node = doc.append_child("node");
 
@@ -21,7 +21,7 @@ int main()
     param.append_attribute("name") = "version";
     param.append_attribute("value") = 1.1;
     param.insert_attribute_after("type", param.attribute("name")) = "float";
-    //]
+    // end::code[]
 
     doc.print(std::cout);
 }

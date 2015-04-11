@@ -7,7 +7,7 @@ int main()
     pugi::xml_document doc;
     if (!doc.load_file("xgconsole.xml")) return -1;
 
-//[code_xpath_select
+// tag::code[]
     pugi::xpath_node_set tools = doc.select_nodes("/Profile/Tools/Tool[@AllowRemote='true' and @DeriveCaptionFrom='lastparam']");
 
     std::cout << "Tools:\n";
@@ -22,7 +22,7 @@ int main()
 
     if (build_tool)
         std::cout << "Build tool: " << build_tool.node().attribute("Filename").value() << "\n";
-//]
+// end::code[]
 }
 
 // vim:et

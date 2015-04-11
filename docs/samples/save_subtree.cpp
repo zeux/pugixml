@@ -4,7 +4,7 @@
 
 int main()
 {
-    //[code_save_subtree
+    // tag::code[]
     // get a test document
     pugi::xml_document doc;
     doc.load_string("<foo bar='baz'><call>hey</call></foo>");
@@ -20,7 +20,7 @@ int main()
     // print a subtree to standard output (prints <call>hey</call>)
     doc.child("foo").child("call").print(std::cout, "", pugi::format_raw);
     std::cout << std::endl;
-    //]
+    // end::code[]
 }
 
 // vim:et

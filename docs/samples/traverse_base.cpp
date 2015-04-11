@@ -10,7 +10,7 @@ int main()
 
     pugi::xml_node tools = doc.child("Profile").child("Tools");
 
-    //[code_traverse_base_basic
+    // tag::basic[]
     for (pugi::xml_node tool = tools.first_child(); tool; tool = tool.next_sibling())
     {
         std::cout << "Tool:";
@@ -22,11 +22,11 @@ int main()
 
         std::cout << std::endl;
     }
-    //]
+    // end::basic[]
 
     std::cout << std::endl;
 
-    //[code_traverse_base_data
+    // tag::data[]
     for (pugi::xml_node tool = tools.child("Tool"); tool; tool = tool.next_sibling("Tool"))
     {
         std::cout << "Tool " << tool.attribute("Filename").value();
@@ -34,18 +34,18 @@ int main()
         std::cout << ", Timeout " << tool.attribute("Timeout").as_int();
         std::cout << ", Description '" << tool.child_value("Description") << "'\n";
     }
-    //]
+    // end::data[]
 
     std::cout << std::endl;
 
-    //[code_traverse_base_contents
+    // tag::contents[]
     std::cout << "Tool for *.dae generation: " << tools.find_child_by_attribute("Tool", "OutputFileMasks", "*.dae").attribute("Filename").value() << "\n";
 
     for (pugi::xml_node tool = tools.child("Tool"); tool; tool = tool.next_sibling("Tool"))
     {
         std::cout << "Tool " << tool.attribute("Filename").value() << "\n";
     }
-    //]
+    // end::contents[]
 }
 
 // vim:et

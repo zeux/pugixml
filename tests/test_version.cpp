@@ -1,5 +1,5 @@
 #include "../src/pugixml.hpp"
 
-#if PUGIXML_VERSION != 150
+#if PUGIXML_VERSION != 160
 #error Unexpected pugixml version
 #endif

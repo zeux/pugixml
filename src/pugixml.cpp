@@ -1,7 +1,7 @@
 /**
- * pugixml parser - version 1.5
+ * pugixml parser - version 1.6
  * --------------------------------------------------------
- * Copyright (C) 2006-2014, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+ * Copyright (C) 2006-2015, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at http://pugixml.org/
  *
  * This library is distributed under the MIT License. See notice at the end
@@ -4059,61 +4059,28 @@ PUGI__NS_BEGIN
 		if (node->first_attribute)
 			node_output_attributes(writer, node, flags);
 
-		if (flags & format_raw)
+		if (!node->first_child)
 		{
-			if (!node->first_child)
-				writer.write(' ', '/', '>');
-			else
-			{
-				writer.write('>');
+			writer.write(' ', '/', '>');
 
-				return true;
-			}
+			return false;
 		}
 		else
 		{
-			xml_node_struct* first = node->first_child;
+			writer.write('>');
 
-			if (!first)
-				writer.write(' ', '/', '>', '\n');
-			else if (!first->next_sibling && (PUGI__NODETYPE(first) == node_pcdata || PUGI__NODETYPE(first) == node_cdata))
-			{
-				writer.write('>');
-
-				const char_t* value = first->contents ? first->contents + 0 : PUGIXML_TEXT("");
-
-				if (PUGI__NODETYPE(first) == node_pcdata)
-					text_output(writer, value, ctx_special_pcdata, flags);
-				else
-					text_output_cdata(writer, value);
-
-				writer.write('<', '/');
-				writer.write_string(name);
-				writer.write('>', '\n');
-			}
-			else
-			{
-				writer.write('>', '\n');
-
-				return true;
-			}
+			return true;
 		}
-
-		return false;
 	}
 
-	PUGI__FN void node_output_end(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
+	PUGI__FN void node_output_end(xml_buffered_writer& writer, xml_node_struct* node)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 		const char_t* name = node->contents ? node->contents : default_name;
 
 		writer.write('<', '/');
 		writer.write_string(name);
-
-		if (flags & format_raw)
-			writer.write('>');
-		else
-			writer.write('>', '\n');
+		writer.write('>');
 	}
 
 	PUGI__FN void node_output_simple(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
@@ -4124,17 +4091,14 @@ PUGI__NS_BEGIN
 		{
 			case node_pcdata:
 				text_output(writer, node->contents ? node->contents + 0 : PUGIXML_TEXT(""), ctx_special_pcdata, flags);
-				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_cdata:
 				text_output_cdata(writer, node->contents ? node->contents + 0 : PUGIXML_TEXT(""));
-				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_comment:
 				node_output_comment(writer, node->contents ? node->contents + 0 : PUGIXML_TEXT(""));
-				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_pi:
@@ -4148,7 +4112,6 @@ PUGI__NS_BEGIN
 				}
 
 				writer.write('?', '>');
-				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_declaration:
@@ -4156,7 +4119,6 @@ PUGI__NS_BEGIN
 				writer.write_string(node->contents ? node->contents : default_name);
 				node_output_attributes(writer, node, flags);
 				writer.write('?', '>');
-				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			case node_doctype:
@@ -4170,7 +4132,6 @@ PUGI__NS_BEGIN
 				}
 
 				writer.write('>');
-				if ((flags & format_raw) == 0) writer.write('\n');
 				break;
 
 			default:
@@ -4178,9 +4139,16 @@ PUGI__NS_BEGIN
 		}
 	}
 
+	enum indent_flags_t
+	{
+		indent_newline = 1,
+		indent_indent = 2
+	};
+
 	PUGI__FN void node_output(xml_buffered_writer& writer, xml_node_struct* root, const char_t* indent, unsigned int flags, unsigned int depth)
 	{
 		size_t indent_length = ((flags & (format_indent | format_raw)) == format_indent) ? strlength(indent) : 0;
+		unsigned int indent_flags = indent_indent;
 
 		xml_node_struct* node = root;
 
@@ -4189,29 +4157,47 @@ PUGI__NS_BEGIN
 			assert(node);
 
 			// begin writing current node
-			if (indent_length)
-				text_output_indent(writer, indent, indent_length, depth);
+			if (PUGI__NODETYPE(node) == node_pcdata || PUGI__NODETYPE(node) == node_cdata)
+			{
+				node_output_simple(writer, node, flags);
 
-			if (PUGI__NODETYPE(node) == node_element)
-			{
-				if (node_output_start(writer, node, flags))
-				{
-					node = node->first_child;
-					depth++;
-					continue;
-				}
-			}
-			else if (PUGI__NODETYPE(node) == node_document)
-			{
-				if (node->first_child)
-				{
-					node = node->first_child;
-					continue;
-				}
+				indent_flags = 0;
 			}
 			else
 			{
-				node_output_simple(writer, node, flags);
+				if ((indent_flags & indent_newline) && (flags & format_raw) == 0)
+					writer.write('\n');
+
+				if ((indent_flags & indent_indent) && indent_length)
+					text_output_indent(writer, indent, indent_length, depth);
+
+				if (PUGI__NODETYPE(node) == node_element)
+				{
+					indent_flags = indent_newline | indent_indent;
+
+					if (node_output_start(writer, node, flags))
+					{
+						node = node->first_child;
+						depth++;
+						continue;
+					}
+				}
+				else if (PUGI__NODETYPE(node) == node_document)
+				{
+					indent_flags = indent_indent;
+
+					if (node->first_child)
+					{
+						node = node->first_child;
+						continue;
+					}
+				}
+				else
+				{
+					node_output_simple(writer, node, flags);
+
+					indent_flags = indent_newline | indent_indent;
+				}
 			}
 
 			// continue to the next node
@@ -4230,14 +4216,22 @@ PUGI__NS_BEGIN
 				{
 					depth--;
 
-					if (indent_length)
+					if ((indent_flags & indent_newline) && (flags & format_raw) == 0)
+						writer.write('\n');
+
+					if ((indent_flags & indent_indent) && indent_length)
 						text_output_indent(writer, indent, indent_length, depth);
 
-					node_output_end(writer, node, flags);
+					node_output_end(writer, node);
+
+					indent_flags = indent_newline | indent_indent;
 				}
 			}
 		}
 		while (node != root);
+
+		if ((indent_flags & indent_newline) && (flags & format_raw) == 0)
+			writer.write('\n');
 	}
 
 	PUGI__FN bool has_declaration(xml_node_struct* node)
@@ -12171,7 +12165,7 @@ namespace pugi
 #endif
 
 /**
- * Copyright (c) 2006-2014 Arseny Kapoulkine
+ * Copyright (c) 2006-2015 Arseny Kapoulkine
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation

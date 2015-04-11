@@ -1,10 +1,16 @@
+.SUFFIXES:
+MAKEFLAGS+=-r
+
 config=debug
 defines=standard
 
 BUILD=build/make-$(CXX)-$(config)-$(defines)
 
-SOURCES=src/pugixml.cpp tests/main.cpp tests/allocator.cpp tests/test.cpp tests/writer_string.cpp $(wildcard tests/test_*.cpp)
+SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
+
+VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
+RELEASE=$(shell git ls-files src docs/*.html docs/*.css docs/samples docs/images scripts contrib readme.txt)
 
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic
 LDFLAGS=
@@ -47,6 +53,13 @@ fuzz:
 clean:
 	rm -rf $(BUILD)
 
+release: build/pugixml-$(VERSION).tar.gz build/pugixml-$(VERSION).zip
+
+docs: docs/quickstart.html docs/manual.html
+
+build/pugixml-%: .FORCE | $(RELEASE)
+	perl tests/archive.pl $@ $|
+
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
@@ -56,4 +69,8 @@ $(BUILD)/%.o: %
 
 -include $(OBJECTS:.o=.d)
 
-.PHONY: all test clean	
+.SECONDEXPANSION:
+docs/%.html: docs/%.adoc $$(shell sed -n 's/include\:\:\(.*\)\[.*/docs\/\1/p' docs/%.adoc)
+	asciidoctor -b html5 -a version=$(VERSION) $< -o $@
+
+.PHONY: all test clean release .FORCE

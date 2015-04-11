@@ -7,7 +7,7 @@ int main()
     pugi::xml_document doc;
     if (!doc.load_file("xgconsole.xml")) return -1;
 
-//[code_xpath_error
+// tag::code[]
     // Exception is thrown for incorrect query syntax
     try
     {
@@ -37,7 +37,7 @@ int main()
     {
         std::cout << "Select failed: " << e.what() << std::endl;
     }
-//]
+// end::code[]
 }
 
 // vim:et
