@@ -926,6 +926,15 @@ TEST(parse_out_of_memory_halfway_attr)
 	CHECK_STRING(doc.first_child().last_attribute().name(), STR("a"));
 }
 
+TEST(parse_out_of_memory_conversion)
+{
+	test_runner::_memory_fail_threshold = 256;
+
+	xml_document doc;
+	CHECK(doc.load_buffer("<foo\x90/>", 7, parse_default, encoding_latin1).status == status_out_of_memory);
+	CHECK(!doc.first_child());
+}
+
 static bool test_offset(const char_t* contents, unsigned int options, pugi::xml_parse_status status, ptrdiff_t offset)
 {
 	xml_document doc;

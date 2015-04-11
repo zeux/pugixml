@@ -1100,6 +1100,42 @@ TEST(dom_node_append_buffer_out_of_memory_buffer)
 	CHECK(!doc.first_child());
 }
 
+TEST(dom_node_append_buffer_out_of_memory_nodes)
+{
+	unsigned int count = 4000;
+	std::basic_string<char_t> data;
+
+	for (unsigned int i = 0; i < count; ++i)
+		data += STR("<a/>");
+
+	test_runner::_memory_fail_threshold = 32768 + 128 + data.length() * sizeof(wchar_t) + 32;
+
+	xml_document doc;
+	CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(wchar_t), parse_fragment).status == status_out_of_memory);
+
+	unsigned int valid = 0;
+
+	for (xml_node n = doc.first_child(); n; n = n.next_sibling())
+	{
+		CHECK_STRING(n.name(), STR("a"));
+		valid++;
+	}
+
+	CHECK(valid > 0 && valid < count);
+}
+
+TEST(dom_node_append_buffer_out_of_memory_name)
+{
+	test_runner::_memory_fail_threshold = 32768 + 128;
+
+	char data[128] = {0};
+
+	xml_document doc;
+	CHECK(doc.append_child(STR("root")));
+	CHECK(doc.first_child().append_buffer(data, sizeof(data)).status == status_out_of_memory);
+	CHECK_STRING(doc.first_child().name(), STR("root"));
+}
+
 TEST_XML(dom_node_append_buffer_fragment, "<node />")
 {
 	xml_node node = doc.child(STR("node"));
