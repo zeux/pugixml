@@ -1108,10 +1108,10 @@ TEST(dom_node_append_buffer_out_of_memory_nodes)
 	for (unsigned int i = 0; i < count; ++i)
 		data += STR("<a/>");
 
-	test_runner::_memory_fail_threshold = 32768 + 128 + data.length() * sizeof(wchar_t) + 32;
+	test_runner::_memory_fail_threshold = 32768 + 128 + data.length() * sizeof(char_t) + 32;
 
 	xml_document doc;
-	CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(wchar_t), parse_fragment).status == status_out_of_memory);
+	CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(char_t), parse_fragment).status == status_out_of_memory);
 
 	unsigned int valid = 0;
 
