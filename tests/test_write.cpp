@@ -4,6 +4,7 @@
 
 #include <string>
 #include <sstream>
+#include <stdexcept>
 
 TEST_XML(write_simple, "<node attr='1'><child>text</child></node>")
 {
@@ -574,3 +575,41 @@ TEST_XML_FLAGS(write_mixed, "<node><child1/><child2>pre<![CDATA[data]]>mid<!--co
 	CHECK_NODE_EX(doc, STR("<node>\n<child1 />\n<child2>pre<![CDATA[data]]>mid<!--comment-->\n<test />post<?pi value?>fin</child2>\n<child3 />\n</node>\n"), STR("\t"), 0);
 	CHECK_NODE_EX(doc, STR("<node>\n\t<child1 />\n\t<child2>pre<![CDATA[data]]>mid<!--comment-->\n\t\t<test />post<?pi value?>fin</child2>\n\t<child3 />\n</node>\n"), STR("\t"), format_indent);
 }
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+struct throwing_writer: pugi::xml_writer
+{
+	virtual void write(const void*, size_t)
+	{
+		throw std::runtime_error("write failed");
+	}
+};
+
+TEST_XML(write_throw_simple, "<node><child/></node>")
+{
+	try
+	{
+		throwing_writer w;
+		doc.print(w);
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (std::runtime_error&)
+	{
+	}
+}
+
+TEST_XML(write_throw_encoding, "<node><child/></node>")
+{
+	try
+	{
+		throwing_writer w;
+		doc.print(w, STR("\t"), format_default, encoding_utf32_be);
+
+		CHECK_FORCE_FAIL("Expected exception");
+	}
+	catch (std::runtime_error&)
+	{
+	}
+}
+#endif

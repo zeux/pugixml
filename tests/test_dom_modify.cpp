@@ -644,7 +644,7 @@ TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node
 
 TEST_XML(dom_node_remove_child_complex, "<node id='1'><n1 id1='1' id2='2'/><n2/><n3/><child><n4/></child></node>")
 {
-	doc.child(STR("node")).remove_child(STR("n1"));
+	CHECK(doc.child(STR("node")).remove_child(STR("n1")));
 
 	CHECK_NODE(doc, STR("<node id=\"1\"><n2 /><n3 /><child><n4 /></child></node>"));
 
@@ -771,6 +771,14 @@ TEST_XML(dom_node_copy_crossdoc, "<node/>")
 	CHECK_NODE(newdoc, STR("<node />"));
 }
 
+TEST_XML(dom_node_copy_crossdoc_attribute, "<node attr='value'/>")
+{
+	xml_document newdoc;
+	newdoc.append_child(STR("copy")).append_copy(doc.child(STR("node")).attribute(STR("attr")));
+	CHECK_NODE(doc, STR("<node attr=\"value\" />"));
+	CHECK_NODE(newdoc, STR("<copy attr=\"value\" />"));
+}
+
 TEST_XML_FLAGS(dom_node_copy_types, "<?xml version='1.0'?><!DOCTYPE id><root><?pi value?><!--comment--><node id='1'>pcdata<![CDATA[cdata]]></node></root>", parse_full)
 {
 	doc.append_copy(doc.child(STR("root")));
@@ -858,10 +866,10 @@ TEST(dom_string_out_of_memory)
 	// no value => long value
 	test_runner::_memory_fail_threshold = 32;
 
-	CHECK(!node.set_name(string));
-	CHECK(!text.set_value(string));
-	CHECK(!attr.set_name(string));
-	CHECK(!attr.set_value(string));
+	CHECK_ALLOC_FAIL(CHECK(!node.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!text.set_value(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_value(string)));
 
 	// set some names/values
 	test_runner::_memory_fail_threshold = 0;
@@ -873,10 +881,10 @@ TEST(dom_string_out_of_memory)
 	// some value => long value
 	test_runner::_memory_fail_threshold = 32;
 
-	CHECK(!node.set_name(string));
-	CHECK(!text.set_value(string));
-	CHECK(!attr.set_name(string));
-	CHECK(!attr.set_value(string));
+	CHECK_ALLOC_FAIL(CHECK(!node.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!text.set_value(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_value(string)));
 
 	// check that original state was preserved
 	test_runner::_memory_fail_threshold = 0;
@@ -897,30 +905,27 @@ TEST(dom_node_out_of_memory)
 	xml_attribute a = n.append_attribute(STR("a"));
 	CHECK(a);
 
-	while (n.append_child(node_comment) || n.append_attribute(STR("b")))
-	{
-		// nop
-	}
+	CHECK_ALLOC_FAIL(while (n.append_child(node_comment) || n.append_attribute(STR("b"))) { /* nop */ });
 
 	// verify all node modification operations
-	CHECK(!n.append_child());
-	CHECK(!n.prepend_child());
-	CHECK(!n.insert_child_after(node_element, n.first_child()));
-	CHECK(!n.insert_child_before(node_element, n.first_child()));
-	CHECK(!n.append_attribute(STR("")));
-	CHECK(!n.prepend_attribute(STR("")));
-	CHECK(!n.insert_attribute_after(STR(""), a));
-	CHECK(!n.insert_attribute_before(STR(""), a));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_child()));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_child()));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_child_after(node_element, n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_child_before(node_element, n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_attribute(STR(""))));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_attribute(STR(""))));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_attribute_after(STR(""), a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_attribute_before(STR(""), a)));
 
 	// verify node copy operations
-	CHECK(!n.append_copy(n.first_child()));
-	CHECK(!n.prepend_copy(n.first_child()));
-	CHECK(!n.insert_copy_after(n.first_child(), n.first_child()));
-	CHECK(!n.insert_copy_before(n.first_child(), n.first_child()));
-	CHECK(!n.append_copy(a));
-	CHECK(!n.prepend_copy(a));
-	CHECK(!n.insert_copy_after(a, a));
-	CHECK(!n.insert_copy_before(a, a));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_copy(n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_copy(n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_after(n.first_child(), n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_before(n.first_child(), n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_copy(a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_copy(a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_after(a, a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_before(a, a)));
 }
 
 TEST(dom_node_memory_limit)
@@ -1043,7 +1048,7 @@ TEST_XML(dom_node_append_buffer_remove, "<node>test</node>")
 
 	CHECK_NODE(doc, STR("<node>test</node>"));
 
-	doc.remove_child(STR("node"));
+	CHECK(doc.remove_child(STR("node")));
 
 	CHECK(!doc.first_child());
 }
@@ -1085,7 +1090,7 @@ TEST(dom_node_append_buffer_out_of_memory_extra)
 	test_runner::_memory_fail_threshold = 1;
 
 	xml_document doc;
-	CHECK(doc.append_buffer("<n/>", 4).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer("<n/>", 4).status == status_out_of_memory));
 	CHECK(!doc.first_child());
 }
 
@@ -1096,8 +1101,44 @@ TEST(dom_node_append_buffer_out_of_memory_buffer)
 	char data[128] = {0};
 
 	xml_document doc;
-	CHECK(doc.append_buffer(data, sizeof(data)).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer(data, sizeof(data)).status == status_out_of_memory));
 	CHECK(!doc.first_child());
+}
+
+TEST(dom_node_append_buffer_out_of_memory_nodes)
+{
+	unsigned int count = 4000;
+	std::basic_string<char_t> data;
+
+	for (unsigned int i = 0; i < count; ++i)
+		data += STR("<a/>");
+
+	test_runner::_memory_fail_threshold = 32768 + 128 + data.length() * sizeof(char_t) + 32;
+
+	xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(char_t), parse_fragment).status == status_out_of_memory));
+
+	unsigned int valid = 0;
+
+	for (xml_node n = doc.first_child(); n; n = n.next_sibling())
+	{
+		CHECK_STRING(n.name(), STR("a"));
+		valid++;
+	}
+
+	CHECK(valid > 0 && valid < count);
+}
+
+TEST(dom_node_append_buffer_out_of_memory_name)
+{
+	test_runner::_memory_fail_threshold = 32768 + 128;
+
+	char data[128] = {0};
+
+	xml_document doc;
+	CHECK(doc.append_child(STR("root")));
+	CHECK_ALLOC_FAIL(CHECK(doc.first_child().append_buffer(data, sizeof(data)).status == status_out_of_memory));
+	CHECK_STRING(doc.first_child().name(), STR("root"));
 }
 
 TEST_XML(dom_node_append_buffer_fragment, "<node />")
@@ -1381,7 +1422,7 @@ TEST(dom_node_copy_copyless_mix)
 	CHECK_NODE(copy2, dataxml.c_str());
 }
 
-TEST_XML(dom_node_copyless_taint, "<node attr=\"value\" />")
+TEST_XML(dom_node_copy_copyless_taint, "<node attr=\"value\" />")
 {
 	xml_node node = doc.child(STR("node"));
 	xml_node copy = doc.append_copy(node);
@@ -1405,13 +1446,65 @@ TEST_XML(dom_node_copyless_taint, "<node attr=\"value\" />")
 	CHECK_NODE(doc, STR("<nod1 attr=\"value\" /><node attr=\"valu2\" /><node att3=\"value\" />"));
 }
 
+TEST(dom_node_copy_attribute_copyless)
+{
+	std::basic_string<char_t> data;
+	data += STR("<node attr=\"");
+	for (int i = 0; i < 10000; ++i)
+		data += STR("data");
+	data += STR("\" />");
+
+	std::basic_string<char_t> datacopy = data;
+
+	// the document is parsed in-place so there should only be 1 page worth of allocations
+	test_runner::_memory_fail_threshold = 32768 + 128;
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(&datacopy[0], datacopy.size() * sizeof(char_t), parse_full));
+
+	// this copy should share all string storage; since there are not a lot of nodes we should not have *any* allocations here (everything will fit in the same page in the document)
+	xml_node copy1 = doc.append_child(STR("node"));
+	copy1.append_copy(doc.first_child().first_attribute());
+
+	xml_node copy2 = doc.append_child(STR("node"));
+	copy2.append_copy(copy1.first_attribute());
+
+	CHECK_NODE(copy1, data.c_str());
+	CHECK_NODE(copy2, data.c_str());
+}
+
+TEST_XML(dom_node_copy_attribute_copyless_taint, "<node attr=\"value\" />")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_attribute attr = node.first_attribute();
+
+	xml_node copy1 = doc.append_child(STR("copy1"));
+	xml_node copy2 = doc.append_child(STR("copy2"));
+	xml_node copy3 = doc.append_child(STR("copy3"));
+
+	CHECK_NODE(doc, STR("<node attr=\"value\" /><copy1 /><copy2 /><copy3 />"));
+
+	copy1.append_copy(attr);
+
+	CHECK_NODE(doc, STR("<node attr=\"value\" /><copy1 attr=\"value\" /><copy2 /><copy3 />"));
+
+	attr.set_name(STR("att1"));
+	copy2.append_copy(attr);
+
+	CHECK_NODE(doc, STR("<node att1=\"value\" /><copy1 attr=\"value\" /><copy2 att1=\"value\" /><copy3 />"));
+
+	copy1.first_attribute().set_value(STR("valu2"));
+	copy3.append_copy(copy1.first_attribute());
+
+	CHECK_NODE(doc, STR("<node att1=\"value\" /><copy1 attr=\"valu2\" /><copy2 att1=\"value\" /><copy3 attr=\"valu2\" />"));
+}
+
 TEST_XML(dom_node_copy_out_of_memory_node, "<node><child1 /><child2 /><child3>text1<child4 />text2</child3></node>")
 {
 	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
 
 	xml_document copy;
-	for (int i = 0; i < 1000; ++i)
-		copy.append_copy(doc.first_child());
+	CHECK_ALLOC_FAIL(for (int i = 0; i < 1000; ++i) copy.append_copy(doc.first_child()));
 }
 
 TEST_XML(dom_node_copy_out_of_memory_attr, "<node attr1='' attr2='' attr3='' attr4='' attr5='' attr6='' attr7='' attr8='' attr9='' attr10='' attr11='' attr12='' attr13='' attr14='' attr15='' />")
@@ -1419,8 +1512,7 @@ TEST_XML(dom_node_copy_out_of_memory_attr, "<node attr1='' attr2='' attr3='' att
 	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
 
 	xml_document copy;
-	for (int i = 0; i < 1000; ++i)
-		copy.append_copy(doc.first_child());
+	CHECK_ALLOC_FAIL(for (int i = 0; i < 1000; ++i) copy.append_copy(doc.first_child()));
 }
 
 TEST_XML(dom_node_remove_deallocate, "<node attr='value'>text</node>")

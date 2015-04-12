@@ -32,9 +32,11 @@ static bool load_file_in_memory(const char* path, char*& data, size_t& size)
 	if (!file) return false;
 
 	fseek(file, 0, SEEK_END);
-	size = static_cast<size_t>(ftell(file));
+	long length = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
+	CHECK(length >= 0);
+	size = static_cast<size_t>(length);
 	data = new char[size];
 
 	CHECK(fread(data, 1, size, file) == size);
@@ -110,7 +112,7 @@ TEST(document_load_stream_error)
 	
 	std::istringstream iss("<node/>");
 	test_runner::_memory_fail_threshold = 1;
-	CHECK(doc.load(iss).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.load(iss).status == status_out_of_memory));
 }
 
 TEST(document_load_stream_empty)
@@ -237,7 +239,7 @@ TEST(document_load_stream_nonseekable_out_of_memory)
     test_runner::_memory_fail_threshold = 1;
 
     pugi::xml_document doc;
-    CHECK(doc.load(in).status == status_out_of_memory);
+    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
 TEST(document_load_stream_nonseekable_out_of_memory_large)
@@ -253,7 +255,7 @@ TEST(document_load_stream_nonseekable_out_of_memory_large)
     test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
 
     pugi::xml_document doc;
-    CHECK(doc.load(in).status == status_out_of_memory);
+    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 #endif
 
@@ -300,9 +302,31 @@ TEST(document_load_file_error)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
+}
 
+TEST(document_load_file_out_of_memory)
+{
 	test_runner::_memory_fail_threshold = 1;
-	CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory);
+
+	pugi::xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
+}
+
+TEST(document_load_file_out_of_memory_file_leak)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	pugi::xml_document doc;
+
+	for (int i = 0; i < 256; ++i)
+	{
+		CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
+	}
+
+	test_runner::_memory_fail_threshold = 0;
+
+	CHECK(doc.load_file("tests/data/small.xml"));
+	CHECK_NODE(doc, STR("<node />"));
 }
 
 TEST(document_load_file_error_previous)
@@ -339,7 +363,9 @@ TEST(document_load_file_wide_out_of_memory)
 
 	pugi::xml_document doc;
 
-	pugi::xml_parse_result result = doc.load_file(L"tests/data/small.xml");
+	pugi::xml_parse_result result;
+	result.status = status_out_of_memory;
+	CHECK_ALLOC_FAIL(result = doc.load_file(L"tests/data/small.xml"));
 
 	CHECK(result.status == status_out_of_memory || result.status == status_file_not_found);
 }
@@ -1320,7 +1346,7 @@ TEST(document_convert_out_of_memory)
 	for (unsigned int src = 0; src < sizeof(files) / sizeof(files[0]); ++src)
 	{
 		xml_document doc;
-		CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default, files[src].encoding).status == status_out_of_memory);
+		CHECK_ALLOC_FAIL(CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default, files[src].encoding).status == status_out_of_memory));
 	}
 
 	// cleanup

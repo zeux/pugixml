@@ -30,6 +30,10 @@ ifneq ($(defines),standard)
 	CXXFLAGS+=-D $(subst $(COMMA), -D ,$(defines))
 endif
 
+ifneq ($(findstring PUGIXML_NO_EXCEPTIONS,$(defines)),)
+	CXXFLAGS+=-fno-exceptions
+endif
+
 OBJECTS=$(SOURCES:%=$(BUILD)/%.o)
 
 all: $(EXECUTABLE)

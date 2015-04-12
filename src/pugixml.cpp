@@ -1088,11 +1088,11 @@ PUGI__NS_BEGIN
 	#endif
 	};
 
-	inline xml_allocator& get_allocator(const xml_node_struct* node)
+	template <typename Object> inline xml_allocator& get_allocator(const Object* object)
 	{
-		assert(node);
+		assert(object);
 
-		return *reinterpret_cast<xml_memory_page*>(node->header & xml_memory_page_pointer_mask)->allocator;
+		return *reinterpret_cast<xml_memory_page*>(object->header & xml_memory_page_pointer_mask)->allocator;
 	}
 
 	template <typename Object> inline xml_document_struct& get_document(const Object* object)
@@ -2235,9 +2235,6 @@ PUGI__NS_BEGIN
 	
 		assert(begin + size == end);
 		(void)!end;
-
-		// zero-terminate
-		buffer[size] = 0;
 	}
 	
 #ifndef PUGIXML_NO_STL
@@ -4383,6 +4380,15 @@ PUGI__NS_BEGIN
 		}
 	}
 
+	PUGI__FN void node_copy_attribute(xml_attribute_struct* da, xml_attribute_struct* sa)
+	{
+		xml_allocator& alloc = get_allocator(da);
+		xml_allocator* shared_alloc = (&alloc == &get_allocator(sa)) ? &alloc : 0;
+
+		node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
+		node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+	}
+
 	inline bool is_text_node(xml_node_struct* node)
 	{
 		xml_node_type type = PUGI__NODETYPE(node);
@@ -4623,6 +4629,7 @@ PUGI__NS_BEGIN
 		return status_ok;
 	}
 
+	// This function assumes that buffer has extra sizeof(char_t) writable bytes after size
 	PUGI__FN size_t zero_terminate_buffer(void* buffer, size_t size, xml_encoding encoding) 
 	{
 		// We only need to zero-terminate if encoding conversion does not do it for us
@@ -4858,6 +4865,9 @@ PUGI__NS_BEGIN
 
 		// second pass: convert to utf8
 		as_utf8_end(result, size, str, length);
+
+		// zero-terminate
+		result[size] = 0;
 
 		return result;
 	}
@@ -5590,41 +5600,59 @@ namespace pugi
 	PUGI__FN xml_attribute xml_node::append_copy(const xml_attribute& proto)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
-		xml_attribute result = append_attribute(proto.name());
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::append_attribute(a._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_attribute xml_node::prepend_copy(const xml_attribute& proto)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
-		xml_attribute result = prepend_attribute(proto.name());
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::prepend_attribute(a._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
+		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 
-		xml_attribute result = insert_attribute_after(proto.name(), attr);
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::insert_attribute_after(a._attr, attr._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
+		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 
-		xml_attribute result = insert_attribute_before(proto.name(), attr);
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::insert_attribute_before(a._attr, attr._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_node xml_node::append_child(xml_node_type type_)
@@ -5975,19 +6003,34 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	PUGI__FN string_t xml_node::path(char_t delimiter) const
 	{
-		xml_node cursor = *this; // Make a copy.
-		
-		string_t result = cursor.name();
+		if (!_root) return string_t();
 
-		while (cursor.parent())
+		size_t offset = 0;
+
+		for (xml_node_struct* i = _root; i; i = i->parent)
 		{
-			cursor = cursor.parent();
-			
-			string_t temp = cursor.name();
-			temp += delimiter;
-			temp += result;
-			result.swap(temp);
+			offset += (i != _root);
+			offset += i->name ? impl::strlength(i->name) : 0;
 		}
+
+		string_t result;
+		result.resize(offset);
+
+		for (xml_node_struct* j = _root; j; j = j->parent)
+		{
+			if (j != _root)
+				result[--offset] = delimiter;
+
+			if (j->name && *j->name)
+			{
+				size_t length = impl::strlength(j->name);
+
+				offset -= length;
+				memcpy(&result[offset], j->name, length * sizeof(char_t));
+			}
+		}
+
+		assert(offset == 0);
 
 		return result;
 	}
@@ -6825,12 +6868,14 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = fopen(path_, (flags & format_save_file_text) ? "w" : "wb");
+
 		return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb");
+
 		return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 
@@ -8351,7 +8396,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN xpath_variable* get_variable_scratch(char_t (&buffer)[32], xpath_variable_set* set, const char_t* begin, const char_t* end)
+	PUGI__FN bool get_variable_scratch(char_t (&buffer)[32], xpath_variable_set* set, const char_t* begin, const char_t* end, xpath_variable** out_result)
 	{
 		size_t length = static_cast<size_t>(end - begin);
 		char_t* scratch = buffer;
@@ -8360,19 +8405,19 @@ PUGI__NS_BEGIN
 		{
 			// need to make dummy on-heap copy
 			scratch = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
-			if (!scratch) return 0;
+			if (!scratch) return false;
 		}
 
 		// copy string to zero-terminated buffer and perform lookup
 		memcpy(scratch, begin, length * sizeof(char_t));
 		scratch[length] = 0;
 
-		xpath_variable* result = set->get(scratch);
+		*out_result = set->get(scratch);
 
 		// free dummy buffer
 		if (scratch != buffer) xml_memory::deallocate(scratch);
 
-		return result;
+		return true;
 	}
 PUGI__NS_END
 
@@ -10945,7 +10990,9 @@ PUGI__NS_BEGIN
 				if (!_variables)
 					throw_error("Unknown variable: variable set is not provided");
 
-				xpath_variable* var = get_variable_scratch(_scratch, _variables, name.begin, name.end);
+				xpath_variable* var = 0;
+				if (!get_variable_scratch(_scratch, _variables, name.begin, name.end, &var))
+					throw_error_oom();
 
 				if (!var)
 					throw_error("Unknown variable: variable set does not contain the given name");

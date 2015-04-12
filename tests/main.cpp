@@ -27,11 +27,13 @@ const char* test_runner::_temp_path;
 
 static size_t g_memory_total_size = 0;
 static size_t g_memory_total_count = 0;
+static size_t g_memory_fail_triggered = false;
 
 static void* custom_allocate(size_t size)
 {
 	if (test_runner::_memory_fail_threshold > 0 && test_runner::_memory_fail_threshold < g_memory_total_size + size)
 	{
+		g_memory_fail_triggered = true;
 		test_runner::_memory_fail_triggered = true;
 
 		return 0;
@@ -88,6 +90,7 @@ static bool run_test(test_runner* test)
 #endif
 		g_memory_total_size = 0;
 		g_memory_total_count = 0;
+		g_memory_fail_triggered = false;
 		test_runner::_memory_fail_threshold = 0;
 		test_runner::_memory_fail_triggered = false;
 	
@@ -112,6 +115,12 @@ static bool run_test(test_runner* test)
 		}
 
 		test->run();
+
+		if (test_runner::_memory_fail_triggered)
+		{
+			printf("Test %s failed: unguarded memory fail triggered\n", test->_name);
+			return false;
+		}
 
 		if (g_memory_total_size != 0 || g_memory_total_count != 0)
 		{
