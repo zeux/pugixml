@@ -1085,14 +1085,24 @@ TEST_XML(dom_unspecified_bool_coverage, "<node attr='value'>text</node>")
 {
 	xml_node node = doc.first_child();
 
+	CHECK(node);
 	static_cast<void (*)(xml_node***)>(node)(0);
+
+	CHECK(node.first_attribute());
 	static_cast<void (*)(xml_attribute***)>(node.first_attribute())(0);
+
+	CHECK(node.text());
 	static_cast<void (*)(xml_text***)>(node.text())(0);
 
 #ifndef PUGIXML_NO_XPATH
 	xpath_query q(STR("/node"));
 
+	CHECK(q);
 	static_cast<void (*)(xpath_query***)>(q)(0);
-	static_cast<void (*)(xpath_node***)>(q.evaluate_node(doc))(0);
+
+	xpath_node qn = q.evaluate_node(doc);
+
+	CHECK(qn);
+	static_cast<void (*)(xpath_node***)>(qn)(0);
 #endif
 }

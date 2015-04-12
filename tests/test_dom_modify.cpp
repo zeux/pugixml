@@ -644,7 +644,7 @@ TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node
 
 TEST_XML(dom_node_remove_child_complex, "<node id='1'><n1 id1='1' id2='2'/><n2/><n3/><child><n4/></child></node>")
 {
-	doc.child(STR("node")).remove_child(STR("n1"));
+	CHECK(doc.child(STR("node")).remove_child(STR("n1")));
 
 	CHECK_NODE(doc, STR("<node id=\"1\"><n2 /><n3 /><child><n4 /></child></node>"));
 
@@ -1040,7 +1040,7 @@ TEST_XML(dom_node_append_buffer_remove, "<node>test</node>")
 
 	CHECK_NODE(doc, STR("<node>test</node>"));
 
-	doc.remove_child(STR("node"));
+	CHECK(doc.remove_child(STR("node")));
 
 	CHECK(!doc.first_child());
 }

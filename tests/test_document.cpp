@@ -32,9 +32,11 @@ static bool load_file_in_memory(const char* path, char*& data, size_t& size)
 	if (!file) return false;
 
 	fseek(file, 0, SEEK_END);
-	size = static_cast<size_t>(ftell(file));
+	long length = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
+	CHECK(length >= 0);
+	size = static_cast<size_t>(length);
 	data = new char[size];
 
 	CHECK(fread(data, 1, size, file) == size);
