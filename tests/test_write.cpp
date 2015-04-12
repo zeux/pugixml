@@ -4,6 +4,7 @@
 
 #include <string>
 #include <sstream>
+#include <stdexcept>
 
 TEST_XML(write_simple, "<node attr='1'><child>text</child></node>")
 {
