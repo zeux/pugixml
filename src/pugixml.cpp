@@ -7715,7 +7715,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN xpath_variable* get_variable_scratch(char_t (&buffer)[32], xpath_variable_set* set, const char_t* begin, const char_t* end)
+	PUGI__FN bool get_variable_scratch(char_t (&buffer)[32], xpath_variable_set* set, const char_t* begin, const char_t* end, xpath_variable** out_result)
 	{
 		size_t length = static_cast<size_t>(end - begin);
 		char_t* scratch = buffer;
@@ -7724,19 +7724,19 @@ PUGI__NS_BEGIN
 		{
 			// need to make dummy on-heap copy
 			scratch = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
-			if (!scratch) return 0;
+			if (!scratch) return false;
 		}
 
 		// copy string to zero-terminated buffer and perform lookup
 		memcpy(scratch, begin, length * sizeof(char_t));
 		scratch[length] = 0;
 
-		xpath_variable* result = set->get(scratch);
+		*out_result = set->get(scratch);
 
 		// free dummy buffer
 		if (scratch != buffer) xml_memory::deallocate(scratch);
 
-		return result;
+		return true;
 	}
 PUGI__NS_END
 
@@ -10309,7 +10309,9 @@ PUGI__NS_BEGIN
 				if (!_variables)
 					throw_error("Unknown variable: variable set is not provided");
 
-				xpath_variable* var = get_variable_scratch(_scratch, _variables, name.begin, name.end);
+				xpath_variable* var = 0;
+				if (!get_variable_scratch(_scratch, _variables, name.begin, name.end, &var))
+					throw_error_oom();
 
 				if (!var)
 					throw_error("Unknown variable: variable set does not contain the given name");

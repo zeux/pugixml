@@ -293,7 +293,7 @@ TEST(xpath_variables_long_name_out_of_memory)
 
 		CHECK_FORCE_FAIL("Expected exception");
 	}
-	catch (const xpath_exception&)
+	catch (const std::bad_alloc&)
 	{
 	}
 #endif
