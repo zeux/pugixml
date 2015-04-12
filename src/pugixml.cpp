@@ -557,11 +557,11 @@ PUGI__NS_BEGIN
 		xml_extra_buffer* extra_buffers;
 	};
 
-	inline xml_allocator& get_allocator(const xml_node_struct* node)
+	template <typename Object> inline xml_allocator& get_allocator(const Object* object)
 	{
-		assert(node);
+		assert(object);
 
-		return *reinterpret_cast<xml_memory_page*>(node->header & xml_memory_page_pointer_mask)->allocator;
+		return *reinterpret_cast<xml_memory_page*>(object->header & xml_memory_page_pointer_mask)->allocator;
 	}
 
 	template <typename Object> inline xml_document_struct& get_document(const Object* object)
@@ -3824,6 +3824,15 @@ PUGI__NS_BEGIN
 		}
 	}
 
+	PUGI__FN void node_copy_attribute(xml_attribute_struct* da, xml_attribute_struct* sa)
+	{
+		xml_allocator& alloc = get_allocator(da);
+		xml_allocator* shared_alloc = (&alloc == &get_allocator(sa)) ? &alloc : 0;
+
+		node_copy_string(da->name, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
+		node_copy_string(da->value, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+	}
+
 	inline bool is_text_node(xml_node_struct* node)
 	{
 		xml_node_type type = PUGI__NODETYPE(node);
@@ -4986,41 +4995,59 @@ namespace pugi
 	PUGI__FN xml_attribute xml_node::append_copy(const xml_attribute& proto)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
-		xml_attribute result = append_attribute(proto.name());
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::append_attribute(a._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_attribute xml_node::prepend_copy(const xml_attribute& proto)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
-		xml_attribute result = prepend_attribute(proto.name());
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::prepend_attribute(a._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_attribute xml_node::insert_copy_after(const xml_attribute& proto, const xml_attribute& attr)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
+		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 
-		xml_attribute result = insert_attribute_after(proto.name(), attr);
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::insert_attribute_after(a._attr, attr._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_attribute xml_node::insert_copy_before(const xml_attribute& proto, const xml_attribute& attr)
 	{
 		if (!proto) return xml_attribute();
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
+		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 
-		xml_attribute result = insert_attribute_before(proto.name(), attr);
-		result.set_value(proto.value());
+		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		if (!a) return xml_attribute();
 
-		return result;
+		impl::insert_attribute_before(a._attr, attr._attr, _root);
+		impl::node_copy_attribute(a._attr, proto._attr);
+
+		return a;
 	}
 
 	PUGI__FN xml_node xml_node::append_child(xml_node_type type_)
