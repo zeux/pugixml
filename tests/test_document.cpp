@@ -110,7 +110,7 @@ TEST(document_load_stream_error)
 	
 	std::istringstream iss("<node/>");
 	test_runner::_memory_fail_threshold = 1;
-	CHECK(doc.load(iss).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.load(iss).status == status_out_of_memory));
 }
 
 TEST(document_load_stream_empty)
@@ -237,7 +237,7 @@ TEST(document_load_stream_nonseekable_out_of_memory)
     test_runner::_memory_fail_threshold = 1;
 
     pugi::xml_document doc;
-    CHECK(doc.load(in).status == status_out_of_memory);
+    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
 TEST(document_load_stream_nonseekable_out_of_memory_large)
@@ -253,7 +253,7 @@ TEST(document_load_stream_nonseekable_out_of_memory_large)
     test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
 
     pugi::xml_document doc;
-    CHECK(doc.load(in).status == status_out_of_memory);
+    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 #endif
 
@@ -302,7 +302,7 @@ TEST(document_load_file_error)
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
 
 	test_runner::_memory_fail_threshold = 1;
-	CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
 }
 
 TEST(document_load_file_error_previous)
@@ -339,7 +339,9 @@ TEST(document_load_file_wide_out_of_memory)
 
 	pugi::xml_document doc;
 
-	pugi::xml_parse_result result = doc.load_file(L"tests/data/small.xml");
+	pugi::xml_parse_result result;
+	result.status = status_out_of_memory;
+	CHECK_ALLOC_FAIL(result = doc.load_file(L"tests/data/small.xml"));
 
 	CHECK(result.status == status_out_of_memory || result.status == status_file_not_found);
 }
@@ -1320,7 +1322,7 @@ TEST(document_convert_out_of_memory)
 	for (unsigned int src = 0; src < sizeof(files) / sizeof(files[0]); ++src)
 	{
 		xml_document doc;
-		CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default, files[src].encoding).status == status_out_of_memory);
+		CHECK_ALLOC_FAIL(CHECK(doc.load_buffer(files[src].data, files[src].size, parse_default, files[src].encoding).status == status_out_of_memory));
 	}
 
 	// cleanup

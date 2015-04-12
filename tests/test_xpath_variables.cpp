@@ -177,7 +177,8 @@ TEST(xpath_variables_set_out_of_memory)
 
 	xpath_variable_set set;
 
-	xpath_variable* var = set.add(STR("target"), xpath_type_number);
+	xpath_variable* var = 0;
+	CHECK_ALLOC_FAIL(var = set.add(STR("target"), xpath_type_number));
 	CHECK(!var);
 }
 
@@ -190,7 +191,7 @@ TEST(xpath_variables_out_of_memory)
 	xpath_variable* var = set.add(STR("target"), xpath_type_string);
 	CHECK(var);
 
-	CHECK(!var->set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")));
+	CHECK_ALLOC_FAIL(CHECK(!var->set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))));
 }
 
 TEST_XML(xpath_variables_evaluate, "<node/>")
@@ -283,20 +284,7 @@ TEST(xpath_variables_long_name_out_of_memory)
 
 	test_runner::_memory_fail_threshold = 4096 + 64 + 52 * sizeof(char_t);
 
-#ifdef PUGIXML_NO_EXCEPTIONS
-	xpath_query q(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set);
-	CHECK(!q);
-#else
-	try
-	{
-		xpath_query q(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set);
-
-		CHECK_FORCE_FAIL("Expected exception");
-	}
-	catch (const std::bad_alloc&)
-	{
-	}
-#endif
+	CHECK_ALLOC_FAIL(CHECK(!xpath_query(STR("$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), &set)));
 }
 
 TEST_XML(xpath_variables_select, "<node attr='1'/><node attr='2'/>")

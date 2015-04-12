@@ -858,10 +858,10 @@ TEST(dom_string_out_of_memory)
 	// no value => long value
 	test_runner::_memory_fail_threshold = 32;
 
-	CHECK(!node.set_name(string));
-	CHECK(!text.set_value(string));
-	CHECK(!attr.set_name(string));
-	CHECK(!attr.set_value(string));
+	CHECK_ALLOC_FAIL(CHECK(!node.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!text.set_value(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_value(string)));
 
 	// set some names/values
 	test_runner::_memory_fail_threshold = 0;
@@ -873,10 +873,10 @@ TEST(dom_string_out_of_memory)
 	// some value => long value
 	test_runner::_memory_fail_threshold = 32;
 
-	CHECK(!node.set_name(string));
-	CHECK(!text.set_value(string));
-	CHECK(!attr.set_name(string));
-	CHECK(!attr.set_value(string));
+	CHECK_ALLOC_FAIL(CHECK(!node.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!text.set_value(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_name(string)));
+	CHECK_ALLOC_FAIL(CHECK(!attr.set_value(string)));
 
 	// check that original state was preserved
 	test_runner::_memory_fail_threshold = 0;
@@ -897,30 +897,27 @@ TEST(dom_node_out_of_memory)
 	xml_attribute a = n.append_attribute(STR("a"));
 	CHECK(a);
 
-	while (n.append_child(node_comment) || n.append_attribute(STR("b")))
-	{
-		// nop
-	}
+	CHECK_ALLOC_FAIL(while (n.append_child(node_comment) || n.append_attribute(STR("b"))) { /* nop */ });
 
 	// verify all node modification operations
-	CHECK(!n.append_child());
-	CHECK(!n.prepend_child());
-	CHECK(!n.insert_child_after(node_element, n.first_child()));
-	CHECK(!n.insert_child_before(node_element, n.first_child()));
-	CHECK(!n.append_attribute(STR("")));
-	CHECK(!n.prepend_attribute(STR("")));
-	CHECK(!n.insert_attribute_after(STR(""), a));
-	CHECK(!n.insert_attribute_before(STR(""), a));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_child()));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_child()));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_child_after(node_element, n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_child_before(node_element, n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_attribute(STR(""))));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_attribute(STR(""))));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_attribute_after(STR(""), a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_attribute_before(STR(""), a)));
 
 	// verify node copy operations
-	CHECK(!n.append_copy(n.first_child()));
-	CHECK(!n.prepend_copy(n.first_child()));
-	CHECK(!n.insert_copy_after(n.first_child(), n.first_child()));
-	CHECK(!n.insert_copy_before(n.first_child(), n.first_child()));
-	CHECK(!n.append_copy(a));
-	CHECK(!n.prepend_copy(a));
-	CHECK(!n.insert_copy_after(a, a));
-	CHECK(!n.insert_copy_before(a, a));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_copy(n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_copy(n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_after(n.first_child(), n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_before(n.first_child(), n.first_child())));
+	CHECK_ALLOC_FAIL(CHECK(!n.append_copy(a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.prepend_copy(a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_after(a, a)));
+	CHECK_ALLOC_FAIL(CHECK(!n.insert_copy_before(a, a)));
 }
 
 TEST(dom_node_memory_limit)
@@ -1085,7 +1082,7 @@ TEST(dom_node_append_buffer_out_of_memory_extra)
 	test_runner::_memory_fail_threshold = 1;
 
 	xml_document doc;
-	CHECK(doc.append_buffer("<n/>", 4).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer("<n/>", 4).status == status_out_of_memory));
 	CHECK(!doc.first_child());
 }
 
@@ -1096,7 +1093,7 @@ TEST(dom_node_append_buffer_out_of_memory_buffer)
 	char data[128] = {0};
 
 	xml_document doc;
-	CHECK(doc.append_buffer(data, sizeof(data)).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer(data, sizeof(data)).status == status_out_of_memory));
 	CHECK(!doc.first_child());
 }
 
@@ -1111,7 +1108,7 @@ TEST(dom_node_append_buffer_out_of_memory_nodes)
 	test_runner::_memory_fail_threshold = 32768 + 128 + data.length() * sizeof(char_t) + 32;
 
 	xml_document doc;
-	CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(char_t), parse_fragment).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(char_t), parse_fragment).status == status_out_of_memory));
 
 	unsigned int valid = 0;
 
@@ -1132,7 +1129,7 @@ TEST(dom_node_append_buffer_out_of_memory_name)
 
 	xml_document doc;
 	CHECK(doc.append_child(STR("root")));
-	CHECK(doc.first_child().append_buffer(data, sizeof(data)).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.first_child().append_buffer(data, sizeof(data)).status == status_out_of_memory));
 	CHECK_STRING(doc.first_child().name(), STR("root"));
 }
 
@@ -1441,8 +1438,7 @@ TEST_XML(dom_node_copy_out_of_memory_node, "<node><child1 /><child2 /><child3>te
 	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
 
 	xml_document copy;
-	for (int i = 0; i < 1000; ++i)
-		copy.append_copy(doc.first_child());
+	CHECK_ALLOC_FAIL(for (int i = 0; i < 1000; ++i) copy.append_copy(doc.first_child()));
 }
 
 TEST_XML(dom_node_copy_out_of_memory_attr, "<node attr1='' attr2='' attr3='' attr4='' attr5='' attr6='' attr7='' attr8='' attr9='' attr10='' attr11='' attr12='' attr13='' attr14='' attr15='' />")
@@ -1450,8 +1446,7 @@ TEST_XML(dom_node_copy_out_of_memory_attr, "<node attr1='' attr2='' attr3='' att
 	test_runner::_memory_fail_threshold = 32768 * 2 + 4096;
 
 	xml_document copy;
-	for (int i = 0; i < 1000; ++i)
-		copy.append_copy(doc.first_child());
+	CHECK_ALLOC_FAIL(for (int i = 0; i < 1000; ++i) copy.append_copy(doc.first_child()));
 }
 
 TEST_XML(dom_node_remove_deallocate, "<node attr='value'>text</node>")

@@ -873,7 +873,7 @@ TEST(parse_out_of_memory)
 	test_runner::_memory_fail_threshold = 256;
 
 	xml_document doc;
-	CHECK(doc.load_string(STR("<foo a='1'/>")).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.load_string(STR("<foo a='1'/>")).status == status_out_of_memory));
 	CHECK(!doc.first_child());
 }
 
@@ -893,7 +893,7 @@ TEST(parse_out_of_memory_halfway_node)
 	test_runner::_memory_fail_threshold = 65536;
 
 	xml_document doc;
-	CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory));
 	CHECK_NODE(doc.first_child(), STR("<n />"));
 }
 
@@ -920,7 +920,7 @@ TEST(parse_out_of_memory_halfway_attr)
 	test_runner::_memory_fail_threshold = 65536;
 
 	xml_document doc;
-	CHECK(doc.load_buffer_inplace(text, count * 5 + 4).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 5 + 4).status == status_out_of_memory));
 	CHECK_STRING(doc.first_child().name(), STR("n"));
 	CHECK_STRING(doc.first_child().first_attribute().name(), STR("a"));
 	CHECK_STRING(doc.first_child().last_attribute().name(), STR("a"));
@@ -931,7 +931,7 @@ TEST(parse_out_of_memory_conversion)
 	test_runner::_memory_fail_threshold = 256;
 
 	xml_document doc;
-	CHECK(doc.load_buffer("<foo\x90/>", 7, parse_default, encoding_latin1).status == status_out_of_memory);
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer("<foo\x90/>", 7, parse_default, encoding_latin1).status == status_out_of_memory));
 	CHECK(!doc.first_child());
 }
 
@@ -950,7 +950,7 @@ TEST(parse_error_offset)
 	CHECK_OFFSET("<node/>", parse_default, status_ok, 0);
 
 	test_runner::_memory_fail_threshold = 1;
-	CHECK_OFFSET("<node/>", parse_default, status_out_of_memory, 0);
+	CHECK_ALLOC_FAIL(CHECK_OFFSET("<node/>", parse_default, status_out_of_memory, 0));
 	test_runner::_memory_fail_threshold = 0;
 
 	CHECK_OFFSET("<3d/>", parse_default, status_unrecognized_tag, 1);

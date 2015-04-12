@@ -142,6 +142,12 @@ struct dummy_fixture {};
 #define CHECK_XPATH_FAIL(query) CHECK_XPATH_FAIL_VAR(query, 0)
 #endif
 
+#ifdef PUGIXML_NO_EXCEPTIONS
+#define CHECK_ALLOC_FAIL(code) CHECK(!test_runner::_memory_fail_triggered); code; CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false
+#else
+#define CHECK_ALLOC_FAIL(code) CHECK(!test_runner::_memory_fail_triggered); try { code; } catch (std::bad_alloc&) {} CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false
+#endif
+
 #define STR(text) PUGIXML_TEXT(text)
 
 #ifdef __DMC__
