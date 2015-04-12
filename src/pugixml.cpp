@@ -1691,9 +1691,6 @@ PUGI__NS_BEGIN
 	
 		assert(begin + size == end);
 		(void)!end;
-
-		// zero-terminate
-		buffer[size] = 0;
 	}
 	
 #ifndef PUGIXML_NO_STL
@@ -4294,6 +4291,9 @@ PUGI__NS_BEGIN
 
 		// second pass: convert to utf8
 		as_utf8_end(result, size, str, length);
+
+		// zero-terminate
+		result[size] = 0;
 
 		return result;
 	}
