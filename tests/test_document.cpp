@@ -302,9 +302,31 @@ TEST(document_load_file_error)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
+}
 
+TEST(document_load_file_out_of_memory)
+{
 	test_runner::_memory_fail_threshold = 1;
+
+	pugi::xml_document doc;
 	CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
+}
+
+TEST(document_load_file_out_of_memory_file_leak)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	pugi::xml_document doc;
+
+	for (int i = 0; i < 256; ++i)
+	{
+		CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
+	}
+
+	test_runner::_memory_fail_threshold = 0;
+
+	CHECK(doc.load_file("tests/data/small.xml"));
+	CHECK_NODE(doc, STR("<node />"));
 }
 
 TEST(document_load_file_error_previous)
