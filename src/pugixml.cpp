@@ -5602,7 +5602,10 @@ namespace pugi
 		if (!proto) return xml_attribute();
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::append_attribute(a._attr, _root);
@@ -5616,7 +5619,10 @@ namespace pugi
 		if (!proto) return xml_attribute();
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::prepend_attribute(a._attr, _root);
@@ -5631,7 +5637,10 @@ namespace pugi
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_after(a._attr, attr._attr, _root);
@@ -5646,7 +5655,10 @@ namespace pugi
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
 
-		xml_attribute a(impl::allocate_attribute(impl::get_allocator(_root)));
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
 		if (!a) return xml_attribute();
 
 		impl::insert_attribute_before(a._attr, attr._attr, _root);
@@ -6010,7 +6022,7 @@ namespace pugi
 		for (xml_node_struct* i = _root; i; i = i->parent)
 		{
 			offset += (i != _root);
-			offset += i->name ? impl::strlength(i->name) : 0;
+			offset += (impl::has_name(i) && i->contents) ? impl::strlength(i->contents) : 0;
 		}
 
 		string_t result;
@@ -6021,12 +6033,12 @@ namespace pugi
 			if (j != _root)
 				result[--offset] = delimiter;
 
-			if (j->name && *j->name)
+			if (impl::has_name(j) && j->contents && *j->contents)
 			{
-				size_t length = impl::strlength(j->name);
+				size_t length = impl::strlength(j->contents);
 
 				offset -= length;
-				memcpy(&result[offset], j->name, length * sizeof(char_t));
+				memcpy(&result[offset], j->contents, length * sizeof(char_t));
 			}
 		}
 

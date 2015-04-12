@@ -1115,6 +1115,11 @@ TEST(dom_node_append_buffer_out_of_memory_nodes)
 
 	test_runner::_memory_fail_threshold = 32768 + 128 + data.length() * sizeof(char_t) + 32;
 
+#ifdef PUGIXML_COMPACT
+	// ... and some space for hash table
+	test_runner::_memory_fail_threshold += 2048;
+#endif
+
 	xml_document doc;
 	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(char_t), parse_fragment).status == status_out_of_memory));
 
@@ -1131,9 +1136,9 @@ TEST(dom_node_append_buffer_out_of_memory_nodes)
 
 TEST(dom_node_append_buffer_out_of_memory_name)
 {
-	test_runner::_memory_fail_threshold = 32768 + 128;
+	test_runner::_memory_fail_threshold = 32768 + 4096;
 
-	char data[128] = {0};
+	char data[4096] = {0};
 
 	xml_document doc;
 	CHECK(doc.append_child(STR("root")));
@@ -1458,6 +1463,11 @@ TEST(dom_node_copy_attribute_copyless)
 
 	// the document is parsed in-place so there should only be 1 page worth of allocations
 	test_runner::_memory_fail_threshold = 32768 + 128;
+
+#ifdef PUGIXML_COMPACT
+	// ... and some space for hash table
+	test_runner::_memory_fail_threshold += 2048;
+#endif
 
 	xml_document doc;
 	CHECK(doc.load_buffer_inplace(&datacopy[0], datacopy.size() * sizeof(char_t), parse_full));
