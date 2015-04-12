@@ -4056,6 +4056,7 @@ PUGI__NS_BEGIN
 		return status_ok;
 	}
 
+	// This function assumes that buffer has extra sizeof(char_t) writable bytes after size
 	PUGI__FN size_t zero_terminate_buffer(void* buffer, size_t size, xml_encoding encoding) 
 	{
 		// We only need to zero-terminate if encoding conversion does not do it for us
@@ -5328,19 +5329,34 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	PUGI__FN string_t xml_node::path(char_t delimiter) const
 	{
-		xml_node cursor = *this; // Make a copy.
-		
-		string_t result = cursor.name();
+		if (!_root) return string_t();
 
-		while (cursor.parent())
+		size_t offset = 0;
+
+		for (xml_node_struct* i = _root; i; i = i->parent)
 		{
-			cursor = cursor.parent();
-			
-			string_t temp = cursor.name();
-			temp += delimiter;
-			temp += result;
-			result.swap(temp);
+			offset += (i != _root);
+			offset += i->name ? impl::strlength(i->name) : 0;
 		}
+
+		string_t result;
+		result.resize(offset);
+
+		for (xml_node_struct* j = _root; j; j = j->parent)
+		{
+			if (j != _root)
+				result[--offset] = delimiter;
+
+			if (j->name && *j->name)
+			{
+				size_t length = impl::strlength(j->name);
+
+				offset -= length;
+				memcpy(&result[offset], j->name, length * sizeof(char_t));
+			}
+		}
+
+		assert(offset == 0);
 
 		return result;
 	}
@@ -6188,12 +6204,14 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = fopen(path_, (flags & format_save_file_text) ? "w" : "wb");
+
 		return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		FILE* file = impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb");
+
 		return impl::save_file_impl(*this, file, indent, flags, encoding);
 	}
 
