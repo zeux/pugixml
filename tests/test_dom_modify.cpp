@@ -905,7 +905,8 @@ TEST(dom_node_out_of_memory)
 	xml_attribute a = n.append_attribute(STR("a"));
 	CHECK(a);
 
-	CHECK_ALLOC_FAIL(while (n.append_child(node_comment) || n.append_attribute(STR("b"))) { /* nop */ });
+	CHECK_ALLOC_FAIL(while (n.append_child(node_comment)) { /* nop */ });
+	CHECK_ALLOC_FAIL(while (n.append_attribute(STR("b"))) { /* nop */ });
 
 	// verify all node modification operations
 	CHECK_ALLOC_FAIL(CHECK(!n.append_child()));

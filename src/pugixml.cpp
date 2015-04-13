@@ -5306,7 +5306,7 @@ namespace pugi
 
 		name_sentry sentry = { _root, _root->name };
 
-		_root->name = 0;
+		sentry.node->name = 0;
 
 		return impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
 	}
