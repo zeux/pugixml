@@ -3480,13 +3480,26 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
+	PUGI__FN void node_output_attributes(xml_buffered_writer &writer, xml_node_struct *node, const char_t *indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
+		bool eachAttributeOnNewLine = PUGI__NODETYPE(node) != node_declaration
+			&& (flags & format_indent)
+			&& (flags & format_each_attribute_on_new_line)
+			&& (flags & format_raw) == 0;
+
 		for (xml_attribute_struct* a = node->first_attribute; a; a = a->next_attribute)
 		{
-			writer.write(' ');
+			if (eachAttributeOnNewLine)
+			{
+				writer.write('\n');
+				text_output_indent(writer, indent, indent_length, depth + 1);
+			}
+			else
+			{
+				writer.write(' ');
+			}
 			writer.write_string(a->name ? a->name : default_name);
 			writer.write('=', '"');
 
@@ -3497,7 +3510,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
+	PUGI__FN bool node_output_start(xml_buffered_writer &writer, xml_node_struct *node, const char_t *indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 		const char_t* name = node->name ? node->name : default_name;
@@ -3506,18 +3519,16 @@ PUGI__NS_BEGIN
 		writer.write_string(name);
 
 		if (node->first_attribute)
-			node_output_attributes(writer, node, flags);
+			node_output_attributes(writer, node, indent, indent_length, flags, depth);
 
 		if (!node->first_child)
 		{
 			writer.write(' ', '/', '>');
-
 			return false;
 		}
 		else
 		{
 			writer.write('>');
-
 			return true;
 		}
 	}
@@ -3532,7 +3543,7 @@ PUGI__NS_BEGIN
 		writer.write('>');
 	}
 
-	PUGI__FN void node_output_simple(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
+	PUGI__FN void node_output_simple(xml_buffered_writer &writer, xml_node_struct *node, const char_t *indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
@@ -3566,7 +3577,7 @@ PUGI__NS_BEGIN
 			case node_declaration:
 				writer.write('<', '?');
 				writer.write_string(node->name ? node->name : default_name);
-				node_output_attributes(writer, node, flags);
+				node_output_attributes(writer, node, indent, indent_length, flags, depth);
 				writer.write('?', '>');
 				break;
 
@@ -3608,7 +3619,7 @@ PUGI__NS_BEGIN
 			// begin writing current node
 			if (PUGI__NODETYPE(node) == node_pcdata || PUGI__NODETYPE(node) == node_cdata)
 			{
-				node_output_simple(writer, node, flags);
+				node_output_simple(writer, node, indent, indent_length, flags, depth);
 
 				indent_flags = 0;
 			}
@@ -3624,7 +3635,7 @@ PUGI__NS_BEGIN
 				{
 					indent_flags = indent_newline | indent_indent;
 
-					if (node_output_start(writer, node, flags))
+					if (node_output_start(writer, node, indent, indent_length, flags, depth))
 					{
 						node = node->first_child;
 						depth++;
@@ -3643,7 +3654,7 @@ PUGI__NS_BEGIN
 				}
 				else
 				{
-					node_output_simple(writer, node, flags);
+					node_output_simple(writer, node, indent, indent_length, flags, depth);
 
 					indent_flags = indent_newline | indent_indent;
 				}
