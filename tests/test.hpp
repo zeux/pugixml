@@ -143,9 +143,9 @@ struct dummy_fixture {};
 #endif
 
 #ifdef PUGIXML_NO_EXCEPTIONS
-#define CHECK_ALLOC_FAIL(code) CHECK(!test_runner::_memory_fail_triggered); code; CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false
+#define CHECK_ALLOC_FAIL(code) do { CHECK(!test_runner::_memory_fail_triggered); code; CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false; } while (test_runner::_memory_fail_triggered)
 #else
-#define CHECK_ALLOC_FAIL(code) CHECK(!test_runner::_memory_fail_triggered); try { code; } catch (std::bad_alloc&) {} CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false
+#define CHECK_ALLOC_FAIL(code) do { CHECK(!test_runner::_memory_fail_triggered); try { code; } catch (std::bad_alloc&) {} CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false; } while (test_runner::_memory_fail_triggered)
 #endif
 
 #define STR(text) PUGIXML_TEXT(text)
