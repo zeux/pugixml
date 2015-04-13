@@ -233,25 +233,25 @@ PUGI__NS_BEGIN
 PUGI__NS_END
 
 #if !defined(PUGIXML_NO_STL) || !defined(PUGIXML_NO_XPATH)
-// auto_ptr-like buffer holder for exception recovery
+// auto_ptr-like object for exception recovery
 PUGI__NS_BEGIN
-	struct buffer_holder
+	template <typename T, typename D = void(*)(T*)> struct auto_deleter
 	{
-		void* data;
-		void (*deleter)(void*);
+		T* data;
+		D deleter;
 
-		buffer_holder(void* data_, void (*deleter_)(void*)): data(data_), deleter(deleter_)
+		auto_deleter(T* data_, D deleter_): data(data_), deleter(deleter_)
 		{
 		}
 
-		~buffer_holder()
+		~auto_deleter()
 		{
 			if (data) deleter(data);
 		}
 
-		void* release()
+		T* release()
 		{
-			void* result = data;
+			T* result = data;
 			data = 0;
 			return result;
 		}
@@ -2856,11 +2856,17 @@ PUGI__NS_BEGIN
 	struct xml_parser
 	{
 		xml_allocator alloc;
+		xml_allocator* alloc_state;
 		char_t* error_offset;
 		xml_parse_status error_status;
 		
-		xml_parser(const xml_allocator& alloc_): alloc(alloc_), error_offset(0), error_status(status_ok)
+		xml_parser(xml_allocator* alloc_): alloc(*alloc_), alloc_state(alloc_), error_offset(0), error_status(status_ok)
 		{
+		}
+
+		~xml_parser()
+		{
+			*alloc_state = alloc;
 		}
 
 		// DOCTYPE consists of nested sections of the following possible types:
@@ -3438,9 +3444,6 @@ PUGI__NS_BEGIN
 
 		static xml_parse_result parse(char_t* buffer, size_t length, xml_document_struct* xmldoc, xml_node_struct* root, unsigned int optmsk)
 		{
-			// allocator object is a part of document object
-			xml_allocator& alloc_ = *static_cast<xml_allocator*>(xmldoc);
-
 			// early-out for empty documents
 			if (length == 0)
 				return make_parse_result(PUGI__OPTSET(parse_fragment) ? status_ok : status_no_document_element);
@@ -3449,7 +3452,7 @@ PUGI__NS_BEGIN
 			xml_node_struct* last_root_child = root->first_child ? root->first_child->prev_sibling_c + 0 : 0;
 	
 			// create parser on stack
-			xml_parser parser(alloc_);
+			xml_parser parser(static_cast<xml_allocator*>(xmldoc));
 
 			// save last character and make buffer zero-terminated (speeds up parsing)
 			char_t endch = buffer[length - 1];
@@ -3460,9 +3463,6 @@ PUGI__NS_BEGIN
 
 			// perform actual parsing
 			parser.parse_tree(buffer_data, root, optmsk, endch);
-
-			// update allocator state
-			alloc_ = parser.alloc;
 
 			xml_parse_result result = make_parse_result(parser.error_status, parser.error_offset ? parser.error_offset - buffer : 0);
 			assert(result.offset >= 0 && static_cast<size_t>(result.offset) <= length);
@@ -4661,27 +4661,16 @@ PUGI__NS_BEGIN
 		// get file size (can result in I/O errors)
 		size_t size = 0;
 		xml_parse_status size_status = get_file_size(file, size);
-
-		if (size_status != status_ok)
-		{
-			fclose(file);
-			return make_parse_result(size_status);
-		}
+		if (size_status != status_ok) return make_parse_result(size_status);
 		
 		size_t max_suffix_size = sizeof(char_t);
 
 		// allocate buffer for the whole file
 		char* contents = static_cast<char*>(xml_memory::allocate(size + max_suffix_size));
-
-		if (!contents)
-		{
-			fclose(file);
-			return make_parse_result(status_out_of_memory);
-		}
+		if (!contents) return make_parse_result(status_out_of_memory);
 
 		// read file in memory
 		size_t read_size = fread(contents, 1, size, file);
-		fclose(file);
 
 		if (read_size != size)
 		{
@@ -4704,10 +4693,8 @@ PUGI__NS_BEGIN
 			return new (memory) xml_stream_chunk();
 		}
 
-		static void destroy(void* ptr)
+		static void destroy(xml_stream_chunk* chunk)
 		{
-			xml_stream_chunk* chunk = static_cast<xml_stream_chunk*>(ptr);
-
 			// free chunk chain
 			while (chunk)
 			{
@@ -4731,7 +4718,7 @@ PUGI__NS_BEGIN
 
 	template <typename T> PUGI__FN xml_parse_status load_stream_data_noseek(std::basic_istream<T>& stream, void** out_buffer, size_t* out_size)
 	{
-		buffer_holder chunks(0, xml_stream_chunk<T>::destroy);
+		auto_deleter<xml_stream_chunk<T> > chunks(0, xml_stream_chunk<T>::destroy);
 
 		// read file to a chunk list
 		size_t total = 0;
@@ -4767,7 +4754,7 @@ PUGI__NS_BEGIN
 
 		char* write = buffer;
 
-		for (xml_stream_chunk<T>* chunk = static_cast<xml_stream_chunk<T>*>(chunks.data); chunk; chunk = chunk->next)
+		for (xml_stream_chunk<T>* chunk = chunks.data; chunk; chunk = chunk->next)
 		{
 			assert(write + chunk->size <= buffer + total);
 			memcpy(write, chunk->data, chunk->size);
@@ -4801,7 +4788,7 @@ PUGI__NS_BEGIN
 		size_t max_suffix_size = sizeof(char_t);
 
 		// read stream data into memory (guard against stream exceptions with buffer holder)
-		buffer_holder buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);
+		auto_deleter<void> buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);
 		if (!buffer.data) return status_out_of_memory;
 
 		stream.read(static_cast<T*>(buffer.data), static_cast<std::streamsize>(read_length));
@@ -4899,11 +4886,7 @@ PUGI__NS_BEGIN
 		xml_writer_file writer(file);
 		doc.save(writer, indent, flags, encoding);
 
-		int result = ferror(file);
-
-		fclose(file);
-
-		return result == 0;
+		return ferror(file) == 0;
 	}
 
 	PUGI__FN xml_parse_result load_buffer_impl(xml_document_struct* doc, xml_node_struct* root, void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own, char_t** out_buffer)
@@ -4923,6 +4906,9 @@ PUGI__NS_BEGIN
 		// delete original buffer if we performed a conversion
 		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
 
+		// grab onto buffer if it's our buffer, user is responsible for deallocating contents himself
+		if (own || buffer != contents) *out_buffer = buffer;
+
 		// store buffer for offset_debug
 		doc->buffer = buffer;
 
@@ -4931,9 +4917,6 @@ PUGI__NS_BEGIN
 
 		// remember encoding
 		res.encoding = buffer_encoding;
-
-		// grab onto buffer if it's our buffer, user is responsible for deallocating contents himself
-		if (own || buffer != contents) *out_buffer = buffer;
 
 		return res;
 	}
@@ -5966,23 +5949,25 @@ namespace pugi
 
 		if (!extra) return impl::make_parse_result(status_out_of_memory);
 
-		// save name; name of the root has to be NULL before parsing - otherwise closing node mismatches will not be detected at the top level
-		char_t* rootname = _root->contents;
-		_root->contents = 0;
-
-		// parse
-		char_t* buffer = 0;
-		xml_parse_result res = impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &buffer);
-
-		// restore name
-		_root->contents = rootname;
-
 		// add extra buffer to the list
-		extra->buffer = buffer;
+		extra->buffer = 0;
 		extra->next = doc->extra_buffers;
 		doc->extra_buffers = extra;
 
-		return res;
+		// name of the root has to be NULL before parsing - otherwise closing node mismatches will not be detected at the top level
+		struct name_sentry
+		{
+			xml_node_struct* node;
+			char_t* name;
+
+			~name_sentry() { node->contents = name; }
+		};
+
+		name_sentry sentry = { _root, _root->contents };
+
+		sentry.node->contents = 0;
+
+		return impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
 	}
 
 	PUGI__FN xml_node xml_node::find_child_by_attribute(const char_t* name_, const char_t* attr_name, const char_t* attr_value) const
@@ -6800,18 +6785,18 @@ namespace pugi
 	{
 		reset();
 
-		FILE* file = fopen(path_, "rb");
+		impl::auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, "rb"), fclose);
 
-		return impl::load_file_impl(*this, file, options, encoding);
+		return impl::load_file_impl(*this, file.data, options, encoding);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load_file(const wchar_t* path_, unsigned int options, xml_encoding encoding)
 	{
 		reset();
 
-		FILE* file = impl::open_file_wide(path_, L"rb");
+		impl::auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, L"rb"), fclose);
 
-		return impl::load_file_impl(*this, file, options, encoding);
+		return impl::load_file_impl(*this, file.data, options, encoding);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, xml_encoding encoding)
@@ -6879,16 +6864,16 @@ namespace pugi
 
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		FILE* file = fopen(path_, (flags & format_save_file_text) ? "w" : "wb");
+		impl::auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), fclose);
 
-		return impl::save_file_impl(*this, file, indent, flags, encoding);
+		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		FILE* file = impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb");
+		impl::auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), fclose);
 
-		return impl::save_file_impl(*this, file, indent, flags, encoding);
+		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
 
 	PUGI__FN xml_node xml_document::document_element() const
@@ -11544,15 +11529,13 @@ PUGI__NS_BEGIN
 			return new (memory) xpath_query_impl();
 		}
 
-		static void destroy(void* ptr)
+		static void destroy(xpath_query_impl* impl)
 		{
-			if (!ptr) return;
-			
 			// free all allocated pages
-			static_cast<xpath_query_impl*>(ptr)->alloc.release();
+			impl->alloc.release();
 
 			// free allocator memory (with the first page)
-			xml_memory::deallocate(ptr);
+			xml_memory::deallocate(impl);
 		}
 
 		xpath_query_impl(): root(0), alloc(&block)
@@ -12011,7 +11994,7 @@ namespace pugi
 		}
 		else
 		{
-			impl::buffer_holder impl_holder(qimpl, impl::xpath_query_impl::destroy);
+			impl::auto_deleter<impl::xpath_query_impl> impl(qimpl, impl::xpath_query_impl::destroy);
 
 			qimpl->root = impl::xpath_parser::parse(query, variables, &qimpl->alloc, &_result);
 
@@ -12019,7 +12002,7 @@ namespace pugi
 			{
 				qimpl->root->optimize(&qimpl->alloc);
 
-				_impl = static_cast<impl::xpath_query_impl*>(impl_holder.release());
+				_impl = impl.release();
 				_result.error = 0;
 			}
 		}
@@ -12027,7 +12010,8 @@ namespace pugi
 
 	PUGI__FN xpath_query::~xpath_query()
 	{
-		impl::xpath_query_impl::destroy(_impl);
+		if (_impl)
+			impl::xpath_query_impl::destroy(static_cast<impl::xpath_query_impl*>(_impl));
 	}
 
 	PUGI__FN xpath_value_type xpath_query::return_type() const

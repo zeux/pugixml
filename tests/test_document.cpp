@@ -319,13 +319,26 @@ TEST(document_load_file_out_of_memory_file_leak)
 	pugi::xml_document doc;
 
 	for (int i = 0; i < 256; ++i)
-	{
 		CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
-	}
 
 	test_runner::_memory_fail_threshold = 0;
 
 	CHECK(doc.load_file("tests/data/small.xml"));
+	CHECK_NODE(doc, STR("<node />"));
+}
+
+TEST(document_load_file_wide_out_of_memory_file_leak)
+{
+	test_runner::_memory_fail_threshold = 256;
+
+	pugi::xml_document doc;
+
+	for (int i = 0; i < 256; ++i)
+		CHECK_ALLOC_FAIL(CHECK(doc.load_file(L"tests/data/small.xml").status == status_out_of_memory));
+
+	test_runner::_memory_fail_threshold = 0;
+
+	CHECK(doc.load_file(L"tests/data/small.xml"));
 	CHECK_NODE(doc, STR("<node />"));
 }
 
@@ -554,6 +567,26 @@ TEST_XML(document_save_file_wide_text, "<node/>")
 
 	CHECK(doc.save_file(wpath, STR(""), pugi::format_no_declaration));
     CHECK(test_file_contents(f.path, "<node />\n", 9));
+}
+
+TEST_XML(document_save_file_leak, "<node/>")
+{
+	temp_file f;
+
+	for (int i = 0; i < 256; ++i)
+		CHECK(doc.save_file(f.path));
+}
+
+TEST_XML(document_save_file_wide_leak, "<node/>")
+{
+	temp_file f;
+
+	// widen the path
+	wchar_t wpath[sizeof(f.path)];
+	std::copy(f.path, f.path + strlen(f.path) + 1, wpath + 0);
+
+	for (int i = 0; i < 256; ++i)
+		CHECK(doc.save_file(wpath));
 }
 
 TEST(document_load_buffer)

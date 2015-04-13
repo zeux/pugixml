@@ -935,6 +935,31 @@ TEST(parse_out_of_memory_conversion)
 	CHECK(!doc.first_child());
 }
 
+TEST(parse_out_of_memory_allocator_state_sync)
+{
+	const unsigned int count = 10000;
+	static char_t text[count * 4];
+
+	for (unsigned int i = 0; i < count; ++i)
+	{
+		text[4*i + 0] = '<';
+		text[4*i + 1] = 'n';
+		text[4*i + 2] = '/';
+		text[4*i + 3] = '>';
+	}
+
+	test_runner::_memory_fail_threshold = 65536;
+
+	xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory));
+	CHECK_NODE(doc.first_child(), STR("<n />"));
+
+	test_runner::_memory_fail_threshold = 0;
+
+	for (unsigned int i = 0; i < count; ++i)
+		CHECK(doc.append_child(STR("n")));
+}
+
 static bool test_offset(const char_t* contents, unsigned int options, pugi::xml_parse_status status, ptrdiff_t offset)
 {
 	xml_document doc;
