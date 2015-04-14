@@ -1,0 +1,4 @@
+version: "{build}"
+
+build_script:
+  - ps: .\tests\appveyor.ps1
