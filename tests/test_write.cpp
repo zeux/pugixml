@@ -21,19 +21,29 @@ TEST_XML(write_indent, "<node attr='1'><child><sub>text</sub></child></node>")
 	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\n\t<child>\n\t\t<sub>text</sub>\n\t</child>\n</node>\n"), STR("\t"), format_indent);
 }
 
-TEST_XML(write_indent_attribute, "<node attr='1' other='2'><child><sub>text</sub></child></node>")
+TEST_XML(write_indent_attributes, "<node attr='1' other='2'><child><sub>text</sub></child></node>")
 {
 	CHECK_NODE_EX(doc, STR("<node\n\tattr=\"1\"\n\tother=\"2\">\n\t<child>\n\t\t<sub>text</sub>\n\t</child>\n</node>\n"), STR("\t"), format_indent_attributes);
 }
 
-TEST_XML(write_indent_attribute_empty_tag, "<node attr='1' other='2' />")
+TEST_XML(write_indent_attributes_empty_element, "<node attr='1' other='2' />")
 {
 	CHECK_NODE_EX(doc, STR("<node\n\tattr=\"1\"\n\tother=\"2\" />\n"), STR("\t"), format_indent_attributes);
 }
 
-TEST_XML_FLAGS(write_indent_attribute_on_declaration, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><node attr='1' other='2' />", pugi::parse_full)
+TEST_XML_FLAGS(write_indent_attributes_declaration, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><node attr='1' other='2' />", parse_full)
 {
 	CHECK_NODE_EX(doc, STR("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<node\n\tattr=\"1\"\n\tother=\"2\" />\n"), STR("\t"), format_indent_attributes);
+}
+
+TEST_XML(write_indent_attributes_raw, "<node attr='1' other='2'><child><sub>text</sub></child></node>")
+{
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\" other=\"2\"><child><sub>text</sub></child></node>"), STR("\t"), format_indent_attributes | format_raw);
+}
+
+TEST_XML(write_indent_attributes_empty_indent, "<node attr='1' other='2'><child><sub>text</sub></child></node>")
+{
+	CHECK_NODE_EX(doc, STR("<node\nattr=\"1\"\nother=\"2\">\n<child>\n<sub>text</sub>\n</child>\n</node>\n"), STR(""), format_indent_attributes);
 }
 
 TEST_XML(write_pcdata, "<node attr='1'><child><sub/>text</child></node>")
