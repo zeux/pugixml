@@ -21,6 +21,21 @@ TEST_XML(write_indent, "<node attr='1'><child><sub>text</sub></child></node>")
 	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\n\t<child>\n\t\t<sub>text</sub>\n\t</child>\n</node>\n"), STR("\t"), format_indent);
 }
 
+TEST_XML(write_indent_attribute, "<node attr='1' other='2'><child><sub>text</sub></child></node>")
+{
+	CHECK_NODE_EX(doc, STR("<node\n\tattr=\"1\"\n\tother=\"2\">\n\t<child>\n\t\t<sub>text</sub>\n\t</child>\n</node>\n"), STR("\t"), format_indent_attributes);
+}
+
+TEST_XML(write_indent_attribute_empty_tag, "<node attr='1' other='2' />")
+{
+	CHECK_NODE_EX(doc, STR("<node\n\tattr=\"1\"\n\tother=\"2\" />\n"), STR("\t"), format_indent_attributes);
+}
+
+TEST_XML_FLAGS(write_indent_attribute_on_declaration, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><node attr='1' other='2' />", pugi::parse_full)
+{
+	CHECK_NODE_EX(doc, STR("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<node\n\tattr=\"1\"\n\tother=\"2\" />\n"), STR("\t"), format_indent_attributes);
+}
+
 TEST_XML(write_pcdata, "<node attr='1'><child><sub/>text</child></node>")
 {
 	CHECK_NODE_EX(doc, STR("<node attr=\"1\">\n\t<child>\n\t\t<sub />text</child>\n</node>\n"), STR("\t"), format_indent);
@@ -360,7 +375,7 @@ TEST(write_encoding_huge_invalid)
 TEST(write_unicode_escape)
 {
 	char s_utf8[] = "<\xE2\x82\xAC \xC2\xA2='\"\xF0\xA4\xAD\xA2&#x0a;\"'>&amp;\x14\xF0\xA4\xAD\xA2&lt;</\xE2\x82\xAC>";
-	
+
 	xml_document doc;
 	CHECK(doc.load_buffer(s_utf8, sizeof(s_utf8), parse_default, encoding_utf8));
 
