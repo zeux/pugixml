@@ -1,4 +1,4 @@
 version: "{build}"
 
 build_script:
-  - ps: .\tests\appveyor.ps1
+  - ps: .\tests\autotest-appveyor.ps1
