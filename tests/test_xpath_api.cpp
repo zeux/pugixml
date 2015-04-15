@@ -381,15 +381,20 @@ TEST_XML(xpath_api_node_set_assign_out_of_memory_preserve, "<node><a/><b/></node
 {
 	xpath_node_set ns = doc.select_nodes(STR("node/*"));
 	CHECK(ns.size() == 2);
+	CHECK(ns.type() == xpath_node_set::type_sorted);
 
 	xpath_node_set nsall = doc.select_nodes(STR("//*"));
+	nsall.sort(true);
 	CHECK(nsall.size() == 3);
+	CHECK(nsall.type() == xpath_node_set::type_sorted_reverse);
 
 	test_runner::_memory_fail_threshold = 1;
 
 	CHECK_ALLOC_FAIL(ns = nsall);
 
-	CHECK(ns.size() == 2 && ns[0] == doc.child(STR("node")).child(STR("a")) && ns[1] == doc.child(STR("node")).child(STR("b")));
+	CHECK(ns.size() == 2);
+	CHECK(ns.type() == xpath_node_set::type_sorted);
+	CHECK(ns[0] == doc.child(STR("node")).child(STR("a")) && ns[1] == doc.child(STR("node")).child(STR("b")));
 }
 
 TEST_XML(xpath_api_deprecated_select_single_node, "<node><head/><foo id='1'/><foo/><tail/></node>")

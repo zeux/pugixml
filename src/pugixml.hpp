@@ -1286,7 +1286,7 @@ namespace pugi
 		xpath_node* _begin;
 		xpath_node* _end;
 
-		void _assign(const_iterator begin, const_iterator end);
+		void _assign(const_iterator begin, const_iterator end, type_t type);
 	};
 #endif
 

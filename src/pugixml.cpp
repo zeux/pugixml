@@ -11025,7 +11025,7 @@ namespace pugi
 	}
 #endif
 
-	PUGI__FN void xpath_node_set::_assign(const_iterator begin_, const_iterator end_)
+	PUGI__FN void xpath_node_set::_assign(const_iterator begin_, const_iterator end_, type_t type_)
 	{
 		assert(begin_ <= end_);
 
@@ -11041,6 +11041,7 @@ namespace pugi
 
 			_begin = &_storage;
 			_end = &_storage + size_;
+			_type = type_;
 		}
 		else
 		{
@@ -11064,6 +11065,7 @@ namespace pugi
 			// finalize
 			_begin = storage;
 			_end = storage + size_;
+			_type = type_;
 		}
 	}
 
@@ -11071,9 +11073,9 @@ namespace pugi
 	{
 	}
 
-	PUGI__FN xpath_node_set::xpath_node_set(const_iterator begin_, const_iterator end_, type_t type_): _type(type_), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(const_iterator begin_, const_iterator end_, type_t type_): _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
-		_assign(begin_, end_);
+		_assign(begin_, end_, type_);
 	}
 
 	PUGI__FN xpath_node_set::~xpath_node_set()
@@ -11081,17 +11083,16 @@ namespace pugi
 		if (_begin != &_storage) impl::xml_memory::deallocate(_begin);
 	}
 		
-	PUGI__FN xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
-		_assign(ns._begin, ns._end);
+		_assign(ns._begin, ns._end, ns._type);
 	}
 	
 	PUGI__FN xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
 	{
 		if (this == &ns) return *this;
-		
-		_type = ns._type;
-		_assign(ns._begin, ns._end);
+
+		_assign(ns._begin, ns._end, ns._type);
 
 		return *this;
 	}
