@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Benchmark
-redirect_from: /benchmark
+redirect_from: "/benchmark/"
 ---
 
 ## Benchmarks
