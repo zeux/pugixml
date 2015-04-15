@@ -7626,7 +7626,7 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_boolean: xpath_variable
 	{
-		xpath_variable_boolean(): value(false)
+		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false)
 		{
 		}
 
@@ -7636,7 +7636,7 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_number: xpath_variable
 	{
-		xpath_variable_number(): value(0)
+		xpath_variable_number(): xpath_variable(xpath_type_number), value(0)
 		{
 		}
 
@@ -7646,7 +7646,7 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_string: xpath_variable
 	{
-		xpath_variable_string(): value(0)
+		xpath_variable_string(): xpath_variable(xpath_type_string), value(0)
 		{
 		}
 
@@ -7661,6 +7661,10 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_node_set: xpath_variable
 	{
+		xpath_variable_node_set(): xpath_variable(xpath_type_node_set)
+		{
+		}
+
 		xpath_node_set value;
 		char_t name[1];
 	};
@@ -11080,7 +11084,8 @@ namespace pugi
 
 	PUGI__FN xpath_node_set::~xpath_node_set()
 	{
-		if (_begin != &_storage) impl::xml_memory::deallocate(_begin);
+		if (_begin != &_storage)
+			impl::xml_memory::deallocate(_begin);
 	}
 		
 	PUGI__FN xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(type_unsorted), _begin(&_storage), _end(&_storage)
@@ -11152,7 +11157,7 @@ namespace pugi
 		return error ? error : "No error";
 	}
 
-	PUGI__FN xpath_variable::xpath_variable(): _type(xpath_type_none), _next(0)
+	PUGI__FN xpath_variable::xpath_variable(xpath_value_type type_): _type(type_), _next(0)
 	{
 	}
 
@@ -11251,7 +11256,8 @@ namespace pugi
 
 	PUGI__FN xpath_variable_set::xpath_variable_set()
 	{
-		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i) _data[i] = 0;
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+			_data[i] = 0;
 	}
 
 	PUGI__FN xpath_variable_set::~xpath_variable_set()
@@ -11299,7 +11305,6 @@ namespace pugi
 
 		if (result)
 		{
-			result->_type = type;
 			result->_next = _data[hash];
 
 			_data[hash] = result;

@@ -1043,7 +1043,7 @@ namespace pugi
 		xpath_value_type _type;
 		xpath_variable* _next;
 
-		xpath_variable();
+		xpath_variable(xpath_value_type type);
 
 		// Non-copyable semantics
 		xpath_variable(const xpath_variable&);
