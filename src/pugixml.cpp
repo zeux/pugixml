@@ -3115,11 +3115,6 @@ PUGI__NS_BEGIN
 			PUGI__STATIC_ASSERT(bufcapacity >= 8);
 		}
 
-		~xml_buffered_writer()
-		{
-			flush();
-		}
-
 		size_t flush()
 		{
 			flush(buffer, bufsize);
@@ -5496,6 +5491,8 @@ namespace pugi
 		impl::xml_buffered_writer buffered_writer(writer, encoding);
 
 		impl::node_output(buffered_writer, _root, indent, flags, depth);
+
+		buffered_writer.flush();
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -6205,6 +6202,8 @@ namespace pugi
 		}
 
 		impl::node_output(buffered_writer, _root, indent, flags, 0);
+
+		buffered_writer.flush();
 	}
 
 #ifndef PUGIXML_NO_STL
