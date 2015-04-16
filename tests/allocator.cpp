@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
 // Low-level allocation functions
 #if defined(_WIN32) || defined(_WIN64)
@@ -113,8 +114,6 @@ namespace
 	}
 }
 #else
-#	include <stdlib.h>
-
 namespace
 {
 	void* allocate(size_t size)
