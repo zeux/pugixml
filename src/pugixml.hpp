@@ -1075,16 +1075,21 @@ namespace pugi
 	private:
 		xpath_variable* _data[64];
 
-		// Non-copyable semantics
-		xpath_variable_set(const xpath_variable_set&);
-		xpath_variable_set& operator=(const xpath_variable_set&);
+		void _assign(const xpath_variable_set& rhs);
+		void _swap(xpath_variable_set& rhs);
 
-		xpath_variable* find(const char_t* name) const;
+		xpath_variable* _find(const char_t* name) const;
+
+		static bool _clone(xpath_variable* var, xpath_variable** out_result);
 
 	public:
 		// Default constructor/destructor
 		xpath_variable_set();
 		~xpath_variable_set();
+
+		// Copy constructor/assignment operator
+		xpath_variable_set(const xpath_variable_set& rhs);
+		xpath_variable_set& operator=(const xpath_variable_set& rhs);
 
 		// Add a new variable or get the existing one, if the types match
 		xpath_variable* add(const char_t* name, xpath_value_type type);

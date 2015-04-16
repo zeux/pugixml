@@ -7758,6 +7758,28 @@ PUGI__NS_BEGIN
 		}
 	}
 
+	PUGI__FN bool copy_xpath_variable(xpath_variable* lhs, const xpath_variable* rhs)
+	{
+		switch (rhs->type())
+		{
+		case xpath_type_node_set:
+			return lhs->set(static_cast<const xpath_variable_node_set*>(rhs)->value);
+
+		case xpath_type_number:
+			return lhs->set(static_cast<const xpath_variable_number*>(rhs)->value);
+
+		case xpath_type_string:
+			return lhs->set(static_cast<const xpath_variable_string*>(rhs)->value);
+
+		case xpath_type_boolean:
+			return lhs->set(static_cast<const xpath_variable_boolean*>(rhs)->value);
+
+		default:
+			assert(!"Invalid variable type");
+			return false;
+		}
+	}
+
 	PUGI__FN bool get_variable_scratch(char_t (&buffer)[32], xpath_variable_set* set, const char_t* begin, const char_t* end, xpath_variable** out_result)
 	{
 		size_t length = static_cast<size_t>(end - begin);
@@ -11277,7 +11299,46 @@ namespace pugi
 		}
 	}
 
-	PUGI__FN xpath_variable* xpath_variable_set::find(const char_t* name) const
+	PUGI__FN xpath_variable_set::xpath_variable_set(const xpath_variable_set& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+			_data[i] = 0;
+
+		_assign(rhs);
+	}
+
+	PUGI__FN xpath_variable_set& xpath_variable_set::operator=(const xpath_variable_set& rhs)
+	{
+		if (this == &rhs) return *this;
+
+		_assign(rhs);
+
+		return *this;
+	}
+
+	PUGI__FN void xpath_variable_set::_assign(const xpath_variable_set& rhs)
+	{
+		xpath_variable_set temp;
+
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+			if (rhs._data[i] && !_clone(rhs._data[i], &temp._data[i]))
+				return;
+
+		_swap(temp);
+	}
+
+	PUGI__FN void xpath_variable_set::_swap(xpath_variable_set& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+		{
+			xpath_variable* chain = _data[i];
+
+			_data[i] = rhs._data[i];
+			rhs._data[i] = chain;
+		}
+	}
+
+	PUGI__FN xpath_variable* xpath_variable_set::_find(const char_t* name) const
 	{
 		const size_t hash_size = sizeof(_data) / sizeof(_data[0]);
 		size_t hash = impl::hash_string(name) % hash_size;
@@ -11288,6 +11349,33 @@ namespace pugi
 				return var;
 
 		return 0;
+	}
+
+	PUGI__FN bool xpath_variable_set::_clone(xpath_variable* var, xpath_variable** out_result)
+	{
+		xpath_variable* last = 0;
+
+		while (var)
+		{
+			// allocate storage for new variable
+			xpath_variable* nvar = impl::new_xpath_variable(var->_type, var->name());
+			if (!nvar) return false;
+
+			// link the variable to the result immediately to handle failures gracefully
+			if (last)
+				last->_next = nvar;
+			else
+				*out_result = nvar;
+
+			last = nvar;
+
+			// copy the value; this can fail due to out-of-memory conditions
+			if (!impl::copy_xpath_variable(nvar, var)) return false;
+
+			var = var->_next;
+		}
+
+		return true;
 	}
 
 	PUGI__FN xpath_variable* xpath_variable_set::add(const char_t* name, xpath_value_type type)
@@ -11339,12 +11427,12 @@ namespace pugi
 
 	PUGI__FN xpath_variable* xpath_variable_set::get(const char_t* name)
 	{
-		return find(name);
+		return _find(name);
 	}
 
 	PUGI__FN const xpath_variable* xpath_variable_set::get(const char_t* name) const
 	{
-		return find(name);
+		return _find(name);
 	}
 
 	PUGI__FN xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _impl(0)
