@@ -1691,6 +1691,7 @@ PUGI__NS_BEGIN
 	
 		assert(begin + size == end);
 		(void)!end;
+		(void)!size;
 	}
 	
 #ifndef PUGIXML_NO_STL
