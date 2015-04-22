@@ -5457,7 +5457,7 @@ namespace pugi
 		if (!_root) return PUGIXML_TEXT("");
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (impl::has_value(i) && i->contents && impl::is_text_node(i))
+			if (impl::is_text_node(i) && i->contents)
 				return i->contents;
 
 		return PUGIXML_TEXT("");
