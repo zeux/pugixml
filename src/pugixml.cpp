@@ -1163,6 +1163,14 @@ PUGI__NS_BEGIN
 		if (n->header & impl::xml_memory_page_contents_allocated_mask)
 			alloc.deallocate_string(n->contents);
 
+		if (PUGI__NODETYPE(n) == node_pi)
+		{
+			xml_node_pi_struct* pn = static_cast<xml_node_pi_struct*>(n);
+
+			if (pn->pi_header & impl::xml_memory_page_contents_allocated_mask)
+				alloc.deallocate_string(pn->pi_value);
+		}
+
 		for (xml_attribute_struct* attr = n->first_attribute; attr; )
 		{
 			xml_attribute_struct* next = attr->next_attribute;

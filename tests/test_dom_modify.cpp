@@ -948,6 +948,25 @@ TEST(dom_node_memory_limit)
 	}
 }
 
+TEST(dom_node_memory_limit_pi)
+{
+	const unsigned int length = 65536;
+	static char_t string[length + 1];
+
+	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
+	string[length] = 0;
+
+	test_runner::_memory_fail_threshold = 32768 * 2 + sizeof(string);
+
+	xml_document doc;
+
+	for (int j = 0; j < 32; ++j)
+	{
+		CHECK(doc.append_child(node_pi).set_value(string));
+		CHECK(doc.remove_child(doc.first_child()));
+	}
+}
+
 TEST(dom_node_doctype_top_level)
 {
 	xml_document doc;
