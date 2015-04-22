@@ -34,6 +34,10 @@ ifneq ($(findstring PUGIXML_NO_EXCEPTIONS,$(defines)),)
 	CXXFLAGS+=-fno-exceptions
 endif
 
+ifeq ($(findstring PUGIXML_NO_CXX11,$(defines)),)
+	CXXFLAGS+=-std=c++11
+endif
+
 OBJECTS=$(SOURCES:%=$(BUILD)/%.o)
 
 all: $(EXECUTABLE)
