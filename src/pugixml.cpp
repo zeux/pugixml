@@ -5490,38 +5490,29 @@ namespace pugi
 
 	PUGI__FN bool xml_node::set_name(const char_t* rhs)
 	{
-		switch (type())
-		{
-		case node_pi:
-		case node_declaration:
-		case node_element:
+		if (!_root) return false;
+
+		if (impl::has_name(_root))
 			return impl::strcpy_insitu(_root->contents, _root->header, impl::xml_memory_page_contents_allocated_mask, rhs);
 
-		default:
-			return false;
-		}
+		return false;
 	}
 		
 	PUGI__FN bool xml_node::set_value(const char_t* rhs)
 	{
-		switch (type())
-		{
-		case node_pi:
+		if (!_root) return false;
+
+		if (impl::has_value(_root))
+			return impl::strcpy_insitu(_root->contents, _root->header, impl::xml_memory_page_contents_allocated_mask, rhs);
+
+		if (PUGI__NODETYPE(_root) == node_pi)
 		{
 			xml_node_pi_struct* pn = static_cast<xml_node_pi_struct*>(_root);
 
 			return impl::strcpy_insitu(pn->pi_value, pn->pi_header, impl::xml_memory_page_contents_allocated_mask, rhs);
 		}
 
-		case node_cdata:
-		case node_pcdata:
-		case node_comment:
-		case node_doctype:
-			return impl::strcpy_insitu(_root->contents, _root->header, impl::xml_memory_page_contents_allocated_mask, rhs);
-
-		default:
-			return false;
-		}
+		return false;
 	}
 
 	PUGI__FN xml_attribute xml_node::append_attribute(const char_t* name_)
