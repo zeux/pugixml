@@ -5378,14 +5378,13 @@ namespace pugi
 	
 	PUGI__FN const char_t* xml_node::value() const
 	{
-		if (_root)
-		{
-			if (impl::has_value(_root) && _root->contents)
-				return _root->contents;
+		if (!_root) return PUGIXML_TEXT("");
 
-			if (PUGI__NODETYPE(_root) == node_pi && static_cast<xml_node_pi_struct*>(_root)->pi_value)
-				return static_cast<xml_node_pi_struct*>(_root)->pi_value;
-		}
+		if (impl::has_value(_root) && _root->contents)
+			return _root->contents;
+
+		if (PUGI__NODETYPE(_root) == node_pi && static_cast<xml_node_pi_struct*>(_root)->pi_value)
+			return static_cast<xml_node_pi_struct*>(_root)->pi_value;
 
 		return PUGIXML_TEXT("");
 	}
