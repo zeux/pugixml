@@ -338,7 +338,7 @@ PUGI__NS_BEGIN
 
 		bool reserve()
 		{
-			if (_count + 16 >= _capacity * 3 / 4)
+			if (_count + 16 >= _capacity - _capacity / 4)
 				return rehash();
 
 			return true;
@@ -356,29 +356,7 @@ PUGI__NS_BEGIN
 
 		size_t _count;
 
-		bool rehash()
-		{
-			compact_hash_table rt;
-			rt._capacity = (_capacity == 0) ? 32 : _capacity * 2;
-			rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * rt._capacity));
-
-			if (!rt._items)
-				return false;
-
-			memset(rt._items, 0, sizeof(item_t) * rt._capacity);
-
-			for (size_t i = 0; i < _capacity; ++i)
-				if (_items[i].key)
-					*rt.insert(_items[i].key) = _items[i].value;
-
-			if (_items)
-				xml_memory::deallocate(_items);
-
-			_capacity = rt._capacity;
-			_items = rt._items;
-
-			return true;
-		}
+		bool rehash();
 
 		static unsigned int hash(const void* key)
 		{
@@ -394,6 +372,31 @@ PUGI__NS_BEGIN
 			return h;
 		}
 	};
+
+	PUGI__FN_NO_INLINE bool compact_hash_table::rehash()
+	{
+		compact_hash_table rt;
+		rt._capacity = (_capacity == 0) ? 32 : _capacity * 2;
+		rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * rt._capacity));
+
+		if (!rt._items)
+			return false;
+
+		memset(rt._items, 0, sizeof(item_t) * rt._capacity);
+
+		for (size_t i = 0; i < _capacity; ++i)
+			if (_items[i].key)
+				*rt.insert(_items[i].key) = _items[i].value;
+
+		if (_items)
+			xml_memory::deallocate(_items);
+
+		_capacity = rt._capacity;
+		_items = rt._items;
+
+		return true;
+	}
+
 PUGI__NS_END
 #endif
 
