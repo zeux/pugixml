@@ -35,7 +35,8 @@ ifneq ($(findstring PUGIXML_NO_EXCEPTIONS,$(defines)),)
 endif
 
 ifeq ($(findstring PUGIXML_NO_CXX11,$(defines)),)
-	CXXFLAGS+=-std=c++11
+	# Can't use std=c++11 since Travis-CI has gcc 4.6.3
+	CXXFLAGS+=-std=c++0x
 endif
 
 OBJECTS=$(SOURCES:%=$(BUILD)/%.o)
