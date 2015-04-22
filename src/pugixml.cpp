@@ -967,10 +967,8 @@ PUGI__NS_END
 #ifdef PUGIXML_COMPACT
 namespace pugi
 {
-	/// A 'name=value' XML attribute structure.
 	struct xml_attribute_struct
 	{
-		/// Default ctor
 		xml_attribute_struct(impl::xml_memory_page* page): header(page, 0)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_attribute_struct) == 12);
@@ -980,18 +978,15 @@ namespace pugi
 
 		unsigned char padding;
 
-		impl::compact_string<4> name;	///< Pointer to attribute name.
-		impl::compact_string<7> value;	///< Pointer to attribute value.
+		impl::compact_string<4> name;
+		impl::compact_string<7> value;
 
-		impl::compact_pointer<xml_attribute_struct, 10> prev_attribute_c;	///< Previous attribute (cyclic list)
-		impl::compact_pointer<xml_attribute_struct, 11, 0> next_attribute;	///< Next attribute
+		impl::compact_pointer<xml_attribute_struct, 10> prev_attribute_c;
+		impl::compact_pointer<xml_attribute_struct, 11, 0> next_attribute;
 	};
 
-	/// An XML document tree node.
 	struct xml_node_struct
 	{
-		/// Default ctor
-		/// \param type - node type
 		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(page, type - 1)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_node_struct) == 12);
@@ -999,16 +994,16 @@ namespace pugi
 
 		impl::compact_header header;
 
-		impl::compact_string<3>								contents;				///< Pointer to element name.
+		impl::compact_string<3> contents;
 
-		impl::compact_pointer_parent<xml_node_struct, 6>	parent;					///< Pointer to parent
+		impl::compact_pointer_parent<xml_node_struct, 6> parent;
 
-		impl::compact_pointer<xml_node_struct,  8, 0>		first_child;			///< First child
+		impl::compact_pointer<xml_node_struct,  8, 0> first_child;
 
-		impl::compact_pointer<xml_node_struct,  9>			prev_sibling_c;			///< Left brother (cyclic list)
-		impl::compact_pointer<xml_node_struct, 10, 0>		next_sibling;			///< Right brother
+		impl::compact_pointer<xml_node_struct,  9>    prev_sibling_c;
+		impl::compact_pointer<xml_node_struct, 10, 0> next_sibling;
 
-		impl::compact_pointer<xml_attribute_struct, 11, 0>	first_attribute;		///< First attribute
+		impl::compact_pointer<xml_attribute_struct, 11, 0> first_attribute;
 	};
 
 	struct xml_node_pi_struct: xml_node_struct
@@ -1027,44 +1022,39 @@ namespace pugi
 #else
 namespace pugi
 {
-	/// A 'name=value' XML attribute structure.
 	struct xml_attribute_struct
 	{
-		/// Default ctor
 		xml_attribute_struct(impl::xml_memory_page* page): header(reinterpret_cast<uintptr_t>(page)), name(0), value(0), prev_attribute_c(0), next_attribute(0)
 		{
 		}
 
 		uintptr_t header;
 
-		char_t*	name;	///< Pointer to attribute name.
-		char_t*	value;	///< Pointer to attribute value.
+		char_t*	name;
+		char_t*	value;
 
-		xml_attribute_struct* prev_attribute_c;	///< Previous attribute (cyclic list)
-		xml_attribute_struct* next_attribute;	///< Next attribute
+		xml_attribute_struct* prev_attribute_c;
+		xml_attribute_struct* next_attribute;
 	};
 
-	/// An XML document tree node.
 	struct xml_node_struct
 	{
-		/// Default ctor
-		/// \param type - node type
-		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | (type - 1)), parent(0), contents(0), first_child(0), prev_sibling_c(0), next_sibling(0), first_attribute(0)
+		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | (type - 1)), contents(0), parent(0), first_child(0), prev_sibling_c(0), next_sibling(0), first_attribute(0)
 		{
 		}
 
 		uintptr_t header;
 
-		xml_node_struct*		parent;					///< Pointer to parent
+		char_t* contents;
 
-		char_t*					contents;				///< Pointer to element name/value
+		xml_node_struct* parent;
 
-		xml_node_struct*		first_child;			///< First child
-		
-		xml_node_struct*		prev_sibling_c;			///< Left brother (cyclic list)
-		xml_node_struct*		next_sibling;			///< Right brother
-		
-		xml_attribute_struct*	first_attribute;		///< First attribute
+		xml_node_struct* first_child;
+
+		xml_node_struct* prev_sibling_c;
+		xml_node_struct* next_sibling;
+
+		xml_attribute_struct* first_attribute;
 	};
 
 	struct xml_node_pi_struct: xml_node_struct
