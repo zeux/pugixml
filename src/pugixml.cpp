@@ -760,7 +760,12 @@ PUGI__NS_BEGIN
 		{
 			if (value)
 			{
-				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(compact_alignment - 1)) >> compact_alignment_log2) - start;
+				// value is guaranteed to be compact-aligned; this is not
+				// our decoding is based on this aligned to compact alignment downwards (see operator T*)
+				// so for negative offsets (e.g. -3) we need to adjust the diff by compact_alignment - 1 to
+				// compensate for arithmetic shift behavior for negative values
+				ptrdiff_t diff = reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this);
+				ptrdiff_t offset = ((diff + int(compact_alignment - 1)) >> compact_alignment_log2) - start;
 
 				if (static_cast<uintptr_t>(offset) <= 253)
 					_data = static_cast<unsigned char>(offset + 1);
@@ -783,7 +788,7 @@ PUGI__NS_BEGIN
 				{
 					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
 
-					return reinterpret_cast<T*>(base + ((_data - (1 - start)) << compact_alignment_log2));
+					return reinterpret_cast<T*>(base + ((_data - 1 + start) << compact_alignment_log2));
 				}
 				else
 					return compact_get_value<header_offset, T>(this);
@@ -804,7 +809,7 @@ PUGI__NS_BEGIN
 	template <typename T, int header_offset> class compact_pointer_parent
 	{
 	public:
-		compact_pointer_parent(): _data0(0), _data1(0)
+		compact_pointer_parent(): _data(0)
 		{
 		}
 
@@ -817,12 +822,16 @@ PUGI__NS_BEGIN
 		{
 			if (value)
 			{
-				ptrdiff_t offset = ((reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this) + int(compact_alignment - 1)) >> compact_alignment_log2) + 65533;
+				// value is guaranteed to be compact-aligned; this is not
+				// our decoding is based on this aligned to compact alignment downwards (see operator T*)
+				// so for negative offsets (e.g. -3) we need to adjust the diff by compact_alignment - 1 to
+				// compensate for arithmetic shift behavior for negative values
+				ptrdiff_t diff = reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this);
+				ptrdiff_t offset = ((diff + int(compact_alignment - 1)) >> compact_alignment_log2) + 65533;
 
 				if (static_cast<uintptr_t>(offset) <= 65533)
 				{
-					_data0 = static_cast<unsigned char>(offset + 1);
-					_data1 = static_cast<unsigned char>((offset + 1) >> 8);
+					_data = static_cast<unsigned short>(offset + 1);
 				}
 				else
 				{
@@ -833,28 +842,25 @@ PUGI__NS_BEGIN
 
 					if (page->compact_shared_parent == value)
 					{
-						_data0 = 254;
-						_data1 = 255;
+						_data = 65534;
 					}
 					else
 					{
 						compact_set_value<header_offset>(this, value);
 
-						_data0 = 255;
-						_data1 = 255;
+						_data = 65535;
 					}
 				}
 			}
 			else
 			{
-				_data0 = 0;
-				_data1 = 0;
+				_data = 0;
 			}
 		}
 
 		operator T*() const
 		{
-			int data = _data0 + (_data1 << 8);
+			int data = _data;
 
 			if (data)
 			{
@@ -862,7 +868,7 @@ PUGI__NS_BEGIN
 				{
 					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
 
-					return reinterpret_cast<T*>(base + ((data - (1 + 65533)) << compact_alignment_log2));
+					return reinterpret_cast<T*>(base + ((data - 1 - 65533) << compact_alignment_log2));
 				}
 				else if (data == 65534)
 					return static_cast<T*>(compact_get_page(this, header_offset)->compact_shared_parent);
@@ -879,8 +885,7 @@ PUGI__NS_BEGIN
 		}
 
 	private:
-		unsigned char _data0;
-		unsigned char _data1;
+		uint16_t _data;
 	};
 
 	template <int header_offset> class compact_string
@@ -901,12 +906,12 @@ PUGI__NS_BEGIN
 			{
 				xml_memory_page* page = compact_get_page(this, header_offset);
 
-				if (page->compact_string_base == 0)
+				if (PUGI__UNLIKELY(page->compact_string_base == 0))
 					page->compact_string_base = value;
 
 				ptrdiff_t offset = value - page->compact_string_base;
 
-				if (static_cast<uintptr_t>(offset) >= 16777213)
+				if (PUGI__UNLIKELY(static_cast<uintptr_t>(offset) >= 16777213))
 				{
 					compact_set_value<header_offset>(this, value);
 
