@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 
 // Low-level allocation functions
 #if defined(_WIN32) || defined(_WIN64)
@@ -80,7 +81,9 @@ namespace
 
 	void* allocate_page_aligned(size_t size)
 	{
-		return mmap(0, size + page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+		void* result = malloc(size + page_size);
+
+		return reinterpret_cast<void*>(align_to_page(reinterpret_cast<size_t>(result)));
 	}
 
 	void* allocate(size_t size)
@@ -111,8 +114,6 @@ namespace
 	}
 }
 #else
-#	include <stdlib.h>
-
 namespace
 {
 	void* allocate(size_t size)

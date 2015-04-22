@@ -1,4 +1,4 @@
-version: "{build}"
+version: "{branch}-{build}"
 
 build_script:
   - ps: .\tests\autotest-appveyor.ps1

@@ -413,4 +413,170 @@ TEST_XML(xpath_variables_count_sum, "<node><c1>12</c1><c2>23</c2><c3>34</c3></no
 
 	CHECK_XPATH_NUMBER_VAR(xml_node(), STR("sum($c12) * count($c) - sum($c3)"), &set, 71);
 }
+
+TEST_XML(xpath_variables_copy, "<node />")
+{
+	xpath_variable_set set1;
+	set1.set(STR("a"), true);
+	set1.set(STR("b"), 2.0);
+	set1.set(STR("c"), STR("string"));
+	set1.set(STR("d"), doc.select_nodes(STR("//*")));
+
+	CHECK_XPATH_STRING_VAR(xml_node(), STR("substring($c, count($d[$a]) + $b)"), &set1, STR("ring"));
+
+	xpath_variable_set set2 = set1;
+
+	CHECK_XPATH_STRING_VAR(xml_node(), STR("substring($c, count($d[$a]) + $b)"), &set2, STR("ring"));
+
+	xpath_variable_set set3;
+
+	CHECK(!set3.get(STR("a")));
+
+	set3 = set1;
+
+	CHECK_XPATH_STRING_VAR(xml_node(), STR("substring($c, count($d[$a]) + $b)"), &set2, STR("ring"));
+
+	set3 = set3;
+
+	CHECK_XPATH_STRING_VAR(xml_node(), STR("substring($c, count($d[$a]) + $b)"), &set2, STR("ring"));
+
+	set3 = xpath_variable_set();
+
+	CHECK(!set3.get(STR("a")));
+}
+
+TEST_XML(xpath_variables_copy_out_of_memory, "<node />")
+{
+	xpath_variable_set set1;
+	set1.set(STR("a"), true);
+	set1.set(STR("b"), 2.0);
+	set1.set(STR("c"), STR("string"));
+	set1.set(STR("d"), doc.select_nodes(STR("//*")));
+
+	xpath_variable_set set2 = set1;
+
+	test_runner::_memory_fail_threshold = 32768 + 75 * sizeof(void*);
+
+	CHECK_ALLOC_FAIL(xpath_variable_set set3 = set1);
+
+	xpath_variable_set set4;
+
+	CHECK_ALLOC_FAIL(set4 = set1);
+	CHECK(!set4.get(STR("a")) && !set4.get(STR("b")) && !set4.get(STR("c")) && !set4.get(STR("d")));
+
+	CHECK_ALLOC_FAIL(set2 = set1);
+
+	CHECK(set2.get(STR("a")) && set2.get(STR("b")) && set2.get(STR("c")) && set2.get(STR("d")));
+
+	CHECK(set2.get(STR("a"))->get_boolean() == true);
+	CHECK(set2.get(STR("b"))->get_number() == 2.0);
+	CHECK_STRING(set2.get(STR("c"))->get_string(), STR("string"));
+	CHECK(set2.get(STR("d"))->get_node_set().size() == 1);
+}
+
+#if __cplusplus >= 201103
+TEST_XML(xpath_variables_move, "<node />")
+{
+	xpath_variable_set set;
+	set.set(STR("a"), true);
+	set.set(STR("b"), 2.0);
+	set.set(STR("c"), STR("string"));
+	set.set(STR("d"), doc.select_nodes(STR("//*")));
+
+	xpath_variable_set copy = set;
+	copy.set(STR("e"), 42.0);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	xpath_variable_set move1 = std::move(set);
+
+	CHECK(!set.get(STR("a")) && !set.get(STR("b")) && !set.get(STR("c")) && !set.get(STR("d")));
+	CHECK(move1.get(STR("a")) && move1.get(STR("b")) && move1.get(STR("c")) && move1.get(STR("d")));
+
+	CHECK(move1.get(STR("a"))->get_boolean() == true);
+	CHECK(move1.get(STR("b"))->get_number() == 2.0);
+	CHECK_STRING(move1.get(STR("c"))->get_string(), STR("string"));
+	CHECK(move1.get(STR("d"))->get_node_set().size() == 1);
+
+	xpath_variable_set move2;
+	move2 = std::move(move1);
+
+	CHECK(!move1.get(STR("a")) && !move1.get(STR("b")) && !move1.get(STR("c")) && !move1.get(STR("d")));
+	CHECK(move2.get(STR("a")) && move2.get(STR("b")) && move2.get(STR("c")) && move2.get(STR("d")));
+
+	CHECK(copy.get(STR("e")));
+
+	copy = std::move(move2);
+
+	CHECK(!move2.get(STR("a")) && !move2.get(STR("b")) && !move2.get(STR("c")) && !move2.get(STR("d")));
+	CHECK(copy.get(STR("a")) && copy.get(STR("b")) && copy.get(STR("c")) && copy.get(STR("d")));
+	CHECK(!copy.get(STR("e")));
+
+	CHECK(copy.get(STR("a"))->get_boolean() == true);
+	CHECK(copy.get(STR("b"))->get_number() == 2.0);
+	CHECK_STRING(copy.get(STR("c"))->get_string(), STR("string"));
+	CHECK(copy.get(STR("d"))->get_node_set().size() == 1);
+}
+#endif
+
+TEST(xpath_variables_copy_big)
+{
+	xpath_variable_set set;
+
+	for (int i = 0; i < 100; ++i)
+	{
+		char_t name[4];
+		name[0] = 'a';
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
+		name[3] = 0;
+
+		set.set(name, double(i));
+	}
+
+	xpath_variable_set copy = set;
+
+	for (int i = 0; i < 100; ++i)
+	{
+		char_t name[4];
+		name[0] = 'a';
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
+		name[3] = 0;
+
+		CHECK(copy.get(name) && copy.get(name)->get_number() == i);
+	}
+}
+
+TEST(xpath_variables_copy_big_out_of_memory)
+{
+	xpath_variable_set set;
+
+	for (int i = 0; i < 100; ++i)
+	{
+		char_t name[4];
+		name[0] = 'a';
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
+		name[3] = 0;
+
+		set.set(name, double(i));
+	}
+
+	test_runner::_memory_fail_threshold = 1;
+
+	xpath_variable_set copy;
+	CHECK_ALLOC_FAIL(copy = set);
+
+	for (int i = 0; i < 100; ++i)
+	{
+		char_t name[4];
+		name[0] = 'a';
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
+		name[3] = 0;
+
+		CHECK(!copy.get(name));
+	}
+}
 #endif

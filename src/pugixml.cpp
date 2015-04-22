@@ -2235,6 +2235,7 @@ PUGI__NS_BEGIN
 	
 		assert(begin + size == end);
 		(void)!end;
+		(void)!size;
 	}
 	
 #ifndef PUGIXML_NO_STL
@@ -3663,11 +3664,6 @@ PUGI__NS_BEGIN
 			PUGI__STATIC_ASSERT(bufcapacity >= 8);
 		}
 
-		~xml_buffered_writer()
-		{
-			flush();
-		}
-
 		size_t flush()
 		{
 			flush(buffer, bufsize);
@@ -4028,13 +4024,23 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
+	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, xml_node_struct* node, const char_t* indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 
 		for (xml_attribute_struct* a = node->first_attribute; a; a = a->next_attribute)
 		{
-			writer.write(' ');
+			if ((flags & (format_indent_attributes | format_raw)) == format_indent_attributes)
+			{
+				writer.write('\n');
+
+				text_output_indent(writer, indent, indent_length, depth + 1);
+			}
+			else
+			{
+				writer.write(' ');
+			}
+
 			writer.write_string(a->name ? a->name : default_name);
 			writer.write('=', '"');
 
@@ -4045,7 +4051,7 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, unsigned int flags)
+	PUGI__FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, const char_t* indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
 		const char_t* name = node->contents ? node->contents : default_name;
@@ -4054,7 +4060,7 @@ PUGI__NS_BEGIN
 		writer.write_string(name);
 
 		if (node->first_attribute)
-			node_output_attributes(writer, node, flags);
+			node_output_attributes(writer, node, indent, indent_length, flags, depth);
 
 		if (!node->first_child)
 		{
@@ -4114,7 +4120,7 @@ PUGI__NS_BEGIN
 			case node_declaration:
 				writer.write('<', '?');
 				writer.write_string(node->contents ? node->contents : default_name);
-				node_output_attributes(writer, node, flags);
+				node_output_attributes(writer, node, PUGIXML_TEXT(""), 0, flags | format_raw, 0);
 				writer.write('?', '>');
 				break;
 
@@ -4144,7 +4150,7 @@ PUGI__NS_BEGIN
 
 	PUGI__FN void node_output(xml_buffered_writer& writer, xml_node_struct* root, const char_t* indent, unsigned int flags, unsigned int depth)
 	{
-		size_t indent_length = ((flags & (format_indent | format_raw)) == format_indent) ? strlength(indent) : 0;
+		size_t indent_length = ((flags & (format_indent | format_indent_attributes)) && (flags & format_raw) == 0) ? strlength(indent) : 0;
 		unsigned int indent_flags = indent_indent;
 
 		xml_node_struct* node = root;
@@ -4172,7 +4178,7 @@ PUGI__NS_BEGIN
 				{
 					indent_flags = indent_newline | indent_indent;
 
-					if (node_output_start(writer, node, flags))
+					if (node_output_start(writer, node, indent, indent_length, flags, depth))
 					{
 						node = node->first_child;
 						depth++;
@@ -6145,6 +6151,8 @@ namespace pugi
 		impl::xml_buffered_writer buffered_writer(writer, encoding);
 
 		impl::node_output(buffered_writer, _root, indent, flags, depth);
+
+		buffered_writer.flush();
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -6844,6 +6852,8 @@ namespace pugi
 		}
 
 		impl::node_output(buffered_writer, _root, indent, flags, 0);
+
+		buffered_writer.flush();
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -8265,7 +8275,7 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_boolean: xpath_variable
 	{
-		xpath_variable_boolean(): value(false)
+		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false)
 		{
 		}
 
@@ -8275,7 +8285,7 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_number: xpath_variable
 	{
-		xpath_variable_number(): value(0)
+		xpath_variable_number(): xpath_variable(xpath_type_number), value(0)
 		{
 		}
 
@@ -8285,7 +8295,7 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_string: xpath_variable
 	{
-		xpath_variable_string(): value(0)
+		xpath_variable_string(): xpath_variable(xpath_type_string), value(0)
 		{
 		}
 
@@ -8300,6 +8310,10 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_node_set: xpath_variable
 	{
+		xpath_variable_node_set(): xpath_variable(xpath_type_node_set)
+		{
+		}
+
 		xpath_node_set value;
 		char_t name[1];
 	};
@@ -8390,6 +8404,28 @@ PUGI__NS_BEGIN
 
 		default:
 			assert(!"Invalid variable type");
+		}
+	}
+
+	PUGI__FN bool copy_xpath_variable(xpath_variable* lhs, const xpath_variable* rhs)
+	{
+		switch (rhs->type())
+		{
+		case xpath_type_node_set:
+			return lhs->set(static_cast<const xpath_variable_node_set*>(rhs)->value);
+
+		case xpath_type_number:
+			return lhs->set(static_cast<const xpath_variable_number*>(rhs)->value);
+
+		case xpath_type_string:
+			return lhs->set(static_cast<const xpath_variable_string*>(rhs)->value);
+
+		case xpath_type_boolean:
+			return lhs->set(static_cast<const xpath_variable_boolean*>(rhs)->value);
+
+		default:
+			assert(!"Invalid variable type");
+			return false;
 		}
 	}
 
@@ -11664,7 +11700,7 @@ namespace pugi
 	}
 #endif
 
-	PUGI__FN void xpath_node_set::_assign(const_iterator begin_, const_iterator end_)
+	PUGI__FN void xpath_node_set::_assign(const_iterator begin_, const_iterator end_, type_t type_)
 	{
 		assert(begin_ <= end_);
 
@@ -11680,6 +11716,7 @@ namespace pugi
 
 			_begin = &_storage;
 			_end = &_storage + size_;
+			_type = type_;
 		}
 		else
 		{
@@ -11703,37 +11740,71 @@ namespace pugi
 			// finalize
 			_begin = storage;
 			_end = storage + size_;
+			_type = type_;
 		}
 	}
+
+#if __cplusplus >= 201103
+	PUGI__FN void xpath_node_set::_move(xpath_node_set& rhs)
+	{
+		_type = rhs._type;
+		_storage = rhs._storage;
+		_begin = (rhs._begin == &rhs._storage) ? &_storage : rhs._begin;
+		_end = _begin + (rhs._end - rhs._begin);
+
+		rhs._type = type_unsorted;
+		rhs._begin = &rhs._storage;
+		rhs._end = rhs._begin;
+	}
+#endif
 
 	PUGI__FN xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
 	}
 
-	PUGI__FN xpath_node_set::xpath_node_set(const_iterator begin_, const_iterator end_, type_t type_): _type(type_), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(const_iterator begin_, const_iterator end_, type_t type_): _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
-		_assign(begin_, end_);
+		_assign(begin_, end_, type_);
 	}
 
 	PUGI__FN xpath_node_set::~xpath_node_set()
 	{
-		if (_begin != &_storage) impl::xml_memory::deallocate(_begin);
+		if (_begin != &_storage)
+			impl::xml_memory::deallocate(_begin);
 	}
 		
-	PUGI__FN xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(ns._type), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
-		_assign(ns._begin, ns._end);
+		_assign(ns._begin, ns._end, ns._type);
 	}
 	
 	PUGI__FN xpath_node_set& xpath_node_set::operator=(const xpath_node_set& ns)
 	{
 		if (this == &ns) return *this;
-		
-		_type = ns._type;
-		_assign(ns._begin, ns._end);
+
+		_assign(ns._begin, ns._end, ns._type);
 
 		return *this;
 	}
+
+#if __cplusplus >= 201103
+	PUGI__FN xpath_node_set::xpath_node_set(xpath_node_set&& rhs): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	{
+		_move(rhs);
+	}
+
+	PUGI__FN xpath_node_set& xpath_node_set::operator=(xpath_node_set&& rhs)
+	{
+		if (this == &rhs) return *this;
+
+		if (_begin != &_storage)
+			impl::xml_memory::deallocate(_begin);
+
+		_move(rhs);
+
+		return *this;
+	}
+#endif
 
 	PUGI__FN xpath_node_set::type_t xpath_node_set::type() const
 	{
@@ -11790,7 +11861,7 @@ namespace pugi
 		return error ? error : "No error";
 	}
 
-	PUGI__FN xpath_variable::xpath_variable(): _type(xpath_type_none), _next(0)
+	PUGI__FN xpath_variable::xpath_variable(xpath_value_type type_): _type(type_), _next(0)
 	{
 	}
 
@@ -11889,27 +11960,80 @@ namespace pugi
 
 	PUGI__FN xpath_variable_set::xpath_variable_set()
 	{
-		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i) _data[i] = 0;
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+			_data[i] = 0;
 	}
 
 	PUGI__FN xpath_variable_set::~xpath_variable_set()
 	{
 		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+			_destroy(_data[i]);
+	}
+
+	PUGI__FN xpath_variable_set::xpath_variable_set(const xpath_variable_set& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+			_data[i] = 0;
+
+		_assign(rhs);
+	}
+
+	PUGI__FN xpath_variable_set& xpath_variable_set::operator=(const xpath_variable_set& rhs)
+	{
+		if (this == &rhs) return *this;
+
+		_assign(rhs);
+
+		return *this;
+	}
+
+#if __cplusplus >= 201103
+	PUGI__FN xpath_variable_set::xpath_variable_set(xpath_variable_set&& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
 		{
-			xpath_variable* var = _data[i];
-
-			while (var)
-			{
-				xpath_variable* next = var->_next;
-
-				impl::delete_xpath_variable(var->_type, var);
-
-				var = next;
-			}
+			_data[i] = rhs._data[i];
+			rhs._data[i] = 0;
 		}
 	}
 
-	PUGI__FN xpath_variable* xpath_variable_set::find(const char_t* name) const
+	PUGI__FN xpath_variable_set& xpath_variable_set::operator=(xpath_variable_set&& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+		{
+			_destroy(_data[i]);
+
+			_data[i] = rhs._data[i];
+			rhs._data[i] = 0;
+		}
+
+		return *this;
+	}
+#endif
+
+	PUGI__FN void xpath_variable_set::_assign(const xpath_variable_set& rhs)
+	{
+		xpath_variable_set temp;
+
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+			if (rhs._data[i] && !_clone(rhs._data[i], &temp._data[i]))
+				return;
+
+		_swap(temp);
+	}
+
+	PUGI__FN void xpath_variable_set::_swap(xpath_variable_set& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+		{
+			xpath_variable* chain = _data[i];
+
+			_data[i] = rhs._data[i];
+			rhs._data[i] = chain;
+		}
+	}
+
+	PUGI__FN xpath_variable* xpath_variable_set::_find(const char_t* name) const
 	{
 		const size_t hash_size = sizeof(_data) / sizeof(_data[0]);
 		size_t hash = impl::hash_string(name) % hash_size;
@@ -11920,6 +12044,45 @@ namespace pugi
 				return var;
 
 		return 0;
+	}
+
+	PUGI__FN bool xpath_variable_set::_clone(xpath_variable* var, xpath_variable** out_result)
+	{
+		xpath_variable* last = 0;
+
+		while (var)
+		{
+			// allocate storage for new variable
+			xpath_variable* nvar = impl::new_xpath_variable(var->_type, var->name());
+			if (!nvar) return false;
+
+			// link the variable to the result immediately to handle failures gracefully
+			if (last)
+				last->_next = nvar;
+			else
+				*out_result = nvar;
+
+			last = nvar;
+
+			// copy the value; this can fail due to out-of-memory conditions
+			if (!impl::copy_xpath_variable(nvar, var)) return false;
+
+			var = var->_next;
+		}
+
+		return true;
+	}
+
+	PUGI__FN void xpath_variable_set::_destroy(xpath_variable* var)
+	{
+		while (var)
+		{
+			xpath_variable* next = var->_next;
+
+			impl::delete_xpath_variable(var->_type, var);
+
+			var = next;
+		}
 	}
 
 	PUGI__FN xpath_variable* xpath_variable_set::add(const char_t* name, xpath_value_type type)
@@ -11937,7 +12100,6 @@ namespace pugi
 
 		if (result)
 		{
-			result->_type = type;
 			result->_next = _data[hash];
 
 			_data[hash] = result;
@@ -11972,12 +12134,12 @@ namespace pugi
 
 	PUGI__FN xpath_variable* xpath_variable_set::get(const char_t* name)
 	{
-		return find(name);
+		return _find(name);
 	}
 
 	PUGI__FN const xpath_variable* xpath_variable_set::get(const char_t* name) const
 	{
-		return find(name);
+		return _find(name);
 	}
 
 	PUGI__FN xpath_query::xpath_query(const char_t* query, xpath_variable_set* variables): _impl(0)
@@ -12008,11 +12170,36 @@ namespace pugi
 		}
 	}
 
+	PUGI__FN xpath_query::xpath_query(): _impl(0)
+	{
+	}
+
 	PUGI__FN xpath_query::~xpath_query()
 	{
 		if (_impl)
 			impl::xpath_query_impl::destroy(static_cast<impl::xpath_query_impl*>(_impl));
 	}
+
+#if __cplusplus >= 201103
+	PUGI__FN xpath_query::xpath_query(xpath_query&& rhs)
+	{
+		_impl = rhs._impl;
+		rhs._impl = 0;
+	}
+
+	xpath_query& xpath_query::operator=(xpath_query&& rhs)
+	{
+		if (this == &rhs) return *this;
+
+		if (_impl)
+			impl::xpath_query_impl::destroy(static_cast<impl::xpath_query_impl*>(_impl));
+
+		_impl = rhs._impl;
+		rhs._impl = 0;
+
+		return *this;
+	}
+#endif
 
 	PUGI__FN xpath_value_type xpath_query::return_type() const
 	{

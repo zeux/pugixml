@@ -34,6 +34,11 @@ ifneq ($(findstring PUGIXML_NO_EXCEPTIONS,$(defines)),)
 	CXXFLAGS+=-fno-exceptions
 endif
 
+ifeq ($(findstring PUGIXML_NO_CXX11,$(defines)),)
+	# Can't use std=c++11 since Travis-CI has gcc 4.6.3
+	CXXFLAGS+=-std=c++0x
+endif
+
 OBJECTS=$(SOURCES:%=$(BUILD)/%.o)
 
 all: $(EXECUTABLE)

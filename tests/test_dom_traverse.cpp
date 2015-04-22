@@ -1106,3 +1106,27 @@ TEST_XML(dom_unspecified_bool_coverage, "<node attr='value'>text</node>")
 	static_cast<void (*)(xpath_node***)>(qn)(0);
 #endif
 }
+
+#if __cplusplus >= 201103
+TEST_XML(dom_ranged_for, "<node attr1='1' attr2='2'><test>3</test><fake>5</fake><test>4</test></node>")
+{
+	int index = 1;
+
+	for (xml_node n: doc.children())
+	{
+		for (xml_attribute a: n.attributes())
+		{
+			CHECK(a.as_int() == index);
+			index++;
+		}
+
+		for (xml_node c: n.children(STR("test")))
+		{
+			CHECK(c.text().as_int() == index);
+			index++;
+		}
+	}
+
+	CHECK(index == 5);
+}
+#endif
