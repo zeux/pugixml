@@ -65,7 +65,7 @@
 
 // If the platform is known to have long long support, enable long long functions
 #ifndef PUGIXML_HAS_LONG_LONG
-#	if defined(__cplusplus) && __cplusplus >= 201103
+#	if __cplusplus >= 201103
 #		define PUGIXML_HAS_LONG_LONG
 #	elif defined(_MSC_VER) && _MSC_VER >= 1400
 #		define PUGIXML_HAS_LONG_LONG
@@ -1081,6 +1081,7 @@ namespace pugi
 		xpath_variable* _find(const char_t* name) const;
 
 		static bool _clone(xpath_variable* var, xpath_variable** out_result);
+		static void _destroy(xpath_variable* var);
 
 	public:
 		// Default constructor/destructor
@@ -1090,6 +1091,12 @@ namespace pugi
 		// Copy constructor/assignment operator
 		xpath_variable_set(const xpath_variable_set& rhs);
 		xpath_variable_set& operator=(const xpath_variable_set& rhs);
+
+	#if __cplusplus >= 201103
+		// Move semantics support
+		xpath_variable_set(xpath_variable_set&& rhs);
+		xpath_variable_set& operator=(xpath_variable_set&& rhs);
+	#endif
 
 		// Add a new variable or get the existing one, if the types match
 		xpath_variable* add(const char_t* name, xpath_value_type type);
@@ -1123,8 +1130,17 @@ namespace pugi
 		// If PUGIXML_NO_EXCEPTIONS is not defined, throws xpath_exception on compilation errors.
 		explicit xpath_query(const char_t* query, xpath_variable_set* variables = 0);
 
+		// Constructor
+		xpath_query();
+
 		// Destructor
 		~xpath_query();
+
+	#if __cplusplus >= 201103
+		// Move semantics support
+		xpath_query(xpath_query&& rhs);
+		xpath_query& operator=(xpath_query&& rhs);
+	#endif
 
 		// Get query expression return type
 		xpath_value_type return_type() const;
@@ -1261,6 +1277,12 @@ namespace pugi
 		xpath_node_set(const xpath_node_set& ns);
 		xpath_node_set& operator=(const xpath_node_set& ns);
 
+	#if __cplusplus >= 201103
+		// Move semantics support
+		xpath_node_set(xpath_node_set&& rhs);
+		xpath_node_set& operator=(xpath_node_set&& rhs);
+	#endif
+
 		// Get collection type
 		type_t type() const;
 		
@@ -1292,6 +1314,7 @@ namespace pugi
 		xpath_node* _end;
 
 		void _assign(const_iterator begin, const_iterator end, type_t type);
+		void _move(xpath_node_set& rhs);
 	};
 #endif
 

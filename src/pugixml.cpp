@@ -11096,6 +11096,20 @@ namespace pugi
 		}
 	}
 
+#if __cplusplus >= 201103
+	PUGI__FN void xpath_node_set::_move(xpath_node_set& rhs)
+	{
+		_type = rhs._type;
+		_storage = rhs._storage;
+		_begin = (rhs._begin == &rhs._storage) ? &_storage : rhs._begin;
+		_end = _begin + (rhs._end - rhs._begin);
+
+		rhs._type = type_unsorted;
+		rhs._begin = &rhs._storage;
+		rhs._end = rhs._begin;
+	}
+#endif
+
 	PUGI__FN xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
 	}
@@ -11124,6 +11138,25 @@ namespace pugi
 
 		return *this;
 	}
+
+#if __cplusplus >= 201103
+	PUGI__FN xpath_node_set::xpath_node_set(xpath_node_set&& rhs): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	{
+		_move(rhs);
+	}
+
+	PUGI__FN xpath_node_set& xpath_node_set::operator=(xpath_node_set&& rhs)
+	{
+		if (this == &rhs) return *this;
+
+		if (_begin != &_storage)
+			impl::xml_memory::deallocate(_begin);
+
+		_move(rhs);
+
+		return *this;
+	}
+#endif
 
 	PUGI__FN xpath_node_set::type_t xpath_node_set::type() const
 	{
@@ -11286,18 +11319,7 @@ namespace pugi
 	PUGI__FN xpath_variable_set::~xpath_variable_set()
 	{
 		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
-		{
-			xpath_variable* var = _data[i];
-
-			while (var)
-			{
-				xpath_variable* next = var->_next;
-
-				impl::delete_xpath_variable(var->_type, var);
-
-				var = next;
-			}
-		}
+			_destroy(_data[i]);
 	}
 
 	PUGI__FN xpath_variable_set::xpath_variable_set(const xpath_variable_set& rhs)
@@ -11316,6 +11338,30 @@ namespace pugi
 
 		return *this;
 	}
+
+#if __cplusplus >= 201103
+	PUGI__FN xpath_variable_set::xpath_variable_set(xpath_variable_set&& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+		{
+			_data[i] = rhs._data[i];
+			rhs._data[i] = 0;
+		}
+	}
+
+	PUGI__FN xpath_variable_set& xpath_variable_set::operator=(xpath_variable_set&& rhs)
+	{
+		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
+		{
+			_destroy(_data[i]);
+
+			_data[i] = rhs._data[i];
+			rhs._data[i] = 0;
+		}
+
+		return *this;
+	}
+#endif
 
 	PUGI__FN void xpath_variable_set::_assign(const xpath_variable_set& rhs)
 	{
@@ -11377,6 +11423,18 @@ namespace pugi
 		}
 
 		return true;
+	}
+
+	PUGI__FN void xpath_variable_set::_destroy(xpath_variable* var)
+	{
+		while (var)
+		{
+			xpath_variable* next = var->_next;
+
+			impl::delete_xpath_variable(var->_type, var);
+
+			var = next;
+		}
 	}
 
 	PUGI__FN xpath_variable* xpath_variable_set::add(const char_t* name, xpath_value_type type)
@@ -11464,11 +11522,36 @@ namespace pugi
 		}
 	}
 
+	PUGI__FN xpath_query::xpath_query(): _impl(0)
+	{
+	}
+
 	PUGI__FN xpath_query::~xpath_query()
 	{
 		if (_impl)
 			impl::xpath_query_impl::destroy(static_cast<impl::xpath_query_impl*>(_impl));
 	}
+
+#if __cplusplus >= 201103
+	PUGI__FN xpath_query::xpath_query(xpath_query&& rhs)
+	{
+		_impl = rhs._impl;
+		rhs._impl = 0;
+	}
+
+	xpath_query& xpath_query::operator=(xpath_query&& rhs)
+	{
+		if (this == &rhs) return *this;
+
+		if (_impl)
+			impl::xpath_query_impl::destroy(static_cast<impl::xpath_query_impl*>(_impl));
+
+		_impl = rhs._impl;
+		rhs._impl = 0;
+
+		return *this;
+	}
+#endif
 
 	PUGI__FN xpath_value_type xpath_query::return_type() const
 	{
