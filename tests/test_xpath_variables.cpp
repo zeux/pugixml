@@ -527,8 +527,8 @@ TEST(xpath_variables_copy_big)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + (i / 10);
-		name[2] = '0' + (i % 10);
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
 		name[3] = 0;
 
 		set.set(name, double(i));
@@ -540,8 +540,8 @@ TEST(xpath_variables_copy_big)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + (i / 10);
-		name[2] = '0' + (i % 10);
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
 		name[3] = 0;
 
 		CHECK(copy.get(name) && copy.get(name)->get_number() == i);
@@ -556,8 +556,8 @@ TEST(xpath_variables_copy_big_out_of_memory)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + (i / 10);
-		name[2] = '0' + (i % 10);
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
 		name[3] = 0;
 
 		set.set(name, double(i));
@@ -572,8 +572,8 @@ TEST(xpath_variables_copy_big_out_of_memory)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + (i / 10);
-		name[2] = '0' + (i % 10);
+		name[1] = '0' + char_t(i / 10);
+		name[2] = '0' + char_t(i % 10);
 		name[3] = 0;
 
 		CHECK(!copy.get(name));
