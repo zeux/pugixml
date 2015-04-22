@@ -435,6 +435,13 @@ PUGI__NS_BEGIN
 	#endif
 		;
 
+	#ifdef PUGIXML_COMPACT
+		#define PUGI__GETPAGE_IMPL(header) (header).get_page()
+	#else
+		#define PUGI__GETPAGE_IMPL(header) reinterpret_cast<impl::xml_memory_page*>((header) & impl::xml_memory_page_pointer_mask)
+	#endif
+
+	#define PUGI__GETPAGE(n) PUGI__GETPAGE_IMPL((n)->header)
 	#define PUGI__NODETYPE(n) static_cast<xml_node_type>(((n)->header & impl::xml_memory_page_type_mask) + 1)
 
 	struct xml_allocator;
@@ -691,6 +698,7 @@ PUGI__NS_BEGIN
 		{
 			PUGI__STATIC_ASSERT(xml_memory_block_alignment == compact_alignment);
 			PUGI__STATIC_ASSERT(sizeof(xml_memory_page) + xml_memory_page_size <= (1 << (16 + compact_alignment_log2)));
+			PUGI__STATIC_ASSERT(xml_memory_page_pointer_mask & 0xff);
 
 			ptrdiff_t page_offset = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(page)) >> compact_alignment_log2;
 			assert(page_offset >= 0 && page_offset < (1 << 16));
@@ -700,19 +708,19 @@ PUGI__NS_BEGIN
 			this->flags = static_cast<unsigned char>(flags);
 		}
 
-		void operator&=(uintptr_t modflags)
+		void operator&=(uintptr_t mod)
 		{
-			flags &= modflags;
+			flags &= mod;
 		}
 
-		void operator|=(uintptr_t modflags)
+		void operator|=(uintptr_t mod)
 		{
-			flags |= modflags;
+			flags |= mod;
 		}
 
-		operator uintptr_t() const
+		uintptr_t operator&(uintptr_t mod) const
 		{
-			return reinterpret_cast<uintptr_t>(get_page()) | flags;
+			return flags & mod;
 		}
 
 		xml_memory_page* get_page() const
@@ -1100,14 +1108,14 @@ PUGI__NS_BEGIN
 	{
 		assert(object);
 
-		return *reinterpret_cast<xml_memory_page*>(object->header & xml_memory_page_pointer_mask)->allocator;
+		return *PUGI__GETPAGE(object)->allocator;
 	}
 
 	template <typename Object> inline xml_document_struct& get_document(const Object* object)
 	{
 		assert(object);
 
-		return *static_cast<xml_document_struct*>(reinterpret_cast<xml_memory_page*>(object->header & xml_memory_page_pointer_mask)->allocator);
+		return *static_cast<xml_document_struct*>(PUGI__GETPAGE(object)->allocator);
 	}
 PUGI__NS_END
 
@@ -1141,19 +1149,19 @@ PUGI__NS_BEGIN
 
 	inline void destroy_attribute(xml_attribute_struct* a, xml_allocator& alloc)
 	{
-		uintptr_t header = a->header;
+		if (a->header & impl::xml_memory_page_name_allocated_mask)
+			alloc.deallocate_string(a->name);
 
-		if (header & impl::xml_memory_page_name_allocated_mask) alloc.deallocate_string(a->name);
-		if (header & impl::xml_memory_page_value_allocated_mask) alloc.deallocate_string(a->value);
+		if (a->header & impl::xml_memory_page_value_allocated_mask)
+			alloc.deallocate_string(a->value);
 
-		alloc.deallocate_memory(a, sizeof(xml_attribute_struct), reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask));
+		alloc.deallocate_memory(a, sizeof(xml_attribute_struct), PUGI__GETPAGE(a));
 	}
 
 	inline void destroy_node(xml_node_struct* n, xml_allocator& alloc)
 	{
-		uintptr_t header = n->header;
-
-		if (header & impl::xml_memory_page_contents_allocated_mask) alloc.deallocate_string(n->contents);
+		if (n->header & impl::xml_memory_page_contents_allocated_mask)
+			alloc.deallocate_string(n->contents);
 
 		for (xml_attribute_struct* attr = n->first_attribute; attr; )
 		{
@@ -1173,7 +1181,7 @@ PUGI__NS_BEGIN
 			child = next;
 		}
 
-		alloc.deallocate_memory(n, sizeof(xml_node_struct), reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask));
+		alloc.deallocate_memory(n, sizeof(xml_node_struct), PUGI__GETPAGE(n));
 	}
 
 	inline void append_node(xml_node_struct* child, xml_node_struct* node)
@@ -2287,7 +2295,8 @@ PUGI__NS_BEGIN
 	}
 #endif
 
-	inline bool strcpy_insitu_allow(size_t length, uintptr_t header, uintptr_t header_mask, char_t* target)
+	template <typename Header>
+	inline bool strcpy_insitu_allow(size_t length, const Header& header, uintptr_t header_mask, char_t* target)
 	{
 		// never reuse shared memory
 		if (header & xml_memory_page_contents_shared_mask) return false;
@@ -2306,14 +2315,12 @@ PUGI__NS_BEGIN
 	template <typename String, typename Header>
 	PUGI__FN bool strcpy_insitu(String& dest, Header& header, uintptr_t header_mask, const char_t* source)
 	{
-		assert(header);
-
 		size_t source_length = strlength(source);
 
 		if (source_length == 0)
 		{
 			// empty string and null pointer are equivalent, so just deallocate old memory
-			xml_allocator* alloc = reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask)->allocator;
+			xml_allocator* alloc = PUGI__GETPAGE_IMPL(header)->allocator;
 
 			if (header & header_mask) alloc->deallocate_string(dest);
 			
@@ -2332,7 +2339,7 @@ PUGI__NS_BEGIN
 		}
 		else
 		{
-			xml_allocator* alloc = reinterpret_cast<xml_memory_page*>(header & xml_memory_page_pointer_mask)->allocator;
+			xml_allocator* alloc = PUGI__GETPAGE_IMPL(header)->allocator;
 
 			if (!alloc->reserve()) return false;
 
@@ -6734,7 +6741,7 @@ namespace pugi
 		}
 
 		// destroy dynamic storage, leave sentinel page (it's in static memory)
-		impl::xml_memory_page* root_page = reinterpret_cast<impl::xml_memory_page*>(_root->header & impl::xml_memory_page_pointer_mask);
+		impl::xml_memory_page* root_page = PUGI__GETPAGE(_root);
 		assert(root_page && !root_page->prev);
 		assert(reinterpret_cast<char*>(root_page) >= _memory && reinterpret_cast<char*>(root_page) < _memory + sizeof(_memory));
 
@@ -12375,6 +12382,8 @@ namespace pugi
 #undef PUGI__NS_END
 #undef PUGI__FN
 #undef PUGI__FN_NO_INLINE
+#undef PUGI__GETPAGE_IMPL
+#undef PUGI__GETPAGE
 #undef PUGI__NODETYPE
 #undef PUGI__IS_CHARTYPE_IMPL
 #undef PUGI__IS_CHARTYPE
