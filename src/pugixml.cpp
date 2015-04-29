@@ -6186,7 +6186,12 @@ namespace pugi
 		// document node always has an offset of 0
 		if (_root == &doc) return 0;
 
-		return _root->contents && (_root->header & impl::xml_memory_page_contents_allocated_or_shared_mask) == 0 ? _root->contents - doc.buffer : -1;
+		// we need contents to be inside buffer and not shared
+		// if it's shared we don't know if this is the original node
+		if (!_root->contents) return -1;
+		if (_root->header & impl::xml_memory_page_contents_allocated_or_shared_mask) return -1;
+
+		return _root->contents - doc.buffer;
 	}
 
 #ifdef __BORLANDC__
