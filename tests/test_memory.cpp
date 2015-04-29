@@ -12,7 +12,7 @@ namespace
 
 	bool is_page(size_t size)
 	{
-		return size >= 8192;
+		return size >= 16384;
 	}
 
 	void* allocate(size_t size)
