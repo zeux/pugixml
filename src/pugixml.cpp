@@ -133,16 +133,16 @@ using std::memmove;
 #if !defined(_MSC_VER) || _MSC_VER >= 1600
 #	include <stdint.h>
 #else
+namespace pugi
+{
 #	ifndef _UINTPTR_T_DEFINED
-// No native uintptr_t in MSVC6 and in some WinCE versions
-typedef size_t uintptr_t;
-#define _UINTPTR_T_DEFINED
+	typedef size_t uintptr_t;
 #	endif
-PUGI__NS_BEGIN
+
 	typedef unsigned __int8 uint8_t;
 	typedef unsigned __int16 uint16_t;
 	typedef unsigned __int32 uint32_t;
-PUGI__NS_END
+}
 #endif
 
 // Memory allocation
