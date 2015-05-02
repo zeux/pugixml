@@ -849,7 +849,7 @@ PUGI__NS_BEGIN
 				{
 					xml_memory_page* page = compact_get_page(this, header_offset);
 
-					if (page->compact_shared_parent == 0)
+					if (PUGI__UNLIKELY(page->compact_shared_parent == 0))
 						page->compact_shared_parent = value;
 
 					if (page->compact_shared_parent == value)
@@ -872,17 +872,15 @@ PUGI__NS_BEGIN
 
 		operator T*() const
 		{
-			int data = _data;
-
-			if (data)
+			if (_data)
 			{
-				if (data < 65534)
+				if (_data < 65534)
 				{
 					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
 
-					return reinterpret_cast<T*>(base + ((data - 1 - 65533) << compact_alignment_log2));
+					return reinterpret_cast<T*>(base + ((_data - 1 - 65533) << compact_alignment_log2));
 				}
-				else if (data == 65534)
+				else if (_data == 65534)
 					return static_cast<T*>(compact_get_page(this, header_offset)->compact_shared_parent);
 				else
 					return compact_get_value<header_offset, T>(this);
@@ -923,36 +921,36 @@ PUGI__NS_BEGIN
 
 				ptrdiff_t offset = value - page->compact_string_base;
 
-				if (PUGI__UNLIKELY(static_cast<uintptr_t>(offset) >= (65535 << 7)))
-				{
-					compact_set_value<header_offset>(this, value);
-
-					_data = 255;
-				}
-				else
+				if (static_cast<uintptr_t>(offset) < (65535 << 7))
 				{
 					uint16_t* base = reinterpret_cast<uint16_t*>(reinterpret_cast<char*>(this) - base_offset);
 
-					if (PUGI__UNLIKELY(*base))
+					if (*base == 0)
+					{
+						*base = static_cast<uint16_t>((offset >> 7) + 1);
+						_data = static_cast<unsigned char>((offset & 127) + 1);
+					}
+					else
 					{
 						ptrdiff_t remainder = offset - ((*base - 1) << 7);
 
-						if (PUGI__UNLIKELY(static_cast<uintptr_t>(remainder) >= 254))
+						if (static_cast<uintptr_t>(remainder) < 254)
+						{
+							_data = static_cast<unsigned char>(remainder + 1);
+						}
+						else
 						{
 							compact_set_value<header_offset>(this, value);
 
 							_data = 255;
 						}
-						else
-						{
-							_data = static_cast<unsigned char>(remainder + 1);
-						}
 					}
-					else
-					{
-						*base = static_cast<uint16_t>((offset >> 7) + 1);
-						_data = static_cast<unsigned char>((offset & 127) + 1);
-					}
+				}
+				else
+				{
+					compact_set_value<header_offset>(this, value);
+
+					_data = 255;
 				}
 			}
 			else
@@ -965,11 +963,7 @@ PUGI__NS_BEGIN
 		{
 			if (_data)
 			{
-				if (PUGI__UNLIKELY(_data == 255))
-				{
-					return compact_get_value<header_offset, char_t>(this);
-				}
-				else
+				if (_data < 255)
 				{
 					xml_memory_page* page = compact_get_page(this, header_offset);
 
@@ -979,6 +973,10 @@ PUGI__NS_BEGIN
 					ptrdiff_t offset = ((*base - 1) << 7) + (_data - 1);
 
 					return page->compact_string_base + offset;
+				}
+				else
+				{
+					return compact_get_value<header_offset, char_t>(this);
 				}
 			}
 			else
