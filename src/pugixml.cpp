@@ -473,7 +473,7 @@ PUGI__NS_BEGIN
 	#ifdef PUGIXML_COMPACT
 		char_t* compact_string_base;
 		void* compact_shared_parent;
-		char* compact_page_marker;
+		uint32_t* compact_page_marker;
 	#endif
 	};
 
@@ -556,7 +556,16 @@ PUGI__NS_BEGIN
 					assert(_root == page);
 
 					// top page freed, just reset sizes
-					page->busy_size = page->freed_size = 0;
+					page->busy_size = 0;
+					page->freed_size = 0;
+
+				#ifdef PUGIXML_COMPACT
+					// reset compact state to maximize efficiency
+					page->compact_string_base = 0;
+					page->compact_shared_parent = 0;
+					page->compact_page_marker = 0;
+				#endif
+
 					_busy_size = 0;
 				}
 				else
@@ -696,7 +705,7 @@ PUGI__NS_BEGIN
 			PUGI__STATIC_ASSERT(xml_memory_block_alignment == compact_alignment);
 			PUGI__STATIC_ASSERT(sizeof(xml_memory_page) + xml_memory_page_size <= (1 << (16 + compact_alignment_log2)));
 
-			ptrdiff_t offset = (reinterpret_cast<char*>(this) - page->compact_page_marker);
+			ptrdiff_t offset = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(page->compact_page_marker));
 			assert(offset >= 0 && offset < 256 << compact_alignment_log2);
 
 			_page = static_cast<unsigned char>(offset >> compact_alignment_log2);
@@ -723,11 +732,6 @@ PUGI__NS_BEGIN
 			const char* page_marker = reinterpret_cast<const char*>(this) - (_page << compact_alignment_log2);
 
 			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(page_marker - *reinterpret_cast<const uint32_t*>(page_marker)));
-		}
-
-		bool has_marker() const
-		{
-			return _page == sizeof(uint32_t) >> compact_alignment_log2;
 		}
 
 	private:
@@ -1122,13 +1126,17 @@ PUGI__NS_BEGIN
 		if (!result) return 0;
 
 		// adjust for marker
-		if (PUGI__UNLIKELY(static_cast<uintptr_t>(static_cast<char*>(result) - out_page->compact_page_marker) >= 256 * compact_alignment))
+		if (PUGI__UNLIKELY(static_cast<uintptr_t>(static_cast<char*>(result) - reinterpret_cast<char*>(out_page->compact_page_marker)) >= 256 * compact_alignment))
 		{
 			// insert new marker
 			uint32_t* marker = static_cast<uint32_t*>(result);
 
 			*marker = reinterpret_cast<char*>(marker) - reinterpret_cast<char*>(out_page);
-			out_page->compact_page_marker = reinterpret_cast<char*>(marker);
+			out_page->compact_page_marker = marker;
+
+			// since we don't reuse the page space until we reallocate it, we can just pretend that we freed the marker block
+			// this will make sure deallocate_memory correctly tracks the size
+			out_page->freed_size += sizeof(uint32_t);
 
 			return marker + 1;
 		}
@@ -1140,25 +1148,10 @@ PUGI__NS_BEGIN
 			return result;
 		}
 	}
-
-	template <typename T>
-	inline void deallocate_object(xml_allocator& alloc, T* ptr, size_t size, xml_memory_page* page)
-	{
-		// this is very crude... we should be able to do better?
-		if (ptr->header.has_marker())
-			page->compact_page_marker = 0;
-
-		alloc.deallocate_memory(ptr, size + ptr->header.has_marker() * sizeof(uint32_t), page);
-	}
 #else
 	inline void* allocate_object(xml_allocator& alloc, size_t size, xml_memory_page*& out_page)
 	{
 		return alloc.allocate_memory(size, out_page);
-	}
-
-	inline void deallocate_object(xml_allocator& alloc, void* ptr, size_t size, xml_memory_page* page)
-	{
-		alloc.deallocate_memory(ptr, size, page);
 	}
 #endif
 
@@ -1186,7 +1179,7 @@ PUGI__NS_BEGIN
 		if (a->header & impl::xml_memory_page_value_allocated_mask)
 			alloc.deallocate_string(a->value);
 
-		deallocate_object(alloc, a, sizeof(xml_attribute_struct), PUGI__GETPAGE(a));
+		alloc.deallocate_memory(a, sizeof(xml_attribute_struct), PUGI__GETPAGE(a));
 	}
 
 	inline void destroy_node(xml_node_struct* n, xml_allocator& alloc)
@@ -1215,7 +1208,7 @@ PUGI__NS_BEGIN
 			child = next;
 		}
 
-		deallocate_object(alloc, n, sizeof(xml_node_struct), PUGI__GETPAGE(n));
+		alloc.deallocate_memory(n, sizeof(xml_node_struct), PUGI__GETPAGE(n));
 	}
 
 	inline void append_node(xml_node_struct* child, xml_node_struct* node)
@@ -6725,8 +6718,8 @@ namespace pugi
 
 		// setup first page marker
 	#ifdef PUGIXML_COMPACT
-		page->compact_page_marker = reinterpret_cast<char*>(page) + sizeof(impl::xml_memory_page);
-		*reinterpret_cast<uint32_t*>(page->compact_page_marker) = sizeof(impl::xml_memory_page);
+		page->compact_page_marker = reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(page) + sizeof(impl::xml_memory_page));
+		*page->compact_page_marker = sizeof(impl::xml_memory_page);
 	#endif
 
 		// allocate new root
