@@ -892,14 +892,14 @@ PUGI__NS_BEGIN
 		uint16_t _data;
 	};
 
-	template <int header_offset> class compact_string_fat
+	template <int header_offset, int base_offset> class compact_string
 	{
 	public:
-		compact_string_fat(): _data0(0), _data1(0), _data2(0)
+		compact_string(): _data(0)
 		{
 		}
 
-		void operator=(const compact_string_fat& rhs)
+		void operator=(const compact_string& rhs)
 		{
 			*this = rhs + 0;
 		}
@@ -913,50 +913,59 @@ PUGI__NS_BEGIN
 				if (PUGI__UNLIKELY(page->compact_string_base == 0))
 					page->compact_string_base = value;
 
+				uint16_t* base = reinterpret_cast<uint16_t*>(reinterpret_cast<char*>(this) - base_offset);
+
 				ptrdiff_t offset = value - page->compact_string_base;
 
-				if (PUGI__UNLIKELY(static_cast<uintptr_t>(offset) >= 16777213))
+				if (*base == 0)
+					*base = static_cast<uint16_t>(offset >> 7) + 1;
+
+				ptrdiff_t remainder = offset - ((*base - 1) << 7);
+
+				if (PUGI__UNLIKELY(static_cast<uintptr_t>(remainder) >= 254 || *base == 0))
 				{
 					compact_set_value<header_offset>(this, value);
 
-					offset = 16777214;
+					_data = 255;
 				}
-
-				_data0 = static_cast<unsigned char>(offset + 1);
-				_data1 = static_cast<unsigned char>((offset + 1) >> 8);
-				_data2 = static_cast<unsigned char>((offset + 1) >> 16);
+				else
+				{
+					_data = static_cast<unsigned char>(remainder + 1);
+				}
 			}
 			else
 			{
-				_data0 = 0;
-				_data1 = 0;
-				_data2 = 0;
+				_data = 0;
 			}
 		}
 
 		operator char_t*() const
 		{
-			unsigned int data = _data0 + (_data1 << 8) + (_data2 << 16);
-
-			if (data)
+			if (_data)
 			{
-				xml_memory_page* page = compact_get_page(this, header_offset);
-
-				if (data < 16777215)
-					return page->compact_string_base + (data - 1);
-				else
+				if (PUGI__UNLIKELY(_data == 255))
+				{
 					return compact_get_value<header_offset, char_t>(this);
+				}
+				else
+				{
+					xml_memory_page* page = compact_get_page(this, header_offset);
+
+					const uint16_t* base = reinterpret_cast<const uint16_t*>(reinterpret_cast<const char*>(this) - base_offset);
+					assert(*base);
+
+					ptrdiff_t offset = ((*base - 1) << 7) + (_data - 1);
+
+					return page->compact_string_base + offset;
+				}
 			}
 			else
 				return 0;
 		}
 
 	private:
-		unsigned char _data0;
-		unsigned char _data1;
-		unsigned char _data2;
+		unsigned char _data;
 	};
-
 PUGI__NS_END
 #endif
 
@@ -965,17 +974,19 @@ namespace pugi
 {
 	struct xml_attribute_struct
 	{
-		xml_attribute_struct(impl::xml_memory_page* page): header(page, 0)
+		xml_attribute_struct(impl::xml_memory_page* page): header(page, 0), namevalue_base(0)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_attribute_struct) == 12);
 		}
 
 		impl::compact_header header;
 
-		unsigned char padding;
+		unsigned char padding[3];
 
-		impl::compact_string_fat<4> name;
-		impl::compact_string_fat<7> value;
+		uint16_t namevalue_base;
+
+		impl::compact_string<8, 2> name;
+		impl::compact_string<9, 3> value;
 
 		impl::compact_pointer<xml_attribute_struct, 10> prev_attribute_c;
 		impl::compact_pointer<xml_attribute_struct, 11, 0> next_attribute;
@@ -983,17 +994,19 @@ namespace pugi
 
 	struct xml_node_struct
 	{
-		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(page, type - 1)
+		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(page, type - 1), namevalue_base(0)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_node_struct) == 16);
 		}
 
 		impl::compact_header header;
 
-		unsigned char padding;
+		unsigned char padding[3];
 
-		impl::compact_string_fat<4> name;
-		impl::compact_string_fat<7> value;
+		uint16_t namevalue_base;
+
+		impl::compact_string<8, 2> name;
+		impl::compact_string<9, 3> value;
 
 		impl::compact_pointer_parent<xml_node_struct, 10> parent;
 
