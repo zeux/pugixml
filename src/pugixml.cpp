@@ -679,13 +679,13 @@ PUGI__NS_BEGIN
 			// the last page is not deleted even if it's empty (see deallocate_memory)
 			assert(_root->prev);
 
+			page->busy_size = size;
+
 			page->prev = _root->prev;
 			page->next = _root;
 
 			_root->prev->next = page;
 			_root->prev = page;
-
-			page->busy_size = size;
 		}
 
 		return reinterpret_cast<char*>(page) + sizeof(xml_memory_page);
@@ -703,10 +703,9 @@ PUGI__NS_BEGIN
 		compact_header(xml_memory_page* page, unsigned int flags)
 		{
 			PUGI__STATIC_ASSERT(xml_memory_block_alignment == compact_alignment);
-			PUGI__STATIC_ASSERT(sizeof(xml_memory_page) + xml_memory_page_size <= (1 << (16 + compact_alignment_log2)));
 
 			ptrdiff_t offset = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(page->compact_page_marker));
-			assert(offset >= 0 && offset < 256 << compact_alignment_log2);
+			assert(static_cast<uintptr_t>(offset) < 256 * compact_alignment);
 
 			_page = static_cast<unsigned char>(offset >> compact_alignment_log2);
 			_flags = static_cast<unsigned char>(flags);
@@ -730,8 +729,9 @@ PUGI__NS_BEGIN
 		xml_memory_page* get_page() const
 		{
 			const char* page_marker = reinterpret_cast<const char*>(this) - (_page << compact_alignment_log2);
+			const char* page = page_marker - *reinterpret_cast<const uint32_t*>(page_marker);
 
-			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(page_marker - *reinterpret_cast<const uint32_t*>(page_marker)));
+			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(page));
 		}
 
 	private:
@@ -775,7 +775,7 @@ PUGI__NS_BEGIN
 				// value is guaranteed to be compact-aligned; this is not
 				// our decoding is based on this aligned to compact alignment downwards (see operator T*)
 				// so for negative offsets (e.g. -3) we need to adjust the diff by compact_alignment - 1 to
-				// compensate for arithmetic shift behavior for negative values
+				// compensate for arithmetic shift rounding for negative values
 				ptrdiff_t diff = reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this);
 				ptrdiff_t offset = ((diff + int(compact_alignment - 1)) >> compact_alignment_log2) - start;
 
