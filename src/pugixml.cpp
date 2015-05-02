@@ -892,14 +892,14 @@ PUGI__NS_BEGIN
 		uint16_t _data;
 	};
 
-	template <int header_offset> class compact_string
+	template <int header_offset> class compact_string_fat
 	{
 	public:
-		compact_string(): _data0(0), _data1(0), _data2(0)
+		compact_string_fat(): _data0(0), _data1(0), _data2(0)
 		{
 		}
 
-		void operator=(const compact_string& rhs)
+		void operator=(const compact_string_fat& rhs)
 		{
 			*this = rhs + 0;
 		}
@@ -974,8 +974,8 @@ namespace pugi
 
 		unsigned char padding;
 
-		impl::compact_string<4> name;
-		impl::compact_string<7> value;
+		impl::compact_string_fat<4> name;
+		impl::compact_string_fat<7> value;
 
 		impl::compact_pointer<xml_attribute_struct, 10> prev_attribute_c;
 		impl::compact_pointer<xml_attribute_struct, 11, 0> next_attribute;
@@ -990,10 +990,10 @@ namespace pugi
 
 		impl::compact_header header;
 
-		impl::compact_string<3> name;
-		impl::compact_string<6> value;
-
 		unsigned char padding;
+
+		impl::compact_string_fat<4> name;
+		impl::compact_string_fat<7> value;
 
 		impl::compact_pointer_parent<xml_node_struct, 10> parent;
 
