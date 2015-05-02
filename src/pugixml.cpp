@@ -538,35 +538,6 @@ PUGI__NS_BEGIN
 			return buf;
 		}
 
-		void* allocate_object(size_t size, xml_memory_page*& out_page)
-		{
-		#ifdef PUGIXML_COMPACT
-			void* result = allocate_memory(size + sizeof(uint32_t), out_page);
-			if (!result) return 0;
-
-			// adjust for marker
-			if (PUGI__UNLIKELY(static_cast<uintptr_t>(static_cast<char*>(result) - out_page->compact_page_marker) >= 256 * xml_memory_block_alignment))
-			{
-				// insert new marker
-				uint32_t* marker = static_cast<uint32_t*>(result);
-
-				*marker = reinterpret_cast<char*>(marker) - reinterpret_cast<char*>(out_page);
-				out_page->compact_page_marker = reinterpret_cast<char*>(marker);
-
-				return marker + 1;
-			}
-			else
-			{
-				// roll back uint32_t part
-				_busy_size -= sizeof(uint32_t);
-
-				return result;
-			}
-		#else
-			return allocate_memory(size, out_page);
-		#endif
-		}
-
 		void deallocate_memory(void* ptr, size_t size, xml_memory_page* page)
 		{
 			if (page == _root) page->busy_size = _busy_size;
@@ -703,10 +674,9 @@ PUGI__NS_BEGIN
 
 			_root->prev->next = page;
 			_root->prev = page;
-		}
 
-		// allocate inside page
-		page->busy_size = size;
+			page->busy_size = size;
+		}
 
 		return reinterpret_cast<char*>(page) + sizeof(xml_memory_page);
 	}
@@ -752,6 +722,11 @@ PUGI__NS_BEGIN
 			const char* page_marker = reinterpret_cast<const char*>(this) - (_page << compact_alignment_log2);
 
 			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(page_marker - *reinterpret_cast<const uint32_t*>(page_marker)));
+		}
+
+		bool has_marker() const
+		{
+			return _page == sizeof(uint32_t) >> compact_alignment_log2;
 		}
 
 	private:
@@ -1125,10 +1100,57 @@ PUGI__NS_END
 
 // Low-level DOM operations
 PUGI__NS_BEGIN
+#ifdef PUGIXML_COMPACT
+	inline void* allocate_object(xml_allocator& alloc, size_t size, xml_memory_page*& out_page)
+	{
+		void* result = alloc.allocate_memory(size + sizeof(uint32_t), out_page);
+		if (!result) return 0;
+
+		// adjust for marker
+		if (PUGI__UNLIKELY(static_cast<uintptr_t>(static_cast<char*>(result) - out_page->compact_page_marker) >= 256 * compact_alignment))
+		{
+			// insert new marker
+			uint32_t* marker = static_cast<uint32_t*>(result);
+
+			*marker = reinterpret_cast<char*>(marker) - reinterpret_cast<char*>(out_page);
+			out_page->compact_page_marker = reinterpret_cast<char*>(marker);
+
+			return marker + 1;
+		}
+		else
+		{
+			// roll back uint32_t part
+			alloc._busy_size -= sizeof(uint32_t);
+
+			return result;
+		}
+	}
+
+	template <typename T>
+	inline void deallocate_object(xml_allocator& alloc, T* ptr, size_t size, xml_memory_page* page)
+	{
+		// this is very crude... we should be able to do better?
+		if (ptr->header.has_marker())
+			page->compact_page_marker = 0;
+
+		alloc.deallocate_memory(ptr, size + ptr->header.has_marker() * sizeof(uint32_t), page);
+	}
+#else
+	inline void* allocate_object(xml_allocator& alloc, size_t size, xml_memory_page*& out_page)
+	{
+		return alloc.allocate_memory(size, out_page);
+	}
+
+	inline void deallocate_object(xml_allocator& alloc, void* ptr, size_t size, xml_memory_page* page)
+	{
+		alloc.deallocate_memory(ptr, size, page);
+	}
+#endif
+
 	inline xml_attribute_struct* allocate_attribute(xml_allocator& alloc)
 	{
 		xml_memory_page* page;
-		void* memory = alloc.allocate_object(sizeof(xml_attribute_struct), page);
+		void* memory = allocate_object(alloc, sizeof(xml_attribute_struct), page);
 
 		return new (memory) xml_attribute_struct(page);
 	}
@@ -1136,7 +1158,7 @@ PUGI__NS_BEGIN
 	inline xml_node_struct* allocate_node(xml_allocator& alloc, xml_node_type type)
 	{
 		xml_memory_page* page;
-		void* memory = alloc.allocate_object(sizeof(xml_node_struct), page);
+		void* memory = allocate_object(alloc, sizeof(xml_node_struct), page);
 
 		return new (memory) xml_node_struct(page, type);
 	}
@@ -1149,7 +1171,7 @@ PUGI__NS_BEGIN
 		if (a->header & impl::xml_memory_page_value_allocated_mask)
 			alloc.deallocate_string(a->value);
 
-		alloc.deallocate_memory(a, sizeof(xml_attribute_struct), PUGI__GETPAGE(a));
+		deallocate_object(alloc, a, sizeof(xml_attribute_struct), PUGI__GETPAGE(a));
 	}
 
 	inline void destroy_node(xml_node_struct* n, xml_allocator& alloc)
@@ -1178,7 +1200,7 @@ PUGI__NS_BEGIN
 			child = next;
 		}
 
-		alloc.deallocate_memory(n, sizeof(xml_node_struct), PUGI__GETPAGE(n));
+		deallocate_object(alloc, n, sizeof(xml_node_struct), PUGI__GETPAGE(n));
 	}
 
 	inline void append_node(xml_node_struct* child, xml_node_struct* node)
@@ -6668,8 +6690,14 @@ namespace pugi
 	{
 		assert(!_root);
 
+	#ifdef PUGIXML_COMPACT
+		const size_t page_offset = sizeof(uint32_t);
+	#else
+		const size_t page_offset = 0;
+	#endif
+
 		// initialize sentinel page
-		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment - sizeof(void*) <= sizeof(_memory));
+		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment - sizeof(void*) + page_offset <= sizeof(_memory));
 
 		// align upwards to page boundary
 		void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(_memory) + (impl::xml_memory_page_alignment - 1)) & ~(impl::xml_memory_page_alignment - 1));
@@ -6680,16 +6708,13 @@ namespace pugi
 
 		page->busy_size = impl::xml_memory_page_size;
 
-		// allocate new root
+		// setup first page marker
 	#ifdef PUGIXML_COMPACT
-		const size_t page_offset = sizeof(uint32_t);
-
 		page->compact_page_marker = reinterpret_cast<char*>(page) + sizeof(impl::xml_memory_page);
 		*reinterpret_cast<uint32_t*>(page->compact_page_marker) = sizeof(impl::xml_memory_page);
-	#else
-		const size_t page_offset = 0;
 	#endif
 
+		// allocate new root
 		_root = new (reinterpret_cast<char*>(page) + sizeof(impl::xml_memory_page) + page_offset) impl::xml_document_struct(page);
 		_root->prev_sibling_c = _root;
 
