@@ -527,7 +527,8 @@ PUGI__NS_BEGIN
 
 		void* allocate_memory(size_t size, xml_memory_page*& out_page)
 		{
-			if (_busy_size + size > xml_memory_page_size) return allocate_memory_oob(size, out_page);
+			if (PUGI__UNLIKELY(_busy_size + size > xml_memory_page_size))
+				return allocate_memory_oob(size, out_page);
 
 			void* buf = reinterpret_cast<char*>(_root) + sizeof(xml_memory_page) + _busy_size;
 
@@ -916,16 +917,9 @@ PUGI__NS_BEGIN
 				if (PUGI__UNLIKELY(page->compact_string_base == 0))
 					page->compact_string_base = value;
 
-				uint16_t* base = reinterpret_cast<uint16_t*>(reinterpret_cast<char*>(this) - base_offset);
-
 				ptrdiff_t offset = value - page->compact_string_base;
 
-				if (*base == 0)
-					*base = static_cast<uint16_t>(offset >> 7) + 1;
-
-				ptrdiff_t remainder = offset - ((*base - 1) << 7);
-
-				if (PUGI__UNLIKELY(static_cast<uintptr_t>(remainder) >= 254 || *base == 0))
+				if (PUGI__UNLIKELY(static_cast<uintptr_t>(offset) >= (65535 << 7)))
 				{
 					compact_set_value<header_offset>(this, value);
 
@@ -933,7 +927,28 @@ PUGI__NS_BEGIN
 				}
 				else
 				{
-					_data = static_cast<unsigned char>(remainder + 1);
+					uint16_t* base = reinterpret_cast<uint16_t*>(reinterpret_cast<char*>(this) - base_offset);
+
+					if (PUGI__UNLIKELY(*base))
+					{
+						ptrdiff_t remainder = offset - ((*base - 1) << 7);
+
+						if (PUGI__UNLIKELY(static_cast<uintptr_t>(remainder) >= 254))
+						{
+							compact_set_value<header_offset>(this, value);
+
+							_data = 255;
+						}
+						else
+						{
+							_data = static_cast<unsigned char>(remainder + 1);
+						}
+					}
+					else
+					{
+						*base = static_cast<uint16_t>((offset >> 7) + 1);
+						_data = static_cast<unsigned char>((offset & 127) + 1);
+					}
 				}
 			}
 			else
