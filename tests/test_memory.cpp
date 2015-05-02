@@ -4,6 +4,7 @@
 #include "allocator.hpp"
 
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -121,6 +122,63 @@ TEST(memory_large_allocations)
 
 				node = next;
 			}
+		}
+
+		CHECK(page_allocs == page_deallocs + 1); // only one live page left (it waits for new allocations)
+
+		char buffer;
+		CHECK(doc.load_buffer_inplace(&buffer, 0, parse_fragment, get_native_encoding()));
+
+		CHECK(page_allocs == page_deallocs); // no live pages left
+	}
+
+	CHECK(page_allocs == page_deallocs); // everything is freed
+
+	// restore old functions
+	set_memory_management_functions(old_allocate, old_deallocate);
+}
+
+TEST(memory_page_management)
+{
+	page_allocs = page_deallocs = 0;
+
+	// remember old functions
+	allocation_function old_allocate = get_memory_allocation_function();
+	deallocation_function old_deallocate = get_memory_deallocation_function();
+
+	// replace functions
+	set_memory_management_functions(allocate, deallocate);
+
+	{
+		xml_document doc;
+
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		// initial fill
+		std::vector<xml_node> nodes;
+
+		for (size_t i = 0; i < 4000; ++i)
+		{
+			xml_node node = doc.append_child(STR("node"));
+			CHECK(node);
+
+			nodes.push_back(node);
+		}
+
+		CHECK(page_allocs > 0 && page_deallocs == 0);
+
+		// grow-prune loop
+		size_t offset = 0;
+		size_t prime = 15485863;
+
+		while (nodes.size() > 0)
+		{
+			offset = (offset + prime) % nodes.size();
+
+			doc.remove_child(nodes[offset]);
+
+			nodes[offset] = nodes.back();
+			nodes.pop_back();
 		}
 
 		CHECK(page_allocs == page_deallocs + 1); // only one live page left (it waits for new allocations)
