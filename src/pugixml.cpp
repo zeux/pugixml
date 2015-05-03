@@ -1129,7 +1129,7 @@ PUGI__NS_BEGIN
 			// insert new marker
 			uint32_t* marker = static_cast<uint32_t*>(result);
 
-			*marker = reinterpret_cast<char*>(marker) - reinterpret_cast<char*>(out_page);
+			*marker = static_cast<uint32_t>(reinterpret_cast<char*>(marker) - reinterpret_cast<char*>(out_page));
 			out_page->compact_page_marker = marker;
 
 			// since we don't reuse the page space until we reallocate it, we can just pretend that we freed the marker block
