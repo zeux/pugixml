@@ -430,11 +430,11 @@ PUGI__NS_BEGIN
 	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_contents_shared_mask;
 
-	#ifdef PUGIXML_COMPACT
-		#define PUGI__GETPAGE_IMPL(header) (header).get_page()
-	#else
-		#define PUGI__GETPAGE_IMPL(header) reinterpret_cast<impl::xml_memory_page*>((header) & impl::xml_memory_page_pointer_mask)
-	#endif
+#ifdef PUGIXML_COMPACT
+	#define PUGI__GETPAGE_IMPL(header) (header).get_page()
+#else
+	#define PUGI__GETPAGE_IMPL(header) reinterpret_cast<impl::xml_memory_page*>((header) & impl::xml_memory_page_pointer_mask)
+#endif
 
 	#define PUGI__GETPAGE(n) PUGI__GETPAGE_IMPL((n)->header)
 	#define PUGI__NODETYPE(n) static_cast<xml_node_type>(((n)->header & impl::xml_memory_page_type_mask) + 1)
@@ -538,6 +538,44 @@ PUGI__NS_BEGIN
 
 			return buf;
 		}
+
+	#ifdef PUGIXML_COMPACT
+		void* allocate_object(size_t size, xml_memory_page*& out_page)
+		{
+			void* result = allocate_memory(size + sizeof(uint32_t), out_page);
+			if (!result) return 0;
+
+			// adjust for marker
+			ptrdiff_t offset = static_cast<char*>(result) - reinterpret_cast<char*>(out_page->compact_page_marker);
+
+			if (PUGI__UNLIKELY(static_cast<uintptr_t>(offset) >= 256 * xml_memory_block_alignment))
+			{
+				// insert new marker
+				uint32_t* marker = static_cast<uint32_t*>(result);
+
+				*marker = static_cast<uint32_t>(reinterpret_cast<char*>(marker) - reinterpret_cast<char*>(out_page));
+				out_page->compact_page_marker = marker;
+
+				// since we don't reuse the page space until we reallocate it, we can just pretend that we freed the marker block
+				// this will make sure deallocate_memory correctly tracks the size
+				out_page->freed_size += sizeof(uint32_t);
+
+				return marker + 1;
+			}
+			else
+			{
+				// roll back uint32_t part
+				_busy_size -= sizeof(uint32_t);
+
+				return result;
+			}
+		}
+	#else
+		void* allocate_object(size_t size, xml_memory_page*& out_page)
+		{
+			return allocate_memory(size, out_page);
+		}
+	#endif
 
 		void deallocate_memory(void* ptr, size_t size, xml_memory_page* page)
 		{
@@ -679,13 +717,13 @@ PUGI__NS_BEGIN
 			// the last page is not deleted even if it's empty (see deallocate_memory)
 			assert(_root->prev);
 
-			page->busy_size = size;
-
 			page->prev = _root->prev;
 			page->next = _root;
 
 			_root->prev->next = page;
 			_root->prev = page;
+
+			page->busy_size = size;
 		}
 
 		return reinterpret_cast<char*>(page) + sizeof(xml_memory_page);
@@ -705,7 +743,7 @@ PUGI__NS_BEGIN
 			PUGI__STATIC_ASSERT(xml_memory_block_alignment == compact_alignment);
 
 			ptrdiff_t offset = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(page->compact_page_marker));
-			assert(static_cast<uintptr_t>(offset) < 256 * compact_alignment);
+			assert(offset % compact_alignment == 0 && static_cast<uintptr_t>(offset) < 256 * compact_alignment);
 
 			_page = static_cast<unsigned char>(offset >> compact_alignment_log2);
 			_flags = static_cast<unsigned char>(flags);
@@ -772,8 +810,8 @@ PUGI__NS_BEGIN
 		{
 			if (value)
 			{
-				// value is guaranteed to be compact-aligned; this is not
-				// our decoding is based on this aligned to compact alignment downwards (see operator T*)
+				// value is guaranteed to be compact-aligned; 'this' is not
+				// our decoding is based on 'this' aligned to compact alignment downwards (see operator T*)
 				// so for negative offsets (e.g. -3) we need to adjust the diff by compact_alignment - 1 to
 				// compensate for arithmetic shift rounding for negative values
 				ptrdiff_t diff = reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this);
@@ -834,8 +872,8 @@ PUGI__NS_BEGIN
 		{
 			if (value)
 			{
-				// value is guaranteed to be compact-aligned; this is not
-				// our decoding is based on this aligned to compact alignment downwards (see operator T*)
+				// value is guaranteed to be compact-aligned; 'this' is not
+				// our decoding is based on 'this' aligned to compact alignment downwards (see operator T*)
 				// so for negative offsets (e.g. -3) we need to adjust the diff by compact_alignment - 1 to
 				// compensate for arithmetic shift behavior for negative values
 				ptrdiff_t diff = reinterpret_cast<char*>(value) - reinterpret_cast<char*>(this);
@@ -934,7 +972,7 @@ PUGI__NS_BEGIN
 					{
 						ptrdiff_t remainder = offset - ((*base - 1) << 7);
 
-						if (static_cast<uintptr_t>(remainder) < 254)
+						if (static_cast<uintptr_t>(remainder) <= 253)
 						{
 							_data = static_cast<unsigned char>(remainder + 1);
 						}
@@ -1117,46 +1155,10 @@ PUGI__NS_END
 
 // Low-level DOM operations
 PUGI__NS_BEGIN
-#ifdef PUGIXML_COMPACT
-	inline void* allocate_object(xml_allocator& alloc, size_t size, xml_memory_page*& out_page)
-	{
-		void* result = alloc.allocate_memory(size + sizeof(uint32_t), out_page);
-		if (!result) return 0;
-
-		// adjust for marker
-		if (PUGI__UNLIKELY(static_cast<uintptr_t>(static_cast<char*>(result) - reinterpret_cast<char*>(out_page->compact_page_marker)) >= 256 * compact_alignment))
-		{
-			// insert new marker
-			uint32_t* marker = static_cast<uint32_t*>(result);
-
-			*marker = static_cast<uint32_t>(reinterpret_cast<char*>(marker) - reinterpret_cast<char*>(out_page));
-			out_page->compact_page_marker = marker;
-
-			// since we don't reuse the page space until we reallocate it, we can just pretend that we freed the marker block
-			// this will make sure deallocate_memory correctly tracks the size
-			out_page->freed_size += sizeof(uint32_t);
-
-			return marker + 1;
-		}
-		else
-		{
-			// roll back uint32_t part
-			alloc._busy_size -= sizeof(uint32_t);
-
-			return result;
-		}
-	}
-#else
-	inline void* allocate_object(xml_allocator& alloc, size_t size, xml_memory_page*& out_page)
-	{
-		return alloc.allocate_memory(size, out_page);
-	}
-#endif
-
 	inline xml_attribute_struct* allocate_attribute(xml_allocator& alloc)
 	{
 		xml_memory_page* page;
-		void* memory = allocate_object(alloc, sizeof(xml_attribute_struct), page);
+		void* memory = alloc.allocate_object(sizeof(xml_attribute_struct), page);
 
 		return new (memory) xml_attribute_struct(page);
 	}
@@ -1164,7 +1166,7 @@ PUGI__NS_BEGIN
 	inline xml_node_struct* allocate_node(xml_allocator& alloc, xml_node_type type)
 	{
 		xml_memory_page* page;
-		void* memory = allocate_object(alloc, sizeof(xml_node_struct), page);
+		void* memory = alloc.allocate_object(sizeof(xml_node_struct), page);
 
 		return new (memory) xml_node_struct(page, type);
 	}
@@ -6174,18 +6176,25 @@ namespace pugi
 		// we can determine the offset reliably only if there is exactly once parse buffer
 		if (!doc.buffer || doc.extra_buffers) return -1;
 
-		// document node always has an offset of 0
-		if (_root == &doc) return 0;
+		switch (type())
+		{
+		case node_document:
+			return 0;
 
-		// we need contents to be inside buffer and not shared
-		// if it's shared we don't know if this is the original node
-		if (_root->name && (_root->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0)
-			return _root->name - doc.buffer;
+		case node_element:
+		case node_declaration:
+		case node_pi:
+			return _root->name && (_root->header & impl::xml_memory_page_name_allocated_or_shared_mask) == 0 ? _root->name - doc.buffer : -1;
 
-		if (_root->value && (_root->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0)
-			return _root->value - doc.buffer;
+		case node_pcdata:
+		case node_cdata:
+		case node_comment:
+		case node_doctype:
+			return _root->value && (_root->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0 ? _root->value - doc.buffer : -1;
 
-		return -1;
+		default:
+			return -1;
+		}
 	}
 
 #ifdef __BORLANDC__
