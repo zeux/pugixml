@@ -948,6 +948,25 @@ TEST(dom_node_memory_limit)
 	}
 }
 
+TEST(dom_node_memory_limit_pi)
+{
+	const unsigned int length = 65536;
+	static char_t string[length + 1];
+
+	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
+	string[length] = 0;
+
+	test_runner::_memory_fail_threshold = 32768 * 2 + sizeof(string);
+
+	xml_document doc;
+
+	for (int j = 0; j < 32; ++j)
+	{
+		CHECK(doc.append_child(node_pi).set_value(string));
+		CHECK(doc.remove_child(doc.first_child()));
+	}
+}
+
 TEST(dom_node_doctype_top_level)
 {
 	xml_document doc;
@@ -1116,6 +1135,11 @@ TEST(dom_node_append_buffer_out_of_memory_nodes)
 
 	test_runner::_memory_fail_threshold = 32768 + 128 + data.length() * sizeof(char_t) + 32;
 
+#ifdef PUGIXML_COMPACT
+	// ... and some space for hash table
+	test_runner::_memory_fail_threshold += 2048;
+#endif
+
 	xml_document doc;
 	CHECK_ALLOC_FAIL(CHECK(doc.append_buffer(data.c_str(), data.length() * sizeof(char_t), parse_fragment).status == status_out_of_memory));
 
@@ -1132,9 +1156,9 @@ TEST(dom_node_append_buffer_out_of_memory_nodes)
 
 TEST(dom_node_append_buffer_out_of_memory_name)
 {
-	test_runner::_memory_fail_threshold = 32768 + 128;
+	test_runner::_memory_fail_threshold = 32768 + 4096;
 
-	char data[128] = {0};
+	char data[4096] = {0};
 
 	xml_document doc;
 	CHECK(doc.append_child(STR("root")));
@@ -1378,6 +1402,11 @@ TEST(dom_node_copy_copyless)
 	// the document is parsed in-place so there should only be 1 page worth of allocations
 	test_runner::_memory_fail_threshold = 32768 + 128;
 
+#ifdef PUGIXML_COMPACT
+	// ... and some space for hash table
+	test_runner::_memory_fail_threshold += 2048;
+#endif
+
 	xml_document doc;
 	CHECK(doc.load_buffer_inplace(&datacopy[0], datacopy.size() * sizeof(char_t), parse_full));
 
@@ -1454,6 +1483,11 @@ TEST(dom_node_copy_attribute_copyless)
 
 	// the document is parsed in-place so there should only be 1 page worth of allocations
 	test_runner::_memory_fail_threshold = 32768 + 128;
+
+#ifdef PUGIXML_COMPACT
+	// ... and some space for hash table
+	test_runner::_memory_fail_threshold += 2048;
+#endif
 
 	xml_document doc;
 	CHECK(doc.load_buffer_inplace(&datacopy[0], datacopy.size() * sizeof(char_t), parse_full));

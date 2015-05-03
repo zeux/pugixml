@@ -445,7 +445,7 @@ TEST_XML(xpath_variables_copy, "<node />")
 	CHECK(!set3.get(STR("a")));
 }
 
-TEST_XML(xpath_variables_copy_out_of_memory, "<node />")
+TEST_XML(xpath_variables_copy_out_of_memory, "<node1 /><node2 />")
 {
 	xpath_variable_set set1;
 	set1.set(STR("a"), true);
@@ -471,7 +471,7 @@ TEST_XML(xpath_variables_copy_out_of_memory, "<node />")
 	CHECK(set2.get(STR("a"))->get_boolean() == true);
 	CHECK(set2.get(STR("b"))->get_number() == 2.0);
 	CHECK_STRING(set2.get(STR("c"))->get_string(), STR("string"));
-	CHECK(set2.get(STR("d"))->get_node_set().size() == 1);
+	CHECK(set2.get(STR("d"))->get_node_set().size() == 2);
 }
 
 #if __cplusplus >= 201103

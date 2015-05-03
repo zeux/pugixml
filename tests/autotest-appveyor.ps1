@@ -21,7 +21,7 @@ foreach ($vs in 9,10,11,12)
 		Invoke-CmdScript "C:\Program Files (x86)\Microsoft Visual Studio $vs.0\VC\vcvarsall.bat" $arch
 		if (! $?) { throw "Error setting up VS$vs $arch" }
 
-		foreach ($defines in "standard", "PUGIXML_WCHAR_MODE")
+		foreach ($defines in "standard", "PUGIXML_WCHAR_MODE", "PUGIXML_COMPACT")
 		{
 			$target = "tests_vs${vs}_${arch}_${defines}"
 			$deflist = if ($defines -eq "standard") { "" } else { "/D$defines" }
