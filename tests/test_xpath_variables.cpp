@@ -527,8 +527,8 @@ TEST(xpath_variables_copy_big)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + char_t(i / 10);
-		name[2] = '0' + char_t(i % 10);
+		name[1] = char_t('0' + i / 10);
+		name[2] = char_t('0' + i % 10);
 		name[3] = 0;
 
 		set.set(name, double(i));
@@ -536,15 +536,15 @@ TEST(xpath_variables_copy_big)
 
 	xpath_variable_set copy = set;
 
-	for (int i = 0; i < 100; ++i)
+	for (int j = 0; j < 100; ++j)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + char_t(i / 10);
-		name[2] = '0' + char_t(i % 10);
+		name[1] = char_t('0' + j / 10);
+		name[2] = char_t('0' + j % 10);
 		name[3] = 0;
 
-		CHECK(copy.get(name) && copy.get(name)->get_number() == i);
+		CHECK(copy.get(name) && copy.get(name)->get_number() == j);
 	}
 }
 
@@ -556,8 +556,8 @@ TEST(xpath_variables_copy_big_out_of_memory)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + char_t(i / 10);
-		name[2] = '0' + char_t(i % 10);
+		name[1] = char_t('0' + i / 10);
+		name[2] = char_t('0' + i % 10);
 		name[3] = 0;
 
 		set.set(name, double(i));
@@ -568,12 +568,12 @@ TEST(xpath_variables_copy_big_out_of_memory)
 	xpath_variable_set copy;
 	CHECK_ALLOC_FAIL(copy = set);
 
-	for (int i = 0; i < 100; ++i)
+	for (int j = 0; j < 100; ++j)
 	{
 		char_t name[4];
 		name[0] = 'a';
-		name[1] = '0' + char_t(i / 10);
-		name[2] = '0' + char_t(i % 10);
+		name[1] = char_t('0' + j / 10);
+		name[2] = char_t('0' + j % 10);
 		name[3] = 0;
 
 		CHECK(!copy.get(name));

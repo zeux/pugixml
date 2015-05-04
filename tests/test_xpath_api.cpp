@@ -614,7 +614,7 @@ TEST(xpath_api_query_vector)
 	for (int i = 0; i < 10; ++i)
 	{
 		char_t expr[2];
-		expr[0] = '0' + char_t(i);
+		expr[0] = char_t('0' + i);
 		expr[1] = 0;
 
 		qv.push_back(xpath_query(expr));
