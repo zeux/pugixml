@@ -25,6 +25,11 @@ ifeq ($(config),coverage)
 	LDFLAGS+=-fprofile-arcs
 endif
 
+ifeq ($(config),sanitize)
+	CXXFLAGS+=-fsanitize=address -fsanitize=undefined -fno-sanitize=vptr
+	LDFLAGS+=-fsanitize=address -fsanitize=undefined
+endif
+
 ifneq ($(defines),standard)
 	COMMA=,
 	CXXFLAGS+=-D $(subst $(COMMA), -D ,$(defines))
