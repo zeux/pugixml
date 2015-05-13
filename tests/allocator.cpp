@@ -4,6 +4,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
+// Address sanitizer
+#if defined(__has_feature)
+#	define ADDRESS_SANITIZER __has_feature(address_sanitizer)
+#else
+#	define ADDRESS_SANITIZER defined(__SANITIZE_ADDRESS__)
+#endif
+
 // Low-level allocation functions
 #if defined(_WIN32) || defined(_WIN64)
 #	ifdef __MWERKS__
@@ -67,7 +74,7 @@ namespace
 		VirtualProtect(rptr, aligned_size + page_size, PAGE_NOACCESS, &old_flags);
 	}
 }
-#elif (defined(__APPLE__) || defined(__linux__)) && !((defined(__has_feature) && __has_feature(address_sanitizer)) || defined(__SANITIZE_ADDRESS__))
+#elif (defined(__APPLE__) || defined(__linux__)) && !ADDRESS_SANITIZER
 #	include <sys/mman.h>
 
 namespace
