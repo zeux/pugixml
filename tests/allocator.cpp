@@ -67,7 +67,7 @@ namespace
 		VirtualProtect(rptr, aligned_size + page_size, PAGE_NOACCESS, &old_flags);
 	}
 }
-#elif defined(__APPLE__) || defined(__linux__)
+#elif (defined(__APPLE__) || defined(__linux__)) && !((defined(__has_feature) && __has_feature(address_sanitizer)) || defined(__SANITIZE_ADDRESS__))
 #	include <sys/mman.h>
 
 namespace
