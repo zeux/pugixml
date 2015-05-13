@@ -601,7 +601,7 @@ TEST(xpath_api_query_move)
 	CHECK(q4);
 	CHECK(q4.evaluate_boolean(c));
 
-	q4 = std::move(q4);
+	q4 = std::move(*&q4);
 
 	CHECK(q4);
 	CHECK(q4.evaluate_boolean(c));
