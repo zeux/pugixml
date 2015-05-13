@@ -12,7 +12,7 @@ function Invoke-CmdScript($scriptName)
 $sources = @("src/pugixml.cpp") + (Get-ChildItem -Path "tests/*.cpp" -Exclude "fuzz_*.cpp")
 $failed = $FALSE
 
-foreach ($vs in 9,10,11,12)
+foreach ($vs in 9,10,11,12,14)
 {
 	foreach ($arch in "x86","x64")
 	{
