@@ -1130,3 +1130,24 @@ TEST_XML(dom_ranged_for, "<node attr1='1' attr2='2'><test>3</test><fake>5</fake>
 	CHECK(index == 5);
 }
 #endif
+
+TEST_XML(dom_node_attribute_hinted, "<node attr1='1' attr2='2' attr3='3' />")
+{
+	xml_node node = doc.first_child();
+	xml_attribute attr1 = node.attribute(STR("attr1"));
+	xml_attribute attr2 = node.attribute(STR("attr2"));
+	xml_attribute attr3 = node.attribute(STR("attr3"));
+
+	xml_attribute hint;
+	CHECK(!xml_node().attribute(STR("test"), hint) && !hint);
+
+	CHECK(node.attribute(STR("attr2"), hint) == attr2 && hint == attr3);
+	CHECK(node.attribute(STR("attr3"), hint) == attr3 && !hint);
+
+	CHECK(node.attribute(STR("attr1"), hint) == attr1 && hint == attr2);
+	CHECK(node.attribute(STR("attr2"), hint) == attr2 && hint == attr3);
+	CHECK(node.attribute(STR("attr1"), hint) == attr1 && hint == attr2);
+	CHECK(node.attribute(STR("attr1"), hint) == attr1 && hint == attr2);
+
+	CHECK(!node.attribute(STR("attr"), hint) && hint == attr2);
+}

@@ -466,6 +466,9 @@ namespace pugi
 		xml_node next_sibling(const char_t* name) const;
 		xml_node previous_sibling(const char_t* name) const;
 
+		// Get attribute, starting the search from a hint (and updating hint so that searching for a sequence of attributes is fast)
+		xml_attribute attribute(const char_t* name, xml_attribute& hint) const;
+
 		// Get child value of current node; that is, value of the first child node of type PCDATA/CDATA
 		const char_t* child_value() const;
 

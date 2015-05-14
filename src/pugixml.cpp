@@ -5431,6 +5431,39 @@ namespace pugi
 		return xml_node();
 	}
 
+	PUGI__FN xml_attribute xml_node::attribute(const char_t* name_, xml_attribute& hint_) const
+	{
+		xml_attribute_struct* hint = hint_._attr;
+
+		// if hint is not an attribute of node, behavior is not defined
+		assert(!hint || (_root && impl::is_attribute_of(hint, _root)));
+
+		if (!_root) return xml_attribute();
+
+		// optimistically search from hint up until the end
+		for (xml_attribute_struct* i = hint; i; i = i->next_attribute)
+			if (i->name && impl::strequal(name_, i->name))
+			{
+				// update hint to maximize efficiency of searching for consecutive attributes
+				hint_._attr = i->next_attribute;
+
+				return xml_attribute(i);
+			}
+
+		// wrap around and search from the first attribute until the hint
+		// 'j' null pointer check is technically redundant, but it prevents a crash in case the assertion above fails
+		for (xml_attribute_struct* j = _root->first_attribute; j && j != hint; j = j->next_attribute)
+			if (j->name && impl::strequal(name_, j->name))
+			{
+				// update hint to maximize efficiency of searching for consecutive attributes
+				hint_._attr = j->next_attribute;
+
+				return xml_attribute(j);
+			}
+
+		return xml_attribute();
+	}
+
 	PUGI__FN xml_node xml_node::previous_sibling() const
 	{
 		if (!_root) return xml_node();
