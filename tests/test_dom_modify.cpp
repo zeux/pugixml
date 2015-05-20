@@ -1603,7 +1603,7 @@ template <typename T> bool fp_equal(T lhs, T rhs)
 #endif
 }
 
-TEST(dom_fp_roundtrip_min_max)
+TEST(dom_fp_roundtrip_min_max_float)
 {
 	xml_document doc;
 	xml_node node = doc.append_child(STR("node"));
@@ -1614,6 +1614,13 @@ TEST(dom_fp_roundtrip_min_max)
 
 	attr.set_value(std::numeric_limits<float>::max());
 	CHECK(fp_equal(attr.as_float(), std::numeric_limits<float>::max()));
+}
+
+TEST(dom_fp_roundtrip_min_max_double)
+{
+	xml_document doc;
+	xml_node node = doc.append_child(STR("node"));
+	xml_attribute attr = node.append_attribute(STR("attr"));
 
 	attr.set_value(std::numeric_limits<double>::min());
 	CHECK(fp_equal(attr.as_double(), std::numeric_limits<double>::min()));
