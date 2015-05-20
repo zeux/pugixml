@@ -8089,7 +8089,7 @@ PUGI__NS_BEGIN
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(string, 0);
 	#else
-		return atof(string);
+		return strtod(string, 0);
 	#endif
 	}
 
