@@ -956,7 +956,7 @@ TEST(parse_out_of_memory_allocator_state_sync)
 
 	test_runner::_memory_fail_threshold = 0;
 
-	for (unsigned int i = 0; i < count; ++i)
+	for (unsigned int j = 0; j < count; ++j)
 		CHECK(doc.append_child(STR("n")));
 }
 
