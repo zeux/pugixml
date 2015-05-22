@@ -4449,10 +4449,8 @@ PUGI__NS_BEGIN
 		return (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) ? 16 : 10;
 	}
 
-	PUGI__FN int get_value_int(const char_t* value, int def)
+	PUGI__FN int get_value_int(const char_t* value)
 	{
-		if (!value) return def;
-
 		int base = get_integer_base(value);
 
 	#ifdef PUGIXML_WCHAR_MODE
@@ -4462,10 +4460,8 @@ PUGI__NS_BEGIN
 	#endif
 	}
 
-	PUGI__FN unsigned int get_value_uint(const char_t* value, unsigned int def)
+	PUGI__FN unsigned int get_value_uint(const char_t* value)
 	{
-		if (!value) return def;
-
 		int base = get_integer_base(value);
 
 	#ifdef PUGIXML_WCHAR_MODE
@@ -4475,10 +4471,8 @@ PUGI__NS_BEGIN
 	#endif
 	}
 
-	PUGI__FN double get_value_double(const char_t* value, double def)
+	PUGI__FN double get_value_double(const char_t* value)
 	{
-		if (!value) return def;
-
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(value, 0);
 	#else
@@ -4486,10 +4480,8 @@ PUGI__NS_BEGIN
 	#endif
 	}
 
-	PUGI__FN float get_value_float(const char_t* value, float def)
+	PUGI__FN float get_value_float(const char_t* value)
 	{
-		if (!value) return def;
-
 	#ifdef PUGIXML_WCHAR_MODE
 		return static_cast<float>(wcstod(value, 0));
 	#else
@@ -4497,10 +4489,8 @@ PUGI__NS_BEGIN
 	#endif
 	}
 
-	PUGI__FN bool get_value_bool(const char_t* value, bool def)
+	PUGI__FN bool get_value_bool(const char_t* value)
 	{
-		if (!value) return def;
-
 		// only look at first char
 		char_t first = *value;
 
@@ -4509,10 +4499,8 @@ PUGI__NS_BEGIN
 	}
 
 #ifdef PUGIXML_HAS_LONG_LONG
-	PUGI__FN long long get_value_llong(const char_t* value, long long def)
+	PUGI__FN long long get_value_llong(const char_t* value)
 	{
-		if (!value) return def;
-
 		int base = get_integer_base(value);
 
 	#ifdef PUGIXML_WCHAR_MODE
@@ -4530,10 +4518,8 @@ PUGI__NS_BEGIN
 	#endif
 	}
 
-	PUGI__FN unsigned long long get_value_ullong(const char_t* value, unsigned long long def)
+	PUGI__FN unsigned long long get_value_ullong(const char_t* value)
 	{
-		if (!value) return def;
-
 		int base = get_integer_base(value);
 
 	#ifdef PUGIXML_WCHAR_MODE
@@ -5091,38 +5077,38 @@ namespace pugi
 
 	PUGI__FN int xml_attribute::as_int(int def) const
 	{
-		return impl::get_value_int(_attr ? _attr->value + 0 : 0, def);
+		return (_attr && _attr->value) ? impl::get_value_int(_attr->value) : def;
 	}
 
 	PUGI__FN unsigned int xml_attribute::as_uint(unsigned int def) const
 	{
-		return impl::get_value_uint(_attr ? _attr->value + 0 : 0, def);
+		return (_attr && _attr->value) ? impl::get_value_uint(_attr->value) : def;
 	}
 
 	PUGI__FN double xml_attribute::as_double(double def) const
 	{
-		return impl::get_value_double(_attr ? _attr->value + 0 : 0, def);
+		return (_attr && _attr->value) ? impl::get_value_double(_attr->value) : def;
 	}
 
 	PUGI__FN float xml_attribute::as_float(float def) const
 	{
-		return impl::get_value_float(_attr ? _attr->value + 0 : 0, def);
+		return (_attr && _attr->value) ? impl::get_value_float(_attr->value) : def;
 	}
 
 	PUGI__FN bool xml_attribute::as_bool(bool def) const
 	{
-		return impl::get_value_bool(_attr ? _attr->value + 0 : 0, def);
+		return (_attr && _attr->value) ? impl::get_value_bool(_attr->value) : def;
 	}
 
 #ifdef PUGIXML_HAS_LONG_LONG
 	PUGI__FN long long xml_attribute::as_llong(long long def) const
 	{
-		return impl::get_value_llong(_attr ? _attr->value + 0 : 0, def);
+		return (_attr && _attr->value) ? impl::get_value_llong(_attr->value) : def;
 	}
 
 	PUGI__FN unsigned long long xml_attribute::as_ullong(unsigned long long def) const
 	{
-		return impl::get_value_ullong(_attr ? _attr->value + 0 : 0, def);
+		return (_attr && _attr->value) ? impl::get_value_ullong(_attr->value) : def;
 	}
 #endif
 
@@ -6304,35 +6290,35 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_int(d ? d->value + 0 : 0, def);
+		return (d && d->value) ? impl::get_value_int(d->value) : def;
 	}
 
 	PUGI__FN unsigned int xml_text::as_uint(unsigned int def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_uint(d ? d->value + 0 : 0, def);
+		return (d && d->value) ? impl::get_value_uint(d->value) : def;
 	}
 
 	PUGI__FN double xml_text::as_double(double def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_double(d ? d->value + 0 : 0, def);
+		return (d && d->value) ? impl::get_value_double(d->value) : def;
 	}
 
 	PUGI__FN float xml_text::as_float(float def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_float(d ? d->value + 0 : 0, def);
+		return (d && d->value) ? impl::get_value_float(d->value) : def;
 	}
 
 	PUGI__FN bool xml_text::as_bool(bool def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_bool(d ? d->value + 0 : 0, def);
+		return (d && d->value) ? impl::get_value_bool(d->value) : def;
 	}
 
 #ifdef PUGIXML_HAS_LONG_LONG
@@ -6340,14 +6326,14 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_llong(d ? d->value + 0 : 0, def);
+		return (d && d->value) ? impl::get_value_llong(d->value) : def;
 	}
 
 	PUGI__FN unsigned long long xml_text::as_ullong(unsigned long long def) const
 	{
 		xml_node_struct* d = _data();
 
-		return impl::get_value_ullong(d ? d->value + 0 : 0, def);
+		return (d && d->value) ? impl::get_value_ullong(d->value) : def;
 	}
 #endif
 
