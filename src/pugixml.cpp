@@ -6833,7 +6833,8 @@ namespace pugi
 	{
 		reset();
 
-		impl::auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, "rb"), fclose);
+		using impl::auto_deleter; // MSVC7 workaround
+		auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, "rb"), fclose);
 
 		return impl::load_file_impl(*this, file.data, options, encoding);
 	}
@@ -6842,7 +6843,8 @@ namespace pugi
 	{
 		reset();
 
-		impl::auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, L"rb"), fclose);
+		using impl::auto_deleter; // MSVC7 workaround
+		auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, L"rb"), fclose);
 
 		return impl::load_file_impl(*this, file.data, options, encoding);
 	}
@@ -6914,14 +6916,16 @@ namespace pugi
 
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		impl::auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), fclose);
+		using impl::auto_deleter; // MSVC7 workaround
+		auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), fclose);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
-		impl::auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), fclose);
+		using impl::auto_deleter; // MSVC7 workaround
+		auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), fclose);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
@@ -12197,7 +12201,8 @@ namespace pugi
 		}
 		else
 		{
-			impl::auto_deleter<impl::xpath_query_impl> impl(qimpl, impl::xpath_query_impl::destroy);
+			using impl::auto_deleter; // MSVC7 workaround
+			auto_deleter<impl::xpath_query_impl> impl(qimpl, impl::xpath_query_impl::destroy);
 
 			qimpl->root = impl::xpath_parser::parse(query, variables, &qimpl->alloc, &_result);
 
