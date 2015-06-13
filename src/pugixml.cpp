@@ -1157,6 +1157,7 @@ PUGI__NS_BEGIN
 	{
 		xml_memory_page* page;
 		void* memory = alloc.allocate_object(sizeof(xml_attribute_struct), page);
+		if (!memory) return 0;
 
 		return new (memory) xml_attribute_struct(page);
 	}
@@ -1165,6 +1166,7 @@ PUGI__NS_BEGIN
 	{
 		xml_memory_page* page;
 		void* memory = alloc.allocate_object(sizeof(xml_node_struct), page);
+		if (!memory) return 0;
 
 		return new (memory) xml_node_struct(page, type);
 	}
@@ -4714,6 +4716,7 @@ PUGI__NS_BEGIN
 		static xml_stream_chunk* create()
 		{
 			void* memory = xml_memory::allocate(sizeof(xml_stream_chunk));
+			if (!memory) return 0;
 			
 			return new (memory) xml_stream_chunk();
 		}
@@ -11606,6 +11609,7 @@ PUGI__NS_BEGIN
 		static xpath_query_impl* create()
 		{
 			void* memory = xml_memory::allocate(sizeof(xpath_query_impl));
+			if (!memory) return 0;
 
 			return new (memory) xpath_query_impl();
 		}
