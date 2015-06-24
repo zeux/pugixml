@@ -379,7 +379,7 @@ Both `xml_node` and `xml_attribute` have the default constructor which initializ
 `xml_node` and `xml_attribute` try to behave like pointers, that is, they can be compared with other objects of the same type, making it possible to use them as keys in associative containers. All handles to the same underlying object are equal, and any two handles to different underlying objects are not equal. Null handles only compare as equal to themselves. The result of relational comparison can not be reliably determined from the order of nodes in file or in any other way. Do not use relational comparison operators except for search optimization (i.e. associative container keys).
 
 [[xml_attribute::hash_value]][[xml_node::hash_value]]
-If you want to use `xml_node` or `xml_attribute` objects as keys in hash-based associative containers, you can use the `hash_value` member functions. They return the hash values that are guaranteed to be the same for all handles to the same underlying object. The hash value for null handles is 0.
+If you want to use `xml_node` or `xml_attribute` objects as keys in hash-based associative containers, you can use the `hash_value` member functions. They return the hash values that are guaranteed to be the same for all handles to the same underlying object. The hash value for null handles is 0. Note that hash value does not depend on the content of the node, only on the location of the underlying structure in memory - this means that loading the same document twice will likely produce different hash values, and copying the node will not preserve the hash.
 
 [[xml_attribute::unspecified_bool_type]][[xml_node::unspecified_bool_type]][[xml_attribute::empty]][[xml_node::empty]]
 Finally handles can be implicitly cast to boolean-like objects, so that you can test if the node/attribute is empty with the following code: `if (node) { ... }` or `if (!node) { ... } else { ... }`. Alternatively you can check if a given `xml_node`/`xml_attribute` handle is null by calling the following methods:
@@ -1668,7 +1668,7 @@ NOTE: You should use the usual bitwise arithmetics to manipulate the bitmask: to
 
 These flags control the resulting tree contents:
 
-* [[format_indent]]`format_indent` determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is `"\t"` by default). If this flag is on, the indentations string is printed several times before every node, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if <<format_raw,format_raw>> is enabled. This flag is *on* by default.
+* [[format_indent]]`format_indent` determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is `"\t"` by default). If this flag is on, the indentation string is printed several times before every node, where the amount of indentation depends on the node's depth relative to the output subtree. This flag has no effect if <<format_raw,format_raw>> is enabled. This flag is *on* by default.
 
 * [[format_indent_attributes]]`format_indent_attributes` determines if all attributes should be printed on a new line, indented with the indentation string according to the attribute's depth. This flag implies <<format_indent,format_indent>>. This flag has no effect if <<format_raw,format_raw>> is enabled. This flag is *off* by default.
 
