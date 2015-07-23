@@ -10660,6 +10660,11 @@ PUGI__NS_BEGIN
 			if (_right) _right->optimize(alloc);
 			if (_next) _next->optimize(alloc);
 
+			optimize_self(alloc);
+		}
+
+		void optimize_self(xpath_allocator* alloc)
+		{
 			// Rewrite [position()=expr] with [expr]
 			// Note that this step has to go before classification to recognize [position()=1]
 			if ((_type == ast_filter || _type == ast_predicate) &&
