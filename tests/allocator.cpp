@@ -138,14 +138,16 @@ namespace
 #endif
 
 // High-level allocation functions
+const size_t memory_alignment = sizeof(double) > sizeof(void*) ? sizeof(double) : sizeof(void*);
+
 void* memory_allocate(size_t size)
 {
-	void* result = allocate(size + sizeof(size_t));
+	void* result = allocate(size + memory_alignment);
 	if (!result) return 0;
 
 	memcpy(result, &size, sizeof(size_t));
 
-	return static_cast<size_t*>(result) + 1;
+	return static_cast<char*>(result) + memory_alignment;
 }
 
 size_t memory_size(void* ptr)
@@ -153,7 +155,7 @@ size_t memory_size(void* ptr)
 	assert(ptr);
 
 	size_t result;
-	memcpy(&result, static_cast<size_t*>(ptr) - 1, sizeof(size_t));
+	memcpy(&result, static_cast<char*>(ptr) - memory_alignment, sizeof(size_t));
 
 	return result;
 }
@@ -164,6 +166,6 @@ void memory_deallocate(void* ptr)
 
 	size_t size = memory_size(ptr);
 
-	deallocate(static_cast<size_t*>(ptr) - 1, size + sizeof(size_t));
+	deallocate(static_cast<char*>(ptr) - memory_alignment, size + memory_alignment);
 }
 
