@@ -7259,18 +7259,22 @@ PUGI__NS_END
 
 // Allocator used for AST and evaluation stacks
 PUGI__NS_BEGIN
+	static const size_t xpath_memory_page_size =
+	#ifdef PUGIXML_MEMORY_XPATH_PAGE_SIZE
+		PUGIXML_MEMORY_XPATH_PAGE_SIZE
+	#else
+		4096
+	#endif
+		;
+
+	static const uintptr_t xpath_memory_block_alignment = sizeof(void*);
+
 	struct xpath_memory_block
 	{	
 		xpath_memory_block* next;
 		size_t capacity;
 
-		char data[
-	#ifdef PUGIXML_MEMORY_XPATH_PAGE_SIZE
-			PUGIXML_MEMORY_XPATH_PAGE_SIZE
-	#else
-			4096
-	#endif
-		];
+		char data[xpath_memory_page_size];
 	};
 		
 	class xpath_allocator
@@ -7292,8 +7296,8 @@ PUGI__NS_BEGIN
 		
 		void* allocate_nothrow(size_t size)
 		{
-			// align size so that we're able to store pointers in subsequent blocks
-			size = (size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+			// round size up to block alignment boundary
+			size = (size + xpath_memory_block_alignment - 1) & ~(xpath_memory_block_alignment - 1);
 
 			if (_root_size + size <= _root->capacity)
 			{
@@ -7342,9 +7346,9 @@ PUGI__NS_BEGIN
 
 		void* reallocate(void* ptr, size_t old_size, size_t new_size)
 		{
-			// align size so that we're able to store pointers in subsequent blocks
-			old_size = (old_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
-			new_size = (new_size + sizeof(void*) - 1) & ~(sizeof(void*) - 1);
+			// round size up to block alignment boundary
+			old_size = (old_size + xpath_memory_block_alignment - 1) & ~(xpath_memory_block_alignment - 1);
+			new_size = (new_size + xpath_memory_block_alignment - 1) & ~(xpath_memory_block_alignment - 1);
 
 			// we can only reallocate the last object
 			assert(ptr == 0 || static_cast<char*>(ptr) + old_size == _root->data + _root_size);
