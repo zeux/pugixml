@@ -7267,14 +7267,18 @@ PUGI__NS_BEGIN
 	#endif
 		;
 
-	static const uintptr_t xpath_memory_block_alignment = sizeof(void*);
+	static const uintptr_t xpath_memory_block_alignment = sizeof(double) > sizeof(void*) ? sizeof(double) : sizeof(void*);
 
 	struct xpath_memory_block
 	{	
 		xpath_memory_block* next;
 		size_t capacity;
 
-		char data[xpath_memory_page_size];
+		union
+		{
+			char data[xpath_memory_page_size];
+			double alignment;
+		};
 	};
 		
 	class xpath_allocator
