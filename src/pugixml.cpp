@@ -7305,7 +7305,7 @@ PUGI__NS_BEGIN
 
 			if (_root_size + size <= _root->capacity)
 			{
-				void* buf = _root->data + _root_size;
+				void* buf = &_root->data[0] + _root_size;
 				_root_size += size;
 				return buf;
 			}
@@ -7355,7 +7355,7 @@ PUGI__NS_BEGIN
 			new_size = (new_size + xpath_memory_block_alignment - 1) & ~(xpath_memory_block_alignment - 1);
 
 			// we can only reallocate the last object
-			assert(ptr == 0 || static_cast<char*>(ptr) + old_size == _root->data + _root_size);
+			assert(ptr == 0 || static_cast<char*>(ptr) + old_size == &_root->data[0] + _root_size);
 
 			// adjust root size so that we have not allocated the object at all
 			bool only_object = (_root_size == old_size);
