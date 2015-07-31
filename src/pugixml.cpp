@@ -3430,7 +3430,7 @@ PUGI__NS_BEGIN
 					if (!PUGI__OPTSET(parse_trim_pcdata))
 						s = mark;
 							
-					if (cursor->parent || PUGI__OPTSET(parse_fragment))
+					if ((cursor->parent && !PUGI__OPTSET(parse_embed_pcdata)) || PUGI__OPTSET(parse_fragment))
 					{
 						PUGI__PUSHNODE(node_pcdata); // Append a new node on the tree.
 						cursor->value = s; // Save the offset.
@@ -3439,6 +3439,14 @@ PUGI__NS_BEGIN
 								
 						PUGI__POPNODE(); // Pop since this is a standalone.
 						
+						if (!*s) break;
+                    }
+					else if (cursor->parent && PUGI__OPTSET(parse_embed_pcdata) && !cursor->value)
+					{
+						cursor->value = s; // Save the offset.
+
+						s = strconv_pcdata(s);
+
 						if (!*s) break;
 					}
 					else
@@ -5479,6 +5487,9 @@ namespace pugi
 	PUGI__FN const char_t* xml_node::child_value() const
 	{
 		if (!_root) return PUGIXML_TEXT("");
+
+		if ((_root->header & impl::xml_memory_page_type_mask) + 1 == node_element && _root->value)
+			return _root->value;
 		
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if (impl::is_text_node(i) && i->value)
@@ -6236,6 +6247,9 @@ namespace pugi
 	PUGI__FN xml_node_struct* xml_text::_data() const
 	{
 		if (!_root || impl::is_text_node(_root)) return _root;
+
+		if ((_root->header & impl::xml_memory_page_type_mask) + 1 == node_element && _root->value)
+			return _root;
 
 		for (xml_node_struct* node = _root->first_child; node; node = node->next_sibling)
 			if (impl::is_text_node(node))
