@@ -216,6 +216,8 @@ pugixml uses several defines to control the compilation process. There are two w
 
 [[PUGIXML_WCHAR_MODE]]`PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See <<dom.unicode>> for more details.
 
+[[PUGIXML_COMPACT]]`PUGIXML_COMPACT` define activates a different internal representation of document storage that is much more memory efficient for documents with a lot of markup (i.e. nodes and attributes), but is slightly slower to parse and access. For details see <<dom.memory.compact>>.
+
 [[PUGIXML_NO_XPATH]]`PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation. This option is provided in case you do not need XPath functionality and need to save code space.
 
 [[PUGIXML_NO_STL]]`PUGIXML_NO_STL` define disables use of STL in pugixml. The functions that operate on STL types are no longer present (i.e. load/save via iostream) if this macro is defined. This option is provided in case your target platform does not have a standard-compliant STL implementation.
@@ -535,6 +537,17 @@ Constructing a document object using the default constructor does not result in 
 When the document is loaded from file/buffer, unless an inplace loading function is used (see <<loading.memory>>), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the <<xml_document,xml_document>> object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
 
 All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 Kb; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
+
+[[dom.memory.compact]]
+==== Compact mode
+
+By default nodes and attributes are optimized for efficiency of access. This can cause them to take a significant amount of memory - for documents with a lot of nodes and not a lot of contents (short attribute values/node text), and depending on the pointer size, the document structure can take noticeably more memory than the document itself (e.g. on a 64-bit platform in UTF-8 mode a markup-heavy document with the file size of 2.1 Mb can use 2.1 Mb for document buffer and 8.3 Mb for document structure).
+
+If you are processing big documents or your platform is memory constrained and you're willing to sacrifice a bit of performance for memory, you can compile pugixml with `PUGIXML_COMPACT` define which will activate compact mode. Compact mode uses a different representation of the document structure that assumes locality of reference between nodes and attributes to optimize memory usage. As a result you get significantly smaller node/attribute objects; usually most objects in most documents don't require additional storage, but in the worst case - if assumptions about locality of reference don't hold - additional memory will be allocated to store the extra data required.
+
+The compact storage supports all existing operations - including tree modification - with the same amortized complexity (that is, all basic document manipulations are still O(1) on average). The operations are slightly slower; you can usually expect 10-50% slowdown in terms of processing time unless your processing was memory-bound.
+
+On 32-bit architectures document structure in compact mode is typically reduced by around 2.5x; on 64-bit architectures the ratio is around 5x. Thus for big markup-heavy documents compact mode can make the difference between the processing of a multi-gigabyte document running completely from RAM vs requiring swapping to disk. Even if the document fits into memory, compact storage can use CPU caches more efficiently by taking less space and causing less cache/TLB misses.
 
 [[loading]]
 == Loading document
@@ -2461,6 +2474,7 @@ This is the reference for all macros, types, enumerations, classes and functions
 [source,subs="+macros"]
 ----
 #define +++<a href="#PUGIXML_WCHAR_MODE">PUGIXML_WCHAR_MODE</a>+++
+#define +++<a href="#PUGIXML_COMPACT">PUGIXML_COMPACT</a>+++
 #define +++<a href="#PUGIXML_NO_XPATH">PUGIXML_NO_XPATH</a>+++
 #define +++<a href="#PUGIXML_NO_STL">PUGIXML_NO_STL</a>+++
 #define +++<a href="#PUGIXML_NO_EXCEPTIONS">PUGIXML_NO_EXCEPTIONS</a>+++

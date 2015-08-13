@@ -930,6 +930,9 @@ can include pugixml.cpp in your project (see <a href="#install.building.embed">B
 <p><a id="PUGIXML_WCHAR_MODE"></a><code>PUGIXML_WCHAR_MODE</code> define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use <code>char</code> as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on <code>wchar_t</code> size, most functions use <code>wchar_t</code> as character type). See <a href="#dom.unicode">Unicode interface</a> for more details.</p>
 </div>
 <div class="paragraph">
+<p><a id="PUGIXML_COMPACT"></a><code>PUGIXML_COMPACT</code> define activates a different internal representation of document storage that is much more memory efficient for documents with a lot of markup (i.e. nodes and attributes), but is slightly slower to parse and access. For details see <a href="#dom.memory.compact">Compact mode</a>.</p>
+</div>
+<div class="paragraph">
 <p><a id="PUGIXML_NO_XPATH"></a><code>PUGIXML_NO_XPATH</code> define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation. This option is provided in case you do not need XPath functionality and need to save code space.</p>
 </div>
 <div class="paragraph">
@@ -1215,7 +1218,7 @@ Both <code>xml_node</code> and <code>xml_attribute</code> have the default const
 </div>
 <div class="paragraph">
 <p><a id="xml_attribute::hash_value"></a><a id="xml_node::hash_value"></a>
-If you want to use <code>xml_node</code> or <code>xml_attribute</code> objects as keys in hash-based associative containers, you can use the <code>hash_value</code> member functions. They return the hash values that are guaranteed to be the same for all handles to the same underlying object. The hash value for null handles is 0.</p>
+If you want to use <code>xml_node</code> or <code>xml_attribute</code> objects as keys in hash-based associative containers, you can use the <code>hash_value</code> member functions. They return the hash values that are guaranteed to be the same for all handles to the same underlying object. The hash value for null handles is 0. Note that hash value does not depend on the content of the node, only on the location of the underlying structure in memory - this means that loading the same document twice will likely produce different hash values, and copying the node will not preserve the hash.</p>
 </div>
 <div class="paragraph">
 <p><a id="xml_attribute::unspecified_bool_type"></a><a id="xml_node::unspecified_bool_type"></a><a id="xml_attribute::empty"></a><a id="xml_node::empty"></a>
@@ -1382,7 +1385,7 @@ You can use the following accessor functions to change or get current memory man
 </div>
 </div>
 <div class="paragraph">
-<p>Allocation function is called with the size (in bytes) as an argument and should return a pointer to a memory block with alignment that is suitable for storage of primitive types (usually a maximum of <code>void*</code> and <code>double</code> types alignment is sufficient) and size that is greater than or equal to the requested one. If the allocation fails, the function has to return null pointer (throwing an exception from allocation function results in undefined behavior).</p>
+<p>Allocation function is called with the size (in bytes) as an argument and should return a pointer to a memory block with alignment that is suitable for storage of primitive types (usually a maximum of <code>void*</code> and <code>double</code> types alignment is sufficient) and size that is greater than or equal to the requested one. If the allocation fails, the function has to either return null pointer or to throw an exception.</p>
 </div>
 <div class="paragraph">
 <p>Deallocation function is called with the pointer that was returned by some call to allocation function; it is never called with a null pointer. If memory management functions are not thread-safe, library thread safety is not guaranteed.</p>
@@ -1444,6 +1447,21 @@ You can use the following accessor functions to change or get current memory man
 </div>
 <div class="paragraph">
 <p>All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 Kb; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="dom.memory.compact"><a class="anchor" href="#dom.memory.compact"></a>3.6.4. Compact mode</h4>
+<div class="paragraph">
+<p>By default nodes and attributes are optimized for efficiency of access. This can cause them to take a significant amount of memory - for documents with a lot of nodes and not a lot of contents (short attribute values/node text), and depending on the pointer size, the document structure can take noticeably more memory than the document itself (e.g. on a 64-bit platform in UTF-8 mode a markup-heavy document with the file size of 2.1 Mb can use 2.1 Mb for document buffer and 8.3 Mb for document structure).</p>
+</div>
+<div class="paragraph">
+<p>If you are processing big documents or your platform is memory constrained and you&#8217;re willing to sacrifice a bit of performance for memory, you can compile pugixml with <code>PUGIXML_COMPACT</code> define which will activate compact mode. Compact mode uses a different representation of the document structure that assumes locality of reference between nodes and attributes to optimize memory usage. As a result you get significantly smaller node/attribute objects; usually most objects in most documents don&#8217;t require additional storage, but in the worst case - if assumptions about locality of reference don&#8217;t hold - additional memory will be allocated to store the extra data required.</p>
+</div>
+<div class="paragraph">
+<p>The compact storage supports all existing operations - including tree modification - with the same <strong>amortized</strong> complexity (that is, all basic document manipulations are still amortized O(1)). The operations are slightly slower; you can usually expect 10-50% slowdown in terms of processing time unless your processing was memory-bound.</p>
+</div>
+<div class="paragraph">
+<p>On 32-bit architectures document structure is typically reduced by around 2.5x; on 64-bit architectures the ratio is around 5x. Thus for big markup-heavy documents compact mode can make the difference between the processing of a multi-gigabyte document running completely in RAM vs requiring swapping to disk. Even if the document fits into memory, compact storage can use CPU caches more efficiently by taking less space and causing less cache/TLB misses.</p>
 </div>
 </div>
 </div>
@@ -3295,7 +3313,10 @@ You should use the usual bitwise arithmetics to manipulate the bitmask: to enabl
 <div class="ulist">
 <ul>
 <li>
-<p><a id="format_indent"></a><code>format_indent</code> determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is <code>"\t"</code> by default). If this flag is on, before every node the indentation string is output several times, where the amount of indentation depends on the node&#8217;s depth relative to the output subtree. This flag has no effect if <a href="#format_raw">format_raw</a> is enabled. This flag is <strong>on</strong> by default.</p>
+<p><a id="format_indent"></a><code>format_indent</code> determines if all nodes should be indented with the indentation string (this is an additional parameter for all saving functions, and is <code>"\t"</code> by default). If this flag is on, the indentation string is printed several times before every node, where the amount of indentation depends on the node&#8217;s depth relative to the output subtree. This flag has no effect if <a href="#format_raw">format_raw</a> is enabled. This flag is <strong>on</strong> by default.</p>
+</li>
+<li>
+<p><a id="format_indent_attributes"></a><code>format_indent_attributes</code> determines if all attributes should be printed on a new line, indented with the indentation string according to the attribute&#8217;s depth. This flag implies <a href="#format_indent">format_indent</a>. This flag has no effect if <a href="#format_raw">format_raw</a> is enabled. This flag is <strong>off</strong> by default.</p>
 </li>
 <li>
 <p><a id="format_raw"></a><code>format_raw</code> switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with <a href="#parse_ws_pcdata">parse_ws_pcdata</a> flag, to preserve the original document formatting as much as possible. This flag is <strong>off</strong> by default.</p>
@@ -5028,6 +5049,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="c++"><span class="tok-cp">#define <a href="#PUGIXML_WCHAR_MODE">PUGIXML_WCHAR_MODE</a></span>
+<span class="tok-cp">#define <a href="#PUGIXML_COMPACT">PUGIXML_COMPACT</a></span>
 <span class="tok-cp">#define <a href="#PUGIXML_NO_XPATH">PUGIXML_NO_XPATH</a></span>
 <span class="tok-cp">#define <a href="#PUGIXML_NO_STL">PUGIXML_NO_STL</a></span>
 <span class="tok-cp">#define <a href="#PUGIXML_NO_EXCEPTIONS">PUGIXML_NO_EXCEPTIONS</a></span>
@@ -5115,6 +5137,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <pre class="pygments highlight"><code data-lang="c++"><span class="tok-c1">// Formatting options bit flags:</span>
 <span class="tok-k">const</span> <span class="tok-kt">unsigned</span> <span class="tok-kt">int</span> <a href="#format_default">format_default</a>
 <span class="tok-k">const</span> <span class="tok-kt">unsigned</span> <span class="tok-kt">int</span> <a href="#format_indent">format_indent</a>
+<span class="tok-k">const</span> <span class="tok-kt">unsigned</span> <span class="tok-kt">int</span> <a href="#format_indent_attributes">format_indent_attributes</a>
 <span class="tok-k">const</span> <span class="tok-kt">unsigned</span> <span class="tok-kt">int</span> <a href="#format_no_declaration">format_no_declaration</a>
 <span class="tok-k">const</span> <span class="tok-kt">unsigned</span> <span class="tok-kt">int</span> <a href="#format_no_escapes">format_no_escapes</a>
 <span class="tok-k">const</span> <span class="tok-kt">unsigned</span> <span class="tok-kt">int</span> <a href="#format_raw">format_raw</a>
@@ -5509,7 +5532,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-04-10 20:49:27 PDT
+Last updated 2015-08-13 13:59:26 BST
 </div>
 </div>
 </body>
