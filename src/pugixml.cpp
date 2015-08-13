@@ -4448,7 +4448,7 @@ PUGI__NS_BEGIN
 		if (*s == '-')
 			s++;
 
-		return (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) ? 16 : 10;
+		return (s[0] == '0' && (s[1] | ' ') == 'x') ? 16 : 10;
 	}
 
 	PUGI__FN int get_value_int(const char_t* value)
