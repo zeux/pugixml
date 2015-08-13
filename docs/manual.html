@@ -1274,7 +1274,7 @@ If the size of <code>wchar_t</code> is 2, pugixml assumes UTF-16 encoding instea
 There is a special type, <code>pugi::char_t</code>, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type <code>pugi::string_t</code>, which is defined as the STL string of the character type; it corresponds to <code>std::string</code> in char mode and to <code>std::wstring</code> in wchar_t mode.</p>
 </div>
 <div class="paragraph">
-<p>In addition to the interface, the internal implementation changes to store XML data as <code>pugi::char_t</code>; this means that these two modes have different memory usage characteristics. The conversion to <code>pugi::char_t</code> upon document loading and from <code>pugi::char_t</code> upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is non-ASCII, wchar_t mode is probably a better choice.</p>
+<p>In addition to the interface, the internal implementation changes to store XML data as <code>pugi::char_t</code>; this means that these two modes have different memory usage characteristics - generally UTF-8 mode is more memory and performance efficient, especially if <code>sizeof(wchar_t)</code> is 4. The conversion to <code>pugi::char_t</code> upon document loading and from <code>pugi::char_t</code> upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is non-ASCII, wchar_t mode is probably a better choice.</p>
 </div>
 <div class="paragraph">
 <p><a id="as_utf8"></a><a id="as_wide"></a>
@@ -1458,10 +1458,10 @@ You can use the following accessor functions to change or get current memory man
 <p>If you are processing big documents or your platform is memory constrained and you&#8217;re willing to sacrifice a bit of performance for memory, you can compile pugixml with <code>PUGIXML_COMPACT</code> define which will activate compact mode. Compact mode uses a different representation of the document structure that assumes locality of reference between nodes and attributes to optimize memory usage. As a result you get significantly smaller node/attribute objects; usually most objects in most documents don&#8217;t require additional storage, but in the worst case - if assumptions about locality of reference don&#8217;t hold - additional memory will be allocated to store the extra data required.</p>
 </div>
 <div class="paragraph">
-<p>The compact storage supports all existing operations - including tree modification - with the same <strong>amortized</strong> complexity (that is, all basic document manipulations are still amortized O(1)). The operations are slightly slower; you can usually expect 10-50% slowdown in terms of processing time unless your processing was memory-bound.</p>
+<p>The compact storage supports all existing operations - including tree modification - with the same amortized complexity (that is, all basic document manipulations are still O(1) on average). The operations are slightly slower; you can usually expect 10-50% slowdown in terms of processing time unless your processing was memory-bound.</p>
 </div>
 <div class="paragraph">
-<p>On 32-bit architectures document structure is typically reduced by around 2.5x; on 64-bit architectures the ratio is around 5x. Thus for big markup-heavy documents compact mode can make the difference between the processing of a multi-gigabyte document running completely in RAM vs requiring swapping to disk. Even if the document fits into memory, compact storage can use CPU caches more efficiently by taking less space and causing less cache/TLB misses.</p>
+<p>On 32-bit architectures document structure in compact mode is typically reduced by around 2.5x; on 64-bit architectures the ratio is around 5x. Thus for big markup-heavy documents compact mode can make the difference between the processing of a multi-gigabyte document running completely from RAM vs requiring swapping to disk. Even if the document fits into memory, compact storage can use CPU caches more efficiently by taking less space and causing less cache/TLB misses.</p>
 </div>
 </div>
 </div>
@@ -5532,7 +5532,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-08-13 13:59:26 BST
+Last updated 2015-08-13 14:06:53 BST
 </div>
 </div>
 </body>
