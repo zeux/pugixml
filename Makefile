@@ -20,9 +20,8 @@ ifeq ($(config),release)
 endif
 
 ifeq ($(config),coverage)
-	CXXFLAGS+=-DNDEBUG
-	CXXFLAGS+=-fprofile-arcs -ftest-coverage
-	LDFLAGS+=-fprofile-arcs
+	CXXFLAGS+=-coverage
+	LDFLAGS+=-coverage
 endif
 
 ifeq ($(config),sanitize)
