@@ -8,3 +8,4 @@ env:
   - DEFINES=PUGIXML_WCHAR_MODE
   - DEFINES=PUGIXML_COMPACT
 script: make test defines=$DEFINES -j2
+after_success: bash <(curl -s https://codecov.io/bash)
