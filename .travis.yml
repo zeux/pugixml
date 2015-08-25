@@ -8,4 +8,4 @@ env:
   - DEFINES=PUGIXML_WCHAR_MODE
   - DEFINES=PUGIXML_COMPACT
 script: make test defines=$DEFINES config=coverage -j2
-after_success: bash <(curl -s https://codecov.io/bash)
+after_success: bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov
