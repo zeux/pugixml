@@ -7,5 +7,5 @@ env:
   - DEFINES=standard
   - DEFINES=PUGIXML_WCHAR_MODE
   - DEFINES=PUGIXML_COMPACT
-script: make test defines=$DEFINES -j2
+script: make test defines=$DEFINES config=coverage -j2
 after_success: bash <(curl -s https://codecov.io/bash)
