@@ -777,7 +777,7 @@ namespace pugi
 		xml_node_iterator();
 
 		// Construct an iterator which points to the specified node
-		explicit xml_node_iterator(const xml_node& node);
+		xml_node_iterator(const xml_node& node);
 
 		// Iterator operators
 		bool operator==(const xml_node_iterator& rhs) const;
