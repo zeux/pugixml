@@ -236,6 +236,15 @@ PUGI__NS_END
 PUGI__NS_BEGIN
 	template <typename T, typename D = void(*)(T*)> struct auto_deleter
 	{
+		// Non-copyable semantics
+#if __cplusplus >= 201103
+		auto_deleter(const auto_deleter&) = delete;
+		auto_deleter& operator=(const auto_deleter) = delete;
+#else
+		auto_deleter(const auto_deleter&);
+		auto_deleter& operator=(const auto_deleter);
+#endif
+
 		T* data;
 		D deleter;
 
@@ -483,7 +492,7 @@ PUGI__NS_BEGIN
 
 	struct xml_allocator
 	{
-		xml_allocator(xml_memory_page* root): _root(root), _busy_size(root->busy_size)
+		explicit xml_allocator(xml_memory_page* root): _root(root), _busy_size(root->busy_size)
 		{
 		#ifdef PUGIXML_COMPACT
 			_hash = 0;
@@ -1030,7 +1039,7 @@ namespace pugi
 {
 	struct xml_attribute_struct
 	{
-		xml_attribute_struct(impl::xml_memory_page* page): header(page, 0), namevalue_base(0)
+		explicit xml_attribute_struct(impl::xml_memory_page* page): header(page, 0), namevalue_base(0)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_attribute_struct) == 8);
 		}
@@ -1075,7 +1084,7 @@ namespace pugi
 {
 	struct xml_attribute_struct
 	{
-		xml_attribute_struct(impl::xml_memory_page* page): header(reinterpret_cast<uintptr_t>(page)), name(0), value(0), prev_attribute_c(0), next_attribute(0)
+		explicit xml_attribute_struct(impl::xml_memory_page* page): header(reinterpret_cast<uintptr_t>(page)), name(0), value(0), prev_attribute_c(0), next_attribute(0)
 		{
 		}
 
@@ -1120,7 +1129,7 @@ PUGI__NS_BEGIN
 
 	struct xml_document_struct: public xml_node_struct, public xml_allocator
 	{
-		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0)
+		explicit xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0)
 		{
 		#ifdef PUGIXML_COMPACT
 			_hash = &hash;
@@ -2898,12 +2907,21 @@ PUGI__NS_BEGIN
 
 	struct xml_parser
 	{
+		// Non-copyable semantics
+#if __cplusplus >= 201103
+		xml_parser(const xml_parser&) = delete;
+		xml_parser& operator=(const xml_parser) = delete;
+#else
+		xml_parser(const xml_parser&);
+		xml_parser& operator=(const xml_parser);
+#endif
+
 		xml_allocator alloc;
 		xml_allocator* alloc_state;
 		char_t* error_offset;
 		xml_parse_status error_status;
 		
-		xml_parser(xml_allocator* alloc_): alloc(*alloc_), alloc_state(alloc_), error_offset(0), error_status(status_ok)
+		explicit xml_parser(xml_allocator* alloc_): alloc(*alloc_), alloc_state(alloc_), error_offset(0), error_status(status_ok)
 		{
 		}
 
@@ -3142,7 +3160,6 @@ PUGI__NS_BEGIN
 		{
 			// load into registers
 			xml_node_struct* cursor = ref_cursor;
-			char_t ch = 0;
 
 			// parse node contents, starting with question mark
 			++s;
@@ -3160,6 +3177,8 @@ PUGI__NS_BEGIN
 
 			if (declaration ? PUGI__OPTSET(parse_declaration) : PUGI__OPTSET(parse_pi))
 			{
+				char_t ch = 0;
+
 				if (declaration)
 				{
 					// disallow non top-level declarations
@@ -7430,7 +7449,16 @@ PUGI__NS_BEGIN
 
 	struct xpath_allocator_capture
 	{
-		xpath_allocator_capture(xpath_allocator* alloc): _target(alloc), _state(*alloc)
+		// Non-copyable semantics
+#if __cplusplus >= 201103
+		xpath_allocator_capture(const xpath_allocator_capture&) = delete;
+		xpath_allocator_capture& operator=(const xpath_allocator_capture) = delete;
+#else
+		xpath_allocator_capture(const xpath_allocator_capture&);
+		xpath_allocator_capture& operator=(const xpath_allocator_capture);
+#endif
+
+		explicit xpath_allocator_capture(xpath_allocator* alloc): _target(alloc), _state(*alloc)
 		{
 		}
 
@@ -8117,7 +8145,7 @@ PUGI__NS_BEGIN
 
 		return true;
 	}
-	
+
 	PUGI__FN double round_nearest(double value)
 	{
 		return floor(value + 0.5);
@@ -8129,17 +8157,17 @@ PUGI__NS_BEGIN
 		// ceil is used to differentiate between +0 and -0 (we return -0 for [-0.5, -0] and +0 for +0)
 		return (value >= -0.5 && value <= 0) ? ceil(value) : floor(value + 0.5);
 	}
-	
+
 	PUGI__FN const char_t* qualified_name(const xpath_node& node)
 	{
 		return node.attribute() ? node.attribute().name() : node.node().name();
 	}
-	
+
 	PUGI__FN const char_t* local_name(const xpath_node& node)
 	{
 		const char_t* name = qualified_name(node);
 		const char_t* p = find_char(name, ':');
-		
+
 		return p ? p + 1 : name;
 	}
 
@@ -8148,7 +8176,7 @@ PUGI__NS_BEGIN
 		const char_t* prefix;
 		size_t prefix_length;
 
-		namespace_uri_predicate(const char_t* name)
+		explicit namespace_uri_predicate(const char_t* name)
 		{
 			const char_t* pos = find_char(name, ':');
 
@@ -8168,40 +8196,40 @@ PUGI__NS_BEGIN
 
 	PUGI__FN const char_t* namespace_uri(xml_node node)
 	{
-		namespace_uri_predicate pred = node.name();
-		
+		namespace_uri_predicate pred(node.name());
+
 		xml_node p = node;
-		
+
 		while (p)
 		{
 			xml_attribute a = p.find_attribute(pred);
-			
+
 			if (a) return a.value();
-			
+
 			p = p.parent();
 		}
-		
+
 		return PUGIXML_TEXT("");
 	}
 
 	PUGI__FN const char_t* namespace_uri(xml_attribute attr, xml_node parent)
 	{
-		namespace_uri_predicate pred = attr.name();
-		
+		namespace_uri_predicate pred(attr.name());
+
 		// Default namespace does not apply to attributes
 		if (!pred.prefix) return PUGIXML_TEXT("");
-		
+
 		xml_node p = parent;
-		
+
 		while (p)
 		{
 			xml_attribute a = p.find_attribute(pred);
-			
+
 			if (a) return a.value();
-			
+
 			p = p.parent();
 		}
-		
+
 		return PUGIXML_TEXT("");
 	}
 
@@ -8351,6 +8379,15 @@ PUGI__NS_BEGIN
 
 	struct xpath_variable_string: xpath_variable
 	{
+		// Non-copyable semantics
+#if __cplusplus >= 201103
+		xpath_variable_string(const xpath_variable_string&) = delete;
+		xpath_variable_string& operator=(const xpath_variable_string) = delete;
+#else
+		xpath_variable_string(const xpath_variable_string&);
+		xpath_variable_string& operator=(const xpath_variable_string);
+#endif
+
 		xpath_variable_string(): xpath_variable(xpath_type_string), value(0)
 		{
 		}
@@ -8387,7 +8424,7 @@ PUGI__NS_BEGIN
 			result += result << 10;
 			result ^= result >> 6;
 		}
-	
+
 		result += result << 3;
 		result ^= result >> 11;
 		result += result << 15;
@@ -8545,9 +8582,9 @@ PUGI__NS_BEGIN
 			else
 				type = sorted;
 		}
-		
+
 		if (type != order) reverse(begin, end);
-			
+
 		return order;
 	}
 
