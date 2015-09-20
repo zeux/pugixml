@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 
 #ifdef PUGIXML_WCHAR_MODE
 #	include <wchar.h>
@@ -4429,39 +4430,81 @@ PUGI__NS_BEGIN
 	}
 
 	// get value with conversion functions
-	PUGI__FN int get_integer_base(const char_t* value)
+	template <typename U> U string_to_integer(const char_t* value, U minneg, U maxpos)
 	{
+		U result = 0;
 		const char_t* s = value;
 
 		while (PUGI__IS_CHARTYPE(*s, ct_space))
 			s++;
 
-		if (*s == '-')
-			s++;
+		bool negative = (*s == '-');
 
-		return (s[0] == '0' && (s[1] | ' ') == 'x') ? 16 : 10;
+		s += negative;
+
+		bool overflow = false;
+
+		if (s[0] == '0' && (s[1] | ' ') == 'x')
+		{
+			s += 2;
+
+			const char_t* start = s;
+
+			for (;;)
+			{
+				if (static_cast<unsigned>(*s - '0') < 10)
+					result = result * 16 + (*s - '0');
+				else if (static_cast<unsigned>((*s | ' ') - 'a') < 6)
+					result = result * 16 + ((*s | ' ') - 'a' + 10);
+				else
+					break;
+
+				s++;
+			}
+
+			size_t digits = static_cast<size_t>(s - start);
+
+			overflow = digits > sizeof(U) * 2;
+		}
+		else
+		{
+			const char_t* start = s;
+
+			for (;;)
+			{
+				if (static_cast<unsigned>(*s - '0') < 10)
+					result = result * 10 + (*s - '0');
+				else
+					break;
+
+				s++;
+			}
+
+			size_t digits = static_cast<size_t>(s - start);
+
+			PUGI__STATIC_ASSERT(sizeof(U) == 8 || sizeof(U) == 4 || sizeof(U) == 2);
+
+			const size_t max_digits10 = sizeof(U) == 8 ? 20 : sizeof(U) == 4 ? 10 : 5;
+			const char max_lead = sizeof(U) == 8 ? '1' : sizeof(U) == 4 ? '4' : '6';
+			const size_t high_bit = sizeof(U) * 8 - 1;
+
+			overflow = digits >= max_digits10 && !(digits == max_digits10 && (*start < max_lead || (*start == max_lead && result >> high_bit)));
+		}
+
+		if (negative)
+			return (overflow || result > minneg) ? 0 - minneg : 0 - result;
+		else
+			return (overflow || result > maxpos) ? maxpos : result;
 	}
 
 	PUGI__FN int get_value_int(const char_t* value)
 	{
-		int base = get_integer_base(value);
-
-	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<int>(wcstol(value, 0, base));
-	#else
-		return static_cast<int>(strtol(value, 0, base));
-	#endif
+		return string_to_integer<unsigned int>(value, INT_MIN, INT_MAX);
 	}
 
 	PUGI__FN unsigned int get_value_uint(const char_t* value)
 	{
-		int base = get_integer_base(value);
-
-	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<unsigned int>(wcstoul(value, 0, base));
-	#else
-		return static_cast<unsigned int>(strtoul(value, 0, base));
-	#endif
+		return string_to_integer<unsigned int>(value, 0, UINT_MAX);
 	}
 
 	PUGI__FN double get_value_double(const char_t* value)
@@ -4494,40 +4537,12 @@ PUGI__NS_BEGIN
 #ifdef PUGIXML_HAS_LONG_LONG
 	PUGI__FN long long get_value_llong(const char_t* value)
 	{
-		int base = get_integer_base(value);
-
-	#ifdef PUGIXML_WCHAR_MODE
-		#ifdef PUGI__MSVC_CRT_VERSION
-			return _wcstoi64(value, 0, base);
-		#else
-			return wcstoll(value, 0, base);
-		#endif
-	#else
-		#ifdef PUGI__MSVC_CRT_VERSION
-			return _strtoi64(value, 0, base);
-		#else
-			return strtoll(value, 0, base);
-		#endif
-	#endif
+		return string_to_integer<unsigned long long>(value, LLONG_MIN, LLONG_MAX);
 	}
 
 	PUGI__FN unsigned long long get_value_ullong(const char_t* value)
 	{
-		int base = get_integer_base(value);
-
-	#ifdef PUGIXML_WCHAR_MODE
-		#ifdef PUGI__MSVC_CRT_VERSION
-			return _wcstoui64(value, 0, base);
-		#else
-			return wcstoull(value, 0, base);
-		#endif
-	#else
-		#ifdef PUGI__MSVC_CRT_VERSION
-			return _strtoui64(value, 0, base);
-		#else
-			return strtoull(value, 0, base);
-		#endif
-	#endif
+		return string_to_integer<unsigned long long>(value, 0, ULLONG_MAX);
 	}
 #endif
 
