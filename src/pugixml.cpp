@@ -4540,6 +4540,28 @@ PUGI__NS_BEGIN
 	}
 #endif
 
+	template <typename U>
+	PUGI__FN char_t* integer_to_string(char_t (&buf)[64], U value, bool negative)
+	{
+		char_t* end = buf + sizeof(buf) / sizeof(buf[0]) - 1;
+		U rest = negative ? 0 - value : value;
+
+		*end-- = 0;
+
+		do
+		{
+			*end-- = static_cast<char_t>('0' + (rest % 10));
+			rest /= 10;
+		}
+		while (rest);
+
+		assert(end >= buf);
+
+		*end = '-';
+
+		return end + !negative;
+	}
+
 	// set value with conversion functions
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_buffer(String& dest, Header& header, uintptr_t header_mask, char (&buf)[128])
@@ -4557,19 +4579,19 @@ PUGI__NS_BEGIN
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, int value)
 	{
-		char buf[128];
-		sprintf(buf, "%d", value);
-	
-		return set_value_buffer(dest, header, header_mask, buf);
+		char_t buf[64];
+		char_t* begin = integer_to_string<unsigned int>(buf, value, value < 0);
+
+		return strcpy_insitu(dest, header, header_mask, begin);
 	}
 
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, unsigned int value)
 	{
-		char buf[128];
-		sprintf(buf, "%u", value);
+		char_t buf[64];
+		char_t* begin = integer_to_string<unsigned int>(buf, value, false);
 
-		return set_value_buffer(dest, header, header_mask, buf);
+		return strcpy_insitu(dest, header, header_mask, begin);
 	}
 
 	template <typename String, typename Header>
@@ -4600,19 +4622,19 @@ PUGI__NS_BEGIN
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, long long value)
 	{
-		char buf[128];
-		sprintf(buf, "%lld", value);
-	
-		return set_value_buffer(dest, header, header_mask, buf);
+		char_t buf[64];
+		char_t* begin = integer_to_string<unsigned long long>(buf, value, value < 0);
+
+		return strcpy_insitu(dest, header, header_mask, begin);
 	}
 
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, unsigned long long value)
 	{
-		char buf[128];
-		sprintf(buf, "%llu", value);
-	
-		return set_value_buffer(dest, header, header_mask, buf);
+		char_t buf[64];
+		char_t* begin = integer_to_string<unsigned long long>(buf, value, false);
+
+		return strcpy_insitu(dest, header, header_mask, begin);
 	}
 #endif
 
