@@ -4541,25 +4541,24 @@ PUGI__NS_BEGIN
 #endif
 
 	template <typename U>
-	PUGI__FN char_t* integer_to_string(char_t (&buf)[64], U value, bool negative)
+	PUGI__FN char_t* integer_to_string(char_t* begin, char_t* end, U value, bool negative)
 	{
-		char_t* end = buf + sizeof(buf) / sizeof(buf[0]) - 1;
+		char_t* result = end - 1;
 		U rest = negative ? 0 - value : value;
-
-		*end-- = 0;
 
 		do
 		{
-			*end-- = static_cast<char_t>('0' + (rest % 10));
+			*result-- = static_cast<char_t>('0' + (rest % 10));
 			rest /= 10;
 		}
 		while (rest);
 
-		assert(end >= buf);
+		assert(result >= begin);
+		(void)begin;
 
-		*end = '-';
+		*result = '-';
 
-		return end + !negative;
+		return result + !negative;
 	}
 
 	// set value with conversion functions
@@ -4580,18 +4579,20 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, int value)
 	{
 		char_t buf[64];
-		char_t* begin = integer_to_string<unsigned int>(buf, value, value < 0);
+		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
+		char_t* begin = integer_to_string<unsigned int>(buf, end, value, value < 0);
 
-		return strcpy_insitu(dest, header, header_mask, begin, strlength(begin));
+		return strcpy_insitu(dest, header, header_mask, begin, end - begin);
 	}
 
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, unsigned int value)
 	{
 		char_t buf[64];
-		char_t* begin = integer_to_string<unsigned int>(buf, value, false);
+		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
+		char_t* begin = integer_to_string<unsigned int>(buf, end, value, false);
 
-		return strcpy_insitu(dest, header, header_mask, begin, strlength(begin));
+		return strcpy_insitu(dest, header, header_mask, begin, end - begin);
 	}
 
 	template <typename String, typename Header>
@@ -4623,18 +4624,20 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, long long value)
 	{
 		char_t buf[64];
-		char_t* begin = integer_to_string<unsigned long long>(buf, value, value < 0);
+		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
+		char_t* begin = integer_to_string<unsigned long long>(buf, end, value, value < 0);
 
-		return strcpy_insitu(dest, header, header_mask, begin, strlength(begin));
+		return strcpy_insitu(dest, header, header_mask, begin, end - begin);
 	}
 
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, unsigned long long value)
 	{
 		char_t buf[64];
-		char_t* begin = integer_to_string<unsigned long long>(buf, value, false);
+		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
+		char_t* begin = integer_to_string<unsigned long long>(buf, end, value, false);
 
-		return strcpy_insitu(dest, header, header_mask, begin, strlength(begin));
+		return strcpy_insitu(dest, header, header_mask, begin, end - begin);
 	}
 #endif
 
