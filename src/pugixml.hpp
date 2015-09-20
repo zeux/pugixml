@@ -945,7 +945,7 @@ namespace pugi
 		
 		// Non-copyable semantics
 		xml_document(const xml_document&);
-		const xml_document& operator=(const xml_document&);
+		xml_document& operator=(const xml_document&);
 
 		void create();
 		void destroy();
