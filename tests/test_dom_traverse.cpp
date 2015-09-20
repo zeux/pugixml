@@ -1151,3 +1151,77 @@ TEST_XML(dom_node_attribute_hinted, "<node attr1='1' attr2='2' attr3='3' />")
 
 	CHECK(!node.attribute(STR("attr"), hint) && hint == attr2);
 }
+
+TEST_XML(dom_as_int_overflow, "<node attr1='-2147483649' attr2='2147483648' attr3='-4294967296' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_int() == -2147483647 - 1);
+	CHECK(node.attribute(STR("attr2")).as_int() == 2147483647);
+	CHECK(node.attribute(STR("attr3")).as_int() == -2147483647 - 1);
+}
+
+TEST_XML(dom_as_uint_overflow, "<node attr1='-1' attr2='4294967296' attr3='5294967295' attr4='21474836479' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_uint() == 0);
+	CHECK(node.attribute(STR("attr2")).as_uint() == 4294967295);
+	CHECK(node.attribute(STR("attr3")).as_uint() == 4294967295);
+	CHECK(node.attribute(STR("attr4")).as_uint() == 4294967295);
+}
+
+TEST_XML(dom_as_int_hex_overflow, "<node attr1='-0x80000001' attr2='0x80000000' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_int() == -2147483647 - 1);
+	CHECK(node.attribute(STR("attr2")).as_int() == 2147483647);
+}
+
+TEST_XML(dom_as_uint_hex_overflow, "<node attr1='-0x1' attr2='0x100000000' attr3='0x123456789' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_uint() == 0);
+	CHECK(node.attribute(STR("attr2")).as_uint() == 4294967295);
+	CHECK(node.attribute(STR("attr3")).as_uint() == 4294967295);
+}
+
+#ifdef PUGIXML_HAS_LONG_LONG
+TEST_XML(dom_as_llong_overflow, "<node attr1='-9223372036854775809' attr2='9223372036854775808' attr3='-18446744073709551616' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_llong() == -9223372036854775807ll - 1);
+	CHECK(node.attribute(STR("attr2")).as_llong() == 9223372036854775807ll);
+	CHECK(node.attribute(STR("attr3")).as_llong() == -9223372036854775807ll - 1);
+}
+
+TEST_XML(dom_as_ullong_overflow, "<node attr1='-1' attr2='18446744073709551616' attr3='28446744073709551615' attr4='166020696663385964543' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_ullong() == 0);
+	CHECK(node.attribute(STR("attr2")).as_ullong() == 18446744073709551615ull);
+	CHECK(node.attribute(STR("attr3")).as_ullong() == 18446744073709551615ull);
+	CHECK(node.attribute(STR("attr4")).as_ullong() == 18446744073709551615ull);
+}
+
+TEST_XML(dom_as_llong_hex_overflow, "<node attr1='-0x8000000000000001' attr2='0x8000000000000000' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_llong() == -9223372036854775807ll - 1);
+	CHECK(node.attribute(STR("attr2")).as_llong() == 9223372036854775807ll);
+}
+
+TEST_XML(dom_as_ullong_hex_overflow, "<node attr1='-0x1' attr2='0x10000000000000000' attr3='0x12345678923456789' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_ullong() == 0);
+	CHECK(node.attribute(STR("attr2")).as_ullong() == 18446744073709551615ull);
+	CHECK(node.attribute(STR("attr3")).as_ullong() == 18446744073709551615ull);
+}
+#endif
