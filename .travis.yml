@@ -1,8 +1,8 @@
 sudo: false
 language: cpp
-compiler:
-  - clang
-  - gcc
+os:
+  - linux
+  - osx
 env:
   - DEFINES=standard
   - DEFINES=PUGIXML_WCHAR_MODE
