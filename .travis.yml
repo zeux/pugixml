@@ -3,9 +3,6 @@ language: cpp
 os:
   - linux
   - osx
-compiler:
-  - clang
-  - gcc
 env:
   - DEFINES=standard
   - DEFINES=PUGIXML_WCHAR_MODE
