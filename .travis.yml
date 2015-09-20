@@ -1,5 +1,8 @@
 sudo: false
 language: cpp
+os:
+  - linux
+  - osx
 compiler:
   - clang
   - gcc
