@@ -221,15 +221,6 @@ PUGI__NS_BEGIN
 		return static_cast<size_t>(end - s);
 	#endif
 	}
-
-#ifdef PUGIXML_WCHAR_MODE
-	// Convert string to wide string, assuming all symbols are ASCII
-	PUGI__FN void widen_ascii(wchar_t* dest, const char* source)
-	{
-		for (const char* i = source; *i; ++i) *dest++ = *i;
-		*dest = 0;
-	}
-#endif
 PUGI__NS_END
 
 // auto_ptr-like object for exception recovery
@@ -4563,13 +4554,15 @@ PUGI__NS_BEGIN
 
 	// set value with conversion functions
 	template <typename String, typename Header>
-	PUGI__FN bool set_value_buffer(String& dest, Header& header, uintptr_t header_mask, char (&buf)[128])
+	PUGI__FN bool set_value_ascii(String& dest, Header& header, uintptr_t header_mask, char (&buf)[128])
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		char_t wbuf[128];
-		impl::widen_ascii(wbuf, buf);
 
-		return strcpy_insitu(dest, header, header_mask, wbuf, strlength(wbuf));
+		size_t offset = 0;
+		for (; buf[offset]; ++offset) wbuf[offset] = buf[offset];
+
+		return strcpy_insitu(dest, header, header_mask, wbuf, offset);
 	#else
 		return strcpy_insitu(dest, header, header_mask, buf, strlength(buf));
 	#endif
@@ -4601,7 +4594,7 @@ PUGI__NS_BEGIN
 		char buf[128];
 		sprintf(buf, "%.9g", value);
 
-		return set_value_buffer(dest, header, header_mask, buf);
+		return set_value_ascii(dest, header, header_mask, buf);
 	}
 
 	template <typename String, typename Header>
@@ -4610,7 +4603,7 @@ PUGI__NS_BEGIN
 		char buf[128];
 		sprintf(buf, "%.17g", value);
 
-		return set_value_buffer(dest, header, header_mask, buf);
+		return set_value_ascii(dest, header, header_mask, buf);
 	}
 	
 	template <typename String, typename Header>
