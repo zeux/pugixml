@@ -1225,3 +1225,20 @@ TEST_XML(dom_as_ullong_hex_overflow, "<node attr1='-0x1' attr2='0x10000000000000
 	CHECK(node.attribute(STR("attr3")).as_ullong() == 18446744073709551615ull);
 }
 #endif
+
+TEST_XML(dom_as_int_plus, "<node attr1='+1' attr2='+0xa' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_int() == 1);
+	CHECK(node.attribute(STR("attr1")).as_uint() == 1);
+	CHECK(node.attribute(STR("attr2")).as_int() == 10);
+	CHECK(node.attribute(STR("attr2")).as_uint() == 10);
+
+#ifdef PUGIXML_HAS_LONG_LONG
+	CHECK(node.attribute(STR("attr1")).as_llong() == 1);
+	CHECK(node.attribute(STR("attr1")).as_ullong() == 1);
+	CHECK(node.attribute(STR("attr2")).as_llong() == 10);
+	CHECK(node.attribute(STR("attr2")).as_ullong() == 10);
+#endif
+}

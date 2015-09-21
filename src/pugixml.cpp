@@ -4440,7 +4440,7 @@ PUGI__NS_BEGIN
 
 		bool negative = (*s == '-');
 
-		s += negative;
+		s += (*s == '+' || *s == '-');
 
 		bool overflow = false;
 
