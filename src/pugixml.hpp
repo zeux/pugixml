@@ -1254,7 +1254,7 @@ namespace pugi
 
 		// Construct XPath node from XML node/attribute
 		xpath_node(const xml_node& node);
-		explicit xpath_node(const xml_attribute& attribute, const xml_node& parent);
+		xpath_node(const xml_attribute& attribute, const xml_node& parent);
 
 		// Get node/attribute, if any
 		xml_node node() const;
@@ -1302,7 +1302,7 @@ namespace pugi
 		xpath_node_set();
 
 		// Constructs a set from iterator range; data is not checked for duplicates and is not sorted according to provided type, so be careful
-		explicit xpath_node_set(const_iterator begin, const_iterator end, type_t type = type_unsorted);
+		xpath_node_set(const_iterator begin, const_iterator end, type_t type = type_unsorted);
 
 		// Destructor
 		~xpath_node_set();
