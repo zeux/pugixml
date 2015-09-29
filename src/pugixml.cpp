@@ -237,13 +237,8 @@ PUGI__NS_BEGIN
 	template <typename T, typename D = void(*)(T*)> struct auto_deleter
 	{
 		// Non-copyable semantics
-#if __cplusplus >= 201103
-		auto_deleter(const auto_deleter&) = delete;
-		auto_deleter& operator=(const auto_deleter) = delete;
-#else
 		auto_deleter(const auto_deleter&);
 		auto_deleter& operator=(const auto_deleter);
-#endif
 
 		T* data;
 		D deleter;
@@ -2908,13 +2903,8 @@ PUGI__NS_BEGIN
 	struct xml_parser
 	{
 		// Non-copyable semantics
-#if __cplusplus >= 201103
-		xml_parser(const xml_parser&) = delete;
-		xml_parser& operator=(const xml_parser) = delete;
-#else
 		xml_parser(const xml_parser&);
 		xml_parser& operator=(const xml_parser);
-#endif
 
 		xml_allocator alloc;
 		xml_allocator* alloc_state;
@@ -3160,6 +3150,7 @@ PUGI__NS_BEGIN
 		{
 			// load into registers
 			xml_node_struct* cursor = ref_cursor;
+			char_t ch = 0;
 
 			// parse node contents, starting with question mark
 			++s;
@@ -3177,8 +3168,6 @@ PUGI__NS_BEGIN
 
 			if (declaration ? PUGI__OPTSET(parse_declaration) : PUGI__OPTSET(parse_pi))
 			{
-				char_t ch = 0;
-
 				if (declaration)
 				{
 					// disallow non top-level declarations
@@ -7450,13 +7439,8 @@ PUGI__NS_BEGIN
 	struct xpath_allocator_capture
 	{
 		// Non-copyable semantics
-#if __cplusplus >= 201103
-		xpath_allocator_capture(const xpath_allocator_capture&) = delete;
-		xpath_allocator_capture& operator=(const xpath_allocator_capture) = delete;
-#else
 		xpath_allocator_capture(const xpath_allocator_capture&);
 		xpath_allocator_capture& operator=(const xpath_allocator_capture);
-#endif
 
 		explicit xpath_allocator_capture(xpath_allocator* alloc): _target(alloc), _state(*alloc)
 		{
@@ -8380,13 +8364,8 @@ PUGI__NS_BEGIN
 	struct xpath_variable_string: xpath_variable
 	{
 		// Non-copyable semantics
-#if __cplusplus >= 201103
-		xpath_variable_string(const xpath_variable_string&) = delete;
-		xpath_variable_string& operator=(const xpath_variable_string) = delete;
-#else
 		xpath_variable_string(const xpath_variable_string&);
 		xpath_variable_string& operator=(const xpath_variable_string);
-#endif
 
 		xpath_variable_string(): xpath_variable(xpath_type_string), value(0)
 		{
