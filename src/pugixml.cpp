@@ -12283,7 +12283,7 @@ namespace pugi
 		rhs._impl = 0;
 	}
 
-	xpath_query& xpath_query::operator=(xpath_query&& rhs)
+	PUGI__FN xpath_query& xpath_query::operator=(xpath_query&& rhs)
 	{
 		if (this == &rhs) return *this;
 
