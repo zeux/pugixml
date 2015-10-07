@@ -1,0 +1,50 @@
+nuget{
+	nuspec{
+		id = libpugixml;
+		version : 1.6.0.1;
+		title: XML parser library in C++;
+		authors: {Arseny Kapoulkine};
+		owners: {Ivan Gagis};
+		licenseUrl: "http://pugixml.org/license.html";
+		projectUrl: "http://pugixml.org/";
+		iconUrl: "https://github.com/zeux/pugixml/logo.svg";
+		requireLicenseAcceptance:false;
+		summary: XML parser library in C++;
+
+		description: @"XML parser library in C++";
+		releaseNotes: "Initial release";
+		copyright: Copyright (c) 2006-2015 Arseny Kapoulkine;
+		tags: { native};
+	}
+	dependencies {
+		packages : {
+		};
+	}
+	files {
+		include: { "..\src\**\*.hpp" };
+		
+		[x86,release] { 
+			lib: vs2015\Release\libpugixml.lib;
+//			symbols: vs2015\Release\libpugixml.pdb;
+//			bin: vs2015\Release\libpugixml.dll;
+		}
+
+		[x86,debug] { 
+			lib: vs2015\Debug\libpugixml.lib;
+//			symbols: vs2015\Debug\libpugixml.pdb;
+//			bin: vs2015\Debug\libpugixml.dll;
+		}
+
+		[x64,release] { 
+			lib: vs2015\x64\Release\libpugixml.lib;
+//			symbols: vs2015\x64\Release\libpugixml.pdb;
+//			bin: vs2015\x64\Release\libpugixml.dll;
+		}
+
+		[x64,debug] { 
+			lib: vs2015\x64\Debug\libpugixml.lib;
+//			symbols: vs2015\x64\Debug\libpugixml.pdb;
+//			bin: vs2015\x64\Debug\libpugixml.dll;
+		}  
+	}
+}
