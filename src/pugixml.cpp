@@ -1676,9 +1676,7 @@ PUGI__NS_BEGIN
 
 		static inline typename Traits::value_type decode_utf16_block(const uint16_t* data, size_t size, typename Traits::value_type result)
 		{
-			const uint16_t* end = data + size;
-
-			while (data < end)
+			while (size)
 			{
 				unsigned int lead = opt_swap::value ? endian_swap(*data) : *data;
 
@@ -1687,15 +1685,17 @@ PUGI__NS_BEGIN
 				{
 					result = Traits::low(result, lead);
 					data += 1;
+					size -= 1;
 				}
 				// U+E000..U+FFFF
 				else if (static_cast<unsigned int>(lead - 0xE000) < 0x2000)
 				{
 					result = Traits::low(result, lead);
 					data += 1;
+					size -= 1;
 				}
 				// surrogate pair lead
-				else if (static_cast<unsigned int>(lead - 0xD800) < 0x400 && data + 1 < end)
+				else if (static_cast<unsigned int>(lead - 0xD800) < 0x400 && size >= 2)
 				{
 					uint16_t next = opt_swap::value ? endian_swap(data[1]) : data[1];
 
@@ -1703,15 +1703,18 @@ PUGI__NS_BEGIN
 					{
 						result = Traits::high(result, 0x10000 + ((lead & 0x3ff) << 10) + (next & 0x3ff));
 						data += 2;
+						size -= 2;
 					}
 					else
 					{
 						data += 1;
+						size -= 1;
 					}
 				}
 				else
 				{
 					data += 1;
+					size -= 1;
 				}
 			}
 
@@ -1720,9 +1723,7 @@ PUGI__NS_BEGIN
 
 		static inline typename Traits::value_type decode_utf32_block(const uint32_t* data, size_t size, typename Traits::value_type result)
 		{
-			const uint32_t* end = data + size;
-
-			while (data < end)
+			while (size)
 			{
 				uint32_t lead = opt_swap::value ? endian_swap(*data) : *data;
 
@@ -1731,12 +1732,14 @@ PUGI__NS_BEGIN
 				{
 					result = Traits::low(result, lead);
 					data += 1;
+					size -= 1;
 				}
 				// U+10000..U+10FFFF
 				else
 				{
 					result = Traits::high(result, lead);
 					data += 1;
+					size -= 1;
 				}
 			}
 
@@ -1745,9 +1748,11 @@ PUGI__NS_BEGIN
 
 		static inline typename Traits::value_type decode_latin1_block(const uint8_t* data, size_t size, typename Traits::value_type result)
 		{
-			for (size_t i = 0; i < size; ++i)
+			while (size)
 			{
-				result = Traits::low(result, data[i]);
+				result = Traits::low(result, *data);
+				data += 1;
+				size -= 1;
 			}
 
 			return result;
