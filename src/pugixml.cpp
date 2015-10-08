@@ -1678,7 +1678,7 @@ PUGI__NS_BEGIN
 		{
 			while (size)
 			{
-				unsigned int lead = opt_swap::value ? endian_swap(*data) : *data;
+				uint16_t lead = opt_swap::value ? endian_swap(*data) : *data;
 
 				// U+0000..U+D7FF
 				if (lead < 0xD800)
