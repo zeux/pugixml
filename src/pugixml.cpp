@@ -4649,6 +4649,38 @@ PUGI__NS_BEGIN
 	}
 #endif
 
+	PUGI__FN xml_parse_result load_buffer_impl(xml_document_struct* doc, xml_node_struct* root, void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own, char_t** out_buffer)
+	{
+		// check input buffer
+		if (!contents && size) return make_parse_result(status_io_error);
+
+		// get actual encoding
+		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);
+
+		// get private buffer
+		char_t* buffer = 0;
+		size_t length = 0;
+
+		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
+
+		// delete original buffer if we performed a conversion
+		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
+
+		// grab onto buffer if it's our buffer, user is responsible for deallocating contents himself
+		if (own || buffer != contents) *out_buffer = buffer;
+
+		// store buffer for offset_debug
+		doc->buffer = buffer;
+
+		// parse
+		xml_parse_result res = impl::xml_parser::parse(buffer, length, doc, root, options);
+
+		// remember encoding
+		res.encoding = buffer_encoding;
+
+		return res;
+	}
+
 	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	PUGI__FN xml_parse_status get_file_size(FILE* file, size_t& out_result)
 	{
@@ -4714,7 +4746,7 @@ PUGI__NS_BEGIN
 		return size;
 	}
 
-	PUGI__FN xml_parse_result load_file_impl(xml_document& doc, FILE* file, unsigned int options, xml_encoding encoding)
+	PUGI__FN xml_parse_result load_file_impl(xml_document_struct* doc, FILE* file, unsigned int options, xml_encoding encoding, char_t** out_buffer)
 	{
 		if (!file) return make_parse_result(status_file_not_found);
 
@@ -4739,8 +4771,8 @@ PUGI__NS_BEGIN
 		}
 
 		xml_encoding real_encoding = get_buffer_encoding(encoding, contents, size);
-		
-		return doc.load_buffer_inplace_own(contents, zero_terminate_buffer(contents, size, real_encoding), options, real_encoding);
+
+		return load_buffer_impl(doc, doc, contents, zero_terminate_buffer(contents, size, real_encoding), options, real_encoding, true, true, out_buffer);
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -4867,7 +4899,7 @@ PUGI__NS_BEGIN
 		return status_ok;
 	}
 
-	template <typename T> PUGI__FN xml_parse_result load_stream_impl(xml_document& doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding)
+	template <typename T> PUGI__FN xml_parse_result load_stream_impl(xml_document_struct* doc, std::basic_istream<T>& stream, unsigned int options, xml_encoding encoding, char_t** out_buffer)
 	{
 		void* buffer = 0;
 		size_t size = 0;
@@ -4889,7 +4921,7 @@ PUGI__NS_BEGIN
 
 		xml_encoding real_encoding = get_buffer_encoding(encoding, buffer, size);
 		
-		return doc.load_buffer_inplace_own(buffer, zero_terminate_buffer(buffer, size, real_encoding), options, real_encoding);
+		return load_buffer_impl(doc, doc, buffer, zero_terminate_buffer(buffer, size, real_encoding), options, real_encoding, true, true, out_buffer);
 	}
 #endif
 
@@ -4948,38 +4980,6 @@ PUGI__NS_BEGIN
 		doc.save(writer, indent, flags, encoding);
 
 		return ferror(file) == 0;
-	}
-
-	PUGI__FN xml_parse_result load_buffer_impl(xml_document_struct* doc, xml_node_struct* root, void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own, char_t** out_buffer)
-	{
-		// check input buffer
-		if (!contents && size) return make_parse_result(status_io_error);
-
-		// get actual encoding
-		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);
-
-		// get private buffer
-		char_t* buffer = 0;
-		size_t length = 0;
-
-		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
-		
-		// delete original buffer if we performed a conversion
-		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
-
-		// grab onto buffer if it's our buffer, user is responsible for deallocating contents himself
-		if (own || buffer != contents) *out_buffer = buffer;
-
-		// store buffer for offset_debug
-		doc->buffer = buffer;
-
-		// parse
-		xml_parse_result res = impl::xml_parser::parse(buffer, length, doc, root, options);
-
-		// remember encoding
-		res.encoding = buffer_encoding;
-
-		return res;
 	}
 PUGI__NS_END
 
@@ -6837,14 +6837,14 @@ namespace pugi
 	{
 		reset();
 
-		return impl::load_stream_impl(*this, stream, options, encoding);
+		return impl::load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding, &_buffer);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options)
 	{
 		reset();
 
-		return impl::load_stream_impl(*this, stream, options, encoding_wchar);
+		return impl::load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding_wchar, &_buffer);
 	}
 #endif
 
@@ -6872,7 +6872,7 @@ namespace pugi
 		using impl::auto_deleter; // MSVC7 workaround
 		auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, "rb"), fclose);
 
-		return impl::load_file_impl(*this, file.data, options, encoding);
+		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load_file(const wchar_t* path_, unsigned int options, xml_encoding encoding)
@@ -6882,7 +6882,7 @@ namespace pugi
 		using impl::auto_deleter; // MSVC7 workaround
 		auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, L"rb"), fclose);
 
-		return impl::load_file_impl(*this, file.data, options, encoding);
+		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
 
 	PUGI__FN xml_parse_result xml_document::load_buffer(const void* contents, size_t size, unsigned int options, xml_encoding encoding)
