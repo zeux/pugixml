@@ -2112,6 +2112,31 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.7]]
+=== v1.7 ^17.10.2015^
+
+Major release, featuring performance and memory improvements along with some new features. Changes:
+
+* Compact mode:
+    . Introduced a new tree storage mode that takes significantly less memory (2-5x smaller DOM) at some performance cost.
+    . The mode can be enabled using `PUGIXML_COMPACT` define.
+
+* New integer parsing/formatting implementation:
+	. Functions that convert from and to integers (e.g. `as_int`/`set_value`) do not rely on CRT any more.
+	. New implementation is 3-5x faster and is always correct wrt overflow or underflow. This is a behavior change - where previously `as_uint()` would return UINT_MAX on a value "-1", it now returns 0.
+
+* New features:
+	. XPath objects (`xpath_query`, `xpath_node_set`, `xpath_variable_set`) are now movable if your compiler supports C++11. Additionally, `xpath_variable_set` is copyable.
+	. Added `format_indent_attributes` that makes the resulting XML friendlier to line diff/merge tools.
+	. Added a variant of `xml_node::attribute` function with a hint that can improve lookup performance.
+	. Custom allocation functions are now allowed (but not required) to throw instead of returning a null pointer.
+
+* Bug fixes:
+	. Fix Clang 3.7 crashes in out-of-memory cases (C++ DR 1748)
+	. Fix XPath crashes on SPARC64 (and other 32-bit architectures where doubles have to be aligned to 8 bytes)
+	. Fix xpath_node_set assignment to provide strong exception guarantee
+	. Fix saving for custom xml_writer implementations that can throw from write()
+
 [[v1.6]]
 === v1.6 ^10.04.2015^
 
