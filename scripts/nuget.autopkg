@@ -1,7 +1,7 @@
 nuget {
 	nuspec {
 		id = pugixml;
-		version: 1.7;
+		version: 1.7.1-alpha;
 		title: pugixml;
 		authors: {Arseny Kapoulkine};
 		owners: {Arseny Kapoulkine};
@@ -22,9 +22,9 @@ nuget {
 	files {
 		include: { "..\src\*.hpp" };
 		
-		[x86,release] { lib: vs2015\Win32_Release\pugixml.lib; symbols: vs2015\Win32_Release\pugixml.pdb; }
-		[x86,debug] { lib: vs2015\Win32_Debug\pugixml.lib; symbols: vs2015\Win32_Debug\pugixml.pdb; }
-		[x64,release] { lib: vs2015\x64_Release\pugixml.lib; symbols: vs2015\x64_Release\pugixml.pdb; }
-		[x64,debug] { lib: vs2015\x64_Debug\pugixml.lib; symbols: vs2015\x64_Debug\pugixml.pdb; }
+		[x86,release] { lib: vs2015\Win32_Release\pugixml.lib; }
+		[x86,debug] { lib: vs2015\Win32_Debug\pugixml.lib; }
+		[x64,release] { lib: vs2015\x64_Release\pugixml.lib; }
+		[x64,debug] { lib: vs2015\x64_Debug\pugixml.lib; }
 	}
 }
