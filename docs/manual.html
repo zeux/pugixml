@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.2">
 <meta name="author" content="website, repository">
-<title>pugixml 1.6 manual</title>
+<title>pugixml 1.7 manual</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -477,7 +477,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>pugixml 1.6 manual</h1>
+<h1>pugixml 1.7 manual</h1>
 <div class="details">
 <span id="author" class="author">website</span><br>
 <span id="email" class="email"><a href="http://pugixml.org" class="bare">http://pugixml.org</a></span><br>
@@ -572,6 +572,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#changes">9. Changelog</a>
 <ul class="sectlevel2">
+<li><a href="#v1.7">v1.7 <sup>17.10.2015</sup></a></li>
 <li><a href="#v1.6">v1.6 <sup>10.04.2015</sup></a></li>
 <li><a href="#v1.5">v1.5 <sup>27.11.2014</sup></a></li>
 <li><a href="#v1.4">v1.4 <sup>27.02.2014</sup></a></li>
@@ -659,7 +660,7 @@ No documentation is perfect; neither is this one. If you find errors or omission
 <p>Thanks to <strong>Artyom Palvelev</strong> for suggesting a lazy gap contraction approach.</p>
 </div>
 <div class="paragraph">
-<p>Thanks to <strong>Vyacheslav Egorov</strong> for documentation proofreading.</p>
+<p>Thanks to <strong>Vyacheslav Egorov</strong> for documentation proofreading and fuzz testing.</p>
 </div>
 </div>
 <div class="sect2">
@@ -719,9 +720,9 @@ pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.</pre>
 <p>You can download the latest source distribution as an archive:</p>
 </div>
 <div class="paragraph">
-<p><a href="https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.zip">pugixml-1.6.zip</a> (Windows line endings)
+<p><a href="https://github.com/zeux/pugixml/releases/download/v1.7/pugixml-1.7.zip">pugixml-1.7.zip</a> (Windows line endings)
 /
-<a href="https://github.com/zeux/pugixml/releases/download/v1.6/pugixml-1.6.tar.gz">pugixml-1.6.tar.gz</a> (Unix line endings)</p>
+<a href="https://github.com/zeux/pugixml/releases/download/v1.7/pugixml-1.7.tar.gz">pugixml-1.7.tar.gz</a> (Unix line endings)</p>
 </div>
 <div class="paragraph">
 <p>The distribution contains library source, documentation (the manual you&#8217;re reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.</p>
@@ -742,7 +743,7 @@ pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.</pre>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="bash">git clone https://github.com/zeux/pugixml
 cd pugixml
-git checkout v1.6</code></pre>
+git checkout v1.7</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -759,7 +760,7 @@ git checkout v1.6</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.6 pugixml</code></pre>
+<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.7 pugixml</code></pre>
 </div>
 </div>
 </div>
@@ -4022,6 +4023,80 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <h2 id="changes"><a class="anchor" href="#changes"></a>9. Changelog</h2>
 <div class="sectionbody">
 <div class="sect2">
+<h3 id="v1.7"><a class="anchor" href="#v1.7"></a>v1.7 <sup>17.10.2015</sup></h3>
+<div class="paragraph">
+<p>Major release, featuring performance and memory improvements along with some new features. Changes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Compact mode:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Introduced a new tree storage mode that takes significantly less memory (2-5x smaller DOM) at some performance cost.</p>
+</li>
+<li>
+<p>The mode can be enabled using <code>PUGIXML_COMPACT</code> define.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>New integer parsing/formatting implementation:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Functions that convert from and to integers (e.g. <code>as_int</code>/<code>set_value</code>) do not rely on CRT any more.</p>
+</li>
+<li>
+<p>New implementation is 3-5x faster and is always correct wrt overflow or underflow. This is a behavior change - where previously <code>as_uint()</code> would return UINT_MAX on a value "-1", it now returns 0.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>New features:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>XPath objects (<code>xpath_query</code>, <code>xpath_node_set</code>, <code>xpath_variable_set</code>) are now movable if your compiler supports C++11. Additionally, <code>xpath_variable_set</code> is copyable.</p>
+</li>
+<li>
+<p>Added <code>format_indent_attributes</code> that makes the resulting XML friendlier to line diff/merge tools.</p>
+</li>
+<li>
+<p>Added a variant of <code>xml_node::attribute</code> function with a hint that can improve lookup performance.</p>
+</li>
+<li>
+<p>Custom allocation functions are now allowed (but not required) to throw instead of returning a null pointer.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Bug fixes:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Fix Clang 3.7 crashes in out-of-memory cases (C++ DR 1748)</p>
+</li>
+<li>
+<p>Fix XPath crashes on SPARC64 (and other 32-bit architectures where doubles have to be aligned to 8 bytes)</p>
+</li>
+<li>
+<p>Fix xpath_node_set assignment to provide strong exception guarantee</p>
+</li>
+<li>
+<p>Fix saving for custom xml_writer implementations that can throw from write()</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
 <h3 id="v1.6"><a class="anchor" href="#v1.6"></a>v1.6 <sup>10.04.2015</sup></h3>
 <div class="paragraph">
 <p>Maintenance release. Changes:</p>
@@ -5532,7 +5607,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-08-13 14:06:53 BST
+Last updated 2015-10-10 13:42:56 PDT
 </div>
 </div>
 </body>
