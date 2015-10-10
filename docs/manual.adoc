@@ -38,7 +38,7 @@ Thanks to *Neville Franks* for contributions to pugxml parser.
 
 Thanks to *Artyom Palvelev* for suggesting a lazy gap contraction approach.
 
-Thanks to *Vyacheslav Egorov* for documentation proofreading.
+Thanks to *Vyacheslav Egorov* for documentation proofreading and fuzz testing.
 
 [[overview.license]]
 === License
