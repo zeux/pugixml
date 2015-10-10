@@ -76,6 +76,7 @@ release: build/pugixml-$(VERSION).tar.gz build/pugixml-$(VERSION).zip
 docs: docs/quickstart.html docs/manual.html
 
 build/pugixml-%: .FORCE | $(RELEASE)
+	@mkdir -p $(BUILD)
 	perl tests/archive.pl $@ $|
 
 $(EXECUTABLE): $(OBJECTS)
