@@ -1,5 +1,5 @@
 /**
- * pugixml parser - version 1.6
+ * pugixml parser - version 1.7
  * --------------------------------------------------------
  * Copyright (C) 2006-2015, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at http://pugixml.org/
@@ -13,7 +13,7 @@
 
 #ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 100 + minor so that it's safe to use in less-than comparisons
-#	define PUGIXML_VERSION 160
+#	define PUGIXML_VERSION 170
 #endif
 
 // Include user configuration file (this can define various configuration macros)
