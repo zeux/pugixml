@@ -1591,28 +1591,11 @@ PUGI__NS_BEGIN
 		}
 	};
 
-	template <size_t size> struct wchar_selector;
-
-	template <> struct wchar_selector<2>
+	struct utf8_decoder
 	{
-		typedef uint16_t type;
-		typedef utf16_counter counter;
-		typedef utf16_writer writer;
-	};
+		typedef uint8_t type;
 
-	template <> struct wchar_selector<4>
-	{
-		typedef uint32_t type;
-		typedef utf32_counter counter;
-		typedef utf32_writer writer;
-	};
-
-	typedef wchar_selector<sizeof(wchar_t)>::counter wchar_counter;
-	typedef wchar_selector<sizeof(wchar_t)>::writer wchar_writer;
-
-	template <typename Traits, typename opt_swap = opt_false> struct utf_decoder
-	{
-		static inline typename Traits::value_type decode_utf8_block(const uint8_t* data, size_t size, typename Traits::value_type result)
+		template <typename Traits> static inline typename Traits::value_type process(const uint8_t* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			const uint8_t utf8_byte_mask = 0x3f;
 
@@ -1673,8 +1656,13 @@ PUGI__NS_BEGIN
 
 			return result;
 		}
+	};
 
-		static inline typename Traits::value_type decode_utf16_block(const uint16_t* data, size_t size, typename Traits::value_type result)
+	template <typename opt_swap> struct utf16_decoder
+	{
+		typedef uint16_t type;
+
+		template <typename Traits> static inline typename Traits::value_type process(const uint16_t* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			while (size)
 			{
@@ -1720,8 +1708,13 @@ PUGI__NS_BEGIN
 
 			return result;
 		}
+	};
 
-		static inline typename Traits::value_type decode_utf32_block(const uint32_t* data, size_t size, typename Traits::value_type result)
+	template <typename opt_swap> struct utf32_decoder
+	{
+		typedef uint32_t type;
+
+		template <typename Traits> static inline typename Traits::value_type process(const uint32_t* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			while (size)
 			{
@@ -1745,8 +1738,13 @@ PUGI__NS_BEGIN
 
 			return result;
 		}
+	};
 
-		static inline typename Traits::value_type decode_latin1_block(const uint8_t* data, size_t size, typename Traits::value_type result)
+	struct latin1_decoder
+	{
+		typedef uint8_t type;
+
+		template <typename Traits> static inline typename Traits::value_type process(const uint8_t* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			while (size)
 			{
@@ -1757,20 +1755,37 @@ PUGI__NS_BEGIN
 
 			return result;
 		}
+	};
 
-		static inline typename Traits::value_type decode_wchar_block_impl(const uint16_t* data, size_t size, typename Traits::value_type result)
-		{
-			return decode_utf16_block(data, size, result);
-		}
+	template <size_t size> struct wchar_selector;
 
-		static inline typename Traits::value_type decode_wchar_block_impl(const uint32_t* data, size_t size, typename Traits::value_type result)
-		{
-			return decode_utf32_block(data, size, result);
-		}
+	template <> struct wchar_selector<2>
+	{
+		typedef uint16_t type;
+		typedef utf16_counter counter;
+		typedef utf16_writer writer;
+		typedef utf16_decoder<opt_false> decoder;
+	};
 
-		static inline typename Traits::value_type decode_wchar_block(const wchar_t* data, size_t size, typename Traits::value_type result)
+	template <> struct wchar_selector<4>
+	{
+		typedef uint32_t type;
+		typedef utf32_counter counter;
+		typedef utf32_writer writer;
+		typedef utf32_decoder<opt_false> decoder;
+	};
+
+	typedef wchar_selector<sizeof(wchar_t)>::counter wchar_counter;
+	typedef wchar_selector<sizeof(wchar_t)>::writer wchar_writer;
+
+	struct wchar_decoder
+	{
+		typedef wchar_t type;
+
+		template <typename Traits> static inline typename Traits::value_type process(const wchar_t* data, size_t size, typename Traits::value_type result, Traits traits)
 		{
-			return decode_wchar_block_impl(reinterpret_cast<const wchar_selector<sizeof(wchar_t)>::type*>(data), size, result);
+			typedef wchar_selector<sizeof(wchar_t)>::decoder decoder;
+			return decoder::process(reinterpret_cast<const typename decoder::type*>(data), size, result, traits);
 		}
 	};
 
@@ -1991,38 +2006,13 @@ PUGI__NS_BEGIN
 		return true;
 	}
 
-	PUGI__FN bool convert_buffer_utf8(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size)
+	template <typename D> PUGI__FN bool convert_buffer_generic(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, D)
 	{
-		const uint8_t* data = static_cast<const uint8_t*>(contents);
-		size_t data_length = size;
+		const typename D::type* data = static_cast<const typename D::type*>(contents);
+		size_t data_length = size / sizeof(typename D::type);
 
 		// first pass: get length in wchar_t units
-		size_t length = utf_decoder<wchar_counter>::decode_utf8_block(data, data_length, 0);
-
-		// allocate buffer of suitable length
-		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
-		if (!buffer) return false;
-
-		// second pass: convert utf8 input to wchar_t
-		wchar_writer::value_type obegin = reinterpret_cast<wchar_writer::value_type>(buffer);
-		wchar_writer::value_type oend = utf_decoder<wchar_writer>::decode_utf8_block(data, data_length, obegin);
-
-		assert(oend == obegin + length);
-		*oend = 0;
-
-		out_buffer = buffer;
-		out_length = length + 1;
-
-		return true;
-	}
-
-	template <typename opt_swap> PUGI__FN bool convert_buffer_utf16(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt_swap)
-	{
-		const uint16_t* data = static_cast<const uint16_t*>(contents);
-		size_t data_length = size / sizeof(uint16_t);
-
-		// first pass: get length in wchar_t units
-		size_t length = utf_decoder<wchar_counter, opt_swap>::decode_utf16_block(data, data_length, 0);
+		size_t length = D::process(data, data_length, 0, wchar_counter());
 
 		// allocate buffer of suitable length
 		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
@@ -2030,57 +2020,7 @@ PUGI__NS_BEGIN
 
 		// second pass: convert utf16 input to wchar_t
 		wchar_writer::value_type obegin = reinterpret_cast<wchar_writer::value_type>(buffer);
-		wchar_writer::value_type oend = utf_decoder<wchar_writer, opt_swap>::decode_utf16_block(data, data_length, obegin);
-
-		assert(oend == obegin + length);
-		*oend = 0;
-
-		out_buffer = buffer;
-		out_length = length + 1;
-
-		return true;
-	}
-
-	template <typename opt_swap> PUGI__FN bool convert_buffer_utf32(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt_swap)
-	{
-		const uint32_t* data = static_cast<const uint32_t*>(contents);
-		size_t data_length = size / sizeof(uint32_t);
-
-		// first pass: get length in wchar_t units
-		size_t length = utf_decoder<wchar_counter, opt_swap>::decode_utf32_block(data, data_length, 0);
-
-		// allocate buffer of suitable length
-		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
-		if (!buffer) return false;
-
-		// second pass: convert utf32 input to wchar_t
-		wchar_writer::value_type obegin = reinterpret_cast<wchar_writer::value_type>(buffer);
-		wchar_writer::value_type oend = utf_decoder<wchar_writer, opt_swap>::decode_utf32_block(data, data_length, obegin);
-
-		assert(oend == obegin + length);
-		*oend = 0;
-
-		out_buffer = buffer;
-		out_length = length + 1;
-
-		return true;
-	}
-
-	PUGI__FN bool convert_buffer_latin1(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size)
-	{
-		const uint8_t* data = static_cast<const uint8_t*>(contents);
-		size_t data_length = size;
-
-		// get length in wchar_t units
-		size_t length = data_length;
-
-		// allocate buffer of suitable length
-		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
-		if (!buffer) return false;
-
-		// convert latin1 input to wchar_t
-		wchar_writer::value_type obegin = reinterpret_cast<wchar_writer::value_type>(buffer);
-		wchar_writer::value_type oend = utf_decoder<wchar_writer>::decode_latin1_block(data, data_length, obegin);
+		wchar_writer::value_type oend = D::process(data, data_length, obegin, wchar_writer());
 
 		assert(oend == obegin + length);
 		*oend = 0;
@@ -2097,13 +2037,16 @@ PUGI__NS_BEGIN
 		xml_encoding wchar_encoding = get_wchar_encoding();
 
 		// fast path: no conversion required
-		if (encoding == wchar_encoding) return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
+		if (encoding == wchar_encoding)
+			return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
 
 		// only endian-swapping is required
-		if (need_endian_swap_utf(encoding, wchar_encoding)) return convert_buffer_endian_swap(out_buffer, out_length, contents, size, is_mutable);
+		if (need_endian_swap_utf(encoding, wchar_encoding))
+			return convert_buffer_endian_swap(out_buffer, out_length, contents, size, is_mutable);
 
 		// source encoding is utf8
-		if (encoding == encoding_utf8) return convert_buffer_utf8(out_buffer, out_length, contents, size);
+		if (encoding == encoding_utf8)
+			return convert_buffer_generic(out_buffer, out_length, contents, size, utf8_decoder());
 
 		// source encoding is utf16
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
@@ -2111,8 +2054,8 @@ PUGI__NS_BEGIN
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
 
 			return (native_encoding == encoding) ?
-				convert_buffer_utf16(out_buffer, out_length, contents, size, opt_false()) :
-				convert_buffer_utf16(out_buffer, out_length, contents, size, opt_true());
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf16_decoder<opt_false>()) :
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf16_decoder<opt_true>());
 		}
 
 		// source encoding is utf32
@@ -2121,24 +2064,25 @@ PUGI__NS_BEGIN
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 
 			return (native_encoding == encoding) ?
-				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_false()) :
-				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_true());
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf32_decoder<opt_false>()) :
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf32_decoder<opt_true>());
 		}
 
 		// source encoding is latin1
-		if (encoding == encoding_latin1) return convert_buffer_latin1(out_buffer, out_length, contents, size);
+		if (encoding == encoding_latin1)
+			return convert_buffer_generic(out_buffer, out_length, contents, size, latin1_decoder());
 
 		assert(!"Invalid encoding");
 		return false;
 	}
 #else
-	template <typename opt_swap> PUGI__FN bool convert_buffer_utf16(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt_swap)
+	template <typename D> PUGI__FN bool convert_buffer_generic(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, D)
 	{
-		const uint16_t* data = static_cast<const uint16_t*>(contents);
-		size_t data_length = size / sizeof(uint16_t);
+		const typename D::type* data = static_cast<const typename D::type*>(contents);
+		size_t data_length = size / sizeof(typename D::type);
 
 		// first pass: get length in utf8 units
-		size_t length = utf_decoder<utf8_counter, opt_swap>::decode_utf16_block(data, data_length, 0);
+		size_t length = D::process(data, data_length, 0, utf8_counter());
 
 		// allocate buffer of suitable length
 		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
@@ -2146,32 +2090,7 @@ PUGI__NS_BEGIN
 
 		// second pass: convert utf16 input to utf8
 		uint8_t* obegin = reinterpret_cast<uint8_t*>(buffer);
-		uint8_t* oend = utf_decoder<utf8_writer, opt_swap>::decode_utf16_block(data, data_length, obegin);
-
-		assert(oend == obegin + length);
-		*oend = 0;
-
-		out_buffer = buffer;
-		out_length = length + 1;
-
-		return true;
-	}
-
-	template <typename opt_swap> PUGI__FN bool convert_buffer_utf32(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, opt_swap)
-	{
-		const uint32_t* data = static_cast<const uint32_t*>(contents);
-		size_t data_length = size / sizeof(uint32_t);
-
-		// first pass: get length in utf8 units
-		size_t length = utf_decoder<utf8_counter, opt_swap>::decode_utf32_block(data, data_length, 0);
-
-		// allocate buffer of suitable length
-		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
-		if (!buffer) return false;
-
-		// second pass: convert utf32 input to utf8
-		uint8_t* obegin = reinterpret_cast<uint8_t*>(buffer);
-		uint8_t* oend = utf_decoder<utf8_writer, opt_swap>::decode_utf32_block(data, data_length, obegin);
+		uint8_t* oend = D::process(data, data_length, obegin, utf8_writer());
 
 		assert(oend == obegin + length);
 		*oend = 0;
@@ -2207,7 +2126,7 @@ PUGI__NS_BEGIN
 		if (postfix_length == 0) return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
 
 		// first pass: get length in utf8 units
-		size_t length = prefix_length + utf_decoder<utf8_counter>::decode_latin1_block(postfix, postfix_length, 0);
+		size_t length = prefix_length + latin1_decoder::process(postfix, postfix_length, 0, utf8_counter());
 
 		// allocate buffer of suitable length
 		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
@@ -2217,7 +2136,7 @@ PUGI__NS_BEGIN
 		memcpy(buffer, data, prefix_length);
 
 		uint8_t* obegin = reinterpret_cast<uint8_t*>(buffer);
-		uint8_t* oend = utf_decoder<utf8_writer>::decode_latin1_block(postfix, postfix_length, obegin + prefix_length);
+		uint8_t* oend = latin1_decoder::process(postfix, postfix_length, obegin + prefix_length, utf8_writer());
 
 		assert(oend == obegin + length);
 		*oend = 0;
@@ -2231,7 +2150,8 @@ PUGI__NS_BEGIN
 	PUGI__FN bool convert_buffer(char_t*& out_buffer, size_t& out_length, xml_encoding encoding, const void* contents, size_t size, bool is_mutable)
 	{
 		// fast path: no conversion required
-		if (encoding == encoding_utf8) return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
+		if (encoding == encoding_utf8)
+			return get_mutable_buffer(out_buffer, out_length, contents, size, is_mutable);
 
 		// source encoding is utf16
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
@@ -2239,8 +2159,8 @@ PUGI__NS_BEGIN
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
 
 			return (native_encoding == encoding) ?
-				convert_buffer_utf16(out_buffer, out_length, contents, size, opt_false()) :
-				convert_buffer_utf16(out_buffer, out_length, contents, size, opt_true());
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf16_decoder<opt_false>()) :
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf16_decoder<opt_true>());
 		}
 
 		// source encoding is utf32
@@ -2249,12 +2169,13 @@ PUGI__NS_BEGIN
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 
 			return (native_encoding == encoding) ?
-				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_false()) :
-				convert_buffer_utf32(out_buffer, out_length, contents, size, opt_true());
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf32_decoder<opt_false>()) :
+				convert_buffer_generic(out_buffer, out_length, contents, size, utf32_decoder<opt_true>());
 		}
 
 		// source encoding is latin1
-		if (encoding == encoding_latin1) return convert_buffer_latin1(out_buffer, out_length, contents, size, is_mutable);
+		if (encoding == encoding_latin1)
+			return convert_buffer_latin1(out_buffer, out_length, contents, size, is_mutable);
 
 		assert(!"Invalid encoding");
 		return false;
@@ -2264,14 +2185,14 @@ PUGI__NS_BEGIN
 	PUGI__FN size_t as_utf8_begin(const wchar_t* str, size_t length)
 	{
 		// get length in utf8 characters
-		return utf_decoder<utf8_counter>::decode_wchar_block(str, length, 0);
+		return wchar_decoder::process(str, length, 0, utf8_counter());
 	}
 
 	PUGI__FN void as_utf8_end(char* buffer, size_t size, const wchar_t* str, size_t length)
 	{
 		// convert to utf8
 		uint8_t* begin = reinterpret_cast<uint8_t*>(buffer);
-		uint8_t* end = utf_decoder<utf8_writer>::decode_wchar_block(str, length, begin);
+		uint8_t* end = wchar_decoder::process(str, length, begin, utf8_writer());
 	
 		assert(begin + size == end);
 		(void)!end;
@@ -2299,7 +2220,7 @@ PUGI__NS_BEGIN
 		const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
 
 		// first pass: get length in wchar_t units
-		size_t length = utf_decoder<wchar_counter>::decode_utf8_block(data, size, 0);
+		size_t length = utf8_decoder::process(data, size, 0, wchar_counter());
 
 		// allocate resulting string
 		std::basic_string<wchar_t> result;
@@ -2309,7 +2230,7 @@ PUGI__NS_BEGIN
 		if (length > 0)
 		{
 			wchar_writer::value_type begin = reinterpret_cast<wchar_writer::value_type>(&result[0]);
-			wchar_writer::value_type end = utf_decoder<wchar_writer>::decode_utf8_block(data, size, begin);
+			wchar_writer::value_type end = utf8_decoder::process(data, size, begin, wchar_writer());
 
 			assert(begin + length == end);
 			(void)!end;
@@ -3581,7 +3502,7 @@ PUGI__NS_BEGIN
 		if (encoding == encoding_utf8)
 		{
 			uint8_t* dest = r_u8;
-			uint8_t* end = utf_decoder<utf8_writer>::decode_wchar_block(data, length, dest);
+			uint8_t* end = wchar_decoder::process(data, length, dest, utf8_writer());
 
 			return static_cast<size_t>(end - dest);
 		}
@@ -3592,7 +3513,7 @@ PUGI__NS_BEGIN
 			uint16_t* dest = r_u16;
 
 			// convert to native utf16
-			uint16_t* end = utf_decoder<utf16_writer>::decode_wchar_block(data, length, dest);
+			uint16_t* end = wchar_decoder::process(data, length, dest, utf16_writer());
 
 			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
@@ -3608,7 +3529,7 @@ PUGI__NS_BEGIN
 			uint32_t* dest = r_u32;
 
 			// convert to native utf32
-			uint32_t* end = utf_decoder<utf32_writer>::decode_wchar_block(data, length, dest);
+			uint32_t* end = wchar_decoder::process(data, length, dest, utf32_writer());
 
 			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
@@ -3622,7 +3543,7 @@ PUGI__NS_BEGIN
 		if (encoding == encoding_latin1)
 		{
 			uint8_t* dest = r_u8;
-			uint8_t* end = utf_decoder<latin1_writer>::decode_wchar_block(data, length, dest);
+			uint8_t* end = wchar_decoder::process(data, length, dest, latin1_writer());
 
 			return static_cast<size_t>(end - dest);
 		}
@@ -3654,7 +3575,7 @@ PUGI__NS_BEGIN
 			uint16_t* dest = r_u16;
 
 			// convert to native utf16
-			uint16_t* end = utf_decoder<utf16_writer>::decode_utf8_block(reinterpret_cast<const uint8_t*>(data), length, dest);
+			uint16_t* end = utf8_decoder::process(reinterpret_cast<const uint8_t*>(data), length, dest, utf16_writer());
 
 			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
@@ -3669,7 +3590,7 @@ PUGI__NS_BEGIN
 			uint32_t* dest = r_u32;
 
 			// convert to native utf32
-			uint32_t* end = utf_decoder<utf32_writer>::decode_utf8_block(reinterpret_cast<const uint8_t*>(data), length, dest);
+			uint32_t* end = utf8_decoder::process(reinterpret_cast<const uint8_t*>(data), length, dest, utf32_writer());
 
 			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
@@ -3682,7 +3603,7 @@ PUGI__NS_BEGIN
 		if (encoding == encoding_latin1)
 		{
 			uint8_t* dest = r_u8;
-			uint8_t* end = utf_decoder<latin1_writer>::decode_utf8_block(reinterpret_cast<const uint8_t*>(data), length, dest);
+			uint8_t* end = utf8_decoder::process(reinterpret_cast<const uint8_t*>(data), length, dest, latin1_writer());
 
 			return static_cast<size_t>(end - dest);
 		}
