@@ -409,6 +409,15 @@ TEST_XML(xpath_api_deprecated_select_single_node, "<node><head/><foo id='1'/><fo
 	CHECK(n2.node().attribute(STR("id")).as_int() == 1);
 }
 
+TEST(xpath_api_empty)
+{
+	xml_node c;
+
+	xpath_query q;
+	CHECK(!q);
+	CHECK(!q.evaluate_boolean(c));
+}
+
 #if __cplusplus >= 201103
 TEST_XML(xpath_api_nodeset_move_ctor, "<node><foo/><foo/><bar/></node>")
 {
