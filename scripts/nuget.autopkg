@@ -1,50 +1,35 @@
-nuget{
-	nuspec{
+nuget {
+	nuspec {
 		id = pugixml;
-		version : 1.6.0.1;
-		title: XML parser library in C++;
+		version: 1.7.0-alpha;
+		title: pugixml;
 		authors: {Arseny Kapoulkine};
 		owners: {Arseny Kapoulkine};
 		licenseUrl: "http://pugixml.org/license.html";
 		projectUrl: "http://pugixml.org/";
 		iconUrl: "https://github.com/zeux/pugixml/logo.svg";
-		requireLicenseAcceptance:false;
-		summary: XML parser library in C++;
+		requireLicenseAcceptance: false;
+		summary: "Light-weight, simple and fast XML parser for C++ with XPath support";
 
-		description: @"XML parser library in C++";
+		description: @"pugixml is a C++ XML processing library, which consists of a DOM-like
+		interface with rich traversal/modification capabilities, an extremely fast XML parser
+		which constructs the DOM tree from an XML file/buffer, and an XPath 1.0 implementation
+		for complex data-driven tree queries. Full Unicode support is also available, with Unicode
+		interface variants and conversions between different Unicode encodings (which happen
+		automatically during parsing/saving).
+
+		pugixml is used by a lot of projects, both open-source and proprietary, for performance and
+		easy-to-use interface.";
 		releaseNotes: "Initial release";
 		copyright: Copyright (c) 2006-2015 Arseny Kapoulkine;
-		tags: { native};
-	}
-	dependencies {
-		packages : {
-		};
+		tags: { native };
 	}
 	files {
-		include: { "..\src\**\*.hpp" };
+		include: { "..\src\*.hpp" };
 		
-		[x86,release] { 
-			lib: vs2015\Release\libpugixml.lib;
-//			symbols: vs2015\Release\libpugixml.pdb;
-//			bin: vs2015\Release\libpugixml.dll;
-		}
-
-		[x86,debug] { 
-			lib: vs2015\Debug\libpugixml.lib;
-//			symbols: vs2015\Debug\libpugixml.pdb;
-//			bin: vs2015\Debug\libpugixml.dll;
-		}
-
-		[x64,release] { 
-			lib: vs2015\x64\Release\libpugixml.lib;
-//			symbols: vs2015\x64\Release\libpugixml.pdb;
-//			bin: vs2015\x64\Release\libpugixml.dll;
-		}
-
-		[x64,debug] { 
-			lib: vs2015\x64\Debug\libpugixml.lib;
-//			symbols: vs2015\x64\Debug\libpugixml.pdb;
-//			bin: vs2015\x64\Debug\libpugixml.dll;
-		}  
+		[x86,release] { lib: vs2015\Win32_Release\pugixml.lib; symbols: vs2015\Win32_Release\pugixml.pdb; }
+		[x86,debug] { lib: vs2015\Win32_Debug\pugixml.lib; symbols: vs2015\Win32_Debug\pugixml.pdb; }
+		[x64,release] { lib: vs2015\x64_Release\pugixml.lib; symbols: vs2015\x64_Release\pugixml.pdb; }
+		[x64,debug] { lib: vs2015\x64_Debug\pugixml.lib; symbols: vs2015\x64_Debug\pugixml.pdb; }
 	}
 }
