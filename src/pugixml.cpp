@@ -1785,19 +1785,16 @@ PUGI__NS_BEGIN
 		template <typename Traits> static inline typename Traits::value_type process(const wchar_t* data, size_t size, typename Traits::value_type result, Traits traits)
 		{
 			typedef wchar_selector<sizeof(wchar_t)>::decoder decoder;
+
 			return decoder::process(reinterpret_cast<const typename decoder::type*>(data), size, result, traits);
 		}
 	};
 
-	template <typename T> PUGI__FN void convert_utf_endian_swap(T* result, const T* data, size_t length)
-	{
-		for (size_t i = 0; i < length; ++i) result[i] = endian_swap(data[i]);
-	}
-
 #ifdef PUGIXML_WCHAR_MODE
 	PUGI__FN void convert_wchar_endian_swap(wchar_t* result, const wchar_t* data, size_t length)
 	{
-		for (size_t i = 0; i < length; ++i) result[i] = static_cast<wchar_t>(endian_swap(static_cast<wchar_selector<sizeof(wchar_t)>::type>(data[i])));
+		for (size_t i = 0; i < length; ++i)
+			result[i] = static_cast<wchar_t>(endian_swap(static_cast<wchar_selector<sizeof(wchar_t)>::type>(data[i])));
 	}
 #endif
 PUGI__NS_END
@@ -3479,6 +3476,30 @@ PUGI__NS_BEGIN
 		return encoding_utf8;
 	}
 
+	template <typename D, typename T> PUGI__FN size_t convert_buffer_output_generic(typename T::value_type dest, const char_t* data, size_t length, D, T)
+	{
+		PUGI__STATIC_ASSERT(sizeof(char_t) == sizeof(typename D::type));
+
+		typename T::value_type end = D::process(reinterpret_cast<const typename D::type*>(data), length, dest, T());
+
+		return static_cast<size_t>(end - dest) * sizeof(*dest);
+	}
+
+	template <typename D, typename T> PUGI__FN size_t convert_buffer_output_generic(typename T::value_type dest, const char_t* data, size_t length, D, T, bool opt_swap)
+	{
+		PUGI__STATIC_ASSERT(sizeof(char_t) == sizeof(typename D::type));
+
+		typename T::value_type end = D::process(reinterpret_cast<const typename D::type*>(data), length, dest, T());
+
+		if (opt_swap)
+		{
+			for (typename T::value_type i = dest; i != end; ++i)
+				*i = endian_swap(*i);
+		}
+
+		return static_cast<size_t>(end - dest) * sizeof(*dest);
+	}
+
 #ifdef PUGIXML_WCHAR_MODE
 	PUGI__FN size_t get_valid_length(const char_t* data, size_t length)
 	{
@@ -3500,53 +3521,27 @@ PUGI__NS_BEGIN
 	
 		// convert to utf8
 		if (encoding == encoding_utf8)
-		{
-			uint8_t* dest = r_u8;
-			uint8_t* end = wchar_decoder::process(data, length, dest, utf8_writer());
-
-			return static_cast<size_t>(end - dest);
-		}
+			return convert_buffer_output_generic(r_u8, data, length, wchar_decoder(), utf8_writer());
 
 		// convert to utf16
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
-			uint16_t* dest = r_u16;
-
-			// convert to native utf16
-			uint16_t* end = wchar_decoder::process(data, length, dest, utf16_writer());
-
-			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
 
-			if (native_encoding != encoding) convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
-
-			return static_cast<size_t>(end - dest) * sizeof(uint16_t);
+			return convert_buffer_output_generic(r_u16, data, length, wchar_decoder(), utf16_writer(), native_encoding != encoding);
 		}
 
 		// convert to utf32
 		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
 		{
-			uint32_t* dest = r_u32;
-
-			// convert to native utf32
-			uint32_t* end = wchar_decoder::process(data, length, dest, utf32_writer());
-
-			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 
-			if (native_encoding != encoding) convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
-
-			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
+			return convert_buffer_output_generic(r_u32, data, length, wchar_decoder(), utf32_writer(), native_encoding != encoding);
 		}
 
 		// convert to latin1
 		if (encoding == encoding_latin1)
-		{
-			uint8_t* dest = r_u8;
-			uint8_t* end = wchar_decoder::process(data, length, dest, latin1_writer());
-
-			return static_cast<size_t>(end - dest);
-		}
+			return convert_buffer_output_generic(r_u8, data, length, wchar_decoder(), latin1_writer());
 
 		assert(!"Invalid encoding");
 		return 0;
@@ -3572,41 +3567,20 @@ PUGI__NS_BEGIN
 	{
 		if (encoding == encoding_utf16_be || encoding == encoding_utf16_le)
 		{
-			uint16_t* dest = r_u16;
-
-			// convert to native utf16
-			uint16_t* end = utf8_decoder::process(reinterpret_cast<const uint8_t*>(data), length, dest, utf16_writer());
-
-			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf16_le : encoding_utf16_be;
 
-			if (native_encoding != encoding) convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
-
-			return static_cast<size_t>(end - dest) * sizeof(uint16_t);
+			return convert_buffer_output_generic(r_u16, data, length, utf8_decoder(), utf16_writer(), native_encoding != encoding);
 		}
 
 		if (encoding == encoding_utf32_be || encoding == encoding_utf32_le)
 		{
-			uint32_t* dest = r_u32;
-
-			// convert to native utf32
-			uint32_t* end = utf8_decoder::process(reinterpret_cast<const uint8_t*>(data), length, dest, utf32_writer());
-
-			// swap if necessary
 			xml_encoding native_encoding = is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 
-			if (native_encoding != encoding) convert_utf_endian_swap(dest, dest, static_cast<size_t>(end - dest));
-
-			return static_cast<size_t>(end - dest) * sizeof(uint32_t);
+			return convert_buffer_output_generic(r_u32, data, length, utf8_decoder(), utf32_writer(), native_encoding != encoding);
 		}
 
 		if (encoding == encoding_latin1)
-		{
-			uint8_t* dest = r_u8;
-			uint8_t* end = utf8_decoder::process(reinterpret_cast<const uint8_t*>(data), length, dest, latin1_writer());
-
-			return static_cast<size_t>(end - dest);
-		}
+			return convert_buffer_output_generic(r_u8, data, length, utf8_decoder(), latin1_writer());
 
 		assert(!"Invalid encoding");
 		return 0;
