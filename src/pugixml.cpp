@@ -4891,6 +4891,22 @@ PUGI__NS_BEGIN
 
 		return ferror(file) == 0;
 	}
+
+	struct name_null_sentry
+	{
+		xml_node_struct* node;
+		char_t* name;
+
+		name_null_sentry(xml_node_struct* node): node(node), name(node->name)
+		{
+			node->name = 0;
+		}
+
+		~name_null_sentry()
+		{
+			node->name = name;
+		}
+	};
 PUGI__NS_END
 
 namespace pugi
@@ -5920,17 +5936,7 @@ namespace pugi
 		doc->extra_buffers = extra;
 
 		// name of the root has to be NULL before parsing - otherwise closing node mismatches will not be detected at the top level
-		struct name_sentry
-		{
-			xml_node_struct* node;
-			char_t* name;
-
-			~name_sentry() { node->name = name; }
-		};
-
-		name_sentry sentry = { _root, _root->name };
-
-		sentry.node->name = 0;
+		impl::name_null_sentry sentry(_root);
 
 		return impl::load_buffer_impl(doc, _root, const_cast<void*>(contents), size, options, encoding, false, false, &extra->buffer);
 	}
