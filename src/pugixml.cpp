@@ -4401,7 +4401,7 @@ PUGI__NS_BEGIN
 
 	PUGI__FN int get_value_int(const char_t* value)
 	{
-		return string_to_integer<unsigned int>(value, static_cast<unsigned int>(INT_MIN), INT_MAX);
+		return string_to_integer<unsigned int>(value, 0 - static_cast<unsigned int>(INT_MIN), INT_MAX);
 	}
 
 	PUGI__FN unsigned int get_value_uint(const char_t* value)
@@ -4439,7 +4439,7 @@ PUGI__NS_BEGIN
 #ifdef PUGIXML_HAS_LONG_LONG
 	PUGI__FN long long get_value_llong(const char_t* value)
 	{
-		return string_to_integer<unsigned long long>(value, static_cast<unsigned long long>(LLONG_MIN), LLONG_MAX);
+		return string_to_integer<unsigned long long>(value, 0 - static_cast<unsigned long long>(LLONG_MIN), LLONG_MAX);
 	}
 
 	PUGI__FN unsigned long long get_value_ullong(const char_t* value)
