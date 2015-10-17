@@ -12196,7 +12196,9 @@ namespace pugi
 	PUGI__FN xpath_query::xpath_query(xpath_query&& rhs)
 	{
 		_impl = rhs._impl;
+		_result = rhs._result;
 		rhs._impl = 0;
+		rhs._result = xpath_parse_result();
 	}
 
 	PUGI__FN xpath_query& xpath_query::operator=(xpath_query&& rhs)
@@ -12207,7 +12209,9 @@ namespace pugi
 			impl::xpath_query_impl::destroy(static_cast<impl::xpath_query_impl*>(_impl));
 
 		_impl = rhs._impl;
+		_result = rhs._result;
 		rhs._impl = 0;
+		rhs._result = xpath_parse_result();
 
 		return *this;
 	}
