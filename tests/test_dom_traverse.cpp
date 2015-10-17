@@ -1166,9 +1166,9 @@ TEST_XML(dom_as_uint_overflow, "<node attr1='-1' attr2='4294967296' attr3='52949
 	xml_node node = doc.child(STR("node"));
 
 	CHECK(node.attribute(STR("attr1")).as_uint() == 0);
-	CHECK(node.attribute(STR("attr2")).as_uint() == 4294967295);
-	CHECK(node.attribute(STR("attr3")).as_uint() == 4294967295);
-	CHECK(node.attribute(STR("attr4")).as_uint() == 4294967295);
+	CHECK(node.attribute(STR("attr2")).as_uint() == 4294967295u);
+	CHECK(node.attribute(STR("attr3")).as_uint() == 4294967295u);
+	CHECK(node.attribute(STR("attr4")).as_uint() == 4294967295u);
 }
 
 TEST_XML(dom_as_int_hex_overflow, "<node attr1='-0x80000001' attr2='0x80000000' />")
@@ -1184,8 +1184,8 @@ TEST_XML(dom_as_uint_hex_overflow, "<node attr1='-0x1' attr2='0x100000000' attr3
 	xml_node node = doc.child(STR("node"));
 
 	CHECK(node.attribute(STR("attr1")).as_uint() == 0);
-	CHECK(node.attribute(STR("attr2")).as_uint() == 4294967295);
-	CHECK(node.attribute(STR("attr3")).as_uint() == 4294967295);
+	CHECK(node.attribute(STR("attr2")).as_uint() == 4294967295u);
+	CHECK(node.attribute(STR("attr3")).as_uint() == 4294967295u);
 }
 
 TEST_XML(dom_as_int_many_digits, "<node attr1='0000000000000000000000000000000000000000000000001' />")
