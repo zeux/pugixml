@@ -4897,7 +4897,7 @@ PUGI__NS_BEGIN
 		xml_node_struct* node;
 		char_t* name;
 
-		name_null_sentry(xml_node_struct* node): node(node), name(node->name)
+		name_null_sentry(xml_node_struct* node_): node(node_), name(node_->name)
 		{
 			node->name = 0;
 		}
