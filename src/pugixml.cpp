@@ -5449,9 +5449,9 @@ namespace pugi
 
 	PUGI__FN bool xml_node::set_name(const char_t* rhs)
 	{
-		static const bool has_name[] = { false, false, true, false, false, false, true, true, false };
+		xml_node_type type_ = _root ? PUGI__NODETYPE(_root) : node_null;
 
-		if (!_root || !has_name[PUGI__NODETYPE(_root)])
+		if (type_ != node_element && type_ != node_pi && type_ != node_declaration)
 			return false;
 
 		return impl::strcpy_insitu(_root->name, _root->header, impl::xml_memory_page_name_allocated_mask, rhs, impl::strlength(rhs));
@@ -5459,9 +5459,9 @@ namespace pugi
 		
 	PUGI__FN bool xml_node::set_value(const char_t* rhs)
 	{
-		static const bool has_value[] = { false, false, false, true, true, true, true, false, true };
+		xml_node_type type_ = _root ? PUGI__NODETYPE(_root) : node_null;
 
-		if (!_root || !has_value[PUGI__NODETYPE(_root)])
+		if (type_ != node_pcdata && type_ != node_cdata && type_ != node_comment && type_ != node_pi && type_ != node_doctype)
 			return false;
 
 		return impl::strcpy_insitu(_root->value, _root->header, impl::xml_memory_page_value_allocated_mask, rhs, impl::strlength(rhs));
