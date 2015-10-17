@@ -299,7 +299,7 @@ PUGI__NS_BEGIN
 		void** insert(const void* key)
 		{
 			assert(key);
-			assert(_count < _capacity * 3 / 4);
+			assert(_capacity != 0 && _count < _capacity - _capacity / 4);
 
 			size_t hashmod = _capacity - 1;
 			size_t bucket = hash(key) & hashmod;
@@ -383,6 +383,8 @@ PUGI__NS_BEGIN
 
 		_capacity = rt._capacity;
 		_items = rt._items;
+
+		assert(_count == rt._count);
 
 		return true;
 	}
