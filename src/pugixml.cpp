@@ -4350,6 +4350,10 @@ PUGI__NS_BEGIN
 		{
 			s += 2;
 
+			// since overflow detection relies on length of the sequence skip leading zeros
+			while (*s == '0')
+				s++;
+
 			const char_t* start = s;
 
 			for (;;)
@@ -4370,6 +4374,10 @@ PUGI__NS_BEGIN
 		}
 		else
 		{
+			// since overflow detection relies on length of the sequence skip leading zeros
+			while (*s == '0')
+				s++;
+
 			const char_t* start = s;
 
 			for (;;)

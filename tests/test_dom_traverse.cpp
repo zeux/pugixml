@@ -1188,6 +1188,22 @@ TEST_XML(dom_as_uint_hex_overflow, "<node attr1='-0x1' attr2='0x100000000' attr3
 	CHECK(node.attribute(STR("attr3")).as_uint() == 4294967295);
 }
 
+TEST_XML(dom_as_int_many_digits, "<node attr1='0000000000000000000000000000000000000000000000001' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_int() == 1);
+	CHECK(node.attribute(STR("attr1")).as_uint() == 1);
+}
+
+TEST_XML(dom_as_int_hex_many_digits, "<node attr1='0x0000000000000000000000000000000000000000000000001' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_int() == 1);
+	CHECK(node.attribute(STR("attr1")).as_uint() == 1);
+}
+
 #ifdef PUGIXML_HAS_LONG_LONG
 TEST_XML(dom_as_llong_overflow, "<node attr1='-9223372036854775809' attr2='9223372036854775808' attr3='-18446744073709551616' />")
 {
@@ -1223,6 +1239,22 @@ TEST_XML(dom_as_ullong_hex_overflow, "<node attr1='-0x1' attr2='0x10000000000000
 	CHECK(node.attribute(STR("attr1")).as_ullong() == 0);
 	CHECK(node.attribute(STR("attr2")).as_ullong() == 18446744073709551615ull);
 	CHECK(node.attribute(STR("attr3")).as_ullong() == 18446744073709551615ull);
+}
+
+TEST_XML(dom_as_llong_many_digits, "<node attr1='0000000000000000000000000000000000000000000000001' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_llong() == 1);
+	CHECK(node.attribute(STR("attr1")).as_ullong() == 1);
+}
+
+TEST_XML(dom_as_llong_hex_many_digits, "<node attr1='0x0000000000000000000000000000000000000000000000001' />")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.attribute(STR("attr1")).as_llong() == 1);
+	CHECK(node.attribute(STR("attr1")).as_ullong() == 1);
 }
 #endif
 
