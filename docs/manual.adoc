@@ -1880,7 +1880,7 @@ When you call `select_nodes` with an expression string as an argument, a query o
 * You can use query objects to evaluate XPath expressions which result in booleans, numbers or strings;
 * You can get the type of expression value via query object.
 
-Query objects correspond to `xpath_query` type. They are immutable and non-copyable: they are bound to the expression at creation time and can not be cloned. If you want to put query objects in a container, allocate them on heap via `new` operator and store pointers to `xpath_query` in the container.
+Query objects correspond to `xpath_query` type. They are immutable and non-copyable: they are bound to the expression at creation time and can not be cloned. If you want to put query objects in a container, either allocate them on heap via `new` operator and store pointers to `xpath_query` in the container, or use a C++11 compiler (query objects are movable in C++11).
 
 [[xpath_query::ctor]]
 You can create a query object with the constructor that takes XPath expression as an argument:

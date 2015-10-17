@@ -3656,7 +3656,7 @@ While compiling expressions is fast, the compilation time can introduce a signif
 </ul>
 </div>
 <div class="paragraph">
-<p>Query objects correspond to <code>xpath_query</code> type. They are immutable and non-copyable: they are bound to the expression at creation time and can not be cloned. If you want to put query objects in a container, allocate them on heap via <code>new</code> operator and store pointers to <code>xpath_query</code> in the container.</p>
+<p>Query objects correspond to <code>xpath_query</code> type. They are immutable and non-copyable: they are bound to the expression at creation time and can not be cloned. If you want to put query objects in a container, either allocate them on heap via <code>new</code> operator and store pointers to <code>xpath_query</code> in the container, or use a C11 compiler (query objects are movable in C11).</p>
 </div>
 <div id="xpath_query::ctor" class="paragraph">
 <p>You can create a query object with the constructor that takes XPath expression as an argument:</p>
@@ -5607,7 +5607,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-10-10 13:42:56 PDT
+Last updated 2015-10-17 08:59:09 PDT
 </div>
 </div>
 </body>
