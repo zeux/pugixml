@@ -758,10 +758,11 @@ PUGI__NS_BEGIN
 
 		xml_memory_page* get_page() const
 		{
+			// round-trip through void* to silence 'cast increases required alignment of target type' warnings
 			const char* page_marker = reinterpret_cast<const char*>(this) - (_page << compact_alignment_log2);
-			const char* page = page_marker - *reinterpret_cast<const uint32_t*>(page_marker);
+			const char* page = page_marker - *reinterpret_cast<const uint32_t*>(static_cast<const void*>(page_marker));
 
-			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(page));
+			return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(static_cast<const void*>(page)));
 		}
 
 	private:
@@ -953,7 +954,8 @@ PUGI__NS_BEGIN
 
 				if (static_cast<uintptr_t>(offset) < (65535 << 7))
 				{
-					uint16_t* base = reinterpret_cast<uint16_t*>(reinterpret_cast<char*>(this) - base_offset);
+					// round-trip through void* to silence 'cast increases required alignment of target type' warnings
+					uint16_t* base = reinterpret_cast<uint16_t*>(static_cast<void*>(reinterpret_cast<char*>(this) - base_offset));
 
 					if (*base == 0)
 					{
@@ -997,7 +999,8 @@ PUGI__NS_BEGIN
 				{
 					xml_memory_page* page = compact_get_page(this, header_offset);
 
-					const uint16_t* base = reinterpret_cast<const uint16_t*>(reinterpret_cast<const char*>(this) - base_offset);
+					// round-trip through void* to silence 'cast increases required alignment of target type' warnings
+					const uint16_t* base = reinterpret_cast<const uint16_t*>(static_cast<const void*>(reinterpret_cast<const char*>(this) - base_offset));
 					assert(*base);
 
 					ptrdiff_t offset = ((*base - 1) << 7) + (_data - 1);
@@ -6694,7 +6697,8 @@ namespace pugi
 
 		// setup first page marker
 	#ifdef PUGIXML_COMPACT
-		page->compact_page_marker = reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(page) + sizeof(impl::xml_memory_page));
+		// round-trip through void* to avoid 'cast increases required alignment of target type' warning
+		page->compact_page_marker = reinterpret_cast<uint32_t*>(static_cast<void*>(reinterpret_cast<char*>(page) + sizeof(impl::xml_memory_page)));
 		*page->compact_page_marker = sizeof(impl::xml_memory_page);
 	#endif
 
