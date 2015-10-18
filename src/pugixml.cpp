@@ -106,6 +106,7 @@
 #if defined(__BORLANDC__) && !defined(__MEM_H_USING_LIST)
 using std::memcpy;
 using std::memmove;
+using std::memset;
 #endif
 
 // In some environments MSVC is a compiler but the CRT lacks certain MSVC-specific features
@@ -743,12 +744,12 @@ PUGI__NS_BEGIN
 
 		void operator&=(uintptr_t mod)
 		{
-			_flags &= mod;
+			_flags &= static_cast<unsigned char>(mod);
 		}
 
 		void operator|=(uintptr_t mod)
 		{
-			_flags |= mod;
+			_flags |= static_cast<unsigned char>(mod);
 		}
 
 		uintptr_t operator&(uintptr_t mod) const
@@ -3437,7 +3438,7 @@ PUGI__NS_BEGIN
 					return make_parse_result(status_unrecognized_tag, length - 1);
 
 				// check if there are any element nodes parsed
-				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling + 0 : root->first_child;
+				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling + 0 : root->first_child+ 0;
 
 				if (!PUGI__OPTSET(parse_fragment) && !has_element_node_siblings(first_root_child_parsed))
 					return make_parse_result(status_no_document_element, length - 1);
@@ -3980,7 +3981,7 @@ PUGI__NS_BEGIN
 				writer.write(' ');
 			}
 
-			writer.write_string(a->name ? a->name : default_name);
+			writer.write_string(a->name ? a->name + 0 : default_name);
 			writer.write('=', '"');
 
 			if (a->value)
@@ -3993,7 +3994,7 @@ PUGI__NS_BEGIN
 	PUGI__FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, const char_t* indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
-		const char_t* name = node->name ? node->name : default_name;
+		const char_t* name = node->name ? node->name + 0 : default_name;
 
 		writer.write('<');
 		writer.write_string(name);
@@ -4018,7 +4019,7 @@ PUGI__NS_BEGIN
 	PUGI__FN void node_output_end(xml_buffered_writer& writer, xml_node_struct* node)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
-		const char_t* name = node->name ? node->name : default_name;
+		const char_t* name = node->name ? node->name + 0 : default_name;
 
 		writer.write('<', '/');
 		writer.write_string(name);
@@ -4045,7 +4046,7 @@ PUGI__NS_BEGIN
 
 			case node_pi:
 				writer.write('<', '?');
-				writer.write_string(node->name ? node->name : default_name);
+				writer.write_string(node->name ? node->name + 0 : default_name);
 
 				if (node->value)
 				{
@@ -4058,7 +4059,7 @@ PUGI__NS_BEGIN
 
 			case node_declaration:
 				writer.write('<', '?');
-				writer.write_string(node->name ? node->name : default_name);
+				writer.write_string(node->name ? node->name + 0 : default_name);
 				node_output_attributes(writer, node, PUGIXML_TEXT(""), 0, flags | format_raw, 0);
 				writer.write('?', '>');
 				break;
@@ -5038,7 +5039,7 @@ namespace pugi
 
 	PUGI__FN const char_t* xml_attribute::as_string(const char_t* def) const
 	{
-		return (_attr && _attr->value) ? _attr->value : def;
+		return (_attr && _attr->value) ? _attr->value + 0 : def;
 	}
 
 	PUGI__FN int xml_attribute::as_int(int def) const
@@ -6239,7 +6240,7 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return (d && d->value) ? d->value : def;
+		return (d && d->value) ? d->value + 0 : def;
 	}
 
 	PUGI__FN int xml_text::as_int(int def) const
