@@ -843,7 +843,7 @@ PUGI__NS_BEGIN
 
 		T* operator->() const
 		{
-			return operator T*();
+			return *this;
 		}
 
 	private:
@@ -923,7 +923,7 @@ PUGI__NS_BEGIN
 
 		T* operator->() const
 		{
-			return operator T*();
+			return *this;
 		}
 
 	private:
