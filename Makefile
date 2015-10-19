@@ -34,6 +34,10 @@ ifeq ($(config),sanitize)
 	endif
 endif
 
+ifeq ($(config),analyze)
+	CXXFLAGS+=--analyze
+endif
+
 ifneq ($(defines),standard)
 	COMMA=,
 	CXXFLAGS+=-D $(subst $(COMMA), -D ,$(defines))
