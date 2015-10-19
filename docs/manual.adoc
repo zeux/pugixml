@@ -2103,7 +2103,7 @@ Because of the differences in document object models, performance considerations
 :!numbered:
 
 [[v1.7]]
-=== v1.7 ^17.10.2015^
+=== v1.7 ^19.10.2015^
 
 Major release, featuring performance and memory improvements along with some new features. Changes:
 
