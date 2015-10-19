@@ -968,63 +968,19 @@ In that example <code>PUGIXML_API</code> is inconsistent between several source 
 <div class="sect2">
 <h3 id="install.portability"><a class="anchor" href="#install.portability"></a>2.3. Portability</h3>
 <div class="paragraph">
-<p>pugixml is written in standard-compliant C&#43;&#43; with some compiler-specific workarounds where appropriate. pugixml is compatible with the C&#43;&#43;11 standard, but does not require C&#43;&#43;11 support. Each version is tested with a unit test suite (with code coverage about 99%) on the following platforms:</p>
+<p>pugixml is written in standard-compliant C&#43;&#43; with some compiler-specific workarounds where appropriate. pugixml is compatible with the C&#43;&#43;11 standard, but does not require C&#43;&#43;11 support. Each version is tested with a unit test suite with code coverage exceeding 99%.</p>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>Microsoft Windows:</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Borland C&#43;&#43; Compiler 5.82</p>
-</li>
-<li>
-<p>Digital Mars C&#43;&#43; Compiler 8.51</p>
-</li>
-<li>
-<p>Intel C&#43;&#43; Compiler 8.0, 9.0 x86/x64, 10.0 x86/x64, 11.0 x86/x64</p>
-</li>
-<li>
-<p>Metrowerks CodeWarrior 8.0</p>
-</li>
-<li>
-<p>Microsoft Visual C&#43;&#43; 6.0, 7.0 (2002), 7.1 (2003), 8.0 (2005) x86/x64, 9.0 (2008) x86/x64, 10.0 (2010) x86/x64, 11.0 (2011) x86/x64/ARM, 12.0 (2013) x86/x64/ARM and some CLR versions</p>
-</li>
-<li>
-<p>MinGW (GCC) 3.4, 4.4, 4.5, 4.6 x64</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>pugixml runs on a variety of desktop platforms (including Microsoft Windows, Linux, FreeBSD, Apple MacOSX and Sun Solaris), game consoles (inclusing Microsoft Xbox 360, Microsoft Xbox One, Nintendo Wii, Sony Playstation Portable and Sony Playstation 3) and mobile platforms (including Android, BlackBerry, Samsung bada and Microsoft Windows CE).</p>
 </div>
-</li>
-<li>
-<p>Linux (GCC 4.4.3 x86/x64, GCC 4.8.1 x64, Clang 3.2 x64)</p>
-</li>
-<li>
-<p>FreeBSD (GCC 4.2.1 x86/x64)</p>
-</li>
-<li>
-<p>Apple MacOSX (GCC 4.0.1 x86/x64/PowerPC, Clang 3.5 x64)</p>
-</li>
-<li>
-<p>Sun Solaris (sunCC x86/x64)</p>
-</li>
-<li>
-<p>Microsoft Xbox 360</p>
-</li>
-<li>
-<p>Nintendo Wii (Metrowerks CodeWarrior 4.1)</p>
-</li>
-<li>
-<p>Sony Playstation Portable (GCC 3.4.2)</p>
-</li>
-<li>
-<p>Sony Playstation 3 (GCC 4.1.1, SNC 310.1)</p>
-</li>
-<li>
-<p>Various portable platforms (Android NDK, BlackBerry NDK, Samsung bada, Windows CE)</p>
-</li>
-</ul>
+<div class="paragraph">
+<p>pugixml supports various architectures, such as x86/x86-64, PowerPC, ARM, MIPS and SPARC. In general it should run on any architecture since it does not use architecture-specific code and does not rely on features such as unaligned memory access.</p>
+</div>
+<div class="paragraph">
+<p>pugixml can be compiled using any C++ compiler; it was tested with all versions of Microsoft Visual C&#43;&#43; from 6.0 up to 2015, GCC from 3.4 up to 5.2, Clang from 3.2 up to 3.7, as well as a variety of other compilers (e.g. Borland C&#43;&#43;, Digital Mars C&#43;&#43;, Intel C&#43;&#43;, Metrowerks CodeWarrior and PathScale). The code is written to avoid compilation warnings even on reasonably high warning levels.</p>
+</div>
+<div class="paragraph">
+<p>Note that some platforms may have very bare-bones support of C++; in some cases you&#8217;ll have to use <code>PUGIXML_NO_STL</code> and/or <code>PUGIXML_NO_EXCEPTIONS</code> to compile without issues. This mostly applies to old game consoles and embedded systems.</p>
 </div>
 </div>
 </div>
@@ -5607,7 +5563,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2015-10-17 08:59:09 PDT
+Last updated 2015-10-18 18:22:42 PDT
 </div>
 </div>
 </body>
