@@ -126,6 +126,18 @@ You can access the Git repository via Subversion using https://github.com/zeux/p
 svn checkout https://github.com/zeux/pugixml/tags/v{version} pugixml
 ----
 
+[[install.getting.packages]]
+==== Packages
+
+pugixml is available as a package via various package managers. Note that most packages are maintained separately from the main repository so they do not necessarily contain the latest version.
+
+Here's an incomplete list of pugixml packages in various systems:
+
+* Linux (http://packages.ubuntu.com/search?keywords=pugixml[Ubuntu], https://tracker.debian.org/pkg/pugixml[Debian], https://apps.fedoraproject.org/packages/pugixml[Fedora], https://aur.archlinux.org/packages/pugixml/[Arch Linux], other http://pkgs.org/search/pugixml[distributions])
+* http://fbsdmon.org/ports/textproc/pugixml[FreeBSD]
+* OSX, via http://brewformulas.org/Pugixml[Homebrew]
+* Windows, via https://www.nuget.org/packages/pugixml/[NuGet]
+
 [[install.building]]
 === Building pugixml
 
