@@ -1,7 +1,7 @@
 nuget {
 	nuspec {
 		id = pugixml;
-		version: 1.7.0;
+		version: 1.7.0-appveyor;
 
 		authors: {Arseny Kapoulkine};
 		owners: {Arseny Kapoulkine};
