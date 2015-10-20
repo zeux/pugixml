@@ -291,7 +291,7 @@ Here `"node"` element has three children, two of which are PCDATA nodes with val
 * Character data nodes ([[node_cdata]]`node_cdata`) represent text in XML that is quoted in a special way. CDATA nodes do not differ from PCDATA nodes except in XML representation - the above text example looks like this with CDATA:
 +
 ----
-<node> <![CDATA[[text1]]> <child/> <![CDATA[[text2]]> </node>
+<node> <![CDATA[text1]]> <child/> <![CDATA[text2]]> </node>
 ----
 +
 CDATA nodes make it easy to include non-escaped `<`, `&` and `>` characters in plain text. CDATA value can not contain the character sequence `]]>`, since it is used to determine the end of node contents.
