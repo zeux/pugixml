@@ -112,8 +112,8 @@ struct dummy_fixture {};
 #define CHECK_TEXT(condition, text) if (condition) ; else test_runner::_failure_message = CHECK_JOIN2(text, __FILE__, __LINE__), longjmp(test_runner::_failure_buffer, 1)
 #define CHECK_FORCE_FAIL(text) test_runner::_failure_message = CHECK_JOIN2(text, __FILE__, __LINE__), longjmp(test_runner::_failure_buffer, 1)
 
-#if (defined(_MSC_VER) && _MSC_VER == 1200) || defined(__MWERKS__)
-#	define STRINGIZE(value) "??" // MSVC 6.0 and CodeWarrior have troubles stringizing stuff with strings w/escaping inside
+#if (defined(_MSC_VER) && _MSC_VER == 1200) || defined(__MWERKS__) || (defined(__BORLANDC__) && __BORLANDC__ <= 0x540)
+#	define STRINGIZE(value) "??" // Some compilers have issues with stringizing expressions that contain strings w/escaping inside
 #else
 #	define STRINGIZE(value) #value
 #endif
@@ -150,7 +150,7 @@ struct dummy_fixture {};
 
 #define STR(text) PUGIXML_TEXT(text)
 
-#ifdef __DMC__
+#if defined(__DMC__) || defined(__BORLANDC__)
 #define U_LITERALS // DMC does not understand \x01234 (it parses first three digits), but understands \u01234
 #endif
 

@@ -360,7 +360,7 @@ TEST(document_load_file_wide_ascii)
 	CHECK_NODE(doc, STR("<node />"));
 }
 
-#if !defined(__DMC__) && !defined(__MWERKS__) && !(defined(__MINGW32__) && defined(__STRICT_ANSI__) && !defined(__MINGW64_VERSION_MAJOR))
+#if !defined(__DMC__) && !defined(__MWERKS__) && !(defined(__MINGW32__) && defined(__STRICT_ANSI__) && !defined(__MINGW64_VERSION_MAJOR)) && !defined(__BORLANDC__)
 TEST(document_load_file_wide_unicode)
 {
 	pugi::xml_document doc;

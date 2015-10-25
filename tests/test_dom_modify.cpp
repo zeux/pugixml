@@ -6,10 +6,6 @@
 #include <math.h>
 #include <string.h>
 
-#ifdef __BORLANDC__
-using std::ldexpf;
-#endif
-
 TEST_XML(dom_attr_assign, "<node/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -1647,7 +1643,7 @@ TEST(dom_fp_roundtrip_float)
 	{
 		for (size_t i = 0; i < sizeof(fp_roundtrip_base) / sizeof(fp_roundtrip_base[0]); ++i)
 		{
-			float value = ldexpf(static_cast<float>(fp_roundtrip_base[i]), e);
+			float value = static_cast<float>(ldexp(fp_roundtrip_base[i], e));
 
 			doc.text().set(value);
 			CHECK(fp_equal(doc.text().as_float(), value));
