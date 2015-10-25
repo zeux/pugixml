@@ -132,9 +132,7 @@ using std::memset;
 #endif
 
 // uintptr_t
-#if !defined(_MSC_VER) || _MSC_VER >= 1600
-#	include <stdint.h>
-#else
+#if (defined(_MSC_VER) && _MSC_VER < 1600) || (defined(__BORLANDC__) && __BORLANDC__ < 0x561)
 namespace pugi
 {
 #	ifndef _UINTPTR_T_DEFINED
@@ -145,6 +143,8 @@ namespace pugi
 	typedef unsigned __int16 uint16_t;
 	typedef unsigned __int32 uint32_t;
 }
+#else
+#	include <stdint.h>
 #endif
 
 // Memory allocation
@@ -6450,7 +6450,7 @@ namespace pugi
 	PUGI__FN xml_node* xml_node_iterator::operator->() const
 	{
 		assert(_wrap._root);
-		return const_cast<xml_node*>(&_wrap); // BCC32 workaround
+		return const_cast<xml_node*>(&_wrap); // BCC5 workaround
 	}
 
 	PUGI__FN const xml_node_iterator& xml_node_iterator::operator++()
@@ -6511,7 +6511,7 @@ namespace pugi
 	PUGI__FN xml_attribute* xml_attribute_iterator::operator->() const
 	{
 		assert(_wrap._attr);
-		return const_cast<xml_attribute*>(&_wrap); // BCC32 workaround
+		return const_cast<xml_attribute*>(&_wrap); // BCC5 workaround
 	}
 
 	PUGI__FN const xml_attribute_iterator& xml_attribute_iterator::operator++()
@@ -6572,7 +6572,7 @@ namespace pugi
 	PUGI__FN xml_node* xml_named_node_iterator::operator->() const
 	{
 		assert(_wrap._root);
-		return const_cast<xml_node*>(&_wrap); // BCC32 workaround
+		return const_cast<xml_node*>(&_wrap); // BCC5 workaround
 	}
 
 	PUGI__FN const xml_named_node_iterator& xml_named_node_iterator::operator++()
@@ -6792,7 +6792,8 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, "rb"), fclose);
+		typedef int (*fclose_t)(FILE*); // BCC5 workaround
+		auto_deleter<FILE, fclose_t> file(fopen(path_, "rb"), fclose);
 
 		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -6802,7 +6803,8 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, L"rb"), fclose);
+		typedef int (*fclose_t)(FILE*); // BCC5 workaround
+		auto_deleter<FILE, fclose_t> file(impl::open_file_wide(path_, L"rb"), fclose);
 
 		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -6875,7 +6877,8 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE, int(*)(FILE*)> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), fclose);
+		typedef int (*fclose_t)(FILE*); // BCC5 workaround
+		auto_deleter<FILE, fclose_t> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), fclose);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
@@ -6883,7 +6886,8 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE, int(*)(FILE*)> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), fclose);
+		typedef int (*fclose_t)(FILE*); // BCC5 workaround
+		auto_deleter<FILE, fclose_t> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), fclose);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
@@ -7825,9 +7829,11 @@ PUGI__NS_BEGIN
 	PUGI__FN double gen_nan()
 	{
 	#if defined(__STDC_IEC_559__) || ((FLT_RADIX - 0 == 2) && (FLT_MAX_EXP - 0 == 128) && (FLT_MANT_DIG - 0 == 24))
-		union { float f; uint32_t i; } u[sizeof(float) == sizeof(uint32_t) ? 1 : -1];
-		u[0].i = 0x7fc00000;
-		return u[0].f;
+		PUGI__STATIC_ASSERT(sizeof(float) == sizeof(uint32_t));
+		typedef uint32_t UI; // BCC5 workaround
+		union { float f; UI i; } u;
+		u.i = 0x7fc00000;
+		return u.f;
 	#else
 		// fallback
 		const volatile double zero = 0.0;
