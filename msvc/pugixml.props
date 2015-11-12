@@ -2,34 +2,28 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- Some auxiliary properties. Prefix "_" make them invisible to Visual Studio user -->
-
   <PropertyGroup>
-    <!-- Imported BEFORE others props-->
-    <!-- Property sheets specific for each project.-->
-    <PUGI_Props_Primary>$(PUGI_ProjectDir)_$(ProjectName).props</PUGI_Props_Primary>
+    <_PUGI_Rtl_Type Condition="'$(PUGI_Use_Static_Rtl)'=='True'">static</_PUGI_Rtl_Type>
+    <_PUGI_Rtl_Type Condition="'$(PUGI_Use_Static_Rtl)'!='True'">dynamic</_PUGI_Rtl_Type>
   </PropertyGroup>
 
-  <!-- PropsPrefix contain only part of PropertySheet path: Absolute path to directory and first part of file name -->
-
   <PropertyGroup>
-    <!-- Property sheets common for all projects. -->
+    <!-- PUGI_CommonPropsPrefix contain only part of PropertySheet path: 
+         Absolute path to directory and first part of file name -->
     <PUGI_CommonPropsPrefix>$(ProjectDir)props\common</PUGI_CommonPropsPrefix>
-
-    <PUGI_Props_Common     >$(PUGI_CommonPropsPrefix).props</PUGI_Props_Common>
-    <PUGI_Props_CommonConf >$(PUGI_CommonPropsPrefix).$(Configuration.ToLower()).props</PUGI_Props_CommonConf>
-    <PUGI_Props_CommonPlatf>$(PUGI_CommonPropsPrefix).$(Platform.ToLower()).props</PUGI_Props_CommonPlatf>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PUGI_A Condition="exists('$(PUGI_Props_Common)')" >True</PUGI_A>
-    <PUGI_B Condition="exists('$(PUGI_Props_CommonConf)')">True</PUGI_B>
-    <PUGI_C Condition="exists('$(PUGI_Props_CommonPlatf)')">True</PUGI_C>
+    <PUGI_Props_Common       >$(PUGI_CommonPropsPrefix).props</PUGI_Props_Common>
+    <PUGI_Props_CommonConf   >$(PUGI_CommonPropsPrefix).$(Configuration.ToLower()).props</PUGI_Props_CommonConf>
+    <PUGI_Props_CommonPlatf  >$(PUGI_CommonPropsPrefix).$(Platform.ToLower()).props</PUGI_Props_CommonPlatf>
+    <PUGI_Props_CommonConfRtl>$(PUGI_CommonPropsPrefix).$(Configuration.ToLower()).$(_PUGI_Rtl_Type).props</PUGI_Props_CommonConfRtl>
   </PropertyGroup>
-
 
   <ImportGroup Label="PropertySheets">
-    <Import Condition="exists('$(PUGI_Props_Common)')"      Project="$(PUGI_Props_Common)"      />
-    <Import Condition="exists('$(PUGI_Props_CommonConf)')"  Project="$(PUGI_Props_CommonConf)"  />
-    <Import Condition="exists('$(PUGI_Props_CommonPlatf)')" Project="$(PUGI_Props_CommonPlatf)" />
+    <Import Condition="exists('$(PUGI_Props_Common)')"        Project="$(PUGI_Props_Common)"         />
+    <Import Condition="exists('$(PUGI_Props_CommonConf)')"    Project="$(PUGI_Props_CommonConf)"     />
+    <Import Condition="exists('$(PUGI_Props_CommonPlatf)')"   Project="$(PUGI_Props_CommonPlatf)"    />
+    <Import Condition="exists('$(PUGI_Props_CommonConfRtl)')" Project="$(PUGI_Props_CommonConfRtl)"  />
   </ImportGroup>
 </Project>
