@@ -44,4 +44,14 @@
     <Import Condition="exists('$(PUGI_Props_VcverPlatf)')" Project="$(PUGI_Props_VcverPlatf)" />
   </ImportGroup>
 
+  <!--
+    Import custom property sheet. It allow user to customize build without props/vcxproj editing.
+    User can create his own props, and set its path to PUGI_Props_External property.
+    For example:
+    MsBuild.exe /p:PUGI_Props_External=d:\MyProps.props pugixml_vs2010.vcxproj    
+  -->
+  <ImportGroup Label="PropertySheets">
+    <Import Condition="exists('$(PUGI_Props_External)')" Project="$(PUGI_Props_External)" />
+  </ImportGroup>
+
 </Project>
