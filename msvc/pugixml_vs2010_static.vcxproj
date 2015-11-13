@@ -76,25 +76,21 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Lib />
     <Link>
-      <ProgramDataBaseFileName>$(OutDir)pugixmlsd.pdb</ProgramDataBaseFileName>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Lib />
     <Link>
-      <ProgramDataBaseFileName>$(OutDir)pugixmlsd.pdb</ProgramDataBaseFileName>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Lib />
     <Link>
-      <ProgramDataBaseFileName>$(OutDir)pugixmls.pdb</ProgramDataBaseFileName>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Lib />
     <Link>
-      <ProgramDataBaseFileName>$(OutDir)pugixmls.pdb</ProgramDataBaseFileName>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
