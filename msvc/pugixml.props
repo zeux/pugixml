@@ -25,8 +25,9 @@
 
   <!-- Property sheets specific for MSVC version -->
   <PropertyGroup>
-    <PUGI_Props_Vcver    >$(PUGI_VcverPropsPrefix).props</PUGI_Props_Vcver>
-    <PUGI_Props_VcverConf>$(PUGI_VcverPropsPrefix).$(Configuration.ToLower()).props</PUGI_Props_VcverConf>
+    <PUGI_Props_Vcver     >$(PUGI_VcverPropsPrefix).props</PUGI_Props_Vcver>
+    <PUGI_Props_VcverConf >$(PUGI_VcverPropsPrefix).$(Configuration.ToLower()).props</PUGI_Props_VcverConf>
+    <PUGI_Props_VcverPlatf>$(PUGI_VcverPropsPrefix).$(Platform.ToLower()).props</PUGI_Props_VcverPlatf>
   </PropertyGroup>
 
 
@@ -38,8 +39,9 @@
   </ImportGroup>
 
   <ImportGroup Label="PropertySheets">
-    <Import Condition="exists('$(PUGI_Props_Vcver)')"     Project="$(PUGI_Props_Vcver)"     />
-    <Import Condition="exists('$(PUGI_Props_VcverConf)')" Project="$(PUGI_Props_VcverConf)" />
+    <Import Condition="exists('$(PUGI_Props_Vcver)')"      Project="$(PUGI_Props_Vcver)"      />
+    <Import Condition="exists('$(PUGI_Props_VcverConf)')"  Project="$(PUGI_Props_VcverConf)"  />
+    <Import Condition="exists('$(PUGI_Props_VcverPlatf)')" Project="$(PUGI_Props_VcverPlatf)" />
   </ImportGroup>
 
 </Project>
