@@ -4,8 +4,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <TargetName>pugixml</TargetName>
-    <OutDir>vs.$(PlatformToolset)\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>vs.$(PlatformToolset)\$(Platform)_$(Configuration)\</IntDir>
+    <OutDir>vs.$(PlatformToolset)\$(Platform)_$(Configuration)_$(PUGI_Rtl_Type)\</OutDir>
+    <IntDir>vs.$(PlatformToolset)\$(Platform)_$(Configuration)_$(PUGI_Rtl_Type)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
