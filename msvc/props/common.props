@@ -3,8 +3,8 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IntDir>vc$(PlatformToolset)\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>vc$(PlatformToolset)\$(Platform)\</OutDir>
+    <IntDir>vc.$(PlatformToolset)\$(Platform)\$(Configuration)$(PUGI_Rtl_Type)\</IntDir>
+    <OutDir>vc.$(PlatformToolset)\$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
