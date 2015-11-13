@@ -8,11 +8,14 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- PUGI_CommonPropsPrefix contain only part of PropertySheet path: 
+    <!-- PUGI_XxxxPropsPrefix contain only part of PropertySheet path: 
          Absolute path to directory and first part of file name -->
     <PUGI_CommonPropsPrefix>$(ProjectDir)props\common</PUGI_CommonPropsPrefix>
+    <PUGI_VcverPropsPrefix>$(ProjectDir)props\msvc$(PlatformToolsetVersion)</PUGI_VcverPropsPrefix>
   </PropertyGroup>
 
+
+  <!-- Property sheets common for all projects -->
   <PropertyGroup>
     <PUGI_Props_Common       >$(PUGI_CommonPropsPrefix).props</PUGI_Props_Common>
     <PUGI_Props_CommonConf   >$(PUGI_CommonPropsPrefix).$(Configuration.ToLower()).props</PUGI_Props_CommonConf>
@@ -20,10 +23,23 @@
     <PUGI_Props_CommonConfRtl>$(PUGI_CommonPropsPrefix).$(Configuration.ToLower()).$(PUGI_Rtl_Type.ToLower()).props</PUGI_Props_CommonConfRtl>
   </PropertyGroup>
 
+  <!-- Property sheets specific for MSVC version -->
+  <PropertyGroup>
+    <PUGI_Props_Vcver    >$(PUGI_VcverPropsPrefix).props</PUGI_Props_Vcver>
+    <PUGI_Props_VcverConf>$(PUGI_VcverPropsPrefix).$(Configuration.ToLower()).props</PUGI_Props_VcverConf>
+  </PropertyGroup>
+
+
   <ImportGroup Label="PropertySheets">
     <Import Condition="exists('$(PUGI_Props_Common)')"        Project="$(PUGI_Props_Common)"         />
     <Import Condition="exists('$(PUGI_Props_CommonConf)')"    Project="$(PUGI_Props_CommonConf)"     />
     <Import Condition="exists('$(PUGI_Props_CommonPlatf)')"   Project="$(PUGI_Props_CommonPlatf)"    />
     <Import Condition="exists('$(PUGI_Props_CommonConfRtl)')" Project="$(PUGI_Props_CommonConfRtl)"  />
   </ImportGroup>
+
+  <ImportGroup Label="PropertySheets">
+    <Import Condition="exists('$(PUGI_Props_Vcver)')"     Project="$(PUGI_Props_Vcver)"     />
+    <Import Condition="exists('$(PUGI_Props_VcverConf)')" Project="$(PUGI_Props_VcverConf)" />
+  </ImportGroup>
+
 </Project>
