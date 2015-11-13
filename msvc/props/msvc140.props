@@ -10,6 +10,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
