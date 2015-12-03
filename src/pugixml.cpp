@@ -109,6 +109,13 @@ using std::memmove;
 using std::memset;
 #endif
 
+// Some MinGW versions have headers that erroneously omit LLONG_MIN/LLONG_MAX/ULLONG_MAX definitions in strict ANSI mode
+#if defined(PUGIXML_HAS_LONG_LONG) && defined(__MINGW32__) && defined(__STRICT_ANSI__) && !defined(LLONG_MAX) && !defined(LLONG_MIN) && !defined(ULLONG_MAX)
+#	define LLONG_MAX 9223372036854775807LL
+#	define LLONG_MIN (-LLONG_MAX-1)
+#	define ULLONG_MAX (2ULL*LLONG_MAX+1)
+#endif
+
 // In some environments MSVC is a compiler but the CRT lacks certain MSVC-specific features
 #if defined(_MSC_VER) && !defined(__S3E__)
 #	define PUGI__MSVC_CRT_VERSION _MSC_VER
