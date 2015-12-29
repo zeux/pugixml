@@ -300,7 +300,7 @@ PUGI__NS_BEGIN
 				bucket = (bucket + probe + 1) & hashmod;
 			}
 
-			assert(!"Hash table is full");
+			assert(false && "Hash table is full");
 			return 0;
 		}
 
@@ -330,7 +330,7 @@ PUGI__NS_BEGIN
 				bucket = (bucket + probe + 1) & hashmod;
 			}
 
-			assert(!"Hash table is full");
+			assert(false && "Hash table is full");
 			return 0;
 		}
 
@@ -2082,7 +2082,7 @@ PUGI__NS_BEGIN
 		if (encoding == encoding_latin1)
 			return convert_buffer_generic(out_buffer, out_length, contents, size, latin1_decoder());
 
-		assert(!"Invalid encoding");
+		assert(false && "Invalid encoding");
 		return false;
 	}
 #else
@@ -2187,7 +2187,7 @@ PUGI__NS_BEGIN
 		if (encoding == encoding_latin1)
 			return convert_buffer_latin1(out_buffer, out_length, contents, size, is_mutable);
 
-		assert(!"Invalid encoding");
+		assert(false && "Invalid encoding");
 		return false;
 	}
 #endif
@@ -3556,7 +3556,7 @@ PUGI__NS_BEGIN
 		if (encoding == encoding_latin1)
 			return convert_buffer_output_generic(r_u8, data, length, wchar_decoder(), latin1_writer());
 
-		assert(!"Invalid encoding");
+		assert(false && "Invalid encoding");
 		return 0;
 	}
 #else
@@ -3595,7 +3595,7 @@ PUGI__NS_BEGIN
 		if (encoding == encoding_latin1)
 			return convert_buffer_output_generic(r_u8, data, length, utf8_decoder(), latin1_writer());
 
-		assert(!"Invalid encoding");
+		assert(false && "Invalid encoding");
 		return 0;
 	}
 #endif
@@ -4085,7 +4085,7 @@ PUGI__NS_BEGIN
 				break;
 
 			default:
-				assert(!"Invalid node type");
+				assert(false && "Invalid node type");
 		}
 	}
 
@@ -8427,7 +8427,7 @@ PUGI__NS_BEGIN
 			break;
 
 		default:
-			assert(!"Invalid variable type");
+			assert(false && "Invalid variable type");
 		}
 	}
 
@@ -8448,7 +8448,7 @@ PUGI__NS_BEGIN
 			return lhs->set(static_cast<const xpath_variable_boolean*>(rhs)->value);
 
 		default:
-			assert(!"Invalid variable type");
+			assert(false && "Invalid variable type");
 			return false;
 		}
 	}
@@ -8535,7 +8535,7 @@ PUGI__NS_BEGIN
 			return *min_element(begin, end, document_order_comparator());
 
 		default:
-			assert(!"Invalid node set type");
+			assert(false && "Invalid node set type");
 			return xpath_node();
 		}
 	}
@@ -9265,7 +9265,7 @@ PUGI__NS_BEGIN
 				}
 			}
 
-			assert(!"Wrong types");
+			assert(false && "Wrong types");
 			return false;
 		}
 
@@ -9340,7 +9340,7 @@ PUGI__NS_BEGIN
 			}
 			else
 			{
-				assert(!"Wrong types");
+				assert(false && "Wrong types");
 				return false;
 			}
 		}
@@ -9558,7 +9558,7 @@ PUGI__NS_BEGIN
 				break;
 
 			default:
-				assert(!"Unknown axis");
+				assert(false && "Unknown axis");
 			}
 
 			return false;
@@ -9753,7 +9753,7 @@ PUGI__NS_BEGIN
 			}
 				
 			default:
-				assert(!"Unimplemented axis");
+				assert(false && "Unimplemented axis");
 			}
 		}
 		
@@ -9834,7 +9834,7 @@ PUGI__NS_BEGIN
 			}
 			
 			default:
-				assert(!"Unimplemented axis");
+				assert(false && "Unimplemented axis");
 			}
 		}
 
@@ -10076,7 +10076,7 @@ PUGI__NS_BEGIN
 				}
 
 				default:
-					assert(!"Wrong expression for return type boolean");
+					assert(false && "Wrong expression for return type boolean");
 					return false;
 				}
 			}
@@ -10212,7 +10212,7 @@ PUGI__NS_BEGIN
 				}
 					
 				default:
-					assert(!"Wrong expression for return type number");
+					assert(false && "Wrong expression for return type number");
 					return 0;
 				}
 				
@@ -10495,7 +10495,7 @@ PUGI__NS_BEGIN
 				}
 				
 				default:
-					assert(!"Wrong expression for return type string");
+					assert(false && "Wrong expression for return type string");
 					return xpath_string();
 				}
 			}
@@ -10586,7 +10586,7 @@ PUGI__NS_BEGIN
 					return step_do(c, stack, eval, axis_to_type<axis_self>());
 
 				default:
-					assert(!"Unknown axis");
+					assert(false && "Unknown axis");
 					return xpath_node_set_raw();
 				}
 			}
@@ -10625,7 +10625,7 @@ PUGI__NS_BEGIN
 			}
 
 			default:
-				assert(!"Wrong expression for return type node set");
+				assert(false && "Wrong expression for return type node set");
 				return xpath_node_set_raw();
 			}
 		}
@@ -11912,7 +11912,7 @@ namespace pugi
 			return static_cast<const impl::xpath_variable_boolean*>(this)->name;
 
 		default:
-			assert(!"Invalid variable type");
+			assert(false && "Invalid variable type");
 			return 0;
 		}
 	}
