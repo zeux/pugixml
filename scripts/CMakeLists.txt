@@ -1,10 +1,15 @@
 project(pugixml)
 
 cmake_minimum_required(VERSION 2.6)
-IF (MSVC)
 
-	option(STATIC_CRT "Use static CRT libraries" ON)
+option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
+option(BUILD_TESTS "Build tests" OFF)
+set(BUILD_DEFINES "" CACHE STRING "Build defines")
+
+if(MSVC)
+	option(STATIC_CRT "Use static CRT libraries" OFF)
 	
+	# Rewrite command line flags to use /MT if necessary
 	if(STATIC_CRT)
 		foreach(flag_var
 				CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
@@ -14,11 +19,7 @@ IF (MSVC)
 			endif(${flag_var} MATCHES "/MD")
 		endforeach(flag_var)
 	endif()
-ENDIF()
-
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
-option(BUILD_TESTS "Build tests" OFF)
-set(BUILD_DEFINES "" CACHE STRING "Build defines")
+endif()
 
 # Pre-defines standard install locations on *nix systems.
 include(GNUInstallDirs)
