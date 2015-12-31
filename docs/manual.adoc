@@ -2115,7 +2115,7 @@ Because of the differences in document object models, performance considerations
 :!numbered:
 
 [[v1.7]]
-=== v1.7 ^19.10.2015^
+=== v1.7 ^2015-10-19^
 
 Major release, featuring performance and memory improvements along with some new features. Changes:
 
@@ -2140,7 +2140,7 @@ Major release, featuring performance and memory improvements along with some new
 	. Fix saving for custom xml_writer implementations that can throw from write()
 
 [[v1.6]]
-=== v1.6 ^10.04.2015^
+=== v1.6 ^2015-04-10^
 
 Maintenance release. Changes:
 
@@ -2155,7 +2155,7 @@ Maintenance release. Changes:
     . Adjusted processing instruction output to avoid malformed documents if the PI value contains `?>`
 
 [[v1.5]]
-=== v1.5 ^27.11.2014^
+=== v1.5 ^2014-11-27^
 
 Major release, featuring a lot of performance improvements and some new features.
 
@@ -2188,7 +2188,7 @@ Major release, featuring a lot of performance improvements and some new features
     . Fix `load_file` for wide-character paths with non-ASCII characters in MinGW with C{plus}{plus}11 mode enabled
 
 [[v1.4]]
-=== v1.4 ^27.02.2014^
+=== v1.4 ^2014-02-27^
 
 Major release, featuring various new features, bug fixes and compatibility improvements.
 
@@ -2217,7 +2217,7 @@ Major release, featuring various new features, bug fixes and compatibility impro
     . Fixed `find_child_by_attribute` assertion for attributes with null name/value
 
 [[v1.2]]
-=== v1.2 ^1.05.2012^
+=== v1.2 ^2012-05-01^
 
 Major release, featuring header-only mode, various interface enhancements (i.e. PCDATA manipulation and C{plus}{plus}11 iteration), many other features and compatibility improvements.
 
@@ -2246,7 +2246,7 @@ Major release, featuring header-only mode, various interface enhancements (i.e. 
     . `xml_document::save_file` now checks for file I/O errors during saving
 
 [[v1.0]]
-=== v1.0 ^1.11.2010^
+=== v1.0 ^2010-11-01^
 
 Major release, featuring many XPath enhancements, wide character filename support, miscellaneous performance improvements, bug fixes and more.
 
@@ -2311,7 +2311,7 @@ Major release, featuring many XPath enhancements, wide character filename suppor
     . Removed `as_utf16` function; use `as_wide` instead
 
 [[v0.9]]
-=== v0.9 ^1.07.2010^
+=== v0.9 ^2010-07-01^
 
 Major release, featuring extended and improved Unicode support, miscellaneous performance improvements, bug fixes and more.
 
@@ -2349,7 +2349,7 @@ Major release, featuring extended and improved Unicode support, miscellaneous pe
     . `xpath_type_t` enumeration was renamed to `xpath_value_type`; `xpath_type_t` is deprecated and will be removed in version 1.0
 
 [[v0.5]]
-=== v0.5 ^8.11.2009^
+=== v0.5 ^2009-11-08^
 
 Major bugfix release. Changes:
 
@@ -2385,7 +2385,7 @@ Major bugfix release. Changes:
     . Added getter accessors for memory-management functions
 
 [[v0.42]]
-=== v0.42 ^17.09.2009^
+=== v0.42 ^2009-09-17^
 
 Maintenance release. Changes:
 
@@ -2401,7 +2401,7 @@ Maintenance release. Changes:
     . Added `xml_attribute::set_value` overloads for different types
 
 [[v0.41]]
-=== v0.41 ^8.02.2009^
+=== v0.41 ^2009-02-08^
 
 Maintenance release. Changes:
 
@@ -2409,7 +2409,7 @@ Maintenance release. Changes:
     . Fixed bug with node printing (occasionally some content was not written to output stream)
 
 [[v0.4]]
-=== v0.4 ^18.01.2009^
+=== v0.4 ^2009-01-18^
 
 Changes:
 
@@ -2432,7 +2432,7 @@ Changes:
     . Improved error handling for parsing - now `load()`, `load_file()` and `parse()` return `xml_parse_result`, which contains error code and last parsed offset; this does not break old interface as `xml_parse_result` can be implicitly casted to `bool`.
 
 [[v0.34]]
-=== v0.34 ^31.10.2007^
+=== v0.34 ^2007-10-31^
 
 Maintenance release. Changes:
 
@@ -2447,7 +2447,7 @@ Maintenance release. Changes:
     . `PUGIXML_NO_EXCEPTION` flag for platforms without exception handling
 
 [[v0.3]]
-=== v0.3 ^21.02.2007^
+=== v0.3 ^2007-02-21^
 
 Refactored, reworked and improved version. Changes:
 
@@ -2470,7 +2470,7 @@ Refactored, reworked and improved version. Changes:
     . Fixed several bugs
 
 [[v0.2]]
-=== v0.2 ^6.11.2006^
+=== v0.2 ^2006-11-06^
 
 First public release. Changes:
 
@@ -2484,7 +2484,7 @@ First public release. Changes:
     . Optimizations of `strconv_t`
 
 [[v0.1]]
-=== v0.1 ^15.07.2006^
+=== v0.1 ^2006-07-15^
 
 First private release for testing purposes
 
