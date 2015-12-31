@@ -158,6 +158,9 @@ namespace pugi
 	// is a valid document. This flag is off by default.
 	const unsigned int parse_fragment = 0x1000;
 
+	// Experimental API for reduced memory consumption
+	const unsigned int parse_embed_pcdata = 0x0800;
+
 	// The default parsing mode.
 	// Elements, PCDATA and CDATA sections are added to the DOM tree, character/reference entities are expanded,
 	// End-of-Line characters are normalized, attribute values are normalized using CDATA normalization rules.
