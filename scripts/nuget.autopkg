@@ -12,7 +12,7 @@ nuget {
 		title: pugixml;
 		summary: "Light-weight, simple and fast XML parser for C++ with XPath support";
 		releaseNotes: "http://pugixml.org/docs/manual.html#changes";
-		copyright: "Copyright (c) 2006-2015 Arseny Kapoulkine";
+		copyright: "Copyright (c) 2006-2016 Arseny Kapoulkine";
 		licenseUrl: "http://pugixml.org/license.html";
 		requireLicenseAcceptance: false;
 
