@@ -3360,13 +3360,22 @@ PUGI__NS_BEGIN
 							
 					if (cursor->parent || PUGI__OPTSET(parse_fragment))
 					{
-						PUGI__PUSHNODE(node_pcdata); // Append a new node on the tree.
-						cursor->value = s; // Save the offset.
+						if (!PUGI__OPTSET(parse_embed_pcdata))
+						{
+							PUGI__PUSHNODE(node_pcdata); // Append a new node on the tree.
+
+							cursor->value = s; // Save the offset.
+
+							PUGI__POPNODE(); // Pop since this is a standalone.
+						}
+						else
+						{
+							if (cursor->parent && !cursor->value)
+								cursor->value = s; // Save the offset.
+						}
 
 						s = strconv_pcdata(s);
 								
-						PUGI__POPNODE(); // Pop since this is a standalone.
-						
 						if (!*s) break;
 					}
 					else
