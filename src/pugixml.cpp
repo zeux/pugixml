@@ -5464,6 +5464,10 @@ namespace pugi
 			if (impl::is_text_node(i) && i->value)
 				return i->value;
 
+		// element nodes can have value if parse_embed_pcdata was used
+		if (PUGI__NODETYPE(_root) == node_element && _root->value)
+			return _root->value;
+
 		return PUGIXML_TEXT("");
 	}
 
@@ -6210,6 +6214,10 @@ namespace pugi
 		for (xml_node_struct* node = _root->first_child; node; node = node->next_sibling)
 			if (impl::is_text_node(node))
 				return node;
+
+		// element nodes can have value if parse_embed_pcdata was used
+		if (PUGI__NODETYPE(_root) == node_element && _root->value)
+			return _root;
 
 		return 0;
 	}
