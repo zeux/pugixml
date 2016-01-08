@@ -7653,6 +7653,10 @@ PUGI__NS_BEGIN
 			{
 				xpath_string result;
 
+				// element nodes can have value if parse_embed_pcdata was used
+				if (n.value()[0])
+					result.append(xpath_string::from_const(n.value()), alloc);
+
 				xml_node cur = n.first_child();
 				
 				while (cur && cur != n)
