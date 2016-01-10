@@ -4018,17 +4018,40 @@ PUGI__NS_BEGIN
 		if (node->first_attribute)
 			node_output_attributes(writer, node, indent, indent_length, flags, depth);
 
-		if (!node->first_child)
+		// element nodes can have value if parse_embed_pcdata was used
+		if (!node->value)
 		{
-			writer.write(' ', '/', '>');
+			if (!node->first_child)
+			{
+				writer.write(' ', '/', '>');
 
-			return false;
+				return false;
+			}
+			else
+			{
+				writer.write('>');
+
+				return true;
+			}
 		}
 		else
 		{
 			writer.write('>');
 
-			return true;
+			text_output(writer, node->value, ctx_special_pcdata, flags);
+
+			if (!node->first_child)
+			{
+				writer.write('<', '/');
+				writer.write_string(name);
+				writer.write('>');
+
+				return false;
+			}
+			else
+			{
+				return true;
+			}
 		}
 	}
 
@@ -4136,6 +4159,10 @@ PUGI__NS_BEGIN
 
 					if (node_output_start(writer, node, indent, indent_length, flags, depth))
 					{
+						// element nodes can have value if parse_embed_pcdata was used
+						if (node->value)
+							indent_flags = 0;
+
 						node = node->first_child;
 						depth++;
 						continue;
