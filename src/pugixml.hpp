@@ -159,8 +159,8 @@ namespace pugi
 	const unsigned int parse_fragment = 0x1000;
 
 	// This flag determines if plain character data is be stored in the parent element's value. This significantly changes the structure of
-	// the document and does not allow some documents to round-trip; this flag is only recommended for parsing documents with a lot of
-	// PCDATA nodes in a very memory-constrained environment. This flag is off by default.
+	// the document; this flag is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments.
+	// This flag is off by default.
 	const unsigned int parse_embed_pcdata = 0x2000;
 
 	// The default parsing mode.
