@@ -3360,13 +3360,21 @@ PUGI__NS_BEGIN
 							
 					if (cursor->parent || PUGI__OPTSET(parse_fragment))
 					{
-						PUGI__PUSHNODE(node_pcdata); // Append a new node on the tree.
-						cursor->value = s; // Save the offset.
+						if (PUGI__OPTSET(parse_embed_pcdata) && cursor->parent && !cursor->first_child && !cursor->value)
+						{
+							cursor->value = s; // Save the offset.
+						}
+						else
+						{
+							PUGI__PUSHNODE(node_pcdata); // Append a new node on the tree.
+
+							cursor->value = s; // Save the offset.
+
+							PUGI__POPNODE(); // Pop since this is a standalone.
+						}
 
 						s = strconv_pcdata(s);
 								
-						PUGI__POPNODE(); // Pop since this is a standalone.
-						
 						if (!*s) break;
 					}
 					else
@@ -4009,17 +4017,40 @@ PUGI__NS_BEGIN
 		if (node->first_attribute)
 			node_output_attributes(writer, node, indent, indent_length, flags, depth);
 
-		if (!node->first_child)
+		// element nodes can have value if parse_embed_pcdata was used
+		if (!node->value)
 		{
-			writer.write(' ', '/', '>');
+			if (!node->first_child)
+			{
+				writer.write(' ', '/', '>');
 
-			return false;
+				return false;
+			}
+			else
+			{
+				writer.write('>');
+
+				return true;
+			}
 		}
 		else
 		{
 			writer.write('>');
 
-			return true;
+			text_output(writer, node->value, ctx_special_pcdata, flags);
+
+			if (!node->first_child)
+			{
+				writer.write('<', '/');
+				writer.write_string(name);
+				writer.write('>');
+
+				return false;
+			}
+			else
+			{
+				return true;
+			}
 		}
 	}
 
@@ -4127,6 +4158,10 @@ PUGI__NS_BEGIN
 
 					if (node_output_start(writer, node, indent, indent_length, flags, depth))
 					{
+						// element nodes can have value if parse_embed_pcdata was used
+						if (node->value)
+							indent_flags = 0;
+
 						node = node->first_child;
 						depth++;
 						continue;
@@ -5451,6 +5486,10 @@ namespace pugi
 	{
 		if (!_root) return PUGIXML_TEXT("");
 		
+		// element nodes can have value if parse_embed_pcdata was used
+		if (PUGI__NODETYPE(_root) == node_element && _root->value)
+			return _root->value;
+
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			if (impl::is_text_node(i) && i->value)
 				return i->value;
@@ -6197,6 +6236,10 @@ namespace pugi
 	PUGI__FN xml_node_struct* xml_text::_data() const
 	{
 		if (!_root || impl::is_text_node(_root)) return _root;
+
+		// element nodes can have value if parse_embed_pcdata was used
+		if (PUGI__NODETYPE(_root) == node_element && _root->value)
+			return _root;
 
 		for (xml_node_struct* node = _root->first_child; node; node = node->next_sibling)
 			if (impl::is_text_node(node))
@@ -7635,6 +7678,10 @@ PUGI__NS_BEGIN
 			case node_element:
 			{
 				xpath_string result;
+
+				// element nodes can have value if parse_embed_pcdata was used
+				if (n.value()[0])
+					result.append(xpath_string::from_const(n.value()), alloc);
 
 				xml_node cur = n.first_child();
 				

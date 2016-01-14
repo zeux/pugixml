@@ -1139,3 +1139,46 @@ TEST(parse_fuzz_doctype)
 	xml_document doc;
 	CHECK(doc.load_buffer(data, sizeof(data)).status == status_bad_doctype);
 }
+
+TEST(parse_embed_pcdata)
+{
+	// parse twice - once with default and once with embed_pcdata flags
+	for (int i = 0; i < 2; ++i)
+	{
+		unsigned int flags = (i == 0) ? parse_default : parse_default | parse_embed_pcdata;
+
+		xml_document doc;
+		xml_parse_result res = doc.load_string(STR("<node><key>value</key><child><inner1>value1</inner1><inner2>value2</inner2>outer</child><two>text<data /></two></node>"), flags);
+		CHECK(res);
+
+		xml_node child = doc.child(STR("node")).child(STR("child"));
+
+		// parse_embed_pcdata omits PCDATA nodes so DOM is different
+		if (flags & parse_embed_pcdata)
+		{
+			CHECK_STRING(doc.child(STR("node")).child(STR("key")).value(), STR("value"));
+			CHECK(!doc.child(STR("node")).child(STR("key")).first_child());
+		}
+		else
+		{
+			CHECK_STRING(doc.child(STR("node")).child(STR("key")).value(), STR(""));
+			CHECK(doc.child(STR("node")).child(STR("key")).first_child());
+			CHECK_STRING(doc.child(STR("node")).child(STR("key")).first_child().value(), STR("value"));
+		}
+
+		// higher-level APIs work the same though
+		CHECK_STRING(child.text().get(), STR("outer"));
+		CHECK_STRING(child.child(STR("inner1")).text().get(), STR("value1"));
+
+		CHECK_STRING(child.child_value(), STR("outer"));
+		CHECK_STRING(child.child_value(STR("inner2")), STR("value2"));
+
+	#ifndef PUGIXML_NO_XPATH
+		CHECK_XPATH_NUMBER(doc, STR("count(node/child/*[starts-with(., 'value')])"), 2);
+	#endif
+
+		CHECK_NODE(doc, STR("<node><key>value</key><child><inner1>value1</inner1><inner2>value2</inner2>outer</child><two>text<data /></two></node>"));
+		CHECK_NODE_EX(doc, STR("<node>\n<key>value</key>\n<child>\n<inner1>value1</inner1>\n<inner2>value2</inner2>outer</child>\n<two>text<data />\n</two>\n</node>\n"), STR("\t"), 0);
+		CHECK_NODE_EX(doc, STR("<node>\n\t<key>value</key>\n\t<child>\n\t\t<inner1>value1</inner1>\n\t\t<inner2>value2</inner2>outer</child>\n\t<two>text<data />\n\t</two>\n</node>\n"), STR("\t"), format_indent);
+	}
+}
