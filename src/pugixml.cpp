@@ -411,33 +411,30 @@ PUGI__NS_BEGIN
 
 #ifdef PUGIXML_COMPACT
 	static const uintptr_t xml_memory_block_alignment = 4;
-
-	static const uintptr_t xml_memory_page_alignment = sizeof(void*);
 #else
 	static const uintptr_t xml_memory_block_alignment = sizeof(void*);
-
-	static const uintptr_t xml_memory_page_alignment = 64;
-	static const uintptr_t xml_memory_page_pointer_mask = ~(xml_memory_page_alignment - 1);
 #endif
 
 	// extra metadata bits
-	static const uintptr_t xml_memory_page_contents_shared_mask = 32;
-	static const uintptr_t xml_memory_page_name_allocated_mask = 16;
-	static const uintptr_t xml_memory_page_value_allocated_mask = 8;
-	static const uintptr_t xml_memory_page_type_mask = 7;
+	static const uintptr_t xml_memory_page_contents_shared_mask = 64;
+	static const uintptr_t xml_memory_page_name_allocated_mask = 32;
+	static const uintptr_t xml_memory_page_value_allocated_mask = 16;
+	static const uintptr_t xml_memory_page_type_mask = 15;
 
 	// combined masks for string uniqueness
 	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_contents_shared_mask;
 
 #ifdef PUGIXML_COMPACT
+	#define PUGI__GETHEADER_IMPL(object, page, flags) // unused
 	#define PUGI__GETPAGE_IMPL(header) (header).get_page()
 #else
-	#define PUGI__GETPAGE_IMPL(header) reinterpret_cast<impl::xml_memory_page*>((header) & impl::xml_memory_page_pointer_mask)
+	#define PUGI__GETHEADER_IMPL(object, page, flags) (((reinterpret_cast<char*>(object) - reinterpret_cast<char*>(page)) << 8) | (flags))
+	#define PUGI__GETPAGE_IMPL(header) const_cast<impl::xml_memory_page*>(reinterpret_cast<const impl::xml_memory_page*>(reinterpret_cast<const char*>(&header) - (header >> 8)))
 #endif
 
 	#define PUGI__GETPAGE(n) PUGI__GETPAGE_IMPL((n)->header)
-	#define PUGI__NODETYPE(n) static_cast<xml_node_type>(((n)->header & impl::xml_memory_page_type_mask) + 1)
+	#define PUGI__NODETYPE(n) static_cast<xml_node_type>((n)->header & impl::xml_memory_page_type_mask)
 
 	struct xml_allocator;
 
@@ -497,30 +494,21 @@ PUGI__NS_BEGIN
 			size_t size = sizeof(xml_memory_page) + data_size;
 
 			// allocate block with some alignment, leaving memory for worst-case padding
-			void* memory = xml_memory::allocate(size + xml_memory_page_alignment);
+			void* memory = xml_memory::allocate(size);
 			if (!memory) return 0;
 
-			// align to next page boundary (note: this guarantees at least 1 usable byte before the page)
-			char* page_memory = reinterpret_cast<char*>((reinterpret_cast<uintptr_t>(memory) + xml_memory_page_alignment) & ~(xml_memory_page_alignment - 1));
-
 			// prepare page structure
-			xml_memory_page* page = xml_memory_page::construct(page_memory);
+			xml_memory_page* page = xml_memory_page::construct(memory);
 			assert(page);
 
 			page->allocator = _root->allocator;
-
-			// record the offset for freeing the memory block
-			assert(page_memory > memory && page_memory - static_cast<char*>(memory) <= 127);
-			page_memory[-1] = static_cast<char>(page_memory - static_cast<char*>(memory));
 
 			return page;
 		}
 
 		static void deallocate_page(xml_memory_page* page)
 		{
-			char* page_memory = reinterpret_cast<char*>(page);
-
-			xml_memory::deallocate(page_memory - page_memory[-1]);
+			xml_memory::deallocate(page);
 		}
 
 		void* allocate_memory_oob(size_t size, xml_memory_page*& out_page);
@@ -1053,7 +1041,7 @@ namespace pugi
 
 	struct xml_node_struct
 	{
-		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(page, type - 1), namevalue_base(0)
+		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(page, type), namevalue_base(0)
 		{
 			PUGI__STATIC_ASSERT(sizeof(xml_node_struct) == 12);
 		}
@@ -1080,8 +1068,9 @@ namespace pugi
 {
 	struct xml_attribute_struct
 	{
-		xml_attribute_struct(impl::xml_memory_page* page): header(reinterpret_cast<uintptr_t>(page)), name(0), value(0), prev_attribute_c(0), next_attribute(0)
+		xml_attribute_struct(impl::xml_memory_page* page): name(0), value(0), prev_attribute_c(0), next_attribute(0)
 		{
+			header = PUGI__GETHEADER_IMPL(this, page, 0);
 		}
 
 		uintptr_t header;
@@ -1095,8 +1084,9 @@ namespace pugi
 
 	struct xml_node_struct
 	{
-		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(reinterpret_cast<uintptr_t>(page) | (type - 1)), name(0), value(0), parent(0), first_child(0), prev_sibling_c(0), next_sibling(0), first_attribute(0)
+		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): name(0), value(0), parent(0), first_child(0), prev_sibling_c(0), next_sibling(0), first_attribute(0)
 		{
+			header = PUGI__GETHEADER_IMPL(this, page, type);
 		}
 
 		uintptr_t header;
@@ -6736,13 +6726,10 @@ namespace pugi
 	#endif
 
 		// initialize sentinel page
-		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + impl::xml_memory_page_alignment - sizeof(void*) + page_offset <= sizeof(_memory));
-
-		// align upwards to page boundary
-		void* page_memory = reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(_memory) + (impl::xml_memory_page_alignment - 1)) & ~(impl::xml_memory_page_alignment - 1));
+		PUGI__STATIC_ASSERT(sizeof(impl::xml_memory_page) + sizeof(impl::xml_document_struct) + page_offset <= sizeof(_memory));
 
 		// prepare page structure
-		impl::xml_memory_page* page = impl::xml_memory_page::construct(page_memory);
+		impl::xml_memory_page* page = impl::xml_memory_page::construct(_memory);
 		assert(page);
 
 		page->busy_size = impl::xml_memory_page_size;
@@ -12458,6 +12445,7 @@ namespace pugi
 #undef PUGI__NS_END
 #undef PUGI__FN
 #undef PUGI__FN_NO_INLINE
+#undef PUGI__GETHEADER_IMPL
 #undef PUGI__GETPAGE_IMPL
 #undef PUGI__GETPAGE
 #undef PUGI__NODETYPE
