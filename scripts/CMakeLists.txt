@@ -8,7 +8,7 @@ set(BUILD_DEFINES "" CACHE STRING "Build defines")
 
 if(MSVC)
 	option(STATIC_CRT "Use static CRT libraries" OFF)
-	
+
 	# Rewrite command line flags to use /MT if necessary
 	if(STATIC_CRT)
 		foreach(flag_var
@@ -47,7 +47,7 @@ endif()
 
 set_target_properties(pugixml PROPERTIES VERSION 1.7 SOVERSION 1)
 
-install(TARGETS pugixml EXPORT pugixml-config 
+install(TARGETS pugixml EXPORT pugixml-config
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

@@ -45,7 +45,7 @@ static void* custom_allocate(size_t size)
 
 		g_memory_total_size += memory_size(ptr);
 		g_memory_total_count++;
-		
+
 		return ptr;
 	}
 }
@@ -68,7 +68,7 @@ static void custom_deallocate(void* ptr)
 
 	g_memory_total_size -= memory_size(ptr);
 	g_memory_total_count--;
-	
+
 	memory_deallocate(ptr);
 }
 
@@ -105,9 +105,9 @@ static bool run_test(test_runner* test, const char* test_name, pugi::allocation_
 		g_memory_fail_triggered = false;
 		test_runner::_memory_fail_threshold = 0;
 		test_runner::_memory_fail_triggered = false;
-	
+
 		pugi::set_memory_management_functions(allocate, custom_deallocate);
-		
+
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable: 4611) // interaction between _setjmp and C++ object destruction is non-portable
@@ -115,7 +115,7 @@ static bool run_test(test_runner* test, const char* test_name, pugi::allocation_
 #endif
 
 		volatile int result = setjmp(test_runner::_failure_buffer);
-	
+
 #ifdef _MSC_VER
 #	pragma warning(pop)
 #endif
@@ -177,7 +177,7 @@ int main(int, char** argv)
 	temp.erase((slash != std::string::npos) ? slash + 1 : 0);
 
 	test_runner::_temp_path = temp.c_str();
-	
+
 	replace_memory_management();
 
 	unsigned int total = 0;

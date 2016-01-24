@@ -71,7 +71,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 ....
 
 This means that you can freely use pugixml in your applications, both open-source and proprietary. If you use pugixml in a product, it is sufficient to add an acknowledgment like this to the product distribution:
- 
+
 ....
 This software is based on pugixml library (http://pugixml.org).
 pugixml is Copyright (C) 2006-2016 Arseny Kapoulkine.
@@ -142,9 +142,9 @@ Here's an incomplete list of pugixml packages in various systems:
 === Building pugixml
 
 pugixml is distributed in source form without any pre-built binaries; you have to build them yourself.
- 
+
 The complete pugixml source consists of three files - one source file, `pugixml.cpp`, and two header files, `pugixml.hpp` and `pugiconfig.hpp`. `pugixml.hpp` is the primary header which you need to include in order to use pugixml classes/functions; `pugiconfig.hpp` is a supplementary configuration file (see <<install.building.config>>). The rest of this guide assumes that `pugixml.hpp` is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
- 
+
 [[install.building.embed]]
 ==== Building pugixml as a part of another static library/executable
 
@@ -165,11 +165,11 @@ The correct way to resolve this is to disable precompiled headers for `pugixml.c
 | image::vs2005_pch3.png[link="images/vs2005_pch3.png"]
 | image::vs2005_pch4.png[link="images/vs2005_pch4.png"]
 |===
- 
+
 [[install.building.static]]
 ==== Building pugixml as a standalone static library
- 
-It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode, Code::Blocks, Codelite, Microsoft Visual Studio 2005, 2008, 2010+, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see <<overview.feedback>>. 
+
+It's possible to compile pugixml as a standalone static library. This process depends on the method of building your application; pugixml distribution comes with project files for several popular IDEs/build systems. There are project files for Apple XCode, Code::Blocks, Codelite, Microsoft Visual Studio 2005, 2008, 2010+, and configuration scripts for CMake and premake4. You're welcome to submit project files/build scripts for other software; see <<overview.feedback>>.
 
 There are two projects for each version of Microsoft Visual Studio: one for dynamically linked CRT, which has a name like `pugixml_vs2008.vcproj`, and another one for statically linked CRT, which has a name like `pugixml_vs2008_static.vcproj`. You should select the version that matches the CRT used in your application; the default option for new projects created by Microsoft Visual Studio is dynamically linked CRT, so unless you changed the defaults, you should use the version with dynamic CRT (i.e. `pugixml_vs2008.vcproj` for Microsoft Visual Studio 2008).
 
@@ -187,7 +187,7 @@ In addition to adding pugixml project to your workspace, you'll have to make sur
 
 [[install.building.shared]]
 ==== Building pugixml as a standalone shared library
- 
+
 It's possible to compile pugixml as a standalone shared library. The process is usually similar to the static library approach; however, no preconfigured projects/scripts are included into pugixml distribution, so you'll have to do it yourself. Generally, if you're using GCC-based toolchain, the process does not differ from building any other library as DLL (adding -shared to compilation flags should suffice); if you're using MSVC-based toolchain, you'll have to explicitly mark exported symbols with a declspec attribute. You can do it by defining <<PUGIXML_API,PUGIXML_API>> macro, i.e. via `pugiconfig.hpp`:
 
 [source]
@@ -243,7 +243,7 @@ NOTE: In that example `PUGIXML_API` is inconsistent between several source files
 [[PUGIXML_MEMORY_PAGE_SIZE]]`PUGIXML_MEMORY_PAGE_SIZE`, [[PUGIXML_MEMORY_OUTPUT_STACK]]`PUGIXML_MEMORY_OUTPUT_STACK` and [[PUGIXML_MEMORY_XPATH_PAGE_SIZE]]`PUGIXML_MEMORY_XPATH_PAGE_SIZE` can be used to customize certain important sizes to optimize memory usage for the application-specific patterns. For details see <<dom.memory.tuning>>.
 
 [[PUGIXML_HAS_LONG_LONG]]`PUGIXML_HAS_LONG_LONG` define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C{plus}{plus}11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
- 
+
 [[install.portability]]
 === Portability
 
@@ -451,7 +451,7 @@ you'll have to use
 
 `xml_node node = doc.child(L"bookstore").find_child_by_attribute(L"book", L"id", L"12345");`
 ====
- 
+
 [[dom.thread]]
 === Thread-safety guarantees
 
@@ -509,11 +509,11 @@ This is a simple example of custom memory management (link:samples/custom_memory
 
 [source,indent=0]
 ----
-include::samples/custom_memory_management.cpp[tags=decl] 
+include::samples/custom_memory_management.cpp[tags=decl]
 ----
 [source,indent=0]
 ----
-include::samples/custom_memory_management.cpp[tags=call] 
+include::samples/custom_memory_management.cpp[tags=call]
 ----
 
 When setting new memory management functions, care must be taken to make sure that there are no live pugixml objects. Otherwise when the objects are destroyed, the new deallocation function will be called with the memory obtained by the old allocation function, resulting in undefined behavior.
@@ -569,7 +569,7 @@ The most common source of XML data is files; pugixml provides dedicated function
 xml_parse_result xml_document::load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 xml_parse_result xml_document::load_file(const wchar_t* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 ----
-    
+
 These functions accept the file path as its first argument, and also two optional arguments, which specify parsing options (see <<loading.options>>) and input data encoding (see <<loading.encoding>>). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc.
 
 File path is passed to the system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
@@ -580,7 +580,7 @@ This is an example of loading XML document from file (link:samples/load_file.cpp
 
 [source,indent=0]
 ----
-include::samples/load_file.cpp[tags=code] 
+include::samples/load_file.cpp[tags=code]
 ----
 
 [[loading.memory]]
@@ -616,25 +616,25 @@ This is an example of loading XML document from memory using different functions
 
 [source,indent=0]
 ----
-include::samples/load_memory.cpp[tags=decl] 
+include::samples/load_memory.cpp[tags=decl]
 ----
 [source,indent=0]
 ----
-include::samples/load_memory.cpp[tags=load_buffer] 
+include::samples/load_memory.cpp[tags=load_buffer]
 ----
 [source,indent=0]
 ----
-include::samples/load_memory.cpp[tags=load_buffer_inplace_begin] 
+include::samples/load_memory.cpp[tags=load_buffer_inplace_begin]
 
-include::samples/load_memory.cpp[tags=load_buffer_inplace_end] 
+include::samples/load_memory.cpp[tags=load_buffer_inplace_end]
 ----
 [source,indent=0]
 ----
-include::samples/load_memory.cpp[tags=load_buffer_inplace_own] 
+include::samples/load_memory.cpp[tags=load_buffer_inplace_own]
 ----
 [source,indent=0]
 ----
-include::samples/load_memory.cpp[tags=load_string] 
+include::samples/load_memory.cpp[tags=load_string]
 ----
 
 [[loading.stream]]
@@ -657,7 +657,7 @@ This is a simple example of loading XML document from file using streams (link:s
 
 [source,indent=0]
 ----
-include::samples/load_stream.cpp[tags=code] 
+include::samples/load_stream.cpp[tags=code]
 ----
 
 [[loading.errors]]
@@ -718,7 +718,7 @@ This is an example of handling loading errors (link:samples/load_error_handling.
 
 [source,indent=0]
 ----
-include::samples/load_error_handling.cpp[tags=code] 
+include::samples/load_error_handling.cpp[tags=code]
 ----
 
 [[loading.options]]
@@ -777,7 +777,7 @@ This is an example of using different parsing options (link:samples/load_options
 
 [source,indent=0]
 ----
-include::samples/load_options.cpp[tags=code] 
+include::samples/load_options.cpp[tags=code]
 ----
 
 [[loading.encoding]]
@@ -838,7 +838,7 @@ pugixml features an extensive interface for getting various types of data from t
 
 [[xml_node::parent]][[xml_node::first_child]][[xml_node::last_child]][[xml_node::next_sibling]][[xml_node::previous_sibling]][[xml_node::first_attribute]][[xml_node::last_attribute]][[xml_attribute::next_attribute]][[xml_attribute::previous_attribute]]
 The internal representation of the document is a tree, where each node has a list of child nodes (the order of children corresponds to their order in the XML representation), and additionally element nodes have a list of attributes, which is also ordered. Several functions are provided in order to let you get from one node in the tree to the other. These functions roughly correspond to the internal representation, and thus are usually building blocks for other methods of traversing (i.e. XPath traversals are based on these functions).
- 
+
 [source]
 ----
 xml_node xml_node::parent() const;
@@ -863,7 +863,7 @@ With these functions, you can iterate through all child nodes and display all at
 
 [source,indent=0]
 ----
-include::samples/traverse_base.cpp[tags=basic] 
+include::samples/traverse_base.cpp[tags=basic]
 ----
 
 [[access.nodedata]]
@@ -922,7 +922,7 @@ It returns `def` argument if the attribute handle is null. If you do not specify
 
 [[xml_attribute::as_int]][[xml_attribute::as_uint]][[xml_attribute::as_double]][[xml_attribute::as_float]][[xml_attribute::as_bool]][[xml_attribute::as_llong]][[xml_attribute::as_ullong]]
 In many cases attribute values have types that are not strings - i.e. an attribute may always contain values that should be treated as integers, despite the fact that they are represented as strings in XML. pugixml provides several accessors that convert attribute value to some other type:
- 
+
 [source]
 ----
 int xml_attribute::as_int(int def = 0) const;
@@ -949,7 +949,7 @@ This is an example of using these functions, along with node data retrieval ones
 
 [source,indent=0]
 ----
-include::samples/traverse_base.cpp[tags=data] 
+include::samples/traverse_base.cpp[tags=data]
 ----
 
 [[access.contents]]
@@ -992,7 +992,7 @@ This is an example of using these functions (link:samples/traverse_base.cpp[]):
 
 [source,indent=0]
 ----
-include::samples/traverse_base.cpp[tags=contents] 
+include::samples/traverse_base.cpp[tags=contents]
 ----
 
 [[access.rangefor]]
@@ -1014,7 +1014,7 @@ This is an example of using these functions (link:samples/traverse_rangefor.cpp[
 
 [source,indent=0]
 ----
-include::samples/traverse_rangefor.cpp[tags=code] 
+include::samples/traverse_rangefor.cpp[tags=code]
 ----
 
 [[access.iterators]]
@@ -1047,7 +1047,7 @@ Here is an example of using iterators for document traversal (link:samples/trave
 
 [source,indent=0]
 ----
-include::samples/traverse_iter.cpp[tags=code] 
+include::samples/traverse_iter.cpp[tags=code]
 ----
 
 CAUTION: Node and attribute iterators are somewhere in the middle between const and non-const iterators. While dereference operation yields a non-constant reference to the object, so that you can use it for tree modification operations, modifying this reference using assignment - i.e. passing iterators to a function like `std::sort` - will not give expected results, as assignment modifies local handle that's stored in the iterator.
@@ -1089,11 +1089,11 @@ This is an example of traversing tree hierarchy with xml_tree_walker (link:sampl
 
 [source,indent=0]
 ----
-include::samples/traverse_walker.cpp[tags=impl] 
+include::samples/traverse_walker.cpp[tags=impl]
 ----
 [source,indent=0]
 ----
-include::samples/traverse_walker.cpp[tags=traverse] 
+include::samples/traverse_walker.cpp[tags=traverse]
 ----
 
 [[access.predicate]]
@@ -1121,11 +1121,11 @@ This is an example of using predicate-based functions (link:samples/traverse_pre
 
 [source,indent=0]
 ----
-include::samples/traverse_predicate.cpp[tags=decl] 
+include::samples/traverse_predicate.cpp[tags=decl]
 ----
 [source,indent=0]
 ----
-include::samples/traverse_predicate.cpp[tags=find] 
+include::samples/traverse_predicate.cpp[tags=find]
 ----
 
 [[access.text]]
@@ -1136,7 +1136,7 @@ It is common to store data as text contents of some node - i.e. `<node><descript
 
 [[xml_node::text]]
 You can get the text object from a node by using `text()` method:
-    
+
 [source]
 ----
 xml_text xml_node::text() const;
@@ -1193,7 +1193,7 @@ This is an example of using `xml_text` object (link:samples/text.cpp[]):
 
 [source,indent=0]
 ----
-include::samples/text.cpp[tags=access] 
+include::samples/text.cpp[tags=access]
 ----
 
 [[access.misc]]
@@ -1220,7 +1220,7 @@ xml_node xml_node::first_element_by_path(const char_t* path, char_t delimiter = 
 
 Node paths consist of node names, separated with a delimiter (which is `/` by default); also paths can contain self (`.`) and parent (`..`) pseudo-names, so that this is a valid path: `"../../foo/./bar"`. `path` returns the path to the node from the document root, `first_element_by_path` looks for a node represented by a given path; a path can be an absolute one (absolute paths start with the delimiter), in which case the rest of the path is treated as document root relative, and relative to the given node. For example, in the following document: `<a><b><c/></b></a>`, node `<c/>` has path `"a/b/c"`; calling `first_element_by_path` for document with path `"a/b"` results in node `<b/>`; calling `first_element_by_path` for node `<a/>` with path `"../a/./b/../."` results in node `<a/>`; calling `first_element_by_path` with path `"/a"` results in node `<a/>` for any node.
 
-In case path component is ambiguous (if there are two nodes with given name), the first one is selected; paths are not guaranteed to uniquely identify nodes in a document. If any component of a path is not found, the result of `first_element_by_path` is null node; also `first_element_by_path` returns null node for null nodes, in which case the path does not matter. `path` returns an empty string for null nodes. 
+In case path component is ambiguous (if there are two nodes with given name), the first one is selected; paths are not guaranteed to uniquely identify nodes in a document. If any component of a path is not found, the result of `first_element_by_path` is null node; also `first_element_by_path` returns null node for null nodes, in which case the path does not matter. `path` returns an empty string for null nodes.
 
 NOTE: `path` function returns the result as STL string, and thus is not available if <<PUGIXML_NO_STL,PUGIXML_NO_STL>> is defined.
 
@@ -1261,7 +1261,7 @@ This is an example of setting node name and value (link:samples/modify_base.cpp[
 
 [source,indent=0]
 ----
-include::samples/modify_base.cpp[tags=node] 
+include::samples/modify_base.cpp[tags=node]
 ----
 
 [[modify.attrdata]]
@@ -1290,7 +1290,7 @@ bool xml_attribute::set_value(bool rhs);
 bool xml_attribute::set_value(long long rhs);
 bool xml_attribute::set_value(unsigned long long rhs);
 ----
-    
+
 The above functions convert the argument to string and then call the base `set_value` function. Integers are converted to a decimal form, floating-point numbers are converted to either decimal or scientific form, depending on the number magnitude, boolean values are converted to either `"true"` or `"false"`.
 
 CAUTION: Number conversion functions depend on current C locale as set with `setlocale`, so may generate unexpected results if the locale is different from `"C"`.
@@ -1319,7 +1319,7 @@ This is an example of setting attribute name and value (link:samples/modify_base
 
 [source,indent=0]
 ----
-include::samples/modify_base.cpp[tags=attr] 
+include::samples/modify_base.cpp[tags=attr]
 ----
 
 [[modify.add]]
@@ -1368,7 +1368,7 @@ This is an example of adding new attributes/nodes to the document (link:samples/
 
 [source,indent=0]
 ----
-include::samples/modify_add.cpp[tags=code] 
+include::samples/modify_add.cpp[tags=code]
 ----
 
 [[modify.remove]]
@@ -1405,7 +1405,7 @@ This is an example of removing attributes/nodes from the document (link:samples/
 
 [source,indent=0]
 ----
-include::samples/modify_remove.cpp[tags=code] 
+include::samples/modify_remove.cpp[tags=code]
 ----
 
 [[modify.text]]
@@ -1436,7 +1436,7 @@ bool xml_text::set(bool rhs);
 bool xml_text::set(long long rhs);
 bool xml_text::set(unsigned long long rhs);
 ----
-    
+
 The above functions convert the argument to string and then call the base `set` function. These functions have the same semantics as similar `xml_attribute` functions. You can <<xml_attribute::set_value,refer to documentation for the attribute functions>> for details.
 
 [[xml_text::assign]]
@@ -1461,7 +1461,7 @@ This is an example of using `xml_text` object to modify text contents (link:samp
 
 [source,indent=0]
 ----
-include::samples/text.cpp[tags=modify] 
+include::samples/text.cpp[tags=modify]
 ----
 
 [[modify.clone]]
@@ -1497,7 +1497,7 @@ This is an example with one possible implementation of include tags in XML (link
 
 [source,indent=0]
 ----
-include::samples/include.cpp[tags=code] 
+include::samples/include.cpp[tags=code]
 ----
 
 [[modify.move]]
@@ -1600,7 +1600,7 @@ This is a simple example of saving XML document to file (link:samples/save_file.
 
 [source,indent=0]
 ----
-include::samples/save_file.cpp[tags=code] 
+include::samples/save_file.cpp[tags=code]
 ----
 
 [[saving.stream]]
@@ -1624,7 +1624,7 @@ This is a simple example of saving XML document to standard output (link:samples
 
 [source,indent=0]
 ----
-include::samples/save_stream.cpp[tags=code] 
+include::samples/save_stream.cpp[tags=code]
 ----
 
 [[saving.writer]]
@@ -1652,7 +1652,7 @@ This is a simple example of custom writer for saving document data to STL string
 
 [source,indent=0]
 ----
-include::samples/save_custom_writer.cpp[tags=code] 
+include::samples/save_custom_writer.cpp[tags=code]
 ----
 
 [[saving.subtree]]
@@ -1674,7 +1674,7 @@ Saving a subtree differs from saving the whole document: the process behaves as 
 
 [source,indent=0]
 ----
-include::samples/save_subtree.cpp[tags=code] 
+include::samples/save_subtree.cpp[tags=code]
 ----
 
 [[saving.options]]
@@ -1711,7 +1711,7 @@ This is an example that shows the outputs of different output options (link:samp
 
 [source,indent=0]
 ----
-include::samples/save_options.cpp[tags=code] 
+include::samples/save_options.cpp[tags=code]
 ----
 
 [[saving.encoding]]
@@ -1738,7 +1738,7 @@ This is an example that shows how to create a custom declaration node (link:samp
 
 [source,indent=0]
 ----
-include::samples/save_declaration.cpp[tags=code] 
+include::samples/save_declaration.cpp[tags=code]
 ----
 
 [[xpath]]
@@ -1872,7 +1872,7 @@ This is an example of selecting nodes using XPath expressions (link:samples/xpat
 
 [source,indent=0]
 ----
-include::samples/xpath_select.cpp[tags=code] 
+include::samples/xpath_select.cpp[tags=code]
 ----
 
 [[xpath.query]]
@@ -1927,7 +1927,7 @@ Note that `evaluate_string` function returns the STL string; as such, it's not a
 size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const;
 ----
 
-This function evaluates the string, and then writes the result to `buffer` (but at most `capacity` characters); then it returns the full size of the result in characters, including the terminating zero. If `capacity` is not 0, the resulting buffer is always zero-terminated. You can use this function as follows: 
+This function evaluates the string, and then writes the result to `buffer` (but at most `capacity` characters); then it returns the full size of the result in characters, including the terminating zero. If `capacity` is not 0, the resulting buffer is always zero-terminated. You can use this function as follows:
 
 * First call the function with `buffer = 0` and `capacity = 0`; then allocate the returned amount of characters, and call the function again, passing the allocated storage and the amount of characters;
 * First call the function with small buffer and buffer capacity; then, if the result is larger than the capacity, the output has been trimmed, so allocate a larger buffer and call the function again.
@@ -1936,7 +1936,7 @@ This is an example of using query objects (link:samples/xpath_query.cpp[]):
 
 [source,indent=0]
 ----
-include::samples/xpath_query.cpp[tags=code] 
+include::samples/xpath_query.cpp[tags=code]
 ----
 
 [[xpath.variables]]
@@ -2040,7 +2040,7 @@ This is an example of using variables in XPath queries (link:samples/xpath_varia
 
 [source,indent=0]
 ----
-include::samples/xpath_variables.cpp[tags=code] 
+include::samples/xpath_variables.cpp[tags=code]
 ----
 
 [[xpath.errors]]
@@ -2064,7 +2064,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 ----
 const xpath_parse_result& xpath_query::result() const;
 ----
-    
+
 Without exceptions, evaluating invalid query results in `false`, empty string, `NaN` or an empty node set, depending on the type; evaluating a query as a node set results in an empty node set if the return type is not node set.
 
 [[xpath_parse_result]]
@@ -2098,7 +2098,7 @@ This is an example of XPath error handling (link:samples/xpath_error.cpp[]):
 
 [source,indent=0]
 ----
-include::samples/xpath_error.cpp[tags=code] 
+include::samples/xpath_error.cpp[tags=code]
 ----
 
 [[xpath.w3c]]
@@ -2618,7 +2618,7 @@ const unsigned int +++<a href="#parse_embed_pcdata">parse_embed_pcdata</a>+++
 const unsigned int +++<a href="#parse_wconv_attribute">parse_wconv_attribute</a>+++
 const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>+++
 ----
-        
+
 [[apiref.classes]]
 === Classes
 

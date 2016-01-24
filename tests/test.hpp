@@ -157,7 +157,7 @@ struct dummy_fixture {};
 #if (defined(_MSC_VER) && _MSC_VER == 1200) || (defined(__INTEL_COMPILER) && __INTEL_COMPILER == 800) || defined(__BORLANDC__)
 // NaN comparison on MSVC6 is incorrect, see http://www.nabble.com/assertDoubleEquals,-NaN---Microsoft-Visual-Studio-6-td9137859.html
 // IC8 and BCC are also affected by the same bug
-#	define MSVC6_NAN_BUG 
+#	define MSVC6_NAN_BUG
 #endif
 
 inline wchar_t wchar_cast(unsigned int value)

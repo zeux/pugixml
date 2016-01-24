@@ -57,10 +57,10 @@ TEST_XML(dom_attr_next_previous_attribute, "<node attr1='1' attr2='2' />")
 
 	CHECK(attr1.next_attribute() == attr2);
 	CHECK(attr2.next_attribute() == xml_attribute());
-	
+
 	CHECK(attr1.previous_attribute() == xml_attribute());
 	CHECK(attr2.previous_attribute() == attr1);
-	
+
 	CHECK(xml_attribute().next_attribute() == xml_attribute());
 	CHECK(xml_attribute().previous_attribute() == xml_attribute());
 }
@@ -497,7 +497,7 @@ TEST_XML_FLAGS(dom_node_type, "<?xml?><!DOCTYPE><?pi?><!--comment--><node>pcdata
 	CHECK((it++)->type() == node_element);
 
 	xml_node_iterator cit = doc.child(STR("node")).begin();
-	
+
 	CHECK((cit++)->type() == node_pcdata);
 	CHECK((cit++)->type() == node_cdata);
 }
@@ -516,7 +516,7 @@ TEST_XML_FLAGS(dom_node_name_value, "<?xml?><!DOCTYPE id><?pi?><!--comment--><no
 	CHECK_NAME_VALUE(*it++, STR("node"), STR(""));
 
 	xml_node_iterator cit = doc.child(STR("node")).begin();
-	
+
 	CHECK_NAME_VALUE(*cit++, STR(""), STR("pcdata"));
 	CHECK_NAME_VALUE(*cit++, STR(""), STR("cdata"));
 }
@@ -555,10 +555,10 @@ TEST_XML(dom_node_next_previous_sibling, "<node><child1/><child2/><child3/></nod
 
 	CHECK(child1.next_sibling() == child2);
 	CHECK(child3.next_sibling() == xml_node());
-	
+
 	CHECK(child1.previous_sibling() == xml_node());
 	CHECK(child3.previous_sibling() == child2);
-	
+
 	CHECK(child1.next_sibling(STR("child3")) == child3);
 	CHECK(child1.next_sibling(STR("child")) == xml_node());
 
@@ -728,13 +728,13 @@ TEST_XML(dom_node_find_node, "<node><child1/><child2/></node>")
 TEST_XML(dom_node_path, "<node><child1>text<child2/></child1></node>")
 {
 	CHECK(xml_node().path() == STR(""));
-	
+
 	CHECK(doc.path() == STR(""));
 	CHECK(doc.child(STR("node")).path() == STR("/node"));
 	CHECK(doc.child(STR("node")).child(STR("child1")).path() == STR("/node/child1"));
 	CHECK(doc.child(STR("node")).child(STR("child1")).child(STR("child2")).path() == STR("/node/child1/child2"));
 	CHECK(doc.child(STR("node")).child(STR("child1")).first_child().path() == STR("/node/child1/"));
-	
+
 	CHECK(doc.child(STR("node")).child(STR("child1")).path('\\') == STR("\\node\\child1"));
 }
 #endif
@@ -743,7 +743,7 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 {
 	CHECK(xml_node().first_element_by_path(STR("/")) == xml_node());
 	CHECK(xml_node().first_element_by_path(STR("a")) == xml_node());
-	
+
 	CHECK(doc.first_element_by_path(STR("")) == doc);
 	CHECK(doc.first_element_by_path(STR("/")) == doc);
 
@@ -757,7 +757,7 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 #endif
 
 	CHECK(doc.first_element_by_path(STR("/node/child2")) == xml_node());
-	
+
 	CHECK(doc.first_element_by_path(STR("\\node\\child1"), '\\') == doc.child(STR("node")).child(STR("child1")));
 
 	CHECK(doc.child(STR("node")).first_element_by_path(STR("..")) == doc);
@@ -919,7 +919,7 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><!DOCTYPE><?pi?><!--comment--><node>pcd
 	CHECK((it++)->offset_debug() == 38);
 
 	xml_node_iterator cit = doc.child(STR("node")).begin();
-	
+
 	CHECK((cit++)->offset_debug() == 43);
 	CHECK((cit++)->offset_debug() == 58);
 }
@@ -966,7 +966,7 @@ TEST_XML(dom_internal_object, "<node attr='value'>value</node>")
 	xml_node node = doc.child(STR("node"));
 	xml_attribute attr = node.first_attribute();
 	xml_node value = node.first_child();
-	
+
 	CHECK(xml_node().internal_object() == 0);
 	CHECK(xml_attribute().internal_object() == 0);
 
@@ -988,7 +988,7 @@ TEST_XML(dom_hash_value, "<node attr='value'>value</node>")
 	xml_node node = doc.child(STR("node"));
 	xml_attribute attr = node.first_attribute();
 	xml_node value = node.first_child();
-	
+
 	CHECK(xml_node().hash_value() == 0);
 	CHECK(xml_attribute().hash_value() == 0);
 

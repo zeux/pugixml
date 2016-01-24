@@ -109,7 +109,7 @@ TEST(document_load_stream_error)
 
 	std::ifstream fs("filedoesnotexist");
 	CHECK(doc.load(fs).status == status_io_error);
-	
+
 	std::istringstream iss("<node/>");
 	test_runner::_memory_fail_threshold = 1;
 	CHECK_ALLOC_FAIL(CHECK(doc.load(iss).status == status_out_of_memory));
@@ -499,7 +499,7 @@ TEST_XML(document_save_declaration_latin1, "<node/>")
 struct temp_file
 {
 	char path[512];
-	
+
 	temp_file()
 	{
 		static int index = 0;
