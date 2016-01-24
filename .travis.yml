@@ -4,9 +4,9 @@ os:
   - linux
   - osx
 env:
-  - DEFINES=standard
-  - DEFINES=PUGIXML_WCHAR_MODE
-  - DEFINES=PUGIXML_COMPACT
+  - DEFINES=PUGIXML_NO_CXX11
+  - DEFINES=PUGIXML_NO_CXX11,PUGIXML_WCHAR_MODE
+  - DEFINES=PUGIXML_NO_CXX11,PUGIXML_COMPACT
 script:
   - make test config=coverage defines=$DEFINES -j2
   - make test config=release defines=$DEFINES -j2
