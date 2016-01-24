@@ -48,7 +48,7 @@ TEST(memory_custom_memory_management)
 		CHECK(page_allocs == 0 && page_deallocs == 0);
 
 		CHECK(doc.load_string(STR("<node />")));
-	
+
 		CHECK(page_allocs == 1 && page_deallocs == 0);
 
 		// modify document (no new page)

@@ -261,7 +261,7 @@ TEST(xpath_variables_multiple_documents)
 
 	CHECK(ns.size() == 3);
 	CHECK(ns[0] != ns[1] && ns[0] != ns[2]);
-	
+
 	xml_node n0 = doc.child(STR("node")), n1 = doc1.child(STR("node")), n2 = doc2.child(STR("node"));
 
 	CHECK(n0 == ns[0].node() || n0 == ns[1].node() || n0 == ns[2].node());

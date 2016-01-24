@@ -82,7 +82,7 @@ TEST(parse_pi_error)
 		CHECK(doc.load_string(STR("<?name&"), flags).status == status_bad_pi);
 		CHECK(doc.load_string(STR("<?name&?"), flags).status == status_bad_pi);
 	}
-	
+
 	CHECK(doc.load_string(STR("<?xx#?>"), parse_fragment | parse_pi).status == status_bad_pi);
 	CHECK(doc.load_string(STR("<?name&?>"), parse_fragment | parse_pi).status == status_bad_pi);
 	CHECK(doc.load_string(STR("<?name& x?>"), parse_fragment | parse_pi).status == status_bad_pi);
@@ -235,9 +235,9 @@ TEST(parse_ws_pcdata_skip)
 	CHECK(!doc.first_child());
 
 	CHECK(doc.load_string(STR("<root>  <node>  </node>  </root>"), parse_minimal));
-	
+
 	xml_node root = doc.child(STR("root"));
-	
+
 	CHECK(root.first_child() == root.last_child());
 	CHECK(!root.first_child().first_child());
 }
@@ -855,7 +855,7 @@ TEST(parse_declaration_error)
 		CHECK(doc.load_string(STR("<?xml>"), flags).status == status_bad_pi);
 		CHECK(doc.load_string(STR("<?xml version='1>"), flags).status == status_bad_pi);
 	}
-	
+
 	CHECK(doc.load_string(STR("<?xml version='1?>"), parse_fragment | parse_declaration).status == status_bad_attribute);
 	CHECK(doc.load_string(STR("<foo><?xml version='1'?></foo>"), parse_fragment | parse_declaration).status == status_bad_pi);
 }
