@@ -1,5 +1,6 @@
-sudo: false
 language: cpp
+sudo: required
+dist: trusty
 os:
   - linux
   - osx
@@ -10,5 +11,6 @@ env:
 script:
   - make test config=coverage defines=$DEFINES -j2
   - make test config=release defines=$DEFINES -j2
+  - make test cxxstd=c++98 defines=$DEFINES -j2
 
 after_success: bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov
