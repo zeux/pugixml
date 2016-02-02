@@ -1284,6 +1284,8 @@ In addition to string functions, several functions are provided for handling att
 ----
 bool xml_attribute::set_value(int rhs);
 bool xml_attribute::set_value(unsigned int rhs);
+bool xml_attribute::set_value(long rhs);
+bool xml_attribute::set_value(unsigned long rhs);
 bool xml_attribute::set_value(double rhs);
 bool xml_attribute::set_value(float rhs);
 bool xml_attribute::set_value(bool rhs);
@@ -1306,6 +1308,8 @@ For convenience, all `set_value` functions have the corresponding assignment ope
 xml_attribute& xml_attribute::operator=(const char_t* rhs);
 xml_attribute& xml_attribute::operator=(int rhs);
 xml_attribute& xml_attribute::operator=(unsigned int rhs);
+xml_attribute& xml_attribute::operator=(long rhs);
+xml_attribute& xml_attribute::operator=(unsigned long rhs);
 xml_attribute& xml_attribute::operator=(double rhs);
 xml_attribute& xml_attribute::operator=(float rhs);
 xml_attribute& xml_attribute::operator=(bool rhs);
@@ -1430,6 +1434,8 @@ In addition to a string function, several functions are provided for handling te
 ----
 bool xml_text::set(int rhs);
 bool xml_text::set(unsigned int rhs);
+bool xml_text::set(long rhs);
+bool xml_text::set(unsigned long rhs);
 bool xml_text::set(double rhs);
 bool xml_text::set(float rhs);
 bool xml_text::set(bool rhs);
@@ -1448,6 +1454,8 @@ For convenience, all `set` functions have the corresponding assignment operators
 xml_text& xml_text::operator=(const char_t* rhs);
 xml_text& xml_text::operator=(int rhs);
 xml_text& xml_text::operator=(unsigned int rhs);
+xml_text& xml_text::operator=(long rhs);
+xml_text& xml_text::operator=(unsigned long rhs);
 xml_text& xml_text::operator=(double rhs);
 xml_text& xml_text::operator=(float rhs);
 xml_text& xml_text::operator=(bool rhs);
@@ -2658,6 +2666,8 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(int rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(unsigned int rhs);
+    bool +++<a href="#xml_attribute::set_value">set_value</a>+++(long rhs);
+    bool +++<a href="#xml_attribute::set_value">set_value</a>+++(unsigned long rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(double rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(float rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(bool rhs);
@@ -2667,6 +2677,8 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(const char_t* rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(int rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(unsigned int rhs);
+    xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(long rhs);
+    xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(unsigned long rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(double rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(float rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(bool rhs);
@@ -2851,6 +2863,8 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_text::set">set</a>+++(int rhs);
     bool +++<a href="#xml_text::set">set</a>+++(unsigned int rhs);
+    bool +++<a href="#xml_text::set">set</a>+++(long rhs);
+    bool +++<a href="#xml_text::set">set</a>+++(unsigned long rhs);
     bool +++<a href="#xml_text::set">set</a>+++(double rhs);
     bool +++<a href="#xml_text::set">set</a>+++(float rhs);
     bool +++<a href="#xml_text::set">set</a>+++(bool rhs);
@@ -2860,6 +2874,8 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(const char_t* rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(int rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(unsigned int rhs);
+    xml_text& +++<a href="#xml_text::assign">operator=</a>+++(long rhs);
+    xml_text& +++<a href="#xml_text::assign">operator=</a>+++(unsigned long rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(double rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(float rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(bool rhs);
