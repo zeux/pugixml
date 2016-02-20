@@ -32,6 +32,10 @@ struct test_runner
 
 bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs);
 
+#ifndef PUGIXML_NO_STL
+bool test_string_equal(const pugi::string_t& lhs, const pugi::string_t& rhs);
+#endif
+
 template <typename Node> inline bool test_node_name_value(const Node& node, const pugi::char_t* name, const pugi::char_t* value)
 {
 	return test_string_equal(node.name(), name) && test_string_equal(node.value(), value);
