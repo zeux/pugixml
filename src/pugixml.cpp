@@ -255,6 +255,13 @@ PUGI__NS_BEGIN
 			return result;
 		}
 	};
+
+	// Do not assume that fclose can be converted to int(*)(FILE*) because some
+	// compilers use a special calling convention for stdlib functions like fclose
+	PUGI__FN void auto_deleter_fclose(FILE* File)
+	{
+		fclose(File);
+	}
 PUGI__NS_END
 
 #ifdef PUGIXML_COMPACT
@@ -6865,8 +6872,7 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		typedef int (*fclose_t)(FILE*); // BCC5 workaround
-		auto_deleter<FILE, fclose_t> file(fopen(path_, "rb"), fclose);
+		auto_deleter<FILE> file(fopen(path_, "rb"), impl::auto_deleter_fclose);
 
 		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -6876,8 +6882,7 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		typedef int (*fclose_t)(FILE*); // BCC5 workaround
-		auto_deleter<FILE, fclose_t> file(impl::open_file_wide(path_, L"rb"), fclose);
+		auto_deleter<FILE> file(impl::open_file_wide(path_, L"rb"), impl::auto_deleter_fclose);
 
 		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -6950,8 +6955,7 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		typedef int (*fclose_t)(FILE*); // BCC5 workaround
-		auto_deleter<FILE, fclose_t> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), fclose);
+		auto_deleter<FILE> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::auto_deleter_fclose);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
@@ -6959,8 +6963,7 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		typedef int (*fclose_t)(FILE*); // BCC5 workaround
-		auto_deleter<FILE, fclose_t> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), fclose);
+		auto_deleter<FILE> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::auto_deleter_fclose);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
