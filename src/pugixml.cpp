@@ -234,8 +234,10 @@ PUGI__NS_END
 
 // auto_ptr-like object for exception recovery
 PUGI__NS_BEGIN
-	template <typename T, typename D = void(*)(T*)> struct auto_deleter
+	template <typename T> struct auto_deleter
 	{
+		typedef void (*D)(T*);
+
 		T* data;
 		D deleter;
 
@@ -255,13 +257,6 @@ PUGI__NS_BEGIN
 			return result;
 		}
 	};
-
-	// Do not assume that fclose can be converted to int(*)(FILE*) because some
-	// compilers use a special calling convention for stdlib functions like fclose
-	PUGI__FN void auto_deleter_fclose(FILE* File)
-	{
-		fclose(File);
-	}
 PUGI__NS_END
 
 #ifdef PUGIXML_COMPACT
@@ -4713,6 +4708,11 @@ PUGI__NS_BEGIN
 		return load_buffer_impl(doc, doc, contents, zero_terminate_buffer(contents, size, real_encoding), options, real_encoding, true, true, out_buffer);
 	}
 
+	PUGI__FN void close_file(FILE* file)
+	{
+		fclose(file);
+	}
+
 #ifndef PUGIXML_NO_STL
 	template <typename T> struct xml_stream_chunk
 	{
@@ -6872,7 +6872,7 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(fopen(path_, "rb"), impl::auto_deleter_fclose);
+		auto_deleter<FILE> file(fopen(path_, "rb"), impl::close_file);
 
 		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -6882,7 +6882,7 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(impl::open_file_wide(path_, L"rb"), impl::auto_deleter_fclose);
+		auto_deleter<FILE> file(impl::open_file_wide(path_, L"rb"), impl::close_file);
 
 		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -6955,7 +6955,7 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::auto_deleter_fclose);
+		auto_deleter<FILE> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::close_file);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
@@ -6963,7 +6963,7 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
-		auto_deleter<FILE> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::auto_deleter_fclose);
+		auto_deleter<FILE> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::close_file);
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
