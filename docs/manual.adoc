@@ -1698,6 +1698,8 @@ These flags control the resulting tree contents:
 
 * [[format_indent_attributes]]`format_indent_attributes` determines if all attributes should be printed on a new line, indented with the indentation string according to the attribute's depth. This flag implies <<format_indent,format_indent>>. This flag has no effect if <<format_raw,format_raw>> is enabled. This flag is *off* by default.
 
+* [[format_no_empty_element_space]]`format_no_empty_element_space` omits the space before the final `/>` of empty elements. If this flag is on, then the output of an empty element is `<element/>` instead of `<element />`. This flag is *off* by default.
+
 * [[format_raw]]`format_raw` switches between formatted and raw output. If this flag is on, the nodes are not indented in any way, and also no newlines that are not part of document text are printed. Raw mode can be used for serialization where the result is not intended to be read by humans; also it can be useful if the document was parsed with <<parse_ws_pcdata,parse_ws_pcdata>> flag, to preserve the original document formatting as much as possible. This flag is *off* by default.
 
 * [[format_no_escapes]]`format_no_escapes` disables output escaping for attribute values and PCDATA contents. If this flag is off, special symbols (`"`, `&`, `<`, `>`) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. `&amp;amp;`) during output. If this flag is on, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray `<` in the PCDATA will make the output malformed). This flag is *off* by default.

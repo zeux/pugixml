@@ -31,6 +31,11 @@ TEST_XML(write_indent_attributes_empty_element, "<node attr='1' other='2' />")
 	CHECK_NODE_EX(doc, STR("<node\n\tattr=\"1\"\n\tother=\"2\" />\n"), STR("\t"), format_indent_attributes);
 }
 
+TEST_XML(write_no_empty_element_space, "<node attr='1' />")
+{
+	CHECK_NODE_EX(doc, STR("<node attr=\"1\"/>\n"), STR(""), format_no_empty_element_space);
+}
+
 TEST_XML_FLAGS(write_indent_attributes_declaration, "<?xml version=\"1.0\" encoding=\"UTF-8\"?><node attr='1' other='2' />", parse_full)
 {
 	CHECK_NODE_EX(doc, STR("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<node\n\tattr=\"1\"\n\tother=\"2\" />\n"), STR("\t"), format_indent_attributes);

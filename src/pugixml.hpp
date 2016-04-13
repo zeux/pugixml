@@ -211,6 +211,9 @@ namespace pugi
 	// Write every attribute on a new line with appropriate indentation. This flag is off by default.
 	const unsigned int format_indent_attributes = 0x40;
 
+	// Don't output a space before '/>' at the end of self-closing (empty) elements.
+	const unsigned int format_no_empty_element_space = 0x80;
+
 	// The default set of formatting flags.
 	// Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;
