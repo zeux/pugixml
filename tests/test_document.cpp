@@ -68,7 +68,7 @@ TEST(document_create)
 {
 	pugi::xml_document doc;
 	doc.append_child().set_name(STR("node"));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 #ifndef PUGIXML_NO_STL
@@ -78,7 +78,7 @@ TEST(document_load_stream)
 
 	std::istringstream iss("<node/>");
 	CHECK(doc.load(iss));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_stream_offset)
@@ -91,7 +91,7 @@ TEST(document_load_stream_offset)
 	iss >> s;
 
 	CHECK(doc.load(iss));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_stream_text)
@@ -100,7 +100,7 @@ TEST(document_load_stream_text)
 
 	std::ifstream iss("tests/data/multiline.xml");
 	CHECK(doc.load(iss));
-	CHECK_NODE(doc, STR("<node1 /><node2 /><node3 />"));
+	CHECK_NODE(doc, STR("<node1/><node2/><node3/>"));
 }
 
 TEST(document_load_stream_error)
@@ -130,7 +130,7 @@ TEST(document_load_stream_wide)
 
 	std::basic_istringstream<wchar_t> iss(L"<node/>");
 	CHECK(doc.load(iss));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 #ifndef PUGIXML_NO_EXCEPTIONS
@@ -201,7 +201,7 @@ TEST(document_load_stream_nonseekable)
 
     pugi::xml_document doc;
     CHECK(doc.load(in));
-    CHECK_NODE(doc, STR("<node />"));
+    CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_stream_wide_nonseekable)
@@ -212,14 +212,14 @@ TEST(document_load_stream_wide_nonseekable)
 
     pugi::xml_document doc;
     CHECK(doc.load(in));
-    CHECK_NODE(doc, STR("<node />"));
+    CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_stream_nonseekable_large)
 {
 	std::basic_string<pugi::char_t> str;
 	str += STR("<node>");
-	for (int i = 0; i < 10000; ++i) str += STR("<node />");
+	for (int i = 0; i < 10000; ++i) str += STR("<node/>");
 	str += STR("</node>");
 
     char_array_buffer<pugi::char_t> buffer(&str[0], &str[0] + str.length());
@@ -264,7 +264,7 @@ TEST(document_load_string)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_string(STR("<node/>")));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_file)
@@ -272,7 +272,7 @@ TEST(document_load_file)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_file("tests/data/small.xml"));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_file_empty)
@@ -291,7 +291,7 @@ TEST(document_load_file_large)
 
 	std::basic_string<pugi::char_t> str;
 	str += STR("<node>");
-	for (int i = 0; i < 10000; ++i) str += STR("<node />");
+	for (int i = 0; i < 10000; ++i) str += STR("<node/>");
 	str += STR("</node>");
 
 	CHECK_NODE(doc, str.c_str());
@@ -324,7 +324,7 @@ TEST(document_load_file_out_of_memory_file_leak)
 	test_runner::_memory_fail_threshold = 0;
 
 	CHECK(doc.load_file("tests/data/small.xml"));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_file_wide_out_of_memory_file_leak)
@@ -339,7 +339,7 @@ TEST(document_load_file_wide_out_of_memory_file_leak)
 	test_runner::_memory_fail_threshold = 0;
 
 	CHECK(doc.load_file(L"tests/data/small.xml"));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_file_error_previous)
@@ -357,7 +357,7 @@ TEST(document_load_file_wide_ascii)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_file(L"tests/data/small.xml"));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 #if !defined(__DMC__) && !defined(__MWERKS__) && !(defined(__MINGW32__) && defined(__STRICT_ANSI__) && !defined(__MINGW64_VERSION_MAJOR)) && !defined(__BORLANDC__)
@@ -366,7 +366,7 @@ TEST(document_load_file_wide_unicode)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_file(L"tests/data/\x0442\x0435\x0441\x0442.xml"));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 #endif
 
@@ -389,7 +389,7 @@ TEST_XML(document_save, "<node/>")
 
 	doc.save(writer, STR(""), pugi::format_no_declaration | pugi::format_raw, get_native_encoding());
 
-	CHECK(writer.as_string() == STR("<node />"));
+	CHECK(writer.as_string() == STR("<node/>"));
 }
 
 #ifndef PUGIXML_NO_STL
@@ -399,7 +399,7 @@ TEST_XML(document_save_stream, "<node/>")
 
 	doc.save(oss, STR(""), pugi::format_no_declaration | pugi::format_raw);
 
-	CHECK(oss.str() == "<node />");
+	CHECK(oss.str() == "<node/>");
 }
 
 TEST_XML(document_save_stream_wide, "<node/>")
@@ -408,7 +408,7 @@ TEST_XML(document_save_stream_wide, "<node/>")
 
 	doc.save(oss, STR(""), pugi::format_no_declaration | pugi::format_raw);
 
-	CHECK(oss.str() == L"<node />");
+	CHECK(oss.str() == L"<node/>");
 }
 #endif
 
@@ -417,12 +417,12 @@ TEST_XML(document_save_bom, "<n/>")
 	unsigned int flags = format_no_declaration | format_raw | format_write_bom;
 
 	// specific encodings
-	CHECK(test_save_narrow(doc, flags, encoding_utf8, "\xef\xbb\xbf<n />", 8));
-	CHECK(test_save_narrow(doc, flags, encoding_utf16_be, "\xfe\xff\x00<\x00n\x00 \x00/\x00>", 12));
-	CHECK(test_save_narrow(doc, flags, encoding_utf16_le, "\xff\xfe<\x00n\x00 \x00/\x00>\x00", 12));
-	CHECK(test_save_narrow(doc, flags, encoding_utf32_be, "\x00\x00\xfe\xff\x00\x00\x00<\x00\x00\x00n\x00\x00\x00 \x00\x00\x00/\x00\x00\x00>", 24));
-	CHECK(test_save_narrow(doc, flags, encoding_utf32_le, "\xff\xfe\x00\x00<\x00\x00\x00n\x00\x00\x00 \x00\x00\x00/\x00\x00\x00>\x00\x00\x00", 24));
-	CHECK(test_save_narrow(doc, flags, encoding_latin1, "<n />", 5));
+	CHECK(test_save_narrow(doc, flags, encoding_utf8, "\xef\xbb\xbf<n/>", 7));
+	CHECK(test_save_narrow(doc, flags, encoding_utf16_be, "\xfe\xff\x00<\x00n\x00/\x00>", 10));
+	CHECK(test_save_narrow(doc, flags, encoding_utf16_le, "\xff\xfe<\x00n\x00/\x00>\x00", 10));
+	CHECK(test_save_narrow(doc, flags, encoding_utf32_be, "\x00\x00\xfe\xff\x00\x00\x00<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>", 20));
+	CHECK(test_save_narrow(doc, flags, encoding_utf32_le, "\xff\xfe\x00\x00<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>\x00\x00\x00", 20));
+	CHECK(test_save_narrow(doc, flags, encoding_latin1, "<n/>", 4));
 
 	// encodings synonyms
 	CHECK(save_narrow(doc, flags, encoding_utf16) == save_narrow(doc, flags, (is_little_endian() ? encoding_utf16_le : encoding_utf16_be)));
@@ -521,7 +521,7 @@ TEST_XML(document_save_file, "<node/>")
 	CHECK(doc.save_file(f.path));
 
 	CHECK(doc.load_file(f.path, pugi::parse_default | pugi::parse_declaration));
-	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node />"));
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node/>"));
 }
 
 TEST_XML(document_save_file_wide, "<node/>")
@@ -535,7 +535,7 @@ TEST_XML(document_save_file_wide, "<node/>")
 	CHECK(doc.save_file(wpath));
 
 	CHECK(doc.load_file(f.path, pugi::parse_default | pugi::parse_declaration));
-	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node />"));
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node/>"));
 }
 
 TEST_XML(document_save_file_error, "<node/>")
@@ -596,7 +596,7 @@ TEST(document_load_buffer)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_buffer(text, sizeof(text)));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_buffer_inplace)
@@ -606,7 +606,7 @@ TEST(document_load_buffer_inplace)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_buffer_inplace(text, sizeof(text)));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_buffer_inplace_own)
@@ -623,7 +623,7 @@ TEST(document_load_buffer_inplace_own)
 	pugi::xml_document doc;
 
 	CHECK(doc.load_buffer_inplace_own(text, size));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_parse_result_bool)
@@ -1196,7 +1196,7 @@ TEST_XML(document_reset, "<node><child/></node>")
 
     CHECK(doc.load_string(STR("<node/>")));
     CHECK(doc.first_child());
-    CHECK_NODE(doc, STR("<node />"));
+    CHECK_NODE(doc, STR("<node/>"));
 
     doc.reset();
     CHECK(!doc.first_child());
@@ -1220,12 +1220,12 @@ TEST_XML(document_reset_copy, "<node><child/></node>")
 
     doc2.reset(doc);
 
-    CHECK_NODE(doc2, STR("<node><child /></node>"));
+    CHECK_NODE(doc2, STR("<node><child/></node>"));
     CHECK(doc.first_child() != doc2.first_child());
 
     doc.reset(doc2);
 
-    CHECK_NODE(doc, STR("<node><child /></node>"));
+    CHECK_NODE(doc, STR("<node><child/></node>"));
     CHECK(doc.first_child() != doc2.first_child());
 
     CHECK(doc.first_child().offset_debug() == -1);
@@ -1233,7 +1233,7 @@ TEST_XML(document_reset_copy, "<node><child/></node>")
 
 TEST_XML(document_reset_copy_self, "<node><child/></node>")
 {
-    CHECK_NODE(doc, STR("<node><child /></node>"));
+    CHECK_NODE(doc, STR("<node><child/></node>"));
 
     doc.reset(doc);
 
@@ -1349,7 +1349,7 @@ TEST(document_alignment)
 		xml_document* doc = new (buf + offset) xml_document;
 
 		CHECK(doc->load_string(STR("<node />")));
-		CHECK_NODE(*doc, STR("<node />"));
+		CHECK_NODE(*doc, STR("<node/>"));
 
 		doc->~xml_document();
 	}
@@ -1393,5 +1393,5 @@ TEST(document_deprecated_load)
 {
 	xml_document doc;
 	CHECK(doc.load(STR("<node/>")));
-	CHECK_NODE(doc, STR("<node />"));
+	CHECK_NODE(doc, STR("<node/>"));
 }

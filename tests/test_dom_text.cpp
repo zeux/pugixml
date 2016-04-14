@@ -403,16 +403,16 @@ TEST_XML(dom_text_middle, "<node><c1>notthisone</c1>text<c2/></node>")
     CHECK_STRING(t.get(), STR("text"));
     t.set(STR("notext"));
 
-    CHECK_NODE(node, STR("<node><c1>notthisone</c1>notext<c2 /></node>"));
+    CHECK_NODE(node, STR("<node><c1>notthisone</c1>notext<c2/></node>"));
     CHECK(node.remove_child(t.data()));
 
     CHECK(!t);
-    CHECK_NODE(node, STR("<node><c1>notthisone</c1><c2 /></node>"));
+    CHECK_NODE(node, STR("<node><c1>notthisone</c1><c2/></node>"));
 
     t.set(STR("yestext"));
 
     CHECK(t);
-    CHECK_NODE(node, STR("<node><c1>notthisone</c1><c2 />yestext</node>"));
+    CHECK_NODE(node, STR("<node><c1>notthisone</c1><c2/>yestext</node>"));
     CHECK(t.data() == node.last_child());
 }
 

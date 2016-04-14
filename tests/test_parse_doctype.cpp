@@ -36,9 +36,9 @@ static bool test_doctype_wf(const char_t* decl)
 	if (!load_concat(doc, STR("a"), decl, STR("b")) || !test_node(doc, STR("ab"), STR(""), format_raw)) return false;
 
 	// node pre/postfix
-	if (!load_concat(doc, STR("<nodea/>"), decl) || !test_node(doc, STR("<nodea />"), STR(""), format_raw)) return false;
-	if (!load_concat(doc, decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodeb />"), STR(""), format_raw)) return false;
-	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea /><nodeb />"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("<nodea/>"), decl) || !test_node(doc, STR("<nodea/>"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodeb/>"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea/><nodeb/>"), STR(""), format_raw)) return false;
 
     // check load-store contents preservation
     CHECK(doc.load_string(decl, parse_doctype | parse_fragment));

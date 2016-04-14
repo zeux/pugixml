@@ -192,12 +192,12 @@ TEST_XML(write_escape_unicode, "<node attr='&#x3c00;'/>")
 {
 #ifdef PUGIXML_WCHAR_MODE
 	#ifdef U_LITERALS
-		CHECK_NODE(doc, STR("<node attr=\"\u3c00\" />"));
+		CHECK_NODE(doc, STR("<node attr=\"\u3c00\"/>"));
 	#else
-		CHECK_NODE(doc, STR("<node attr=\"\x3c00\" />"));
+		CHECK_NODE(doc, STR("<node attr=\"\x3c00\"/>"));
 	#endif
 #else
-	CHECK_NODE(doc, STR("<node attr=\"\xe3\xb0\x80\" />"));
+	CHECK_NODE(doc, STR("<node attr=\"\xe3\xb0\x80\"/>"));
 #endif
 }
 
@@ -473,7 +473,7 @@ TEST(write_no_name_element)
 	root.append_child();
 	root.append_child().append_child(node_pcdata).set_value(STR("text"));
 
-	CHECK_NODE(doc, STR("<:anonymous><:anonymous /><:anonymous>text</:anonymous></:anonymous>"));
+	CHECK_NODE(doc, STR("<:anonymous><:anonymous/><:anonymous>text</:anonymous></:anonymous>"));
 	CHECK_NODE_EX(doc, STR("<:anonymous>\n\t<:anonymous />\n\t<:anonymous>text</:anonymous>\n</:anonymous>\n"), STR("\t"), format_default);
 }
 
@@ -491,7 +491,7 @@ TEST(write_no_name_attribute)
 	doc.append_child().set_name(STR("root"));
 	doc.child(STR("root")).append_attribute(STR(""));
 
-	CHECK_NODE(doc, STR("<root :anonymous=\"\" />"));
+	CHECK_NODE(doc, STR("<root :anonymous=\"\"/>"));
 }
 
 TEST(write_print_empty)
@@ -596,7 +596,7 @@ TEST(write_pcdata_whitespace_fixedpoint)
 
 TEST_XML_FLAGS(write_mixed, "<node><child1/><child2>pre<![CDATA[data]]>mid<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>", parse_full)
 {
-	CHECK_NODE(doc, STR("<node><child1 /><child2>pre<![CDATA[data]]>mid<!--comment--><test />post<?pi value?>fin</child2><child3 /></node>"));
+	CHECK_NODE(doc, STR("<node><child1/><child2>pre<![CDATA[data]]>mid<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>"));
 	CHECK_NODE_EX(doc, STR("<node>\n<child1 />\n<child2>pre<![CDATA[data]]>mid<!--comment-->\n<test />post<?pi value?>fin</child2>\n<child3 />\n</node>\n"), STR("\t"), 0);
 	CHECK_NODE_EX(doc, STR("<node>\n\t<child1 />\n\t<child2>pre<![CDATA[data]]>mid<!--comment-->\n\t\t<test />post<?pi value?>fin</child2>\n\t<child3 />\n</node>\n"), STR("\t"), format_indent);
 }

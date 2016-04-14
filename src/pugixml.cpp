@@ -4014,7 +4014,10 @@ PUGI__NS_BEGIN
 		{
 			if (!node->first_child)
 			{
-				writer.write(' ', '/', '>');
+				if ((flags & format_raw) == 0)
+					writer.write(' ');
+
+				writer.write('/', '>');
 
 				return false;
 			}

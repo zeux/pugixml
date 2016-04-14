@@ -288,38 +288,38 @@ TEST(parse_ws_pcdata_permutations)
     test_data_t test_data[] =
     {
         // external pcdata should be discarded (whitespace or not)
-        {7, STR("ext1<node/>"), STR("<node />"), 2},
-        {7, STR("ext1<node/>ext2"), STR("<node />"), 2},
-        {7, STR(" <node/>"), STR("<node />"), 2},
-        {7, STR("<node/> "), STR("<node />"), 2},
-        {7, STR(" <node/> "), STR("<node />"), 2},
+        {7, STR("ext1<node/>"), STR("<node/>"), 2},
+        {7, STR("ext1<node/>ext2"), STR("<node/>"), 2},
+        {7, STR(" <node/>"), STR("<node/>"), 2},
+        {7, STR("<node/> "), STR("<node/>"), 2},
+        {7, STR(" <node/> "), STR("<node/>"), 2},
         // inner pcdata should be preserved
         {7, STR("<node>inner</node>"), STR("<node>inner</node>"), 3},
-        {7, STR("<node>inner1<child/>inner2</node>"), STR("<node>inner1<child />inner2</node>"), 5},
+        {7, STR("<node>inner1<child/>inner2</node>"), STR("<node>inner1<child/>inner2</node>"), 5},
         {7, STR("<node>inner1<child>deep</child>inner2</node>"), STR("<node>inner1<child>deep</child>inner2</node>"), 6},
         // empty pcdata nodes should never be created
-        {7, STR("<node>inner1<child></child>inner2</node>"), STR("<node>inner1<child />inner2</node>"), 5},
-        {7, STR("<node><child></child>inner2</node>"), STR("<node><child />inner2</node>"), 4},
-        {7, STR("<node>inner1<child></child></node>"), STR("<node>inner1<child /></node>"), 4},
-        {7, STR("<node><child></child></node>"), STR("<node><child /></node>"), 3},
+        {7, STR("<node>inner1<child></child>inner2</node>"), STR("<node>inner1<child/>inner2</node>"), 5},
+        {7, STR("<node><child></child>inner2</node>"), STR("<node><child/>inner2</node>"), 4},
+        {7, STR("<node>inner1<child></child></node>"), STR("<node>inner1<child/></node>"), 4},
+        {7, STR("<node><child></child></node>"), STR("<node><child/></node>"), 3},
         // comments, pi or other nodes should not cause pcdata creation either
-        {7, STR("<node><!----><child><?pi?></child><![CDATA[x]]></node>"), STR("<node><child /><![CDATA[x]]></node>"), 4},
+        {7, STR("<node><!----><child><?pi?></child><![CDATA[x]]></node>"), STR("<node><child/><![CDATA[x]]></node>"), 4},
         // leading/trailing pcdata whitespace should be preserved (note: this will change if parse_ws_pcdata_trim is introduced)
         {7, STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), 6},
         // whitespace-only pcdata preservation depends on the parsing mode
-        {1, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child /><child><deep /></child></node>"), 5},
+        {1, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child/><child><deep/></child></node>"), 5},
         {2, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t\n\t</node>"), 13},
         {4, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child>   </child><child><deep>  </deep></child></node>"), 7},
         // current implementation of parse_ws_pcdata_single has an unfortunate bug; reproduce it here
         {4, STR("<node>\t\t<!---->\n\n</node>"), STR("<node>\n\n</node>"), 3},
         // error case: terminate PCDATA in the middle
         {7, STR("<node>abcdef"), STR("<node>abcdef</node>"), -3},
-        {5, STR("<node>      "), STR("<node />"), -2},
+        {5, STR("<node>      "), STR("<node/>"), -2},
         {2, STR("<node>      "), STR("<node>      </node>"), -3},
         // error case: terminate PCDATA as early as possible
-        {7, STR("<node>"), STR("<node />"), -2},
+        {7, STR("<node>"), STR("<node/>"), -2},
         {7, STR("<node>a"), STR("<node>a</node>"), -3},
-        {5, STR("<node> "), STR("<node />"), -2},
+        {5, STR("<node> "), STR("<node/>"), -2},
         {2, STR("<node> "), STR("<node> </node>"), -3},
     };
 
@@ -360,18 +360,18 @@ TEST(parse_ws_pcdata_fragment_permutations)
         {7, STR("ext1"), STR("ext1"), 2},
         {5, STR("    "), STR(""), 1},
         {2, STR("    "), STR("    "), 2},
-        {7, STR("ext1<node/>"), STR("ext1<node />"), 3},
-        {7, STR("<node/>ext2"), STR("<node />ext2"), 3},
-        {7, STR("ext1<node/>ext2"), STR("ext1<node />ext2"), 4},
-        {7, STR("ext1<node1/>ext2<node2/>ext3"), STR("ext1<node1 />ext2<node2 />ext3"), 6},
-        {5, STR(" <node/>"), STR("<node />"), 2},
-        {2, STR(" <node/>"), STR(" <node />"), 3},
-        {5, STR("<node/> "), STR("<node />"), 2},
-        {2, STR("<node/> "), STR("<node /> "), 3},
-        {5, STR(" <node/> "), STR("<node />"), 2},
-        {2, STR(" <node/> "), STR(" <node /> "), 4},
-        {5, STR(" <node1/> <node2/> "), STR("<node1 /><node2 />"), 3},
-        {2, STR(" <node1/> <node2/> "), STR(" <node1 /> <node2 /> "), 6},
+        {7, STR("ext1<node/>"), STR("ext1<node/>"), 3},
+        {7, STR("<node/>ext2"), STR("<node/>ext2"), 3},
+        {7, STR("ext1<node/>ext2"), STR("ext1<node/>ext2"), 4},
+        {7, STR("ext1<node1/>ext2<node2/>ext3"), STR("ext1<node1/>ext2<node2/>ext3"), 6},
+        {5, STR(" <node/>"), STR("<node/>"), 2},
+        {2, STR(" <node/>"), STR(" <node/>"), 3},
+        {5, STR("<node/> "), STR("<node/>"), 2},
+        {2, STR("<node/> "), STR("<node/> "), 3},
+        {5, STR(" <node/> "), STR("<node/>"), 2},
+        {2, STR(" <node/> "), STR(" <node/> "), 4},
+        {5, STR(" <node1/> <node2/> "), STR("<node1/><node2/>"), 3},
+        {2, STR(" <node1/> <node2/> "), STR(" <node1/> <node2/> "), 6},
     };
 
     for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
@@ -750,14 +750,14 @@ TEST(parse_tag_single)
 {
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node/><node /><node\n/>"), parse_minimal));
-	CHECK_NODE(doc, STR("<node /><node /><node />"));
+	CHECK_NODE(doc, STR("<node/><node/><node/>"));
 }
 
 TEST(parse_tag_hierarchy)
 {
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node><n1><n2/></n1><n3><n4><n5></n5></n4></n3 \r\n></node>"), parse_minimal));
-	CHECK_NODE(doc, STR("<node><n1><n2 /></n1><n3><n4><n5 /></n4></n3></node>"));
+	CHECK_NODE(doc, STR("<node><n1><n2/></n1><n3><n4><n5/></n4></n3></node>"));
 }
 
 TEST(parse_tag_error)
@@ -894,7 +894,7 @@ TEST(parse_out_of_memory_halfway_node)
 
 	xml_document doc;
 	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory));
-	CHECK_NODE(doc.first_child(), STR("<n />"));
+	CHECK_NODE(doc.first_child(), STR("<n/>"));
 }
 
 TEST(parse_out_of_memory_halfway_attr)
@@ -952,7 +952,7 @@ TEST(parse_out_of_memory_allocator_state_sync)
 
 	xml_document doc;
 	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory));
-	CHECK_NODE(doc.first_child(), STR("<n />"));
+	CHECK_NODE(doc.first_child(), STR("<n/>"));
 
 	test_runner::_memory_fail_threshold = 0;
 
@@ -1177,7 +1177,7 @@ TEST(parse_embed_pcdata)
 		CHECK_XPATH_NUMBER(doc, STR("count(node/child/*[starts-with(., 'value')])"), 2);
 	#endif
 
-		CHECK_NODE(doc, STR("<node><key>value</key><child><inner1>value1</inner1><inner2>value2</inner2>outer</child><two>text<data /></two></node>"));
+		CHECK_NODE(doc, STR("<node><key>value</key><child><inner1>value1</inner1><inner2>value2</inner2>outer</child><two>text<data/></two></node>"));
 		CHECK_NODE_EX(doc, STR("<node>\n<key>value</key>\n<child>\n<inner1>value1</inner1>\n<inner2>value2</inner2>outer</child>\n<two>text<data />\n</two>\n</node>\n"), STR("\t"), 0);
 		CHECK_NODE_EX(doc, STR("<node>\n\t<key>value</key>\n\t<child>\n\t\t<inner1>value1</inner1>\n\t\t<inner2>value2</inner2>outer</child>\n\t<two>text<data />\n\t</two>\n</node>\n"), STR("\t"), format_indent);
 	}
