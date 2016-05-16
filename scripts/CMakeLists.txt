@@ -1,6 +1,6 @@
 project(pugixml)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
@@ -57,11 +57,16 @@ install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT pugixml-config DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
 
 if(BUILD_TESTS)
+	include(CTest)
+	enable_testing()
+
 	file(GLOB TEST_SOURCES ../tests/*.cpp)
 	file(GLOB FUZZ_SOURCES ../tests/fuzz_*.cpp)
 	list(REMOVE_ITEM TEST_SOURCES ${FUZZ_SOURCES})
 
-	add_executable(check ${TEST_SOURCES})
-	target_link_libraries(check pugixml)
-	add_custom_command(TARGET check POST_BUILD COMMAND check WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/..)
+	add_executable(test_pugixml ${TEST_SOURCES})
+	target_link_libraries(test_pugixml pugixml)
+	add_test(NAME test_pugixml WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/.."
+		COMMAND "$<TARGET_FILE:test_pugixml>")
+	add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS test_pugixml)
 endif()
