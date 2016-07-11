@@ -14,7 +14,7 @@ EXECUTABLE=$(BUILD)/test
 VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
 RELEASE=$(shell git ls-files src docs/*.html docs/*.css docs/samples docs/images scripts contrib CMakeLists.txt readme.txt)
 
-CXXFLAGS=-g -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wold-style-cast -Wcast-align
+CXXFLAGS=-g -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-align -Wcast-qual -Wold-style-cast
 LDFLAGS=
 
 ifeq ($(config),release)
