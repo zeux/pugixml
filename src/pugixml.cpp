@@ -1895,7 +1895,7 @@ PUGI__NS_BEGIN
 			return is_little_endian() ? encoding_utf32_le : encoding_utf32_be;
 	}
 
-	PUGI__FN bool parse_declaration_encoding(const uint8_t* data, size_t size, const uint8_t** out_encoding, size_t* out_length)
+	PUGI__FN bool parse_declaration_encoding(const uint8_t* data, size_t size, const uint8_t*& out_encoding, size_t& out_length)
 	{
 	#define PUGI__SCANCHAR(ch) { if (offset >= size || data[offset] != ch) return false; offset++; }
 	#define PUGI__SCANCHARTYPE(ct) { while (offset < size && PUGI__IS_CHARTYPE(data[offset], ct)) offset++; }
@@ -1931,11 +1931,11 @@ PUGI__NS_BEGIN
 
 				size_t start = offset;
 
-				*out_encoding = data + offset;
+				out_encoding = data + offset;
 
 				PUGI__SCANCHARTYPE(ct_symbol);
 
-				*out_length = offset - start;
+				out_length = offset - start;
 
 				PUGI__SCANCHAR(delimiter);
 
@@ -1977,7 +1977,7 @@ PUGI__NS_BEGIN
 		const uint8_t* enc = 0;
 		size_t enc_length = 0;
 
-		if (d0 == 0x3c && d1 == 0x3f && d2 == 0x78 && d3 == 0x6d && parse_declaration_encoding(data, size, &enc, &enc_length))
+		if (d0 == 0x3c && d1 == 0x3f && d2 == 0x78 && d3 == 0x6d && parse_declaration_encoding(data, size, enc, enc_length))
 		{
 			// iso-8859-1 (case-insensitive)
 			if (enc_length == 10
