@@ -1,10 +1,8 @@
 configurations {
-      	// This node contains custom pivot information.
-      	Toolset 
-      	{
-           	key: "PlatformToolset";
-           	choices: { v140, v120, v110, v100 };
-      	}
+	Toolset {
+		key: "PlatformToolset";
+		choices: { v140, v120, v110, v100 };
+	}
 }
 nuget {
 	nuspec {
