@@ -25,6 +25,11 @@ endif()
 include(GNUInstallDirs)
 mark_as_advanced(CLEAR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
 
+set(INSTALL_BIN_DIR "bin" CACHE PATH "Installation directory for executables")
+set(INSTALL_LIB_DIR "lib" CACHE PATH "Installation directory for libraries")
+set(INSTALL_INCLUDE_DIR "include" CACHE PATH "Installation directory for header files")
+set(INSTALL_PKGCONFIG_DIR "lib/pkgconfig" CACHE PATH "Installation directory for pkg-config file")
+
 set(HEADERS src/pugixml.hpp src/pugiconfig.hpp)
 set(SOURCES ${HEADERS} src/pugixml.cpp)
 
@@ -46,15 +51,34 @@ if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_C
 endif()
 
 set_target_properties(pugixml PROPERTIES VERSION 1.7 SOVERSION 1)
+get_target_property(PUGIXML_VERSION_STRING pugixml VERSION)
 
+# Install shared library into its own directory under LIBDIR
 install(TARGETS pugixml EXPORT pugixml-config
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/pugixml-${PUGIXML_VERSION_STRING}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/pugixml-${PUGIXML_VERSION_STRING}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+# Install header files into their own directory under INCLUDEDIR
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pugixml-${PUGIXML_VERSION_STRING})
 install(EXPORT pugixml-config DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
+
+if(BUILD_SHARED_LIBS)
+	###############################################################################
+	# prepare pkg-config file
+
+	configure_file(misc/cmake/pugixml.pc
+	"${PROJECT_BINARY_DIR}/pugixml.pc" @ONLY)
+
+	# copy the pugixml.pc file into lib/pkgconfig
+	if(INSTALL_PKGCONFIG_DIR)
+		install(
+			FILES ${PROJECT_BINARY_DIR}/pugixml.pc
+			DESTINATION ${INSTALL_PKGCONFIG_DIR})
+	endif()
+	###############################################################################
+endif()
 
 if(BUILD_TESTS)
 	file(GLOB TEST_SOURCES tests/*.cpp)
