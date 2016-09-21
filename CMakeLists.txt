@@ -4,8 +4,7 @@ cmake_minimum_required(VERSION 2.6)
 
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_PKGCONFIG "Build PKGCONFIG file" OFF)
-option(BUILD_USEOWNSUBDIR "Use a separate directory to install include and lib files" OFF)
+option(BUILD_PKGCONFIG "Build in PKGCONFIG mode" OFF)
 
 set(BUILD_DEFINES "" CACHE STRING "Build defines")
 
@@ -51,18 +50,7 @@ endif()
 set_target_properties(pugixml PROPERTIES VERSION 1.7 SOVERSION 1)
 get_target_property(PUGIXML_VERSION_STRING pugixml VERSION)
 
-set(INSTALL_BIN_DIR "bin" CACHE PATH "Installation directory for executables")
-if(BUILD_USEOWNSUBDIR)
-	set(INSTALL_LIB_DIR "lib/pugixml-${PUGIXML_VERSION_STRING}" CACHE PATH "Installation directory for libraries")
-	set(INSTALL_INCLUDE_DIR "include/pugixml-${PUGIXML_VERSION_STRING}" CACHE PATH "Installation directory for header files")
-else()
-	set(INSTALL_LIB_DIR "lib" CACHE PATH "Installation directory for libraries")
-	set(INSTALL_INCLUDE_DIR "include" CACHE PATH "Installation directory for header files")
-endif()
-
-set(INSTALL_PKGCONFIG_DIR "lib/pkgconfig" CACHE PATH "Installation directory for pkg-config file")
-
-if(BUILD_USEOWNSUBDIR)
+if(BUILD_PKGCONFIG)
 	# Install shared library into its own directory under LIBDIR
 	install(TARGETS pugixml EXPORT pugixml-config
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/pugixml-${PUGIXML_VERSION_STRING}
@@ -86,19 +74,9 @@ endif()
 
 install(EXPORT pugixml-config DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
 
-if(BUILD_SHARED_LIBS AND BUILD_PKGCONFIG)
-	###############################################################################
-	# prepare pkg-config file
-	configure_file(misc/cmake/pugixml.pc
-	"${PROJECT_BINARY_DIR}/pugixml.pc" @ONLY)
-
-	# copy the pugixml.pc file into lib/pkgconfig
-	if(INSTALL_PKGCONFIG_DIR)
-		install(
-			FILES ${PROJECT_BINARY_DIR}/pugixml.pc
-			DESTINATION ${INSTALL_PKGCONFIG_DIR})
-	endif()
-	###############################################################################
+if(BUILD_PKGCONFIG)
+	configure_file(scripts/pugixml.pc.in ${PROJECT_BINARY_DIR}/pugixml.pc @ONLY)
+	install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 endif()
 
 if(BUILD_TESTS)
