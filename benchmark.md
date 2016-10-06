@@ -12,8 +12,6 @@ The time measured is the time to parse the document from memory; for DOM parsers
 
 The memory consumption is the peak value of allocated memory during the parsing process; it is only displayed for DOM parsers, since SAX/pull parsers usually have more or less constant memory consumption.
 
-*Note: pugixml_compact refers to new compact mode implementation from compact branch that is not released yet. That branch also reduces the memory requirements of baseline configuration - expect it to make it into next version!*
-
 All tests were performed with Microsoft Visual Studio 2015, with all optimizations on and with all parsers operating in their default modes (i.e., no custom tuning has been performed). The timing results were recorded on a Intel Core i7 @ 2.67 GHz.
 
 Benchmarks are performed on nine different test files; all of them are in 1-20 Mb range and display a different range of markup/content ratios - e.g. there's a COLLADA file that has little markup, there's a book file that has almost no markup, there are some files where there is a lot of markup and almost no content, etc. The test files include a 10 Mb [XMark](http://www.xml-benchmark.org) test file.
