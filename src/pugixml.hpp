@@ -72,7 +72,7 @@
 #	endif
 #endif
 
-// If no API for functions is defined, assume default
+// If C++ is 2011 or higher, add 'override' qualifiers
 #ifndef PUGIXML_OVERRIDE
 #	if __cplusplus >= 201103
 #		define PUGIXML_OVERRIDE override
