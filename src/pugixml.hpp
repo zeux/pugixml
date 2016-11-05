@@ -1117,7 +1117,7 @@ namespace pugi
 		xpath_variable_set(const xpath_variable_set& rhs);
 		xpath_variable_set& operator=(const xpath_variable_set& rhs);
 
-	#if __cplusplus >= 201103
+	#if __cplusplus >= 201103 || _MSC_VER >= 1800
 		// Move semantics support
 		xpath_variable_set(xpath_variable_set&& rhs);
 		xpath_variable_set& operator=(xpath_variable_set&& rhs);
@@ -1161,7 +1161,7 @@ namespace pugi
 		// Destructor
 		~xpath_query();
 
-	#if __cplusplus >= 201103
+	#if __cplusplus >= 201103 || _MSC_VER >= 1800
 		// Move semantics support
 		xpath_query(xpath_query&& rhs);
 		xpath_query& operator=(xpath_query&& rhs);
@@ -1302,7 +1302,7 @@ namespace pugi
 		xpath_node_set(const xpath_node_set& ns);
 		xpath_node_set& operator=(const xpath_node_set& ns);
 
-	#if __cplusplus >= 201103
+	#if __cplusplus >= 201103 || _MSC_VER >= 1800
 		// Move semantics support
 		xpath_node_set(xpath_node_set&& rhs);
 		xpath_node_set& operator=(xpath_node_set&& rhs);
