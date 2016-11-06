@@ -76,11 +76,10 @@
 #ifndef PUGIXML_HAS_MOVE
 #	if __cplusplus >= 201103
 #		define PUGIXML_HAS_MOVE
-#	elif defined(_MSC_VER) && _MSC_VER >= 1800
+#	elif defined(_MSC_VER) && _MSC_VER >= 1600
 #		define PUGIXML_HAS_MOVE
 #	endif
 #endif
-
 
 // If C++ is 2011 or higher, add 'override' qualifiers
 #ifndef PUGIXML_OVERRIDE
