@@ -474,7 +474,7 @@ TEST_XML(xpath_variables_copy_out_of_memory, "<node1 /><node2 />")
 	CHECK(set2.get(STR("d"))->get_node_set().size() == 2);
 }
 
-#if __cplusplus >= 201103
+#ifdef PUGIXML_HAS_MOVE
 TEST_XML(xpath_variables_move, "<node />")
 {
 	xpath_variable_set set;

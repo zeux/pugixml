@@ -72,6 +72,16 @@
 #	endif
 #endif
 
+// If the platform is known to have move semantics support, compile move ctor/operator implementation
+#ifndef PUGIXML_HAS_MOVE
+#	if __cplusplus >= 201103
+#		define PUGIXML_HAS_MOVE
+#	elif defined(_MSC_VER) && _MSC_VER >= 1800
+#		define PUGIXML_HAS_MOVE
+#	endif
+#endif
+
+
 // If C++ is 2011 or higher, add 'override' qualifiers
 #ifndef PUGIXML_OVERRIDE
 #	if __cplusplus >= 201103
@@ -1117,7 +1127,7 @@ namespace pugi
 		xpath_variable_set(const xpath_variable_set& rhs);
 		xpath_variable_set& operator=(const xpath_variable_set& rhs);
 
-	#if __cplusplus >= 201103 || (defined(_MSC_VER) && _MSC_VER >= 1800)
+	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
 		xpath_variable_set(xpath_variable_set&& rhs);
 		xpath_variable_set& operator=(xpath_variable_set&& rhs);
@@ -1161,7 +1171,7 @@ namespace pugi
 		// Destructor
 		~xpath_query();
 
-	#if __cplusplus >= 201103 || (defined(_MSC_VER) && _MSC_VER >= 1800)
+	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
 		xpath_query(xpath_query&& rhs);
 		xpath_query& operator=(xpath_query&& rhs);
@@ -1302,7 +1312,7 @@ namespace pugi
 		xpath_node_set(const xpath_node_set& ns);
 		xpath_node_set& operator=(const xpath_node_set& ns);
 
-	#if __cplusplus >= 201103 || (defined(_MSC_VER) && _MSC_VER >= 1800)
+	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
 		xpath_node_set(xpath_node_set&& rhs);
 		xpath_node_set& operator=(xpath_node_set&& rhs);

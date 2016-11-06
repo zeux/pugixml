@@ -11923,7 +11923,7 @@ namespace pugi
 		}
 	}
 
-#if __cplusplus >= 201103 || (defined(_MSC_VER) && _MSC_VER >= 1800)
+#ifdef PUGIXML_HAS_MOVE
 	PUGI__FN void xpath_node_set::_move(xpath_node_set& rhs)
 	{
 		_type = rhs._type;
@@ -11966,7 +11966,7 @@ namespace pugi
 		return *this;
 	}
 
-#if __cplusplus >= 201103 || (defined(_MSC_VER) && _MSC_VER >= 1800)
+#ifdef PUGIXML_HAS_MOVE
 	PUGI__FN xpath_node_set::xpath_node_set(xpath_node_set&& rhs): _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
 		_move(rhs);
@@ -12166,7 +12166,7 @@ namespace pugi
 		return *this;
 	}
 
-#if __cplusplus >= 201103 || (defined(_MSC_VER) && _MSC_VER >= 1800)
+#ifdef PUGIXML_HAS_MOVE
 	PUGI__FN xpath_variable_set::xpath_variable_set(xpath_variable_set&& rhs)
 	{
 		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
@@ -12360,7 +12360,7 @@ namespace pugi
 			impl::xpath_query_impl::destroy(static_cast<impl::xpath_query_impl*>(_impl));
 	}
 
-#if __cplusplus >= 201103 || (defined(_MSC_VER) && _MSC_VER >= 1800)
+#ifdef PUGIXML_HAS_MOVE
 	PUGI__FN xpath_query::xpath_query(xpath_query&& rhs)
 	{
 		_impl = rhs._impl;

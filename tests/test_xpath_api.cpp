@@ -418,7 +418,7 @@ TEST(xpath_api_empty)
 	CHECK(!q.evaluate_boolean(c));
 }
 
-#if __cplusplus >= 201103
+#ifdef PUGIXML_HAS_MOVE
 TEST_XML(xpath_api_nodeset_move_ctor, "<node><foo/><foo/><bar/></node>")
 {
 	xpath_node_set set = doc.select_nodes(STR("node/bar/preceding::*"));
