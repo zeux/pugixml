@@ -631,8 +631,8 @@ TEST(xpath_api_query_vector)
 
 	double result = 0;
 
-	for (auto& q: qv)
-		result += q.evaluate_number(xml_node());
+	for (size_t i = 0; i < qv.size(); ++i)
+		result += qv[i].evaluate_number(xml_node());
 
 	CHECK(result == 45);
 }
