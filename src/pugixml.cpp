@@ -2567,7 +2567,7 @@ PUGI__NS_BEGIN
 	#define PUGI__ENDSWITH(c, e)        ((c) == (e) || ((c) == 0 && endch == (e)))
 	#define PUGI__SKIPWS()              { while (PUGI__IS_CHARTYPE(*s, ct_space)) ++s; }
 	#define PUGI__OPTSET(OPT)           ( optmsk & (OPT) )
-	#define PUGI__PUSHNODE(TYPE)        { cursor = append_new_node(cursor, alloc, TYPE); if (!cursor) PUGI__THROW_ERROR(status_out_of_memory, s); }
+	#define PUGI__PUSHNODE(TYPE)        { cursor = append_new_node(cursor, *alloc, TYPE); if (!cursor) PUGI__THROW_ERROR(status_out_of_memory, s); }
 	#define PUGI__POPNODE()             { cursor = cursor->parent; }
 	#define PUGI__SCANFOR(X)            { while (*s != 0 && !(X)) ++s; }
 	#define PUGI__SCANWHILE(X)          { while (X) ++s; }
@@ -2891,18 +2891,12 @@ PUGI__NS_BEGIN
 
 	struct xml_parser
 	{
-		xml_allocator alloc;
-		xml_allocator* alloc_state;
+		xml_allocator* alloc;
 		char_t* error_offset;
 		xml_parse_status error_status;
 
-		xml_parser(xml_allocator* alloc_): alloc(*alloc_), alloc_state(alloc_), error_offset(0), error_status(status_ok)
+		xml_parser(xml_allocator* alloc_): alloc(alloc_), error_offset(0), error_status(status_ok)
 		{
-		}
-
-		~xml_parser()
-		{
-			*alloc_state = alloc;
 		}
 
 		// DOCTYPE consists of nested sections of the following possible types:
@@ -3263,7 +3257,7 @@ PUGI__NS_BEGIN
 
 								if (PUGI__IS_CHARTYPE(*s, ct_start_symbol)) // <... #...
 								{
-									xml_attribute_struct* a = append_new_attribute(cursor, alloc); // Make space for this attribute.
+									xml_attribute_struct* a = append_new_attribute(cursor, *alloc); // Make space for this attribute.
 									if (!a) PUGI__THROW_ERROR(status_out_of_memory, s);
 
 									a->name = s; // Save the offset.
