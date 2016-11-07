@@ -6812,18 +6812,18 @@ namespace pugi
 
 	PUGI__FN xml_document::xml_document(): _buffer(0)
 	{
-		create();
+		_create();
 	}
 
 	PUGI__FN xml_document::~xml_document()
 	{
-		destroy();
+		_destroy();
 	}
 
 	PUGI__FN void xml_document::reset()
 	{
-		destroy();
-		create();
+		_destroy();
+		_create();
 	}
 
 	PUGI__FN void xml_document::reset(const xml_document& proto)
@@ -6834,7 +6834,7 @@ namespace pugi
 			append_copy(cur);
 	}
 
-	PUGI__FN void xml_document::create()
+	PUGI__FN void xml_document::_create()
 	{
 		assert(!_root);
 
@@ -6871,7 +6871,7 @@ namespace pugi
 		assert(reinterpret_cast<char*>(_root) + sizeof(impl::xml_document_struct) <= _memory + sizeof(_memory));
 	}
 
-	PUGI__FN void xml_document::destroy()
+	PUGI__FN void xml_document::_destroy()
 	{
 		assert(_root);
 
