@@ -10777,9 +10777,14 @@ PUGI__NS_BEGIN
 
 		void optimize(xpath_allocator* alloc)
 		{
-			if (_left) _left->optimize(alloc);
-			if (_right) _right->optimize(alloc);
-			if (_next) _next->optimize(alloc);
+			if (_left)
+				_left->optimize(alloc);
+
+			if (_right)
+				_right->optimize(alloc);
+
+			if (_next)
+				_next->optimize(alloc);
 
 			optimize_self(alloc);
 		}
@@ -10964,7 +10969,8 @@ PUGI__NS_BEGIN
 		{
 			assert(argc <= 1);
 
-			if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+			if (argc == 1 && args[0]->rettype() != xpath_type_node_set)
+				throw_error("Function has to be applied to node set");
 
 			return new (alloc_node()) xpath_ast_node(argc == 0 ? type0 : type1, xpath_type_string, args[0]);
 		}
@@ -10982,7 +10988,9 @@ PUGI__NS_BEGIN
 			case 'c':
 				if (name == PUGIXML_TEXT("count") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					if (args[0]->rettype() != xpath_type_node_set)
+						throw_error("Function has to be applied to node set");
+
 					return new (alloc_node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
@@ -11303,7 +11311,8 @@ PUGI__NS_BEGIN
 
 				xpath_ast_node* expr = parse_expression();
 
-				if (n->rettype() != xpath_type_node_set) throw_error("Predicate has to be applied to node set");
+				if (n->rettype() != xpath_type_node_set)
+					throw_error("Predicate has to be applied to node set");
 
 				n = new (alloc_node()) xpath_ast_node(ast_filter, n, expr, predicate_default);
 
@@ -11362,11 +11371,13 @@ PUGI__NS_BEGIN
 				if (_lexer.current() == lex_double_colon)
 				{
 					// parse axis name
-					if (axis_specified) throw_error("Two axis specifiers in one step");
+					if (axis_specified)
+						throw_error("Two axis specifiers in one step");
 
 					axis = parse_axis_name(nt_name, axis_specified);
 
-					if (!axis_specified) throw_error("Unknown axis");
+					if (!axis_specified)
+						throw_error("Unknown axis");
 
 					// read actual node test
 					_lexer.next();
@@ -11398,7 +11409,8 @@ PUGI__NS_BEGIN
 
 							nt_type = parse_node_test_type(nt_name);
 
-							if (nt_type == nodetest_none) throw_error("Unrecognized node type");
+							if (nt_type == nodetest_none)
+								throw_error("Unrecognized node type");
 
 							nt_name = xpath_lexer_string();
 						}
@@ -11416,8 +11428,9 @@ PUGI__NS_BEGIN
 							_lexer.next();
 						}
 						else
+						{
 							throw_error("Unmatched brace near node type test");
-
+						}
 					}
 					// QName or NCName:*
 					else
@@ -11428,7 +11441,10 @@ PUGI__NS_BEGIN
 
 							nt_type = nodetest_all_in_namespace;
 						}
-						else nt_type = nodetest_name;
+						else
+						{
+							nt_type = nodetest_name;
+						}
 					}
 				}
 			}
@@ -11437,9 +11453,13 @@ PUGI__NS_BEGIN
 				nt_type = nodetest_all;
 				_lexer.next();
 			}
-			else throw_error("Unrecognized node test");
+			else
+			{
+				throw_error("Unrecognized node test");
+			}
 
-			xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step, set, axis, nt_type, alloc_string(nt_name));
+			const char_t* nt_name_copy = alloc_string(nt_name);
+			xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step, set, axis, nt_type, nt_name_copy);
 
 			xpath_ast_node* last = 0;
 
@@ -11544,7 +11564,8 @@ PUGI__NS_BEGIN
 					if (*state != '(') return parse_location_path();
 
 					// This looks like a function call; however this still can be a node-test. Check it.
-					if (parse_node_test_type(_lexer.contents()) != nodetest_none) return parse_location_path();
+					if (parse_node_test_type(_lexer.contents()) != nodetest_none)
+						return parse_location_path();
 				}
 
 				xpath_ast_node* n = parse_filter_expression();
@@ -11556,7 +11577,8 @@ PUGI__NS_BEGIN
 
 					if (l == lex_double_slash)
 					{
-						if (n->rettype() != xpath_type_node_set) throw_error("Step has to be applied to node set");
+						if (n->rettype() != xpath_type_node_set)
+							throw_error("Step has to be applied to node set");
 
 						n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 					}
@@ -11577,7 +11599,9 @@ PUGI__NS_BEGIN
 				return new (alloc_node()) xpath_ast_node(ast_op_negate, xpath_type_number, expr);
 			}
 			else
+			{
 				return parse_location_path();
+			}
 		}
 
 		struct binary_op_t
@@ -11707,11 +11731,9 @@ PUGI__NS_BEGIN
 		{
 			xpath_ast_node* result = parse_expression();
 
+			// check if there are unparsed tokens left
 			if (_lexer.current() != lex_eof)
-			{
-				// there are still unparsed tokens left, error
 				throw_error("Incorrect query");
-			}
 
 			return result;
 		}
