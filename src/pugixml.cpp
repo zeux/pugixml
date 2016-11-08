@@ -1119,9 +1119,6 @@ PUGI__NS_BEGIN
 	{
 		xml_document_struct(xml_memory_page* page): xml_node_struct(page, node_document), xml_allocator(page), buffer(0), extra_buffers(0)
 		{
-		#ifdef PUGIXML_COMPACT
-			_hash = &hash;
-		#endif
 		}
 
 		const char_t* buffer;
@@ -6860,6 +6857,11 @@ namespace pugi
 
 		// setup sentinel page
 		page->allocator = static_cast<impl::xml_document_struct*>(_root);
+
+		// setup hash table pointer in allocator
+	#ifdef PUGIXML_COMPACT
+		page->allocator->_hash = &static_cast<impl::xml_document_struct*>(_root)->hash;
+	#endif
 
 		// verify the document allocation
 		assert(reinterpret_cast<char*>(_root) + sizeof(impl::xml_document_struct) <= _memory + sizeof(_memory));
