@@ -4078,12 +4078,23 @@ PUGI__NS_BEGIN
 		{
 			if (!node->first_child)
 			{
-				if ((flags & format_raw) == 0)
-					writer.write(' ');
+				if (flags & format_no_empty_element_tags)
+				{
+					writer.write('>', '<', '/');
+					writer.write_string(name);
+					writer.write('>');
 
-				writer.write('/', '>');
+					return false;
+				}
+				else
+				{
+					if ((flags & format_raw) == 0)
+						writer.write(' ');
 
-				return false;
+					writer.write('/', '>');
+
+					return false;
+				}
 			}
 			else
 			{
