@@ -2125,6 +2125,27 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.8]]
+=== v1.8 ^2016-??-??^
+
+Maintenance release. Changes:
+
+* Specification changes:
+	. When printing empty elements, a space is no longer added before / in format_raw mode
+
+* New features:
+	. Added parse_embed_pcdata parsing mode in which PCDATA value is stored in the element node if possible (significantly reducing memory consumption for some documents)
+	. Added auto-detection support for Latin-1 (ISO-8859-1) encoding during parsing
+
+* Performance improvements:
+	. Minor memory allocation improvements (yielding up to 1% memory savings in some cases)
+
+* Compatibility improvements:
+	. Fixed compilation issues for Borland C++ 5.4
+	. Fixed compilation issues for some distributions of MinGW 3.8
+	. Fixed various Clang/GCC warnings
+	. Enabled move semantics support for XPath objects for MSVC 2010 and above
+
 [[v1.7]]
 === v1.7 ^2015-10-19^
 
