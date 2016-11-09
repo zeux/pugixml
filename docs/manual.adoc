@@ -1702,6 +1702,8 @@ These flags control the resulting tree contents:
 
 * [[format_no_escapes]]`format_no_escapes` disables output escaping for attribute values and PCDATA contents. If this flag is off, special symbols (`"`, `&`, `<`, `>`) and all non-printable characters (those with codepoint values less than 32) are converted to XML escape sequences (i.e. `&amp;amp;`) during output. If this flag is on, no text processing is performed; therefore, output XML can be malformed if output contents contains invalid symbols (i.e. having a stray `<` in the PCDATA will make the output malformed). This flag is *off* by default.
 
+* [[format_no_empty_element_tags]]`format_no_empty_element_tags` determines if start/end tags should be output instead of empty element tags for empty elements (that is, elements with no children). This flag is *off* by default.
+
 These flags control the additional output information:
 
 * [[format_no_declaration]]`format_no_declaration` disables default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.
@@ -2136,6 +2138,7 @@ Maintenance release. Changes:
 * New features:
 	. Added parse_embed_pcdata parsing mode in which PCDATA value is stored in the element node if possible (significantly reducing memory consumption for some documents)
 	. Added auto-detection support for Latin-1 (ISO-8859-1) encoding during parsing
+	. Added format_no_empty_element_tags formatting flag that outputs start/end tags instead of empty element tags for empty elements
 
 * Performance improvements:
 	. Minor memory allocation improvements (yielding up to 1% memory savings in some cases)
@@ -2623,6 +2626,7 @@ const unsigned int +++<a href="#format_default">format_default</a>+++
 const unsigned int +++<a href="#format_indent">format_indent</a>+++
 const unsigned int +++<a href="#format_indent_attributes">format_indent_attributes</a>+++
 const unsigned int +++<a href="#format_no_declaration">format_no_declaration</a>+++
+const unsigned int +++<a href="#format_no_empty_element_tags">format_no_empty_element_tags</a>+++
 const unsigned int +++<a href="#format_no_escapes">format_no_escapes</a>+++
 const unsigned int +++<a href="#format_raw">format_raw</a>+++
 const unsigned int +++<a href="#format_save_file_text">format_save_file_text</a>+++
