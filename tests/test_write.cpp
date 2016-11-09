@@ -601,6 +601,13 @@ TEST_XML_FLAGS(write_mixed, "<node><child1/><child2>pre<![CDATA[data]]>mid<!--co
 	CHECK_NODE_EX(doc, STR("<node>\n\t<child1 />\n\t<child2>pre<![CDATA[data]]>mid<!--comment-->\n\t\t<test />post<?pi value?>fin</child2>\n\t<child3 />\n</node>\n"), STR("\t"), format_indent);
 }
 
+TEST_XML(write_no_empty_element_tags, "<node><child1/><child2>text</child2><child3></child3></node>")
+{
+	CHECK_NODE(doc, STR("<node><child1/><child2>text</child2><child3/></node>"));
+	CHECK_NODE_EX(doc, STR("<node><child1></child1><child2>text</child2><child3></child3></node>"), STR("\t"), format_raw | format_no_empty_element_tags);
+	CHECK_NODE_EX(doc, STR("<node>\n\t<child1></child1>\n\t<child2>text</child2>\n\t<child3></child3>\n</node>\n"), STR("\t"), format_indent | format_no_empty_element_tags);
+}
+
 #ifndef PUGIXML_NO_EXCEPTIONS
 struct throwing_writer: pugi::xml_writer
 {
