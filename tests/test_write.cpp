@@ -608,6 +608,31 @@ TEST_XML(write_no_empty_element_tags, "<node><child1/><child2>text</child2><chil
 	CHECK_NODE_EX(doc, STR("<node>\n\t<child1></child1>\n\t<child2>text</child2>\n\t<child3></child3>\n</node>\n"), STR("\t"), format_indent | format_no_empty_element_tags);
 }
 
+TEST_XML_FLAGS(write_roundtrip, "<node><child1 attr1='value1' attr2='value2'/><child2 attr='value'>pre<![CDATA[data]]>mid&lt;text&amp;escape<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>", parse_full)
+{
+	const unsigned int flagset[] = { format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags };
+	size_t flagcount = sizeof(flagset) / sizeof(flagset[0]);
+
+	for (size_t i = 0; i < size_t(1 << flagcount); ++i)
+	{
+		unsigned int flags = 0;
+
+		for (size_t j = 0; j < flagcount; ++j)
+			if (i & (1 << j))
+				flags |= flagset[j];
+
+		std::string contents = write_narrow(doc, flags, encoding_utf8);
+
+		pugi::xml_document verify;
+		CHECK(verify.load_buffer(contents.c_str(), contents.size(), parse_full));
+		CHECK(test_write_narrow(verify, flags, encoding_utf8, contents.c_str(), contents.size()));
+
+		pugi::xml_document verifyws;
+		CHECK(verifyws.load_buffer(contents.c_str(), contents.size(), parse_full | parse_ws_pcdata));
+		CHECK(test_write_narrow(verifyws, flags, encoding_utf8, contents.c_str(), contents.size()));
+	}
+}
+
 #ifndef PUGIXML_NO_EXCEPTIONS
 struct throwing_writer: pugi::xml_writer
 {
