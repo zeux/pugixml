@@ -613,12 +613,12 @@ TEST_XML_FLAGS(write_roundtrip, "<node><child1 attr1='value1' attr2='value2'/><c
 	const unsigned int flagset[] = { format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags };
 	size_t flagcount = sizeof(flagset) / sizeof(flagset[0]);
 
-	for (size_t i = 0; i < size_t(1 << flagcount); ++i)
+	for (size_t i = 0; i < (size_t(1) << flagcount); ++i)
 	{
 		unsigned int flags = 0;
 
 		for (size_t j = 0; j < flagcount; ++j)
-			if (i & (1 << j))
+			if (i & (size_t(1) << j))
 				flags |= flagset[j];
 
 		std::string contents = write_narrow(doc, flags, encoding_utf8);
