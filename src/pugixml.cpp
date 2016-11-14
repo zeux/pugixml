@@ -3346,18 +3346,20 @@ PUGI__NS_BEGIN
 					{
 						++s;
 
+						mark = s;
+
 						char_t* name = cursor->name;
-						if (!name) PUGI__THROW_ERROR(status_end_element_mismatch, s);
+						if (!name) PUGI__THROW_ERROR(status_end_element_mismatch, mark);
 
 						while (PUGI__IS_CHARTYPE(*s, ct_symbol))
 						{
-							if (*s++ != *name++) PUGI__THROW_ERROR(status_end_element_mismatch, s);
+							if (*s++ != *name++) PUGI__THROW_ERROR(status_end_element_mismatch, mark);
 						}
 
 						if (*name)
 						{
 							if (*s == 0 && name[0] == endch && name[1] == 0) PUGI__THROW_ERROR(status_bad_end_element, s);
-							else PUGI__THROW_ERROR(status_end_element_mismatch, s);
+							else PUGI__THROW_ERROR(status_end_element_mismatch, mark);
 						}
 
 						PUGI__POPNODE(); // Pop.

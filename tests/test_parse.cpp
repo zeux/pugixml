@@ -1005,8 +1005,8 @@ TEST(parse_error_offset)
 	CHECK_OFFSET("<n></n $>", parse_default, status_bad_end_element, 7);
 	CHECK_OFFSET("<n></n", parse_default, status_bad_end_element, 5);
 
-	CHECK_OFFSET("<no></na>", parse_default, status_end_element_mismatch, 8);
-	CHECK_OFFSET("<no></nod>", parse_default, status_end_element_mismatch, 9);
+	CHECK_OFFSET("<no></na>", parse_default, status_end_element_mismatch, 6);
+	CHECK_OFFSET("<no></nod>", parse_default, status_end_element_mismatch, 6);
 }
 
 TEST(parse_result_default)
