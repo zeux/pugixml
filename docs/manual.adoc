@@ -2128,7 +2128,7 @@ Because of the differences in document object models, performance considerations
 :!numbered:
 
 [[v1.8]]
-=== v1.8 ^2016-??-??^
+=== v1.8 ^2016-11-24^
 
 Maintenance release. Changes:
 
