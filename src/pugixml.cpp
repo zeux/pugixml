@@ -424,7 +424,8 @@ PUGI__NS_BEGIN
 	#define PUGI__GETPAGE_IMPL(header) (header).get_page()
 #else
 	#define PUGI__GETHEADER_IMPL(object, page, flags) (((reinterpret_cast<char*>(object) - reinterpret_cast<char*>(page)) << 8) | (flags))
-	#define PUGI__GETPAGE_IMPL(header) const_cast<impl::xml_memory_page*>(reinterpret_cast<const impl::xml_memory_page*>(reinterpret_cast<const char*>(&header) - (header >> 8)))
+	// this macro casts pointers through void* to avoid 'cast increases required alignment of target type' warnings
+	#define PUGI__GETPAGE_IMPL(header) static_cast<impl::xml_memory_page*>(const_cast<void*>(static_cast<const void*>(reinterpret_cast<const char*>(&header) - (header >> 8))))
 #endif
 
 	#define PUGI__GETPAGE(n) PUGI__GETPAGE_IMPL((n)->header)
