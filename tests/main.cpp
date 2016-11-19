@@ -190,13 +190,14 @@ int main(int, char** argv)
 		total++;
 		passed += run_test(test, test->_name, custom_allocate);
 
-	#ifndef PUGIXML_NO_EXCEPTIONS
 		if (g_memory_fail_triggered)
 		{
+			// run tests that trigger memory failures twice - with an allocator that returns NULL and with an allocator that throws
+		#ifndef PUGIXML_NO_EXCEPTIONS
 			total++;
 			passed += run_test(test, (test->_name + std::string(" (throw)")).c_str(), custom_allocate_throw);
+		#endif
 		}
-	#endif
 	}
 
 	unsigned int failed = total - passed;
