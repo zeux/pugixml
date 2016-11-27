@@ -1,6 +1,7 @@
 import os.path
 import sys
 import tarfile
+import time
 import zipfile
 import StringIO
 
@@ -29,6 +30,7 @@ def write_tar(target, arcprefix, sources, compression):
 			path = os.path.join(arcprefix, source)
 			info = tarfile.TarInfo(path)
 			info.size = len(data)
+			info.mtime = time.time()
 			archive.addfile(info, StringIO.StringIO(data))
 
 if len(sys.argv) < 4:
