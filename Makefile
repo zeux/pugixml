@@ -82,7 +82,7 @@ docs: docs/quickstart.html docs/manual.html
 
 build/pugixml-%: .FORCE | $(RELEASE)
 	@mkdir -p $(BUILD)
-	python tests/archive.py $@ pugixml-$(VERSION) $|
+	python scripts/archive.py $@ pugixml-$(VERSION) $|
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
