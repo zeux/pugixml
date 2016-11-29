@@ -12,7 +12,7 @@ SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
 
 VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
-RELEASE=$(shell git ls-files src docs/*.html docs/*.css docs/samples docs/images scripts contrib CMakeLists.txt readme.txt)
+RELEASE=$(filter-out scripts/archive.py docs/%.adoc,$(shell git ls-files contrib docs scripts src CMakeLists.txt readme.txt))
 
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-align -Wcast-qual -Wold-style-cast
 LDFLAGS=
@@ -82,7 +82,7 @@ docs: docs/quickstart.html docs/manual.html
 
 build/pugixml-%: .FORCE | $(RELEASE)
 	@mkdir -p $(BUILD)
-	python scripts/archive.py $@ pugixml-$(VERSION) $|
+	TIMESTAMP=`git show v$(VERSION) -s --format=%ct` && python scripts/archive.py $@ pugixml-$(VERSION) $$TIMESTAMP $|
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
