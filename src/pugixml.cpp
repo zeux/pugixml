@@ -4521,7 +4521,14 @@ PUGI__NS_BEGIN
 		}
 
 		if (negative)
+		{
+			// Workaround for crayc++ CC-3059: Expected no overflow in routine.
+		#ifdef _CRAYC
+			return (overflow || result > minneg) ? ~minneg + 1 : ~result + 1;
+		#else
 			return (overflow || result > minneg) ? 0 - minneg : 0 - result;
+		#endif
+		}
 		else
 			return (overflow || result > maxpos) ? maxpos : result;
 	}
