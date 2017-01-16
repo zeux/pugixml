@@ -1,0 +1,1320 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="chrome=1">
+	<title>pugixml.org - Benchmark</title>
+</head>
+<body>
+
+<div id="chart_speed_x86" style="width: 600px; height: 500px; padding: 10px;">Parsing time (x86) relative to pugixml, lower is better</div>
+<div id="chart_memory_x86" style="width: 600px; height: 350px; padding: 10px;">Parsing memory (x86) relative to pugixml, lower is better</div>
+<div id="chart_speed_x64" style="width: 600px; height: 500px; padding: 10px;">Parsing time (x64) relative to pugixml, lower is better</div>
+<div id="chart_memory_x64" style="width: 600px; height: 350px; padding: 10px;">Parsing memory (x64) relative to pugixml, lower is better</div>
+
+<script type="text/javascript">
+function benchmark(data)  
+{ 
+// data/house.dae
+// asmxml: 0.62 ns/byte, 1535 Mb/s, 7559 Kb, 2118 allocations
+data("speed", "x86", "asmxml", "data/house.dae", 0.621419);
+data("memory", "x86", "asmxml", "data/house.dae", 7.38267);
+// cmarkup: 2.95 ns/byte, 323 Mb/s, 15666 Kb, 17 allocations
+data("speed", "x86", "cmarkup", "data/house.dae", 2.95205);
+data("memory", "x86", "cmarkup", "data/house.dae", 15.2997);
+// expat: 1.30 ns/byte, 734 Mb/s, 8203 Kb, 164 allocations
+data("speed", "x86", "expat", "data/house.dae", 1.29859);
+// hexml: 0.26 ns/byte, 3651 Mb/s, 6835 Kb, 6 allocations
+data("speed", "x86", "hexml", "data/house.dae", 0.261207);
+data("memory", "x86", "hexml", "data/house.dae", 6.67556);
+// irrxml: 6.01 ns/byte, 159 Mb/s, 6670 Kb, 170531 allocations
+data("speed", "x86", "irrxml", "data/house.dae", 6.01385);
+// ixmlparser_dom: 4.74 ns/byte, 201 Mb/s, 8193 Kb, 14 allocations
+data("speed", "x86", "ixmlparser_dom", "data/house.dae", 4.74248);
+data("memory", "x86", "ixmlparser_dom", "data/house.dae", 8.00116);
+// ixmlparser_pull: 3.93 ns/byte, 243 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/house.dae", 3.9284);
+// libxml_dom: 2.02 ns/byte, 471 Mb/s, 16446 Kb, 57098 allocations
+data("speed", "x86", "libxml_dom", "data/house.dae", 2.02299);
+data("memory", "x86", "libxml_dom", "data/house.dae", 16.0611);
+// libxml_sax: 1.19 ns/byte, 801 Mb/s, 8205 Kb, 6964 allocations
+data("speed", "x86", "libxml_sax", "data/house.dae", 1.19095);
+// msxml_dom: 5.54 ns/byte, 172 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/house.dae", 5.54071);
+data("memory", "x86", "msxml_dom", "data/house.dae", 12.5019);
+// msxml_sax: 8.05 ns/byte, 118 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/house.dae", 8.04792);
+// pugixml: 0.46 ns/byte, 2085 Mb/s, 6651 Kb, 13 allocations
+data("speed", "x86", "pugixml", "data/house.dae", 0.45734);
+data("memory", "x86", "pugixml", "data/house.dae", 6.4953);
+// pugixml_compact: 0.47 ns/byte, 2022 Mb/s, 6466 Kb, 13 allocations
+data("speed", "x86", "pugixml_compact", "data/house.dae", 0.471548);
+data("memory", "x86", "pugixml_compact", "data/house.dae", 6.31496);
+// pugixml_simd: 0.24 ns/byte, 3997 Mb/s, 6650 Kb, 13 allocations
+data("speed", "x86", "pugixml_simd", "data/house.dae", 0.238587);
+data("memory", "x86", "pugixml_simd", "data/house.dae", 6.49434);
+// pugxml: 2.71 ns/byte, 352 Mb/s, 7005 Kb, 37428 allocations
+data("speed", "x86", "pugxml", "data/house.dae", 2.71102);
+data("memory", "x86", "pugxml", "data/house.dae", 6.84106);
+// qtxml_dom: 16.46 ns/byte, 58 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/house.dae", 16.4582);
+data("memory", "x86", "qtxml_dom", "data/house.dae", 19.8315);
+// qtxml_sax: 14.22 ns/byte, 67 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/house.dae", 14.2239);
+// rapidxml: 0.51 ns/byte, 1869 Mb/s, 6778 Kb, 9 allocations
+data("speed", "x86", "rapidxml", "data/house.dae", 0.510309);
+data("memory", "x86", "rapidxml", "data/house.dae", 6.61939);
+// tinyxml: 21.75 ns/byte, 44 Mb/s, 10188 Kb, 66621 allocations
+data("speed", "x86", "tinyxml", "data/house.dae", 21.7523);
+data("memory", "x86", "tinyxml", "data/house.dae", 9.94964);
+// tinyxml2: 1.78 ns/byte, 535 Mb/s, 6879 Kb, 162 allocations
+data("speed", "x86", "tinyxml2", "data/house.dae", 1.78293);
+data("memory", "x86", "tinyxml2", "data/house.dae", 6.71816);
+// vtdxml: 3.76 ns/byte, 253 Mb/s, 6539 Kb, 24 allocations
+data("speed", "x86", "vtdxml", "data/house.dae", 3.76477);
+data("memory", "x86", "vtdxml", "data/house.dae", 6.38584);
+// xerces_dom: 2.54 ns/byte, 376 Mb/s, 15260 Kb, 5520 allocations
+data("speed", "x86", "xerces_dom", "data/house.dae", 2.53654);
+data("memory", "x86", "xerces_dom", "data/house.dae", 14.9027);
+// xerces_sax: 1.87 ns/byte, 511 Mb/s, 847 Kb, 739 allocations
+data("speed", "x86", "xerces_sax", "data/house.dae", 1.86727);
+// xmllite: 1.79 ns/byte, 533 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/house.dae", 1.78952);
+// xmlparser: 10.27 ns/byte, 93 Mb/s, 6788 Kb, 48447 allocations
+data("speed", "x86", "xmlparser", "data/house.dae", 10.271);
+data("memory", "x86", "xmlparser", "data/house.dae", 6.62947);
+
+// data/English.sml
+// asmxml: 0.69 ns/byte, 1380 Mb/s, 2703 Kb, 39 allocations
+data("speed", "x86", "asmxml", "data/English.sml", 0.690849);
+data("memory", "x86", "asmxml", "data/English.sml", 2.64017);
+// cmarkup: 3.09 ns/byte, 308 Mb/s, 3430 Kb, 7 allocations
+data("speed", "x86", "cmarkup", "data/English.sml", 3.09259);
+data("memory", "x86", "cmarkup", "data/English.sml", 3.34965);
+// expat: 1.41 ns/byte, 678 Mb/s, 2053 Kb, 22 allocations
+data("speed", "x86", "expat", "data/English.sml", 1.4074);
+// hexml: 0.77 ns/byte, 1238 Mb/s, 4357 Kb, 6 allocations
+data("speed", "x86", "hexml", "data/English.sml", 0.770033);
+data("memory", "x86", "hexml", "data/English.sml", 4.25583);
+// irrxml: 7.73 ns/byte, 123 Mb/s, 1379 Kb, 64680 allocations
+data("speed", "x86", "irrxml", "data/English.sml", 7.72785);
+// ixmlparser_dom: 6.34 ns/byte, 151 Mb/s, 3197 Kb, 23 allocations
+data("speed", "x86", "ixmlparser_dom", "data/English.sml", 6.33525);
+data("memory", "x86", "ixmlparser_dom", "data/English.sml", 3.12243);
+// ixmlparser_pull: 4.90 ns/byte, 194 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/English.sml", 4.90422);
+// libxml_dom: 4.60 ns/byte, 207 Mb/s, 4964 Kb, 37253 allocations
+data("speed", "x86", "libxml_dom", "data/English.sml", 4.60151);
+data("memory", "x86", "libxml_dom", "data/English.sml", 4.84845);
+// libxml_sax: 2.23 ns/byte, 427 Mb/s, 2059 Kb, 20 allocations
+data("speed", "x86", "libxml_sax", "data/English.sml", 2.23117);
+// msxml_dom: 8.84 ns/byte, 108 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/English.sml", 8.83799);
+data("memory", "x86", "msxml_dom", "data/English.sml", 2.78397);
+// msxml_sax: 11.60 ns/byte, 82 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/English.sml", 11.6035);
+// pugixml: 0.60 ns/byte, 1593 Mb/s, 1949 Kb, 19 allocations
+data("speed", "x86", "pugixml", "data/English.sml", 0.598684);
+data("memory", "x86", "pugixml", "data/English.sml", 1.90366);
+// pugixml_compact: 0.93 ns/byte, 1024 Mb/s, 1628 Kb, 16 allocations
+data("speed", "x86", "pugixml_compact", "data/English.sml", 0.930998);
+data("memory", "x86", "pugixml_compact", "data/English.sml", 1.59004);
+// pugixml_simd: 0.38 ns/byte, 2495 Mb/s, 1947 Kb, 19 allocations
+data("speed", "x86", "pugixml_simd", "data/English.sml", 0.38216);
+data("memory", "x86", "pugixml_simd", "data/English.sml", 1.90221);
+// pugxml: 7.05 ns/byte, 135 Mb/s, 2650 Kb, 47830 allocations
+data("speed", "x86", "pugxml", "data/English.sml", 7.0531);
+data("memory", "x86", "pugxml", "data/English.sml", 2.58832);
+// qtxml_dom: 21.62 ns/byte, 44 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/English.sml", 21.6232);
+data("memory", "x86", "qtxml_dom", "data/English.sml", 5.50416);
+// qtxml_sax: 13.75 ns/byte, 69 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/English.sml", 13.7487);
+// rapidxml: 0.70 ns/byte, 1364 Mb/s, 2203 Kb, 14 allocations
+data("speed", "x86", "rapidxml", "data/English.sml", 0.699417);
+data("memory", "x86", "rapidxml", "data/English.sml", 2.1523);
+// tinyxml: 28.03 ns/byte, 34 Mb/s, 3522 Kb, 100500 allocations
+data("speed", "x86", "tinyxml", "data/English.sml", 28.0294);
+data("memory", "x86", "tinyxml", "data/English.sml", 3.43995);
+// tinyxml2: 2.87 ns/byte, 332 Mb/s, 2260 Kb, 232 allocations
+data("speed", "x86", "tinyxml2", "data/English.sml", 2.87322);
+data("memory", "x86", "tinyxml2", "data/English.sml", 2.20755);
+// vtdxml: 3.81 ns/byte, 250 Mb/s, 1676 Kb, 28 allocations
+data("speed", "x86", "vtdxml", "data/English.sml", 3.80759);
+data("memory", "x86", "vtdxml", "data/English.sml", 1.63745);
+// xerces_dom: 4.10 ns/byte, 232 Mb/s, 4646 Kb, 3276 allocations
+data("speed", "x86", "xerces_dom", "data/English.sml", 4.10329);
+data("memory", "x86", "xerces_dom", "data/English.sml", 4.53774);
+// xerces_sax: 2.72 ns/byte, 350 Mb/s, 286 Kb, 213 allocations
+data("speed", "x86", "xerces_sax", "data/English.sml", 2.72341);
+// xmllite: 3.09 ns/byte, 309 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/English.sml", 3.0887);
+// xmlparser: 15.10 ns/byte, 63 Mb/s, 2343 Kb, 60082 allocations
+data("speed", "x86", "xmlparser", "data/English.sml", 15.1003);
+data("memory", "x86", "xmlparser", "data/English.sml", 2.28828);
+
+// data/Russian.sml
+// asmxml: 0.65 ns/byte, 1479 Mb/s, 3930 Kb, 39 allocations
+data("speed", "x86", "asmxml", "data/Russian.sml", 0.645024);
+data("memory", "x86", "asmxml", "data/Russian.sml", 3.83864);
+// cmarkup: 2.98 ns/byte, 320 Mb/s, 6385 Kb, 7 allocations
+data("speed", "x86", "cmarkup", "data/Russian.sml", 2.98237);
+data("memory", "x86", "cmarkup", "data/Russian.sml", 6.23626);
+// expat: 2.98 ns/byte, 320 Mb/s, 4101 Kb, 22 allocations
+data("speed", "x86", "expat", "data/Russian.sml", 2.97567);
+// hexml: 0.55 ns/byte, 1748 Mb/s, 5487 Kb, 6 allocations
+data("speed", "x86", "hexml", "data/Russian.sml", 0.545468);
+data("memory", "x86", "hexml", "data/Russian.sml", 5.35851);
+// irrxml: 5.98 ns/byte, 159 Mb/s, 2567 Kb, 61129 allocations
+data("speed", "x86", "irrxml", "data/Russian.sml", 5.98384);
+// ixmlparser_dom: 3.93 ns/byte, 243 Mb/s, 5220 Kb, 25 allocations
+data("speed", "x86", "ixmlparser_dom", "data/Russian.sml", 3.92815);
+data("memory", "x86", "ixmlparser_dom", "data/Russian.sml", 5.09803);
+// ixmlparser_pull: 2.92 ns/byte, 326 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/Russian.sml", 2.92492);
+// libxml_dom: 11.06 ns/byte, 86 Mb/s, 9402 Kb, 39784 allocations
+data("speed", "x86", "libxml_dom", "data/Russian.sml", 11.0605);
+data("memory", "x86", "libxml_dom", "data/Russian.sml", 9.18179);
+// libxml_sax: 9.08 ns/byte, 105 Mb/s, 4108 Kb, 20 allocations
+data("speed", "x86", "libxml_sax", "data/Russian.sml", 9.07719);
+// msxml_dom: 6.57 ns/byte, 145 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/Russian.sml", 6.56667);
+data("memory", "x86", "msxml_dom", "data/Russian.sml", 5.16262);
+// msxml_sax: 10.14 ns/byte, 94 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/Russian.sml", 10.1436);
+// pugixml: 0.51 ns/byte, 1887 Mb/s, 3099 Kb, 18 allocations
+data("speed", "x86", "pugixml", "data/Russian.sml", 0.505311);
+data("memory", "x86", "pugixml", "data/Russian.sml", 3.02695);
+// pugixml_compact: 0.68 ns/byte, 1394 Mb/s, 2794 Kb, 15 allocations
+data("speed", "x86", "pugixml_compact", "data/Russian.sml", 0.684066);
+data("memory", "x86", "pugixml_compact", "data/Russian.sml", 2.72905);
+// pugixml_simd: 0.28 ns/byte, 3439 Mb/s, 3098 Kb, 18 allocations
+data("speed", "x86", "pugixml_simd", "data/Russian.sml", 0.277335);
+data("memory", "x86", "pugixml_simd", "data/Russian.sml", 3.02559);
+// pugxml: 4.44 ns/byte, 215 Mb/s, 3743 Kb, 44471 allocations
+data("speed", "x86", "pugxml", "data/Russian.sml", 4.43639);
+data("memory", "x86", "pugxml", "data/Russian.sml", 3.65545);
+// qtxml_dom: 21.93 ns/byte, 43 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/Russian.sml", 21.928);
+data("memory", "x86", "qtxml_dom", "data/Russian.sml", 5.63391);
+// qtxml_sax: 8.96 ns/byte, 106 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/Russian.sml", 8.963);
+// rapidxml: 0.58 ns/byte, 1656 Mb/s, 3322 Kb, 13 allocations
+data("speed", "x86", "rapidxml", "data/Russian.sml", 0.576004);
+data("memory", "x86", "rapidxml", "data/Russian.sml", 3.24442);
+// tinyxml: 18.36 ns/byte, 52 Mb/s, 5140 Kb, 95136 allocations
+data("speed", "x86", "tinyxml", "data/Russian.sml", 18.3648);
+data("memory", "x86", "tinyxml", "data/Russian.sml", 5.01982);
+// tinyxml2: 2.16 ns/byte, 442 Mb/s, 3382 Kb, 216 allocations
+data("speed", "x86", "tinyxml2", "data/Russian.sml", 2.15719);
+data("memory", "x86", "tinyxml2", "data/Russian.sml", 3.30355);
+// vtdxml: 4.89 ns/byte, 195 Mb/s, 2859 Kb, 28 allocations
+data("speed", "x86", "vtdxml", "data/Russian.sml", 4.89416);
+data("memory", "x86", "vtdxml", "data/Russian.sml", 2.79208);
+// xerces_dom: 5.24 ns/byte, 182 Mb/s, 4879 Kb, 3238 allocations
+data("speed", "x86", "xerces_dom", "data/Russian.sml", 5.24274);
+data("memory", "x86", "xerces_dom", "data/Russian.sml", 4.76544);
+// xerces_sax: 4.37 ns/byte, 218 Mb/s, 283 Kb, 212 allocations
+data("speed", "x86", "xerces_sax", "data/Russian.sml", 4.37267);
+// xmllite: 4.80 ns/byte, 199 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/Russian.sml", 4.79962);
+// xmlparser: 10.17 ns/byte, 94 Mb/s, 3457 Kb, 55836 allocations
+data("speed", "x86", "xmlparser", "data/Russian.sml", 10.1719);
+data("memory", "x86", "xmlparser", "data/Russian.sml", 3.37626);
+
+// data/blog.xml
+// asmxml: 0.89 ns/byte, 1070 Mb/s, 3495 Kb, 444 allocations
+data("speed", "x86", "asmxml", "data/blog.xml", 0.891694);
+data("memory", "x86", "asmxml", "data/blog.xml", 3.41327);
+// cmarkup: 3.48 ns/byte, 274 Mb/s, 3260 Kb, 9 allocations
+data("speed", "x86", "cmarkup", "data/blog.xml", 3.4796);
+data("memory", "x86", "cmarkup", "data/blog.xml", 3.18419);
+// expat: 3.34 ns/byte, 286 Mb/s, 2056 Kb, 137 allocations
+data("speed", "x86", "expat", "data/blog.xml", 3.33832);
+// hexml: 1.02 ns/byte, 938 Mb/s, 2418 Kb, 7 allocations
+data("speed", "x86", "hexml", "data/blog.xml", 1.01631);
+data("memory", "x86", "hexml", "data/blog.xml", 2.36139);
+// irrxml: 16.84 ns/byte, 57 Mb/s, 1323 Kb, 171511 allocations
+data("speed", "x86", "irrxml", "data/blog.xml", 16.8389);
+// ixmlparser_dom: 7.20 ns/byte, 132 Mb/s, 3080 Kb, 16 allocations
+data("speed", "x86", "ixmlparser_dom", "data/blog.xml", 7.2046);
+data("memory", "x86", "ixmlparser_dom", "data/blog.xml", 3.00803);
+// ixmlparser_pull: 5.02 ns/byte, 190 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/blog.xml", 5.01677);
+// libxml_dom: 7.79 ns/byte, 122 Mb/s, 6262 Kb, 79871 allocations
+data("speed", "x86", "libxml_dom", "data/blog.xml", 7.78668);
+data("memory", "x86", "libxml_dom", "data/blog.xml", 6.11604);
+// libxml_sax: 3.19 ns/byte, 299 Mb/s, 2068 Kb, 5238 allocations
+data("speed", "x86", "libxml_sax", "data/blog.xml", 3.18665);
+// msxml_dom: 15.39 ns/byte, 62 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/blog.xml", 15.3859);
+data("memory", "x86", "msxml_dom", "data/blog.xml", 2.6629);
+// msxml_sax: 12.49 ns/byte, 76 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/blog.xml", 12.4895);
+// pugixml: 0.99 ns/byte, 962 Mb/s, 2041 Kb, 24 allocations
+data("speed", "x86", "pugixml", "data/blog.xml", 0.991439);
+data("memory", "x86", "pugixml", "data/blog.xml", 1.99341);
+// pugixml_compact: 1.26 ns/byte, 759 Mb/s, 1639 Kb, 18 allocations
+data("speed", "x86", "pugixml_compact", "data/blog.xml", 1.25624);
+data("memory", "x86", "pugixml_compact", "data/blog.xml", 1.60143);
+// pugixml_simd: 0.79 ns/byte, 1214 Mb/s, 2039 Kb, 24 allocations
+data("speed", "x86", "pugixml_simd", "data/blog.xml", 0.785664);
+data("memory", "x86", "pugixml_simd", "data/blog.xml", 1.99157);
+// pugxml: 7.09 ns/byte, 134 Mb/s, 2823 Kb, 64805 allocations
+data("speed", "x86", "pugxml", "data/blog.xml", 7.09393);
+data("memory", "x86", "pugxml", "data/blog.xml", 2.75732);
+// qtxml_dom: 35.06 ns/byte, 27 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/blog.xml", 35.0575);
+data("memory", "x86", "qtxml_dom", "data/blog.xml", 6.84798);
+// qtxml_sax: 23.49 ns/byte, 41 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/blog.xml", 23.4882);
+// rapidxml: 1.04 ns/byte, 919 Mb/s, 2391 Kb, 18 allocations
+data("speed", "x86", "rapidxml", "data/blog.xml", 1.0379);
+data("memory", "x86", "rapidxml", "data/blog.xml", 2.33544);
+// tinyxml: 30.17 ns/byte, 32 Mb/s, 3954 Kb, 138821 allocations
+data("speed", "x86", "tinyxml", "data/blog.xml", 30.1654);
+data("memory", "x86", "tinyxml", "data/blog.xml", 3.86146);
+// tinyxml2: 3.65 ns/byte, 262 Mb/s, 2490 Kb, 309 allocations
+data("speed", "x86", "tinyxml2", "data/blog.xml", 3.6452);
+data("memory", "x86", "tinyxml2", "data/blog.xml", 2.4325);
+// vtdxml: 4.00 ns/byte, 238 Mb/s, 1594 Kb, 28 allocations
+data("speed", "x86", "vtdxml", "data/blog.xml", 4.00155);
+data("memory", "x86", "vtdxml", "data/blog.xml", 1.55684);
+// xerces_dom: 9.19 ns/byte, 104 Mb/s, 6384 Kb, 3588 allocations
+data("speed", "x86", "xerces_dom", "data/blog.xml", 9.19158);
+data("memory", "x86", "xerces_dom", "data/blog.xml", 6.2345);
+// xerces_sax: 6.01 ns/byte, 159 Mb/s, 236 Kb, 510 allocations
+data("speed", "x86", "xerces_sax", "data/blog.xml", 6.00821);
+// xmllite: 3.33 ns/byte, 286 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/blog.xml", 3.33449);
+// xmlparser: 18.54 ns/byte, 51 Mb/s, 2460 Kb, 91388 allocations
+data("speed", "x86", "xmlparser", "data/blog.xml", 18.5397);
+data("memory", "x86", "xmlparser", "data/blog.xml", 2.40239);
+
+// data/cathedral.xml
+// asmxml: 0.77 ns/byte, 1236 Mb/s, 2687 Kb, 56 allocations
+data("speed", "x86", "asmxml", "data/cathedral.xml", 0.771756);
+data("memory", "x86", "asmxml", "data/cathedral.xml", 2.62406);
+// cmarkup: 5.01 ns/byte, 190 Mb/s, 2946 Kb, 8 allocations
+data("speed", "x86", "cmarkup", "data/cathedral.xml", 5.01052);
+data("memory", "x86", "cmarkup", "data/cathedral.xml", 2.87747);
+// expat: 9.69 ns/byte, 98 Mb/s, 1028 Kb, 23 allocations
+data("speed", "x86", "expat", "data/cathedral.xml", 9.68586);
+// hexml: 2.10 ns/byte, 455 Mb/s, 3851 Kb, 10 allocations
+data("speed", "x86", "hexml", "data/cathedral.xml", 2.09679);
+data("memory", "x86", "hexml", "data/cathedral.xml", 3.76141);
+// irrxml: 63.58 ns/byte, 15 Mb/s, 906 Kb, 657154 allocations
+data("speed", "x86", "irrxml", "data/cathedral.xml", 63.5838);
+// ixmlparser_dom: 7.24 ns/byte, 132 Mb/s, 4146 Kb, 22 allocations
+data("speed", "x86", "ixmlparser_dom", "data/cathedral.xml", 7.24052);
+data("memory", "x86", "ixmlparser_dom", "data/cathedral.xml", 4.04919);
+// ixmlparser_pull: 4.30 ns/byte, 222 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/cathedral.xml", 4.29614);
+// libxml_dom: 23.55 ns/byte, 41 Mb/s, 9591 Kb, 225750 allocations
+data("speed", "x86", "libxml_dom", "data/cathedral.xml", 23.5452);
+data("memory", "x86", "libxml_dom", "data/cathedral.xml", 9.36716);
+// libxml_sax: 8.52 ns/byte, 112 Mb/s, 1035 Kb, 30115 allocations
+data("speed", "x86", "libxml_sax", "data/cathedral.xml", 8.51643);
+// msxml_dom: 30.23 ns/byte, 32 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/cathedral.xml", 30.2313);
+data("memory", "x86", "msxml_dom", "data/cathedral.xml", 1.85556);
+// msxml_sax: 10.88 ns/byte, 88 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/cathedral.xml", 10.8789);
+// pugixml: 1.08 ns/byte, 880 Mb/s, 2125 Kb, 39 allocations
+data("speed", "x86", "pugixml", "data/cathedral.xml", 1.08415);
+data("memory", "x86", "pugixml", "data/cathedral.xml", 2.07588);
+// pugixml_compact: 1.78 ns/byte, 537 Mb/s, 1516 Kb, 23 allocations
+data("speed", "x86", "pugixml_compact", "data/cathedral.xml", 1.77535);
+data("memory", "x86", "pugixml_compact", "data/cathedral.xml", 1.48102);
+// pugixml_simd: 1.12 ns/byte, 850 Mb/s, 2154 Kb, 40 allocations
+data("speed", "x86", "pugixml_simd", "data/cathedral.xml", 1.12188);
+data("memory", "x86", "pugixml_simd", "data/cathedral.xml", 2.1041);
+// pugxml: 13.19 ns/byte, 72 Mb/s, 3452 Kb, 136702 allocations
+data("speed", "x86", "pugxml", "data/cathedral.xml", 13.1926);
+data("memory", "x86", "pugxml", "data/cathedral.xml", 3.37138);
+// qtxml_dom: 70.03 ns/byte, 14 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/cathedral.xml", 70.0279);
+data("memory", "x86", "qtxml_dom", "data/cathedral.xml", 10.9075);
+// qtxml_sax: 46.78 ns/byte, 20 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/cathedral.xml", 46.7801);
+// rapidxml: 1.21 ns/byte, 787 Mb/s, 2634 Kb, 28 allocations
+data("speed", "x86", "rapidxml", "data/cathedral.xml", 1.21186);
+data("memory", "x86", "rapidxml", "data/cathedral.xml", 2.57301);
+// tinyxml: 40.56 ns/byte, 24 Mb/s, 5290 Kb, 240788 allocations
+data("speed", "x86", "tinyxml", "data/cathedral.xml", 40.5604);
+data("memory", "x86", "tinyxml", "data/cathedral.xml", 5.16678);
+// tinyxml2: 7.21 ns/byte, 132 Mb/s, 3000 Kb, 537 allocations
+data("speed", "x86", "tinyxml2", "data/cathedral.xml", 7.2138);
+data("memory", "x86", "tinyxml2", "data/cathedral.xml", 2.92971);
+// vtdxml: 4.63 ns/byte, 206 Mb/s, 1797 Kb, 58 allocations
+data("speed", "x86", "vtdxml", "data/cathedral.xml", 4.62975);
+data("memory", "x86", "vtdxml", "data/cathedral.xml", 1.75542);
+// xerces_dom: 23.55 ns/byte, 40 Mb/s, 9429 Kb, 249 allocations
+data("speed", "x86", "xerces_dom", "data/cathedral.xml", 23.5535);
+data("memory", "x86", "xerces_dom", "data/cathedral.xml", 9.20844);
+// xerces_sax: 14.09 ns/byte, 68 Mb/s, 244 Kb, 221 allocations
+data("speed", "x86", "xerces_sax", "data/cathedral.xml", 14.0893);
+// xmllite: 5.18 ns/byte, 184 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/cathedral.xml", 5.18499);
+// xmlparser: 20.88 ns/byte, 46 Mb/s, 3069 Kb, 170699 allocations
+data("speed", "x86", "xmlparser", "data/cathedral.xml", 20.8791);
+data("memory", "x86", "xmlparser", "data/cathedral.xml", 2.99764);
+
+// data/employees-big.xml
+// asmxml: 0.92 ns/byte, 1035 Mb/s, 19181 Kb, 285 allocations
+data("speed", "x86", "asmxml", "data/employees-big.xml", 0.921206);
+data("memory", "x86", "asmxml", "data/employees-big.xml", 18.7317);
+// cmarkup: 4.63 ns/byte, 206 Mb/s, 28670 Kb, 10 allocations
+data("speed", "x86", "cmarkup", "data/employees-big.xml", 4.62847);
+data("memory", "x86", "cmarkup", "data/employees-big.xml", 27.9988);
+// expat: 6.77 ns/byte, 141 Mb/s, 16389 Kb, 23 allocations
+data("speed", "x86", "expat", "data/employees-big.xml", 6.77142);
+// hexml: 2.12 ns/byte, 449 Mb/s, 30397 Kb, 14 allocations
+data("speed", "x86", "hexml", "data/employees-big.xml", 2.12449);
+data("memory", "x86", "hexml", "data/employees-big.xml", 29.6848);
+// irrxml: 35.64 ns/byte, 27 Mb/s, 10239 Kb, 3963353 allocations
+data("speed", "x86", "irrxml", "data/employees-big.xml", 35.6408);
+// ixmlparser_dom: 7.62 ns/byte, 125 Mb/s, 24976 Kb, 48 allocations
+data("speed", "x86", "ixmlparser_dom", "data/employees-big.xml", 7.6174);
+data("memory", "x86", "ixmlparser_dom", "data/employees-big.xml", 24.3911);
+// ixmlparser_pull: 4.61 ns/byte, 207 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/employees-big.xml", 4.60895);
+// libxml_dom: 18.56 ns/byte, 51 Mb/s, 88863 Kb, 1777509 allocations
+data("speed", "x86", "libxml_dom", "data/employees-big.xml", 18.5567);
+data("memory", "x86", "libxml_dom", "data/employees-big.xml", 86.781);
+// libxml_sax: 5.38 ns/byte, 177 Mb/s, 16399 Kb, 84088 allocations
+data("speed", "x86", "libxml_sax", "data/employees-big.xml", 5.37535);
+// msxml_dom: 28.96 ns/byte, 33 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/employees-big.xml", 28.9592);
+data("memory", "x86", "msxml_dom", "data/employees-big.xml", 20.8776);
+// msxml_sax: 11.03 ns/byte, 86 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/employees-big.xml", 11.0283);
+// pugixml: 1.13 ns/byte, 841 Mb/s, 25449 Kb, 475 allocations
+data("speed", "x86", "pugixml", "data/employees-big.xml", 1.13459);
+data("memory", "x86", "pugixml", "data/employees-big.xml", 24.8532);
+// pugixml_compact: 2.08 ns/byte, 459 Mb/s, 16587 Kb, 202 allocations
+data("speed", "x86", "pugixml_compact", "data/employees-big.xml", 2.07635);
+data("memory", "x86", "pugixml_compact", "data/employees-big.xml", 16.199);
+// pugixml_simd: 1.22 ns/byte, 779 Mb/s, 25442 Kb, 476 allocations
+data("speed", "x86", "pugixml_simd", "data/employees-big.xml", 1.22408);
+data("memory", "x86", "pugixml_simd", "data/employees-big.xml", 24.8465);
+// pugxml: 16.70 ns/byte, 57 Mb/s, 43171 Kb, 1369156 allocations
+data("speed", "x86", "pugxml", "data/employees-big.xml", 16.7009);
+data("memory", "x86", "pugxml", "data/employees-big.xml", 42.1592);
+// qtxml_dom: 52.36 ns/byte, 18 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/employees-big.xml", 52.3648);
+data("memory", "x86", "qtxml_dom", "data/employees-big.xml", 85.5823);
+// qtxml_sax: 30.56 ns/byte, 31 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/employees-big.xml", 30.5559);
+// rapidxml: 1.34 ns/byte, 712 Mb/s, 32773 Kb, 353 allocations
+data("speed", "x86", "rapidxml", "data/employees-big.xml", 1.33941);
+data("memory", "x86", "rapidxml", "data/employees-big.xml", 32.0052);
+// tinyxml: 42.28 ns/byte, 23 Mb/s, 54796 Kb, 2450061 allocations
+data("speed", "x86", "tinyxml", "data/employees-big.xml", 42.2802);
+data("memory", "x86", "tinyxml", "data/employees-big.xml", 53.5118);
+// tinyxml2: 9.08 ns/byte, 105 Mb/s, 34493 Kb, 6110 allocations
+data("speed", "x86", "tinyxml2", "data/employees-big.xml", 9.07944);
+data("memory", "x86", "tinyxml2", "data/employees-big.xml", 33.6852);
+// vtdxml: 4.17 ns/byte, 229 Mb/s, 16990 Kb, 603 allocations
+data("speed", "x86", "vtdxml", "data/employees-big.xml", 4.16682);
+data("memory", "x86", "vtdxml", "data/employees-big.xml", 16.5924);
+// xerces_dom: 17.06 ns/byte, 56 Mb/s, 80257 Kb, 399 allocations
+data("speed", "x86", "xerces_dom", "data/employees-big.xml", 17.0616);
+data("memory", "x86", "xerces_dom", "data/employees-big.xml", 78.376);
+// xerces_sax: 10.49 ns/byte, 91 Mb/s, 551 Kb, 233 allocations
+data("speed", "x86", "xerces_sax", "data/employees-big.xml", 10.4884);
+// xmllite: 5.80 ns/byte, 164 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/employees-big.xml", 5.80298);
+// xmlparser: 24.32 ns/byte, 39 Mb/s, 33535 Kb, 1898880 allocations
+data("speed", "x86", "xmlparser", "data/employees-big.xml", 24.3165);
+data("memory", "x86", "xmlparser", "data/employees-big.xml", 32.7492);
+
+// data/terrover.xml
+// asmxml: 0.74 ns/byte, 1295 Mb/s, 22824 Kb, 40740 allocations
+data("speed", "x86", "asmxml", "data/terrover.xml", 0.736227);
+data("memory", "x86", "asmxml", "data/terrover.xml", 22.2896);
+// cmarkup: 4.25 ns/byte, 225 Mb/s, 38444 Kb, 12 allocations
+data("speed", "x86", "cmarkup", "data/terrover.xml", 4.24754);
+data("memory", "x86", "cmarkup", "data/terrover.xml", 37.5436);
+// expat: 10.73 ns/byte, 89 Mb/s, 16397 Kb, 132 allocations
+data("speed", "x86", "expat", "data/terrover.xml", 10.7257);
+// hexml: 1.54 ns/byte, 618 Mb/s, 40842 Kb, 16 allocations
+data("speed", "x86", "hexml", "data/terrover.xml", 1.54291);
+data("memory", "x86", "hexml", "data/terrover.xml", 39.8856);
+// irrxml: 31.20 ns/byte, 31 Mb/s, 16164 Kb, 4961420 allocations
+data("speed", "x86", "irrxml", "data/terrover.xml", 31.2008);
+// ixmlparser_dom: 6.39 ns/byte, 149 Mb/s, 26637 Kb, 40 allocations
+data("speed", "x86", "ixmlparser_dom", "data/terrover.xml", 6.39415);
+data("memory", "x86", "ixmlparser_dom", "data/terrover.xml", 26.0127);
+// ixmlparser_pull: 4.48 ns/byte, 213 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/terrover.xml", 4.47952);
+// libxml_dom: 12.28 ns/byte, 78 Mb/s, 89817 Kb, 1652648 allocations
+data("speed", "x86", "libxml_dom", "data/terrover.xml", 12.2812);
+data("memory", "x86", "libxml_dom", "data/terrover.xml", 87.7123);
+// libxml_sax: 5.27 ns/byte, 181 Mb/s, 16400 Kb, 230832 allocations
+data("speed", "x86", "libxml_sax", "data/terrover.xml", 5.26978);
+// msxml_dom: 24.35 ns/byte, 39 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/terrover.xml", 24.3521);
+data("memory", "x86", "msxml_dom", "data/terrover.xml", 32.854);
+// msxml_sax: 8.07 ns/byte, 118 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/terrover.xml", 8.0725);
+// pugixml: 0.83 ns/byte, 1145 Mb/s, 25776 Kb, 301 allocations
+data("speed", "x86", "pugixml", "data/terrover.xml", 0.833076);
+data("memory", "x86", "pugixml", "data/terrover.xml", 25.1727);
+// pugixml_compact: 1.21 ns/byte, 786 Mb/s, 20927 Kb, 156 allocations
+data("speed", "x86", "pugixml_compact", "data/terrover.xml", 1.21406);
+data("memory", "x86", "pugixml_compact", "data/terrover.xml", 20.437);
+// pugixml_simd: 0.86 ns/byte, 1108 Mb/s, 25752 Kb, 301 allocations
+data("speed", "x86", "pugixml_simd", "data/terrover.xml", 0.860839);
+data("memory", "x86", "pugixml_simd", "data/terrover.xml", 25.1486);
+// pugxml: 6.81 ns/byte, 140 Mb/s, 35534 Kb, 1031012 allocations
+data("speed", "x86", "pugxml", "data/terrover.xml", 6.81346);
+data("memory", "x86", "pugxml", "data/terrover.xml", 34.7016);
+// qtxml_dom: 56.05 ns/byte, 17 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/terrover.xml", 56.0549);
+data("memory", "x86", "qtxml_dom", "data/terrover.xml", 114.899);
+// qtxml_sax: 42.64 ns/byte, 22 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/terrover.xml", 42.6366);
+// rapidxml: 0.91 ns/byte, 1049 Mb/s, 30041 Kb, 218 allocations
+data("speed", "x86", "rapidxml", "data/terrover.xml", 0.908867);
+data("memory", "x86", "rapidxml", "data/terrover.xml", 29.3376);
+// tinyxml: 30.53 ns/byte, 31 Mb/s, 52939 Kb, 2131643 allocations
+data("speed", "x86", "tinyxml", "data/terrover.xml", 30.5251);
+data("memory", "x86", "tinyxml", "data/terrover.xml", 51.699);
+// tinyxml2: 4.56 ns/byte, 209 Mb/s, 32572 Kb, 4143 allocations
+data("speed", "x86", "tinyxml2", "data/terrover.xml", 4.55924);
+data("memory", "x86", "tinyxml2", "data/terrover.xml", 31.8095);
+// vtdxml: 4.28 ns/byte, 223 Mb/s, 21341 Kb, 55 allocations
+data("speed", "x86", "vtdxml", "data/terrover.xml", 4.27826);
+data("memory", "x86", "vtdxml", "data/terrover.xml", 20.8409);
+// xerces_dom: 17.88 ns/byte, 53 Mb/s, 83901 Kb, 7388 allocations
+data("speed", "x86", "xerces_dom", "data/terrover.xml", 17.8758);
+data("memory", "x86", "xerces_dom", "data/terrover.xml", 81.9352);
+// xerces_sax: 12.72 ns/byte, 75 Mb/s, 236 Kb, 509 allocations
+data("speed", "x86", "xerces_sax", "data/terrover.xml", 12.7183);
+// xmllite: 3.51 ns/byte, 272 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/terrover.xml", 3.51061);
+// xmlparser: 14.74 ns/byte, 65 Mb/s, 32537 Kb, 1234038 allocations
+data("speed", "x86", "xmlparser", "data/terrover.xml", 14.7375);
+data("memory", "x86", "xmlparser", "data/terrover.xml", 31.7753);
+
+// data/vod.xml
+// asmxml: 1.00 ns/byte, 955 Mb/s, 5589 Kb, 4723 allocations
+data("speed", "x86", "asmxml", "data/vod.xml", 0.998509);
+data("memory", "x86", "asmxml", "data/vod.xml", 5.45857);
+// cmarkup: 5.60 ns/byte, 170 Mb/s, 8216 Kb, 12 allocations
+data("speed", "x86", "cmarkup", "data/vod.xml", 5.59743);
+data("memory", "x86", "cmarkup", "data/vod.xml", 8.02371);
+// expat: 7.98 ns/byte, 120 Mb/s, 4102 Kb, 71 allocations
+data("speed", "x86", "expat", "data/vod.xml", 7.97939);
+// hexml: 3.32 ns/byte, 288 Mb/s, 11457 Kb, 8 allocations
+data("speed", "x86", "hexml", "data/vod.xml", 3.31567);
+data("memory", "x86", "hexml", "data/vod.xml", 11.1885);
+// irrxml: 21.85 ns/byte, 44 Mb/s, 2134 Kb, 461914 allocations
+data("speed", "x86", "irrxml", "data/vod.xml", 21.8478);
+// ixmlparser_dom: 9.48 ns/byte, 101 Mb/s, 8204 Kb, 22 allocations
+data("speed", "x86", "ixmlparser_dom", "data/vod.xml", 9.47657);
+data("memory", "x86", "ixmlparser_dom", "data/vod.xml", 8.0126);
+// ixmlparser_pull: 5.28 ns/byte, 180 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/vod.xml", 5.28497);
+// libxml_dom: 22.70 ns/byte, 42 Mb/s, 22147 Kb, 443506 allocations
+data("speed", "x86", "libxml_dom", "data/vod.xml", 22.7015);
+data("memory", "x86", "libxml_dom", "data/vod.xml", 21.6281);
+// libxml_sax: 6.55 ns/byte, 146 Mb/s, 4108 Kb, 29 allocations
+data("speed", "x86", "libxml_sax", "data/vod.xml", 6.55318);
+// msxml_dom: 29.95 ns/byte, 32 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/vod.xml", 29.9523);
+data("memory", "x86", "msxml_dom", "data/vod.xml", 4.35629);
+// msxml_sax: 12.77 ns/byte, 75 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/vod.xml", 12.771);
+// pugixml: 1.39 ns/byte, 685 Mb/s, 6496 Kb, 137 allocations
+data("speed", "x86", "pugixml", "data/vod.xml", 1.39197);
+data("memory", "x86", "pugixml", "data/vod.xml", 6.34441);
+// pugixml_compact: 2.47 ns/byte, 387 Mb/s, 3831 Kb, 61 allocations
+data("speed", "x86", "pugixml_compact", "data/vod.xml", 2.46713);
+data("memory", "x86", "pugixml_compact", "data/vod.xml", 3.74205);
+// pugixml_simd: 1.34 ns/byte, 710 Mb/s, 6485 Kb, 137 allocations
+data("speed", "x86", "pugixml_simd", "data/vod.xml", 1.34404);
+data("memory", "x86", "pugixml_simd", "data/vod.xml", 6.33352);
+// pugxml: 14.66 ns/byte, 65 Mb/s, 12007 Kb, 382832 allocations
+data("speed", "x86", "pugxml", "data/vod.xml", 14.6583);
+data("memory", "x86", "pugxml", "data/vod.xml", 11.7256);
+// qtxml_dom: 50.56 ns/byte, 19 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/vod.xml", 50.555);
+data("memory", "x86", "qtxml_dom", "data/vod.xml", 17.0858);
+// qtxml_sax: 31.26 ns/byte, 31 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/vod.xml", 31.2629);
+// rapidxml: 1.56 ns/byte, 611 Mb/s, 8598 Kb, 102 allocations
+data("speed", "x86", "rapidxml", "data/vod.xml", 1.56131);
+data("memory", "x86", "rapidxml", "data/vod.xml", 8.39672);
+// tinyxml: 45.59 ns/byte, 21 Mb/s, 14663 Kb, 573268 allocations
+data("speed", "x86", "tinyxml", "data/vod.xml", 45.5892);
+data("memory", "x86", "tinyxml", "data/vod.xml", 14.3194);
+// tinyxml2: 10.99 ns/byte, 87 Mb/s, 8970 Kb, 1731 allocations
+data("speed", "x86", "tinyxml2", "data/vod.xml", 10.9883);
+data("memory", "x86", "tinyxml2", "data/vod.xml", 8.76072);
+// vtdxml: 4.24 ns/byte, 225 Mb/s, 3589 Kb, 49 allocations
+data("speed", "x86", "vtdxml", "data/vod.xml", 4.2422);
+data("memory", "x86", "vtdxml", "data/vod.xml", 3.50551);
+// xerces_dom: 19.79 ns/byte, 48 Mb/s, 20271 Kb, 785 allocations
+data("speed", "x86", "xerces_dom", "data/vod.xml", 19.7938);
+data("memory", "x86", "xerces_dom", "data/vod.xml", 19.7968);
+// xerces_sax: 11.82 ns/byte, 81 Mb/s, 215 Kb, 415 allocations
+data("speed", "x86", "xerces_sax", "data/vod.xml", 11.8245);
+// xmllite: 7.98 ns/byte, 119 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/vod.xml", 7.98339);
+// xmlparser: 27.71 ns/byte, 34 Mb/s, 9482 Kb, 482180 allocations
+data("speed", "x86", "xmlparser", "data/vod.xml", 27.7133);
+data("memory", "x86", "xmlparser", "data/vod.xml", 9.2603);
+
+// data/xmark.xml
+// asmxml: 0.83 ns/byte, 1143 Mb/s, 19066 Kb, 557 allocations
+data("speed", "x86", "asmxml", "data/xmark.xml", 0.834242);
+data("memory", "x86", "asmxml", "data/xmark.xml", 18.6195);
+// cmarkup: 4.09 ns/byte, 233 Mb/s, 29338 Kb, 10 allocations
+data("speed", "x86", "cmarkup", "data/xmark.xml", 4.09128);
+data("memory", "x86", "cmarkup", "data/xmark.xml", 28.6508);
+// expat: 4.19 ns/byte, 227 Mb/s, 16393 Kb, 118 allocations
+data("speed", "x86", "expat", "data/xmark.xml", 4.1948);
+// hexml: 1.66 ns/byte, 573 Mb/s, 31024 Kb, 13 allocations
+data("speed", "x86", "hexml", "data/xmark.xml", 1.66483);
+data("memory", "x86", "hexml", "data/xmark.xml", 30.2969);
+// irrxml: 15.53 ns/byte, 61 Mb/s, 11604 Kb, 1583123 allocations
+data("speed", "x86", "irrxml", "data/xmark.xml", 15.5324);
+// ixmlparser_dom: 7.42 ns/byte, 129 Mb/s, 22553 Kb, 40 allocations
+data("speed", "x86", "ixmlparser_dom", "data/xmark.xml", 7.41995);
+data("memory", "x86", "ixmlparser_dom", "data/xmark.xml", 22.025);
+// ixmlparser_pull: 5.13 ns/byte, 186 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x86", "ixmlparser_pull", "data/xmark.xml", 5.1282);
+// libxml_dom: 11.44 ns/byte, 83 Mb/s, 68957 Kb, 1109077 allocations
+data("speed", "x86", "libxml_dom", "data/xmark.xml", 11.4391);
+data("memory", "x86", "libxml_dom", "data/xmark.xml", 67.341);
+// libxml_sax: 3.33 ns/byte, 286 Mb/s, 16399 Kb, 38303 allocations
+data("speed", "x86", "libxml_sax", "data/xmark.xml", 3.32978);
+// msxml_dom: 18.88 ns/byte, 51 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_dom", "data/xmark.xml", 18.8765);
+data("memory", "x86", "msxml_dom", "data/xmark.xml", 23.5839);
+// msxml_sax: 11.40 ns/byte, 84 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "msxml_sax", "data/xmark.xml", 11.3996);
+// pugixml: 1.02 ns/byte, 932 Mb/s, 21319 Kb, 304 allocations
+data("speed", "x86", "pugixml", "data/xmark.xml", 1.02286);
+data("memory", "x86", "pugixml", "data/xmark.xml", 20.8203);
+// pugixml_compact: 1.49 ns/byte, 639 Mb/s, 15540 Kb, 130 allocations
+data("speed", "x86", "pugixml_compact", "data/xmark.xml", 1.49332);
+data("memory", "x86", "pugixml_compact", "data/xmark.xml", 15.1764);
+// pugixml_simd: 0.85 ns/byte, 1123 Mb/s, 21295 Kb, 304 allocations
+data("speed", "x86", "pugixml_simd", "data/xmark.xml", 0.848891);
+data("memory", "x86", "pugixml_simd", "data/xmark.xml", 20.796);
+// pugxml: 8.42 ns/byte, 113 Mb/s, 32857 Kb, 866856 allocations
+data("speed", "x86", "pugxml", "data/xmark.xml", 8.41846);
+data("memory", "x86", "pugxml", "data/xmark.xml", 32.0873);
+// qtxml_dom: 37.96 ns/byte, 25 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_dom", "data/xmark.xml", 37.9646);
+data("memory", "x86", "qtxml_dom", "data/xmark.xml", 67.7691);
+// qtxml_sax: 23.47 ns/byte, 41 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "qtxml_sax", "data/xmark.xml", 23.4717);
+// rapidxml: 1.02 ns/byte, 938 Mb/s, 26000 Kb, 226 allocations
+data("speed", "x86", "rapidxml", "data/xmark.xml", 1.01629);
+data("memory", "x86", "rapidxml", "data/xmark.xml", 25.3913);
+// tinyxml: 35.75 ns/byte, 27 Mb/s, 42904 Kb, 1596774 allocations
+data("speed", "x86", "tinyxml", "data/xmark.xml", 35.747);
+data("memory", "x86", "tinyxml", "data/xmark.xml", 41.899);
+// tinyxml2: 5.78 ns/byte, 165 Mb/s, 27063 Kb, 3904 allocations
+data("speed", "x86", "tinyxml2", "data/xmark.xml", 5.78015);
+data("memory", "x86", "tinyxml2", "data/xmark.xml", 26.4292);
+// vtdxml: 4.10 ns/byte, 233 Mb/s, 14874 Kb, 63 allocations
+data("speed", "x86", "vtdxml", "data/xmark.xml", 4.098);
+data("memory", "x86", "vtdxml", "data/xmark.xml", 14.5254);
+// xerces_dom: 10.85 ns/byte, 88 Mb/s, 62551 Kb, 18608 allocations
+data("speed", "x86", "xerces_dom", "data/xmark.xml", 10.8518);
+data("memory", "x86", "xerces_dom", "data/xmark.xml", 61.085);
+// xerces_sax: 6.36 ns/byte, 150 Mb/s, 249 Kb, 598 allocations
+data("speed", "x86", "xerces_sax", "data/xmark.xml", 6.36384);
+// xmllite: 4.04 ns/byte, 236 Mb/s, 0 Kb, 0 allocations
+data("speed", "x86", "xmllite", "data/xmark.xml", 4.03622);
+// xmlparser: 19.27 ns/byte, 49 Mb/s, 27426 Kb, 1169012 allocations
+data("speed", "x86", "xmlparser", "data/xmark.xml", 19.2737);
+data("memory", "x86", "xmlparser", "data/xmark.xml", 26.7836);
+
+// data/house.dae
+// cmarkup: 2.81 ns/byte, 339 Mb/s, 15667 Kb, 17 allocations
+data("speed", "x64", "cmarkup", "data/house.dae", 2.80906);
+data("memory", "x64", "cmarkup", "data/house.dae", 15.3);
+// expat: 1.21 ns/byte, 786 Mb/s, 8208 Kb, 164 allocations
+data("speed", "x64", "expat", "data/house.dae", 1.21357);
+// hexml: 0.38 ns/byte, 2490 Mb/s, 6835 Kb, 6 allocations
+data("speed", "x64", "hexml", "data/house.dae", 0.382945);
+data("memory", "x64", "hexml", "data/house.dae", 6.67563);
+// irrxml: 6.00 ns/byte, 159 Mb/s, 6670 Kb, 170531 allocations
+data("speed", "x64", "irrxml", "data/house.dae", 5.99992);
+// ixmlparser_dom: 4.79 ns/byte, 199 Mb/s, 8193 Kb, 14 allocations
+data("speed", "x64", "ixmlparser_dom", "data/house.dae", 4.79153);
+data("memory", "x64", "ixmlparser_dom", "data/house.dae", 8.00192);
+// ixmlparser_pull: 3.95 ns/byte, 241 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/house.dae", 3.95033);
+// libxml_dom: 1.98 ns/byte, 483 Mb/s, 18484 Kb, 57098 allocations
+data("speed", "x64", "libxml_dom", "data/house.dae", 1.97633);
+data("memory", "x64", "libxml_dom", "data/house.dae", 18.0516);
+// libxml_sax: 1.23 ns/byte, 777 Mb/s, 8207 Kb, 6964 allocations
+data("speed", "x64", "libxml_sax", "data/house.dae", 1.22755);
+// msxml_dom: 5.39 ns/byte, 177 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/house.dae", 5.388);
+data("memory", "x64", "msxml_dom", "data/house.dae", 12.6809);
+// msxml_sax: 6.44 ns/byte, 148 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/house.dae", 6.43845);
+// pugixml: 0.46 ns/byte, 2065 Mb/s, 7004 Kb, 24 allocations
+data("speed", "x64", "pugixml", "data/house.dae", 0.46183);
+data("memory", "x64", "pugixml", "data/house.dae", 6.84064);
+// pugixml_compact: 0.52 ns/byte, 1851 Mb/s, 6474 Kb, 13 allocations
+data("speed", "x64", "pugixml_compact", "data/house.dae", 0.515083);
+data("memory", "x64", "pugixml_compact", "data/house.dae", 6.32299);
+// pugixml_simd: 0.23 ns/byte, 4143 Mb/s, 7002 Kb, 24 allocations
+data("speed", "x64", "pugixml_simd", "data/house.dae", 0.230176);
+data("memory", "x64", "pugixml_simd", "data/house.dae", 6.83836);
+// pugxml: 2.51 ns/byte, 381 Mb/s, 7578 Kb, 37428 allocations
+data("speed", "x64", "pugxml", "data/house.dae", 2.5063);
+data("memory", "x64", "pugxml", "data/house.dae", 7.40063);
+// qtxml_dom: 13.89 ns/byte, 69 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/house.dae", 13.8942);
+data("memory", "x64", "qtxml_dom", "data/house.dae", 21.661);
+// qtxml_sax: 12.28 ns/byte, 78 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/house.dae", 12.2774);
+// rapidxml: 0.47 ns/byte, 2038 Mb/s, 7290 Kb, 17 allocations
+data("speed", "x64", "rapidxml", "data/house.dae", 0.467911);
+data("memory", "x64", "rapidxml", "data/house.dae", 7.11984);
+// tinyxml: 17.53 ns/byte, 54 Mb/s, 11297 Kb, 66621 allocations
+data("speed", "x64", "tinyxml", "data/house.dae", 17.5273);
+data("memory", "x64", "tinyxml", "data/house.dae", 11.0324);
+// tinyxml2: 1.72 ns/byte, 553 Mb/s, 7478 Kb, 316 allocations
+data("speed", "x64", "tinyxml2", "data/house.dae", 1.72348);
+data("memory", "x64", "tinyxml2", "data/house.dae", 7.30319);
+// vtdxml: 2.26 ns/byte, 422 Mb/s, 6539 Kb, 24 allocations
+data("speed", "x64", "vtdxml", "data/house.dae", 2.25749);
+data("memory", "x64", "vtdxml", "data/house.dae", 6.38622);
+// xerces_dom: 2.08 ns/byte, 459 Mb/s, 16906 Kb, 5523 allocations
+data("speed", "x64", "xerces_dom", "data/house.dae", 2.07562);
+data("memory", "x64", "xerces_dom", "data/house.dae", 16.51);
+// xerces_sax: 1.63 ns/byte, 584 Mb/s, 874 Kb, 739 allocations
+data("speed", "x64", "xerces_sax", "data/house.dae", 1.633);
+// xmllite: 1.47 ns/byte, 647 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/house.dae", 1.47301);
+// xmlparser: 9.66 ns/byte, 99 Mb/s, 7355 Kb, 48447 allocations
+data("speed", "x64", "xmlparser", "data/house.dae", 9.6591);
+data("memory", "x64", "xmlparser", "data/house.dae", 7.1833);
+
+// data/English.sml
+// cmarkup: 2.96 ns/byte, 322 Mb/s, 3430 Kb, 7 allocations
+data("speed", "x64", "cmarkup", "data/English.sml", 2.96149);
+data("memory", "x64", "cmarkup", "data/English.sml", 3.34978);
+// expat: 1.36 ns/byte, 699 Mb/s, 2054 Kb, 22 allocations
+data("speed", "x64", "expat", "data/English.sml", 1.3643);
+// hexml: 0.86 ns/byte, 1109 Mb/s, 4358 Kb, 6 allocations
+data("speed", "x64", "hexml", "data/English.sml", 0.859602);
+data("memory", "x64", "hexml", "data/English.sml", 4.2559);
+// irrxml: 6.84 ns/byte, 139 Mb/s, 1379 Kb, 64680 allocations
+data("speed", "x64", "irrxml", "data/English.sml", 6.83969);
+// ixmlparser_dom: 5.90 ns/byte, 162 Mb/s, 4246 Kb, 24 allocations
+data("speed", "x64", "ixmlparser_dom", "data/English.sml", 5.89649);
+data("memory", "x64", "ixmlparser_dom", "data/English.sml", 4.1472);
+// ixmlparser_pull: 4.58 ns/byte, 208 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/English.sml", 4.57944);
+// libxml_dom: 4.44 ns/byte, 215 Mb/s, 6301 Kb, 37253 allocations
+data("speed", "x64", "libxml_dom", "data/English.sml", 4.43639);
+data("memory", "x64", "libxml_dom", "data/English.sml", 6.15383);
+// libxml_sax: 2.27 ns/byte, 421 Mb/s, 2062 Kb, 20 allocations
+data("speed", "x64", "libxml_sax", "data/English.sml", 2.26726);
+// msxml_dom: 9.13 ns/byte, 104 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/English.sml", 9.12616);
+data("memory", "x64", "msxml_dom", "data/English.sml", 2.77299);
+// msxml_sax: 9.21 ns/byte, 104 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/English.sml", 9.20587);
+// pugixml: 0.61 ns/byte, 1557 Mb/s, 2495 Kb, 36 allocations
+data("speed", "x64", "pugixml", "data/English.sml", 0.612444);
+data("memory", "x64", "pugixml", "data/English.sml", 2.43734);
+// pugixml_compact: 0.87 ns/byte, 1096 Mb/s, 1660 Kb, 16 allocations
+data("speed", "x64", "pugixml_compact", "data/English.sml", 0.870506);
+data("memory", "x64", "pugixml_compact", "data/English.sml", 1.62154);
+// pugixml_simd: 0.36 ns/byte, 2633 Mb/s, 2492 Kb, 36 allocations
+data("speed", "x64", "pugixml_simd", "data/English.sml", 0.36217);
+data("memory", "x64", "pugixml_simd", "data/English.sml", 2.43387);
+// pugxml: 7.89 ns/byte, 121 Mb/s, 3511 Kb, 47830 allocations
+data("speed", "x64", "pugxml", "data/English.sml", 7.89479);
+data("memory", "x64", "pugxml", "data/English.sml", 3.4295);
+// qtxml_dom: 20.83 ns/byte, 46 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/English.sml", 20.8317);
+data("memory", "x64", "qtxml_dom", "data/English.sml", 6.67031);
+// qtxml_sax: 13.52 ns/byte, 71 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/English.sml", 13.5249);
+// rapidxml: 0.67 ns/byte, 1429 Mb/s, 3036 Kb, 27 allocations
+data("speed", "x64", "rapidxml", "data/English.sml", 0.667483);
+data("memory", "x64", "rapidxml", "data/English.sml", 2.96553);
+// tinyxml: 25.45 ns/byte, 37 Mb/s, 4934 Kb, 100500 allocations
+data("speed", "x64", "tinyxml", "data/English.sml", 25.4529);
+data("memory", "x64", "tinyxml", "data/English.sml", 4.8186);
+// tinyxml2: 2.99 ns/byte, 319 Mb/s, 3142 Kb, 456 allocations
+data("speed", "x64", "tinyxml2", "data/English.sml", 2.9916);
+data("memory", "x64", "tinyxml2", "data/English.sml", 3.06911);
+// vtdxml: 2.80 ns/byte, 341 Mb/s, 1677 Kb, 28 allocations
+data("speed", "x64", "vtdxml", "data/English.sml", 2.79819);
+data("memory", "x64", "vtdxml", "data/English.sml", 1.63785);
+// xerces_dom: 3.63 ns/byte, 263 Mb/s, 5748 Kb, 3278 allocations
+data("speed", "x64", "xerces_dom", "data/English.sml", 3.62819);
+data("memory", "x64", "xerces_dom", "data/English.sml", 5.61424);
+// xerces_sax: 2.55 ns/byte, 374 Mb/s, 371 Kb, 213 allocations
+data("speed", "x64", "xerces_sax", "data/English.sml", 2.54869);
+// xmllite: 2.56 ns/byte, 372 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/English.sml", 2.56219);
+// xmlparser: 15.49 ns/byte, 62 Mb/s, 3136 Kb, 60082 allocations
+data("speed", "x64", "xmlparser", "data/English.sml", 15.4944);
+data("memory", "x64", "xmlparser", "data/English.sml", 3.06335);
+
+// data/Russian.sml
+// cmarkup: 3.07 ns/byte, 311 Mb/s, 6386 Kb, 7 allocations
+data("speed", "x64", "cmarkup", "data/Russian.sml", 3.06561);
+data("memory", "x64", "cmarkup", "data/Russian.sml", 6.2364);
+// expat: 3.09 ns/byte, 308 Mb/s, 4102 Kb, 22 allocations
+data("speed", "x64", "expat", "data/Russian.sml", 3.09433);
+// hexml: 0.59 ns/byte, 1624 Mb/s, 5487 Kb, 6 allocations
+data("speed", "x64", "hexml", "data/Russian.sml", 0.587299);
+data("memory", "x64", "hexml", "data/Russian.sml", 5.35858);
+// irrxml: 5.79 ns/byte, 165 Mb/s, 2567 Kb, 61129 allocations
+data("speed", "x64", "irrxml", "data/Russian.sml", 5.78891);
+// ixmlparser_dom: 4.21 ns/byte, 227 Mb/s, 5270 Kb, 25 allocations
+data("speed", "x64", "ixmlparser_dom", "data/Russian.sml", 4.20702);
+data("memory", "x64", "ixmlparser_dom", "data/Russian.sml", 5.14722);
+// ixmlparser_pull: 3.02 ns/byte, 316 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/Russian.sml", 3.01946);
+// libxml_dom: 11.13 ns/byte, 86 Mb/s, 10646 Kb, 39784 allocations
+data("speed", "x64", "libxml_dom", "data/Russian.sml", 11.1284);
+data("memory", "x64", "libxml_dom", "data/Russian.sml", 10.3973);
+// libxml_sax: 9.46 ns/byte, 101 Mb/s, 4110 Kb, 20 allocations
+data("speed", "x64", "libxml_sax", "data/Russian.sml", 9.46329);
+// msxml_dom: 6.21 ns/byte, 153 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/Russian.sml", 6.2146);
+data("memory", "x64", "msxml_dom", "data/Russian.sml", 5.10614);
+// msxml_sax: 8.22 ns/byte, 116 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/Russian.sml", 8.21897);
+// pugixml: 0.52 ns/byte, 1826 Mb/s, 3613 Kb, 34 allocations
+data("speed", "x64", "pugixml", "data/Russian.sml", 0.522322);
+data("memory", "x64", "pugixml", "data/Russian.sml", 3.52925);
+// pugixml_compact: 0.64 ns/byte, 1493 Mb/s, 2810 Kb, 15 allocations
+data("speed", "x64", "pugixml_compact", "data/Russian.sml", 0.63861);
+data("memory", "x64", "pugixml_compact", "data/Russian.sml", 2.74493);
+// pugixml_simd: 0.27 ns/byte, 3590 Mb/s, 3610 Kb, 34 allocations
+data("speed", "x64", "pugixml_simd", "data/Russian.sml", 0.265623);
+data("memory", "x64", "pugixml_simd", "data/Russian.sml", 3.52597);
+// pugxml: 4.32 ns/byte, 221 Mb/s, 4544 Kb, 44471 allocations
+data("speed", "x64", "pugxml", "data/Russian.sml", 4.31564);
+data("memory", "x64", "pugxml", "data/Russian.sml", 4.43773);
+// qtxml_dom: 18.36 ns/byte, 52 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/Russian.sml", 18.3584);
+data("memory", "x64", "qtxml_dom", "data/Russian.sml", 6.69923);
+// qtxml_sax: 8.66 ns/byte, 110 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/Russian.sml", 8.66307);
+// rapidxml: 0.57 ns/byte, 1665 Mb/s, 4090 Kb, 25 allocations
+data("speed", "x64", "rapidxml", "data/Russian.sml", 0.572658);
+data("memory", "x64", "rapidxml", "data/Russian.sml", 3.99509);
+// tinyxml: 15.02 ns/byte, 64 Mb/s, 6452 Kb, 95136 allocations
+data("speed", "x64", "tinyxml", "data/Russian.sml", 15.0171);
+data("memory", "x64", "tinyxml", "data/Russian.sml", 6.30153);
+// tinyxml2: 2.21 ns/byte, 431 Mb/s, 4200 Kb, 424 allocations
+data("speed", "x64", "tinyxml2", "data/Russian.sml", 2.21269);
+data("memory", "x64", "tinyxml2", "data/Russian.sml", 4.1022);
+// vtdxml: 3.94 ns/byte, 242 Mb/s, 2859 Kb, 28 allocations
+data("speed", "x64", "vtdxml", "data/Russian.sml", 3.93917);
+data("memory", "x64", "vtdxml", "data/Russian.sml", 2.79249);
+// xerces_dom: 4.37 ns/byte, 218 Mb/s, 5981 Kb, 3240 allocations
+data("speed", "x64", "xerces_dom", "data/Russian.sml", 4.36863);
+data("memory", "x64", "xerces_dom", "data/Russian.sml", 5.84166);
+// xerces_sax: 3.66 ns/byte, 260 Mb/s, 368 Kb, 212 allocations
+data("speed", "x64", "xerces_sax", "data/Russian.sml", 3.66127);
+// xmllite: 4.21 ns/byte, 227 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/Russian.sml", 4.20521);
+// xmlparser: 9.62 ns/byte, 99 Mb/s, 4195 Kb, 55836 allocations
+data("speed", "x64", "xmlparser", "data/Russian.sml", 9.61625);
+data("memory", "x64", "xmlparser", "data/Russian.sml", 4.09725);
+
+// data/blog.xml
+// cmarkup: 3.31 ns/byte, 288 Mb/s, 3261 Kb, 9 allocations
+data("speed", "x64", "cmarkup", "data/blog.xml", 3.31318);
+data("memory", "x64", "cmarkup", "data/blog.xml", 3.18461);
+// expat: 2.99 ns/byte, 319 Mb/s, 2061 Kb, 137 allocations
+data("speed", "x64", "expat", "data/blog.xml", 2.99017);
+// hexml: 0.95 ns/byte, 1006 Mb/s, 2418 Kb, 7 allocations
+data("speed", "x64", "hexml", "data/blog.xml", 0.948261);
+data("memory", "x64", "hexml", "data/blog.xml", 2.36147);
+// irrxml: 14.55 ns/byte, 66 Mb/s, 1323 Kb, 171511 allocations
+data("speed", "x64", "irrxml", "data/blog.xml", 14.554);
+// ixmlparser_dom: 6.73 ns/byte, 142 Mb/s, 4109 Kb, 17 allocations
+data("speed", "x64", "ixmlparser_dom", "data/blog.xml", 6.72555);
+data("memory", "x64", "ixmlparser_dom", "data/blog.xml", 4.01302);
+// ixmlparser_pull: 5.14 ns/byte, 186 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/blog.xml", 5.13646);
+// libxml_dom: 7.65 ns/byte, 125 Mb/s, 9096 Kb, 79871 allocations
+data("speed", "x64", "libxml_dom", "data/blog.xml", 7.64621);
+data("memory", "x64", "libxml_dom", "data/blog.xml", 8.88346);
+// libxml_sax: 2.90 ns/byte, 329 Mb/s, 2080 Kb, 5238 allocations
+data("speed", "x64", "libxml_sax", "data/blog.xml", 2.89917);
+// msxml_dom: 14.63 ns/byte, 65 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/blog.xml", 14.6341);
+data("memory", "x64", "msxml_dom", "data/blog.xml", 2.65477);
+// msxml_sax: 9.99 ns/byte, 95 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/blog.xml", 9.99009);
+// pugixml: 0.91 ns/byte, 1045 Mb/s, 2780 Kb, 47 allocations
+data("speed", "x64", "pugixml", "data/blog.xml", 0.913009);
+data("memory", "x64", "pugixml", "data/blog.xml", 2.71542);
+// pugixml_compact: 1.23 ns/byte, 777 Mb/s, 1656 Kb, 18 allocations
+data("speed", "x64", "pugixml_compact", "data/blog.xml", 1.22782);
+data("memory", "x64", "pugixml_compact", "data/blog.xml", 1.61741);
+// pugixml_simd: 0.73 ns/byte, 1301 Mb/s, 2775 Kb, 47 allocations
+data("speed", "x64", "pugixml_simd", "data/blog.xml", 0.732921);
+data("memory", "x64", "pugixml_simd", "data/blog.xml", 2.71085);
+// pugxml: 6.43 ns/byte, 148 Mb/s, 3877 Kb, 64805 allocations
+data("speed", "x64", "pugxml", "data/blog.xml", 6.42577);
+data("memory", "x64", "pugxml", "data/blog.xml", 3.78656);
+// qtxml_dom: 29.07 ns/byte, 33 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/blog.xml", 29.0652);
+data("memory", "x64", "qtxml_dom", "data/blog.xml", 9.39754);
+// qtxml_sax: 17.72 ns/byte, 54 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/blog.xml", 17.7232);
+// rapidxml: 0.97 ns/byte, 987 Mb/s, 3480 Kb, 35 allocations
+data("speed", "x64", "rapidxml", "data/blog.xml", 0.965751);
+data("memory", "x64", "rapidxml", "data/blog.xml", 3.39888);
+// tinyxml: 25.70 ns/byte, 37 Mb/s, 5925 Kb, 138821 allocations
+data("speed", "x64", "tinyxml", "data/blog.xml", 25.6952);
+data("memory", "x64", "tinyxml", "data/blog.xml", 5.78624);
+// tinyxml2: 3.86 ns/byte, 247 Mb/s, 3676 Kb, 611 allocations
+data("speed", "x64", "tinyxml2", "data/blog.xml", 3.85672);
+data("memory", "x64", "tinyxml2", "data/blog.xml", 3.59007);
+// vtdxml: 2.95 ns/byte, 324 Mb/s, 1594 Kb, 28 allocations
+data("speed", "x64", "vtdxml", "data/blog.xml", 2.94617);
+data("memory", "x64", "vtdxml", "data/blog.xml", 1.55725);
+// xerces_dom: 7.59 ns/byte, 126 Mb/s, 8481 Kb, 3592 allocations
+data("speed", "x64", "xerces_dom", "data/blog.xml", 7.59156);
+data("memory", "x64", "xerces_dom", "data/blog.xml", 8.28272);
+// xerces_sax: 5.21 ns/byte, 183 Mb/s, 260 Kb, 510 allocations
+data("speed", "x64", "xerces_sax", "data/blog.xml", 5.21243);
+// xmllite: 2.95 ns/byte, 323 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/blog.xml", 2.95218);
+// xmlparser: 17.37 ns/byte, 55 Mb/s, 3463 Kb, 91388 allocations
+data("speed", "x64", "xmlparser", "data/blog.xml", 17.3742);
+data("memory", "x64", "xmlparser", "data/blog.xml", 3.38209);
+
+// data/cathedral.xml
+// cmarkup: 4.59 ns/byte, 208 Mb/s, 2946 Kb, 8 allocations
+data("speed", "x64", "cmarkup", "data/cathedral.xml", 4.59203);
+data("memory", "x64", "cmarkup", "data/cathedral.xml", 2.87762);
+// expat: 7.77 ns/byte, 123 Mb/s, 1030 Kb, 23 allocations
+data("speed", "x64", "expat", "data/cathedral.xml", 7.7655);
+// hexml: 2.30 ns/byte, 414 Mb/s, 3851 Kb, 10 allocations
+data("speed", "x64", "hexml", "data/cathedral.xml", 2.30466);
+data("memory", "x64", "hexml", "data/cathedral.xml", 3.76149);
+// irrxml: 57.77 ns/byte, 17 Mb/s, 907 Kb, 657154 allocations
+data("speed", "x64", "irrxml", "data/cathedral.xml", 57.7686);
+// ixmlparser_dom: 7.25 ns/byte, 131 Mb/s, 5195 Kb, 23 allocations
+data("speed", "x64", "ixmlparser_dom", "data/cathedral.xml", 7.25467);
+data("memory", "x64", "ixmlparser_dom", "data/cathedral.xml", 5.07397);
+// ixmlparser_pull: 4.03 ns/byte, 237 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/cathedral.xml", 4.02736);
+// libxml_dom: 24.01 ns/byte, 40 Mb/s, 17432 Kb, 225750 allocations
+data("speed", "x64", "libxml_dom", "data/cathedral.xml", 24.0101);
+data("memory", "x64", "libxml_dom", "data/cathedral.xml", 17.0238);
+// libxml_sax: 8.32 ns/byte, 115 Mb/s, 1037 Kb, 30115 allocations
+data("speed", "x64", "libxml_sax", "data/cathedral.xml", 8.32467);
+// msxml_dom: 25.81 ns/byte, 37 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/cathedral.xml", 25.8051);
+data("memory", "x64", "msxml_dom", "data/cathedral.xml", 1.83266);
+// msxml_sax: 8.03 ns/byte, 119 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/cathedral.xml", 8.02799);
+// pugixml: 0.93 ns/byte, 1025 Mb/s, 3379 Kb, 78 allocations
+data("speed", "x64", "pugixml", "data/cathedral.xml", 0.930116);
+data("memory", "x64", "pugixml", "data/cathedral.xml", 3.30012);
+// pugixml_compact: 1.50 ns/byte, 634 Mb/s, 1518 Kb, 23 allocations
+data("speed", "x64", "pugixml_compact", "data/cathedral.xml", 1.50461);
+data("memory", "x64", "pugixml_compact", "data/cathedral.xml", 1.48266);
+// pugixml_simd: 0.96 ns/byte, 998 Mb/s, 3371 Kb, 78 allocations
+data("speed", "x64", "pugixml_simd", "data/cathedral.xml", 0.955657);
+data("memory", "x64", "pugixml_simd", "data/cathedral.xml", 3.29248);
+// pugxml: 12.18 ns/byte, 78 Mb/s, 5528 Kb, 136702 allocations
+data("speed", "x64", "pugxml", "data/cathedral.xml", 12.1823);
+data("memory", "x64", "pugxml", "data/cathedral.xml", 5.39868);
+// qtxml_dom: 59.86 ns/byte, 16 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/cathedral.xml", 59.8642);
+data("memory", "x64", "qtxml_dom", "data/cathedral.xml", 18.294);
+// qtxml_sax: 35.51 ns/byte, 27 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/cathedral.xml", 35.5114);
+// rapidxml: 1.27 ns/byte, 752 Mb/s, 4428 Kb, 56 allocations
+data("speed", "x64", "rapidxml", "data/cathedral.xml", 1.26766);
+data("memory", "x64", "rapidxml", "data/cathedral.xml", 4.32455);
+// tinyxml: 37.32 ns/byte, 26 Mb/s, 9327 Kb, 240788 allocations
+data("speed", "x64", "tinyxml", "data/cathedral.xml", 37.315);
+data("memory", "x64", "tinyxml", "data/cathedral.xml", 9.10884);
+// tinyxml2: 7.65 ns/byte, 125 Mb/s, 5096 Kb, 1067 allocations
+data("speed", "x64", "tinyxml2", "data/cathedral.xml", 7.65194);
+data("memory", "x64", "tinyxml2", "data/cathedral.xml", 4.97752);
+// vtdxml: 3.80 ns/byte, 251 Mb/s, 1798 Kb, 58 allocations
+data("speed", "x64", "vtdxml", "data/cathedral.xml", 3.79866);
+data("memory", "x64", "vtdxml", "data/cathedral.xml", 1.75605);
+// xerces_dom: 18.58 ns/byte, 51 Mb/s, 14584 Kb, 259 allocations
+data("speed", "x64", "xerces_dom", "data/cathedral.xml", 18.5815);
+data("memory", "x64", "xerces_dom", "data/cathedral.xml", 14.243);
+// xerces_sax: 11.67 ns/byte, 82 Mb/s, 294 Kb, 221 allocations
+data("speed", "x64", "xerces_sax", "data/cathedral.xml", 11.6675);
+// xmllite: 4.79 ns/byte, 199 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/cathedral.xml", 4.7885);
+// xmlparser: 18.21 ns/byte, 52 Mb/s, 5167 Kb, 170699 allocations
+data("speed", "x64", "xmlparser", "data/cathedral.xml", 18.2086);
+data("memory", "x64", "xmlparser", "data/cathedral.xml", 5.04624);
+
+// data/employees-big.xml
+// cmarkup: 4.70 ns/byte, 203 Mb/s, 28670 Kb, 10 allocations
+data("speed", "x64", "cmarkup", "data/employees-big.xml", 4.69904);
+data("memory", "x64", "cmarkup", "data/employees-big.xml", 27.999);
+// expat: 5.78 ns/byte, 165 Mb/s, 16390 Kb, 23 allocations
+data("speed", "x64", "expat", "data/employees-big.xml", 5.78204);
+// hexml: 2.55 ns/byte, 374 Mb/s, 30397 Kb, 14 allocations
+data("speed", "x64", "hexml", "data/employees-big.xml", 2.54954);
+data("memory", "x64", "hexml", "data/employees-big.xml", 29.6848);
+// irrxml: 29.68 ns/byte, 32 Mb/s, 10240 Kb, 3963353 allocations
+data("speed", "x64", "irrxml", "data/employees-big.xml", 29.6789);
+// ixmlparser_dom: 7.21 ns/byte, 132 Mb/s, 36441 Kb, 59 allocations
+data("speed", "x64", "ixmlparser_dom", "data/employees-big.xml", 7.20514);
+data("memory", "x64", "ixmlparser_dom", "data/employees-big.xml", 35.5871);
+// ixmlparser_pull: 4.28 ns/byte, 223 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/employees-big.xml", 4.28017);
+// libxml_dom: 18.87 ns/byte, 51 Mb/s, 153842 Kb, 1777509 allocations
+data("speed", "x64", "libxml_dom", "data/employees-big.xml", 18.8722);
+data("memory", "x64", "libxml_dom", "data/employees-big.xml", 150.237);
+// libxml_sax: 5.28 ns/byte, 181 Mb/s, 16401 Kb, 84088 allocations
+data("speed", "x64", "libxml_sax", "data/employees-big.xml", 5.28089);
+// msxml_dom: 48.75 ns/byte, 20 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/employees-big.xml", 48.7506);
+data("memory", "x64", "msxml_dom", "data/employees-big.xml", 20.7101);
+// msxml_sax: 9.01 ns/byte, 106 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/employees-big.xml", 9.00873);
+// pugixml: 1.25 ns/byte, 764 Mb/s, 40718 Kb, 950 allocations
+data("speed", "x64", "pugixml", "data/employees-big.xml", 1.24867);
+data("memory", "x64", "pugixml", "data/employees-big.xml", 39.764);
+// pugixml_compact: 1.82 ns/byte, 523 Mb/s, 16850 Kb, 202 allocations
+data("speed", "x64", "pugixml_compact", "data/employees-big.xml", 1.82478);
+data("memory", "x64", "pugixml_compact", "data/employees-big.xml", 16.4555);
+// pugixml_simd: 1.24 ns/byte, 769 Mb/s, 40653 Kb, 951 allocations
+data("speed", "x64", "pugixml_simd", "data/employees-big.xml", 1.23959);
+data("memory", "x64", "pugixml_simd", "data/employees-big.xml", 39.7011);
+// pugxml: 20.65 ns/byte, 46 Mb/s, 65970 Kb, 1369156 allocations
+data("speed", "x64", "pugxml", "data/employees-big.xml", 20.651);
+data("memory", "x64", "pugxml", "data/employees-big.xml", 64.4239);
+// qtxml_dom: 43.73 ns/byte, 22 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/employees-big.xml", 43.7252);
+data("memory", "x64", "qtxml_dom", "data/employees-big.xml", 128.694);
+// qtxml_sax: 23.83 ns/byte, 40 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/employees-big.xml", 23.8264);
+// rapidxml: 1.44 ns/byte, 661 Mb/s, 55385 Kb, 706 allocations
+data("speed", "x64", "rapidxml", "data/employees-big.xml", 1.44177);
+data("memory", "x64", "rapidxml", "data/employees-big.xml", 54.0872);
+// tinyxml: 38.55 ns/byte, 25 Mb/s, 95377 Kb, 2450061 allocations
+data("speed", "x64", "tinyxml", "data/employees-big.xml", 38.5518);
+data("memory", "x64", "tinyxml", "data/employees-big.xml", 93.1417);
+// tinyxml2: 9.45 ns/byte, 101 Mb/s, 58921 Kb, 12266 allocations
+data("speed", "x64", "tinyxml2", "data/employees-big.xml", 9.44906);
+data("memory", "x64", "tinyxml2", "data/employees-big.xml", 57.5408);
+// vtdxml: 3.45 ns/byte, 276 Mb/s, 16995 Kb, 603 allocations
+data("speed", "x64", "vtdxml", "data/employees-big.xml", 3.45127);
+data("memory", "x64", "vtdxml", "data/employees-big.xml", 16.5972);
+// xerces_dom: 15.23 ns/byte, 63 Mb/s, 125521 Kb, 487 allocations
+data("speed", "x64", "xerces_dom", "data/employees-big.xml", 15.2288);
+data("memory", "x64", "xerces_dom", "data/employees-big.xml", 122.579);
+// xerces_sax: 9.17 ns/byte, 104 Mb/s, 907 Kb, 233 allocations
+data("speed", "x64", "xerces_sax", "data/employees-big.xml", 9.16744);
+// xmllite: 5.37 ns/byte, 178 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/employees-big.xml", 5.37006);
+// xmlparser: 21.78 ns/byte, 44 Mb/s, 55210 Kb, 1898880 allocations
+data("speed", "x64", "xmlparser", "data/employees-big.xml", 21.7788);
+data("memory", "x64", "xmlparser", "data/employees-big.xml", 53.9167);
+
+// data/terrover.xml
+// cmarkup: 4.15 ns/byte, 230 Mb/s, 38444 Kb, 12 allocations
+data("speed", "x64", "cmarkup", "data/terrover.xml", 4.15477);
+data("memory", "x64", "cmarkup", "data/terrover.xml", 37.5439);
+// expat: 7.70 ns/byte, 124 Mb/s, 16402 Kb, 132 allocations
+data("speed", "x64", "expat", "data/terrover.xml", 7.70023);
+// hexml: 1.68 ns/byte, 569 Mb/s, 40842 Kb, 16 allocations
+data("speed", "x64", "hexml", "data/terrover.xml", 1.67687);
+data("memory", "x64", "hexml", "data/terrover.xml", 39.8857);
+// irrxml: 26.81 ns/byte, 36 Mb/s, 16165 Kb, 4961420 allocations
+data("speed", "x64", "irrxml", "data/terrover.xml", 26.8118);
+// ixmlparser_dom: 6.01 ns/byte, 159 Mb/s, 35859 Kb, 49 allocations
+data("speed", "x64", "ixmlparser_dom", "data/terrover.xml", 6.01112);
+data("memory", "x64", "ixmlparser_dom", "data/terrover.xml", 35.0195);
+// ixmlparser_pull: 4.22 ns/byte, 226 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/terrover.xml", 4.22126);
+// libxml_dom: 12.30 ns/byte, 78 Mb/s, 148443 Kb, 1652648 allocations
+data("speed", "x64", "libxml_dom", "data/terrover.xml", 12.3035);
+data("memory", "x64", "libxml_dom", "data/terrover.xml", 144.964);
+// libxml_sax: 4.62 ns/byte, 206 Mb/s, 16403 Kb, 230832 allocations
+data("speed", "x64", "libxml_sax", "data/terrover.xml", 4.61832);
+// msxml_dom: 45.46 ns/byte, 21 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/terrover.xml", 45.4634);
+data("memory", "x64", "msxml_dom", "data/terrover.xml", 32.4969);
+// msxml_sax: 6.97 ns/byte, 137 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/terrover.xml", 6.97265);
+// pugixml: 0.81 ns/byte, 1173 Mb/s, 35420 Kb, 601 allocations
+data("speed", "x64", "pugixml", "data/terrover.xml", 0.812745);
+data("memory", "x64", "pugixml", "data/terrover.xml", 34.59);
+// pugixml_compact: 1.13 ns/byte, 844 Mb/s, 21060 Kb, 156 allocations
+data("speed", "x64", "pugixml_compact", "data/terrover.xml", 1.1298);
+data("memory", "x64", "pugixml_compact", "data/terrover.xml", 20.567);
+// pugixml_simd: 0.83 ns/byte, 1154 Mb/s, 35391 Kb, 602 allocations
+data("speed", "x64", "pugixml_simd", "data/terrover.xml", 0.826527);
+data("memory", "x64", "pugixml_simd", "data/terrover.xml", 34.5618);
+// pugxml: 6.28 ns/byte, 152 Mb/s, 51112 Kb, 1031012 allocations
+data("speed", "x64", "pugxml", "data/terrover.xml", 6.27942);
+data("memory", "x64", "pugxml", "data/terrover.xml", 49.915);
+// qtxml_dom: 38.45 ns/byte, 25 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/terrover.xml", 38.4465);
+data("memory", "x64", "qtxml_dom", "data/terrover.xml", 172.664);
+// qtxml_sax: 24.51 ns/byte, 39 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/terrover.xml", 24.514);
+// rapidxml: 0.93 ns/byte, 1029 Mb/s, 44006 Kb, 436 allocations
+data("speed", "x64", "rapidxml", "data/terrover.xml", 0.926861);
+data("memory", "x64", "rapidxml", "data/terrover.xml", 42.9746);
+// tinyxml: 26.33 ns/byte, 36 Mb/s, 84489 Kb, 2131643 allocations
+data("speed", "x64", "tinyxml", "data/terrover.xml", 26.3259);
+data("memory", "x64", "tinyxml", "data/terrover.xml", 82.5089);
+// tinyxml2: 4.85 ns/byte, 197 Mb/s, 49103 Kb, 8306 allocations
+data("speed", "x64", "tinyxml2", "data/terrover.xml", 4.85184);
+data("memory", "x64", "tinyxml2", "data/terrover.xml", 47.9522);
+// vtdxml: 3.55 ns/byte, 269 Mb/s, 21341 Kb, 55 allocations
+data("speed", "x64", "vtdxml", "data/terrover.xml", 3.54982);
+data("memory", "x64", "vtdxml", "data/terrover.xml", 20.8415);
+// xerces_dom: 14.80 ns/byte, 64 Mb/s, 124431 Kb, 7467 allocations
+data("speed", "x64", "xerces_dom", "data/terrover.xml", 14.8036);
+data("memory", "x64", "xerces_dom", "data/terrover.xml", 121.515);
+// xerces_sax: 10.55 ns/byte, 90 Mb/s, 261 Kb, 509 allocations
+data("speed", "x64", "xerces_sax", "data/terrover.xml", 10.5538);
+// xmllite: 2.97 ns/byte, 321 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/terrover.xml", 2.9721);
+// xmlparser: 15.23 ns/byte, 63 Mb/s, 48579 Kb, 1234038 allocations
+data("speed", "x64", "xmlparser", "data/terrover.xml", 15.2292);
+data("memory", "x64", "xmlparser", "data/terrover.xml", 47.4411);
+
+// data/vod.xml
+// cmarkup: 5.63 ns/byte, 169 Mb/s, 8216 Kb, 12 allocations
+data("speed", "x64", "cmarkup", "data/vod.xml", 5.62715);
+data("memory", "x64", "cmarkup", "data/vod.xml", 8.02387);
+// expat: 7.46 ns/byte, 128 Mb/s, 4105 Kb, 71 allocations
+data("speed", "x64", "expat", "data/vod.xml", 7.45817);
+// hexml: 3.82 ns/byte, 250 Mb/s, 11457 Kb, 8 allocations
+data("speed", "x64", "hexml", "data/vod.xml", 3.82219);
+data("memory", "x64", "hexml", "data/vod.xml", 11.1886);
+// irrxml: 17.96 ns/byte, 53 Mb/s, 2134 Kb, 461914 allocations
+data("speed", "x64", "irrxml", "data/vod.xml", 17.9583);
+// ixmlparser_dom: 9.05 ns/byte, 105 Mb/s, 11283 Kb, 25 allocations
+data("speed", "x64", "ixmlparser_dom", "data/vod.xml", 9.04937);
+data("memory", "x64", "ixmlparser_dom", "data/vod.xml", 11.0191);
+// ixmlparser_pull: 4.85 ns/byte, 197 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/vod.xml", 4.85159);
+// libxml_dom: 22.55 ns/byte, 42 Mb/s, 38602 Kb, 443506 allocations
+data("speed", "x64", "libxml_dom", "data/vod.xml", 22.5469);
+data("memory", "x64", "libxml_dom", "data/vod.xml", 37.6982);
+// libxml_sax: 6.29 ns/byte, 152 Mb/s, 4110 Kb, 29 allocations
+data("speed", "x64", "libxml_sax", "data/vod.xml", 6.29483);
+// msxml_dom: 28.41 ns/byte, 34 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/vod.xml", 28.4085);
+data("memory", "x64", "msxml_dom", "data/vod.xml", 4.33701);
+// msxml_sax: 9.98 ns/byte, 96 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/vod.xml", 9.97824);
+// pugixml: 1.55 ns/byte, 615 Mb/s, 10836 Kb, 272 allocations
+data("speed", "x64", "pugixml", "data/vod.xml", 1.54945);
+data("memory", "x64", "pugixml", "data/vod.xml", 10.5823);
+// pugixml_compact: 2.23 ns/byte, 427 Mb/s, 3897 Kb, 61 allocations
+data("speed", "x64", "pugixml_compact", "data/vod.xml", 2.23116);
+data("memory", "x64", "pugixml_compact", "data/vod.xml", 3.80631);
+// pugixml_simd: 1.60 ns/byte, 596 Mb/s, 10808 Kb, 272 allocations
+data("speed", "x64", "pugixml_simd", "data/vod.xml", 1.60022);
+data("memory", "x64", "pugixml_simd", "data/vod.xml", 10.5554);
+// pugxml: 12.66 ns/byte, 75 Mb/s, 18640 Kb, 382832 allocations
+data("speed", "x64", "pugxml", "data/vod.xml", 12.6551);
+data("memory", "x64", "pugxml", "data/vod.xml", 18.2032);
+// qtxml_dom: 45.92 ns/byte, 21 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/vod.xml", 45.9185);
+data("memory", "x64", "qtxml_dom", "data/vod.xml", 27.2374);
+// qtxml_sax: 26.34 ns/byte, 36 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/vod.xml", 26.3432);
+// rapidxml: 1.85 ns/byte, 515 Mb/s, 15067 Kb, 203 allocations
+data("speed", "x64", "rapidxml", "data/vod.xml", 1.85306);
+data("memory", "x64", "rapidxml", "data/vod.xml", 14.7148);
+// tinyxml: 42.13 ns/byte, 23 Mb/s, 25801 Kb, 573268 allocations
+data("speed", "x64", "tinyxml", "data/vod.xml", 42.1306);
+data("memory", "x64", "tinyxml", "data/vod.xml", 25.1972);
+// tinyxml2: 12.04 ns/byte, 79 Mb/s, 15845 Kb, 3463 allocations
+data("speed", "x64", "tinyxml2", "data/vod.xml", 12.035);
+data("memory", "x64", "tinyxml2", "data/vod.xml", 15.4736);
+// vtdxml: 3.64 ns/byte, 262 Mb/s, 3590 Kb, 49 allocations
+data("speed", "x64", "vtdxml", "data/vod.xml", 3.63882);
+data("memory", "x64", "vtdxml", "data/vod.xml", 3.50608);
+// xerces_dom: 15.61 ns/byte, 61 Mb/s, 32588 Kb, 809 allocations
+data("speed", "x64", "xerces_dom", "data/vod.xml", 15.6082);
+data("memory", "x64", "xerces_dom", "data/vod.xml", 31.825);
+// xerces_sax: 10.66 ns/byte, 89 Mb/s, 243 Kb, 415 allocations
+data("speed", "x64", "xerces_sax", "data/vod.xml", 10.6569);
+// xmllite: 7.05 ns/byte, 135 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/vod.xml", 7.04534);
+// xmlparser: 25.14 ns/byte, 38 Mb/s, 15709 Kb, 482180 allocations
+data("speed", "x64", "xmlparser", "data/vod.xml", 25.1416);
+data("memory", "x64", "xmlparser", "data/vod.xml", 15.341);
+
+// data/xmark.xml
+// cmarkup: 4.01 ns/byte, 238 Mb/s, 29338 Kb, 10 allocations
+data("speed", "x64", "cmarkup", "data/xmark.xml", 4.01266);
+data("memory", "x64", "cmarkup", "data/xmark.xml", 28.651);
+// expat: 3.72 ns/byte, 256 Mb/s, 16398 Kb, 118 allocations
+data("speed", "x64", "expat", "data/xmark.xml", 3.72347);
+// hexml: 1.87 ns/byte, 510 Mb/s, 31024 Kb, 13 allocations
+data("speed", "x64", "hexml", "data/xmark.xml", 1.86831);
+data("memory", "x64", "hexml", "data/xmark.xml", 30.297);
+// irrxml: 13.25 ns/byte, 72 Mb/s, 11604 Kb, 1583123 allocations
+data("speed", "x64", "irrxml", "data/xmark.xml", 13.2538);
+// ixmlparser_dom: 6.96 ns/byte, 137 Mb/s, 29734 Kb, 47 allocations
+data("speed", "x64", "ixmlparser_dom", "data/xmark.xml", 6.95708);
+data("memory", "x64", "ixmlparser_dom", "data/xmark.xml", 29.0379);
+// ixmlparser_pull: 4.87 ns/byte, 196 Mb/s, 1024 Kb, 2 allocations
+data("speed", "x64", "ixmlparser_pull", "data/xmark.xml", 4.86551);
+// libxml_dom: 10.71 ns/byte, 89 Mb/s, 109273 Kb, 1109077 allocations
+data("speed", "x64", "libxml_dom", "data/xmark.xml", 10.7143);
+data("memory", "x64", "libxml_dom", "data/xmark.xml", 106.713);
+// libxml_sax: 3.21 ns/byte, 297 Mb/s, 16401 Kb, 38303 allocations
+data("speed", "x64", "libxml_sax", "data/xmark.xml", 3.2122);
+// msxml_dom: 25.84 ns/byte, 37 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_dom", "data/xmark.xml", 25.843);
+data("memory", "x64", "msxml_dom", "data/xmark.xml", 23.2677);
+// msxml_sax: 8.71 ns/byte, 109 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "msxml_sax", "data/xmark.xml", 8.71099);
+// pugixml: 1.16 ns/byte, 824 Mb/s, 31059 Kb, 607 allocations
+data("speed", "x64", "pugixml", "data/xmark.xml", 1.15779);
+data("memory", "x64", "pugixml", "data/xmark.xml", 30.3318);
+// pugixml_compact: 1.40 ns/byte, 682 Mb/s, 15672 Kb, 130 allocations
+data("speed", "x64", "pugixml_compact", "data/xmark.xml", 1.39846);
+data("memory", "x64", "pugixml_compact", "data/xmark.xml", 15.3055);
+// pugixml_simd: 0.97 ns/byte, 987 Mb/s, 31030 Kb, 608 allocations
+data("speed", "x64", "pugixml_simd", "data/xmark.xml", 0.966291);
+data("memory", "x64", "pugixml_simd", "data/xmark.xml", 30.303);
+// pugxml: 7.81 ns/byte, 122 Mb/s, 47414 Kb, 866856 allocations
+data("speed", "x64", "pugxml", "data/xmark.xml", 7.80674);
+data("memory", "x64", "pugxml", "data/xmark.xml", 46.3031);
+// qtxml_dom: 32.08 ns/byte, 30 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_dom", "data/xmark.xml", 32.0791);
+data("memory", "x64", "qtxml_dom", "data/xmark.xml", 96.834);
+// qtxml_sax: 17.97 ns/byte, 53 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "qtxml_sax", "data/xmark.xml", 17.9718);
+// rapidxml: 1.09 ns/byte, 879 Mb/s, 40477 Kb, 452 allocations
+data("speed", "x64", "rapidxml", "data/xmark.xml", 1.08517);
+data("memory", "x64", "rapidxml", "data/xmark.xml", 39.5288);
+// tinyxml: 30.98 ns/byte, 31 Mb/s, 68671 Kb, 1596774 allocations
+data("speed", "x64", "tinyxml", "data/xmark.xml", 30.9836);
+data("memory", "x64", "tinyxml", "data/xmark.xml", 67.0622);
+// tinyxml2: 5.88 ns/byte, 162 Mb/s, 42621 Kb, 7827 allocations
+data("speed", "x64", "tinyxml2", "data/xmark.xml", 5.87615);
+data("memory", "x64", "tinyxml2", "data/xmark.xml", 41.623);
+// vtdxml: 3.11 ns/byte, 306 Mb/s, 14874 Kb, 63 allocations
+data("speed", "x64", "vtdxml", "data/xmark.xml", 3.11313);
+data("memory", "x64", "vtdxml", "data/xmark.xml", 14.5261);
+// xerces_dom: 8.91 ns/byte, 107 Mb/s, 91404 Kb, 18664 allocations
+data("speed", "x64", "xerces_dom", "data/xmark.xml", 8.91245);
+data("memory", "x64", "xerces_dom", "data/xmark.xml", 89.2626);
+// xerces_sax: 5.63 ns/byte, 170 Mb/s, 288 Kb, 598 allocations
+data("speed", "x64", "xerces_sax", "data/xmark.xml", 5.62575);
+// xmllite: 3.61 ns/byte, 264 Mb/s, 0 Kb, 0 allocations
+data("speed", "x64", "xmllite", "data/xmark.xml", 3.61363);
+// xmlparser: 17.48 ns/byte, 55 Mb/s, 41385 Kb, 1169012 allocations
+data("speed", "x64", "xmlparser", "data/xmark.xml", 17.4823);
+data("memory", "x64", "xmlparser", "data/xmark.xml", 40.4151);
+
+}
+</script>
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script type="text/javascript">
+	bdata = {}
+	bfiles = {}
+
+	function hget(h, key, def) {
+		if (h.hasOwnProperty(key)) {
+			return h[key]
+		} else {
+			h[key] = def
+			return h[key]
+		}
+	}
+
+	function benchmark_data(category, platform, parser, file, value) {
+		hget(hget(hget(bdata, category, {}), platform, {}), parser, {})[file] = value
+		bfiles[file] = file
+	}
+
+	function drawChartRatio(bd, chartid, haxis) {
+		var data = new google.visualization.DataTable()
+		
+		data.addColumn('string', 'parser')
+	
+		for (var file in bfiles) {
+			data.addColumn('number', file)
+		}
+
+		for (var parser in bd) {
+			var row = [parser]
+
+			for (var file in bfiles) {
+				var ratio = bd[parser][file] / bd['pugixml'][file]
+
+				row.push(ratio)
+			}
+
+			data.addRow(row)
+		}
+
+		var chartdiv = document.getElementById(chartid)
+
+		var options = {
+			legend: 'none',
+			orientation: 'vertical',
+			title: chartdiv.innerHTML,
+			lineWidth: 0,
+			pointSize: 5,
+			chartArea: {width: '65%', height: '90%'},
+			hAxis: haxis
+		};
+
+		var chart = new google.visualization.LineChart(chartdiv)
+
+		chart.draw(data, options)
+	}
+
+	google.load('visualization', '1.0', {'packages':['corechart']})
+
+	google.setOnLoadCallback(function () {
+		benchmark(benchmark_data)
+
+		var hAxisSpeed = {
+			logScale: true,
+			minValue: 0.75,
+			ticks: [1, 3, 9, 27, 81]
+		}
+
+		var hAxisMemory = {
+			logScale: true,
+			minValue: 0.25,
+			ticks: [0.5, 1, 2, 4, 8]
+		}
+
+		drawChartRatio(bdata.speed.x86, 'chart_speed_x86', hAxisSpeed)
+		drawChartRatio(bdata.memory.x86, 'chart_memory_x86', hAxisMemory)
+		drawChartRatio(bdata.speed.x64, 'chart_speed_x64', hAxisSpeed)
+		drawChartRatio(bdata.memory.x64, 'chart_memory_x64', hAxisMemory)
+	})
+</script>
+</body>
+</html>
+
+
