@@ -10917,22 +10917,6 @@ PUGI__NS_BEGIN
 
 		char_t _scratch[32];
 
-	#ifdef PUGIXML_NO_EXCEPTIONS
-		jmp_buf _error_handler;
-	#endif
-
-		void throw_error_oom()
-		{
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			_result->error = "Out of memory";
-			_result->offset = _lexer.current_pos() - _query;
-
-			longjmp(_error_handler, 1);
-		#else
-			throw std::bad_alloc();
-		#endif
-		}
-
 		xpath_ast_node* error(const char* message)
 		{
 			_result->error = message;
@@ -10941,10 +10925,15 @@ PUGI__NS_BEGIN
 			return 0;
 		}
 
+		xpath_ast_node* error_oom()
+		{
+			return error("Out of memory");
+		}
+
 		void* alloc_node()
 		{
 			void* result = _alloc->allocate_nothrow(sizeof(xpath_ast_node));
-			if (!result) throw_error_oom();
+			if (!result) return error_oom();
 
 			return result;
 		}
@@ -10993,8 +10982,11 @@ PUGI__NS_BEGIN
 			size_t length = static_cast<size_t>(value.end - value.begin);
 
 			char_t* c = static_cast<char_t*>(_alloc->allocate_nothrow((length + 1) * sizeof(char_t)));
-			if (!c) throw_error_oom();
-			assert(c); // workaround for clang static analysis
+			if (!c)
+			{
+				error_oom();
+				return c;
+			}
 
 			memcpy(c, value.begin, length * sizeof(char_t));
 			c[length] = 0;
@@ -11239,7 +11231,7 @@ PUGI__NS_BEGIN
 
 				xpath_variable* var = 0;
 				if (!get_variable_scratch(_scratch, _variables, name.begin, name.end, &var))
-					throw_error_oom();
+					return error_oom();
 
 				if (!var)
 					return error("Unknown variable: variable set does not contain the given name");
@@ -11279,7 +11271,7 @@ PUGI__NS_BEGIN
 				double value = 0;
 
 				if (!convert_string_to_number_scratch(_scratch, _lexer.contents().begin, _lexer.contents().end, &value))
-					throw_error_oom();
+					return error_oom();
 
 				_lexer.next();
 
@@ -11803,13 +11795,7 @@ PUGI__NS_BEGIN
 		{
 			xpath_parser parser(query, variables, alloc, result);
 
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			int error = setjmp(parser._error_handler);
-
-			return (error == 0) ? parser.parse() : 0;
-		#else
 			return parser.parse();
-		#endif
 		}
 	};
 
@@ -12429,7 +12415,10 @@ namespace pugi
 			else
 			{
 			#ifndef PUGIXML_NO_EXCEPTIONS
-				throw xpath_exception(_result);
+				if (strcmp(_result.error, "Out of memory"))
+					throw xpath_exception(_result);
+				else
+					throw std::bad_alloc();
 			#endif
 			}
 		}
