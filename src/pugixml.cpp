@@ -11222,6 +11222,7 @@ PUGI__NS_BEGIN
 				_lexer.next();
 
 				xpath_ast_node* n = parse_expression();
+				if (!n) return 0;
 
 				if (_lexer.current() != lex_close_brace)
 					throw_error("Unmatched braces");
@@ -11234,12 +11235,11 @@ PUGI__NS_BEGIN
 			case lex_quoted_string:
 			{
 				const char_t* value = alloc_string(_lexer.contents());
-
-				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_string_constant, xpath_type_string, value);
+				if (!value) return 0;
 
 				_lexer.next();
 
-				return n;
+				return new (alloc_node()) xpath_ast_node(ast_string_constant, xpath_type_string, value);
 			}
 
 			case lex_number:
@@ -11249,11 +11249,9 @@ PUGI__NS_BEGIN
 				if (!convert_string_to_number_scratch(_scratch, _lexer.contents().begin, _lexer.contents().end, &value))
 					throw_error_oom();
 
-				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
-
 				_lexer.next();
 
-				return n;
+				return new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
 			}
 
 			case lex_string:
@@ -11280,6 +11278,7 @@ PUGI__NS_BEGIN
 					}
 
 					xpath_ast_node* n = parse_expression();
+					if (!n) return 0;
 
 					if (argc < 2) args[argc] = n;
 					else last_arg->set_next(n);
@@ -11306,17 +11305,20 @@ PUGI__NS_BEGIN
 		xpath_ast_node* parse_filter_expression()
 		{
 			xpath_ast_node* n = parse_primary_expression();
+			if (!n) return 0;
 
 			while (_lexer.current() == lex_open_square_brace)
 			{
 				_lexer.next();
 
 				xpath_ast_node* expr = parse_expression();
+				if (!expr) return 0;
 
 				if (n->rettype() != xpath_type_node_set)
 					throw_error("Predicate has to be applied to node set");
 
 				n = new (alloc_node()) xpath_ast_node(ast_filter, n, expr, predicate_default);
+				if (!n) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
 					throw_error("Unmatched square brace");
@@ -11461,7 +11463,10 @@ PUGI__NS_BEGIN
 			}
 
 			const char_t* nt_name_copy = alloc_string(nt_name);
+			if (!nt_name_copy) return 0;
+
 			xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step, set, axis, nt_type, nt_name_copy);
+			if (!n) return 0;
 
 			xpath_ast_node* last = 0;
 
@@ -11470,8 +11475,10 @@ PUGI__NS_BEGIN
 				_lexer.next();
 
 				xpath_ast_node* expr = parse_expression();
+				if (!expr) return 0;
 
 				xpath_ast_node* pred = new (alloc_node()) xpath_ast_node(ast_predicate, 0, expr, predicate_default);
+				if (!pred) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
 					throw_error("Unmatched square brace");
@@ -11490,6 +11497,7 @@ PUGI__NS_BEGIN
 		xpath_ast_node* parse_relative_location_path(xpath_ast_node* set)
 		{
 			xpath_ast_node* n = parse_step(set);
+			if (!n) return 0;
 
 			while (_lexer.current() == lex_slash || _lexer.current() == lex_double_slash)
 			{
@@ -11497,9 +11505,13 @@ PUGI__NS_BEGIN
 				_lexer.next();
 
 				if (l == lex_double_slash)
+				{
 					n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+					if (!n) return 0;
+				}
 
 				n = parse_step(n);
+				if (!n) return 0;
 			}
 
 			return n;
@@ -11514,6 +11526,7 @@ PUGI__NS_BEGIN
 				_lexer.next();
 
 				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
+				if (!n) return 0;
 
 				// relative location path can start from axis_attribute, dot, double_dot, multiply and string lexemes; any other lexeme means standalone root path
 				lexeme_t l = _lexer.current();
@@ -11528,7 +11541,10 @@ PUGI__NS_BEGIN
 				_lexer.next();
 
 				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
+				if (!n) return 0;
+
 				n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+				if (!n) return 0;
 
 				return parse_relative_location_path(n);
 			}
@@ -11551,7 +11567,6 @@ PUGI__NS_BEGIN
 			// PrimaryExpr begins with '$' in case of it being a variable reference,
 			// '(' in case of it being an expression, string literal, number constant or
 			// function call.
-
 			if (_lexer.current() == lex_var_ref || _lexer.current() == lex_open_brace ||
 				_lexer.current() == lex_quoted_string || _lexer.current() == lex_number ||
 				_lexer.current() == lex_string)
@@ -11572,6 +11587,7 @@ PUGI__NS_BEGIN
 				}
 
 				xpath_ast_node* n = parse_filter_expression();
+				if (!n) return 0;
 
 				if (_lexer.current() == lex_slash || _lexer.current() == lex_double_slash)
 				{
@@ -11584,6 +11600,7 @@ PUGI__NS_BEGIN
 							throw_error("Step has to be applied to node set");
 
 						n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+						if (!n) return 0;
 					}
 
 					// select from location path
@@ -11598,6 +11615,7 @@ PUGI__NS_BEGIN
 
 				// precedence 7+ - only parses union expressions
 				xpath_ast_node* n = parse_expression(7);
+				if (!n) return 0;
 
 				return new (alloc_node()) xpath_ast_node(ast_op_negate, xpath_type_number, n);
 			}
@@ -11682,12 +11700,14 @@ PUGI__NS_BEGIN
 				_lexer.next();
 
 				xpath_ast_node* rhs = parse_path_or_unary_expression();
+				if (!rhs) return 0;
 
 				binary_op_t nextop = binary_op_t::parse(_lexer);
 
 				while (nextop.asttype != ast_unknown && nextop.precedence > op.precedence)
 				{
 					rhs = parse_expression_rec(rhs, nextop.precedence);
+					if (!rhs) return 0;
 
 					nextop = binary_op_t::parse(_lexer);
 				}
@@ -11696,6 +11716,7 @@ PUGI__NS_BEGIN
 					throw_error("Union operator has to be applied to node sets");
 
 				lhs = new (alloc_node()) xpath_ast_node(op.asttype, op.rettype, lhs, rhs);
+				if (!lhs) return 0;
 
 				op = binary_op_t::parse(_lexer);
 			}
@@ -11724,6 +11745,7 @@ PUGI__NS_BEGIN
 		xpath_ast_node* parse_expression(int limit = 0)
 		{
 			xpath_ast_node* n = parse_path_or_unary_expression();
+			if (!n) return 0;
 
 			return parse_expression_rec(n, limit);
 		}
@@ -11734,13 +11756,14 @@ PUGI__NS_BEGIN
 
 		xpath_ast_node* parse()
 		{
-			xpath_ast_node* result = parse_expression();
+			xpath_ast_node* n = parse_expression();
+			if (!n) return 0;
 
 			// check if there are unparsed tokens left
 			if (_lexer.current() != lex_eof)
 				throw_error("Incorrect query");
 
-			return result;
+			return n;
 		}
 
 		static xpath_ast_node* parse(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result)
