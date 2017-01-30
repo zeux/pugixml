@@ -10953,20 +10953,19 @@ PUGI__NS_BEGIN
 
 		const char_t* alloc_string(const xpath_lexer_string& value)
 		{
-			if (value.begin)
-			{
-				size_t length = static_cast<size_t>(value.end - value.begin);
+			if (!value.begin)
+				return PUGIXML_TEXT("");
 
-				char_t* c = static_cast<char_t*>(_alloc->allocate_nothrow((length + 1) * sizeof(char_t)));
-				if (!c) throw_error_oom();
-				assert(c); // workaround for clang static analysis
+			size_t length = static_cast<size_t>(value.end - value.begin);
 
-				memcpy(c, value.begin, length * sizeof(char_t));
-				c[length] = 0;
+			char_t* c = static_cast<char_t*>(_alloc->allocate_nothrow((length + 1) * sizeof(char_t)));
+			if (!c) throw_error_oom();
+			assert(c); // workaround for clang static analysis
 
-				return c;
-			}
-			else return 0;
+			memcpy(c, value.begin, length * sizeof(char_t));
+			c[length] = 0;
+
+			return c;
 		}
 
 		xpath_ast_node* parse_function_helper(ast_type_t type0, ast_type_t type1, size_t argc, xpath_ast_node* args[2])
