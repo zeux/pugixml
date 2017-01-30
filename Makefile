@@ -61,7 +61,7 @@ ifeq ($(config),coverage)
 test: $(EXECUTABLE)
 	-@find $(BUILD) -name '*.gcda' -exec rm {} +
 	./$(EXECUTABLE)
-	@gcov -o $(BUILD)/src/ pugixml.cpp.gcda | sed -e '/./{H;$!d;}' -e 'x;/pugixml.cpp/!d;'
+	@gcov -b -o $(BUILD)/src/ pugixml.cpp.gcda | sed -e '/./{H;$!d;}' -e 'x;/pugixml.cpp/!d;'
 	@find . -name '*.gcov' -and -not -name 'pugixml.cpp.gcov' -exec rm {} +
 else
 test: $(EXECUTABLE)
