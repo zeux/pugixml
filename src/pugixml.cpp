@@ -10944,10 +10944,45 @@ PUGI__NS_BEGIN
 		void* alloc_node()
 		{
 			void* result = _alloc->allocate_nothrow(sizeof(xpath_ast_node));
-
 			if (!result) throw_error_oom();
 
 			return result;
+		}
+
+		xpath_ast_node* alloc_node(ast_type_t type, xpath_value_type rettype, const char_t* value)
+		{
+			void* memory = alloc_node();
+			return memory ? new (memory) xpath_ast_node(type, rettype, value) : 0;
+		}
+
+		xpath_ast_node* alloc_node(ast_type_t type, xpath_value_type rettype, double value)
+		{
+			void* memory = alloc_node();
+			return memory ? new (memory) xpath_ast_node(type, rettype, value) : 0;
+		}
+
+		xpath_ast_node* alloc_node(ast_type_t type, xpath_value_type rettype, xpath_variable* value)
+		{
+			void* memory = alloc_node();
+			return memory ? new (memory) xpath_ast_node(type, rettype, value) : 0;
+		}
+
+		xpath_ast_node* alloc_node(ast_type_t type, xpath_value_type rettype, xpath_ast_node* left = 0, xpath_ast_node* right = 0)
+		{
+			void* memory = alloc_node();
+			return memory ? new (memory) xpath_ast_node(type, rettype, left, right) : 0;
+		}
+
+		xpath_ast_node* alloc_node(ast_type_t type, xpath_ast_node* left, axis_t axis, nodetest_t test, const char_t* contents)
+		{
+			void* memory = alloc_node();
+			return memory ? new (memory) xpath_ast_node(type, left, axis, test, contents) : 0;
+		}
+
+		xpath_ast_node* alloc_node(ast_type_t type, xpath_ast_node* left, xpath_ast_node* right, predicate_t test)
+		{
+			void* memory = alloc_node();
+			return memory ? new (memory) xpath_ast_node(type, left, right, test) : 0;
 		}
 
 		const char_t* alloc_string(const xpath_lexer_string& value)
@@ -10973,7 +11008,7 @@ PUGI__NS_BEGIN
 			{
 			case 'b':
 				if (name == PUGIXML_TEXT("boolean") && argc == 1)
-					return new (alloc_node()) xpath_ast_node(ast_func_boolean, xpath_type_boolean, args[0]);
+					return alloc_node(ast_func_boolean, xpath_type_boolean, args[0]);
 
 				break;
 
@@ -10981,40 +11016,40 @@ PUGI__NS_BEGIN
 				if (name == PUGIXML_TEXT("count") && argc == 1)
 				{
 					if (args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
-					return new (alloc_node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
+					return alloc_node(ast_func_count, xpath_type_number, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
-					return new (alloc_node()) xpath_ast_node(ast_func_contains, xpath_type_boolean, args[0], args[1]);
+					return alloc_node(ast_func_contains, xpath_type_boolean, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("concat") && argc >= 2)
-					return new (alloc_node()) xpath_ast_node(ast_func_concat, xpath_type_string, args[0], args[1]);
+					return alloc_node(ast_func_concat, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("ceiling") && argc == 1)
-					return new (alloc_node()) xpath_ast_node(ast_func_ceiling, xpath_type_number, args[0]);
+					return alloc_node(ast_func_ceiling, xpath_type_number, args[0]);
 
 				break;
 
 			case 'f':
 				if (name == PUGIXML_TEXT("false") && argc == 0)
-					return new (alloc_node()) xpath_ast_node(ast_func_false, xpath_type_boolean);
+					return alloc_node(ast_func_false, xpath_type_boolean);
 				else if (name == PUGIXML_TEXT("floor") && argc == 1)
-					return new (alloc_node()) xpath_ast_node(ast_func_floor, xpath_type_number, args[0]);
+					return alloc_node(ast_func_floor, xpath_type_number, args[0]);
 
 				break;
 
 			case 'i':
 				if (name == PUGIXML_TEXT("id") && argc == 1)
-					return new (alloc_node()) xpath_ast_node(ast_func_id, xpath_type_node_set, args[0]);
+					return alloc_node(ast_func_id, xpath_type_node_set, args[0]);
 
 				break;
 
 			case 'l':
 				if (name == PUGIXML_TEXT("last") && argc == 0)
-					return new (alloc_node()) xpath_ast_node(ast_func_last, xpath_type_number);
+					return alloc_node(ast_func_last, xpath_type_number);
 				else if (name == PUGIXML_TEXT("lang") && argc == 1)
-					return new (alloc_node()) xpath_ast_node(ast_func_lang, xpath_type_boolean, args[0]);
+					return alloc_node(ast_func_lang, xpath_type_boolean, args[0]);
 				else if (name == PUGIXML_TEXT("local-name") && argc <= 1)
 				{
 					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
-					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_local_name_0 : ast_func_local_name_1, xpath_type_string, args[0]);
+					return alloc_node(argc == 0 ? ast_func_local_name_0 : ast_func_local_name_1, xpath_type_string, args[0]);
 				}
 
 				break;
@@ -11023,60 +11058,60 @@ PUGI__NS_BEGIN
 				if (name == PUGIXML_TEXT("name") && argc <= 1)
 				{
 					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
-					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_name_0 : ast_func_name_1, xpath_type_string, args[0]);
+					return alloc_node(argc == 0 ? ast_func_name_0 : ast_func_name_1, xpath_type_string, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("namespace-uri") && argc <= 1)
 				{
 					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
-					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_namespace_uri_0 : ast_func_namespace_uri_1, xpath_type_string, args[0]);
+					return alloc_node(argc == 0 ? ast_func_namespace_uri_0 : ast_func_namespace_uri_1, xpath_type_string, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("normalize-space") && argc <= 1)
-					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_normalize_space_0 : ast_func_normalize_space_1, xpath_type_string, args[0], args[1]);
+					return alloc_node(argc == 0 ? ast_func_normalize_space_0 : ast_func_normalize_space_1, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("not") && argc == 1)
-					return new (alloc_node()) xpath_ast_node(ast_func_not, xpath_type_boolean, args[0]);
+					return alloc_node(ast_func_not, xpath_type_boolean, args[0]);
 				else if (name == PUGIXML_TEXT("number") && argc <= 1)
-					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_number_0 : ast_func_number_1, xpath_type_number, args[0]);
+					return alloc_node(argc == 0 ? ast_func_number_0 : ast_func_number_1, xpath_type_number, args[0]);
 
 				break;
 
 			case 'p':
 				if (name == PUGIXML_TEXT("position") && argc == 0)
-					return new (alloc_node()) xpath_ast_node(ast_func_position, xpath_type_number);
+					return alloc_node(ast_func_position, xpath_type_number);
 
 				break;
 
 			case 'r':
 				if (name == PUGIXML_TEXT("round") && argc == 1)
-					return new (alloc_node()) xpath_ast_node(ast_func_round, xpath_type_number, args[0]);
+					return alloc_node(ast_func_round, xpath_type_number, args[0]);
 
 				break;
 
 			case 's':
 				if (name == PUGIXML_TEXT("string") && argc <= 1)
-					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_string_0 : ast_func_string_1, xpath_type_string, args[0]);
+					return alloc_node(argc == 0 ? ast_func_string_0 : ast_func_string_1, xpath_type_string, args[0]);
 				else if (name == PUGIXML_TEXT("string-length") && argc <= 1)
-					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_string_length_0 : ast_func_string_length_1, xpath_type_number, args[0]);
+					return alloc_node(argc == 0 ? ast_func_string_length_0 : ast_func_string_length_1, xpath_type_number, args[0]);
 				else if (name == PUGIXML_TEXT("starts-with") && argc == 2)
-					return new (alloc_node()) xpath_ast_node(ast_func_starts_with, xpath_type_boolean, args[0], args[1]);
+					return alloc_node(ast_func_starts_with, xpath_type_boolean, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("substring-before") && argc == 2)
-					return new (alloc_node()) xpath_ast_node(ast_func_substring_before, xpath_type_string, args[0], args[1]);
+					return alloc_node(ast_func_substring_before, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("substring-after") && argc == 2)
-					return new (alloc_node()) xpath_ast_node(ast_func_substring_after, xpath_type_string, args[0], args[1]);
+					return alloc_node(ast_func_substring_after, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("substring") && (argc == 2 || argc == 3))
-					return new (alloc_node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
+					return alloc_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("sum") && argc == 1)
 				{
 					if (args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
-					return new (alloc_node()) xpath_ast_node(ast_func_sum, xpath_type_number, args[0]);
+					return alloc_node(ast_func_sum, xpath_type_number, args[0]);
 				}
 
 				break;
 
 			case 't':
 				if (name == PUGIXML_TEXT("translate") && argc == 3)
-					return new (alloc_node()) xpath_ast_node(ast_func_translate, xpath_type_string, args[0], args[1]);
+					return alloc_node(ast_func_translate, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("true") && argc == 0)
-					return new (alloc_node()) xpath_ast_node(ast_func_true, xpath_type_boolean);
+					return alloc_node(ast_func_true, xpath_type_boolean);
 
 				break;
 
@@ -11211,7 +11246,7 @@ PUGI__NS_BEGIN
 
 				_lexer.next();
 
-				return new (alloc_node()) xpath_ast_node(ast_variable, var->type(), var);
+				return alloc_node(ast_variable, var->type(), var);
 			}
 
 			case lex_open_brace:
@@ -11236,7 +11271,7 @@ PUGI__NS_BEGIN
 
 				_lexer.next();
 
-				return new (alloc_node()) xpath_ast_node(ast_string_constant, xpath_type_string, value);
+				return alloc_node(ast_string_constant, xpath_type_string, value);
 			}
 
 			case lex_number:
@@ -11248,7 +11283,7 @@ PUGI__NS_BEGIN
 
 				_lexer.next();
 
-				return new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
+				return alloc_node(ast_number_constant, xpath_type_number, value);
 			}
 
 			case lex_string:
@@ -11312,7 +11347,7 @@ PUGI__NS_BEGIN
 				if (n->rettype() != xpath_type_node_set)
 					return error("Predicate has to be applied to node set");
 
-				n = new (alloc_node()) xpath_ast_node(ast_filter, n, expr, predicate_default);
+				n = alloc_node(ast_filter, n, expr, predicate_default);
 				if (!n) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
@@ -11348,13 +11383,13 @@ PUGI__NS_BEGIN
 			{
 				_lexer.next();
 
-				return new (alloc_node()) xpath_ast_node(ast_step, set, axis_self, nodetest_type_node, 0);
+				return alloc_node(ast_step, set, axis_self, nodetest_type_node, 0);
 			}
 			else if (_lexer.current() == lex_double_dot)
 			{
 				_lexer.next();
 
-				return new (alloc_node()) xpath_ast_node(ast_step, set, axis_parent, nodetest_type_node, 0);
+				return alloc_node(ast_step, set, axis_parent, nodetest_type_node, 0);
 			}
 
 			nodetest_t nt_type = nodetest_none;
@@ -11463,7 +11498,7 @@ PUGI__NS_BEGIN
 			const char_t* nt_name_copy = alloc_string(nt_name);
 			if (!nt_name_copy) return 0;
 
-			xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step, set, axis, nt_type, nt_name_copy);
+			xpath_ast_node* n = alloc_node(ast_step, set, axis, nt_type, nt_name_copy);
 			if (!n) return 0;
 
 			xpath_ast_node* last = 0;
@@ -11475,7 +11510,7 @@ PUGI__NS_BEGIN
 				xpath_ast_node* expr = parse_expression();
 				if (!expr) return 0;
 
-				xpath_ast_node* pred = new (alloc_node()) xpath_ast_node(ast_predicate, 0, expr, predicate_default);
+				xpath_ast_node* pred = alloc_node(ast_predicate, 0, expr, predicate_default);
 				if (!pred) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
@@ -11504,7 +11539,7 @@ PUGI__NS_BEGIN
 
 				if (l == lex_double_slash)
 				{
-					n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+					n = alloc_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 					if (!n) return 0;
 				}
 
@@ -11523,7 +11558,7 @@ PUGI__NS_BEGIN
 			{
 				_lexer.next();
 
-				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
+				xpath_ast_node* n = alloc_node(ast_step_root, xpath_type_node_set);
 				if (!n) return 0;
 
 				// relative location path can start from axis_attribute, dot, double_dot, multiply and string lexemes; any other lexeme means standalone root path
@@ -11538,10 +11573,10 @@ PUGI__NS_BEGIN
 			{
 				_lexer.next();
 
-				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_step_root, xpath_type_node_set);
+				xpath_ast_node* n = alloc_node(ast_step_root, xpath_type_node_set);
 				if (!n) return 0;
 
-				n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+				n = alloc_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 				if (!n) return 0;
 
 				return parse_relative_location_path(n);
@@ -11597,7 +11632,7 @@ PUGI__NS_BEGIN
 						if (n->rettype() != xpath_type_node_set)
 							return error("Step has to be applied to node set");
 
-						n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
+						n = alloc_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 						if (!n) return 0;
 					}
 
@@ -11615,7 +11650,7 @@ PUGI__NS_BEGIN
 				xpath_ast_node* n = parse_expression(7);
 				if (!n) return 0;
 
-				return new (alloc_node()) xpath_ast_node(ast_op_negate, xpath_type_number, n);
+				return alloc_node(ast_op_negate, xpath_type_number, n);
 			}
 			else
 			{
@@ -11713,7 +11748,7 @@ PUGI__NS_BEGIN
 				if (op.asttype == ast_op_union && (lhs->rettype() != xpath_type_node_set || rhs->rettype() != xpath_type_node_set))
 					return error("Union operator has to be applied to node sets");
 
-				lhs = new (alloc_node()) xpath_ast_node(op.asttype, op.rettype, lhs, rhs);
+				lhs = alloc_node(op.asttype, op.rettype, lhs, rhs);
 				if (!lhs) return 0;
 
 				op = binary_op_t::parse(_lexer);
