@@ -11272,7 +11272,7 @@ PUGI__NS_BEGIN
 				if (!n) return 0;
 
 				if (_lexer.current() != lex_close_brace)
-					return error("Unmatched braces");
+					return error("Expected ')' to match an opening '('");
 
 				_lexer.next();
 
@@ -11366,7 +11366,7 @@ PUGI__NS_BEGIN
 				if (!n) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
-					return error("Unmatched square brace");
+					return error("Expected ']' to match an opening '['");
 
 				_lexer.next();
 			}
@@ -11535,7 +11535,7 @@ PUGI__NS_BEGIN
 				if (!pred) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
-					return error("Unmatched square brace");
+					return error("Expected ']' to match an opening '['");
 				_lexer.next();
 
 				if (last) last->set_next(pred);
