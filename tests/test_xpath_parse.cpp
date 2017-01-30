@@ -313,4 +313,26 @@ TEST(xpath_parse_result_default)
 	CHECK(result.offset == 0);
 }
 
+TEST(xpath_parse_error_propagation)
+{
+	char_t query[] = STR("(//foo[count(. | @*)] | /foo | /foo/bar//more/ancestor-or-self::foobar | /text() | a[1 + 2 * 3 div (1+0) mod 2]//b[1]/c | a[$x])[true()]");
+
+	xpath_variable_set vars;
+	vars.set(STR("x"), 1.0);
+
+	xpath_query q(query, &vars);
+	CHECK(q);
+
+	for (size_t i = 0; i + 1 < sizeof(query) / sizeof(query[0]); ++i)
+	{
+		char_t ch = query[i];
+
+		query[i] = '%';
+
+		CHECK_XPATH_FAIL(query);
+
+		query[i] = ch;
+	}
+}
+
 #endif
