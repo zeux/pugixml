@@ -11333,11 +11333,11 @@ PUGI__NS_BEGIN
 			{
 				_lexer.next();
 
-				xpath_ast_node* expr = parse_expression();
-				if (!expr) return 0;
-
 				if (n->rettype() != xpath_type_node_set)
 					return error("Predicate has to be applied to node set");
+
+				xpath_ast_node* expr = parse_expression();
+				if (!expr) return 0;
 
 				n = alloc_node(ast_filter, n, expr, predicate_default);
 				if (!n) return 0;
