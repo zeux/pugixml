@@ -10968,16 +10968,6 @@ PUGI__NS_BEGIN
 			return c;
 		}
 
-		xpath_ast_node* parse_function_helper(ast_type_t type0, ast_type_t type1, size_t argc, xpath_ast_node* args[2])
-		{
-			assert(argc <= 1);
-
-			if (argc == 1 && args[0]->rettype() != xpath_type_node_set)
-				throw_error("Function has to be applied to node set");
-
-			return new (alloc_node()) xpath_ast_node(argc == 0 ? type0 : type1, xpath_type_string, args[0]);
-		}
-
 		xpath_ast_node* parse_function(const xpath_lexer_string& name, size_t argc, xpath_ast_node* args[2])
 		{
 			switch (name.begin[0])
@@ -10991,9 +10981,7 @@ PUGI__NS_BEGIN
 			case 'c':
 				if (name == PUGIXML_TEXT("count") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set)
-						throw_error("Function has to be applied to node set");
-
+					if (args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
@@ -11025,15 +11013,24 @@ PUGI__NS_BEGIN
 				else if (name == PUGIXML_TEXT("lang") && argc == 1)
 					return new (alloc_node()) xpath_ast_node(ast_func_lang, xpath_type_boolean, args[0]);
 				else if (name == PUGIXML_TEXT("local-name") && argc <= 1)
-					return parse_function_helper(ast_func_local_name_0, ast_func_local_name_1, argc, args);
+				{
+					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_local_name_0 : ast_func_local_name_1, xpath_type_string, args[0]);
+				}
 
 				break;
 
 			case 'n':
 				if (name == PUGIXML_TEXT("name") && argc <= 1)
-					return parse_function_helper(ast_func_name_0, ast_func_name_1, argc, args);
+				{
+					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_name_0 : ast_func_name_1, xpath_type_string, args[0]);
+				}
 				else if (name == PUGIXML_TEXT("namespace-uri") && argc <= 1)
-					return parse_function_helper(ast_func_namespace_uri_0, ast_func_namespace_uri_1, argc, args);
+				{
+					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_namespace_uri_0 : ast_func_namespace_uri_1, xpath_type_string, args[0]);
+				}
 				else if (name == PUGIXML_TEXT("normalize-space") && argc <= 1)
 					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_normalize_space_0 : ast_func_normalize_space_1, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("not") && argc == 1)
