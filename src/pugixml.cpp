@@ -10921,25 +10921,24 @@ PUGI__NS_BEGIN
 		jmp_buf _error_handler;
 	#endif
 
-		void throw_error(const char* message)
+		void throw_error_oom()
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			_result->error = "Out of memory";
+			_result->offset = _lexer.current_pos() - _query;
+
+			longjmp(_error_handler, 1);
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
+
+		xpath_ast_node* error(const char* message)
 		{
 			_result->error = message;
 			_result->offset = _lexer.current_pos() - _query;
 
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			longjmp(_error_handler, 1);
-		#else
-			throw xpath_exception(*_result);
-		#endif
-		}
-
-		void throw_error_oom()
-		{
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			throw_error("Out of memory");
-		#else
-			throw std::bad_alloc();
-		#endif
+			return 0;
 		}
 
 		void* alloc_node()
@@ -10981,7 +10980,7 @@ PUGI__NS_BEGIN
 			case 'c':
 				if (name == PUGIXML_TEXT("count") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					if (args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(ast_func_count, xpath_type_number, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("contains") && argc == 2)
@@ -11014,7 +11013,7 @@ PUGI__NS_BEGIN
 					return new (alloc_node()) xpath_ast_node(ast_func_lang, xpath_type_boolean, args[0]);
 				else if (name == PUGIXML_TEXT("local-name") && argc <= 1)
 				{
-					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_local_name_0 : ast_func_local_name_1, xpath_type_string, args[0]);
 				}
 
@@ -11023,12 +11022,12 @@ PUGI__NS_BEGIN
 			case 'n':
 				if (name == PUGIXML_TEXT("name") && argc <= 1)
 				{
-					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_name_0 : ast_func_name_1, xpath_type_string, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("namespace-uri") && argc <= 1)
 				{
-					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					if (argc == 1 && args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(argc == 0 ? ast_func_namespace_uri_0 : ast_func_namespace_uri_1, xpath_type_string, args[0]);
 				}
 				else if (name == PUGIXML_TEXT("normalize-space") && argc <= 1)
@@ -11067,7 +11066,7 @@ PUGI__NS_BEGIN
 					return new (alloc_node()) xpath_ast_node(argc == 2 ? ast_func_substring_2 : ast_func_substring_3, xpath_type_string, args[0], args[1]);
 				else if (name == PUGIXML_TEXT("sum") && argc == 1)
 				{
-					if (args[0]->rettype() != xpath_type_node_set) throw_error("Function has to be applied to node set");
+					if (args[0]->rettype() != xpath_type_node_set) return error("Function has to be applied to node set");
 					return new (alloc_node()) xpath_ast_node(ast_func_sum, xpath_type_number, args[0]);
 				}
 
@@ -11085,9 +11084,7 @@ PUGI__NS_BEGIN
 				break;
 			}
 
-			throw_error("Unrecognized function or wrong parameter count");
-
-			return 0;
+			return error("Unrecognized function or wrong parameter count");
 		}
 
 		axis_t parse_axis_name(const xpath_lexer_string& name, bool& specified)
@@ -11203,14 +11200,14 @@ PUGI__NS_BEGIN
 				xpath_lexer_string name = _lexer.contents();
 
 				if (!_variables)
-					throw_error("Unknown variable: variable set is not provided");
+					return error("Unknown variable: variable set is not provided");
 
 				xpath_variable* var = 0;
 				if (!get_variable_scratch(_scratch, _variables, name.begin, name.end, &var))
 					throw_error_oom();
 
 				if (!var)
-					throw_error("Unknown variable: variable set does not contain the given name");
+					return error("Unknown variable: variable set does not contain the given name");
 
 				_lexer.next();
 
@@ -11225,7 +11222,7 @@ PUGI__NS_BEGIN
 				if (!n) return 0;
 
 				if (_lexer.current() != lex_close_brace)
-					throw_error("Unmatched braces");
+					return error("Unmatched braces");
 
 				_lexer.next();
 
@@ -11265,7 +11262,7 @@ PUGI__NS_BEGIN
 				xpath_ast_node* last_arg = 0;
 
 				if (_lexer.current() != lex_open_brace)
-					throw_error("Unrecognized function call");
+					return error("Unrecognized function call");
 				_lexer.next();
 
 				while (_lexer.current() != lex_close_brace)
@@ -11273,7 +11270,7 @@ PUGI__NS_BEGIN
 					if (argc > 0)
 					{
 						if (_lexer.current() != lex_comma)
-							throw_error("No comma between function arguments");
+							return error("No comma between function arguments");
 						_lexer.next();
 					}
 
@@ -11293,9 +11290,7 @@ PUGI__NS_BEGIN
 			}
 
 			default:
-				throw_error("Unrecognizable primary expression");
-
-				return 0;
+				return error("Unrecognizable primary expression");
 			}
 		}
 
@@ -11315,13 +11310,13 @@ PUGI__NS_BEGIN
 				if (!expr) return 0;
 
 				if (n->rettype() != xpath_type_node_set)
-					throw_error("Predicate has to be applied to node set");
+					return error("Predicate has to be applied to node set");
 
 				n = new (alloc_node()) xpath_ast_node(ast_filter, n, expr, predicate_default);
 				if (!n) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
-					throw_error("Unmatched square brace");
+					return error("Unmatched square brace");
 
 				_lexer.next();
 			}
@@ -11337,7 +11332,7 @@ PUGI__NS_BEGIN
 		xpath_ast_node* parse_step(xpath_ast_node* set)
 		{
 			if (set && set->rettype() != xpath_type_node_set)
-				throw_error("Step has to be applied to node set");
+				return error("Step has to be applied to node set");
 
 			bool axis_specified = false;
 			axis_t axis = axis_child; // implied child axis
@@ -11376,12 +11371,12 @@ PUGI__NS_BEGIN
 				{
 					// parse axis name
 					if (axis_specified)
-						throw_error("Two axis specifiers in one step");
+						return error("Two axis specifiers in one step");
 
 					axis = parse_axis_name(nt_name, axis_specified);
 
 					if (!axis_specified)
-						throw_error("Unknown axis");
+						return error("Unknown axis");
 
 					// read actual node test
 					_lexer.next();
@@ -11397,7 +11392,10 @@ PUGI__NS_BEGIN
 						nt_name = _lexer.contents();
 						_lexer.next();
 					}
-					else throw_error("Unrecognized node test");
+					else
+					{
+						return error("Unrecognized node test");
+					}
 				}
 
 				if (nt_type == nodetest_none)
@@ -11414,26 +11412,26 @@ PUGI__NS_BEGIN
 							nt_type = parse_node_test_type(nt_name);
 
 							if (nt_type == nodetest_none)
-								throw_error("Unrecognized node type");
+								return error("Unrecognized node type");
 
 							nt_name = xpath_lexer_string();
 						}
 						else if (nt_name == PUGIXML_TEXT("processing-instruction"))
 						{
 							if (_lexer.current() != lex_quoted_string)
-								throw_error("Only literals are allowed as arguments to processing-instruction()");
+								return error("Only literals are allowed as arguments to processing-instruction()");
 
 							nt_type = nodetest_pi;
 							nt_name = _lexer.contents();
 							_lexer.next();
 
 							if (_lexer.current() != lex_close_brace)
-								throw_error("Unmatched brace near processing-instruction()");
+								return error("Unmatched brace near processing-instruction()");
 							_lexer.next();
 						}
 						else
 						{
-							throw_error("Unmatched brace near node type test");
+							return error("Unmatched brace near node type test");
 						}
 					}
 					// QName or NCName:*
@@ -11459,7 +11457,7 @@ PUGI__NS_BEGIN
 			}
 			else
 			{
-				throw_error("Unrecognized node test");
+				return error("Unrecognized node test");
 			}
 
 			const char_t* nt_name_copy = alloc_string(nt_name);
@@ -11481,7 +11479,7 @@ PUGI__NS_BEGIN
 				if (!pred) return 0;
 
 				if (_lexer.current() != lex_close_square_brace)
-					throw_error("Unmatched square brace");
+					return error("Unmatched square brace");
 				_lexer.next();
 
 				if (last) last->set_next(pred);
@@ -11597,7 +11595,7 @@ PUGI__NS_BEGIN
 					if (l == lex_double_slash)
 					{
 						if (n->rettype() != xpath_type_node_set)
-							throw_error("Step has to be applied to node set");
+							return error("Step has to be applied to node set");
 
 						n = new (alloc_node()) xpath_ast_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 						if (!n) return 0;
@@ -11713,7 +11711,7 @@ PUGI__NS_BEGIN
 				}
 
 				if (op.asttype == ast_op_union && (lhs->rettype() != xpath_type_node_set || rhs->rettype() != xpath_type_node_set))
-					throw_error("Union operator has to be applied to node sets");
+					return error("Union operator has to be applied to node sets");
 
 				lhs = new (alloc_node()) xpath_ast_node(op.asttype, op.rettype, lhs, rhs);
 				if (!lhs) return 0;
@@ -11761,7 +11759,7 @@ PUGI__NS_BEGIN
 
 			// check if there are unparsed tokens left
 			if (_lexer.current() != lex_eof)
-				throw_error("Incorrect query");
+				return error("Incorrect query");
 
 			return n;
 		}
@@ -12392,6 +12390,12 @@ namespace pugi
 
 				_impl = impl.release();
 				_result.error = 0;
+			}
+			else
+			{
+			#ifndef PUGIXML_NO_EXCEPTIONS
+				throw xpath_exception(_result);
+			#endif
 			}
 		}
 	}
