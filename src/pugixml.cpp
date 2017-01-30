@@ -11236,6 +11236,7 @@ PUGI__NS_BEGIN
 				const char_t* value = alloc_string(_lexer.contents());
 
 				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_string_constant, xpath_type_string, value);
+
 				_lexer.next();
 
 				return n;
@@ -11249,6 +11250,7 @@ PUGI__NS_BEGIN
 					throw_error_oom();
 
 				xpath_ast_node* n = new (alloc_node()) xpath_ast_node(ast_number_constant, xpath_type_number, value);
+
 				_lexer.next();
 
 				return n;
@@ -11268,14 +11270,14 @@ PUGI__NS_BEGIN
 					throw_error("Unrecognized function call");
 				_lexer.next();
 
-				if (_lexer.current() != lex_close_brace)
-					args[argc++] = parse_expression();
-
 				while (_lexer.current() != lex_close_brace)
 				{
-					if (_lexer.current() != lex_comma)
-						throw_error("No comma between function arguments");
-					_lexer.next();
+					if (argc > 0)
+					{
+						if (_lexer.current() != lex_comma)
+							throw_error("No comma between function arguments");
+						_lexer.next();
+					}
 
 					xpath_ast_node* n = parse_expression();
 
@@ -11561,7 +11563,8 @@ PUGI__NS_BEGIN
 
 					while (PUGI__IS_CHARTYPE(*state, ct_space)) ++state;
 
-					if (*state != '(') return parse_location_path();
+					if (*state != '(')
+						return parse_location_path();
 
 					// This looks like a function call; however this still can be a node-test. Check it.
 					if (parse_node_test_type(_lexer.contents()) != nodetest_none)
@@ -11594,9 +11597,9 @@ PUGI__NS_BEGIN
 				_lexer.next();
 
 				// precedence 7+ - only parses union expressions
-				xpath_ast_node* expr = parse_expression_rec(parse_path_or_unary_expression(), 7);
+				xpath_ast_node* n = parse_expression(7);
 
-				return new (alloc_node()) xpath_ast_node(ast_op_negate, xpath_type_number, expr);
+				return new (alloc_node()) xpath_ast_node(ast_op_negate, xpath_type_number, n);
 			}
 			else
 			{
@@ -11718,9 +11721,11 @@ PUGI__NS_BEGIN
 		//						  | MultiplicativeExpr '*' UnaryExpr
 		//						  | MultiplicativeExpr 'div' UnaryExpr
 		//						  | MultiplicativeExpr 'mod' UnaryExpr
-		xpath_ast_node* parse_expression()
+		xpath_ast_node* parse_expression(int limit = 0)
 		{
-			return parse_expression_rec(parse_path_or_unary_expression(), 0);
+			xpath_ast_node* n = parse_path_or_unary_expression();
+
+			return parse_expression_rec(n, limit);
 		}
 
 		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result)
