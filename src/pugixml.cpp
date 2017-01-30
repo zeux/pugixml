@@ -11398,11 +11398,17 @@ PUGI__NS_BEGIN
 			{
 				_lexer.next();
 
+				if (_lexer.current() == lex_open_square_brace)
+					return error("Predicates are not allowed after an abbreviated step");
+
 				return alloc_node(ast_step, set, axis_self, nodetest_type_node, 0);
 			}
 			else if (_lexer.current() == lex_double_dot)
 			{
 				_lexer.next();
+
+				if (_lexer.current() == lex_open_square_brace)
+					return error("Predicates are not allowed after an abbreviated step");
 
 				return alloc_node(ast_step, set, axis_parent, nodetest_type_node, 0);
 			}
