@@ -7688,8 +7688,8 @@ PUGI__NS_BEGIN
 				size_t result_length = target_length + source_length;
 
 				// allocate new buffer
-				char_t* result = static_cast<char_t*>(alloc->reallocate_throw(_uses_heap ? const_cast<char_t*>(_buffer) : 0, (target_length + 1) * sizeof(char_t), (result_length + 1) * sizeof(char_t)));
-				assert(result);
+				char_t* result = static_cast<char_t*>(alloc->reallocate_nothrow(_uses_heap ? const_cast<char_t*>(_buffer) : 0, (target_length + 1) * sizeof(char_t), (result_length + 1) * sizeof(char_t)));
+				if (!result) return;
 
 				// append first string to the new buffer in case there was no reallocation
 				if (!_uses_heap) memcpy(result, _buffer, target_length * sizeof(char_t));
@@ -8148,8 +8148,8 @@ PUGI__NS_BEGIN
 
 		// allocate a buffer of suitable length for the number
 		size_t result_size = strlen(mantissa_buffer) + (exponent > 0 ? exponent : -exponent) + 4;
-		char_t* result = static_cast<char_t*>(alloc->allocate_throw(sizeof(char_t) * result_size));
-		assert(result);
+		char_t* result = static_cast<char_t*>(alloc->allocate_nothrow(sizeof(char_t) * result_size));
+		if (!result) return xpath_string();
 
 		// make the number!
 		char_t* s = result;
@@ -8780,8 +8780,8 @@ PUGI__NS_BEGIN
 			if (size_ + count > capacity)
 			{
 				// reallocate the old array or allocate a new one
-				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate_throw(_begin, capacity * sizeof(xpath_node), (size_ + count) * sizeof(xpath_node)));
-				assert(data);
+				xpath_node* data = static_cast<xpath_node*>(alloc->reallocate_nothrow(_begin, capacity * sizeof(xpath_node), (size_ + count) * sizeof(xpath_node)));
+				if (!data) return;
 
 				// finalize
 				_begin = data;
@@ -8832,8 +8832,8 @@ PUGI__NS_BEGIN
 		size_t new_capacity = capacity + capacity / 2 + 1;
 
 		// reallocate the old array or allocate a new one
-		xpath_node* data = static_cast<xpath_node*>(alloc->reallocate_throw(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
-		assert(data);
+		xpath_node* data = static_cast<xpath_node*>(alloc->reallocate_nothrow(_begin, capacity * sizeof(xpath_node), new_capacity * sizeof(xpath_node)));
+		if (!data) return;
 
 		// finalize
 		_begin = data;
@@ -10418,8 +10418,8 @@ PUGI__NS_BEGIN
 			// allocate on-heap for large concats
 			if (count > sizeof(static_buffer) / sizeof(static_buffer[0]))
 			{
-				buffer = static_cast<xpath_string*>(stack.temp->allocate_throw(count * sizeof(xpath_string)));
-				assert(buffer);
+				buffer = static_cast<xpath_string*>(stack.temp->allocate_nothrow(count * sizeof(xpath_string)));
+				if (!buffer) return xpath_string();
 			}
 
 			// evaluate all strings to temporary stack
@@ -10436,8 +10436,8 @@ PUGI__NS_BEGIN
 			for (size_t i = 0; i < count; ++i) length += buffer[i].length();
 
 			// create final string
-			char_t* result = static_cast<char_t*>(stack.result->allocate_throw((length + 1) * sizeof(char_t)));
-			assert(result);
+			char_t* result = static_cast<char_t*>(stack.result->allocate_nothrow((length + 1) * sizeof(char_t)));
+			if (!result) return xpath_string();
 
 			char_t* ri = result;
 
