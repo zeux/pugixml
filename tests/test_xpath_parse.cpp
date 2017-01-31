@@ -293,6 +293,27 @@ TEST(xpath_parse_out_of_memory_string_to_number)
 	CHECK_ALLOC_FAIL(CHECK_XPATH_FAIL(STR("0.11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111")));
 }
 
+TEST(xpath_parse_out_of_memory_quoted_string)
+{
+	test_runner::_memory_fail_threshold = 4096 + 128;
+
+	std::basic_string<char_t> literal(5000, 'a');
+	std::basic_string<char_t> query = STR("'") + literal + STR("'");
+
+	CHECK_ALLOC_FAIL(CHECK_XPATH_FAIL(query.c_str()));
+}
+
+TEST(xpath_parse_out_of_memory_variable)
+{
+	test_runner::_memory_fail_threshold = 4096 + 128;
+
+	std::basic_string<char_t> literal(5000, 'a');
+	std::basic_string<char_t> query = STR("$") + literal;
+
+	xpath_variable_set vars;
+	CHECK_ALLOC_FAIL(CHECK_XPATH_FAIL_VAR(query.c_str(), &vars));
+}
+
 TEST(xpath_parse_qname_error)
 {
 	CHECK_XPATH_FAIL(STR("foo: bar"));
@@ -315,7 +336,7 @@ TEST(xpath_parse_result_default)
 
 TEST(xpath_parse_error_propagation)
 {
-	char_t query[] = STR("(//foo[count(. | @*)] | /foo | /foo/bar//more/ancestor-or-self::foobar | /text() | a[1 + 2 * 3 div (1+0) mod 2]//b[1]/c | a[$x])[true()]");
+	char_t query[] = STR("(//foo[count(. | @*)] | ((a)//b)[1] | /foo | /foo/bar//more/ancestor-or-self::foobar | /text() | a[1 + 2 * 3 div (1+0) mod 2]//b[1]/c | a[$x])[true()]");
 
 	xpath_variable_set vars;
 	vars.set(STR("x"), 1.0);
@@ -337,7 +358,7 @@ TEST(xpath_parse_error_propagation)
 
 TEST(xpath_parse_oom_propagation)
 {
-	const char_t* query_base = STR("(//foo[count(. | @*)] | /foo | /foo/bar//more/ancestor-or-self::foobar | /text() | a[1 + 2 * 3 div (1+0) mod 2]//b[1]/c | a[$x])[true()]");
+	const char_t* query_base = STR("(//foo[count(. | @*)] | ((a)//b)[1] | /foo | /foo/bar//more/ancestor-or-self::foobar | /text() | a[1 + 2 * 3 div (1+0) mod 2]//b[1]/c | a[$x])[true()]");
 
 	xpath_variable_set vars;
 	vars.set(STR("x"), 1.0);
