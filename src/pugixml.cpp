@@ -7456,33 +7456,35 @@ PUGI__NS_BEGIN
 			// we can only reallocate the last object
 			assert(ptr == 0 || static_cast<char*>(ptr) + old_size == &_root->data[0] + _root_size);
 
-			// adjust root size so that we have not allocated the object at all
-			bool only_object = (_root_size == old_size);
+			// try to reallocate the object inplace
+			if (ptr && _root_size - old_size + new_size <= _root->capacity)
+			{
+				_root_size = _root_size - old_size + new_size;
+				return ptr;
+			}
 
-			if (ptr) _root_size -= old_size;
-
-			// allocate a new version (this will obviously reuse the memory if possible)
+			// allocate a new block
 			void* result = allocate_nothrow(new_size);
 			if (!result) return 0;
 
 			// we have a new block
-			if (result != ptr && ptr)
+			if (ptr)
 			{
-				// copy old data
+				// copy old data (we only support growing)
 				assert(new_size >= old_size);
 				memcpy(result, ptr, old_size);
 
 				// free the previous page if it had no other objects
-				if (only_object)
-				{
-					assert(_root->data == result);
-					assert(_root->next);
+				assert(_root->data == result);
+				assert(_root->next);
 
+				if (_root->next->data == ptr)
+				{
+					// deallocate the whole page, unless it was the first one
 					xpath_memory_block* next = _root->next->next;
 
 					if (next)
 					{
-						// deallocate the whole page, unless it was the first one
 						xml_memory::deallocate(_root->next);
 						_root->next = next;
 					}
