@@ -430,11 +430,11 @@ TEST_XML(xpath_out_of_memory_evaluate_union, "<node><a/><a/><a/><a/><a/><a/><a/>
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node_set(doc.child(STR("node"))).empty()));
 }
 
-TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
+TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
 {
 	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
 
-	pugi::xpath_query q(STR("//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[true()]]]]]]]]]]]]]]"));
+	pugi::xpath_query q(STR("//a[//a[//a[//a[true()]]]]"));
 
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node_set(doc).empty()));
 }
