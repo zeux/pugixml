@@ -7625,8 +7625,8 @@ PUGI__NS_BEGIN
 
 		static char_t* duplicate_string(const char_t* string, size_t length, xpath_allocator* alloc)
 		{
-			char_t* result = static_cast<char_t*>(alloc->allocate_throw((length + 1) * sizeof(char_t)));
-			assert(result);
+			char_t* result = static_cast<char_t*>(alloc->allocate_nothrow((length + 1) * sizeof(char_t)));
+			if (!result) return 0;
 
 			memcpy(result, string, length * sizeof(char_t));
 			result[length] = 0;
@@ -7655,9 +7655,13 @@ PUGI__NS_BEGIN
 		{
 			assert(begin <= end);
 
-			size_t length = static_cast<size_t>(end - begin);
+			if (begin == end)
+				return xpath_string();
 
-			return length == 0 ? xpath_string() : xpath_string(duplicate_string(begin, length, alloc), true, length);
+			size_t length = static_cast<size_t>(end - begin);
+			const char_t* data = duplicate_string(begin, length, alloc);
+
+			return data ? xpath_string(data, true, length) : xpath_string();
 		}
 
 		xpath_string(): _buffer(PUGIXML_TEXT("")), _uses_heap(false), _length_heap(0)
@@ -7715,8 +7719,11 @@ PUGI__NS_BEGIN
 			if (!_uses_heap)
 			{
 				size_t length_ = strlength(_buffer);
+				const char_t* data_ = duplicate_string(_buffer, length_, alloc);
 
-				_buffer = duplicate_string(_buffer, length_, alloc);
+				if (!data_) return 0;
+
+				_buffer = data_;
 				_uses_heap = true;
 				_length_heap = length_;
 			}
@@ -10595,6 +10602,8 @@ PUGI__NS_BEGIN
 				xpath_string s = string_value(c.n, stack.result);
 
 				char_t* begin = s.data(stack.result);
+				if (!begin) return xpath_string();
+
 				char_t* end = normalize_space(begin);
 
 				return xpath_string::from_heap_preallocated(begin, end);
@@ -10605,6 +10614,8 @@ PUGI__NS_BEGIN
 				xpath_string s = _left->eval_string(c, stack);
 
 				char_t* begin = s.data(stack.result);
+				if (!begin) return xpath_string();
+
 				char_t* end = normalize_space(begin);
 
 				return xpath_string::from_heap_preallocated(begin, end);
@@ -10621,6 +10632,8 @@ PUGI__NS_BEGIN
 				xpath_string to = _right->_next->eval_string(c, swapped_stack);
 
 				char_t* begin = s.data(stack.result);
+				if (!begin) return xpath_string();
+
 				char_t* end = translate(begin, from.c_str(), to.c_str(), to.length());
 
 				return xpath_string::from_heap_preallocated(begin, end);
@@ -10631,6 +10644,8 @@ PUGI__NS_BEGIN
 				xpath_string s = _left->eval_string(c, stack);
 
 				char_t* begin = s.data(stack.result);
+				if (!begin) return xpath_string();
+
 				char_t* end = translate_table(begin, _data.table);
 
 				return xpath_string::from_heap_preallocated(begin, end);
