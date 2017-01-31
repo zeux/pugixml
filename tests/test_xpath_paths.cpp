@@ -358,6 +358,13 @@ TEST_XML_FLAGS(xpath_paths_nodetest_principal, "<node attr='value'>pcdata<child/
 	CHECK_XPATH_NODESET(doc, STR("child::abra:*/attribute::abra:*/descendant-or-self::abra:*")); // attribute is not of element type
 }
 
+TEST_XML(xpath_paths_nodetest_attribute_namespace, "<node a1='v1' xmlns:x='?' />")
+{
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::node()")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::xmlns:x"));
+	CHECK_XPATH_NODESET(doc, STR("node/attribute::xmlns:*"));
+}
+
 TEST_XML(xpath_paths_absolute, "<node attr='value'><foo><foo/><foo/></foo></node>")
 {
 	xml_node c;

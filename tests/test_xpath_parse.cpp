@@ -274,7 +274,7 @@ TEST_XML(xpath_parse_absolute, "<div><s/></div>")
 
 TEST(xpath_parse_out_of_memory_first_page)
 {
-	test_runner::_memory_fail_threshold = 1;
+	test_runner::_memory_fail_threshold = 128;
 
 	CHECK_ALLOC_FAIL(CHECK_XPATH_FAIL(STR("1")));
 }
@@ -332,6 +332,29 @@ TEST(xpath_parse_error_propagation)
 		CHECK_XPATH_FAIL(query);
 
 		query[i] = ch;
+	}
+}
+
+TEST(xpath_parse_oom_propagation)
+{
+	const char_t* query_base = STR("(//foo[count(. | @*)] | /foo | /foo/bar//more/ancestor-or-self::foobar | /text() | a[1 + 2 * 3 div (1+0) mod 2]//b[1]/c | a[$x])[true()]");
+
+	xpath_variable_set vars;
+	vars.set(STR("x"), 1.0);
+
+	test_runner::_memory_fail_threshold = 4096 + 128;
+
+	{
+		xpath_query q(query_base, &vars);
+		CHECK(q);
+	}
+
+	for (size_t i = 3200; i < 4200; ++i)
+	{
+		std::basic_string<char_t> literal(i, 'a');
+		std::basic_string<char_t> query = STR("processing-instruction('") + literal + STR("') | ") + query_base;
+		
+		CHECK_ALLOC_FAIL(CHECK_XPATH_FAIL(query.c_str()));
 	}
 }
 

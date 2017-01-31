@@ -573,6 +573,18 @@ TEST(xpath_api_nodeset_move_assign_empty)
 	CHECK(move.type() == xpath_node_set::type_sorted);
 }
 
+TEST_XML(xpath_api_nodeset_move_assign_self, "<node><foo/><foo/><bar/></node>")
+{
+	xpath_node_set set = doc.select_nodes(STR("node/bar"));
+
+	CHECK(set.size() == 1);
+	CHECK(set.type() == xpath_node_set::type_sorted);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	set = std::move(*&set);
+}
+
 TEST(xpath_api_query_move)
 {
 	xml_node c;
