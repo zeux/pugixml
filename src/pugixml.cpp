@@ -6132,7 +6132,7 @@ namespace pugi
 	{
 		xml_node found = *this; // Current search context.
 
-		if (!_root || !path_ || !path_[0]) return found;
+		if (!_root || !path_[0]) return found;
 
 		if (path_[0] == delimiter)
 		{
