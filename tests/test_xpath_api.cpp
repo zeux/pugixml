@@ -107,6 +107,7 @@ TEST_XML(xpath_api_nodeset_accessors, "<node><foo/><foo/></node>")
 
 TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 {
+	xpath_node_set empty;
 	xpath_node_set set = doc.select_nodes(STR("node/foo"));
 
 	xpath_node_set copy1 = set;
@@ -132,7 +133,7 @@ TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 
 	xpath_node_set copy5;
 	copy5 = set;
-	copy5 = xpath_node_set();
+	copy5 = empty;
 	CHECK(copy5.size() == 0);
 }
 
@@ -416,13 +417,6 @@ TEST(xpath_api_empty)
 	xpath_query q;
 	CHECK(!q);
 	CHECK(!q.evaluate_boolean(c));
-}
-
-TEST(xpath_api_query_out_of_memory)
-{
-	test_runner::_memory_fail_threshold = 1;
-
-	CHECK_ALLOC_FAIL(xpath_query q(STR("node")));
 }
 
 #ifdef PUGIXML_HAS_MOVE

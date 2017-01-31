@@ -566,6 +566,7 @@ TEST(xpath_string_translate_table)
 
 	CHECK_XPATH_STRING(c, STR("translate('abcd\xe9 ', 'abc', 'ABC')"), STR("ABCd\xe9 "));
 	CHECK_XPATH_STRING(c, STR("translate('abcd\xe9 ', 'abc\xe9', 'ABC!')"), STR("ABCd! "));
+	CHECK_XPATH_STRING(c, STR("translate('abcd! ', 'abc!', 'ABC\xe9')"), STR("ABCd\xe9 "));
 	CHECK_XPATH_STRING(c, STR("translate('abcde', concat('abc', 'd'), 'ABCD')"), STR("ABCDe"));
 	CHECK_XPATH_STRING(c, STR("translate('abcde', 'abcd', concat('ABC', 'D'))"), STR("ABCDe"));
 }
@@ -799,4 +800,17 @@ TEST_XML(xpath_string_concat_translate, "<node>foobar</node>")
 	CHECK_XPATH_STRING(doc, STR("concat('a', 'b', 'c', translate(node, 'o', 'a'), 'd')"), STR("abcfaabard"));
 }
 
+TEST(xpath_unknown_functions)
+{
+	char_t query[] = STR("a()");
+
+	for (char ch = 'a'; ch <= 'z'; ++ch)
+	{
+		query[0] = ch;
+		CHECK_XPATH_FAIL(query);
+
+		query[0] = ch - 32;
+		CHECK_XPATH_FAIL(query);
+	}
+}
 #endif

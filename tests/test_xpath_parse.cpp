@@ -335,4 +335,12 @@ TEST(xpath_parse_error_propagation)
 	}
 }
 
+TEST_XML(xpath_parse_location_path, "<node><child/></node>")
+{
+	CHECK_XPATH_NODESET(doc, STR("/node")) % 2;
+	CHECK_XPATH_NODESET(doc, STR("/@*"));
+	CHECK_XPATH_NODESET(doc, STR("/.")) % 1;
+	CHECK_XPATH_NODESET(doc, STR("/.."));
+	CHECK_XPATH_NODESET(doc, STR("/*")) % 2;
+}
 #endif

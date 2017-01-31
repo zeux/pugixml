@@ -367,6 +367,32 @@ TEST(xpath_large_node_set)
 	CHECK(ns.size() == 10001);
 }
 
+TEST(xpath_out_of_memory_query)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	CHECK_ALLOC_FAIL(xpath_query q(STR("node")));
+}
+
+TEST_XML(xpath_out_of_memory_evaluate, "<n/>")
+{
+	test_runner::_memory_fail_threshold = 4196 * sizeof(char_t) + 4096 * 2 + 32768;
+
+	std::basic_string<char_t> query = STR("*[concat(\"a\", \"");
+
+	query.resize(4196, 'a');
+	query += STR("\")]");
+
+	pugi::xpath_query q(query.c_str());
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_boolean(doc) == false));
+	CHECK_ALLOC_FAIL(CHECK_DOUBLE_NAN(q.evaluate_number(doc)));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node(doc) == xpath_node()));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node_set(doc).empty()));
+}
+
 TEST(xpath_out_of_memory_evaluate_concat)
 {
 	test_runner::_memory_fail_threshold = 4196 * sizeof(char_t) + 4096 * 2;
@@ -611,5 +637,16 @@ TEST(xpath_remove_duplicates)
 		for (int i = 0; i < 40; ++i)
 			tester % (2 + i);
 	}
+}
+
+TEST(xpath_anonymous_nodes)
+{
+	xml_document doc;
+	doc.append_child(node_element);
+	doc.append_child(node_pi);
+
+	CHECK_XPATH_NODESET(doc, STR("/name"));
+	CHECK_XPATH_NODESET(doc, STR("/processing-instruction('a')"));
+	CHECK_XPATH_NODESET(doc, STR("/ns:*"));
 }
 #endif
