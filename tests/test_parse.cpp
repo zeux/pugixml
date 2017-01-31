@@ -1206,3 +1206,83 @@ TEST(parse_encoding_detect_latin1)
 	CHECK(doc.load_buffer(test3, sizeof(test3)).encoding == encoding_latin1);
 	CHECK(doc.load_buffer(test4, sizeof(test4)).encoding == encoding_latin1);
 }
+
+TEST(parse_encoding_detect_auto)
+{
+	struct data_t
+	{
+		const char* contents;
+		size_t size;
+		xml_encoding encoding;
+	};
+
+	const data_t data[] =
+	{
+		// BOM
+		{ "\x00\x00\xfe\xff", 4, encoding_utf32_be },
+		{ "\xff\xfe\x00\x00", 4, encoding_utf32_le },
+		{ "\xfe\xff  ", 4, encoding_utf16_be },
+		{ "\xff\xfe  ", 4, encoding_utf16_le },
+		{ "\xef\xbb\xbf ", 4, encoding_utf8 },
+		// automatic tag detection for < or <?
+		{ "\x00\x00\x00<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>", 16, encoding_utf32_be },
+		{ "<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>\x00\x00\x00", 16, encoding_utf32_le },
+		{ "\x00<\x00?\x00n\x00?\x00>", 10, encoding_utf16_be },
+		{ "<\x00?\x00n\x00?\x00>\x00", 10, encoding_utf16_le },
+		{ "\x00<\x00n\x00/\x00>", 8, encoding_utf16_be },
+		{ "<\x00n\x00/\x00>\x00", 8, encoding_utf16_le },
+		// <?xml encoding
+		{ "<?xml encoding='latin1'?>", 25, encoding_latin1 },
+	};
+
+	for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); ++i)
+	{
+		xml_document doc;
+		xml_parse_result result = doc.load_buffer(data[i].contents, data[i].size, parse_fragment);
+
+		CHECK(result);
+		CHECK(result.encoding == data[i].encoding);
+	}
+}
+
+TEST(parse_encoding_detect_auto_incomplete)
+{
+	struct data_t
+	{
+		const char* contents;
+		size_t size;
+		xml_encoding encoding;
+	};
+
+	const data_t data[] =
+	{
+		// BOM
+		{ "\x00\x00\xfe ", 4, encoding_utf8 },
+		{ "\x00\x00  ", 4, encoding_utf8 },
+		{ "\xff\xfe\x00 ", 4, encoding_utf16_le },
+		{ "\xfe   ", 4, encoding_utf8 },
+		{ "\xff   ", 4, encoding_utf8 },
+		{ "\xef\xbb  ", 4, encoding_utf8 },
+		{ "\xef   ", 4, encoding_utf8 },
+		// automatic tag detection for < or <?
+		{ "\x00\x00\x00 ", 4, encoding_utf8 },
+		{ "<\x00\x00n/\x00>\x00", 8, encoding_utf16_le },
+		{ "\x00<n\x00\x00/\x00>", 8, encoding_utf16_be },
+		{ "<\x00?n/\x00>\x00", 8, encoding_utf16_le },
+		{ "\x00 ", 8, encoding_utf8 },
+		// <?xml encoding
+		{ "<?xmC encoding='latin1'?>", 25, encoding_utf8 },
+		{ "<?xBC encoding='latin1'?>", 25, encoding_utf8 },
+		{ "<?ABC encoding='latin1'?>", 25, encoding_utf8 },
+		{ "<_ABC encoding='latin1'/>", 25, encoding_utf8 },
+	};
+
+	for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); ++i)
+	{
+		xml_document doc;
+		xml_parse_result result = doc.load_buffer(data[i].contents, data[i].size, parse_fragment);
+
+		CHECK(result);
+		CHECK(result.encoding == data[i].encoding);
+	}
+}
