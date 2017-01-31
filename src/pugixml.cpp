@@ -11870,6 +11870,10 @@ PUGI__NS_BEGIN
 
 		xpath_string r = impl->root->eval_string(c, sd.stack);
 
+	#ifndef PUGIXML_NO_EXCEPTIONS
+		if (sd.error) throw std::bad_alloc();
+	#endif
+
 		return sd.error ? xpath_string() : r;
 	}
 
@@ -12510,6 +12514,10 @@ namespace pugi
 
 		bool r = static_cast<impl::xpath_query_impl*>(_impl)->root->eval_boolean(c, sd.stack);
 
+	#ifndef PUGIXML_NO_EXCEPTIONS
+		if (sd.error) throw std::bad_alloc();
+	#endif
+
 		return sd.error ? false : r;
 	}
 
@@ -12525,6 +12533,10 @@ namespace pugi
 	#endif
 
 		double r = static_cast<impl::xpath_query_impl*>(_impl)->root->eval_number(c, sd.stack);
+
+	#ifndef PUGIXML_NO_EXCEPTIONS
+		if (sd.error) throw std::bad_alloc();
+	#endif
 
 		return sd.error ? impl::gen_nan() : r;
 	}
@@ -12574,6 +12586,10 @@ namespace pugi
 
 		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_all);
 
+	#ifndef PUGIXML_NO_EXCEPTIONS
+		if (sd.error) throw std::bad_alloc();
+	#endif
+
 		return sd.error ? xpath_node_set() : xpath_node_set(r.begin(), r.end(), r.type());
 	}
 
@@ -12590,6 +12606,10 @@ namespace pugi
 	#endif
 
 		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_first);
+
+	#ifndef PUGIXML_NO_EXCEPTIONS
+		if (sd.error) throw std::bad_alloc();
+	#endif
 
 		return sd.error ? xpath_node() : r.first();
 	}
