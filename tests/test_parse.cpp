@@ -928,12 +928,23 @@ TEST(parse_out_of_memory_halfway_attr)
 
 TEST(parse_out_of_memory_conversion)
 {
-	test_runner::_memory_fail_threshold = 256;
+	test_runner::_memory_fail_threshold = 1;
 
 	xml_document doc;
 	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer("<foo\x90/>", 7, parse_default, encoding_latin1).status == status_out_of_memory));
 	CHECK(!doc.first_child());
 }
+
+#ifdef PUGIXML_WCHAR_MODE
+TEST(parse_out_of_memory_conversion_wchar)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer("<foo />", 7).status == status_out_of_memory));
+	CHECK(!doc.first_child());
+}
+#endif
 
 TEST(parse_out_of_memory_allocator_state_sync)
 {
