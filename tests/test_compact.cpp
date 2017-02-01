@@ -11,15 +11,19 @@ static void overflow_hash_table(xml_document& doc)
 		CHECK(n.prepend_child(node_element));
 }
 
-TEST_XML(compact_out_of_memory_string, "<n/>")
+TEST_XML_FLAGS(compact_out_of_memory_string, "<n a='v'/><?n v?>", parse_pi)
 {
 	test_runner::_memory_fail_threshold = 1;
 
 	overflow_hash_table(doc);
 
-	xml_node n = doc.child(STR("n"));
+	xml_attribute a = doc.child(STR("n")).attribute(STR("a"));
+	xml_node pi = doc.last_child();
 
-	CHECK_ALLOC_FAIL(CHECK(!n.set_name(STR("name"))));
+	CHECK_ALLOC_FAIL(CHECK(!pi.set_name(STR("name"))));
+	CHECK_ALLOC_FAIL(CHECK(!pi.set_value(STR("value"))));
+	CHECK_ALLOC_FAIL(CHECK(!a.set_name(STR("name"))));
+	CHECK_ALLOC_FAIL(CHECK(!a.set_value(STR("value"))));
 }
 
 TEST_XML(compact_out_of_memory_attribute, "<n a='v'/>")

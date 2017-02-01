@@ -137,6 +137,10 @@ TEST_XML(dom_attr_as_integer_space, "<node attr1=' \t1234' attr2='\t 0x123' attr
 	CHECK(node.attribute(STR("attr2")).as_int() == 291);
 	CHECK(node.attribute(STR("attr3")).as_int() == 0);
 	CHECK(node.attribute(STR("attr4")).as_int() == 0);
+
+#ifdef PUGIXML_HAS_LONG_LONG
+	CHECK(node.attribute(STR("attr1")).as_llong() == 1234);
+#endif
 }
 
 TEST_XML(dom_attr_as_float, "<node attr1='0' attr2='1' attr3='0.12' attr4='-5.1' attr5='3e-4' attr6='3.14159265358979323846'/>")

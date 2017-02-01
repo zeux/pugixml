@@ -746,6 +746,36 @@ TEST(parse_attribute_quot_inside)
 			}
 }
 
+TEST(parse_attribute_wnorm_coverage)
+{
+	xml_document doc;
+	CHECK(doc.load_string(STR("<n a1='v' a2=' ' a3='x y' a4='x  y' a5='x   y' />"), parse_wnorm_attribute));
+	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"\" a3=\"x y\" a4=\"x y\" a5=\"x y\"/>"));
+
+	CHECK(doc.load_string(STR("<n a1='v' a2=' ' a3='x y' a4='x  y' a5='x   y' />"), parse_wnorm_attribute | parse_escapes));
+	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"\" a3=\"x y\" a4=\"x y\" a5=\"x y\"/>"));
+}
+
+TEST(parse_attribute_wconv_coverage)
+{
+	xml_document doc;
+	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_wconv_attribute));
+	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\" \" a3=\"  \" a4=\" \"/>"));
+
+	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_wconv_attribute | parse_escapes));
+	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\" \" a3=\"  \" a4=\" \"/>"));
+}
+
+TEST(parse_attribute_eol_coverage)
+{
+	xml_document doc;
+	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_eol));
+	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"&#10;\" a3=\"&#10;&#10;\" a4=\"&#10;\"/>"));
+
+	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_eol | parse_escapes));
+	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"&#10;\" a3=\"&#10;&#10;\" a4=\"&#10;\"/>"));
+}
+
 TEST(parse_tag_single)
 {
 	xml_document doc;
