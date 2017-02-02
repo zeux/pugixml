@@ -965,17 +965,6 @@ TEST(parse_out_of_memory_conversion)
 	CHECK(!doc.first_child());
 }
 
-#ifdef PUGIXML_WCHAR_MODE
-TEST(parse_out_of_memory_conversion_wchar)
-{
-	test_runner::_memory_fail_threshold = 1;
-
-	xml_document doc;
-	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer("<foo />", 7).status == status_out_of_memory));
-	CHECK(!doc.first_child());
-}
-#endif
-
 TEST(parse_out_of_memory_allocator_state_sync)
 {
 	const unsigned int count = 10000;
