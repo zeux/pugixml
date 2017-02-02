@@ -1230,6 +1230,26 @@ TEST_XML_FLAGS(parse_embed_pcdata_fragment, "text", parse_fragment | parse_embed
 	CHECK_STRING(doc.first_child().value(), STR("text"));
 }
 
+TEST_XML_FLAGS(parse_embed_pcdata_child, "<n><child/>text</n>", parse_embed_pcdata)
+{
+	xml_node n = doc.child(STR("n"));
+
+	CHECK_NODE(doc, STR("<n><child/>text</n>"));
+	CHECK(n.last_child().type() == node_pcdata);
+	CHECK_STRING(n.last_child().value(), STR("text"));
+}
+
+TEST_XML_FLAGS(parse_embed_pcdata_comment, "<n>text1<!---->text2</n>", parse_embed_pcdata)
+{
+	xml_node n = doc.child(STR("n"));
+
+	CHECK_NODE(doc, STR("<n>text1text2</n>"));
+	CHECK_STRING(n.value(), STR("text1"));
+	CHECK(n.first_child() == n.last_child());
+	CHECK(n.last_child().type() == node_pcdata);
+	CHECK_STRING(n.last_child().value(), STR("text2"));
+}
+
 TEST(parse_encoding_detect)
 {
 	char test[] = "<?xml version='1.0' encoding='utf-8'?><n/>";
