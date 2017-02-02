@@ -88,6 +88,16 @@ TEST(parse_pi_error)
 	CHECK(doc.load_string(STR("<?name& x?>"), parse_fragment | parse_pi).status == status_bad_pi);
 }
 
+TEST(parse_pi_error_buffer_boundary)
+{
+	char buf1[] = "<?name?>";
+	char buf2[] = "<?name?x";
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(buf1, 8, parse_fragment | parse_pi));
+	CHECK(doc.load_buffer_inplace(buf2, 8, parse_fragment | parse_pi).status == status_bad_pi);
+}
+
 TEST(parse_comments_skip)
 {
 	xml_document doc;
@@ -1211,6 +1221,13 @@ TEST(parse_embed_pcdata)
 		CHECK_NODE_EX(doc, STR("<node>\n<key>value</key>\n<child>\n<inner1>value1</inner1>\n<inner2>value2</inner2>outer</child>\n<two>text<data />\n</two>\n</node>\n"), STR("\t"), 0);
 		CHECK_NODE_EX(doc, STR("<node>\n\t<key>value</key>\n\t<child>\n\t\t<inner1>value1</inner1>\n\t\t<inner2>value2</inner2>outer</child>\n\t<two>text<data />\n\t</two>\n</node>\n"), STR("\t"), format_indent);
 	}
+}
+
+TEST_XML_FLAGS(parse_embed_pcdata_fragment, "text", parse_fragment | parse_embed_pcdata)
+{
+	CHECK_NODE(doc, STR("text"));
+	CHECK(doc.first_child().type() == node_pcdata);
+	CHECK_STRING(doc.first_child().value(), STR("text"));
 }
 
 TEST(parse_encoding_detect)
