@@ -6113,7 +6113,7 @@ namespace pugi
 			if (j != _root)
 				result[--offset] = delimiter;
 
-			if (j->name && *j->name)
+			if (j->name)
 			{
 				size_t length = impl::strlength(j->name);
 
