@@ -475,6 +475,38 @@ TEST_XML(xpath_out_of_memory_evaluate_translate_table, "<node> a b c d e f g h i
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
 }
 
+TEST(xpath_out_of_memory_evaluate_string_append)
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	std::basic_string<char_t> literal(5000, 'a');
+
+	std::basic_string<char_t> buf;
+	buf += STR("<n><c>text</c><c>");
+	buf += literal;
+	buf += STR("</c></n>");
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(&buf[0], buf.size() * sizeof(char_t)));
+
+	pugi::xpath_query q(STR("string(n)"));
+	CHECK(q);
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
+}
+
+TEST(xpath_out_of_memory_evaluate_number_to_string)
+{
+	test_runner::_memory_fail_threshold = 4096 + 128;
+
+	xpath_variable_set vars;
+	vars.set(STR("x"), 1e+308);
+
+	xpath_query q(STR("concat($x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x)"), &vars);
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(xml_node()).empty()));
+}
+
 TEST(xpath_memory_concat_massive)
 {
 	pugi::xml_document doc;
