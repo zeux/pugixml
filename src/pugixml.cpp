@@ -7387,13 +7387,12 @@ PUGI__NS_BEGIN
 		};
 	};
 
-	class xpath_allocator
+	struct xpath_allocator
 	{
 		xpath_memory_block* _root;
 		size_t _root_size;
 		bool* _error;
 
-	public:
 		xpath_allocator(xpath_memory_block* root, bool* error = 0): _root(root), _root_size(0), _error(error)
 		{
 		}
@@ -7540,13 +7539,13 @@ PUGI__NS_BEGIN
 
 	struct xpath_stack_data
 	{
-		bool error;
 		xpath_memory_block blocks[2];
 		xpath_allocator result;
 		xpath_allocator temp;
 		xpath_stack stack;
+		bool oom;
 
-		xpath_stack_data(): error(false), result(blocks + 0, &error), temp(blocks + 1, &error)
+		xpath_stack_data(): result(blocks + 0, &oom), temp(blocks + 1, &oom), oom(false)
 		{
 			blocks[0].next = blocks[1].next = 0;
 			blocks[0].capacity = blocks[1].capacity = sizeof(blocks[0].data);
@@ -10911,15 +10910,15 @@ PUGI__NS_BEGIN
 
 		xpath_ast_node* error_oom()
 		{
-			return error("Out of memory");
+			assert(_alloc->_error);
+			*_alloc->_error = true;
+
+			return 0;
 		}
 
 		void* alloc_node()
 		{
-			void* result = _alloc->allocate(sizeof(xpath_ast_node));
-			if (!result) return error_oom();
-
-			return result;
+			return _alloc->allocate(sizeof(xpath_ast_node));
 		}
 
 		xpath_ast_node* alloc_node(ast_type_t type, xpath_value_type rettype, const char_t* value)
@@ -10966,11 +10965,7 @@ PUGI__NS_BEGIN
 			size_t length = static_cast<size_t>(value.end - value.begin);
 
 			char_t* c = static_cast<char_t*>(_alloc->allocate((length + 1) * sizeof(char_t)));
-			if (!c)
-			{
-				error_oom();
-				return c;
-			}
+			if (!c) return 0;
 
 			memcpy(c, value.begin, length * sizeof(char_t));
 			c[length] = 0;
@@ -11808,7 +11803,7 @@ PUGI__NS_BEGIN
 			xml_memory::deallocate(impl);
 		}
 
-		xpath_query_impl(): root(0), alloc(&block)
+		xpath_query_impl(): root(0), alloc(&block, &oom), oom(false)
 		{
 			block.next = 0;
 			block.capacity = sizeof(block.data);
@@ -11817,6 +11812,7 @@ PUGI__NS_BEGIN
 		xpath_ast_node* root;
 		xpath_allocator alloc;
 		xpath_memory_block block;
+		bool oom;
 	};
 
 	PUGI__FN xpath_string evaluate_string_impl(xpath_query_impl* impl, const xpath_node& n, xpath_stack_data& sd)
@@ -11828,10 +11824,10 @@ PUGI__NS_BEGIN
 		xpath_string r = impl->root->eval_string(c, sd.stack);
 
 	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.error) throw std::bad_alloc();
+		if (sd.oom) throw std::bad_alloc();
 	#endif
 
-		return sd.error ? xpath_string() : r;
+		return sd.oom ? xpath_string() : r;
 	}
 
 	PUGI__FN impl::xpath_ast_node* evaluate_node_set_prepare(xpath_query_impl* impl)
@@ -12406,11 +12402,11 @@ namespace pugi
 			}
 			else
 			{
-			#ifndef PUGIXML_NO_EXCEPTIONS
-				if (strcmp(_result.error, "Out of memory"))
-					throw xpath_exception(_result);
-				else
-					throw std::bad_alloc();
+			#ifdef PUGIXML_NO_EXCEPTIONS
+				if (qimpl->oom) _result.error = "Out of memory";
+			#else
+				if (qimpl->oom) throw std::bad_alloc();
+				throw xpath_exception(_result);
 			#endif
 			}
 		}
@@ -12468,10 +12464,10 @@ namespace pugi
 		bool r = static_cast<impl::xpath_query_impl*>(_impl)->root->eval_boolean(c, sd.stack);
 
 	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.error) throw std::bad_alloc();
+		if (sd.oom) throw std::bad_alloc();
 	#endif
 
-		return sd.error ? false : r;
+		return sd.oom ? false : r;
 	}
 
 	PUGI__FN double xpath_query::evaluate_number(const xpath_node& n) const
@@ -12484,10 +12480,10 @@ namespace pugi
 		double r = static_cast<impl::xpath_query_impl*>(_impl)->root->eval_number(c, sd.stack);
 
 	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.error) throw std::bad_alloc();
+		if (sd.oom) throw std::bad_alloc();
 	#endif
 
-		return sd.error ? impl::gen_nan() : r;
+		return sd.oom ? impl::gen_nan() : r;
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -12532,10 +12528,10 @@ namespace pugi
 		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_all);
 
 	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.error) throw std::bad_alloc();
+		if (sd.oom) throw std::bad_alloc();
 	#endif
 
-		return sd.error ? xpath_node_set() : xpath_node_set(r.begin(), r.end(), r.type());
+		return sd.oom ? xpath_node_set() : xpath_node_set(r.begin(), r.end(), r.type());
 	}
 
 	PUGI__FN xpath_node xpath_query::evaluate_node(const xpath_node& n) const
@@ -12549,10 +12545,10 @@ namespace pugi
 		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_first);
 
 	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.error) throw std::bad_alloc();
+		if (sd.oom) throw std::bad_alloc();
 	#endif
 
-		return sd.error ? xpath_node() : r.first();
+		return sd.oom ? xpath_node() : r.first();
 	}
 
 	PUGI__FN const xpath_parse_result& xpath_query::result() const
