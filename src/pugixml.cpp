@@ -11823,11 +11823,16 @@ PUGI__NS_BEGIN
 
 		xpath_string r = impl->root->eval_string(c, sd.stack);
 
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.oom) throw std::bad_alloc();
-	#endif
+		if (sd.oom)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return xpath_string();
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
 
-		return sd.oom ? xpath_string() : r;
+		return r;
 	}
 
 	PUGI__FN impl::xpath_ast_node* evaluate_node_set_prepare(xpath_query_impl* impl)
@@ -12463,11 +12468,16 @@ namespace pugi
 
 		bool r = static_cast<impl::xpath_query_impl*>(_impl)->root->eval_boolean(c, sd.stack);
 
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.oom) throw std::bad_alloc();
-	#endif
+		if (sd.oom)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return false;
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
 
-		return sd.oom ? false : r;
+		return r;
 	}
 
 	PUGI__FN double xpath_query::evaluate_number(const xpath_node& n) const
@@ -12479,11 +12489,16 @@ namespace pugi
 
 		double r = static_cast<impl::xpath_query_impl*>(_impl)->root->eval_number(c, sd.stack);
 
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.oom) throw std::bad_alloc();
-	#endif
+		if (sd.oom)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return impl::gen_nan();
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
 
-		return sd.oom ? impl::gen_nan() : r;
+		return r;
 	}
 
 #ifndef PUGIXML_NO_STL
@@ -12527,11 +12542,16 @@ namespace pugi
 
 		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_all);
 
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.oom) throw std::bad_alloc();
-	#endif
+		if (sd.oom)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return xpath_node_set();
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
 
-		return sd.oom ? xpath_node_set() : xpath_node_set(r.begin(), r.end(), r.type());
+		return xpath_node_set(r.begin(), r.end(), r.type());
 	}
 
 	PUGI__FN xpath_node xpath_query::evaluate_node(const xpath_node& n) const
@@ -12544,11 +12564,16 @@ namespace pugi
 
 		impl::xpath_node_set_raw r = root->eval_node_set(c, sd.stack, impl::nodeset_eval_first);
 
-	#ifndef PUGIXML_NO_EXCEPTIONS
-		if (sd.oom) throw std::bad_alloc();
-	#endif
+		if (sd.oom)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return xpath_node();
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
 
-		return sd.oom ? xpath_node() : r.first();
+		return r.first();
 	}
 
 	PUGI__FN const xpath_parse_result& xpath_query::result() const
