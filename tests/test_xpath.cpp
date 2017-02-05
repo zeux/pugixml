@@ -672,6 +672,17 @@ TEST(xpath_sort_crossdoc_different_depth)
 	CHECK((ns[0] == ns1[0] && ns[1] == ns2[0]) || (ns[0] == ns2[0] && ns[1] == ns1[0]));
 }
 
+TEST_XML(xpath_sort_empty_node, "<node><child1/><child2/></node>")
+{
+	xml_node n = doc.child(STR("node"));
+	xpath_node nodes[] = { n.child(STR("child2")), xml_node(), n.child(STR("child1")), xml_node() };
+	xpath_node_set ns(nodes, nodes + sizeof(nodes) / sizeof(nodes[0]));
+
+	ns.sort();
+
+	CHECK(!ns[0] && !ns[1] && ns[2] == nodes[2] && ns[3] == nodes[0]);
+}
+
 TEST(xpath_allocate_string_out_of_memory)
 {
 	std::basic_string<char_t> query;
