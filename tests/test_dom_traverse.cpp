@@ -137,6 +137,10 @@ TEST_XML(dom_attr_as_integer_space, "<node attr1=' \t1234' attr2='\t 0x123' attr
 	CHECK(node.attribute(STR("attr2")).as_int() == 291);
 	CHECK(node.attribute(STR("attr3")).as_int() == 0);
 	CHECK(node.attribute(STR("attr4")).as_int() == 0);
+
+#ifdef PUGIXML_HAS_LONG_LONG
+	CHECK(node.attribute(STR("attr1")).as_llong() == 1234);
+#endif
 }
 
 TEST_XML(dom_attr_as_float, "<node attr1='0' attr2='1' attr3='0.12' attr4='-5.1' attr5='3e-4' attr6='3.14159265358979323846'/>")
@@ -736,6 +740,9 @@ TEST_XML(dom_node_path, "<node><child1>text<child2/></child1></node>")
 	CHECK(doc.child(STR("node")).child(STR("child1")).first_child().path() == STR("/node/child1/"));
 
 	CHECK(doc.child(STR("node")).child(STR("child1")).path('\\') == STR("\\node\\child1"));
+
+	doc.append_child(node_element);
+	CHECK(doc.last_child().path() == STR("/"));
 }
 #endif
 
@@ -1273,4 +1280,18 @@ TEST_XML(dom_as_int_plus, "<node attr1='+1' attr2='+0xa' />")
 	CHECK(node.attribute(STR("attr2")).as_llong() == 10);
 	CHECK(node.attribute(STR("attr2")).as_ullong() == 10);
 #endif
+}
+
+TEST(dom_node_anonymous)
+{
+	xml_document doc;
+	doc.append_child(node_element);
+	doc.append_child(node_element);
+	doc.append_child(node_pcdata);
+
+	CHECK(doc.child(STR("node")) == xml_node());
+	CHECK(doc.first_child().next_sibling(STR("node")) == xml_node());
+	CHECK(doc.last_child().previous_sibling(STR("node")) == xml_node());
+	CHECK_STRING(doc.child_value(), STR(""));
+	CHECK_STRING(doc.last_child().child_value(), STR(""));
 }

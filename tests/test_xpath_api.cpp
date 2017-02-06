@@ -107,6 +107,7 @@ TEST_XML(xpath_api_nodeset_accessors, "<node><foo/><foo/></node>")
 
 TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 {
+	xpath_node_set empty;
 	xpath_node_set set = doc.select_nodes(STR("node/foo"));
 
 	xpath_node_set copy1 = set;
@@ -132,7 +133,7 @@ TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 
 	xpath_node_set copy5;
 	copy5 = set;
-	copy5 = xpath_node_set();
+	copy5 = empty;
 	CHECK(copy5.size() == 0);
 }
 
@@ -570,6 +571,18 @@ TEST(xpath_api_nodeset_move_assign_empty)
 
 	CHECK(move.size() == 0);
 	CHECK(move.type() == xpath_node_set::type_sorted);
+}
+
+TEST_XML(xpath_api_nodeset_move_assign_self, "<node><foo/><foo/><bar/></node>")
+{
+	xpath_node_set set = doc.select_nodes(STR("node/bar"));
+
+	CHECK(set.size() == 1);
+	CHECK(set.type() == xpath_node_set::type_sorted);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	set = std::move(*&set);
 }
 
 TEST(xpath_api_query_move)

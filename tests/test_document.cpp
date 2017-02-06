@@ -496,6 +496,15 @@ TEST_XML(document_save_declaration_latin1, "<node/>")
 	CHECK(writer.as_narrow() == "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<node />\n");
 }
 
+TEST_XML(document_save_declaration_raw, "<node/>")
+{
+	xml_writer_string writer;
+
+	doc.save(writer, STR(""), pugi::format_raw, get_native_encoding());
+
+	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?><node/>"));
+}
+
 struct temp_file
 {
 	char path[512];

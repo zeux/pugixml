@@ -69,6 +69,12 @@ TEST_XML_FLAGS(write_cdata_escape, "<![CDATA[value]]>", parse_cdata | parse_frag
 
 	doc.first_child().set_value(STR("1]]>2]]>3"));
 	CHECK_NODE(doc, STR("<![CDATA[1]]]]><![CDATA[>2]]]]><![CDATA[>3]]>"));
+
+	doc.first_child().set_value(STR("1]"));
+	CHECK_NODE(doc, STR("<![CDATA[1]]]>"));
+
+	doc.first_child().set_value(STR("1]]"));
+	CHECK_NODE(doc, STR("<![CDATA[1]]]]>"));
 }
 
 TEST_XML(write_cdata_inner, "<node><![CDATA[value]]></node>")

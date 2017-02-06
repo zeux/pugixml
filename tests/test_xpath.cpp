@@ -367,6 +367,32 @@ TEST(xpath_large_node_set)
 	CHECK(ns.size() == 10001);
 }
 
+TEST(xpath_out_of_memory_query)
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	CHECK_ALLOC_FAIL(xpath_query q(STR("node")));
+}
+
+TEST_XML(xpath_out_of_memory_evaluate, "<n/>")
+{
+	test_runner::_memory_fail_threshold = 4196 * sizeof(char_t) + 4096 * 2 + 32768;
+
+	std::basic_string<char_t> query = STR("*[concat(\"a\", \"");
+
+	query.resize(4196, 'a');
+	query += STR("\")]");
+
+	pugi::xpath_query q(query.c_str());
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_boolean(doc) == false));
+	CHECK_ALLOC_FAIL(CHECK_DOUBLE_NAN(q.evaluate_number(doc)));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node(doc) == xpath_node()));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node_set(doc).empty()));
+}
+
 TEST(xpath_out_of_memory_evaluate_concat)
 {
 	test_runner::_memory_fail_threshold = 4196 * sizeof(char_t) + 4096 * 2;
@@ -404,13 +430,81 @@ TEST_XML(xpath_out_of_memory_evaluate_union, "<node><a/><a/><a/><a/><a/><a/><a/>
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node_set(doc.child(STR("node"))).empty()));
 }
 
-TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
+TEST_XML(xpath_out_of_memory_evaluate_predicate, "<node><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/><a/></node>")
 {
 	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
 
-	pugi::xpath_query q(STR("//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[//a[true()]]]]]]]]]]]]]]"));
+	pugi::xpath_query q(STR("//a[//a[//a[//a[true()]]]]"));
 
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node_set(doc).empty()));
+}
+
+TEST_XML(xpath_out_of_memory_evaluate_normalize_space_0, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	pugi::xpath_query q(STR("concat(normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space())"));
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc.first_child()).empty()));
+}
+
+TEST_XML(xpath_out_of_memory_evaluate_normalize_space_1, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	pugi::xpath_query q(STR("concat(normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node))"));
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
+}
+
+TEST_XML(xpath_out_of_memory_evaluate_translate, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	pugi::xpath_query q(STR("concat(translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'))"));
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
+}
+
+TEST_XML(xpath_out_of_memory_evaluate_translate_table, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	pugi::xpath_query q(STR("concat(translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'))"));
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
+}
+
+TEST(xpath_out_of_memory_evaluate_string_append)
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 * 2;
+
+	std::basic_string<char_t> literal(5000, 'a');
+
+	std::basic_string<char_t> buf;
+	buf += STR("<n><c>text</c><c>");
+	buf += literal;
+	buf += STR("</c></n>");
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace(&buf[0], buf.size() * sizeof(char_t)));
+
+	pugi::xpath_query q(STR("string(n)"));
+	CHECK(q);
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
+}
+
+TEST(xpath_out_of_memory_evaluate_number_to_string)
+{
+	test_runner::_memory_fail_threshold = 4096 + 128;
+
+	xpath_variable_set vars;
+	vars.set(STR("x"), 1e+308);
+
+	xpath_query q(STR("concat($x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x)"), &vars);
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(xml_node()).empty()));
 }
 
 TEST(xpath_memory_concat_massive)
@@ -578,6 +672,17 @@ TEST(xpath_sort_crossdoc_different_depth)
 	CHECK((ns[0] == ns1[0] && ns[1] == ns2[0]) || (ns[0] == ns2[0] && ns[1] == ns1[0]));
 }
 
+TEST_XML(xpath_sort_empty_node, "<node><child1/><child2/></node>")
+{
+	xml_node n = doc.child(STR("node"));
+	xpath_node nodes[] = { n.child(STR("child2")), xml_node(), n.child(STR("child1")), xml_node() };
+	xpath_node_set ns(nodes, nodes + sizeof(nodes) / sizeof(nodes[0]));
+
+	ns.sort();
+
+	CHECK(!ns[0] && !ns[1] && ns[2] == nodes[2] && ns[3] == nodes[0]);
+}
+
 TEST(xpath_allocate_string_out_of_memory)
 {
 	std::basic_string<char_t> query;
@@ -611,5 +716,16 @@ TEST(xpath_remove_duplicates)
 		for (int i = 0; i < 40; ++i)
 			tester % (2 + i);
 	}
+}
+
+TEST(xpath_anonymous_nodes)
+{
+	xml_document doc;
+	doc.append_child(node_element);
+	doc.append_child(node_pi);
+
+	CHECK_XPATH_NODESET(doc, STR("/name"));
+	CHECK_XPATH_NODESET(doc, STR("/processing-instruction('a')"));
+	CHECK_XPATH_NODESET(doc, STR("/ns:*"));
 }
 #endif

@@ -8,6 +8,7 @@ env:
   - DEFINES=standard
   - DEFINES=PUGIXML_WCHAR_MODE
   - DEFINES=PUGIXML_COMPACT
+  - DEFINES=PUGIXML_NO_EXCEPTIONS
 script:
   - make test cxxstd=c++11 defines=$DEFINES config=coverage -j2
   - make test cxxstd=c++11 defines=$DEFINES config=release -j2
