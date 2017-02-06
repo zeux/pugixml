@@ -12600,7 +12600,7 @@ namespace pugi
 	PUGI__FN xpath_node xml_node::select_node(const char_t* query, xpath_variable_set* variables) const
 	{
 		xpath_query q(query, variables);
-		return select_node(q);
+		return q.evaluate_node(*this);
 	}
 
 	PUGI__FN xpath_node xml_node::select_node(const xpath_query& query) const
@@ -12611,7 +12611,7 @@ namespace pugi
 	PUGI__FN xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* variables) const
 	{
 		xpath_query q(query, variables);
-		return select_nodes(q);
+		return q.evaluate_node_set(*this);
 	}
 
 	PUGI__FN xpath_node_set xml_node::select_nodes(const xpath_query& query) const
@@ -12622,7 +12622,7 @@ namespace pugi
 	PUGI__FN xpath_node xml_node::select_single_node(const char_t* query, xpath_variable_set* variables) const
 	{
 		xpath_query q(query, variables);
-		return select_single_node(q);
+		return q.evaluate_node(*this);
 	}
 
 	PUGI__FN xpath_node xml_node::select_single_node(const xpath_query& query) const
