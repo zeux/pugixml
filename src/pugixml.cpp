@@ -11815,26 +11815,6 @@ PUGI__NS_BEGIN
 		bool oom;
 	};
 
-	PUGI__FN xpath_string evaluate_string_impl(xpath_query_impl* impl, const xpath_node& n, xpath_stack_data& sd)
-	{
-		if (!impl) return xpath_string();
-
-		xpath_context c(n, 1, 1);
-
-		xpath_string r = impl->root->eval_string(c, sd.stack);
-
-		if (sd.oom)
-		{
-		#ifdef PUGIXML_NO_EXCEPTIONS
-			return xpath_string();
-		#else
-			throw std::bad_alloc();
-		#endif
-		}
-
-		return r;
-	}
-
 	PUGI__FN impl::xpath_ast_node* evaluate_node_set_prepare(xpath_query_impl* impl)
 	{
 		if (!impl) return 0;
@@ -12504,9 +12484,21 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	PUGI__FN string_t xpath_query::evaluate_string(const xpath_node& n) const
 	{
+		if (!_impl) return string_t();
+
+		impl::xpath_context c(n, 1, 1);
 		impl::xpath_stack_data sd;
 
-		impl::xpath_string r = impl::evaluate_string_impl(static_cast<impl::xpath_query_impl*>(_impl), n, sd);
+		impl::xpath_string r = static_cast<impl::xpath_query_impl*>(_impl)->root->eval_string(c, sd.stack);
+
+		if (sd.oom)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return string_t();
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
 
 		return string_t(r.c_str(), r.length());
 	}
@@ -12514,9 +12506,19 @@ namespace pugi
 
 	PUGI__FN size_t xpath_query::evaluate_string(char_t* buffer, size_t capacity, const xpath_node& n) const
 	{
+		impl::xpath_context c(n, 1, 1);
 		impl::xpath_stack_data sd;
 
-		impl::xpath_string r = impl::evaluate_string_impl(static_cast<impl::xpath_query_impl*>(_impl), n, sd);
+		impl::xpath_string r = _impl ? static_cast<impl::xpath_query_impl*>(_impl)->root->eval_string(c, sd.stack) : impl::xpath_string();
+
+		if (sd.oom)
+		{
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			r = impl::xpath_string();
+		#else
+			throw std::bad_alloc();
+		#endif
+		}
 
 		size_t full_size = r.length() + 1;
 
