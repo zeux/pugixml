@@ -7216,39 +7216,25 @@ PUGI__NS_BEGIN
 		return write + 1;
 	}
 
-	template <typename I> void copy_backwards(I begin, I end, I target)
+	template <typename T, typename Pred> void insertion_sort(T* begin, T* end, const Pred& pred)
 	{
-		while (begin != end) *--target = *--end;
-	}
+		if (begin == end)
+			return;
 
-	template <typename I, typename Pred, typename T> void insertion_sort(I begin, I end, const Pred& pred, T*)
-	{
-		assert(begin != end);
-
-		for (I it = begin + 1; it != end; ++it)
+		for (T* it = begin + 1; it != end; ++it)
 		{
 			T val = *it;
+			T* hole = it;
 
-			if (pred(val, *begin))
+			// move hole backwards
+			while (hole > begin && pred(val, *(hole - 1)))
 			{
-				// move to front
-				copy_backwards(begin, it, it + 1);
-				*begin = val;
+				*hole = *(hole - 1);
+				hole--;
 			}
-			else
-			{
-				I hole = it;
 
-				// move hole backwards
-				while (pred(val, *(hole - 1)))
-				{
-					*hole = *(hole - 1);
-					hole--;
-				}
-
-				// fill hole with element
-				*hole = val;
-			}
+			// fill hole with element
+			*hole = val;
 		}
 	}
 
@@ -7359,7 +7345,7 @@ PUGI__NS_BEGIN
 		}
 
 		// insertion sort small chunk
-		if (begin != end) insertion_sort(begin, end, pred, &*begin);
+		insertion_sort(begin, end, pred);
 	}
 PUGI__NS_END
 
