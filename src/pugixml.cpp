@@ -7238,98 +7238,54 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	// std variant for elements with ==
-	template <typename I, typename Pred> void partition(I begin, I middle, I end, const Pred& pred, I* out_eqbeg, I* out_eqend)
+	template <typename I, typename Pred> I median3(I first, I middle, I last, const Pred& pred)
 	{
-		I eqbeg = middle, eqend = middle + 1;
+		if (pred(*middle, *first)) swap(middle, first);
+		if (pred(*last, *middle)) swap(last, middle);
+		if (pred(*middle, *first)) swap(middle, first);
 
-		// expand equal range
-		while (eqbeg != begin && *(eqbeg - 1) == *eqbeg) --eqbeg;
-		while (eqend != end && *eqend == *eqbeg) ++eqend;
-
-		// process outer elements
-		I ltend = eqbeg, gtbeg = eqend;
-
-		for (;;)
-		{
-			// find the element from the right side that belongs to the left one
-			for (; gtbeg != end; ++gtbeg)
-				if (!pred(*eqbeg, *gtbeg))
-				{
-					if (*gtbeg == *eqbeg) swap(*gtbeg, *eqend++);
-					else break;
-				}
-
-			// find the element from the left side that belongs to the right one
-			for (; ltend != begin; --ltend)
-				if (!pred(*(ltend - 1), *eqbeg))
-				{
-					if (*eqbeg == *(ltend - 1)) swap(*(ltend - 1), *--eqbeg);
-					else break;
-				}
-
-			// scanned all elements
-			if (gtbeg == end && ltend == begin)
-			{
-				*out_eqbeg = eqbeg;
-				*out_eqend = eqend;
-				return;
-			}
-
-			// make room for elements by moving equal area
-			if (gtbeg == end)
-			{
-				if (--ltend != --eqbeg) swap(*ltend, *eqbeg);
-				swap(*eqbeg, *--eqend);
-			}
-			else if (ltend == begin)
-			{
-				if (eqend != gtbeg) swap(*eqbeg, *eqend);
-				++eqend;
-				swap(*gtbeg++, *eqbeg++);
-			}
-			else swap(*gtbeg++, *--ltend);
-		}
+		return middle;
 	}
 
-	template <typename I, typename Pred> void median3(I first, I middle, I last, const Pred& pred)
+	template <typename T, typename Pred> void partition(T* begin, T* end, T pivot, const Pred& pred, T** out_eqbeg, T** out_eqend)
 	{
-		if (pred(*middle, *first)) swap(*middle, *first);
-		if (pred(*last, *middle)) swap(*last, *middle);
-		if (pred(*middle, *first)) swap(*middle, *first);
-	}
+		// invariant: array is split into 4 groups: = < ? > (each variable denotes the boundary between the groups)
+		T* eq = begin;
+		T* lt = begin;
+		T* gt = end;
 
-	template <typename I, typename Pred> void median(I first, I middle, I last, const Pred& pred)
-	{
-		if (last - first <= 40)
+		while (lt < gt)
 		{
-			// median of three for small chunks
-			median3(first, middle, last, pred);
+			if (pred(*lt, pivot))
+				lt++;
+			else if (*lt == pivot)
+				swap(*eq++, *lt++);
+			else
+				swap(*lt, *--gt);
 		}
-		else
-		{
-			// median of nine
-			size_t step = (last - first + 1) / 8;
 
-			median3(first, first + step, first + 2 * step, pred);
-			median3(middle - step, middle, middle + step, pred);
-			median3(last - 2 * step, last - step, last, pred);
-			median3(first + step, middle, last - step, pred);
-		}
+		// we now have just 4 groups: = < >; move equal elements to the middle
+		T* eqbeg = gt;
+
+		for (T* it = begin; it != eq; ++it)
+			swap(*it, *--eqbeg);
+
+		*out_eqbeg = eqbeg;
+		*out_eqend = gt;
 	}
 
 	template <typename I, typename Pred> void sort(I begin, I end, const Pred& pred)
 	{
 		// sort large chunks
-		while (end - begin > 32)
+		while (end - begin > 16)
 		{
 			// find median element
 			I middle = begin + (end - begin) / 2;
-			median(begin, middle, end - 1, pred);
+			I median = median3(begin, middle, end - 1, pred);
 
 			// partition in three chunks (< = >)
 			I eqbeg, eqend;
-			partition(begin, middle, end, pred, &eqbeg, &eqend);
+			partition(begin, end, *median, pred, &eqbeg, &eqend);
 
 			// loop on larger half
 			if (eqbeg - begin > end - eqend)
