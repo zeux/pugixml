@@ -521,6 +521,19 @@ TEST(xpath_memory_concat_massive)
 	CHECK(size == 5001);
 }
 
+TEST_XML(xpath_memory_translate_table, "<node>a</node>")
+{
+	test_runner::_memory_fail_threshold = 32768 + 4096 + 128;
+
+	// 128b per table => we need 32 translate calls to exhaust a page
+	std::basic_string<char_t> query = STR("concat(");
+	for (int i = 0; i < 32; ++i)
+		query += STR("translate(.,'a','A'),");
+	query += STR("'')");
+
+	CHECK_ALLOC_FAIL(pugi::xpath_query(query.c_str()).evaluate_string(doc.first_child()) == STR("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+}
+
 TEST_XML(xpath_sort_copy_share, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>")
 {
 	// copy sharing shares the name/value data for nodes that can potentially make document order optimization invalid (silently)

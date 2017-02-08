@@ -474,6 +474,18 @@ TEST_XML(xpath_variables_copy_out_of_memory, "<node1 /><node2 />")
 	CHECK(set2.get(STR("d"))->get_node_set().size() == 2);
 }
 
+TEST(xpath_variables_copy_out_of_memory_clone)
+{
+	xpath_variable_set set1;
+	set1.set(STR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), true);
+
+	xpath_variable_set set2 = set1;
+
+	test_runner::_memory_fail_threshold = 60;
+
+	CHECK_ALLOC_FAIL(xpath_variable_set set3 = set1);
+}
+
 #ifdef PUGIXML_HAS_MOVE
 TEST_XML(xpath_variables_move, "<node />")
 {
