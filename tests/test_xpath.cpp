@@ -531,7 +531,7 @@ TEST_XML(xpath_memory_translate_table, "<node>a</node>")
 		query += STR("translate(.,'a','A'),");
 	query += STR("'')");
 
-	CHECK_ALLOC_FAIL(pugi::xpath_query(query.c_str()).evaluate_string(doc.first_child()) == STR("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+	CHECK_ALLOC_FAIL(CHECK(!pugi::xpath_query(query.c_str())));
 }
 
 TEST_XML(xpath_sort_copy_share, "<node><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>")
