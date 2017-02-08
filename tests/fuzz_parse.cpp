@@ -1,16 +1,14 @@
 #include "../src/pugixml.hpp"
-#include "allocator.hpp"
 
-int main(int argc, const char** argv)
+#include <stdint.h>
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)
 {
-    pugi::set_memory_management_functions(memory_allocate, memory_deallocate);
-
     pugi::xml_document doc;
 
-    for (int i = 1; i < argc; ++i)
-    {
-	    doc.load_file(argv[i]);
-	    doc.load_file(argv[i], pugi::parse_minimal);
-	    doc.load_file(argv[i], pugi::parse_full);
-	}
+	doc.load_buffer(Data, Size);
+	doc.load_buffer(Data, Size, pugi::parse_minimal);
+	doc.load_buffer(Data, Size, pugi::parse_full);
+
+	return 0;
 }
