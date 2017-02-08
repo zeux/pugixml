@@ -6286,6 +6286,7 @@ namespace pugi
 			return _root->value && (_root->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0 ? _root->value - doc.buffer : -1;
 
 		default:
+			assert(false && "Invalid node type");
 			return -1;
 		}
 	}
