@@ -70,7 +70,7 @@ endif
 
 fuzz_%: $(BUILD)/fuzz_%
 	@mkdir -p build/$@
-	$< build/$@ tests/data_$*
+	$< build/$@ tests/data_$* -max_len=1024 -dict=tests/fuzz_$*.dict
 
 clean:
 	rm -rf $(BUILD)
