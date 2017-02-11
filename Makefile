@@ -68,10 +68,9 @@ test: $(EXECUTABLE)
 	./$(EXECUTABLE)
 endif
 
-fuzz:
-	@mkdir -p $(BUILD)
-	$(AFL)/afl-clang++ tests/fuzz_parse.cpp tests/allocator.cpp src/pugixml.cpp $(CXXFLAGS) -o $(BUILD)/fuzz_parse
-	$(AFL)/afl-fuzz -i tests/data_fuzz_parse -o $(BUILD)/fuzz_parse_out -x $(AFL)/testcases/_extras/xml/ -- $(BUILD)/fuzz_parse @@
+fuzz_%: $(BUILD)/fuzz_%
+	@mkdir -p build/$@
+	$< build/$@ tests/data_$* -max_len=1024 -dict=tests/fuzz_$*.dict
 
 clean:
 	rm -rf $(BUILD)
@@ -86,6 +85,10 @@ build/pugixml-%: .FORCE | $(RELEASE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
+
+$(BUILD)/fuzz_%: tests/fuzz_%.cpp src/pugixml.cpp
+	@mkdir -p $(BUILD)
+	clang++ $(CXXFLAGS) -fsanitize=address -fsanitize-coverage=trace-pc-guard $^ libFuzzer.a -o $@
 
 $(BUILD)/%.o: %
 	@mkdir -p $(dir $@)
