@@ -5168,6 +5168,11 @@ namespace pugi
 	}
 #endif
 
+	PUGI__FN std::istringstream xml_attribute::as_stringstream() const
+	{
+		return (_attr && _attr->value) ? std::istringstream(_attr->value) : std::istringstream();
+	}
+
 	PUGI__FN bool xml_attribute::empty() const
 	{
 		return !_attr;
@@ -6417,6 +6422,13 @@ namespace pugi
 		return (d && d->value) ? impl::get_value_ullong(d->value) : def;
 	}
 #endif
+
+	PUGI__FN std::istringstream xml_text::as_stringstream() const
+	{
+		xml_node_struct* d = _data();
+
+		return (d && d->value) ? std::istringstream(d->value) : std::istringstream();
+	}
 
 	PUGI__FN bool xml_text::set(const char_t* rhs)
 	{

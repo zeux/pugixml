@@ -32,6 +32,7 @@
 
 // Include STL headers
 #ifndef PUGIXML_NO_STL
+#	include <sstream>
 #	include <iterator>
 #	include <iosfwd>
 #	include <string>
@@ -373,6 +374,21 @@ namespace pugi
 		// Get attribute value as bool (returns true if first character is in '1tTyY' set), or the default value if attribute is empty
 		bool as_bool(bool def = false) const;
 
+    #ifndef PUGIXML_NO_STL
+		// Get attribute value as std::istringstream, an empty std::istringstream if the attribute is empty
+		std::istringstream as_stringstream() const;
+
+		// Get attribute value as Type (template parameter: try to read a Type value from the attribute value string)
+		template <typename Type>
+		Type as() const
+		{
+			std::istringstream stream = as_stringstream();
+			Type value;
+			stream >> value;
+			return value;
+		}
+    #endif
+
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
 		bool set_value(const char_t* rhs);
@@ -390,6 +406,16 @@ namespace pugi
 		bool set_value(long long rhs);
 		bool set_value(unsigned long long rhs);
 	#endif
+
+    #ifndef PUGIXML_NO_STL
+    	template <typename Type>
+    	bool set_value(const Type& rhs) const
+    	{
+    		std::ostringstream stream;
+    		stream << rhs;
+    		return set_value(stream.str().c_str());
+    	}
+    #endif
 
 		// Set attribute value (equivalent to set_value without error checking)
 		xml_attribute& operator=(const char_t* rhs);
@@ -725,6 +751,21 @@ namespace pugi
 		// Get text as bool (returns true if first character is in '1tTyY' set), or the default value if object is empty
 		bool as_bool(bool def = false) const;
 
+    #ifndef PUGIXML_NO_STL
+		// Get attribute value as std::istringstream, an empty std::istringstream if the attribute is empty
+    	std::istringstream as_stringstream() const;
+
+		// Get attribute value as Type (template parameter: try to read a Type value from the attribute value string)
+    	template <typename Type>
+    	Type as() const
+    	{
+    		std::istringstream stream = as_stringstream();
+    		Type value;
+    		stream >> value;
+    		return value;
+    	}
+    #endif
+
 		// Set text (returns false if object is empty or there is not enough memory)
 		bool set(const char_t* rhs);
 
@@ -741,6 +782,16 @@ namespace pugi
 		bool set(long long rhs);
 		bool set(unsigned long long rhs);
 	#endif
+
+    #ifndef PUGIXML_NO_STL
+    	template <typename Type>
+    	bool set(const Type& rhs)
+    	{
+    		std::ostringstream stream;
+    		stream << rhs;
+    		return set(stream.str().c_str());
+    	}
+    #endif
 
 		// Set text (equivalent to set without error checking)
 		xml_text& operator=(const char_t* rhs);
