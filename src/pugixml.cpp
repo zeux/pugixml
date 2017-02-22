@@ -274,61 +274,31 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		void** find(const void* key)
+		void* find(const void* key)
 		{
-			assert(key);
-
 			if (_capacity == 0) return 0;
 
-			size_t hashmod = _capacity - 1;
-			size_t bucket = hash(key) & hashmod;
+			item_t* item = get_item(key);
+			assert(item);
+			assert(item->key == key || (item->key == 0 && item->value == 0));
 
-			for (size_t probe = 0; probe <= hashmod; ++probe)
-			{
-				item_t& probe_item = _items[bucket];
-
-				if (probe_item.key == key)
-					return &probe_item.value;
-
-				if (probe_item.key == 0)
-					return 0;
-
-				// hash collision, quadratic probing
-				bucket = (bucket + probe + 1) & hashmod;
-			}
-
-			assert(false && "Hash table is full");
-			return 0;
+			return item->value;
 		}
 
-		void** insert(const void* key)
+		void insert(const void* key, void* value)
 		{
-			assert(key);
 			assert(_capacity != 0 && _count < _capacity - _capacity / 4);
 
-			size_t hashmod = _capacity - 1;
-			size_t bucket = hash(key) & hashmod;
+			item_t* item = get_item(key);
+			assert(item);
 
-			for (size_t probe = 0; probe <= hashmod; ++probe)
+			if (item->key == 0)
 			{
-				item_t& probe_item = _items[bucket];
-
-				if (probe_item.key == 0)
-				{
-					probe_item.key = key;
-					_count++;
-					return &probe_item.value;
-				}
-
-				if (probe_item.key == key)
-					return &probe_item.value;
-
-				// hash collision, quadratic probing
-				bucket = (bucket + probe + 1) & hashmod;
+				_count++;
+				item->key = key;
 			}
 
-			assert(false && "Hash table is full");
-			return 0;
+			item->value = value;
 		}
 
 		bool reserve()
@@ -352,6 +322,29 @@ PUGI__NS_BEGIN
 		size_t _count;
 
 		bool rehash();
+
+		item_t* get_item(const void* key)
+		{
+			assert(key);
+			assert(_capacity > 0);
+
+			size_t hashmod = _capacity - 1;
+			size_t bucket = hash(key) & hashmod;
+
+			for (size_t probe = 0; probe <= hashmod; ++probe)
+			{
+				item_t& probe_item = _items[bucket];
+
+				if (probe_item.key == key || probe_item.key == 0)
+					return &probe_item;
+
+				// hash collision, quadratic probing
+				bucket = (bucket + probe + 1) & hashmod;
+			}
+
+			assert(false && "Hash table is full");
+			return 0;
+		}
 
 		static unsigned int hash(const void* key)
 		{
@@ -381,7 +374,7 @@ PUGI__NS_BEGIN
 
 		for (size_t i = 0; i < _capacity; ++i)
 			if (_items[i].key)
-				*rt.insert(_items[i].key) = _items[i].value;
+				rt.insert(_items[i].key, _items[i].value);
 
 		if (_items)
 			xml_memory::deallocate(_items);
@@ -773,12 +766,12 @@ PUGI__NS_BEGIN
 
 	template <int header_offset, typename T> PUGI__FN_NO_INLINE T* compact_get_value(const void* object)
 	{
-		return static_cast<T*>(*compact_get_page(object, header_offset)->allocator->_hash->find(object));
+		return static_cast<T*>(compact_get_page(object, header_offset)->allocator->_hash->find(object));
 	}
 
 	template <int header_offset, typename T> PUGI__FN_NO_INLINE void compact_set_value(const void* object, T* value)
 	{
-		*compact_get_page(object, header_offset)->allocator->_hash->insert(object) = value;
+		compact_get_page(object, header_offset)->allocator->_hash->insert(object, value);
 	}
 
 	template <typename T, int header_offset, int start = -126> class compact_pointer
