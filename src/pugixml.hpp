@@ -383,7 +383,7 @@ namespace pugi
 		template <typename Type>
 		Type as() const
 		{
-			istringstream_t stream = as_stringstream();
+			istringstream_t stream(as_stringstream());
 			Type value;
 			stream >> value;
 			return value;
@@ -760,7 +760,7 @@ namespace pugi
     	template <typename Type>
     	Type as() const
     	{
-    		istringstream_t stream = as_stringstream();
+    		istringstream_t stream(as_stringstream());
     		Type value;
     		stream >> value;
     		return value;
