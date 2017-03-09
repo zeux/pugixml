@@ -108,6 +108,7 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string<PUGIXML_CHAR, std::char_traits<PUGIXML_CHAR>, std::allocator<PUGIXML_CHAR> > string_t;
+	typedef std::basic_istringstream<PUGIXML_CHAR, std::char_traits<PUGIXML_CHAR>, std::allocator<PUGIXML_CHAR> > istringstream_t;
 #endif
 }
 
@@ -376,13 +377,13 @@ namespace pugi
 
     #ifndef PUGIXML_NO_STL
 		// Get attribute value as std::istringstream, an empty std::istringstream if the attribute is empty
-		std::istringstream as_stringstream() const;
+		istringstream_t as_stringstream() const;
 
 		// Get attribute value as Type (template parameter: try to read a Type value from the attribute value string)
 		template <typename Type>
 		Type as() const
 		{
-			std::istringstream stream = as_stringstream();
+			istringstream_t stream = as_stringstream();
 			Type value;
 			stream >> value;
 			return value;
@@ -753,13 +754,13 @@ namespace pugi
 
     #ifndef PUGIXML_NO_STL
 		// Get attribute value as std::istringstream, an empty std::istringstream if the attribute is empty
-    	std::istringstream as_stringstream() const;
+		istringstream_t as_stringstream() const;
 
 		// Get attribute value as Type (template parameter: try to read a Type value from the attribute value string)
     	template <typename Type>
     	Type as() const
     	{
-    		std::istringstream stream = as_stringstream();
+    		istringstream_t stream = as_stringstream();
     		Type value;
     		stream >> value;
     		return value;
