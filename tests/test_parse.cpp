@@ -1336,7 +1336,7 @@ TEST(parse_encoding_detect_auto_incomplete)
 		{ "<\x00\x00n/\x00>\x00", 8, encoding_utf16_le },
 		{ "\x00<n\x00\x00/\x00>", 8, encoding_utf16_be },
 		{ "<\x00?n/\x00>\x00", 8, encoding_utf16_le },
-		{ "\x00 ", 8, encoding_utf8 },
+		{ "\x00 ", 2, encoding_utf8 },
 		// <?xml encoding
 		{ "<?xmC encoding='latin1'?>", 25, encoding_utf8 },
 		{ "<?xBC encoding='latin1'?>", 25, encoding_utf8 },
