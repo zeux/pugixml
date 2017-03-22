@@ -4439,7 +4439,7 @@ PUGI__NS_BEGIN
 	}
 
 	// get value with conversion functions
-	template <typename U> U string_to_integer(const char_t* value, U minneg, U maxpos)
+	template <typename U> PUGI__FN U string_to_integer(const char_t* value, U minneg, U maxpos)
 	{
 		U result = 0;
 		const char_t* s = value;
