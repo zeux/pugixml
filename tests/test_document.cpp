@@ -1101,7 +1101,7 @@ TEST(document_progressive_truncation)
 			bool result = doc.load_buffer_inplace(truncated_data, i, parse_default | parse_fragment);
 
 			// some truncate locations are parseable - those that come after declaration, declaration + doctype, declaration + doctype + comment and eof
-			CHECK(((i - 21) < 3 || (i - 66) < 3 || (i - 95) < 3 || i == original_size) ? result : !result);
+			CHECK(((i >= 21 && i <= 23) || (i >= 66 && i <= 68) || (i >= 95 && i <= 97) || i == original_size) ? result : !result);
 		}
 	}
 
