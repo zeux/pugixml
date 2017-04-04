@@ -97,6 +97,17 @@
 #	define PUGI__DMC_VOLATILE
 #endif
 
+// Integer sanitizer workaround
+#ifdef __has_attribute
+#	if __has_attribute(no_sanitize)
+#		define PUGI__UNSIGNED_OVERFLOW __attribute__((no_sanitize("unsigned-integer-overflow")))
+#	else
+#		define PUGI__UNSIGNED_OVERFLOW
+#	endif
+#else
+#	define PUGI__UNSIGNED_OVERFLOW
+#endif
+
 // Borland C++ bug workaround for not defining ::memcpy depending on header include order (can't always use std::memcpy because some compilers don't have it at all)
 #if defined(__BORLANDC__) && !defined(__MEM_H_USING_LIST)
 using std::memcpy;
@@ -346,7 +357,7 @@ PUGI__NS_BEGIN
 			return 0;
 		}
 
-		static unsigned int hash(const void* key)
+		static PUGI__UNSIGNED_OVERFLOW unsigned int hash(const void* key)
 		{
 			unsigned int h = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key));
 
@@ -4439,7 +4450,7 @@ PUGI__NS_BEGIN
 	}
 
 	// get value with conversion functions
-	template <typename U> PUGI__FN U string_to_integer(const char_t* value, U minneg, U maxpos)
+	template <typename U> PUGI__FN PUGI__UNSIGNED_OVERFLOW U string_to_integer(const char_t* value, U minv, U maxv)
 	{
 		U result = 0;
 		const char_t* s = value;
@@ -4512,18 +4523,18 @@ PUGI__NS_BEGIN
 		{
 			// Workaround for crayc++ CC-3059: Expected no overflow in routine.
 		#ifdef _CRAYC
-			return (overflow || result > minneg) ? ~minneg + 1 : ~result + 1;
+			return (overflow || result > ~minv + 1) ? minv : ~result + 1;
 		#else
-			return (overflow || result > minneg) ? 0 - minneg : 0 - result;
+			return (overflow || result > 0 - minv) ? minv : 0 - result;
 		#endif
 		}
 		else
-			return (overflow || result > maxpos) ? maxpos : result;
+			return (overflow || result > maxv) ? maxv : result;
 	}
 
 	PUGI__FN int get_value_int(const char_t* value)
 	{
-		return string_to_integer<unsigned int>(value, 0 - static_cast<unsigned int>(INT_MIN), INT_MAX);
+		return string_to_integer<unsigned int>(value, static_cast<unsigned int>(INT_MIN), INT_MAX);
 	}
 
 	PUGI__FN unsigned int get_value_uint(const char_t* value)
@@ -4561,7 +4572,7 @@ PUGI__NS_BEGIN
 #ifdef PUGIXML_HAS_LONG_LONG
 	PUGI__FN long long get_value_llong(const char_t* value)
 	{
-		return string_to_integer<unsigned long long>(value, 0 - static_cast<unsigned long long>(LLONG_MIN), LLONG_MAX);
+		return string_to_integer<unsigned long long>(value, static_cast<unsigned long long>(LLONG_MIN), LLONG_MAX);
 	}
 
 	PUGI__FN unsigned long long get_value_ullong(const char_t* value)
@@ -4570,7 +4581,7 @@ PUGI__NS_BEGIN
 	}
 #endif
 
-	template <typename U> PUGI__FN char_t* integer_to_string(char_t* begin, char_t* end, U value, bool negative)
+	template <typename U> PUGI__FN PUGI__UNSIGNED_OVERFLOW char_t* integer_to_string(char_t* begin, char_t* end, U value, bool negative)
 	{
 		char_t* result = end - 1;
 		U rest = negative ? 0 - value : value;
@@ -8404,7 +8415,7 @@ PUGI__NS_BEGIN
 
 	static const xpath_node_set dummy_node_set;
 
-	PUGI__FN unsigned int hash_string(const char_t* str)
+	PUGI__FN PUGI__UNSIGNED_OVERFLOW unsigned int hash_string(const char_t* str)
 	{
 		// Jenkins one-at-a-time hash (http://en.wikipedia.org/wiki/Jenkins_hash_function#one-at-a-time)
 		unsigned int result = 0;
@@ -12580,6 +12591,7 @@ namespace pugi
 #undef PUGI__UNLIKELY
 #undef PUGI__STATIC_ASSERT
 #undef PUGI__DMC_VOLATILE
+#undef PUGI__UNSIGNED_OVERFLOW
 #undef PUGI__MSVC_CRT_VERSION
 #undef PUGI__NS_BEGIN
 #undef PUGI__NS_END
