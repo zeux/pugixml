@@ -9,6 +9,3 @@ cd ..
 clang/clang/scripts/update.py
 sudo cp -rf third_party/llvm-build/Release+Asserts/lib/* /usr/local/lib/
 sudo cp -rf third_party/llvm-build/Release+Asserts/bin/* /usr/local/bin
-
-svn co http://llvm.org/svn/llvm-project/llvm/trunk/lib/Fuzzer
-Fuzzer/build.sh
