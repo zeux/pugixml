@@ -663,7 +663,7 @@ namespace pugi
 		xml_object_range<xml_attribute_iterator> attributes() const;
 
 		// Get node offset in parsed file/string (in char_t units) for debugging purposes
-		ptrdiff_t offset_debug() const;
+		std::ptrdiff_t offset_debug() const;
 
 		// Get hash value (unique for handles to the same object)
 		size_t hash_value() const;
@@ -780,7 +780,7 @@ namespace pugi
 
 	public:
 		// Iterator traits
-		typedef ptrdiff_t difference_type;
+		typedef std::ptrdiff_t difference_type;
 		typedef xml_node value_type;
 		typedef xml_node* pointer;
 		typedef xml_node& reference;
@@ -822,7 +822,7 @@ namespace pugi
 
 	public:
 		// Iterator traits
-		typedef ptrdiff_t difference_type;
+		typedef std::ptrdiff_t difference_type;
 		typedef xml_attribute value_type;
 		typedef xml_attribute* pointer;
 		typedef xml_attribute& reference;
@@ -858,7 +858,7 @@ namespace pugi
 
 	public:
 		// Iterator traits
-		typedef ptrdiff_t difference_type;
+		typedef std::ptrdiff_t difference_type;
 		typedef xml_node value_type;
 		typedef xml_node* pointer;
 		typedef xml_node& reference;
@@ -954,7 +954,7 @@ namespace pugi
 		xml_parse_status status;
 
 		// Last parsed offset (in char_t units from start of input data)
-		ptrdiff_t offset;
+		std::ptrdiff_t offset;
 
 		// Source document encoding
 		xml_encoding encoding;
@@ -1059,7 +1059,7 @@ namespace pugi
 		const char* error;
 
 		// Last parsed offset (in char_t units from string start)
-		ptrdiff_t offset;
+		std::ptrdiff_t offset;
 
 		// Default constructor, initializes object to failed state
 		xpath_parse_result();
