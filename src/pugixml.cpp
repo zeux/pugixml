@@ -5172,6 +5172,13 @@ namespace pugi
 	}
 #endif
 
+#ifndef PUGIXML_NO_STL
+	PUGI__FN istringstream_t xml_attribute::as_stringstream() const
+	{
+		return (_attr && _attr->value) ? istringstream_t(string_t(static_cast<char_t*>(_attr->value))) : istringstream_t();
+	}
+#endif
+
 	PUGI__FN bool xml_attribute::empty() const
 	{
 		return !_attr;
@@ -6419,6 +6426,15 @@ namespace pugi
 		xml_node_struct* d = _data();
 
 		return (d && d->value) ? impl::get_value_ullong(d->value) : def;
+	}
+#endif
+
+#ifndef PUGIXML_NO_STL
+	PUGI__FN istringstream_t xml_text::as_stringstream() const
+	{
+		xml_node_struct* d = _data();
+
+		return (d && d->value) ? istringstream_t(string_t(static_cast<char_t*>(d->value))) : istringstream_t();
 	}
 #endif
 
