@@ -356,8 +356,17 @@ namespace pugi
 		const char_t* name() const;
 		const char_t* value() const;
 
+	#ifndef PUGIXML_NO_STL
+		string_t sname() const { return name(); }
+		string_t svalue() const { return value(); }
+	#endif
+
 		// Get attribute value, or the default value if attribute is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
+
+	#ifndef PUGIXML_NO_STL
+		string_t as_sstring(const string_t &def = string_t()) const { return as_string(def.c_str()); }
+	#endif
 
 		// Get attribute value as a number, or the default value if conversion did not succeed or attribute is empty
 		int as_int(int def = 0) const;
@@ -391,6 +400,10 @@ namespace pugi
 		bool set_value(unsigned long long rhs);
 	#endif
 
+	#ifndef PUGIXML_NO_STL
+		bool set_value(const string_t &rhs) { return set_value(rhs.c_str()); }
+	#endif
+
 		// Set attribute value (equivalent to set_value without error checking)
 		xml_attribute& operator=(const char_t* rhs);
 		xml_attribute& operator=(int rhs);
@@ -404,6 +417,10 @@ namespace pugi
 	#ifdef PUGIXML_HAS_LONG_LONG
 		xml_attribute& operator=(long long rhs);
 		xml_attribute& operator=(unsigned long long rhs);
+	#endif
+
+	#ifndef PUGIXML_NO_STL
+		xml_attribute& operator=(const string_t &rhs) { return (*this = rhs.c_str()); }
 	#endif
 
 		// Get next/previous attribute in the attribute list of the parent node
@@ -468,6 +485,11 @@ namespace pugi
 		// Get node value, or "" if node is empty or it has no value
 		// Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
 		const char_t* value() const;
+
+	#ifndef PUGIXML_NO_STL
+		const string_t sname() const { return name(); }
+		const string_t svalue() const { return value(); }
+	#endif
 
 		// Get attribute list
 		xml_attribute first_attribute() const;
@@ -722,6 +744,10 @@ namespace pugi
 		unsigned long long as_ullong(unsigned long long def = 0) const;
 	#endif
 
+	#ifndef PUGIXML_NO_STL
+		string_t as_sstring(const string_t &def = string_t()) const { return as_string(def.c_str()); }
+	#endif
+
 		// Get text as bool (returns true if first character is in '1tTyY' set), or the default value if object is empty
 		bool as_bool(bool def = false) const;
 
@@ -755,6 +781,10 @@ namespace pugi
 	#ifdef PUGIXML_HAS_LONG_LONG
 		xml_text& operator=(long long rhs);
 		xml_text& operator=(unsigned long long rhs);
+	#endif
+
+	#ifndef PUGIXML_NO_STL
+		xml_text& operator=(const string_t &rhs) { return (*this = rhs.c_str()); }
 	#endif
 
 		// Get the data node (node_pcdata or node_cdata) for this object
@@ -1090,6 +1120,10 @@ namespace pugi
 		// Get variable name
 		const char_t* name() const;
 
+	#ifndef PUGIXML_NO_STL
+		string_t sname() const { return name(); }
+	#endif
+
 		// Get variable type
 		xpath_value_type type() const;
 
@@ -1098,6 +1132,10 @@ namespace pugi
 		double get_number() const;
 		const char_t* get_string() const;
 		const xpath_node_set& get_node_set() const;
+
+	#ifndef PUGIXML_NO_STL
+		string_t get_sstring() const { return get_string(); }
+	#endif
 
 		// Set variable value; no type conversion is performed, false is returned on type mismatch error
 		bool set(bool value);

@@ -52,6 +52,13 @@ bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs)
 	#endif
 }
 
+#ifndef PUGIXML_NO_STL
+bool test_string_equal(const pugi::string_t& lhs, const pugi::string_t& rhs)
+{
+	return (lhs == rhs);
+}
+#endif
+
 bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const pugi::char_t* indent, unsigned int flags)
 {
 	xml_writer_string writer;

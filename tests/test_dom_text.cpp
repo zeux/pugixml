@@ -59,6 +59,26 @@ TEST_XML_FLAGS(dom_text_as_string, "<node><a>foo</a><b><node/><![CDATA[bar]]></b
     CHECK_STRING(xml_node().text().as_string(), STR(""));
 }
 
+#ifndef PUGIXML_NO_STL
+TEST_XML_FLAGS(dom_text_as_sstring, "<node><a>foo</a><b><node/><![CDATA[bar]]></b><c><?pi value?></c><d/></node>", parse_default | parse_pi)
+{
+    xml_node node = doc.child(STR("node"));
+
+    CHECK_STRING(node.child(STR("a")).text().as_sstring(), string_t(STR("foo")));
+    CHECK_STRING(node.child(STR("a")).first_child().text().as_sstring(), string_t(STR("foo")));
+
+    CHECK_STRING(node.child(STR("b")).text().as_sstring(), string_t(STR("bar")));
+    CHECK_STRING(node.child(STR("b")).last_child().text().as_sstring(), string_t(STR("bar")));
+
+    CHECK_STRING(node.child(STR("c")).text().as_sstring(), string_t(STR("")));
+    CHECK_STRING(node.child(STR("c")).first_child().text().as_sstring(), string_t(STR("")));
+
+    CHECK_STRING(node.child(STR("d")).text().as_sstring(), string_t(STR("")));
+
+    CHECK_STRING(xml_node().text().as_sstring(), string_t(STR("")));
+}
+#endif
+
 TEST_XML(dom_text_as_int, "<node><text1>1</text1><text2>-1</text2><text3>-2147483648</text3><text4>2147483647</text4><text5>0</text5></node>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -441,5 +461,9 @@ TEST(dom_text_defaults)
 #ifdef PUGIXML_HAS_LONG_LONG
     CHECK(text.as_llong(42) == 42);
     CHECK(text.as_ullong(42) == 42);
+#endif
+
+#ifndef PUGIXML_NO_STL
+    CHECK(text.as_sstring() == string_t());
 #endif
 }
