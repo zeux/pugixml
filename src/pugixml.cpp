@@ -4632,7 +4632,11 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, float value)
 	{
 		char buf[128];
+#if defined(PUGI__MSVC_CRT_VERSION)
+		_snprintf(buf, 128, "%.9g", value);
+#else
 		snprintf(buf, 128, "%.9g", value);
+#endif
 		buf[127] = '\0';
 
 		return set_value_ascii(dest, header, header_mask, buf);
@@ -4642,7 +4646,11 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, double value)
 	{
 		char buf[128];
+#if defined(PUGI__MSVC_CRT_VERSION)
+		_snprintf(buf, 128, "%.17g", value);
+#else
 		snprintf(buf, 128, "%.17g", value);
+#endif
 		buf[127] = '\0';
 
 		return set_value_ascii(dest, header, header_mask, buf);
@@ -7999,7 +8007,11 @@ PUGI__NS_BEGIN
 	PUGI__FN void convert_number_to_mantissa_exponent(double value, char* buffer, size_t buffer_size, char** out_mantissa, int* out_exponent)
 	{
 		// get a scientific notation value with IEEE DBL_DIG decimals
+#if defined(PUGI__MSVC_CRT_VERSION)
+		_snprintf(buffer, buffer_size, "%.*e", DBL_DIG, value);
+#else
 		snprintf(buffer, buffer_size, "%.*e", DBL_DIG, value);
+#endif
 		buffer[buffer_size - 1] = '\0';
 
 		// get the exponent (possibly negative)
