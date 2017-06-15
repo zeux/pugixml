@@ -41,7 +41,7 @@ static void* custom_allocate(size_t size)
 	else
 	{
 		void* ptr = memory_allocate(size);
-		assert(ptr);
+		if (!ptr) return 0;
 
 		g_memory_total_size += memory_size(ptr);
 		g_memory_total_count++;
