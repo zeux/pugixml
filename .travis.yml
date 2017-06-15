@@ -14,4 +14,6 @@ script:
   - make test cxxstd=c++11 defines=$DEFINES config=release -j2
   - make test cxxstd=c++98 defines=$DEFINES config=debug -j2
 
-after_success: bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov
+after_success:
+  - sed -e "s/#####\(.*\)\(\/\/ unreachable.*\)/    1\1\2/" -i pugixml.cpp.gcov
+  - bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov
