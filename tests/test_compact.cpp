@@ -111,4 +111,38 @@ TEST_XML(compact_out_of_memory_remove, "<n a='v'/>")
 	CHECK_ALLOC_FAIL(CHECK(!n.remove_attribute(a)));
 	CHECK_ALLOC_FAIL(CHECK(!doc.remove_child(n)));
 }
+
+TEST_XML(compact_pointer_attribute_list, "<n a='v'/>")
+{
+	xml_node n = doc.child(STR("n"));
+	xml_attribute a = n.attribute(STR("a"));
+
+	// make sure we fill the page with node x
+	for (int i = 0; i < 1000; ++i)
+		doc.append_child(STR("x"));
+
+	// this requires extended encoding for prev_attribute_c/next_attribute
+	n.append_attribute(STR("b"));
+
+	// this requires extended encoding for first_attribute
+	n.remove_attribute(a);
+
+	CHECK(!n.attribute(STR("a")));
+	CHECK(n.attribute(STR("b")));
+}
+
+TEST_XML(compact_pointer_node_list, "<n/>")
+{
+	xml_node n = doc.child(STR("n"));
+
+	// make sure we fill the page with node x
+	// this requires extended encoding for prev_sibling_c/next_sibling
+	for (int i = 0; i < 1000; ++i)
+		doc.append_child(STR("x"));
+
+	// this requires extended encoding for first_child
+	n.append_child(STR("child"));
+
+	CHECK(n.child(STR("child")));
+}
 #endif
