@@ -302,7 +302,23 @@ TEST_XML(xpath_variables_select, "<node attr='1'/><node attr='2'/>")
 TEST(xpath_variables_empty_name)
 {
 	xpath_variable_set set;
+	CHECK(!set.add(STR(""), xpath_type_node_set));
 	CHECK(!set.add(STR(""), xpath_type_number));
+	CHECK(!set.add(STR(""), xpath_type_string));
+	CHECK(!set.add(STR(""), xpath_type_boolean));
+}
+
+TEST(xpath_variables_long_name_out_of_memory_add)
+{
+	std::basic_string<char_t> name(1000, 'a');
+
+	test_runner::_memory_fail_threshold = 1000;
+
+	xpath_variable_set set;
+	CHECK_ALLOC_FAIL(CHECK(!set.add(name.c_str(), xpath_type_node_set)));
+	CHECK_ALLOC_FAIL(CHECK(!set.add(name.c_str(), xpath_type_number)));
+	CHECK_ALLOC_FAIL(CHECK(!set.add(name.c_str(), xpath_type_string)));
+	CHECK_ALLOC_FAIL(CHECK(!set.add(name.c_str(), xpath_type_boolean)));
 }
 
 TEST_XML(xpath_variables_inside_filter, "<node key='1' value='2'/><node key='2' value='1'/><node key='1' value='1'/>")
@@ -590,5 +606,20 @@ TEST(xpath_variables_copy_big_out_of_memory)
 
 		CHECK(!copy.get(name));
 	}
+}
+
+TEST(xpath_variables_copy_big_value_out_of_memory)
+{
+	xpath_variable_set set;
+
+	std::basic_string<char_t> var(10000, 'a');
+	set.set(STR("x"), var.c_str());
+
+	test_runner::_memory_fail_threshold = 15000;
+
+	xpath_variable_set copy;
+	CHECK_ALLOC_FAIL(copy = set);
+
+	CHECK(!copy.get(STR("x")));
 }
 #endif
