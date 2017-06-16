@@ -127,10 +127,16 @@ using std::memset;
 #	define PUGI__MSVC_CRT_VERSION _MSC_VER
 #endif
 
-#if (defined(PUGI__MSVC_CRT_VERSION) && (PUGI__MSVC_CRT_VERSION >= 1900)) || (__cplusplus >= 201103)
-#	define PUGI__HAVE_SNPRINTF
+// Not all platforms have snprintf; we define a wrapper that uses snprintf if possible. This only works with buffers with a known size.
+#if __cplusplus >= 201103
+#	define PUGI__SNPRINTF(buf, ...) snprintf(buf, sizeof(buf), __VA_ARGS__)
+#elif defined(_MSC_VER) && _MSC_VER >= 1400
+#	define PUGI__SNPRINTF(buf, ...) _snprintf_s(buf, sizeof(buf), _TRUNCATE, __VA_ARGS__)
+#else
+#	define PUGI__SNPRINTF sprintf
 #endif
 
+// We put implementation details into an anonymous namespace in source mode, but have to keep it in non-anonymous namespace in header-only mode to prevent binary bloat.
 #ifdef PUGIXML_HEADER_ONLY
 #	define PUGI__NS_BEGIN namespace pugi { namespace impl {
 #	define PUGI__NS_END } }
@@ -4636,14 +4642,7 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, float value)
 	{
 		char buf[128];
-#if defined(PUGI__HAVE_SNPRINTF)
-		snprintf(buf, 128, "%.9g", value);
-#elif defined(PUGI__MSVC_CRT_VERSION)
-		_snprintf(buf, 128, "%.9g", value);
-		buf[127] = '\0';
-#else
-		sprintf(buf, "%.9g", value);
-#endif
+		PUGI__SNPRINTF(buf, "%.9g", value);
 
 		return set_value_ascii(dest, header, header_mask, buf);
 	}
@@ -4652,14 +4651,7 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, double value)
 	{
 		char buf[128];
-#if defined(PUGI__HAVE_SNPRINTF)
-		snprintf(buf, 128, "%.17g", value);
-#elif defined (PUGI__MSVC_CRT_VERSION)
-		_snprintf(buf, 128, "%.17g", value);
-		buf[127] = '\0';
-#else
-		sprintf(buf, "%.17g", value);
-#endif
+		PUGI__SNPRINTF(buf, "%.17g", value);
 
 		return set_value_ascii(dest, header, header_mask, buf);
 	}
@@ -8015,14 +8007,7 @@ PUGI__NS_BEGIN
 	PUGI__FN void convert_number_to_mantissa_exponent(double value, char (&buffer)[32], char** out_mantissa, int* out_exponent)
 	{
 		// get a scientific notation value with IEEE DBL_DIG decimals
-#if defined(PUGI__HAVE_SNPRINTF)
-		snprintf(buffer, 32, "%.*e", DBL_DIG, value);
-#elif defined(PUGI__MSVC_CRT_VERSION)
-		_snprintf(buffer, 32, "%.*e", DBL_DIG, value);
-		buffer[31] = '\0';
-#else
-		sprintf(buffer, "%.*e", DBL_DIG, value);
-#endif
+		PUGI__SNPRINTF(buffer, "%.*e", DBL_DIG, value);
 
 		// get the exponent (possibly negative)
 		char* exponent_string = strchr(buffer, 'e');
@@ -12616,6 +12601,7 @@ namespace pugi
 #undef PUGI__DMC_VOLATILE
 #undef PUGI__UNSIGNED_OVERFLOW
 #undef PUGI__MSVC_CRT_VERSION
+#undef PUGI__SNPRINTF
 #undef PUGI__NS_BEGIN
 #undef PUGI__NS_END
 #undef PUGI__FN
