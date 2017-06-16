@@ -186,11 +186,6 @@ public:
     {
         this->setg(begin, begin, end);
     }
-
-    typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
-    {
-        return this->gptr() == this->egptr() ? std::basic_streambuf<T>::traits_type::eof() : std::basic_streambuf<T>::traits_type::to_int_type(*this->gptr());
-    }
 };
 
 TEST(document_load_stream_nonseekable)
@@ -256,6 +251,46 @@ TEST(document_load_stream_nonseekable_out_of_memory_large)
 
     pugi::xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+}
+
+TEST(document_load_stream_wide_nonseekable_out_of_memory)
+{
+    wchar_t contents[] = L"<node />";
+    char_array_buffer<wchar_t> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+    std::basic_istream<wchar_t> in(&buffer);
+
+    test_runner::_memory_fail_threshold = 1;
+
+    pugi::xml_document doc;
+    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+}
+
+template <typename T> class seek_fail_buffer: public std::basic_streambuf<T>
+{
+public:
+	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type, std::ios_base::seekdir, std::ios_base::openmode) PUGIXML_OVERRIDE
+	{
+		// pretend that our buffer is seekable (this is called by tellg); actual seeks will fail
+		return 0;
+	}
+};
+
+TEST(document_load_stream_seekable_fail_seek)
+{
+    seek_fail_buffer<char> buffer;
+    std::basic_istream<char> in(&buffer);
+
+    pugi::xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
+}
+
+TEST(document_load_stream_wide_seekable_fail_seek)
+{
+    seek_fail_buffer<wchar_t> buffer;
+    std::basic_istream<wchar_t> in(&buffer);
+
+    pugi::xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
 }
 #endif
 
