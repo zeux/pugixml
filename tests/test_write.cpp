@@ -639,6 +639,30 @@ TEST_XML_FLAGS(write_roundtrip, "<node><child1 attr1='value1' attr2='value2'/><c
 	}
 }
 
+TEST(write_flush_coverage)
+{
+	xml_document doc;
+
+	// this creates a node that uses short sequences of lengths 1-6 for output
+	xml_node n = doc.append_child(STR("n"));
+	n.text().set(STR("<&\""));
+	n.append_child(node_comment);
+
+	xml_attribute a = n.append_attribute(STR("a"));
+
+	size_t basel = save_narrow(doc, 0, encoding_auto).size();
+	size_t bufl = 10240;
+
+	for (size_t l = 0; l <= basel; ++l)
+	{
+		std::basic_string<pugi::char_t> pad(bufl - l, STR('v'));
+		a.set_value(pad.c_str());
+
+		std::string s = save_narrow(doc, 0, encoding_auto);
+		CHECK(s.size() == basel + bufl - l);
+	}
+}
+
 #ifndef PUGIXML_NO_EXCEPTIONS
 struct throwing_writer: pugi::xml_writer
 {
