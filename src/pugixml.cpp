@@ -127,6 +127,10 @@ using std::memset;
 #	define PUGI__MSVC_CRT_VERSION _MSC_VER
 #endif
 
+#if (defined(PUGI__MSVC_CRT_VERSION) && (PUGI__MSVC_CRT_VERSION >= 1900)) || (__cplusplus >= 201103)
+#	define PUGI__HAVE_SNPRINTF
+#endif
+
 #ifdef PUGIXML_HEADER_ONLY
 #	define PUGI__NS_BEGIN namespace pugi { namespace impl {
 #	define PUGI__NS_END } }
@@ -4632,7 +4636,14 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, float value)
 	{
 		char buf[128];
+#if defined(PUGI__HAVE_SNPRINTF)
+		snprintf(buf, 128, "%.9g", value);
+#elif defined(PUGI__MSVC_CRT_VERSION)
+		_snprintf(buf, 128, "%.9g", value);
+		buf[127] = '\0';
+#else
 		sprintf(buf, "%.9g", value);
+#endif
 
 		return set_value_ascii(dest, header, header_mask, buf);
 	}
@@ -4641,7 +4652,14 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, double value)
 	{
 		char buf[128];
+#if defined(PUGI__HAVE_SNPRINTF)
+		snprintf(buf, 128, "%.17g", value);
+#elif defined (PUGI__MSVC_CRT_VERSION)
+		_snprintf(buf, 128, "%.17g", value);
+		buf[127] = '\0';
+#else
 		sprintf(buf, "%.17g", value);
+#endif
 
 		return set_value_ascii(dest, header, header_mask, buf);
 	}
@@ -7997,9 +8015,16 @@ PUGI__NS_BEGIN
 	PUGI__FN void convert_number_to_mantissa_exponent(double value, char* buffer, size_t buffer_size, char** out_mantissa, int* out_exponent)
 	{
 		// get a scientific notation value with IEEE DBL_DIG decimals
+#if defined(PUGI__HAVE_SNPRINTF)
+		snprintf(buffer, buffer_size, "%.*e", DBL_DIG, value);
+#elif defined(PUGI__MSVC_CRT_VERSION)
+		_snprintf(buffer, buffer_size, "%.*e", DBL_DIG, value);
+		buffer[buffer_size - 1] = '\0';
+#else
 		sprintf(buffer, "%.*e", DBL_DIG, value);
 		assert(strlen(buffer) < buffer_size);
-		(void)!buffer_size;
+#endif
+
 
 		// get the exponent (possibly negative)
 		char* exponent_string = strchr(buffer, 'e');
