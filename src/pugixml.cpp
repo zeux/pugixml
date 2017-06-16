@@ -7262,7 +7262,7 @@ PUGI__NS_BEGIN
 		return middle;
 	}
 
-	template <typename T, typename Pred> void partition(T* begin, T* end, T pivot, const Pred& pred, T** out_eqbeg, T** out_eqend)
+	template <typename T, typename Pred> void partition3(T* begin, T* end, T pivot, const Pred& pred, T** out_eqbeg, T** out_eqend)
 	{
 		// invariant: array is split into 4 groups: = < ? > (each variable denotes the boundary between the groups)
 		T* eq = begin;
@@ -7300,7 +7300,7 @@ PUGI__NS_BEGIN
 
 			// partition in three chunks (< = >)
 			I eqbeg, eqend;
-			partition(begin, end, *median, pred, &eqbeg, &eqend);
+			partition3(begin, end, *median, pred, &eqbeg, &eqend);
 
 			// loop on larger half
 			if (eqbeg - begin > end - eqend)

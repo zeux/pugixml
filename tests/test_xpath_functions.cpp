@@ -809,7 +809,7 @@ TEST(xpath_unknown_functions)
 		query[0] = ch;
 		CHECK_XPATH_FAIL(query);
 
-		query[0] = ch - 32;
+		query[0] = char_t(ch - 32);
 		CHECK_XPATH_FAIL(query);
 	}
 }
