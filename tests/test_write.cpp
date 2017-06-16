@@ -645,20 +645,23 @@ TEST(write_flush_coverage)
 
 	// this creates a node that uses short sequences of lengths 1-6 for output
 	xml_node n = doc.append_child(STR("n"));
-	n.text().set(STR("<&\""));
-	n.append_child(node_comment);
 
 	xml_attribute a = n.append_attribute(STR("a"));
 
-	size_t basel = save_narrow(doc, 0, encoding_auto).size();
-	size_t bufl = 10240;
+	xml_attribute b = n.append_attribute(STR("b"));
+	b.set_value(STR("<&\""));
+
+	n.append_child(node_comment);
+
+	size_t basel = save_narrow(doc, format_raw, encoding_auto).size();
+	size_t bufl = 2048;
 
 	for (size_t l = 0; l <= basel; ++l)
 	{
 		std::basic_string<pugi::char_t> pad(bufl - l, STR('v'));
 		a.set_value(pad.c_str());
 
-		std::string s = save_narrow(doc, 0, encoding_auto);
+		std::string s = save_narrow(doc, format_raw, encoding_auto);
 		CHECK(s.size() == basel + bufl - l);
 	}
 }
