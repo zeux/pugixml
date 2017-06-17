@@ -407,6 +407,22 @@ TEST(xpath_out_of_memory_evaluate_concat)
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 1));
 }
 
+TEST(xpath_out_of_memory_evaluate_concat_list)
+{
+	std::basic_string<char_t> query = STR("concat(");
+
+	for (size_t i = 0; i < 500; ++i)
+		query += STR("\"\",");
+
+	query += STR("\"\")");
+
+	pugi::xpath_query q(query.c_str());
+
+	test_runner::_memory_fail_threshold = 1;
+
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 1));
+}
+
 TEST(xpath_out_of_memory_evaluate_substring)
 {
 	test_runner::_memory_fail_threshold = 4196 * sizeof(char_t) + 4096 * 2;
