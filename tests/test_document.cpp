@@ -237,22 +237,6 @@ TEST(document_load_stream_nonseekable_out_of_memory)
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
-TEST(document_load_stream_nonseekable_out_of_memory_large)
-{
-	std::basic_string<pugi::char_t> str;
-	str += STR("<node>");
-	for (int i = 0; i < 10000; ++i) str += STR("<node />");
-	str += STR("</node>");
-
-    char_array_buffer<pugi::char_t> buffer(&str[0], &str[0] + str.length());
-    std::basic_istream<pugi::char_t> in(&buffer);
-
-    test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
-
-    pugi::xml_document doc;
-    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
-}
-
 TEST(document_load_stream_wide_nonseekable_out_of_memory)
 {
     wchar_t contents[] = L"<node />";
@@ -260,6 +244,38 @@ TEST(document_load_stream_wide_nonseekable_out_of_memory)
     std::basic_istream<wchar_t> in(&buffer);
 
     test_runner::_memory_fail_threshold = 1;
+
+    pugi::xml_document doc;
+    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+}
+
+TEST(document_load_stream_nonseekable_out_of_memory_large)
+{
+	std::basic_string<char> str;
+	str += "<node>";
+	for (int i = 0; i < 10000; ++i) str += "<node />";
+	str += "</node>";
+
+    char_array_buffer<char> buffer(&str[0], &str[0] + str.length());
+    std::basic_istream<char> in(&buffer);
+
+    test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
+
+    pugi::xml_document doc;
+    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+}
+
+TEST(document_load_stream_wide_nonseekable_out_of_memory_large)
+{
+	std::basic_string<wchar_t> str;
+	str += L"<node>";
+	for (int i = 0; i < 10000; ++i) str += L"<node />";
+	str += L"</node>";
+
+    char_array_buffer<wchar_t> buffer(&str[0], &str[0] + str.length());
+    std::basic_istream<wchar_t> in(&buffer);
+
+    test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
 
     pugi::xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
