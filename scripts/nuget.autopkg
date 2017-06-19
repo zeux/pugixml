@@ -1,7 +1,7 @@
 configurations {
 	Toolset {
 		key: "PlatformToolset";
-		choices: { v140, v120, v110, v100 };
+		choices: { v141, v140, v120, v110, v100 };
 	}
 }
 nuget {
@@ -38,5 +38,9 @@ nuget {
 		[x86,v140,debug] { lib: vs2015\Win32_Debug\pugixml.lib; }
 		[x64,v140,release] { lib: vs2015\x64_Release\pugixml.lib; }
 		[x64,v140,debug] { lib: vs2015\x64_Debug\pugixml.lib; }
+		[x86,v141,release] { lib: vs2017\Win32_Release\pugixml.lib; }
+		[x86,v141,debug] { lib: vs2017\Win32_Debug\pugixml.lib; }
+		[x64,v141,release] { lib: vs2017\x64_Release\pugixml.lib; }
+		[x64,v141,debug] { lib: vs2017\x64_Debug\pugixml.lib; }
 	}
 }
