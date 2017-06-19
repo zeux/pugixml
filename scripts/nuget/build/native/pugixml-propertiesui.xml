@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
+  <Rule Name="ReferencedPackages05032e35-86af-4ab2-a3dc-d3e348583165" PageTemplate="tool" DisplayName="Referenced Packages" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="pugixml" DisplayName="pugixml" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Linkage-pugixml" DisplayName="Linkage" Description="Which version of the .lib file to link to this library" Category="pugixml">
+      <EnumValue Name="dynamic" DisplayName="dynamic" />
+      <EnumValue Name="static" DisplayName="static" />
+    </EnumProperty>
+  </Rule>
+</ProjectSchemaDefinitions>
