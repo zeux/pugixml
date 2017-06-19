@@ -131,7 +131,7 @@ using std::memset;
 #if __cplusplus >= 201103
 #	define PUGI__SNPRINTF(buf, ...) snprintf(buf, sizeof(buf), __VA_ARGS__)
 #elif defined(_MSC_VER) && _MSC_VER >= 1400
-#	define PUGI__SNPRINTF(buf, ...) _snprintf_s(buf, sizeof(buf), _TRUNCATE, __VA_ARGS__)
+#	define PUGI__SNPRINTF(buf, ...) _snprintf_s(buf, _countof(buf), _TRUNCATE, __VA_ARGS__)
 #else
 #	define PUGI__SNPRINTF sprintf
 #endif
