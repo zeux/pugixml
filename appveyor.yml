@@ -4,12 +4,6 @@ image:
 
 version: "{branch}-{build}"
 
-install:
-  - ps: (new-object net.webclient).DownloadFile('http://coapp.org/files/CoApp.Tools.Powershell.msi', 'C:\CoApp.Tools.Powershell.msi')
-  - ps: Start-Process -FilePath msiexec -ArgumentList /i, 'C:\CoApp.Tools.Powershell.msi', /quiet -Wait
-  - ps: $env:PSModulePath = $env:PSModulePath + ';C:\Program Files (x86)\Outercurve Foundation\Modules'
-  - ps: Import-Module CoApp
-
 build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2017") { .\scripts\nuget_build.ps1 }
 
