@@ -7,9 +7,9 @@
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
     </Rule.DataSource>
-    <EnumProperty Name="Linkage-pugixml" DisplayName="Linkage" Description="Which version of the .lib file to link to this library" Category="pugixml">
-      <EnumValue Name="dynamic" DisplayName="dynamic" />
-      <EnumValue Name="static" DisplayName="static" />
+    <EnumProperty Name="Linkage-pugixml" DisplayName="Linkage" Description="Which version of the runtime library to use for this library" Category="pugixml">
+      <EnumValue Name="dynamic" DisplayName="Dynamic CRT (/MD, /MDd)" />
+      <EnumValue Name="static" DisplayName="Static CRT (/MT, /MTd)" />
     </EnumProperty>
   </Rule>
 </ProjectSchemaDefinitions>
