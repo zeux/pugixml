@@ -631,8 +631,8 @@ namespace pugi
 		xpath_node_set select_nodes(const xpath_query& query) const;
 
 		// (deprecated: use select_node instead) Select single node by evaluating XPath query.
-		xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
-		xpath_node select_single_node(const xpath_query& query) const;
+		PUGIXML_DEPRECATED xpath_node select_single_node(const char_t* query, xpath_variable_set* variables = 0) const;
+		PUGIXML_DEPRECATED xpath_node select_single_node(const xpath_query& query) const;
 
 	#endif
 
@@ -1004,7 +1004,7 @@ namespace pugi
 	#endif
 
 		// (deprecated: use load_string instead) Load document from zero-terminated string. No encoding conversions are applied.
-		xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
+		PUGIXML_DEPRECATED xml_parse_result load(const char_t* contents, unsigned int options = parse_default);
 
 		// Load document from zero-terminated string. No encoding conversions are applied.
 		xml_parse_result load_string(const char_t* contents, unsigned int options = parse_default);

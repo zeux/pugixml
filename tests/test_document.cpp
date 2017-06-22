@@ -1479,10 +1479,3 @@ TEST(document_convert_out_of_memory)
 		delete[] files[j].data;
 	}
 }
-
-TEST(document_deprecated_load)
-{
-	xml_document doc;
-	CHECK(doc.load(STR("<node/>")));
-	CHECK_NODE(doc, STR("<node/>"));
-}
