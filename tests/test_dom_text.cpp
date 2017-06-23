@@ -1,8 +1,10 @@
-#include "common.hpp"
+#include "test.hpp"
 
 #include "helpers.hpp"
 
 #include <limits.h>
+
+using namespace pugi;
 
 TEST_XML_FLAGS(dom_text_empty, "<node><a>foo</a><b><![CDATA[bar]]></b><c><?pi value?></c><d/></node>", parse_default | parse_pi)
 {

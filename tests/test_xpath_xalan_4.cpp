@@ -1,6 +1,8 @@
 #ifndef PUGIXML_NO_XPATH
 
-#include "common.hpp"
+#include "test.hpp"
+
+using namespace pugi;
 
 TEST_XML(xpath_xalan_position_1, "<doc><a>1</a><a>2</a><a>3</a><a>4</a></doc>")
 {

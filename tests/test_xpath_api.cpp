@@ -2,12 +2,14 @@
 
 #include <string.h> // because Borland's STL is braindead, we have to include <string.h> _before_ <string> in order to get memcmp
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include "helpers.hpp"
 
 #include <string>
 #include <vector>
+
+using namespace pugi;
 
 TEST_XML(xpath_api_select_nodes, "<node><head/><foo/><foo/><tail/></node>")
 {

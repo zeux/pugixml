@@ -1,6 +1,8 @@
 #ifndef PUGIXML_NO_XPATH
 
-#include "common.hpp"
+#include "test.hpp"
+
+using namespace pugi;
 
 TEST_XML(xpath_paths_w3c_1, "<node><para/><foo/><para/></node>")
 {

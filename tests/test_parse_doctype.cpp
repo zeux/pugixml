@@ -1,10 +1,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include <string.h>
 #include <wchar.h>
 #include <string>
+
+using namespace pugi;
 
 static xml_parse_result load_concat(xml_document& doc, const char_t* a, const char_t* b = STR(""), const char_t* c = STR(""))
 {

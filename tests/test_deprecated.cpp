@@ -1,6 +1,8 @@
 #define PUGIXML_DEPRECATED // Suppress deprecated declarations to avoid warnings
 
-#include "common.hpp"
+#include "test.hpp"
+
+using namespace pugi;
 
 TEST(document_deprecated_load)
 {

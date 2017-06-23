@@ -1,8 +1,10 @@
 #ifndef PUGIXML_NO_STL
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include <string>
+
+using namespace pugi;
 
 // letters taken from http://www.utf8-chartable.de/
 

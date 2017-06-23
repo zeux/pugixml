@@ -1,6 +1,8 @@
 #ifndef PUGIXML_NO_XPATH
 
-#include "common.hpp"
+#include "test.hpp"
+
+using namespace pugi;
 
 TEST_XML(xpath_xalan_axes_1, "<far-north><north-north-west1/><north-north-west2/><north><near-north><far-west/><west/><near-west/><center center-attr-1='c1' center-attr-2='c2' center-attr-3='c3'><near-south-west/><near-south><south><far-south/></south></near-south><near-south-east/></center><near-east/><east/><far-east/></near-north></north><north-north-east1/><north-north-east2/></far-north>")
 {

@@ -2,10 +2,12 @@
 
 #ifndef PUGIXML_NO_XPATH
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include <string>
 #include <algorithm>
+
+using namespace pugi;
 
 TEST_XML(xpath_xalan_string_1, "<doc a='test'>ENCYCLOPEDIA</doc>")
 {

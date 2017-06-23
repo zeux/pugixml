@@ -2,7 +2,7 @@
 #define _SCL_SECURE_NO_WARNINGS
 #define _SCL_SECURE_NO_DEPRECATE
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include <string.h>
 #include <stdio.h>
@@ -14,6 +14,8 @@
 #include <string>
 
 #include "helpers.hpp"
+
+using namespace pugi;
 
 #ifdef PUGIXML_NO_STL
 template <typename I> static I move_iter(I base, int n)

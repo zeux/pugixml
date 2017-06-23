@@ -1,8 +1,10 @@
 #ifndef PUGIXML_NO_XPATH
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include <string>
+
+using namespace pugi;
 
 TEST(xpath_literal_parse)
 {

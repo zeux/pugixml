@@ -1,5 +1,7 @@
 #ifdef PUGIXML_COMPACT
-#include "common.hpp"
+#include "test.hpp"
+
+using namespace pugi;
 
 static void overflow_hash_table(xml_document& doc)
 {

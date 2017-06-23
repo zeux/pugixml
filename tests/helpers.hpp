@@ -1,7 +1,7 @@
 #ifndef HEADER_TEST_HELPERS_HPP
 #define HEADER_TEST_HELPERS_HPP
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include <utility>
 

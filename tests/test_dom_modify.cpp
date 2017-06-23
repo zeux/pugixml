@@ -1,4 +1,4 @@
-#include "common.hpp"
+#include "test.hpp"
 
 #include <limits>
 #include <string>
@@ -6,6 +6,8 @@
 #include <math.h>
 #include <string.h>
 #include <limits.h>
+
+using namespace pugi;
 
 TEST_XML(dom_attr_assign, "<node/>")
 {

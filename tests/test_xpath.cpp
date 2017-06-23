@@ -1,6 +1,6 @@
 #ifndef PUGIXML_NO_XPATH
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include <string.h>
 #include <wchar.h>
@@ -9,6 +9,8 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+
+using namespace pugi;
 
 static void load_document_copy(xml_document& doc, const char_t* text)
 {

@@ -1,11 +1,13 @@
 #define PUGIXML_HEADER_ONLY
 #define pugi pugih
 
-#include "common.hpp"
+#include "test.hpp"
 
 // Check header guards
 #include "../src/pugixml.hpp"
 #include "../src/pugixml.hpp"
+
+using namespace pugi;
 
 TEST(header_only_2)
 {

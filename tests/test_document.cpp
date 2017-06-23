@@ -5,7 +5,7 @@
 
 #include <string.h> // because Borland's STL is braindead, we have to include <string.h> _before_ <string> in order to get memcpy
 
-#include "common.hpp"
+#include "test.hpp"
 
 #include "writer_string.hpp"
 
@@ -25,6 +25,8 @@
 #if defined(__CELLOS_LV2__) || defined(ANDROID) || defined(_GLIBCXX_HAVE_UNISTD_H) || defined(__APPLE__)
 #	include <unistd.h> // for unlink
 #endif
+
+using namespace pugi;
 
 static bool load_file_in_memory(const char* path, char*& data, size_t& size)
 {

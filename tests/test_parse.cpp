@@ -1,6 +1,8 @@
-#include "common.hpp"
+#include "test.hpp"
 
 #include "writer_string.hpp"
+
+using namespace pugi;
 
 TEST(parse_pi_skip)
 {
