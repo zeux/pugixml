@@ -337,14 +337,50 @@ TEST(document_load_stream_wide_seekable_fail_seek)
     CHECK(doc.load(in).status == status_io_error);
 }
 
+template <typename T> class tell_fail_buffer: public std::basic_streambuf<T>
+{
+public:
+	int seeks;
+
+	tell_fail_buffer(): seeks(0)
+	{
+	}
+
+	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type, std::ios_base::seekdir dir, std::ios_base::openmode) PUGIXML_OVERRIDE
+	{
+		seeks++;
+
+		return seeks > 1 && dir == std::ios_base::cur ? -1 : 0;
+	}
+
+	typename std::basic_streambuf<T>::pos_type seekpos(typename std::basic_streambuf<T>::pos_type, std::ios_base::openmode) PUGIXML_OVERRIDE
+	{
+		return 0;
+	}
+};
+
+TEST(document_load_stream_seekable_fail_tell)
+{
+    tell_fail_buffer<char> buffer;
+    std::basic_istream<char> in(&buffer);
+
+    xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
+}
+
+TEST(document_load_stream_wide_seekable_fail_tell)
+{
+    tell_fail_buffer<wchar_t> buffer;
+    std::basic_istream<wchar_t> in(&buffer);
+
+    xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
+}
+
 #ifndef PUGIXML_NO_EXCEPTIONS
 template <typename T> class read_fail_buffer: public std::basic_streambuf<T>
 {
 public:
-    read_fail_buffer()
-    {
-    }
-
     typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
 	{
 		throw std::runtime_error("underflow failed");
