@@ -636,7 +636,7 @@ TEST_XML(xpath_variables_evaluate_node_set_out_of_memory, "<node />")
 	xpath_variable_set set;
 	set.set(STR("nodes"), ns);
 
-	xpath_query q("$nodes", &set);
+	xpath_query q(STR("$nodes"), &set);
 
 	test_runner::_memory_fail_threshold = 1;
 
