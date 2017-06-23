@@ -815,4 +815,28 @@ TEST(xpath_unknown_functions)
 		CHECK_XPATH_FAIL(query);
 	}
 }
+
+TEST(xpath_string_translate_table_out_of_memory)
+{
+	xml_node c;
+
+	// our goal is to generate translate table OOM without generating query OOM
+	std::basic_string<char_t> query = STR("concat(");
+
+	size_t count = 20;
+
+	for (size_t i = 0; i < count; ++i)
+	{
+		if (i != 0) query += STR(",");
+		query += STR("translate('a','a','A')");
+	}
+
+	query += STR(")");
+
+	std::basic_string<char_t> result(count, 'A');
+
+	test_runner::_memory_fail_threshold = 5000;
+
+	CHECK_ALLOC_FAIL(CHECK_XPATH_STRING(c, query.c_str(), result.c_str()));
+}
 #endif

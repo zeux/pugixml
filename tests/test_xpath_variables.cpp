@@ -624,4 +624,22 @@ TEST(xpath_variables_copy_big_value_out_of_memory)
 
 	CHECK(!copy.get(STR("x")));
 }
+
+TEST_XML(xpath_variables_evaluate_node_set_out_of_memory, "<node />")
+{
+	for (size_t i = 0; i < 600; ++i)
+		doc.append_child(STR("node"));
+
+	xpath_node_set ns = doc.select_nodes(STR("node"));
+	CHECK(ns.size() == 601);
+
+	xpath_variable_set set;
+	set.set(STR("nodes"), ns);
+
+	xpath_query q("$nodes", &set);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	CHECK_ALLOC_FAIL(q.evaluate_node_set(xml_node()).empty());
+}
 #endif
