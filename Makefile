@@ -99,6 +99,10 @@ $(BUILD)/%.o: %
 	@mkdir -p $(dir $@)
 	$(CXX) $< $(CXXFLAGS) -c -MMD -MP -o $@
 
+$(BUILD)/tests/test_short_wchar.cpp.o: tests/test_short_wchar.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $< $(CXXFLAGS) -fshort-wchar -c -MMD -MP -o $@
+
 -include $(OBJECTS:.o=.d)
 
 .SECONDEXPANSION:
