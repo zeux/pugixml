@@ -18,6 +18,10 @@
 #include <string>
 #include <algorithm>
 
+#ifndef PUGIXML_NO_EXCEPTIONS
+#	include <stdexcept>
+#endif
+
 #ifdef __MINGW32__
 #	include <io.h> // for unlink in C++0x mode
 #endif
@@ -275,7 +279,7 @@ TEST(document_load_stream_nonseekable_out_of_memory_large)
     char_array_buffer<char> buffer(&str[0], &str[0] + str.length());
     std::basic_istream<char> in(&buffer);
 
-    test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
+    test_runner::_memory_fail_threshold = 32768 * 3 + 4096;
 
     xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
@@ -291,7 +295,7 @@ TEST(document_load_stream_wide_nonseekable_out_of_memory_large)
     char_array_buffer<wchar_t> buffer(&str[0], &str[0] + str.length());
     std::basic_istream<wchar_t> in(&buffer);
 
-    test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
+    test_runner::_memory_fail_threshold = 32768 * 3 * sizeof(wchar_t) + 4096;
 
     xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
@@ -300,10 +304,18 @@ TEST(document_load_stream_wide_nonseekable_out_of_memory_large)
 template <typename T> class seek_fail_buffer: public std::basic_streambuf<T>
 {
 public:
+	int seeks;
+
+	seek_fail_buffer(): seeks(0)
+	{
+	}
+
 	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type, std::ios_base::seekdir, std::ios_base::openmode) PUGIXML_OVERRIDE
 	{
-		// pretend that our buffer is seekable (this is called by tellg); actual seeks will fail
-		return 0;
+		seeks++;
+
+		// pretend that our buffer is seekable (this is called by tellg)
+		return seeks == 1 ? 0 : -1;
 	}
 };
 
@@ -324,6 +336,98 @@ TEST(document_load_stream_wide_seekable_fail_seek)
     xml_document doc;
     CHECK(doc.load(in).status == status_io_error);
 }
+
+#ifndef PUGIXML_NO_EXCEPTIONS
+template <typename T> class read_fail_buffer: public std::basic_streambuf<T>
+{
+public:
+    read_fail_buffer()
+    {
+    }
+
+    typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
+	{
+		throw std::runtime_error("underflow failed");
+
+	#ifdef __DMC__
+		return 0;
+	#endif
+	}
+};
+
+TEST(document_load_stream_nonseekable_fail_read)
+{
+    read_fail_buffer<char> buffer;
+    std::basic_istream<char> in(&buffer);
+
+    xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
+}
+
+TEST(document_load_stream_wide_nonseekable_fail_read)
+{
+    read_fail_buffer<wchar_t> buffer;
+    std::basic_istream<wchar_t> in(&buffer);
+
+    xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
+}
+
+template <typename T> class read_fail_seekable_buffer: public std::basic_streambuf<T>
+{
+public:
+	typename std::basic_streambuf<T>::pos_type offset;
+
+    read_fail_seekable_buffer(): offset(0)
+    {
+    }
+
+    typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
+	{
+		throw std::runtime_error("underflow failed");
+
+	#ifdef __DMC__
+		return 0;
+	#endif
+	}
+
+	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type off, std::ios_base::seekdir dir, std::ios_base::openmode) PUGIXML_OVERRIDE
+	{
+		switch (dir)
+		{
+		case std::ios_base::beg: offset = off; break;
+		case std::ios_base::cur: offset += off; break;
+		case std::ios_base::end: offset = 16 + off; break;
+		default: ;
+		}
+		return offset;
+	}
+
+	typename std::basic_streambuf<T>::pos_type seekpos(typename std::basic_streambuf<T>::pos_type pos, std::ios_base::openmode) PUGIXML_OVERRIDE
+	{
+		offset = pos;
+		return pos;
+	}
+};
+
+TEST(document_load_stream_seekable_fail_read)
+{
+    read_fail_seekable_buffer<char> buffer;
+    std::basic_istream<char> in(&buffer);
+
+    xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
+}
+
+TEST(document_load_stream_wide_seekable_fail_read)
+{
+    read_fail_seekable_buffer<wchar_t> buffer;
+    std::basic_istream<wchar_t> in(&buffer);
+
+    xml_document doc;
+    CHECK(doc.load(in).status == status_io_error);
+}
+#endif
 #endif
 
 TEST(document_load_string)
