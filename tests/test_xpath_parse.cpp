@@ -222,7 +222,7 @@ TEST(xpath_parse_paths_valid_unicode)
 	#if defined(PUGIXML_WCHAR_MODE)
 		xpath_query q(paths[i]);
 	#elif !defined(PUGIXML_NO_STL)
-		std::basic_string<char> path_utf8 = pugi::as_utf8(paths[i]);
+		std::basic_string<char> path_utf8 = as_utf8(paths[i]);
 		xpath_query q(path_utf8.c_str());
 	#endif
 	}

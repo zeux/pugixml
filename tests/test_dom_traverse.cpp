@@ -337,11 +337,11 @@ TEST_XML(dom_attr_iterator_invalidate, "<node><node1 attr1='0'/><node2 attr1='0'
 
 TEST_XML(dom_attr_iterator_const, "<node attr1='0' attr2='1'/>")
 {
-    pugi::xml_node node = doc.child(STR("node"));
+    xml_node node = doc.child(STR("node"));
 
-    const pugi::xml_attribute_iterator i1 = node.attributes_begin();
-    const pugi::xml_attribute_iterator i2 = ++xml_attribute_iterator(i1);
-    const pugi::xml_attribute_iterator i3 = ++xml_attribute_iterator(i2);
+    const xml_attribute_iterator i1 = node.attributes_begin();
+    const xml_attribute_iterator i2 = ++xml_attribute_iterator(i1);
+    const xml_attribute_iterator i3 = ++xml_attribute_iterator(i2);
 
     CHECK(*i1 == node.attribute(STR("attr1")));
     CHECK(*i2 == node.attribute(STR("attr2")));
@@ -459,11 +459,11 @@ TEST_XML(dom_node_iterator_invalidate, "<node><node1><child1/></node1><node2><ch
 
 TEST_XML(dom_node_iterator_const, "<node><child1/><child2/></node>")
 {
-    pugi::xml_node node = doc.child(STR("node"));
+    xml_node node = doc.child(STR("node"));
 
-    const pugi::xml_node_iterator i1 = node.begin();
-    const pugi::xml_node_iterator i2 = ++xml_node_iterator(i1);
-    const pugi::xml_node_iterator i3 = ++xml_node_iterator(i2);
+    const xml_node_iterator i1 = node.begin();
+    const xml_node_iterator i2 = ++xml_node_iterator(i1);
+    const xml_node_iterator i3 = ++xml_node_iterator(i2);
 
     CHECK(*i1 == node.child(STR("child1")));
     CHECK(*i2 == node.child(STR("child2")));
@@ -669,9 +669,9 @@ struct find_predicate_const
 
 struct find_predicate_prefix
 {
-	const pugi::char_t* prefix;
+	const char_t* prefix;
 
-	find_predicate_prefix(const pugi::char_t* prefix_): prefix(prefix_)
+	find_predicate_prefix(const char_t* prefix_): prefix(prefix_)
 	{
 	}
 
@@ -679,7 +679,7 @@ struct find_predicate_prefix
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		// can't use wcsncmp here because of a bug in DMC
-		return std::basic_string<pugi::char_t>(obj.name()).compare(0, wcslen(prefix), prefix) == 0;
+		return std::basic_string<char_t>(obj.name()).compare(0, wcslen(prefix), prefix) == 0;
 	#else
 		return strncmp(obj.name(), prefix, strlen(prefix)) == 0;
 	#endif
@@ -782,7 +782,7 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 
 struct test_walker: xml_tree_walker
 {
-	std::basic_string<pugi::char_t> log;
+	std::basic_string<char_t> log;
 	unsigned int call_count;
 	unsigned int stop_count;
 
@@ -790,7 +790,7 @@ struct test_walker: xml_tree_walker
 	{
 	}
 
-	std::basic_string<pugi::char_t> depthstr() const
+	std::basic_string<char_t> depthstr() const
 	{
 		char buf[32];
 		sprintf(buf, "%d", depth());
@@ -799,9 +799,9 @@ struct test_walker: xml_tree_walker
 		wchar_t wbuf[32];
 		std::copy(buf, buf + strlen(buf) + 1, &wbuf[0]);
 
-		return std::basic_string<pugi::char_t>(wbuf);
+		return std::basic_string<char_t>(wbuf);
 	#else
-		return std::basic_string<pugi::char_t>(buf);
+		return std::basic_string<char_t>(buf);
 	#endif
 	}
 

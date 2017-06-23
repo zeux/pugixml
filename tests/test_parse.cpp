@@ -290,8 +290,8 @@ TEST(parse_ws_pcdata_permutations)
     struct test_data_t
     {
         unsigned int mask; // 1 = default flags, 2 = parse_ws_pcdata, 4 = parse_ws_pcdata_single
-        const pugi::char_t* source;
-        const pugi::char_t* result;
+        const char_t* source;
+        const char_t* result;
         int nodes; // negative if parsing should fail
     };
 
@@ -359,8 +359,8 @@ TEST(parse_ws_pcdata_fragment_permutations)
     struct test_data_t
     {
         unsigned int mask; // 1 = default flags, 2 = parse_ws_pcdata, 4 = parse_ws_pcdata_single
-        const pugi::char_t* source;
-        const pugi::char_t* result;
+        const char_t* source;
+        const char_t* result;
         int nodes; // negative if parsing should fail
     };
 
@@ -439,8 +439,8 @@ TEST(parse_pcdata_trim)
 {
     struct test_data_t
     {
-        const pugi::char_t* source;
-        const pugi::char_t* result;
+        const char_t* source;
+        const char_t* result;
         unsigned int flags;
     };
 
@@ -472,7 +472,7 @@ TEST(parse_pcdata_trim)
         xml_document doc;
         CHECK(doc.load_string(td.source, td.flags | parse_trim_pcdata));
 
-        const pugi::char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
+        const char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
         CHECK_STRING(value, td.result);
     }
 }
@@ -561,7 +561,7 @@ TEST(parse_escapes_unicode)
 	CHECK(doc.load_string(STR("<node>&#x03B3;&#x03b3;&#x24B62;</node>"), parse_minimal | parse_escapes));
 
 #ifdef PUGIXML_WCHAR_MODE
-	const pugi::char_t* v = doc.child_value(STR("node"));
+	const char_t* v = doc.child_value(STR("node"));
 
 	size_t wcharsize = sizeof(wchar_t);
 
@@ -1000,7 +1000,7 @@ TEST(parse_out_of_memory_allocator_state_sync)
 		CHECK(doc.append_child(STR("n")));
 }
 
-static bool test_offset(const char_t* contents, unsigned int options, pugi::xml_parse_status status, ptrdiff_t offset)
+static bool test_offset(const char_t* contents, unsigned int options, xml_parse_status status, ptrdiff_t offset)
 {
 	xml_document doc;
 	xml_parse_result res = doc.load_string(contents, options);

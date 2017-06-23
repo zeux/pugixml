@@ -171,8 +171,8 @@ TEST_XML(dom_attr_assign_large_number_float, "<node attr='' />")
 
 	node.attribute(STR("attr")) = std::numeric_limits<float>::max();
 
-	CHECK(test_node(node, STR("<node attr=\"3.40282347e+038\"/>"), STR(""), pugi::format_raw) ||
-		  test_node(node, STR("<node attr=\"3.40282347e+38\"/>"), STR(""), pugi::format_raw));
+	CHECK(test_node(node, STR("<node attr=\"3.40282347e+038\"/>"), STR(""), format_raw) ||
+		  test_node(node, STR("<node attr=\"3.40282347e+38\"/>"), STR(""), format_raw));
 }
 
 TEST_XML(dom_attr_assign_large_number_double, "<node attr='' />")

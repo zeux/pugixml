@@ -60,13 +60,13 @@ static bool test_file_contents(const char* path, const char* data, size_t size)
 
 TEST(document_create_empty)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 	CHECK_NODE(doc, STR(""));
 }
 
 TEST(document_create)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 	doc.append_child().set_name(STR("node"));
 	CHECK_NODE(doc, STR("<node/>"));
 }
@@ -74,7 +74,7 @@ TEST(document_create)
 #ifndef PUGIXML_NO_STL
 TEST(document_load_stream)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	std::istringstream iss("<node/>");
 	CHECK(doc.load(iss));
@@ -83,7 +83,7 @@ TEST(document_load_stream)
 
 TEST(document_load_stream_offset)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	std::istringstream iss("<foobar> <node/>");
 
@@ -96,7 +96,7 @@ TEST(document_load_stream_offset)
 
 TEST(document_load_stream_text)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	std::ifstream iss("tests/data/multiline.xml");
 	CHECK(doc.load(iss));
@@ -105,7 +105,7 @@ TEST(document_load_stream_text)
 
 TEST(document_load_stream_error)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	std::ifstream fs("filedoesnotexist");
 	CHECK(doc.load(fs).status == status_io_error);
@@ -113,7 +113,7 @@ TEST(document_load_stream_error)
 
 TEST(document_load_stream_out_of_memory)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	std::istringstream iss("<node/>");
 	test_runner::_memory_fail_threshold = 1;
@@ -122,7 +122,7 @@ TEST(document_load_stream_out_of_memory)
 
 TEST(document_load_stream_wide_out_of_memory)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	std::basic_istringstream<wchar_t> iss(L"<node/>");
 	test_runner::_memory_fail_threshold = 1;
@@ -133,14 +133,14 @@ TEST(document_load_stream_empty)
 {
 	std::istringstream iss;
 
-	pugi::xml_document doc;
+	xml_document doc;
 	doc.load(iss); // parse result depends on STL implementation
 	CHECK(!doc.first_child());
 }
 
 TEST(document_load_stream_wide)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	std::basic_istringstream<wchar_t> iss(L"<node/>");
 	CHECK(doc.load(iss));
@@ -150,7 +150,7 @@ TEST(document_load_stream_wide)
 #ifndef PUGIXML_NO_EXCEPTIONS
 TEST(document_load_stream_exceptions)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	// Windows has newline translation for text-mode files, so reading from this stream reaches eof and sets fail|eof bits.
 	// This test does not cause stream to throw an exception on Linux - I have no idea how to get read() to fail except
@@ -173,7 +173,7 @@ TEST(document_load_stream_exceptions)
 
 TEST(document_load_stream_error_previous)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 	CHECK(doc.load_string(STR("<node/>")));
 	CHECK(doc.first_child());
 
@@ -184,7 +184,7 @@ TEST(document_load_stream_error_previous)
 
 TEST(document_load_stream_wide_error_previous)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 	CHECK(doc.load_string(STR("<node/>")));
 	CHECK(doc.first_child());
 
@@ -208,7 +208,7 @@ TEST(document_load_stream_nonseekable)
     char_array_buffer<char> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
     std::istream in(&buffer);
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK(doc.load(in));
     CHECK_NODE(doc, STR("<node/>"));
 }
@@ -219,22 +219,22 @@ TEST(document_load_stream_wide_nonseekable)
     char_array_buffer<wchar_t> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
     std::basic_istream<wchar_t> in(&buffer);
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK(doc.load(in));
     CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_stream_nonseekable_large)
 {
-	std::basic_string<pugi::char_t> str;
+	std::basic_string<char_t> str;
 	str += STR("<node>");
 	for (int i = 0; i < 10000; ++i) str += STR("<node/>");
 	str += STR("</node>");
 
-    char_array_buffer<pugi::char_t> buffer(&str[0], &str[0] + str.length());
-    std::basic_istream<pugi::char_t> in(&buffer);
+    char_array_buffer<char_t> buffer(&str[0], &str[0] + str.length());
+    std::basic_istream<char_t> in(&buffer);
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK(doc.load(in));
     CHECK_NODE(doc, str.c_str());
 }
@@ -247,7 +247,7 @@ TEST(document_load_stream_nonseekable_out_of_memory)
 
     test_runner::_memory_fail_threshold = 1;
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
@@ -259,7 +259,7 @@ TEST(document_load_stream_wide_nonseekable_out_of_memory)
 
     test_runner::_memory_fail_threshold = 1;
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
@@ -275,7 +275,7 @@ TEST(document_load_stream_nonseekable_out_of_memory_large)
 
     test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
@@ -291,7 +291,7 @@ TEST(document_load_stream_wide_nonseekable_out_of_memory_large)
 
     test_runner::_memory_fail_threshold = 10000 * 8 * 3 / 2;
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
@@ -310,7 +310,7 @@ TEST(document_load_stream_seekable_fail_seek)
     seek_fail_buffer<char> buffer;
     std::basic_istream<char> in(&buffer);
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK(doc.load(in).status == status_io_error);
 }
 
@@ -319,14 +319,14 @@ TEST(document_load_stream_wide_seekable_fail_seek)
     seek_fail_buffer<wchar_t> buffer;
     std::basic_istream<wchar_t> in(&buffer);
 
-    pugi::xml_document doc;
+    xml_document doc;
     CHECK(doc.load(in).status == status_io_error);
 }
 #endif
 
 TEST(document_load_string)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_string(STR("<node/>")));
 	CHECK_NODE(doc, STR("<node/>"));
@@ -334,7 +334,7 @@ TEST(document_load_string)
 
 TEST(document_load_file)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_file("tests/data/small.xml"));
 	CHECK_NODE(doc, STR("<node/>"));
@@ -342,7 +342,7 @@ TEST(document_load_file)
 
 TEST(document_load_file_empty)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_file("tests/data/empty.xml").status == status_no_document_element);
 	CHECK(!doc.first_child());
@@ -350,11 +350,11 @@ TEST(document_load_file_empty)
 
 TEST(document_load_file_large)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_file("tests/data/large.xml"));
 
-	std::basic_string<pugi::char_t> str;
+	std::basic_string<char_t> str;
 	str += STR("<node>");
 	for (int i = 0; i < 10000; ++i) str += STR("<node/>");
 	str += STR("</node>");
@@ -364,7 +364,7 @@ TEST(document_load_file_large)
 
 TEST(document_load_file_error)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_file("filedoesnotexist").status == status_file_not_found);
 }
@@ -373,7 +373,7 @@ TEST(document_load_file_out_of_memory)
 {
 	test_runner::_memory_fail_threshold = 1;
 
-	pugi::xml_document doc;
+	xml_document doc;
 	CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
 }
 
@@ -381,7 +381,7 @@ TEST(document_load_file_out_of_memory_file_leak)
 {
 	test_runner::_memory_fail_threshold = 1;
 
-	pugi::xml_document doc;
+	xml_document doc;
 
 	for (int i = 0; i < 256; ++i)
 		CHECK_ALLOC_FAIL(CHECK(doc.load_file("tests/data/small.xml").status == status_out_of_memory));
@@ -396,7 +396,7 @@ TEST(document_load_file_wide_out_of_memory_file_leak)
 {
 	test_runner::_memory_fail_threshold = 256;
 
-	pugi::xml_document doc;
+	xml_document doc;
 
 	for (int i = 0; i < 256; ++i)
 		CHECK_ALLOC_FAIL(CHECK(doc.load_file(L"tests/data/small.xml").status == status_out_of_memory));
@@ -409,7 +409,7 @@ TEST(document_load_file_wide_out_of_memory_file_leak)
 
 TEST(document_load_file_error_previous)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 	CHECK(doc.load_string(STR("<node/>")));
 	CHECK(doc.first_child());
 
@@ -419,7 +419,7 @@ TEST(document_load_file_error_previous)
 
 TEST(document_load_file_wide_ascii)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_file(L"tests/data/small.xml"));
 	CHECK_NODE(doc, STR("<node/>"));
@@ -428,7 +428,7 @@ TEST(document_load_file_wide_ascii)
 #if !defined(__DMC__) && !defined(__MWERKS__) && !(defined(__MINGW32__) && defined(__STRICT_ANSI__) && !defined(__MINGW64_VERSION_MAJOR)) && !defined(__BORLANDC__)
 TEST(document_load_file_wide_unicode)
 {
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_file(L"tests/data/\x0442\x0435\x0441\x0442.xml"));
 	CHECK_NODE(doc, STR("<node/>"));
@@ -439,9 +439,9 @@ TEST(document_load_file_wide_out_of_memory)
 {
 	test_runner::_memory_fail_threshold = 1;
 
-	pugi::xml_document doc;
+	xml_document doc;
 
-	pugi::xml_parse_result result;
+	xml_parse_result result;
 	result.status = status_out_of_memory;
 	CHECK_ALLOC_FAIL(result = doc.load_file(L"tests/data/small.xml"));
 
@@ -469,7 +469,7 @@ TEST_XML(document_save, "<node/>")
 {
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_no_declaration | pugi::format_raw, get_native_encoding());
+	doc.save(writer, STR(""), format_no_declaration | format_raw, get_native_encoding());
 
 	CHECK(writer.as_string() == STR("<node/>"));
 }
@@ -479,7 +479,7 @@ TEST_XML(document_save_stream, "<node/>")
 {
 	std::ostringstream oss;
 
-	doc.save(oss, STR(""), pugi::format_no_declaration | pugi::format_raw);
+	doc.save(oss, STR(""), format_no_declaration | format_raw);
 
 	CHECK(oss.str() == "<node/>");
 }
@@ -488,7 +488,7 @@ TEST_XML(document_save_stream_wide, "<node/>")
 {
 	std::basic_ostringstream<wchar_t> oss;
 
-	doc.save(oss, STR(""), pugi::format_no_declaration | pugi::format_raw);
+	doc.save(oss, STR(""), format_no_declaration | format_raw);
 
 	CHECK(oss.str() == L"<node/>");
 }
@@ -518,7 +518,7 @@ TEST_XML(document_save_declaration, "<node/>")
 {
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+	doc.save(writer, STR(""), format_default, get_native_encoding());
 
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n<node />\n"));
 }
@@ -529,7 +529,7 @@ TEST(document_save_declaration_empty)
 
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+	doc.save(writer, STR(""), format_default, get_native_encoding());
 
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n"));
 }
@@ -540,7 +540,7 @@ TEST_XML(document_save_declaration_present_first, "<node/>")
 
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+	doc.save(writer, STR(""), format_default, get_native_encoding());
 
 	CHECK(writer.as_string() == STR("<?xml encoding=\"utf8\"?>\n<node />\n"));
 }
@@ -552,7 +552,7 @@ TEST_XML(document_save_declaration_present_second, "<node/>")
 
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+	doc.save(writer, STR(""), format_default, get_native_encoding());
 
 	CHECK(writer.as_string() == STR("<!--text-->\n<?xml encoding=\"utf8\"?>\n<node />\n"));
 }
@@ -563,7 +563,7 @@ TEST_XML(document_save_declaration_present_last, "<node/>")
 
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_default, get_native_encoding());
+	doc.save(writer, STR(""), format_default, get_native_encoding());
 
 	// node writer only looks for declaration before the first element child
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?>\n<node />\n<?xml encoding=\"utf8\"?>\n"));
@@ -573,7 +573,7 @@ TEST_XML(document_save_declaration_latin1, "<node/>")
 {
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_default, encoding_latin1);
+	doc.save(writer, STR(""), format_default, encoding_latin1);
 
 	CHECK(writer.as_narrow() == "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<node />\n");
 }
@@ -582,7 +582,7 @@ TEST_XML(document_save_declaration_raw, "<node/>")
 {
 	xml_writer_string writer;
 
-	doc.save(writer, STR(""), pugi::format_raw, get_native_encoding());
+	doc.save(writer, STR(""), format_raw, get_native_encoding());
 
 	CHECK(writer.as_string() == STR("<?xml version=\"1.0\"?><node/>"));
 }
@@ -611,7 +611,7 @@ TEST_XML(document_save_file, "<node/>")
 
 	CHECK(doc.save_file(f.path));
 
-	CHECK(doc.load_file(f.path, pugi::parse_default | pugi::parse_declaration));
+	CHECK(doc.load_file(f.path, parse_default | parse_declaration));
 	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node/>"));
 }
 
@@ -625,7 +625,7 @@ TEST_XML(document_save_file_wide, "<node/>")
 
 	CHECK(doc.save_file(wpath));
 
-	CHECK(doc.load_file(f.path, pugi::parse_default | pugi::parse_declaration));
+	CHECK(doc.load_file(f.path, parse_default | parse_declaration));
 	CHECK_NODE(doc, STR("<?xml version=\"1.0\"?><node/>"));
 }
 
@@ -638,10 +638,10 @@ TEST_XML(document_save_file_text, "<node/>")
 {
 	temp_file f;
 
-	CHECK(doc.save_file(f.path, STR(""), pugi::format_no_declaration | pugi::format_save_file_text));
+	CHECK(doc.save_file(f.path, STR(""), format_no_declaration | format_save_file_text));
     CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
 
-	CHECK(doc.save_file(f.path, STR(""), pugi::format_no_declaration));
+	CHECK(doc.save_file(f.path, STR(""), format_no_declaration));
     CHECK(test_file_contents(f.path, "<node />\n", 9));
 }
 
@@ -653,10 +653,10 @@ TEST_XML(document_save_file_wide_text, "<node/>")
 	wchar_t wpath[sizeof(f.path)];
 	std::copy(f.path, f.path + strlen(f.path) + 1, wpath + 0);
 
-	CHECK(doc.save_file(wpath, STR(""), pugi::format_no_declaration | pugi::format_save_file_text));
+	CHECK(doc.save_file(wpath, STR(""), format_no_declaration | format_save_file_text));
     CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
 
-	CHECK(doc.save_file(wpath, STR(""), pugi::format_no_declaration));
+	CHECK(doc.save_file(wpath, STR(""), format_no_declaration));
     CHECK(test_file_contents(f.path, "<node />\n", 9));
 }
 
@@ -682,9 +682,9 @@ TEST_XML(document_save_file_wide_leak, "<node/>")
 
 TEST(document_load_buffer)
 {
-	const pugi::char_t text[] = STR("<?xml?><node/>");
+	const char_t text[] = STR("<?xml?><node/>");
 
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_buffer(text, sizeof(text)));
 	CHECK_NODE(doc, STR("<node/>"));
@@ -692,9 +692,9 @@ TEST(document_load_buffer)
 
 TEST(document_load_buffer_inplace)
 {
-	pugi::char_t text[] = STR("<?xml?><node/>");
+	char_t text[] = STR("<?xml?><node/>");
 
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_buffer_inplace(text, sizeof(text)));
 	CHECK_NODE(doc, STR("<node/>"));
@@ -704,14 +704,14 @@ TEST(document_load_buffer_inplace_own)
 {
 	allocation_function alloc = get_memory_allocation_function();
 
-	size_t size = strlen("<?xml?><node/>") * sizeof(pugi::char_t);
+	size_t size = strlen("<?xml?><node/>") * sizeof(char_t);
 
-	pugi::char_t* text = static_cast<pugi::char_t*>(alloc(size));
+	char_t* text = static_cast<char_t*>(alloc(size));
 	CHECK(text);
 
 	memcpy(text, STR("<?xml?><node/>"), size);
 
-	pugi::xml_document doc;
+	xml_document doc;
 
 	CHECK(doc.load_buffer_inplace_own(text, size));
 	CHECK_NODE(doc, STR("<node/>"));
@@ -763,7 +763,7 @@ inline void check_utftest_document(const xml_document& doc)
 	CHECK(static_cast<unsigned int>(doc.last_child().last_child().name()[0]) >= 0x80);
 
 	// check magic string
-	const pugi::char_t* v = doc.last_child().child(STR("Heavy")).previous_sibling().child_value();
+	const char_t* v = doc.last_child().child(STR("Heavy")).previous_sibling().child_value();
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(v[0] == 0x4e16 && v[1] == 0x754c && v[2] == 0x6709 && v[3] == 0x5f88 && v[4] == 0x591a && v[5] == wchar_cast(0x8bed) && v[6] == wchar_cast(0x8a00));
@@ -1097,7 +1097,7 @@ TEST(document_load_buffer_empty)
 		CHECK(doc.load_buffer_inplace(buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 		CHECK(doc.load_buffer_inplace(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 
-		void* own_buffer = pugi::get_memory_allocation_function()(1);
+		void* own_buffer = get_memory_allocation_function()(1);
 
 		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 		CHECK(doc.load_buffer_inplace_own(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
@@ -1133,7 +1133,7 @@ TEST(document_load_buffer_empty_fragment)
 		CHECK(doc.load_buffer_inplace(buffer, 0, parse_fragment, encoding) && !doc.first_child());
 		CHECK(doc.load_buffer_inplace(0, 0, parse_fragment, encoding) && !doc.first_child());
 
-		void* own_buffer = pugi::get_memory_allocation_function()(1);
+		void* own_buffer = get_memory_allocation_function()(1);
 
 		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_fragment, encoding) && !doc.first_child());
 		CHECK(doc.load_buffer_inplace_own(0, 0, parse_fragment, encoding) && !doc.first_child());
@@ -1249,7 +1249,7 @@ TEST(document_load_exceptions)
 
     try
     {
-        pugi::xml_document doc;
+        xml_document doc;
         if (!doc.load_string(STR("<node attribute='value"))) throw std::bad_alloc();
 
         CHECK_FORCE_FAIL("Expected parsing failure");
