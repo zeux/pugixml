@@ -130,7 +130,7 @@ using std::memset;
 // Not all platforms have snprintf; we define a wrapper that uses snprintf if possible. This only works with buffers with a known size.
 #if __cplusplus >= 201103
 #	define PUGI__SNPRINTF(buf, ...) snprintf(buf, sizeof(buf), __VA_ARGS__)
-#elif defined(_MSC_VER) && _MSC_VER >= 1400
+#elif defined(PUGI__MSVC_CRT_VERSION) && PUGI__MSVC_CRT_VERSION >= 1400
 #	define PUGI__SNPRINTF(buf, ...) _snprintf_s(buf, _countof(buf), _TRUNCATE, __VA_ARGS__)
 #else
 #	define PUGI__SNPRINTF sprintf
