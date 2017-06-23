@@ -1,7 +1,11 @@
 #if defined(__GNUC__) && __WCHAR_MAX__ == 0xffff
-#define PUGIXML_HEADER_ONLY
+#undef PUGIXML_WCHAR_MODE
 #define PUGIXML_WCHAR_MODE
+
+#undef PUGIXML_NO_STL
 #define PUGIXML_NO_STL
+
+#define PUGIXML_HEADER_ONLY
 #define pugi pugisw
 
 #include "test.hpp"
