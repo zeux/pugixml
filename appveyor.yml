@@ -10,6 +10,7 @@ build_script:
 test_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2015") { .\tests\autotest-appveyor.ps1 9 10 11 12 14 }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2017") { .\tests\autotest-appveyor.ps1 15 }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2015") { & C:\cygwin\bin\bash.exe -c "PATH=/usr/bin:/usr/local/bin:$PATH; make config=coverage test && bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov" }
 
 artifacts:
   - path: .\scripts\*.nupkg
