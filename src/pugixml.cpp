@@ -48,6 +48,11 @@
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
+#if defined(_MSC_VER) && defined(__c2__)
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wdeprecated" // this function or variable may be unsafe
+#endif
+
 #ifdef __INTEL_COMPILER
 #	pragma warning(disable: 177) // function was declared but never referenced
 #	pragma warning(disable: 279) // controlling expression is constant
@@ -81,7 +86,7 @@
 #endif
 
 // Branch weight controls
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__c2__)
 #	define PUGI__UNLIKELY(cond) __builtin_expect(cond, 0)
 #else
 #	define PUGI__UNLIKELY(cond) (cond)
@@ -12592,6 +12597,10 @@ namespace pugi
 // so popping warning state at the end of translation unit leads to warnings in the middle.
 #if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 #	pragma warning(pop)
+#endif
+
+#if defined(_MSC_VER) && defined(__c2__)
+#	pragma clang diagnostic pop
 #endif
 
 // Undefine all local macros (makes sure we're not leaking macros in header-only mode)
