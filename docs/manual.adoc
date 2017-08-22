@@ -556,7 +556,7 @@ On 32-bit architectures document structure in compact mode is typically reduced 
 
 pugixml provides several functions for loading XML data from various places - files, C{plus}{plus} iostreams, memory buffers. All functions use an extremely fast non-validating parser. This parser is not fully W3C conformant - it can load any valid XML document, but does not perform some well-formedness checks. While considerable effort is made to reject invalid XML documents, some validation is not performed for performance reasons. Also some XML transformations (i.e. EOL handling or attribute value normalization) can impact parsing speed and thus can be disabled. However for vast majority of XML documents there is no performance difference between different parsing options. Parsing options also control whether certain XML nodes are parsed; see <<loading.options>> for more information.
 
-XML data is always converted to internal character format (see <<dom.unicode>>) before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions automatically. Unless explicit encoding is specified, loading functions perform automatic encoding detection based on first few characters of XML data, so in almost all cases you do not have to specify document encoding. Encoding conversion is described in more detail in <<loading.encoding>>.
+XML data is always converted to internal character format (see <<dom.unicode>>) before parsing. pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) as well as some non-Unicode encodings (Latin-1) and handles all encoding conversions automatically. Unless explicit encoding is specified, loading functions perform automatic encoding detection based on source XML data, so in most cases you do not have to specify document encoding. Encoding conversion is described in more detail in <<loading.encoding>>.
 
 [[loading.file]]
 === Loading document from file
@@ -784,17 +784,9 @@ include::samples/load_options.cpp[tags=code]
 === Encodings
 
 [[xml_encoding]]
-pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) and handles all encoding conversions. Most loading functions accept the optional parameter `encoding`. This is a value of enumeration type `xml_encoding`, that can have the following values:
+pugixml supports all popular Unicode encodings (UTF-8, UTF-16 (big and little endian), UTF-32 (big and little endian); UCS-2 is naturally supported since it's a strict subset of UTF-16) as well as some non-Unicode encodings (Latin-1) and handles all encoding conversions. Most loading functions accept the optional parameter `encoding`. This is a value of enumeration type `xml_encoding`, that can have the following values:
 
-* [[encoding_auto]]`encoding_auto` means that pugixml will try to guess the encoding based on source XML data. The algorithm is a modified version of the one presented in http://www.w3.org/TR/REC-xml/#sec-guessing-no-ext-info[Appendix F.1 of XML recommendation]; it tries to match the first few bytes of input data with the following patterns in strict order:
-** If first four bytes match UTF-32 BOM (Byte Order Mark), encoding is assumed to be UTF-32 with the endianness equal to that of BOM;
-** If first two bytes match UTF-16 BOM, encoding is assumed to be UTF-16 with the endianness equal to that of BOM;
-** If first three bytes match UTF-8 BOM, encoding is assumed to be UTF-8;
-** If first four bytes match UTF-32 representation of `<`, encoding is assumed to be UTF-32 with the corresponding endianness;
-** If first four bytes match UTF-16 representation of `<?`, encoding is assumed to be UTF-16 with the corresponding endianness;
-** If first two bytes match UTF-16 representation of `<`, encoding is assumed to be UTF-16 with the corresponding endianness (this guess may yield incorrect result, but it's better than UTF-8);
-** Otherwise encoding is assumed to be UTF-8.
-
+* [[encoding_auto]]`encoding_auto` means that pugixml will try to guess the encoding based on source XML data. The algorithm is a modified version of the one presented in http://www.w3.org/TR/REC-xml/#sec-guessing[Appendix F of XML recommendation]. It tries to find a Byte Order Mark of one of the supported encodings first; if that fails, it checks if the first few bytes of the input data look like a representation of `<` or `<?` in one of UTF-16 or UTF-32 variants; if that fails as well, encoding is assumed to be either UTF-8 or one of the non-Unicode encodings - to make the final decision the algorithm tries to parse the `encoding` attribute of the XML document declaration, ultimately falling back to UTF-8 if document declaration is not present or does not specify a supported encoding.
 * [[encoding_utf8]]`encoding_utf8` corresponds to UTF-8 encoding as defined in the Unicode standard; UTF-8 sequences with length equal to 5 or 6 are not standard and are rejected.
 * [[encoding_utf16_le]]`encoding_utf16_le` corresponds to little-endian UTF-16 encoding as defined in the Unicode standard; surrogate pairs are supported.
 * [[encoding_utf16_be]]`encoding_utf16_be` corresponds to big-endian UTF-16 encoding as defined in the Unicode standard; surrogate pairs are supported.
