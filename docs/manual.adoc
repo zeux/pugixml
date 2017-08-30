@@ -811,12 +811,13 @@ There is only one non-conformant behavior when dealing with valid XML documents:
 As for rejecting invalid XML documents, there are a number of incompatibilities with W3C specification, including:
 
 * Multiple attributes of the same node can have equal names.
-* All non-ASCII characters are treated in the same way as symbols of English alphabet, so some invalid tag names are not rejected.
+* Tag and attribute names are not fully validated for consisting of allowed characters, so some invalid tags are not rejected
 * Attribute values which contain `<` are not rejected.
 * Invalid entity/character references are not rejected and are instead left as is.
 * Comment values can contain `--`.
 * XML data is not required to begin with document declaration; additionally, document declaration can appear after comments and other nodes.
 * Invalid document type declarations are silently ignored in some cases.
+* Unicode validation is not performed so invalid UTF sequences are not rejected.
 
 [[access]]
 == Accessing document data

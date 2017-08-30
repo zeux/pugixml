@@ -1941,7 +1941,7 @@ The current behavior for Unicode conversion is to skip all invalid UTF sequences
 <p>Multiple attributes of the same node can have equal names.</p>
 </li>
 <li>
-<p>All non-ASCII characters are treated in the same way as symbols of English alphabet, so some invalid tag names are not rejected.</p>
+<p>Tag and attribute names are not fully validated for consisting of allowed characters, so some invalid tags are not rejected</p>
 </li>
 <li>
 <p>Attribute values which contain <code>&lt;</code> are not rejected.</p>
@@ -1957,6 +1957,9 @@ The current behavior for Unicode conversion is to skip all invalid UTF sequences
 </li>
 <li>
 <p>Invalid document type declarations are silently ignored in some cases.</p>
+</li>
+<li>
+<p>Unicode validation is not performed so invalid UTF sequences are not rejected.</p>
 </li>
 </ul>
 </div>
@@ -5672,7 +5675,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-08-21 08:46:53 DST
+Last updated 2017-08-29 20:45:58 DST
 </div>
 </div>
 </body>
