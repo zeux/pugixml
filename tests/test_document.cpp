@@ -1726,4 +1726,13 @@ TEST(document_move_large)
 
 	CHECK(!other.first_child());
 }
+
+TEST_XML(document_move_buffer, "<node1/><node2/>")
+{
+	CHECK(doc.child(STR("node2")).offset_debug() == 9);
+
+	xml_document other = std::move(doc);
+
+	CHECK(other.child(STR("node2")).offset_debug() == 9);
+}
 #endif
