@@ -1621,3 +1621,34 @@ TEST(document_convert_out_of_memory)
 		delete[] files[j].data;
 	}
 }
+
+#ifdef PUGIXML_HAS_MOVE
+TEST_XML(document_move_ctor, "<node1/><node2/>")
+{
+	xml_document other = std::move(doc);
+
+	CHECK(doc.first_child().empty());
+
+	CHECK_STRING(other.first_child().name(), STR("node1"));
+	CHECK(other.first_child().parent() == other);
+
+	CHECK_STRING(other.last_child().name(), STR("node2"));
+	CHECK(other.last_child().parent() == other);
+}
+
+TEST_XML(document_move_assign, "<node1/><node2/>")
+{
+	xml_document other;
+	CHECK(other.load_string(STR("<node3/>")));
+
+	other = std::move(doc);
+
+	CHECK(doc.first_child().empty());
+
+	CHECK_STRING(other.first_child().name(), STR("node1"));
+	CHECK(other.first_child().parent() == other);
+
+	CHECK_STRING(other.last_child().name(), STR("node2"));
+	CHECK(other.last_child().parent() == other);
+}
+#endif
