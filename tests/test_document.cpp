@@ -1691,15 +1691,38 @@ TEST(document_move_append_child)
 	xml_document other = std::move(*doc);
 	delete doc;
 
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 0; i < 3000; ++i)
 		other.child(STR("node1")).append_child(STR("node"));
 
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 0; i < 3000; ++i)
 		other.child(STR("node1")).remove_child(other.child(STR("node1")).last_child());
 
 	CHECK_NODE(other, STR("<node1 attr1=\"value1\"><node2/></node1>"));
 
 	other.remove_child(other.first_child());
+
+	CHECK(!other.first_child());
+}
+
+TEST(document_move_empty)
+{
+	xml_document* doc = new xml_document();
+	xml_document other = std::move(*doc);
+	delete doc;
+}
+
+TEST(document_move_large)
+{
+	xml_document* doc = new xml_document();
+
+	for (int i = 0; i < 3000; ++i)
+		doc->append_child(STR("node"));
+
+	xml_document other = std::move(*doc);
+	delete doc;
+
+	for (int i = 0; i < 3000; ++i)
+		CHECK(other.remove_child(other.first_child()));
 
 	CHECK(!other.first_child());
 }
