@@ -6830,6 +6830,25 @@ namespace pugi
 		_destroy();
 	}
 
+#ifdef PUGIXML_HAS_MOVE
+	PUGI__FN xml_document::xml_document(xml_document&& rhs): _buffer(0)
+	{
+		_create();
+		_move(rhs);
+	}
+
+	PUGI__FN xml_document& xml_document::operator=(xml_document&& rhs)
+	{
+		if (this == &rhs) return *this;
+
+		_destroy();
+		_create();
+		_move(rhs);
+
+		return *this;
+	}
+#endif
+
 	PUGI__FN void xml_document::reset()
 	{
 		_destroy();
@@ -6924,6 +6943,92 @@ namespace pugi
 
 		_root = 0;
 	}
+
+#ifdef PUGIXML_HAS_MOVE
+	PUGI__FN void xml_document::_move(xml_document& rhs)
+	{
+		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(_root);
+		impl::xml_document_struct* other = static_cast<impl::xml_document_struct*>(rhs._root);
+
+		// move allocation state
+		doc->_root = other->_root;
+		doc->_busy_size = other->_busy_size;
+
+		// move buffer state
+		doc->buffer = other->buffer;
+		doc->extra_buffers = other->extra_buffers;
+		_buffer = rhs._buffer;
+
+		// save first child pointer for later; this needs hash access
+		xml_node_struct* other_first_child = other->first_child;
+
+	#ifdef PUGIXML_COMPACT
+		// move compact hash
+		// TODO: the hash still has pointers to other, do we need to clear them out?
+		doc->hash = other->hash;
+		doc->_hash = &doc->hash;
+
+		// make sure we don't access other hash up until the end when we reinitialize other document
+		other->_hash = 0;
+	#endif
+
+		// move page structure
+		impl::xml_memory_page* doc_page = PUGI__GETPAGE(doc);
+		assert(doc_page && !doc_page->prev && !doc_page->next);
+
+		impl::xml_memory_page* other_page = PUGI__GETPAGE(other);
+		assert(other_page && !other_page->prev);
+
+		// relink pages since root page is embedded into xml_document
+		if (impl::xml_memory_page* page = other_page->next)
+		{
+			assert(page->prev == other_page);
+
+			page->prev = doc_page;
+
+			doc_page->next = page;
+			other_page->next = 0;
+		}
+
+		// make sure pages point to the correct document state
+		for (impl::xml_memory_page* page = doc_page->next; page; page = page->next)
+		{
+			assert(page->allocator == other);
+
+			page->allocator = doc;
+
+		#ifdef PUGIXML_COMPACT
+			// this automatically migrates most children between documents and prevents ->parent assignment from allocating
+			if (page->compact_shared_parent == other)
+				page->compact_shared_parent = doc;
+		#endif
+		}
+
+		// move tree structure
+		assert(!doc->first_child);
+
+		doc->reserve(); // TODO: it's not clear how to handle reserve running out of memory
+		doc->first_child = other_first_child;
+
+		for (xml_node_struct* child = other_first_child; child; child = child->next_sibling)
+		{
+		#ifdef PUGIXML_COMPACT
+			// most children will have migrated when we reassigned compact_shared_parent
+			assert(child->parent == other || child->parent == doc);
+
+			doc->reserve(); // TODO: it's not clear how to handle reserve running out of memory
+			child->parent = doc;
+		#else
+			assert(child->parent == other);
+			child->parent = doc;
+		#endif
+		}
+
+		// reset other document
+		new (other) impl::xml_document_struct(PUGI__GETPAGE(other));
+		rhs._buffer = 0;
+	}
+#endif
 
 #ifndef PUGIXML_NO_STL
 	PUGI__FN xml_parse_result xml_document::load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options, xml_encoding encoding)
