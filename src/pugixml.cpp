@@ -7010,17 +7010,17 @@ namespace pugi
 		doc->reserve(); // TODO: it's not clear how to handle reserve running out of memory
 		doc->first_child = other_first_child;
 
-		for (xml_node_struct* child = other_first_child; child; child = child->next_sibling)
+		for (xml_node_struct* node = other_first_child; node; node = node->next_sibling)
 		{
 		#ifdef PUGIXML_COMPACT
 			// most children will have migrated when we reassigned compact_shared_parent
-			assert(child->parent == other || child->parent == doc);
+			assert(node->parent == other || node->parent == doc);
 
 			doc->reserve(); // TODO: it's not clear how to handle reserve running out of memory
-			child->parent = doc;
+			node->parent = doc;
 		#else
-			assert(child->parent == other);
-			child->parent = doc;
+			assert(node->parent == other);
+			node->parent = doc;
 		#endif
 		}
 
