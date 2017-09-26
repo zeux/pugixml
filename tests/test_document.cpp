@@ -1651,4 +1651,56 @@ TEST_XML(document_move_assign, "<node1/><node2/>")
 	CHECK_STRING(other.last_child().name(), STR("node2"));
 	CHECK(other.last_child().parent() == other);
 }
+
+TEST_XML(document_move_zero_alloc, "<node1/><node2/>")
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document other = std::move(doc);
+
+	CHECK(doc.first_child().empty());
+
+	CHECK_STRING(other.first_child().name(), STR("node1"));
+	CHECK(other.first_child().parent() == other);
+
+	CHECK_STRING(other.last_child().name(), STR("node2"));
+	CHECK(other.last_child().parent() == other);
+}
+
+TEST(document_move_append_buffer)
+{
+	xml_document* doc = new xml_document();
+	CHECK(doc->load_string(STR("<node1 attr1='value1'><node2/></node1>")));
+	CHECK(doc->child(STR("node1")).append_buffer("<node3/>", 8));
+	CHECK(doc->child(STR("node1")).append_buffer("<node4/>", 8));
+
+	xml_document other = std::move(*doc);
+	delete doc;
+
+	CHECK(other.child(STR("node1")).append_buffer("<node5/>", 8));
+	CHECK(other.child(STR("node1")).append_buffer("<node6/>", 8));
+
+	CHECK_NODE(other, STR("<node1 attr1=\"value1\"><node2/><node3/><node4/><node5/><node6/></node1>"));
+}
+
+TEST(document_move_append_child)
+{
+	xml_document* doc = new xml_document();
+	CHECK(doc->load_string(STR("<node1 attr1='value1'><node2/></node1>")));
+
+	xml_document other = std::move(*doc);
+	delete doc;
+
+	for (int i = 0; i < 1000; ++i)
+		other.child(STR("node1")).append_child(STR("node"));
+
+	for (int i = 0; i < 1000; ++i)
+		other.child(STR("node1")).remove_child(other.child(STR("node1")).last_child());
+
+	CHECK_NODE(other, STR("<node1 attr1=\"value1\"><node2/></node1>"));
+
+	other.remove_child(other.first_child());
+
+	CHECK(!other.first_child());
+}
 #endif
