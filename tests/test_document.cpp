@@ -1715,16 +1715,20 @@ TEST(document_move_large)
 {
 	xml_document* doc = new xml_document();
 
+	xml_node dn = doc->append_child(STR("node"));
+
 	for (int i = 0; i < 3000; ++i)
-		doc->append_child(STR("node"));
+		dn.append_child(STR("child"));
 
 	xml_document other = std::move(*doc);
 	delete doc;
 
-	for (int i = 0; i < 3000; ++i)
-		CHECK(other.remove_child(other.first_child()));
+	xml_node on = other.child(STR("node"));
 
-	CHECK(!other.first_child());
+	for (int i = 0; i < 3000; ++i)
+		CHECK(on.remove_child(on.first_child()));
+
+	CHECK(!on.first_child());
 }
 
 TEST_XML(document_move_buffer, "<node1/><node2/>")
