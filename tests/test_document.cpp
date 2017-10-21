@@ -1739,4 +1739,15 @@ TEST_XML(document_move_buffer, "<node1/><node2/>")
 
 	CHECK(other.child(STR("node2")).offset_debug() == 9);
 }
+
+TEST_XML(document_move_append_child_zero_alloc, "<node1/><node2/>")
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document other = std::move(doc);
+
+	CHECK(other.append_child(STR("node3")));
+
+	CHECK_NODE(other, STR("<node1/><node2/><node3/>"));
+}
 #endif
