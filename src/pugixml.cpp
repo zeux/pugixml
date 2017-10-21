@@ -6963,8 +6963,7 @@ namespace pugi
 		xml_node_struct* other_first_child = other->first_child;
 
 	#ifdef PUGIXML_COMPACT
-		// move compact hash
-		// TODO: the hash still has pointers to other, do we need to clear them out?
+		// move compact hash; note that the hash table can have pointers to other but they will be "inactive", similarly to nodes removed with remove_child
 		doc->hash = other->hash;
 		doc->_hash = &doc->hash;
 
