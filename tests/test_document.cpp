@@ -1750,4 +1750,37 @@ TEST_XML(document_move_append_child_zero_alloc, "<node1/><node2/>")
 
 	CHECK_NODE(other, STR("<node1/><node2/><node3/>"));
 }
+
+#ifndef PUGIXML_COMPACT
+TEST(document_move_empty_zero_alloc)
+{
+	xml_document* docs = new xml_document[32];
+
+	test_runner::_memory_fail_threshold = 1;
+
+	for (int i = 1; i < 32; ++i)
+		docs[i] = std::move(docs[i-1]);
+
+	delete[] docs;
+}
+
+TEST(document_move_repeated_zero_alloc)
+{
+	xml_document* docs = new xml_document[32];
+
+	CHECK(docs[0].load_string(STR("<node><child/></node>")));
+
+	test_runner::_memory_fail_threshold = 1;
+
+	for (int i = 1; i < 32; ++i)
+		docs[i] = std::move(docs[i-1]);
+
+	for (int i = 0; i < 31; ++i)
+		CHECK(!docs[i].first_child());
+
+	CHECK_NODE(docs[31], STR("<node><child/></node>"));
+
+	delete[] docs;
+}
+#endif
 #endif
