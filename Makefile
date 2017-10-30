@@ -86,14 +86,9 @@ build/pugixml-%: .FORCE | $(RELEASE)
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
-build/libFuzzer.o:
-	svn co http://llvm.org/svn/llvm-project/llvm/trunk/lib/Fuzzer build/Fuzzer
-	ls build/Fuzzer/*.cpp | xargs printf '#include "%s"\n' >build/libFuzzer.cpp
-	clang++ build/libFuzzer.cpp -c -g -O2 -fno-omit-frame-pointer -std=c++11 -I . -o build/libFuzzer.o
-
-$(BUILD)/fuzz_%: tests/fuzz_%.cpp src/pugixml.cpp build/libFuzzer.o
+$(BUILD)/fuzz_%: tests/fuzz_%.cpp src/pugixml.cpp
 	@mkdir -p $(BUILD)
-	clang++ $(CXXFLAGS) -fsanitize=address -fsanitize-coverage=trace-pc-guard $^ -o $@
+	$(CXX) $(CXXFLAGS) -fsanitize=address,fuzzer $^ -o $@
 
 $(BUILD)/%.o: %
 	@mkdir -p $(dir $@)
