@@ -8,7 +8,11 @@
 #if defined(__has_feature)
 #	define ADDRESS_SANITIZER __has_feature(address_sanitizer)
 #else
-#	define ADDRESS_SANITIZER defined(__SANITIZE_ADDRESS__)
+#	if defined(__SANITIZE_ADDRESS__)
+#		define ADDRESS_SANITIZER 1
+#	else
+#		define ADDRESS_SANITIZER 0
+#	endif
 #endif
 
 // Low-level allocation functions
