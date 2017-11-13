@@ -1751,7 +1751,6 @@ TEST_XML(document_move_append_child_zero_alloc, "<node1/><node2/>")
 	CHECK_NODE(other, STR("<node1/><node2/><node3/>"));
 }
 
-#ifndef PUGIXML_COMPACT
 TEST(document_move_empty_zero_alloc)
 {
 	xml_document* docs = new xml_document[32];
@@ -1764,9 +1763,10 @@ TEST(document_move_empty_zero_alloc)
 	delete[] docs;
 }
 
+#ifndef PUGIXML_COMPACT
 TEST(document_move_repeated_zero_alloc)
 {
-	xml_document* docs = new xml_document[32];
+	xml_document docs[32];
 
 	CHECK(docs[0].load_string(STR("<node><child/></node>")));
 
@@ -1779,8 +1779,30 @@ TEST(document_move_repeated_zero_alloc)
 		CHECK(!docs[i].first_child());
 
 	CHECK_NODE(docs[31], STR("<node><child/></node>"));
+}
+#endif
 
-	delete[] docs;
+#ifdef PUGIXML_COMPACT
+TEST(document_move_compact_fail)
+{
+	xml_document docs[32];
+
+	CHECK(docs[0].load_string(STR("<node><child/></node>")));
+
+	test_runner::_memory_fail_threshold = 1;
+
+	int safe_count = 21;
+
+	for (int i = 1; i <= safe_count; ++i)
+		docs[i] = std::move(docs[i-1]);
+
+	CHECK_ALLOC_FAIL(docs[safe_count+1] = std::move(docs[safe_count]));
+
+	for (int i = 0; i < safe_count; ++i)
+		CHECK(!docs[i].first_child());
+
+	CHECK_NODE(docs[safe_count], STR("<node><child/></node>"));
+	CHECK(!docs[safe_count+1].first_child());
 }
 #endif
 #endif
