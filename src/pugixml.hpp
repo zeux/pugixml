@@ -983,6 +983,7 @@ namespace pugi
 
 		void _create();
 		void _destroy();
+		void _move(xml_document& rhs);
 
 	public:
 		// Default constructor, makes empty document
@@ -990,6 +991,12 @@ namespace pugi
 
 		// Destructor, invalidates all node/attribute handles to this document
 		~xml_document();
+
+	#ifdef PUGIXML_HAS_MOVE
+		// Move semantics support
+		xml_document(xml_document&& rhs);
+		xml_document& operator=(xml_document&& rhs);
+	#endif
 
 		// Removes all nodes, leaving the empty document
 		void reset();

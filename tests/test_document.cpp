@@ -1621,3 +1621,188 @@ TEST(document_convert_out_of_memory)
 		delete[] files[j].data;
 	}
 }
+
+#ifdef PUGIXML_HAS_MOVE
+TEST_XML(document_move_ctor, "<node1/><node2/>")
+{
+	xml_document other = std::move(doc);
+
+	CHECK(doc.first_child().empty());
+
+	CHECK_STRING(other.first_child().name(), STR("node1"));
+	CHECK(other.first_child().parent() == other);
+
+	CHECK_STRING(other.last_child().name(), STR("node2"));
+	CHECK(other.last_child().parent() == other);
+}
+
+TEST_XML(document_move_assign, "<node1/><node2/>")
+{
+	xml_document other;
+	CHECK(other.load_string(STR("<node3/>")));
+
+	other = std::move(doc);
+
+	CHECK(doc.first_child().empty());
+
+	CHECK_STRING(other.first_child().name(), STR("node1"));
+	CHECK(other.first_child().parent() == other);
+
+	CHECK_STRING(other.last_child().name(), STR("node2"));
+	CHECK(other.last_child().parent() == other);
+}
+
+TEST_XML(document_move_zero_alloc, "<node1/><node2/>")
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document other = std::move(doc);
+
+	CHECK(doc.first_child().empty());
+
+	CHECK_STRING(other.first_child().name(), STR("node1"));
+	CHECK(other.first_child().parent() == other);
+
+	CHECK_STRING(other.last_child().name(), STR("node2"));
+	CHECK(other.last_child().parent() == other);
+}
+
+TEST(document_move_append_buffer)
+{
+	xml_document* doc = new xml_document();
+	CHECK(doc->load_string(STR("<node1 attr1='value1'><node2/></node1>")));
+	CHECK(doc->child(STR("node1")).append_buffer("<node3/>", 8));
+	CHECK(doc->child(STR("node1")).append_buffer("<node4/>", 8));
+
+	xml_document other = std::move(*doc);
+	delete doc;
+
+	CHECK(other.child(STR("node1")).append_buffer("<node5/>", 8));
+	CHECK(other.child(STR("node1")).append_buffer("<node6/>", 8));
+
+	CHECK_NODE(other, STR("<node1 attr1=\"value1\"><node2/><node3/><node4/><node5/><node6/></node1>"));
+}
+
+TEST(document_move_append_child)
+{
+	xml_document* doc = new xml_document();
+	CHECK(doc->load_string(STR("<node1 attr1='value1'><node2/></node1>")));
+
+	xml_document other = std::move(*doc);
+	delete doc;
+
+	for (int i = 0; i < 3000; ++i)
+		other.child(STR("node1")).append_child(STR("node"));
+
+	for (int i = 0; i < 3000; ++i)
+		other.child(STR("node1")).remove_child(other.child(STR("node1")).last_child());
+
+	CHECK_NODE(other, STR("<node1 attr1=\"value1\"><node2/></node1>"));
+
+	other.remove_child(other.first_child());
+
+	CHECK(!other.first_child());
+}
+
+TEST(document_move_empty)
+{
+	xml_document* doc = new xml_document();
+	xml_document other = std::move(*doc);
+	delete doc;
+}
+
+TEST(document_move_large)
+{
+	xml_document* doc = new xml_document();
+
+	xml_node dn = doc->append_child(STR("node"));
+
+	for (int i = 0; i < 3000; ++i)
+		dn.append_child(STR("child"));
+
+	xml_document other = std::move(*doc);
+	delete doc;
+
+	xml_node on = other.child(STR("node"));
+
+	for (int i = 0; i < 3000; ++i)
+		CHECK(on.remove_child(on.first_child()));
+
+	CHECK(!on.first_child());
+}
+
+TEST_XML(document_move_buffer, "<node1/><node2/>")
+{
+	CHECK(doc.child(STR("node2")).offset_debug() == 9);
+
+	xml_document other = std::move(doc);
+
+	CHECK(other.child(STR("node2")).offset_debug() == 9);
+}
+
+TEST_XML(document_move_append_child_zero_alloc, "<node1/><node2/>")
+{
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document other = std::move(doc);
+
+	CHECK(other.append_child(STR("node3")));
+
+	CHECK_NODE(other, STR("<node1/><node2/><node3/>"));
+}
+
+TEST(document_move_empty_zero_alloc)
+{
+	xml_document* docs = new xml_document[32];
+
+	test_runner::_memory_fail_threshold = 1;
+
+	for (int i = 1; i < 32; ++i)
+		docs[i] = std::move(docs[i-1]);
+
+	delete[] docs;
+}
+
+#ifndef PUGIXML_COMPACT
+TEST(document_move_repeated_zero_alloc)
+{
+	xml_document docs[32];
+
+	CHECK(docs[0].load_string(STR("<node><child/></node>")));
+
+	test_runner::_memory_fail_threshold = 1;
+
+	for (int i = 1; i < 32; ++i)
+		docs[i] = std::move(docs[i-1]);
+
+	for (int i = 0; i < 31; ++i)
+		CHECK(!docs[i].first_child());
+
+	CHECK_NODE(docs[31], STR("<node><child/></node>"));
+}
+#endif
+
+#ifdef PUGIXML_COMPACT
+TEST(document_move_compact_fail)
+{
+	xml_document docs[32];
+
+	CHECK(docs[0].load_string(STR("<node><child/></node>")));
+
+	test_runner::_memory_fail_threshold = 1;
+
+	int safe_count = 21;
+
+	for (int i = 1; i <= safe_count; ++i)
+		docs[i] = std::move(docs[i-1]);
+
+	CHECK_ALLOC_FAIL(docs[safe_count+1] = std::move(docs[safe_count]));
+
+	for (int i = 0; i < safe_count; ++i)
+		CHECK(!docs[i].first_child());
+
+	CHECK_NODE(docs[safe_count], STR("<node><child/></node>"));
+	CHECK(!docs[safe_count+1].first_child());
+}
+#endif
+#endif
