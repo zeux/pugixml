@@ -6963,7 +6963,7 @@ namespace pugi
 		if (other_first_child)
 		{
 			size_t other_children = 0;
-			for (xml_node_struct* child = other_first_child; child; child = child->next_sibling)
+			for (xml_node_struct* node = other_first_child; node; node = node->next_sibling)
 				other_children++;
 
 			// in compact mode, each pointer assignment could result in a hash table request
