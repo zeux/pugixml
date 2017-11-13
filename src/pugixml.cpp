@@ -6954,6 +6954,33 @@ namespace pugi
 		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(_root);
 		impl::xml_document_struct* other = static_cast<impl::xml_document_struct*>(rhs._root);
 
+		// save first child pointer for later; this needs hash access
+		xml_node_struct* other_first_child = other->first_child;
+
+	#ifdef PUGIXML_COMPACT
+		// reserve space for the hash table up front; this is the only operation that can fail
+		// if it does, we have no choice but to throw (if we have exceptions)
+		if (other_first_child)
+		{
+			size_t other_children = 0;
+			for (xml_node_struct* child = other_first_child; child; child = child->next_sibling)
+				other_children++;
+
+			// in compact mode, each pointer assignment could result in a hash table request
+			// during move, we have to relocate document first_child and parents of all children
+			// normally there's just one child and its parent has a pointerless encoding but
+			// we assume the worst here
+			if (!other->_hash->reserve(other_children + 1))
+			{
+			#ifdef PUGIXML_NO_EXCEPTIONS
+				return;
+			#else
+				throw std::bad_alloc();
+			#endif
+			}
+		}
+	#endif
+
 		// move allocation state
 		doc->_root = other->_root;
 		doc->_busy_size = other->_busy_size;
@@ -6962,9 +6989,6 @@ namespace pugi
 		doc->buffer = other->buffer;
 		doc->extra_buffers = other->extra_buffers;
 		_buffer = rhs._buffer;
-
-		// save first child pointer for later; this needs hash access
-		xml_node_struct* other_first_child = other->first_child;
 
 	#ifdef PUGIXML_COMPACT
 		// move compact hash; note that the hash table can have pointers to other but they will be "inactive", similarly to nodes removed with remove_child
@@ -7010,7 +7034,6 @@ namespace pugi
 		// move tree structure
 		assert(!doc->first_child);
 
-		doc->reserve(); // TODO: it's not clear how to handle reserve running out of memory
 		doc->first_child = other_first_child;
 
 		for (xml_node_struct* node = other_first_child; node; node = node->next_sibling)
@@ -7019,7 +7042,6 @@ namespace pugi
 			// most children will have migrated when we reassigned compact_shared_parent
 			assert(node->parent == other || node->parent == doc);
 
-			doc->reserve(); // TODO: it's not clear how to handle reserve running out of memory
 			node->parent = doc;
 		#else
 			assert(node->parent == other);
