@@ -327,10 +327,10 @@ PUGI__NS_BEGIN
 			item->value = value;
 		}
 
-		bool reserve()
+		bool reserve(size_t extra = 16)
 		{
-			if (_count + 16 >= _capacity - _capacity / 4)
-				return rehash();
+			if (_count + extra >= _capacity - _capacity / 4)
+				return rehash(_count + extra);
 
 			return true;
 		}
@@ -347,7 +347,7 @@ PUGI__NS_BEGIN
 
 		size_t _count;
 
-		bool rehash();
+		bool rehash(size_t count);
 
 		item_t* get_item(const void* key)
 		{
@@ -387,16 +387,20 @@ PUGI__NS_BEGIN
 		}
 	};
 
-	PUGI__FN_NO_INLINE bool compact_hash_table::rehash()
+	PUGI__FN_NO_INLINE bool compact_hash_table::rehash(size_t count)
 	{
+		size_t capacity = 32;
+		while (count >= capacity - capacity / 4)
+			capacity *= 2;
+
 		compact_hash_table rt;
-		rt._capacity = (_capacity == 0) ? 32 : _capacity * 2;
-		rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * rt._capacity));
+		rt._capacity = capacity;
+		rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * capacity));
 
 		if (!rt._items)
 			return false;
 
-		memset(rt._items, 0, sizeof(item_t) * rt._capacity);
+		memset(rt._items, 0, sizeof(item_t) * capacity);
 
 		for (size_t i = 0; i < _capacity; ++i)
 			if (_items[i].key)
@@ -405,7 +409,7 @@ PUGI__NS_BEGIN
 		if (_items)
 			xml_memory::deallocate(_items);
 
-		_capacity = rt._capacity;
+		_capacity = capacity;
 		_items = rt._items;
 
 		assert(_count == rt._count);
