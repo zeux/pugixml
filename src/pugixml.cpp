@@ -6202,10 +6202,10 @@ namespace pugi
 	{
 		walker._depth = -1;
 
-		xml_node arg_begin = *this;
+		xml_node arg_begin(_root);
 		if (!walker.begin(arg_begin)) return false;
 
-		xml_node cur = first_child();
+		xml_node_struct* cur = _root ? _root->first_child + 0 : 0;
 
 		if (cur)
 		{
@@ -6213,36 +6213,35 @@ namespace pugi
 
 			do
 			{
-				xml_node arg_for_each = cur;
+				xml_node arg_for_each(cur);
 				if (!walker.for_each(arg_for_each))
 					return false;
 
-				if (cur.first_child())
+				if (cur->first_child)
 				{
 					++walker._depth;
-					cur = cur.first_child();
+					cur = cur->first_child;
 				}
-				else if (cur.next_sibling())
-					cur = cur.next_sibling();
+				else if (cur->next_sibling)
+					cur = cur->next_sibling;
 				else
 				{
-					// Borland C++ workaround
-					while (!cur.next_sibling() && cur != *this && !cur.parent().empty())
+					while (!cur->next_sibling && cur != _root && cur->parent)
 					{
 						--walker._depth;
-						cur = cur.parent();
+						cur = cur->parent;
 					}
 
-					if (cur != *this)
-						cur = cur.next_sibling();
+					if (cur != _root)
+						cur = cur->next_sibling;
 				}
 			}
-			while (cur && cur != *this);
+			while (cur && cur != _root);
 		}
 
 		assert(walker._depth == -1);
 
-		xml_node arg_end = *this;
+		xml_node arg_end(_root);
 		return walker.end(arg_end);
 	}
 
