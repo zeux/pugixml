@@ -10442,16 +10442,9 @@ PUGI__NS_BEGIN
 			size_t count = 1;
 			for (xpath_ast_node* nc = _right; nc; nc = nc->_next) count++;
 
-			// gather all strings
-			xpath_string static_buffer[4];
-			xpath_string* buffer = static_buffer;
-
-			// allocate on-heap for large concats
-			if (count > sizeof(static_buffer) / sizeof(static_buffer[0]))
-			{
-				buffer = static_cast<xpath_string*>(stack.temp->allocate(count * sizeof(xpath_string)));
-				if (!buffer) return xpath_string();
-			}
+			// allocate a buffer for temporary string objects
+			xpath_string* buffer = static_cast<xpath_string*>(stack.temp->allocate(count * sizeof(xpath_string)));
+			if (!buffer) return xpath_string();
 
 			// evaluate all strings to temporary stack
 			xpath_stack swapped_stack = {stack.temp, stack.result};
