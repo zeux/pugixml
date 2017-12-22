@@ -54,7 +54,7 @@ There is a special value of `xml_node` type, known as null node or empty node. I
 
 `xml_attribute` is the handle to an XML attribute; it has the same semantics as `xml_node`, i.e. there can be several `xml_attribute` handles pointing to the same underlying object and there is a special null attribute value, which propagates to function results.
 
-There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via `PUGIXML_WCHAR_MODE` define; you can set it via `pugiconfig.hpp` or via preprocessor options. All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. link:manual/dom.html#dom.unicode[Read the manual] for additional information on Unicode interface.
+There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via `PUGIXML_WCHAR_MODE` define; you can set it via `pugiconfig.hpp` or via preprocessor options. All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. link:manual.html#dom.unicode[Read the manual] for additional information on Unicode interface.
 
 [[loading]]
 == Loading document
@@ -240,7 +240,7 @@ This is a simple example of custom writer for saving document data to STL string
 include::samples/save_custom_writer.cpp[tags=code]
 ----
 
-While the previously described functions save the whole document to the destination, it is easy to save a single subtree. Instead of calling `xml_document::save`, just call `xml_node::print` function on the target node. You can save node contents to C{plus}{plus} IOstream object or custom writer in this way. Saving a subtree slightly differs from saving the whole document; link:manual/saving.html#saving.subtree[read the manual] for more information.
+While the previously described functions save the whole document to the destination, it is easy to save a single subtree. Instead of calling `xml_document::save`, just call `xml_node::print` function on the target node. You can save node contents to C{plus}{plus} IOstream object or custom writer in this way. Saving a subtree slightly differs from saving the whole document; link:manual.html#saving.subtree[read the manual] for more information.
 
 [[feedback]]
 == Feedback
@@ -255,7 +255,7 @@ If filing an issue is not possible due to privacy or other concerns, you can con
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2016 Arseny Kapoulkine
+Copyright (c) 2006-2017 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -283,5 +283,5 @@ This means that you can freely use pugixml in your applications, both open-sourc
 
 ....
 This software is based on pugixml library (http://pugixml.org).
-pugixml is Copyright (C) 2006-2016 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2017 Arseny Kapoulkine.
 ....

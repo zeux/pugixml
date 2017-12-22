@@ -425,8 +425,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
 .listingblock .pygments .tok-k { color: #008000; font-weight: bold } /* Keyword */
 .listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-ch { color: #408080; font-style: italic } /* Comment.Hashbang */
 .listingblock .pygments .tok-cm { color: #408080; font-style: italic } /* Comment.Multiline */
 .listingblock .pygments .tok-cp { color: #BC7A00 } /* Comment.Preproc */
+.listingblock .pygments .tok-cpf { color: #408080; font-style: italic } /* Comment.PreprocFile */
 .listingblock .pygments .tok-c1 { color: #408080; font-style: italic } /* Comment.Single */
 .listingblock .pygments .tok-cs { color: #408080; font-style: italic } /* Comment.Special */
 .listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
@@ -466,8 +468,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .listingblock .pygments .tok-mh { color: #666666 } /* Literal.Number.Hex */
 .listingblock .pygments .tok-mi { color: #666666 } /* Literal.Number.Integer */
 .listingblock .pygments .tok-mo { color: #666666 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sa { color: #BA2121 } /* Literal.String.Affix */
 .listingblock .pygments .tok-sb { color: #BA2121 } /* Literal.String.Backtick */
 .listingblock .pygments .tok-sc { color: #BA2121 } /* Literal.String.Char */
+.listingblock .pygments .tok-dl { color: #BA2121 } /* Literal.String.Delimiter */
 .listingblock .pygments .tok-sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
 .listingblock .pygments .tok-s2 { color: #BA2121 } /* Literal.String.Double */
 .listingblock .pygments .tok-se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
@@ -478,9 +482,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .listingblock .pygments .tok-s1 { color: #BA2121 } /* Literal.String.Single */
 .listingblock .pygments .tok-ss { color: #19177C } /* Literal.String.Symbol */
 .listingblock .pygments .tok-bp { color: #008000 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-fm { color: #0000FF } /* Name.Function.Magic */
 .listingblock .pygments .tok-vc { color: #19177C } /* Name.Variable.Class */
 .listingblock .pygments .tok-vg { color: #19177C } /* Name.Variable.Global */
 .listingblock .pygments .tok-vi { color: #19177C } /* Name.Variable.Instance */
+.listingblock .pygments .tok-vm { color: #19177C } /* Name.Variable.Magic */
 .listingblock .pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </style>
 </head>
@@ -610,7 +616,7 @@ All pugixml classes and functions are located in <code>pugi</code> namespace; yo
 <p><code>xml_attribute</code> is the handle to an XML attribute; it has the same semantics as <code>xml_node</code>, i.e. there can be several <code>xml_attribute</code> handles pointing to the same underlying object and there is a special null attribute value, which propagates to function results.</p>
 </div>
 <div class="paragraph">
-<p>There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via <code>PUGIXML_WCHAR_MODE</code> define; you can set it via <code>pugiconfig.hpp</code> or via preprocessor options. All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. <a href="manual/dom.html#dom.unicode">Read the manual</a> for additional information on Unicode interface.</p>
+<p>There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via <code>PUGIXML_WCHAR_MODE</code> define; you can set it via <code>pugiconfig.hpp</code> or via preprocessor options. All tree functions that work with strings work with either C-style null terminated strings or STL strings of the selected character type. <a href="manual.html#dom.unicode">Read the manual</a> for additional information on Unicode interface.</p>
 </div>
 </div>
 </div>
@@ -1010,7 +1016,7 @@ XPath functions throw <code>xpath_exception</code> objects on error; the sample 
 </div>
 </div>
 <div class="paragraph">
-<p>While the previously described functions save the whole document to the destination, it is easy to save a single subtree. Instead of calling <code>xml_document::save</code>, just call <code>xml_node::print</code> function on the target node. You can save node contents to C&#43;&#43; IOstream object or custom writer in this way. Saving a subtree slightly differs from saving the whole document; <a href="manual/saving.html#saving.subtree">read the manual</a> for more information.</p>
+<p>While the previously described functions save the whole document to the destination, it is easy to save a single subtree. Instead of calling <code>xml_document::save</code>, just call <code>xml_node::print</code> function on the target node. You can save node contents to C&#43;&#43; IOstream object or custom writer in this way. Saving a subtree slightly differs from saving the whole document; <a href="manual.html#saving.subtree">read the manual</a> for more information.</p>
 </div>
 </div>
 </div>
@@ -1033,7 +1039,7 @@ XPath functions throw <code>xpath_exception</code> objects on error; the sample 
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>Copyright (c) 2006-2016 Arseny Kapoulkine
+<pre>Copyright (c) 2006-2017 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -1063,7 +1069,7 @@ OTHER DEALINGS IN THE SOFTWARE.</pre>
 <div class="literalblock">
 <div class="content">
 <pre>This software is based on pugixml library (http://pugixml.org).
-pugixml is Copyright (C) 2006-2016 Arseny Kapoulkine.</pre>
+pugixml is Copyright (C) 2006-2017 Arseny Kapoulkine.</pre>
 </div>
 </div>
 </div>
@@ -1077,7 +1083,7 @@ pugixml is Copyright (C) 2006-2016 Arseny Kapoulkine.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2016-11-24 00:20:49 STD
+Last updated 2017-12-22 10:40:20 STD
 </div>
 </div>
 </body>
