@@ -598,7 +598,9 @@ TEST(document_load_file_special_folder)
 	// status_out_of_memory is somewhat counter-intuitive but on Linux ftell returns LONG_MAX for directories
 	CHECK(result.status == status_file_not_found || result.status == status_io_error || result.status == status_out_of_memory);
 }
+#endif
 
+#if defined(__linux__)
 TEST(document_load_file_special_device)
 {
 	xml_document doc;
