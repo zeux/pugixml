@@ -28,7 +28,7 @@ include(GNUInstallDirs)
 mark_as_advanced(CLEAR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
 
 set(HEADERS src/pugixml.hpp src/pugiconfig.hpp)
-set(SOURCES ${HEADERS} src/pugixml.cpp)
+set(SOURCES src/pugixml.cpp)
 
 if(DEFINED BUILD_DEFINES)
 	foreach(DEFINE ${BUILD_DEFINES})
@@ -37,9 +37,9 @@ if(DEFINED BUILD_DEFINES)
 endif()
 
 if(BUILD_SHARED_LIBS)
-	add_library(pugixml SHARED ${SOURCES})
+	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
 else()
-	add_library(pugixml STATIC ${SOURCES})
+	add_library(pugixml STATIC ${HEADERS} ${SOURCES})
 endif()
 
 # Export symbols for shared library builds
