@@ -2,6 +2,15 @@ language: cpp
 os:
   - linux
   - osx
+compiler:
+  - clang
+  - gcc
+
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
+
 env:
   - DEFINES=standard
   - DEFINES=PUGIXML_WCHAR_MODE
