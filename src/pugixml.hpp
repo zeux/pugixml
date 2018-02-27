@@ -81,6 +81,17 @@
 #	endif
 #endif
 
+// If C++ is 2011 or higher, add 'noexcept' specifiers
+#ifndef PUGIXML_NOEXCEPT
+#	if __cplusplus >= 201103
+#		define PUGIXML_NOEXCEPT noexcept
+#	elif defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 190023026
+#		define PUGIXML_NOEXCEPT noexcept
+#	else
+#		define PUGIXML_NOEXCEPT
+#	endif
+#endif
+
 // If C++ is 2011 or higher, add 'override' qualifiers
 #ifndef PUGIXML_OVERRIDE
 #	if __cplusplus >= 201103
