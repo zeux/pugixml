@@ -1136,7 +1136,7 @@ namespace pugi
 		xpath_variable* _find(const char_t* name) const;
 
 		static bool _clone(xpath_variable* var, xpath_variable** out_result);
-		static void _destroy(xpath_variable* var);
+		static void _destroy(xpath_variable* var) PUGIXML_NOEXCEPT;
 
 	public:
 		// Default constructor/destructor
@@ -1149,8 +1149,8 @@ namespace pugi
 
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
-		xpath_variable_set(xpath_variable_set&& rhs);
-		xpath_variable_set& operator=(xpath_variable_set&& rhs);
+		xpath_variable_set(xpath_variable_set&& rhs) PUGIXML_NOEXCEPT;
+		xpath_variable_set& operator=(xpath_variable_set&& rhs) PUGIXML_NOEXCEPT;
 	#endif
 
 		// Add a new variable or get the existing one, if the types match
@@ -1193,8 +1193,8 @@ namespace pugi
 
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
-		xpath_query(xpath_query&& rhs);
-		xpath_query& operator=(xpath_query&& rhs);
+		xpath_query(xpath_query&& rhs) PUGIXML_NOEXCEPT;
+		xpath_query& operator=(xpath_query&& rhs) PUGIXML_NOEXCEPT;
 	#endif
 
 		// Get query expression return type
@@ -1334,8 +1334,8 @@ namespace pugi
 
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
-		xpath_node_set(xpath_node_set&& rhs);
-		xpath_node_set& operator=(xpath_node_set&& rhs);
+		xpath_node_set(xpath_node_set&& rhs) PUGIXML_NOEXCEPT;
+		xpath_node_set& operator=(xpath_node_set&& rhs) PUGIXML_NOEXCEPT;
 	#endif
 
 		// Get collection type
@@ -1369,7 +1369,7 @@ namespace pugi
 		xpath_node* _end;
 
 		void _assign(const_iterator begin, const_iterator end, type_t type);
-		void _move(xpath_node_set& rhs);
+		void _move(xpath_node_set& rhs) PUGIXML_NOEXCEPT;
 	};
 #endif
 
