@@ -85,6 +85,8 @@
 #ifndef PUGIXML_OVERRIDE
 #	if __cplusplus >= 201103
 #		define PUGIXML_OVERRIDE override
+#	elif defined(_MSC_VER) && _MSC_VER >= 1700
+#		define PUGIXML_OVERRIDE override
 #	else
 #		define PUGIXML_OVERRIDE
 #	endif
