@@ -82,14 +82,17 @@
 #endif
 
 // If C++ is 2011 or higher, add 'noexcept' specifiers
-#ifndef PUGIXML_NOEXCEPT
+#ifndef PUGIXML_HAS_NOEXCEPT
 #	if __cplusplus >= 201103
-#		define PUGIXML_NOEXCEPT noexcept
+#		define PUGIXML_HAS_NOEXCEPT
 #	elif defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 190023026
-#		define PUGIXML_NOEXCEPT noexcept
-#	else
-#		define PUGIXML_NOEXCEPT
+#		define PUGIXML_HAS_NOEXCEPT
 #	endif
+#endif
+#ifdef PUGIXML_HAS_NOEXCEPT
+#	define PUGIXML_NOEXCEPT noexcept
+#else
+#	define PUGIXML_NOEXCEPT
 #endif
 
 // If C++ is 2011 or higher, add 'override' qualifiers
@@ -1136,7 +1139,7 @@ namespace pugi
 		xpath_variable* _find(const char_t* name) const;
 
 		static bool _clone(xpath_variable* var, xpath_variable** out_result);
-		static void _destroy(xpath_variable* var) PUGIXML_NOEXCEPT;
+		static void _destroy(xpath_variable* var);
 
 	public:
 		// Default constructor/destructor

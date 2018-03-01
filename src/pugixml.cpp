@@ -7591,7 +7591,7 @@ PUGI__NS_BEGIN
 			_root_size = state._root_size;
 		}
 
-		void release() PUGIXML_NOEXCEPT
+		void release()
 		{
 			xpath_memory_block* cur = _root;
 			assert(cur);
@@ -8613,13 +8613,13 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	template <typename T> PUGI__FN void delete_xpath_variable(T* var) PUGIXML_NOEXCEPT
+	template <typename T> PUGI__FN void delete_xpath_variable(T* var)
 	{
 		var->~T();
 		xml_memory::deallocate(var);
 	}
 
-	PUGI__FN void delete_xpath_variable(xpath_value_type type, xpath_variable* var) PUGIXML_NOEXCEPT
+	PUGI__FN void delete_xpath_variable(xpath_value_type type, xpath_variable* var)
 	{
 		switch (type)
 		{
@@ -11872,7 +11872,7 @@ PUGI__NS_BEGIN
 			return new (memory) xpath_query_impl();
 		}
 
-		static void destroy(xpath_query_impl* impl) PUGIXML_NOEXCEPT
+		static void destroy(xpath_query_impl* impl)
 		{
 			// free all allocated pages
 			impl->alloc.release();
@@ -12368,7 +12368,7 @@ namespace pugi
 		return true;
 	}
 
-	PUGI__FN void xpath_variable_set::_destroy(xpath_variable* var) PUGIXML_NOEXCEPT
+	PUGI__FN void xpath_variable_set::_destroy(xpath_variable* var)
 	{
 		while (var)
 		{
