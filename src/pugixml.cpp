@@ -12044,7 +12044,7 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
-	PUGI__FN void xpath_node_set::_move(xpath_node_set& rhs)
+	PUGI__FN void xpath_node_set::_move(xpath_node_set& rhs) PUGIXML_NOEXCEPT
 	{
 		_type = rhs._type;
 		_storage = rhs._storage;
@@ -12087,12 +12087,12 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
-	PUGI__FN xpath_node_set::xpath_node_set(xpath_node_set&& rhs): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(xpath_node_set&& rhs) PUGIXML_NOEXCEPT: _type(type_unsorted), _begin(&_storage), _end(&_storage)
 	{
 		_move(rhs);
 	}
 
-	PUGI__FN xpath_node_set& xpath_node_set::operator=(xpath_node_set&& rhs)
+	PUGI__FN xpath_node_set& xpath_node_set::operator=(xpath_node_set&& rhs) PUGIXML_NOEXCEPT
 	{
 		if (this == &rhs) return *this;
 
@@ -12287,7 +12287,7 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
-	PUGI__FN xpath_variable_set::xpath_variable_set(xpath_variable_set&& rhs)
+	PUGI__FN xpath_variable_set::xpath_variable_set(xpath_variable_set&& rhs) PUGIXML_NOEXCEPT
 	{
 		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
 		{
@@ -12296,7 +12296,7 @@ namespace pugi
 		}
 	}
 
-	PUGI__FN xpath_variable_set& xpath_variable_set::operator=(xpath_variable_set&& rhs)
+	PUGI__FN xpath_variable_set& xpath_variable_set::operator=(xpath_variable_set&& rhs) PUGIXML_NOEXCEPT
 	{
 		for (size_t i = 0; i < sizeof(_data) / sizeof(_data[0]); ++i)
 		{
@@ -12490,7 +12490,7 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
-	PUGI__FN xpath_query::xpath_query(xpath_query&& rhs)
+	PUGI__FN xpath_query::xpath_query(xpath_query&& rhs) PUGIXML_NOEXCEPT
 	{
 		_impl = rhs._impl;
 		_result = rhs._result;
@@ -12498,7 +12498,7 @@ namespace pugi
 		rhs._result = xpath_parse_result();
 	}
 
-	PUGI__FN xpath_query& xpath_query::operator=(xpath_query&& rhs)
+	PUGI__FN xpath_query& xpath_query::operator=(xpath_query&& rhs) PUGIXML_NOEXCEPT
 	{
 		if (this == &rhs) return *this;
 

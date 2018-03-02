@@ -81,6 +81,20 @@
 #	endif
 #endif
 
+// If C++ is 2011 or higher, add 'noexcept' specifiers
+#ifndef PUGIXML_HAS_NOEXCEPT
+#	if __cplusplus >= 201103
+#		define PUGIXML_HAS_NOEXCEPT
+#	elif defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 190023026
+#		define PUGIXML_HAS_NOEXCEPT
+#	endif
+#endif
+#ifdef PUGIXML_HAS_NOEXCEPT
+#	define PUGIXML_NOEXCEPT noexcept
+#else
+#	define PUGIXML_NOEXCEPT
+#endif
+
 // If C++ is 2011 or higher, add 'override' qualifiers
 #ifndef PUGIXML_OVERRIDE
 #	if __cplusplus >= 201103
@@ -1140,8 +1154,8 @@ namespace pugi
 
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
-		xpath_variable_set(xpath_variable_set&& rhs);
-		xpath_variable_set& operator=(xpath_variable_set&& rhs);
+		xpath_variable_set(xpath_variable_set&& rhs) PUGIXML_NOEXCEPT;
+		xpath_variable_set& operator=(xpath_variable_set&& rhs) PUGIXML_NOEXCEPT;
 	#endif
 
 		// Add a new variable or get the existing one, if the types match
@@ -1184,8 +1198,8 @@ namespace pugi
 
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
-		xpath_query(xpath_query&& rhs);
-		xpath_query& operator=(xpath_query&& rhs);
+		xpath_query(xpath_query&& rhs) PUGIXML_NOEXCEPT;
+		xpath_query& operator=(xpath_query&& rhs) PUGIXML_NOEXCEPT;
 	#endif
 
 		// Get query expression return type
@@ -1325,8 +1339,8 @@ namespace pugi
 
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
-		xpath_node_set(xpath_node_set&& rhs);
-		xpath_node_set& operator=(xpath_node_set&& rhs);
+		xpath_node_set(xpath_node_set&& rhs) PUGIXML_NOEXCEPT;
+		xpath_node_set& operator=(xpath_node_set&& rhs) PUGIXML_NOEXCEPT;
 	#endif
 
 		// Get collection type
@@ -1360,7 +1374,7 @@ namespace pugi
 		xpath_node* _end;
 
 		void _assign(const_iterator begin, const_iterator end, type_t type);
-		void _move(xpath_node_set& rhs);
+		void _move(xpath_node_set& rhs) PUGIXML_NOEXCEPT;
 	};
 #endif
 
