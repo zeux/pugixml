@@ -91,8 +91,14 @@
 #endif
 #ifdef PUGIXML_HAS_NOEXCEPT
 #	define PUGIXML_NOEXCEPT noexcept
+#	ifdef PUGIXML_COMPACT
+#		define PUGIXML_NOEXCEPT_IF_NOT_COMPACT
+#	else
+#		define PUGIXML_NOEXCEPT_IF_NOT_COMPACT noexcept
+#	endif
 #else
 #	define PUGIXML_NOEXCEPT
+#	define PUGIXML_NOEXCEPT_IF_NOT_COMPACT
 #endif
 
 // If C++ is 2011 or higher, add 'override' qualifiers
@@ -999,7 +1005,7 @@ namespace pugi
 
 		void _create();
 		void _destroy();
-		void _move(xml_document& rhs);
+		void _move(xml_document& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
 
 	public:
 		// Default constructor, makes empty document
@@ -1010,8 +1016,8 @@ namespace pugi
 
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
-		xml_document(xml_document&& rhs);
-		xml_document& operator=(xml_document&& rhs);
+		xml_document(xml_document&& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
+		xml_document& operator=(xml_document&& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
 	#endif
 
 		// Removes all nodes, leaving the empty document

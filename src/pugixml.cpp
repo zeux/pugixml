@@ -6838,13 +6838,13 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
-	PUGI__FN xml_document::xml_document(xml_document&& rhs): _buffer(0)
+	PUGI__FN xml_document::xml_document(xml_document&& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT: _buffer(0)
 	{
 		_create();
 		_move(rhs);
 	}
 
-	PUGI__FN xml_document& xml_document::operator=(xml_document&& rhs)
+	PUGI__FN xml_document& xml_document::operator=(xml_document&& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT
 	{
 		if (this == &rhs) return *this;
 
@@ -6952,7 +6952,7 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
-	PUGI__FN void xml_document::_move(xml_document& rhs)
+	PUGI__FN void xml_document::_move(xml_document& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT
 	{
 		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(_root);
 		impl::xml_document_struct* other = static_cast<impl::xml_document_struct*>(rhs._root);
