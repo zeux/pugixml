@@ -92,7 +92,7 @@
 #ifdef PUGIXML_HAS_NOEXCEPT
 #	define PUGIXML_NOEXCEPT noexcept
 #	ifdef PUGIXML_COMPACT
-#		define PUGIXML_NOEXCEPT_IF_NOT_COMPACT noexcept(false)
+#		define PUGIXML_NOEXCEPT_IF_NOT_COMPACT
 #	else
 #		define PUGIXML_NOEXCEPT_IF_NOT_COMPACT noexcept
 #	endif
