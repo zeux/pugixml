@@ -10267,9 +10267,9 @@ PUGI__NS_BEGIN
 
 				if (_rettype == xpath_type_boolean)
 					return _data.variable->get_boolean();
+                __attribute__ ((fallthrough));
 			}
 
-			// fallthrough
 			default:
 			{
 				switch (_rettype)
@@ -10402,9 +10402,9 @@ PUGI__NS_BEGIN
 
 				if (_rettype == xpath_type_number)
 					return _data.variable->get_number();
+                __attribute__ ((fallthrough));
 			}
 
-			// fallthrough
 			default:
 			{
 				switch (_rettype)
@@ -10683,12 +10683,11 @@ PUGI__NS_BEGIN
 			case ast_variable:
 			{
 				assert(_rettype == _data.variable->type());
-
 				if (_rettype == xpath_type_string)
 					return xpath_string::from_const(_data.variable->get_string());
+                __attribute__ ((fallthrough));
 			}
 
-			// fallthrough
 			default:
 			{
 				switch (_rettype)
@@ -10835,9 +10834,9 @@ PUGI__NS_BEGIN
 
 					return ns;
 				}
+                __attribute__ ((fallthrough));
 			}
 
-			// fallthrough
 			default:
 				assert(false && "Wrong expression for return type node set"); // unreachable
 				return xpath_node_set_raw();
