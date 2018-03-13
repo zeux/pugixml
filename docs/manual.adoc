@@ -2120,6 +2120,31 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.9]]
+=== v1.9 ^2018-??-??^
+
+* Specification changes:
+	. `xml_document::load(const char*)` (deprecated in 1.5) now has `deprecated` attribute; use `xml_document::load_string` instead
+	` `xml_node::select_single_node` (deprecated in 1.5) now has `deprecated` attribute; use `xml_node::select_node` instead
+
+* New features:
+	. Add move semantics support for xml_document and improve move semantics support for other objects
+	. CMake build now exports include directories
+	. CMake build with BUILD_SHARED_LIBS=ON now uses dllexport attribute for MSVC
+
+* XPath improvements:
+	. Rework parser/evaluator to not rely on exceptional control flow; longjmp is no longer used when exceptions are disabled
+	. Improve error messages for certain invalid expressions such as `.[1]` or `(1`
+	. Minor performance improvements
+
+* Compatibility improvements:
+	. Fix Texas Instruments compiler warnings
+	. Fix compilation issues with limits.h for some versions of gcc
+	. Fix compilation issues with Clang/C2
+	. Fix implicit fallthrough warnings in gcc 7
+	. Fix cray++ compiler errors
+	. Fix unsigned integer overflow errors with -fsanitize=integer
+
 [[v1.8]]
 === v1.8 ^2016-11-24^
 
