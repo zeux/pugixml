@@ -6076,10 +6076,16 @@ namespace pugi
 
 		// get extra buffer element (we'll store the document fragment buffer there so that we can deallocate it later)
 		impl::xml_memory_page* page = 0;
-		impl::xml_extra_buffer* extra = static_cast<impl::xml_extra_buffer*>(doc->allocate_memory(sizeof(impl::xml_extra_buffer), page));
+		impl::xml_extra_buffer* extra = static_cast<impl::xml_extra_buffer*>(doc->allocate_memory(sizeof(impl::xml_extra_buffer) + sizeof(void*), page));
 		(void)page;
 
 		if (!extra) return impl::make_parse_result(status_out_of_memory);
+
+	#ifdef PUGIXML_COMPACT
+		// align the memory block to a pointer boundary; this is required for compact mode where memory allocations are only 4b aligned
+		// note that this requires up to sizeof(void*)-1 additional memory, which the allocation above takes into account
+		extra = reinterpret_cast<impl::xml_extra_buffer*>((reinterpret_cast<uintptr_t>(extra) + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1));
+	#endif
 
 		// add extra buffer to the list
 		extra->buffer = 0;
