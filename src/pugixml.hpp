@@ -82,23 +82,21 @@
 #endif
 
 // If C++ is 2011 or higher, add 'noexcept' specifiers
-#ifndef PUGIXML_HAS_NOEXCEPT
+#ifndef PUGIXML_NOEXCEPT
 #	if __cplusplus >= 201103
-#		define PUGIXML_HAS_NOEXCEPT
-#	elif defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 190023026
-#		define PUGIXML_HAS_NOEXCEPT
+#		define PUGIXML_NOEXCEPT noexcept
+#	elif defined(_MSC_VER) && _MSC_VER >= 1900
+#		define PUGIXML_NOEXCEPT noexcept
+#	else
+#		define PUGIXML_NOEXCEPT
 #	endif
 #endif
-#ifdef PUGIXML_HAS_NOEXCEPT
-#	define PUGIXML_NOEXCEPT noexcept
-#	ifdef PUGIXML_COMPACT
-#		define PUGIXML_NOEXCEPT_IF_NOT_COMPACT
-#	else
-#		define PUGIXML_NOEXCEPT_IF_NOT_COMPACT noexcept
-#	endif
-#else
-#	define PUGIXML_NOEXCEPT
+
+// Some functions can not be noexcept in compact mode
+#ifdef PUGIXML_COMPACT
 #	define PUGIXML_NOEXCEPT_IF_NOT_COMPACT
+#else
+#	define PUGIXML_NOEXCEPT_IF_NOT_COMPACT PUGIXML_NOEXCEPT
 #endif
 
 // If C++ is 2011 or higher, add 'override' qualifiers
