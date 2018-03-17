@@ -161,7 +161,7 @@ TEST(memory_page_management)
 
 		for (size_t i = 0; i < 4000; ++i)
 		{
-			xml_node node = doc.append_child(STR("node"));
+			xml_node node = doc.append_child(STR("n"));
 			CHECK(node);
 
 			nodes.push_back(node);

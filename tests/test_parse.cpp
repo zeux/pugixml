@@ -935,7 +935,7 @@ TEST(parse_out_of_memory_halfway_node)
 	test_runner::_memory_fail_threshold = 65536;
 
 	xml_document doc;
-	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory));
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, sizeof(text)).status == status_out_of_memory));
 	CHECK_NODE(doc.first_child(), STR("<n/>"));
 }
 
@@ -962,7 +962,7 @@ TEST(parse_out_of_memory_halfway_attr)
 	test_runner::_memory_fail_threshold = 65536;
 
 	xml_document doc;
-	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 5 + 4).status == status_out_of_memory));
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, sizeof(text)).status == status_out_of_memory));
 	CHECK_STRING(doc.first_child().name(), STR("n"));
 	CHECK_STRING(doc.first_child().first_attribute().name(), STR("a"));
 	CHECK_STRING(doc.first_child().last_attribute().name(), STR("a"));
@@ -993,7 +993,7 @@ TEST(parse_out_of_memory_allocator_state_sync)
 	test_runner::_memory_fail_threshold = 65536;
 
 	xml_document doc;
-	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, count * 4).status == status_out_of_memory));
+	CHECK_ALLOC_FAIL(CHECK(doc.load_buffer_inplace(text, sizeof(text)).status == status_out_of_memory));
 	CHECK_NODE(doc.first_child(), STR("<n/>"));
 
 	test_runner::_memory_fail_threshold = 0;
