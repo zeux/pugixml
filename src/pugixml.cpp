@@ -852,7 +852,7 @@ PUGI__NS_BEGIN
 				{
 					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
 
-					return reinterpret_cast<T*>(base + ((_data - 1 + start) << compact_alignment_log2));
+					return reinterpret_cast<T*>(base + (_data - 1 + start) * compact_alignment);
 				}
 				else
 					return compact_get_value<header_offset, T>(this);
@@ -930,7 +930,7 @@ PUGI__NS_BEGIN
 				{
 					uintptr_t base = reinterpret_cast<uintptr_t>(this) & ~(compact_alignment - 1);
 
-					return reinterpret_cast<T*>(base + ((_data - 1 - 65533) << compact_alignment_log2));
+					return reinterpret_cast<T*>(base + (_data - 1 - 65533) * compact_alignment);
 				}
 				else if (_data == 65534)
 					return static_cast<T*>(compact_get_page(this, header_offset)->compact_shared_parent);
