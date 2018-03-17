@@ -2144,6 +2144,7 @@ Because of the differences in document object models, performance considerations
 	. Fix implicit fallthrough warnings in gcc 7
 	. Fix cray++ compiler errors
 	. Fix unsigned integer overflow errors with -fsanitize=integer
+	. Fix undefined behavior sanitizer issues in compact mode
 
 [[v1.8]]
 === v1.8 ^2016-11-24^
