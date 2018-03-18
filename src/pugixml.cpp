@@ -4411,48 +4411,50 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN void node_copy_tree(xml_node_struct* dn, xml_node_struct* sn)
+	PUGI__FN void node_copy_tree(xml_node_struct* dn, xml_node_struct* sn, bool deep = true)
 	{
 		xml_allocator& alloc = get_allocator(dn);
 		xml_allocator* shared_alloc = (&alloc == &get_allocator(sn)) ? &alloc : 0;
 
 		node_copy_contents(dn, sn, shared_alloc);
 
-		xml_node_struct* dit = dn;
-		xml_node_struct* sit = sn->first_child;
-
-		while (sit && sit != sn)
+		if (deep)
 		{
-			if (sit != dn)
+			xml_node_struct* dit = dn;
+			xml_node_struct* sit = sn->first_child;
+
+			while (sit && sit != sn)
 			{
-				xml_node_struct* copy = append_new_node(dit, alloc, PUGI__NODETYPE(sit));
-
-				if (copy)
+				if (sit != dn)
 				{
-					node_copy_contents(copy, sit, shared_alloc);
+					xml_node_struct* copy = append_new_node(dit, alloc, PUGI__NODETYPE(sit));
 
-					if (sit->first_child)
+					if (copy)
 					{
-						dit = copy;
-						sit = sit->first_child;
-						continue;
+						node_copy_contents(copy, sit, shared_alloc);
+
+						if (sit->first_child)
+						{
+							dit = copy;
+							sit = sit->first_child;
+							continue;
+						}
 					}
 				}
-			}
 
-			// continue to the next node
-			do
-			{
-				if (sit->next_sibling)
+				// continue to the next node
+				do
 				{
-					sit = sit->next_sibling;
-					break;
-				}
+					if (sit->next_sibling)
+					{
+						sit = sit->next_sibling;
+						break;
+					}
 
-				sit = sit->parent;
-				dit = dit->parent;
+					sit = sit->parent;
+					dit = dit->parent;
+				} while (sit != sn);
 			}
-			while (sit != sn);
 		}
 	}
 
@@ -5888,7 +5890,7 @@ namespace pugi
 		return result;
 	}
 
-	PUGI__FN xml_node xml_node::append_copy(const xml_node& proto)
+	PUGI__FN xml_node xml_node::append_copy(const xml_node& proto, bool deep)
 	{
 		xml_node_type type_ = proto.type();
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
@@ -5900,12 +5902,12 @@ namespace pugi
 		if (!n) return xml_node();
 
 		impl::append_node(n._root, _root);
-		impl::node_copy_tree(n._root, proto._root);
+		impl::node_copy_tree(n._root, proto._root, deep);
 
 		return n;
 	}
 
-	PUGI__FN xml_node xml_node::prepend_copy(const xml_node& proto)
+	PUGI__FN xml_node xml_node::prepend_copy(const xml_node& proto, bool deep)
 	{
 		xml_node_type type_ = proto.type();
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
@@ -5917,12 +5919,12 @@ namespace pugi
 		if (!n) return xml_node();
 
 		impl::prepend_node(n._root, _root);
-		impl::node_copy_tree(n._root, proto._root);
+		impl::node_copy_tree(n._root, proto._root, deep);
 
 		return n;
 	}
 
-	PUGI__FN xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node)
+	PUGI__FN xml_node xml_node::insert_copy_after(const xml_node& proto, const xml_node& node, bool deep)
 	{
 		xml_node_type type_ = proto.type();
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
@@ -5935,12 +5937,12 @@ namespace pugi
 		if (!n) return xml_node();
 
 		impl::insert_node_after(n._root, node._root);
-		impl::node_copy_tree(n._root, proto._root);
+		impl::node_copy_tree(n._root, proto._root, deep);
 
 		return n;
 	}
 
-	PUGI__FN xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node)
+	PUGI__FN xml_node xml_node::insert_copy_before(const xml_node& proto, const xml_node& node, bool deep)
 	{
 		xml_node_type type_ = proto.type();
 		if (!impl::allow_insert_child(type(), type_)) return xml_node();
@@ -5953,7 +5955,7 @@ namespace pugi
 		if (!n) return xml_node();
 
 		impl::insert_node_before(n._root, node._root);
-		impl::node_copy_tree(n._root, proto._root);
+		impl::node_copy_tree(n._root, proto._root, deep);
 
 		return n;
 	}

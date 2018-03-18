@@ -554,10 +554,10 @@ namespace pugi
 		xml_node insert_child_before(const char_t* name, const xml_node& node);
 
 		// Add a copy of the specified node as a child. Returns added node, or empty node on errors.
-		xml_node append_copy(const xml_node& proto);
-		xml_node prepend_copy(const xml_node& proto);
-		xml_node insert_copy_after(const xml_node& proto, const xml_node& node);
-		xml_node insert_copy_before(const xml_node& proto, const xml_node& node);
+		xml_node append_copy(const xml_node& proto, bool deep = true);
+		xml_node prepend_copy(const xml_node& proto, bool deep = true);
+		xml_node insert_copy_after(const xml_node& proto, const xml_node& node, bool deep = true);
+		xml_node insert_copy_before(const xml_node& proto, const xml_node& node, bool deep = true);
 
 		// Move the specified node to become a child of this node. Returns moved node, or empty node on errors.
 		xml_node append_move(const xml_node& moved);
