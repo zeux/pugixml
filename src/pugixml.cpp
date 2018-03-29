@@ -4423,6 +4423,7 @@ PUGI__NS_BEGIN
 
 		while (sit && sit != sn)
 		{
+			// when a tree is copied into one of the descendants, we need to skip that subtree to avoid an infinite loop
 			if (sit != dn)
 			{
 				xml_node_struct* copy = append_new_node(dit, alloc, PUGI__NODETYPE(sit));
