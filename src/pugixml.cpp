@@ -106,8 +106,8 @@
 #	define PUGI__DMC_VOLATILE
 #endif
 
-// Integer sanitizer workaround
-#ifdef __has_attribute
+// Integer sanitizer workaround; we only apply this for clang since gcc8 has no_sanitize but not unsigned-integer-overflow and produces "attribute directive ignored" warnings
+#if defined(__clang__) && defined(__has_attribute)
 #	if __has_attribute(no_sanitize)
 #		define PUGI__UNSIGNED_OVERFLOW __attribute__((no_sanitize("unsigned-integer-overflow")))
 #	else
