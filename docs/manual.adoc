@@ -2144,6 +2144,7 @@ Maintenance release. Changes:
 	. Fix compilation issues with limits.h for some versions of gcc
 	. Fix compilation issues with Clang/C2
 	. Fix implicit fallthrough warnings in gcc 7
+	. Fix unknown attribute directive warnings in gcc 8
 	. Fix cray++ compiler errors
 	. Fix unsigned integer overflow errors with -fsanitize=integer
 	. Fix undefined behavior sanitizer issues in compact mode
