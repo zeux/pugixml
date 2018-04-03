@@ -2121,7 +2121,9 @@ Because of the differences in document object models, performance considerations
 :!numbered:
 
 [[v1.9]]
-=== v1.9 ^2018-??-??^
+=== v1.9 ^2018-04-04^
+
+Maintenance release. Changes:
 
 * Specification changes:
 	. `xml_document::load(const char*)` (deprecated in 1.5) now has `deprecated` attribute; use `xml_document::load_string` instead
