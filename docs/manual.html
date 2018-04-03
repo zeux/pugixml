@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.5">
 <meta name="author" content="website, repository">
-<title>pugixml 1.8 manual</title>
+<title>pugixml 1.9 manual</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -492,7 +492,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>pugixml 1.8 manual</h1>
+<h1>pugixml 1.9 manual</h1>
 <div class="details">
 <span id="author" class="author">website</span><br>
 <span id="email" class="email"><a href="http://pugixml.org" class="bare">http://pugixml.org</a></span><br>
@@ -587,6 +587,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#changes">9. Changelog</a>
 <ul class="sectlevel2">
+<li><a href="#v1.9">v1.9 <sup>2018-04-04</sup></a></li>
 <li><a href="#v1.8">v1.8 <sup>2016-11-24</sup></a></li>
 <li><a href="#v1.7">v1.7 <sup>2015-10-19</sup></a></li>
 <li><a href="#v1.6">v1.6 <sup>2015-04-10</sup></a></li>
@@ -736,9 +737,9 @@ pugixml is Copyright (C) 2006-2018 Arseny Kapoulkine.</pre>
 <p>You can download the latest source distribution as an archive:</p>
 </div>
 <div class="paragraph">
-<p><a href="https://github.com/zeux/pugixml/releases/download/v1.8/pugixml-1.8.zip">pugixml-1.8.zip</a> (Windows line endings)
+<p><a href="https://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.zip">pugixml-1.9.zip</a> (Windows line endings)
 /
-<a href="https://github.com/zeux/pugixml/releases/download/v1.8/pugixml-1.8.tar.gz">pugixml-1.8.tar.gz</a> (Unix line endings)</p>
+<a href="https://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.tar.gz">pugixml-1.9.tar.gz</a> (Unix line endings)</p>
 </div>
 <div class="paragraph">
 <p>The distribution contains library source, documentation (the manual you&#8217;re reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.</p>
@@ -759,7 +760,7 @@ pugixml is Copyright (C) 2006-2018 Arseny Kapoulkine.</pre>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="bash">git clone https://github.com/zeux/pugixml
 cd pugixml
-git checkout v1.8</code></pre>
+git checkout v1.9</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -776,7 +777,7 @@ git checkout v1.8</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.8 pugixml</code></pre>
+<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.9 pugixml</code></pre>
 </div>
 </div>
 </div>
@@ -4013,6 +4014,90 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <h2 id="changes"><a class="anchor" href="#changes"></a><a class="link" href="#changes">9. Changelog</a></h2>
 <div class="sectionbody">
 <div class="sect2">
+<h3 id="v1.9"><a class="anchor" href="#v1.9"></a><a class="link" href="#v1.9">v1.9 <sup>2018-04-04</sup></a></h3>
+<div class="paragraph">
+<p>Maintenance release. Changes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Specification changes:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>xml_document::load(const char*)</code> (deprecated in 1.5) now has <code>deprecated</code> attribute; use <code>xml_document::load_string</code> instead
+` <code>xml_node::select_single_node</code> (deprecated in 1.5) now has <code>deprecated</code> attribute; use <code>xml_node::select_node</code> instead</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>New features:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add move semantics support for xml_document and improve move semantics support for other objects</p>
+</li>
+<li>
+<p>CMake build now exports include directories</p>
+</li>
+<li>
+<p>CMake build with BUILD_SHARED_LIBS=ON now uses dllexport attribute for MSVC</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>XPath improvements:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Rework parser/evaluator to not rely on exceptional control flow; longjmp is no longer used when exceptions are disabled</p>
+</li>
+<li>
+<p>Improve error messages for certain invalid expressions such as <code>.[1]</code> or <code>(1</code></p>
+</li>
+<li>
+<p>Minor performance improvements</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Compatibility improvements:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Fix Texas Instruments compiler warnings</p>
+</li>
+<li>
+<p>Fix compilation issues with limits.h for some versions of gcc</p>
+</li>
+<li>
+<p>Fix compilation issues with Clang/C2</p>
+</li>
+<li>
+<p>Fix implicit fallthrough warnings in gcc 7</p>
+</li>
+<li>
+<p>Fix unknown attribute directive warnings in gcc 8</p>
+</li>
+<li>
+<p>Fix cray++ compiler errors</p>
+</li>
+<li>
+<p>Fix unsigned integer overflow errors with -fsanitize=integer</p>
+</li>
+<li>
+<p>Fix undefined behavior sanitizer issues in compact mode</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
 <h3 id="v1.8"><a class="anchor" href="#v1.8"></a><a class="link" href="#v1.8">v1.8 <sup>2016-11-24</sup></a></h3>
 <div class="paragraph">
 <p>Maintenance release. Changes:</p>
@@ -5672,7 +5757,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-01-07 20:28:02 STD
+Last updated 2018-04-02 21:07:54 DST
 </div>
 </div>
 </body>
