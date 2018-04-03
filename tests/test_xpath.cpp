@@ -467,7 +467,7 @@ TEST_XML(xpath_out_of_memory_evaluate_normalize_space_0, "<node> a b c d e f g h
 
 	xpath_query q(STR("concat(normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space())"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc.first_child()) == 0));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc.first_child()) == 1));
 }
 
 TEST_XML(xpath_out_of_memory_evaluate_normalize_space_1, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
@@ -476,7 +476,7 @@ TEST_XML(xpath_out_of_memory_evaluate_normalize_space_1, "<node> a b c d e f g h
 
 	xpath_query q(STR("concat(normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node))"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 0));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
 }
 
 TEST_XML(xpath_out_of_memory_evaluate_translate, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
@@ -485,7 +485,7 @@ TEST_XML(xpath_out_of_memory_evaluate_translate, "<node> a b c d e f g h i j k l
 
 	xpath_query q(STR("concat(translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'))"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 0));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
 }
 
 TEST_XML(xpath_out_of_memory_evaluate_translate_table, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
@@ -494,7 +494,7 @@ TEST_XML(xpath_out_of_memory_evaluate_translate_table, "<node> a b c d e f g h i
 
 	xpath_query q(STR("concat(translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'))"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 0));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
 }
 
 TEST(xpath_out_of_memory_evaluate_string_append)
@@ -514,7 +514,7 @@ TEST(xpath_out_of_memory_evaluate_string_append)
 	xpath_query q(STR("string(n)"));
 	CHECK(q);
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 0));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
 }
 
 TEST(xpath_out_of_memory_evaluate_number_to_string)
@@ -526,7 +526,7 @@ TEST(xpath_out_of_memory_evaluate_number_to_string)
 
 	xpath_query q(STR("concat($x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x)"), &vars);
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 0));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 1));
 }
 
 TEST(xpath_memory_concat_massive)
