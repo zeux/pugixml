@@ -6,7 +6,7 @@
 #include <setjmp.h>
 
 #ifndef PUGIXML_NO_EXCEPTIONS
-#include <exception>
+#include <new>
 #endif
 
 struct test_runner
