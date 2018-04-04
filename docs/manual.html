@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.6.1">
+<meta name="generator" content="Asciidoctor 1.5.5">
 <meta name="author" content="website, repository">
-<title>pugixml 1.8 manual</title>
+<title>pugixml 1.9 manual</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -90,12 +90,13 @@ strong,b{font-weight:bold;line-height:inherit}
 small{font-size:60%;line-height:inherit}
 code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
 ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
-ul,ol{margin-left:1.5em}
+ul,ol,ul.no-bullet,ol.no-bullet{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
 ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
 ul.square{list-style-type:square}
 ul.circle{list-style-type:circle}
 ul.disc{list-style-type:disc}
+ul.no-bullet{list-style:none}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -131,11 +132,7 @@ strong strong{font-weight:400}
 kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background-color:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
 .keyseq kbd:first-child{margin-left:0}
 .keyseq kbd:last-child{margin-right:0}
-.menuseq,.menuref{color:#000}
-.menuseq b:not(.caret),.menuref{font-weight:inherit}
-.menuseq{word-spacing:-.02em}
-.menuseq b.caret{font-size:1.25em;line-height:.8}
-.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+.menuseq,.menu{color:rgba(0,0,0,.8)}
 b.button:before,b.button:after{position:relative;top:-1px;font-weight:400}
 b.button:before{content:"[";padding:0 3px 0 2px}
 b.button:after{content:"]";padding:0 2px 0 3px}
@@ -202,7 +199,7 @@ table.tableblock>caption.title{white-space:nowrap;overflow:visible;max-width:0}
 table.tableblock #preamble>.sectionbody>.paragraph:first-of-type p{font-size:inherit}
 .admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
 .admonitionblock>table td.icon{text-align:center;width:80px}
-.admonitionblock>table td.icon img{max-width:initial}
+.admonitionblock>table td.icon img{max-width:none}
 .admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
 .admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #ddddd8;color:rgba(0,0,0,.6)}
 .admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
@@ -258,13 +255,13 @@ table.pyhltable .linenodiv{background:none!important;padding-right:0!important}
 table.tableblock{max-width:100%;border-collapse:separate}
 table.tableblock td>.paragraph:last-child p>p:last-child,table.tableblock th>p:last-child,table.tableblock td>p:last-child{margin-bottom:0}
 table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
-table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
-table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
-table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
-table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px 0}
-table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0 0}
-table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
-table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.grid-all th.tableblock,table.grid-all td.tableblock{border-width:0 1px 1px 0}
+table.grid-all tfoot>tr>th.tableblock,table.grid-all tfoot>tr>td.tableblock{border-width:1px 1px 0 0}
+table.grid-cols th.tableblock,table.grid-cols td.tableblock{border-width:0 1px 0 0}
+table.grid-all *>tr>.tableblock:last-child,table.grid-cols *>tr>.tableblock:last-child{border-right-width:0}
+table.grid-rows th.tableblock,table.grid-rows td.tableblock{border-width:0 0 1px 0}
+table.grid-all tbody>tr:last-child>th.tableblock,table.grid-all tbody>tr:last-child>td.tableblock,table.grid-all thead:last-child>tr>th.tableblock,table.grid-rows tbody>tr:last-child>th.tableblock,table.grid-rows tbody>tr:last-child>td.tableblock,table.grid-rows thead:last-child>tr>th.tableblock{border-bottom-width:0}
+table.grid-rows tfoot>tr>th.tableblock,table.grid-rows tfoot>tr>td.tableblock{border-width:1px 0 0 0}
 table.frame-all{border-width:1px}
 table.frame-sides{border-width:0 1px}
 table.frame-topbot{border-width:1px 0}
@@ -285,12 +282,10 @@ ul li ol{margin-left:1.5em}
 dl dd{margin-left:1.125em}
 dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
 ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
-ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
-ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
-ul.unstyled,ol.unstyled{margin-left:0}
-ul.checklist{margin-left:.625em}
-ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
-ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.unstyled,ol.unnumbered,ul.checklist,ul.none{list-style-type:none}
+ul.unstyled,ol.unnumbered,ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1em;font-size:.85em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{width:1em;position:relative;top:1px}
 ul.inline{margin:0 auto .625em auto;margin-left:-1.375em;margin-right:0;padding:0;list-style:none;overflow:hidden}
 ul.inline>li{list-style:none;float:left;margin-left:1.375em;display:block}
 ul.inline>li>*{display:block}
@@ -307,8 +302,7 @@ ol.lowergreek{list-style-type:lower-greek}
 td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
 td.hdlist1{font-weight:bold;padding-bottom:1.25em}
 .literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
-.colist>table tr>td:first-of-type{padding:.4em .75em 0 .75em;line-height:1;vertical-align:top}
-.colist>table tr>td:first-of-type img{max-width:initial}
+.colist>table tr>td:first-of-type{padding:0 .75em;line-height:1}
 .colist>table tr>td:last-of-type{padding:.25em 0}
 .thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
 .imageblock.left,.imageblock[style*="float: left"]{margin:.25em .625em 1.25em 0}
@@ -371,7 +365,6 @@ div.unbreakable{page-break-inside:avoid}
 .yellow{color:#bfbf00}
 .yellow-background{background-color:#fafa00}
 span.icon>.fa{cursor:default}
-a span.icon>.fa{cursor:inherit}
 .admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
 .admonitionblock td.icon .icon-note:before{content:"\f05a";color:#19407c}
 .admonitionblock td.icon .icon-tip:before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
@@ -475,8 +468,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .listingblock .pygments .tok-mh { color: #666666 } /* Literal.Number.Hex */
 .listingblock .pygments .tok-mi { color: #666666 } /* Literal.Number.Integer */
 .listingblock .pygments .tok-mo { color: #666666 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sa { color: #BA2121 } /* Literal.String.Affix */
 .listingblock .pygments .tok-sb { color: #BA2121 } /* Literal.String.Backtick */
 .listingblock .pygments .tok-sc { color: #BA2121 } /* Literal.String.Char */
+.listingblock .pygments .tok-dl { color: #BA2121 } /* Literal.String.Delimiter */
 .listingblock .pygments .tok-sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
 .listingblock .pygments .tok-s2 { color: #BA2121 } /* Literal.String.Double */
 .listingblock .pygments .tok-se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
@@ -487,15 +482,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 .listingblock .pygments .tok-s1 { color: #BA2121 } /* Literal.String.Single */
 .listingblock .pygments .tok-ss { color: #19177C } /* Literal.String.Symbol */
 .listingblock .pygments .tok-bp { color: #008000 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-fm { color: #0000FF } /* Name.Function.Magic */
 .listingblock .pygments .tok-vc { color: #19177C } /* Name.Variable.Class */
 .listingblock .pygments .tok-vg { color: #19177C } /* Name.Variable.Global */
 .listingblock .pygments .tok-vi { color: #19177C } /* Name.Variable.Instance */
+.listingblock .pygments .tok-vm { color: #19177C } /* Name.Variable.Magic */
 .listingblock .pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </style>
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>pugixml 1.8 manual</h1>
+<h1>pugixml 1.9 manual</h1>
 <div class="details">
 <span id="author" class="author">website</span><br>
 <span id="email" class="email"><a href="http://pugixml.org" class="bare">http://pugixml.org</a></span><br>
@@ -543,28 +540,28 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#access">5. Accessing document data</a>
 <ul class="sectlevel2">
-<li><a href="#access.basic">Basic traversal functions</a></li>
-<li><a href="#access.nodedata">5.1. Getting node data</a></li>
-<li><a href="#access.attrdata">5.2. Getting attribute data</a></li>
-<li><a href="#access.contents">5.3. Contents-based traversal functions</a></li>
-<li><a href="#access.rangefor">5.4. Range-based for-loop support</a></li>
-<li><a href="#access.iterators">5.5. Traversing node/attribute lists via iterators</a></li>
-<li><a href="#access.walker">5.6. Recursive traversal with xml_tree_walker</a></li>
-<li><a href="#access.predicate">5.7. Searching for nodes/attributes with predicates</a></li>
-<li><a href="#access.text">5.8. Working with text contents</a></li>
-<li><a href="#access.misc">5.9. Miscellaneous functions</a></li>
+<li><a href="#access.basic">5.1. Basic traversal functions</a></li>
+<li><a href="#access.nodedata">5.2. Getting node data</a></li>
+<li><a href="#access.attrdata">5.3. Getting attribute data</a></li>
+<li><a href="#access.contents">5.4. Contents-based traversal functions</a></li>
+<li><a href="#access.rangefor">5.5. Range-based for-loop support</a></li>
+<li><a href="#access.iterators">5.6. Traversing node/attribute lists via iterators</a></li>
+<li><a href="#access.walker">5.7. Recursive traversal with xml_tree_walker</a></li>
+<li><a href="#access.predicate">5.8. Searching for nodes/attributes with predicates</a></li>
+<li><a href="#access.text">5.9. Working with text contents</a></li>
+<li><a href="#access.misc">5.10. Miscellaneous functions</a></li>
 </ul>
 </li>
 <li><a href="#modify">6. Modifying document data</a>
 <ul class="sectlevel2">
-<li><a href="#modify.nodedata">Setting node data</a></li>
-<li><a href="#modify.attrdata">6.1. Setting attribute data</a></li>
-<li><a href="#modify.add">6.2. Adding nodes/attributes</a></li>
-<li><a href="#modify.remove">6.3. Removing nodes/attributes</a></li>
-<li><a href="#modify.text">6.4. Working with text contents</a></li>
-<li><a href="#modify.clone">6.5. Cloning nodes/attributes</a></li>
-<li><a href="#modify.move">6.6. Moving nodes</a></li>
-<li><a href="#modify.fragments">6.7. Assembling document from fragments</a></li>
+<li><a href="#modify.nodedata">6.1. Setting node data</a></li>
+<li><a href="#modify.attrdata">6.2. Setting attribute data</a></li>
+<li><a href="#modify.add">6.3. Adding nodes/attributes</a></li>
+<li><a href="#modify.remove">6.4. Removing nodes/attributes</a></li>
+<li><a href="#modify.text">6.5. Working with text contents</a></li>
+<li><a href="#modify.clone">6.6. Cloning nodes/attributes</a></li>
+<li><a href="#modify.move">6.7. Moving nodes</a></li>
+<li><a href="#modify.fragments">6.8. Assembling document from fragments</a></li>
 </ul>
 </li>
 <li><a href="#saving">7. Saving document</a>
@@ -590,6 +587,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#changes">9. Changelog</a>
 <ul class="sectlevel2">
+<li><a href="#v1.9">v1.9 <sup>2018-04-04</sup></a></li>
 <li><a href="#v1.8">v1.8 <sup>2016-11-24</sup></a></li>
 <li><a href="#v1.7">v1.7 <sup>2015-10-19</sup></a></li>
 <li><a href="#v1.6">v1.6 <sup>2015-04-10</sup></a></li>
@@ -689,7 +687,7 @@ No documentation is perfect; neither is this one. If you find errors or omission
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>Copyright (c) 2006-2017 Arseny Kapoulkine
+<pre>Copyright (c) 2006-2018 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -719,7 +717,7 @@ OTHER DEALINGS IN THE SOFTWARE.</pre>
 <div class="literalblock">
 <div class="content">
 <pre>This software is based on pugixml library (http://pugixml.org).
-pugixml is Copyright (C) 2006-2017 Arseny Kapoulkine.</pre>
+pugixml is Copyright (C) 2006-2018 Arseny Kapoulkine.</pre>
 </div>
 </div>
 </div>
@@ -739,9 +737,9 @@ pugixml is Copyright (C) 2006-2017 Arseny Kapoulkine.</pre>
 <p>You can download the latest source distribution as an archive:</p>
 </div>
 <div class="paragraph">
-<p><a href="https://github.com/zeux/pugixml/releases/download/v1.8/pugixml-1.8.zip">pugixml-1.8.zip</a> (Windows line endings)
+<p><a href="https://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.zip">pugixml-1.9.zip</a> (Windows line endings)
 /
-<a href="https://github.com/zeux/pugixml/releases/download/v1.8/pugixml-1.8.tar.gz">pugixml-1.8.tar.gz</a> (Unix line endings)</p>
+<a href="https://github.com/zeux/pugixml/releases/download/v1.9/pugixml-1.9.tar.gz">pugixml-1.9.tar.gz</a> (Unix line endings)</p>
 </div>
 <div class="paragraph">
 <p>The distribution contains library source, documentation (the manual you&#8217;re reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.</p>
@@ -762,7 +760,7 @@ pugixml is Copyright (C) 2006-2017 Arseny Kapoulkine.</pre>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="bash">git clone https://github.com/zeux/pugixml
 cd pugixml
-git checkout v1.8</code></pre>
+git checkout v1.9</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -779,7 +777,7 @@ git checkout v1.8</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.8 pugixml</code></pre>
+<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.9 pugixml</code></pre>
 </div>
 </div>
 </div>
@@ -1973,7 +1971,7 @@ The current behavior for Unicode conversion is to skip all invalid UTF sequences
 <p>pugixml features an extensive interface for getting various types of data from the document and for traversing the document. This section provides documentation for all such functions that do not modify the tree except for XPath-related functions; see <a href="#xpath">XPath</a> for XPath reference. As discussed in <a href="#dom.cpp">C&#43;&#43; interface</a>, there are two types of handles to tree data - <a href="#xml_node">xml_node</a> and <a href="#xml_attribute">xml_attribute</a>. The handles have special null (empty) values which propagate through various functions and thus are useful for writing more concise code; see <a href="#node_null">this description</a> for details. The documentation in this section will explicitly state the results of all function in case of null inputs.</p>
 </div>
 <div class="sect2">
-<h3 id="access.basic"><a class="anchor" href="#access.basic"></a><a class="link" href="#access.basic">Basic traversal functions</a></h3>
+<h3 id="access.basic"><a class="anchor" href="#access.basic"></a><a class="link" href="#access.basic">5.1. Basic traversal functions</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::parent"></a><a id="xml_node::first_child"></a><a id="xml_node::last_child"></a><a id="xml_node::next_sibling"></a><a id="xml_node::previous_sibling"></a><a id="xml_node::first_attribute"></a><a id="xml_node::last_attribute"></a><a id="xml_attribute::next_attribute"></a><a id="xml_attribute::previous_attribute"></a>
 The internal representation of the document is a tree, where each node has a list of child nodes (the order of children corresponds to their order in the XML representation), and additionally element nodes have a list of attributes, which is also ordered. Several functions are provided in order to let you get from one node in the tree to the other. These functions roughly correspond to the internal representation, and thus are usually building blocks for other methods of traversing (i.e. XPath traversals are based on these functions).</p>
@@ -2030,7 +2028,7 @@ Because of memory consumption reasons, attributes do not have a link to their pa
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.nodedata"><a class="anchor" href="#access.nodedata"></a><a class="link" href="#access.nodedata">5.1. Getting node data</a></h3>
+<h3 id="access.nodedata"><a class="anchor" href="#access.nodedata"></a><a class="link" href="#access.nodedata">5.2. Getting node data</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::name"></a><a id="xml_node::value"></a>
 Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. <a href="#node_document">node_document</a> nodes do not have a name or value, <a href="#node_element">node_element</a> and <a href="#node_declaration">node_declaration</a> nodes always have a name but never have a value, <a href="#node_pcdata">node_pcdata</a>, <a href="#node_cdata">node_cdata</a>, <a href="#node_comment">node_comment</a> and <a href="#node_doctype">node_doctype</a> nodes never have a name but always have a value (it may be empty though), <a href="#node_pi">node_pi</a> nodes always have a name and a value (again, value may be empty). In order to get node&#8217;s name or value, you can use the following functions:</p>
@@ -2065,7 +2063,7 @@ Apart from structural information (parent, child nodes, attributes), nodes can h
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.attrdata"><a class="anchor" href="#access.attrdata"></a><a class="link" href="#access.attrdata">5.2. Getting attribute data</a></h3>
+<h3 id="access.attrdata"><a class="anchor" href="#access.attrdata"></a><a class="link" href="#access.attrdata">5.3. Getting attribute data</a></h3>
 <div class="paragraph">
 <p><a id="xml_attribute::name"></a><a id="xml_attribute::value"></a>
 All attributes have name and value, both of which are strings (value may be empty). There are two corresponding accessors, like for <code>xml_node</code>:</p>
@@ -2154,7 +2152,7 @@ Number conversion functions depend on current C locale as set with <code>setloca
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.contents"><a class="anchor" href="#access.contents"></a><a class="link" href="#access.contents">5.3. Contents-based traversal functions</a></h3>
+<h3 id="access.contents"><a class="anchor" href="#access.contents"></a><a class="link" href="#access.contents">5.4. Contents-based traversal functions</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::child"></a><a id="xml_node::attribute"></a><a id="xml_node::next_sibling_name"></a><a id="xml_node::previous_sibling_name"></a>
 Since a lot of document traversal consists of finding the node/attribute with the correct name, there are special functions for that purpose:</p>
@@ -2208,7 +2206,7 @@ Since a lot of document traversal consists of finding the node/attribute with th
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.rangefor"><a class="anchor" href="#access.rangefor"></a><a class="link" href="#access.rangefor">5.4. Range-based for-loop support</a></h3>
+<h3 id="access.rangefor"><a class="anchor" href="#access.rangefor"></a><a class="link" href="#access.rangefor">5.5. Range-based for-loop support</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::children"></a><a id="xml_node::attributes"></a>
 If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43;11 feature, at the time of writing it&#8217;s supported by Microsoft Visual Studio 2012+, GCC 4.6+ and Clang 3.0+), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with <a href="http://www.boost.org/libs/foreach/">Boost Foreach</a>, and possibly other pre-C&#43;&#43;11 foreach facilities.</p>
@@ -2248,7 +2246,7 @@ If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.iterators"><a class="anchor" href="#access.iterators"></a><a class="link" href="#access.iterators">5.5. Traversing node/attribute lists via iterators</a></h3>
+<h3 id="access.iterators"><a class="anchor" href="#access.iterators"></a><a class="link" href="#access.iterators">5.6. Traversing node/attribute lists via iterators</a></h3>
 <div class="paragraph">
 <p><a id="xml_node_iterator"></a><a id="xml_attribute_iterator"></a><a id="xml_node::begin"></a><a id="xml_node::end"></a><a id="xml_node::attributes_begin"></a><a id="xml_node::attributes_end"></a>
 Child node lists and attribute lists are simply double-linked lists; while you can use <code>previous_sibling</code>/<code>next_sibling</code> and other such functions for iteration, pugixml additionally provides node and attribute iterators, so that you can treat nodes as containers of other nodes or attributes:</p>
@@ -2308,7 +2306,7 @@ Node and attribute iterators are somewhere in the middle between const and non-c
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.walker"><a class="anchor" href="#access.walker"></a><a class="link" href="#access.walker">5.6. Recursive traversal with xml_tree_walker</a></h3>
+<h3 id="access.walker"><a class="anchor" href="#access.walker"></a><a class="link" href="#access.walker">5.7. Recursive traversal with xml_tree_walker</a></h3>
 <div id="xml_tree_walker" class="paragraph">
 <p>The methods described above allow traversal of immediate children of some node; if you want to do a deep tree traversal, you&#8217;ll have to do it via a recursive function or some equivalent method. However, pugixml provides a helper for depth-first traversal of a subtree. In order to use it, you have to implement <code>xml_tree_walker</code> interface and to call <code>traverse</code> function:</p>
 </div>
@@ -2376,7 +2374,7 @@ The traversal is launched by calling <code>traverse</code> function on traversal
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.predicate"><a class="anchor" href="#access.predicate"></a><a class="link" href="#access.predicate">5.7. Searching for nodes/attributes with predicates</a></h3>
+<h3 id="access.predicate"><a class="anchor" href="#access.predicate"></a><a class="link" href="#access.predicate">5.8. Searching for nodes/attributes with predicates</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::find_attribute"></a><a id="xml_node::find_child"></a><a id="xml_node::find_node"></a>
 While there are existing functions for getting a node/attribute with known contents, they are often not sufficient for simple queries. As an alternative for manual iteration through nodes/attributes until the needed one is found, you can make a predicate and call one of <code>find_</code> functions:</p>
@@ -2441,7 +2439,7 @@ While there are existing functions for getting a node/attribute with known conte
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.text"><a class="anchor" href="#access.text"></a><a class="link" href="#access.text">5.8. Working with text contents</a></h3>
+<h3 id="access.text"><a class="anchor" href="#access.text"></a><a class="link" href="#access.text">5.9. Working with text contents</a></h3>
 <div id="xml_text" class="paragraph">
 <p>It is common to store data as text contents of some node - i.e. <code>&lt;node&gt;&lt;description&gt;This is a node&lt;/description&gt;&lt;/node&gt;</code>. In this case, <code>&lt;description&gt;</code> node does not have a value, but instead has a child of type <a href="#node_pcdata">node_pcdata</a> with value <code>"This is a node"</code>. pugixml provides a special class, <code>xml_text</code>, to work with such data. Working with text objects to modify data is described in <a href="#modify.text">the documentation for modifying document data</a>; this section describes the access interface of <code>xml_text</code>.</p>
 </div>
@@ -2519,7 +2517,7 @@ If you need a non-empty string if the text object is empty, or if the text conte
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.misc"><a class="anchor" href="#access.misc"></a><a class="link" href="#access.misc">5.9. Miscellaneous functions</a></h3>
+<h3 id="access.misc"><a class="anchor" href="#access.misc"></a><a class="link" href="#access.misc">5.10. Miscellaneous functions</a></h3>
 <div id="xml_node::root" class="paragraph">
 <p>If you need to get the document root of some node, you can use the following function:</p>
 </div>
@@ -2583,7 +2581,7 @@ While pugixml supports complex XPath expressions, sometimes a simple path handli
 <p>All member functions that change node/attribute data or structure are non-constant and thus can not be called on constant handles. However, you can easily convert constant handle to non-constant one by simple assignment: <code>void foo(const pugi::xml_node&amp; n) { pugi::xml_node nc = n; }</code>, so const-correctness here mainly provides additional documentation.</p>
 </div>
 <div class="sect2">
-<h3 id="modify.nodedata"><a class="anchor" href="#modify.nodedata"></a><a class="link" href="#modify.nodedata">Setting node data</a></h3>
+<h3 id="modify.nodedata"><a class="anchor" href="#modify.nodedata"></a><a class="link" href="#modify.nodedata">6.1. Setting node data</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::set_name"></a><a id="xml_node::set_value"></a>
 As discussed before, nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. <a href="#node_document">node_document</a> nodes do not have a name or value, <a href="#node_element">node_element</a> and <a href="#node_declaration">node_declaration</a> nodes always have a name but never have a value, <a href="#node_pcdata">node_pcdata</a>, <a href="#node_cdata">node_cdata</a>, <a href="#node_comment">node_comment</a> and <a href="#node_doctype">node_doctype</a> nodes never have a name but always have a value (it may be empty though), <a href="#node_pi">node_pi</a> nodes always have a name and a value (again, value may be empty). In order to set node&#8217;s name or value, you can use the following functions:</p>
@@ -2618,7 +2616,7 @@ As discussed before, nodes can have name and value, both of which are strings. D
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.attrdata"><a class="anchor" href="#modify.attrdata"></a><a class="link" href="#modify.attrdata">6.1. Setting attribute data</a></h3>
+<h3 id="modify.attrdata"><a class="anchor" href="#modify.attrdata"></a><a class="link" href="#modify.attrdata">6.2. Setting attribute data</a></h3>
 <div class="paragraph">
 <p><a id="xml_attribute::set_name"></a><a id="xml_attribute::set_value"></a>
 All attributes have name and value, both of which are strings (value may be empty). You can set them with the following functions:</p>
@@ -2717,7 +2715,7 @@ Number conversion functions depend on current C locale as set with <code>setloca
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.add"><a class="anchor" href="#modify.add"></a><a class="link" href="#modify.add">6.2. Adding nodes/attributes</a></h3>
+<h3 id="modify.add"><a class="anchor" href="#modify.add"></a><a class="link" href="#modify.add">6.3. Adding nodes/attributes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::prepend_attribute"></a><a id="xml_node::append_attribute"></a><a id="xml_node::insert_attribute_after"></a><a id="xml_node::insert_attribute_before"></a><a id="xml_node::prepend_child"></a><a id="xml_node::append_child"></a><a id="xml_node::insert_child_after"></a><a id="xml_node::insert_child_before"></a>
 Nodes and attributes do not exist without a document tree, so you can&#8217;t create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before/after some other node:</p>
@@ -2812,7 +2810,7 @@ Nodes and attributes do not exist without a document tree, so you can&#8217;t cr
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.remove"><a class="anchor" href="#modify.remove"></a><a class="link" href="#modify.remove">6.3. Removing nodes/attributes</a></h3>
+<h3 id="modify.remove"><a class="anchor" href="#modify.remove"></a><a class="link" href="#modify.remove">6.4. Removing nodes/attributes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::remove_attribute"></a><a id="xml_node::remove_child"></a>
 If you do not want your document to contain some node or attribute, you can remove it with one of the following functions:</p>
@@ -2874,7 +2872,7 @@ If you do not want your document to contain some node or attribute, you can remo
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.text"><a class="anchor" href="#modify.text"></a><a class="link" href="#modify.text">6.4. Working with text contents</a></h3>
+<h3 id="modify.text"><a class="anchor" href="#modify.text"></a><a class="link" href="#modify.text">6.5. Working with text contents</a></h3>
 <div class="paragraph">
 <p>pugixml provides a special class, <code>xml_text</code>, to work with text contents stored as a value of some node, i.e. <code>&lt;node&gt;&lt;description&gt;This is a node&lt;/description&gt;&lt;/node&gt;</code>. Working with text objects to retrieve data is described in <a href="#access.text">the documentation for accessing document data</a>; this section describes the modification interface of <code>xml_text</code>.</p>
 </div>
@@ -2943,7 +2941,7 @@ If you do not want your document to contain some node or attribute, you can remo
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.clone"><a class="anchor" href="#modify.clone"></a><a class="link" href="#modify.clone">6.5. Cloning nodes/attributes</a></h3>
+<h3 id="modify.clone"><a class="anchor" href="#modify.clone"></a><a class="link" href="#modify.clone">6.6. Cloning nodes/attributes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::prepend_copy"></a><a id="xml_node::append_copy"></a><a id="xml_node::insert_copy_after"></a><a id="xml_node::insert_copy_before"></a>
 With the help of previously described functions, it is possible to create trees with any contents and structure, including cloning the existing data. However since this is an often needed operation, pugixml provides built-in node/attribute cloning facilities. Since nodes and attributes do not exist without a document tree, you can&#8217;t create a standalone copy - you have to immediately insert it somewhere in the tree. For this, you can use one of the following functions:</p>
@@ -3039,7 +3037,7 @@ With the help of previously described functions, it is possible to create trees 
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.move"><a class="anchor" href="#modify.move"></a><a class="link" href="#modify.move">6.6. Moving nodes</a></h3>
+<h3 id="modify.move"><a class="anchor" href="#modify.move"></a><a class="link" href="#modify.move">6.7. Moving nodes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::prepend_move"></a><a id="xml_node::append_move"></a><a id="xml_node::insert_move_after"></a><a id="xml_node::insert_move_before"></a>
 Sometimes instead of cloning a node you need to move an existing node to a different position in a tree. This can be accomplished by copying the node and removing the original; however, this is expensive since it results in a lot of extra operations. For moving nodes within the same document tree, you can use of the following functions instead:</p>
@@ -3076,7 +3074,7 @@ Sometimes instead of cloning a node you need to move an existing node to a diffe
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.fragments"><a class="anchor" href="#modify.fragments"></a><a class="link" href="#modify.fragments">6.7. Assembling document from fragments</a></h3>
+<h3 id="modify.fragments"><a class="anchor" href="#modify.fragments"></a><a class="link" href="#modify.fragments">6.8. Assembling document from fragments</a></h3>
 <div id="xml_node::append_buffer" class="paragraph">
 <p>pugixml provides several ways to assemble an XML document from other XML documents. Assuming there is a set of document fragments, represented as in-memory buffers, the implementation choices are as follows:</p>
 </div>
@@ -4015,6 +4013,90 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <div class="sect1">
 <h2 id="changes"><a class="anchor" href="#changes"></a><a class="link" href="#changes">9. Changelog</a></h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="v1.9"><a class="anchor" href="#v1.9"></a><a class="link" href="#v1.9">v1.9 <sup>2018-04-04</sup></a></h3>
+<div class="paragraph">
+<p>Maintenance release. Changes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Specification changes:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>xml_document::load(const char*)</code> (deprecated in 1.5) now has <code>deprecated</code> attribute; use <code>xml_document::load_string</code> instead
+` <code>xml_node::select_single_node</code> (deprecated in 1.5) now has <code>deprecated</code> attribute; use <code>xml_node::select_node</code> instead</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>New features:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Add move semantics support for xml_document and improve move semantics support for other objects</p>
+</li>
+<li>
+<p>CMake build now exports include directories</p>
+</li>
+<li>
+<p>CMake build with BUILD_SHARED_LIBS=ON now uses dllexport attribute for MSVC</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>XPath improvements:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Rework parser/evaluator to not rely on exceptional control flow; longjmp is no longer used when exceptions are disabled</p>
+</li>
+<li>
+<p>Improve error messages for certain invalid expressions such as <code>.[1]</code> or <code>(1</code></p>
+</li>
+<li>
+<p>Minor performance improvements</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Compatibility improvements:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Fix Texas Instruments compiler warnings</p>
+</li>
+<li>
+<p>Fix compilation issues with limits.h for some versions of gcc</p>
+</li>
+<li>
+<p>Fix compilation issues with Clang/C2</p>
+</li>
+<li>
+<p>Fix implicit fallthrough warnings in gcc 7</p>
+</li>
+<li>
+<p>Fix unknown attribute directive warnings in gcc 8</p>
+</li>
+<li>
+<p>Fix cray++ compiler errors</p>
+</li>
+<li>
+<p>Fix unsigned integer overflow errors with -fsanitize=integer</p>
+</li>
+<li>
+<p>Fix undefined behavior sanitizer issues in compact mode</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</div>
 <div class="sect2">
 <h3 id="v1.8"><a class="anchor" href="#v1.8"></a><a class="link" href="#v1.8">v1.8 <sup>2016-11-24</sup></a></h3>
 <div class="paragraph">
@@ -5675,7 +5757,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2017-08-29 20:45:58 DST
+Last updated 2018-04-02 21:07:54 DST
 </div>
 </div>
 </body>

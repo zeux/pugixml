@@ -46,7 +46,7 @@ Thanks to *Vyacheslav Egorov* for documentation proofreading and fuzz testing.
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2017 Arseny Kapoulkine
+Copyright (c) 2006-2018 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -74,7 +74,7 @@ This means that you can freely use pugixml in your applications, both open-sourc
 
 ....
 This software is based on pugixml library (http://pugixml.org).
-pugixml is Copyright (C) 2006-2017 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2018 Arseny Kapoulkine.
 ....
 
 [[install]]
@@ -2119,6 +2119,35 @@ Because of the differences in document object models, performance considerations
 == Changelog
 
 :!numbered:
+
+[[v1.9]]
+=== v1.9 ^2018-04-04^
+
+Maintenance release. Changes:
+
+* Specification changes:
+	. `xml_document::load(const char*)` (deprecated in 1.5) now has `deprecated` attribute; use `xml_document::load_string` instead
+	` `xml_node::select_single_node` (deprecated in 1.5) now has `deprecated` attribute; use `xml_node::select_node` instead
+
+* New features:
+	. Add move semantics support for xml_document and improve move semantics support for other objects
+	. CMake build now exports include directories
+	. CMake build with BUILD_SHARED_LIBS=ON now uses dllexport attribute for MSVC
+
+* XPath improvements:
+	. Rework parser/evaluator to not rely on exceptional control flow; longjmp is no longer used when exceptions are disabled
+	. Improve error messages for certain invalid expressions such as `.[1]` or `(1`
+	. Minor performance improvements
+
+* Compatibility improvements:
+	. Fix Texas Instruments compiler warnings
+	. Fix compilation issues with limits.h for some versions of gcc
+	. Fix compilation issues with Clang/C2
+	. Fix implicit fallthrough warnings in gcc 7
+	. Fix unknown attribute directive warnings in gcc 8
+	. Fix cray++ compiler errors
+	. Fix unsigned integer overflow errors with -fsanitize=integer
+	. Fix undefined behavior sanitizer issues in compact mode
 
 [[v1.8]]
 === v1.8 ^2016-11-24^
