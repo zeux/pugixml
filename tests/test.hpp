@@ -5,6 +5,10 @@
 
 #include <setjmp.h>
 
+#ifndef PUGIXML_NO_EXCEPTIONS
+#include <exception>
+#endif
+
 struct test_runner
 {
 	test_runner(const char* name)
