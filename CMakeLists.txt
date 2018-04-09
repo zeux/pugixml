@@ -4,7 +4,7 @@ project(pugixml)
 
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_PKGCONFIG "Build in PKGCONFIG mode" OFF)
+option(USE_VERSIONED_LIBDIR "Use a private subdirectory to install the headers and libs" OFF)
 
 set(BUILD_DEFINES "" CACHE STRING "Build defines")
 
@@ -55,7 +55,7 @@ endif()
 set_target_properties(pugixml PROPERTIES VERSION 1.9 SOVERSION 1)
 get_target_property(PUGIXML_VERSION_STRING pugixml VERSION)
 
-if(BUILD_PKGCONFIG)
+if(USE_VERSIONED_LIBDIR)
 	# Install library into its own directory under LIBDIR
 	set(INSTALL_SUFFIX /pugixml-${PUGIXML_VERSION_STRING})
 endif()
@@ -71,10 +71,8 @@ install(TARGETS pugixml EXPORT pugixml-config
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX})
 install(EXPORT pugixml-config DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
 
-if(BUILD_PKGCONFIG)
-	configure_file(scripts/pugixml.pc.in ${PROJECT_BINARY_DIR}/pugixml.pc @ONLY)
-	install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
-endif()
+configure_file(scripts/pugixml.pc.in ${PROJECT_BINARY_DIR}/pugixml.pc @ONLY)
+install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 
 if(BUILD_TESTS)
 	file(GLOB TEST_SOURCES tests/*.cpp)
