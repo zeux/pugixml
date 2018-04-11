@@ -16,3 +16,7 @@ Documentation for the current release of pugixml is available on-line as two sep
 * [Complete reference manual](https://pugixml.org/docs/manual.html), that describes all features of the library in detail.
 
 You’re advised to start with the quick-start guide; however, many important library features are either not described in it at all or only mentioned briefly; if you require more information you should read the complete manual.
+
+## License
+
+This library is available to anybody free of charge, under the terms of MIT License (see LICENSE.md).

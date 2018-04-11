@@ -1,4 +1,4 @@
-This library is available to anybody free of charge, under the terms of MIT License:
+MIT License
 
 Copyright (c) 2006-2018 Arseny Kapoulkine
 
