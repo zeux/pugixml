@@ -17,6 +17,56 @@ Documentation for the current release of pugixml is available on-line as two sep
 
 You’re advised to start with the quick-start guide; however, many important library features are either not described in it at all or only mentioned briefly; if you require more information you should read the complete manual.
 
+## Example
+
+Here's an example of how code using pugixml looks; it opens an XML file, goes over all Tool nodes and prints tools that have a Timeout attribute greater than 0:
+
+```c++
+#include "pugixml.hpp"
+#include <iostream>
+
+int main()
+{
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file("xgconsole.xml");
+    if (!result)
+        return -1;
+        
+    for (pugi::xml_node tool: doc.child("Profile").child("Tools").children("Tool"))
+    {
+        int timeout = tool.attribute("Timeout").as_int();
+        
+        if (timeout > 0)
+            std::cout << "Tool " << tool.attribute("Filename").value() << " has timeout " << timeout << "\n";
+    }
+}
+```
+
+And the same example using XPath:
+
+```c++
+#include "pugixml.hpp"
+#include <iostream>
+
+int main()
+{
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_file("xgconsole.xml");
+    if (!result)
+        return -1;
+        
+    pugi::xpath_node_set tools_with_timeout = doc.select_nodes("/Profile/Tools/Tool[@Timeout > 0]");
+    
+    for (pugi::xpath_node node: tools_with_timeout)
+    {
+        pugi::xml_node tool = node.node();
+        std::cout << "Tool " << tool.attribute("Filename").value() <<
+            " has timeout " << tool.attribute("Timeout").as_int() << "\n";
+    }
+}
+```
+
+
 ## License
 
 This library is available to anybody free of charge, under the terms of MIT License (see LICENSE.md).
