@@ -5,6 +5,7 @@ project(pugixml)
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 option(USE_VERSIONED_LIBDIR "Use a private subdirectory to install the headers and libs" OFF)
+option(USE_POSTFIX "Use separate postfix for each configuration to make sure you can install multiple build outputs" OFF)
 
 set(BUILD_DEFINES "" CACHE STRING "Build defines")
 
@@ -64,7 +65,7 @@ target_include_directories(pugixml PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>)
 
-if(CMAKE_CONFIGURATION_TYPES)
+if(USE_POSTFIX AND CMAKE_CONFIGURATION_TYPES)
 	set_target_properties(pugixml PROPERTIES DEBUG_POSTFIX "_d" MINSIZEREL_POSTFIX "_m" RELWITHDEBINFO_POSTFIX "_r")
 endif()
 
