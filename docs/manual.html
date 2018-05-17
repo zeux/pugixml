@@ -2244,6 +2244,14 @@ If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43
 <span class="tok-p">}</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>While using <code>children()</code> makes the intent of the code clear, note that each node can be treated as a container of child nodes, since it provides <code>begin()</code>/<code>end()</code> member functions described in the next section. Because of this, you can iterate through node&#8217;s children simply by using the node itself:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="c++"><span class="tok-k">for</span> <span class="tok-p">(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span> <span class="tok-nl">child</span><span class="tok-p">:</span> <span class="tok-n">tool</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="access.iterators"><a class="anchor" href="#access.iterators"></a><a class="link" href="#access.iterators">5.6. Traversing node/attribute lists via iterators</a></h3>
@@ -5759,7 +5767,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-04-04 08:26:07 DST
+Last updated 2018-05-17 08:04:31 DST
 </div>
 </div>
 </body>

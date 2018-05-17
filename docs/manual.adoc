@@ -1010,6 +1010,13 @@ This is an example of using these functions (link:samples/traverse_rangefor.cpp[
 include::samples/traverse_rangefor.cpp[tags=code]
 ----
 
+While using `children()` makes the intent of the code clear, note that each node can be treated as a container of child nodes, since it provides `begin()`/`end()` member functions described in the next section. Because of this, you can iterate through node's children simply by using the node itself:
+
+[source]
+----
+for (pugi::xml_node child: tool)
+----
+
 [[access.iterators]]
 === Traversing node/attribute lists via iterators
 
