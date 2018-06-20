@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
 
-project(pugixml)
+project(pugixml VERSION 1.9)
 
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
@@ -53,12 +53,11 @@ if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_C
 	target_compile_features(pugixml PUBLIC cxx_long_long_type)
 endif()
 
-set_target_properties(pugixml PROPERTIES VERSION 1.9 SOVERSION 1)
-get_target_property(PUGIXML_VERSION_STRING pugixml VERSION)
+set_target_properties(pugixml PROPERTIES VERSION ${pugixml_VERSION} SOVERSION 1)
 
 if(USE_VERSIONED_LIBDIR)
 	# Install library into its own directory under LIBDIR
-	set(INSTALL_SUFFIX /pugixml-${PUGIXML_VERSION_STRING})
+	set(INSTALL_SUFFIX /pugixml-${pugixml_VERSION})
 endif()
 
 target_include_directories(pugixml PUBLIC
