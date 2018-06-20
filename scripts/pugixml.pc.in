@@ -6,6 +6,6 @@ libdir=${exec_prefix}/lib@INSTALL_SUFFIX@
 Name: pugixml
 Description: Light-weight, simple and fast XML parser for C++ with XPath support.
 URL: http://pugixml.org/
-Version: @PUGIXML_VERSION_STRING@
+Version: @pugixml_VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lpugixml
