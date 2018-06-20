@@ -41,6 +41,7 @@ if(BUILD_SHARED_LIBS)
 	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
 else()
 	add_library(pugixml STATIC ${HEADERS} ${SOURCES})
+	set_property(TARGET pugixml PROPERTY POSITION_INDEPENDENT_CODE ON)
 endif()
 
 # Export symbols for shared library builds
