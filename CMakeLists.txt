@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 
 project(pugixml VERSION 1.9)
 
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 option(USE_VERSIONED_LIBDIR "Use a private subdirectory to install the headers and libs" OFF)
 option(USE_POSTFIX "Use separate postfix for each configuration to make sure you can install multiple build outputs" OFF)
@@ -37,11 +36,7 @@ if(DEFINED BUILD_DEFINES)
 	endforeach()
 endif()
 
-if(BUILD_SHARED_LIBS)
-	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
-else()
-	add_library(pugixml STATIC ${HEADERS} ${SOURCES})
-endif()
+add_library(pugixml ${HEADERS} ${SOURCES})
 
 # Export symbols for shared library builds
 if(BUILD_SHARED_LIBS AND MSVC)
