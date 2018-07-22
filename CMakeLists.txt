@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 project(pugixml VERSION 1.9)
 
