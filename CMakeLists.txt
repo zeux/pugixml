@@ -44,25 +44,32 @@ else()
 endif()
 
 # Export symbols for shared library builds
-if(BUILD_SHARED_LIBS AND MSVC)
-	target_compile_definitions(pugixml PRIVATE "PUGIXML_API=__declspec(dllexport)")
-endif()
+include(GenerateExportHeader)
+generate_export_header(${PROJECT_NAME})
 
 # Enable C++11 long long for compilers that are capable of it
 if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_long_long_type;")
 	target_compile_features(pugixml PUBLIC cxx_long_long_type)
 endif()
 
-set_target_properties(pugixml PROPERTIES VERSION ${pugixml_VERSION} SOVERSION 1)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    POSITION_INDEPENDENT_CODE ON
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON)
 
 if(USE_VERSIONED_LIBDIR)
 	# Install library into its own directory under LIBDIR
 	set(INSTALL_SUFFIX /pugixml-${pugixml_VERSION})
 endif()
 
-target_include_directories(pugixml PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
-	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>)
+target_include_directories(pugixml
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>
+	PRIVATE
+		${CMAKE_CURRENT_BINARY_DIR})
 
 if(USE_POSTFIX AND CMAKE_CONFIGURATION_TYPES)
 	set_target_properties(pugixml PROPERTIES DEBUG_POSTFIX "_d" MINSIZEREL_POSTFIX "_m" RELWITHDEBINFO_POSTFIX "_r")
@@ -78,12 +85,16 @@ install(EXPORT pugixml-config DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
 configure_file(scripts/pugixml.pc.in ${PROJECT_BINARY_DIR}/pugixml.pc @ONLY)
 install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/pugixml_export.h DESTINATION include)
+
 if(BUILD_TESTS)
 	file(GLOB TEST_SOURCES tests/*.cpp)
 	file(GLOB FUZZ_SOURCES tests/fuzz_*.cpp)
 	list(REMOVE_ITEM TEST_SOURCES ${FUZZ_SOURCES})
 
 	add_executable(check ${TEST_SOURCES})
+	target_include_directories(check PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 	target_link_libraries(check pugixml)
 	add_custom_command(TARGET check POST_BUILD COMMAND check WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
