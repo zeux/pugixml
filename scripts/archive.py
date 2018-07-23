@@ -24,6 +24,7 @@ def write_zip(target, arcprefix, timestamp, sources):
 			info = zipfile.ZipInfo(path)
 			info.date_time = time.localtime(timestamp)
 			info.compress_type = zipfile.ZIP_DEFLATED
+			info.external_attr = 0644 << 16L
 			archive.writestr(info, data)
 
 def write_tar(target, arcprefix, timestamp, sources, compression):
