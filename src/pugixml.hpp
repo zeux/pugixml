@@ -12,7 +12,7 @@
  */
 
 #ifndef PUGIXML_VERSION
-// Define version macro; evaluates to major * 100 + minor so that it's safe to use in less-than comparisons
+// Define version macro; evaluates to major * 100 + minor * 10 + patch so that it's safe to use in less-than comparisons
 #	define PUGIXML_VERSION 190
 #endif
 
