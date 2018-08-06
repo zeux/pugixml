@@ -9,15 +9,15 @@
   </Type>
   
   <Type Name="pugi::xml_node_struct">
-    <DisplayString Condition="(header &amp; 0xf) == 0">null</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 1">document</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 2">&lt;{name,sb}&gt;</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 3">{value,sb}</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 4">&lt;![CDATA[{value,sb}]]&gt;</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 5">&lt;--{value,sb}--&gt;</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 6">&lt;?{name,sb}?&gt;</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 7">&lt;?{name,sb}?&gt;</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 8">&lt;!DOCTYPE {value,sb}&gt;</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 0">node_null</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 1">node_document</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 2">node_element name={name,na}</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 3">node_pcdata value={value,na}</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 4">node_cdata value={value,na}</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 5">node_comment value={value,na}</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 6">node_pi name={name,na}</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 7">node_declaration name={name,na}</DisplayString>
+    <DisplayString Condition="(header &amp; 0xf) == 8">node_doctype value={value,na}</DisplayString>
     <Expand>
       <Item Name="value" Condition="value">value,na</Item>
       <Synthetic Name="attributes" Condition="first_attribute">
@@ -26,7 +26,7 @@
             <Variable Name="curr" InitialValue="first_attribute" />
 
             <Loop Condition="curr">
-              <Item Name="{curr->name,sb}">curr,view(child)na</Item>
+              <Item Name="{curr->name,na}">curr,view(child)na</Item>
               <Exec>curr = curr->next_attribute</Exec>
             </Loop>
           </CustomListItems>
@@ -49,8 +49,8 @@
   </Type>
   
   <Type Name="pugi::xml_attribute_struct">
-    <DisplayString ExcludeView="child">{name,sb} = {value,sb}</DisplayString>
-    <DisplayString>{value,sb}</DisplayString>
+    <DisplayString ExcludeView="child">{name,na} = {value,na}</DisplayString>
+    <DisplayString>{value,na}</DisplayString>
     <Expand>
       <Item Name="name">name,na</Item>
       <Item Name="value">value,na</Item>
@@ -58,7 +58,7 @@
   </Type>
   
   <Type Name="pugi::xpath_node">
-    <DisplayString Condition="_node._root &amp;&amp; _attribute._attr">{_node,na} "{_attribute._attr->name,sb}"="{_attribute._attr->value,sb}"</DisplayString>
+    <DisplayString Condition="_node._root &amp;&amp; _attribute._attr">{_node,na} "{_attribute._attr->name,na}"="{_attribute._attr->value,na}"</DisplayString>
     <DisplayString Condition="_node._root">{_node,na}</DisplayString>
     <DisplayString Condition="_attribute._attr">{_attribute}</DisplayString>
     <DisplayString>empty</DisplayString>
