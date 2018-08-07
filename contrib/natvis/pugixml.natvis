@@ -9,15 +9,10 @@
   </Type>
   
   <Type Name="pugi::xml_node_struct">
-    <DisplayString Condition="(header &amp; 0xf) == 0">node_null</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 1">node_document</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 2">node_element name={name,na}</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 3">node_pcdata value={value,na}</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 4">node_cdata value={value,na}</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 5">node_comment value={value,na}</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 6">node_pi name={name,na}</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 7">node_declaration name={name,na}</DisplayString>
-    <DisplayString Condition="(header &amp; 0xf) == 8">node_doctype value={value,na}</DisplayString>
+    <DisplayString Condition="name &amp;&amp; value">{(pugi::xml_node_type)(header &amp; 0xf),en} name={name,na} value={value,na}</DisplayString>
+    <DisplayString Condition="name">{(pugi::xml_node_type)(header &amp; 0xf),en} name={name,na}</DisplayString>
+    <DisplayString Condition="value">{(pugi::xml_node_type)(header &amp; 0xf),en} value={value,na}</DisplayString>
+    <DisplayString>{(pugi::xml_node_type)(header &amp; 0xf),en}</DisplayString>
     <Expand>
       <Item Name="value" Condition="value">value,na</Item>
       <Synthetic Name="attributes" Condition="first_attribute">
