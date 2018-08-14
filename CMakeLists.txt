@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
 project(pugixml VERSION 1.9)
 
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 option(USE_VERSIONED_LIBDIR "Use a private subdirectory to install the headers and libs" OFF)
 option(USE_POSTFIX "Use separate postfix for each configuration to make sure you can install multiple build outputs" OFF)
@@ -37,11 +36,7 @@ if(DEFINED BUILD_DEFINES)
 	endforeach()
 endif()
 
-if(BUILD_SHARED_LIBS)
-	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
-else()
-	add_library(pugixml STATIC ${HEADERS} ${SOURCES})
-endif()
+add_library(pugixml ${HEADERS} ${SOURCES})
 
 # Export symbols for shared library builds
 if(BUILD_SHARED_LIBS AND MSVC)
@@ -53,7 +48,10 @@ if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_C
 	target_compile_features(pugixml PUBLIC cxx_long_long_type)
 endif()
 
-set_target_properties(pugixml PROPERTIES VERSION ${pugixml_VERSION} SOVERSION 1)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    POSITION_INDEPENDENT_CODE ON)
 
 if(USE_VERSIONED_LIBDIR)
 	# Install library into its own directory under LIBDIR
