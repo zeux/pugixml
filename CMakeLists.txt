@@ -53,7 +53,7 @@ if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_C
 	target_compile_features(pugixml PUBLIC cxx_long_long_type)
 endif()
 
-set_target_properties(pugixml PROPERTIES VERSION ${pugixml_VERSION} SOVERSION 1)
+set_target_properties(pugixml PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 
 if(USE_VERSIONED_LIBDIR)
 	# Install library into its own directory under LIBDIR
