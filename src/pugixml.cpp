@@ -10871,13 +10871,14 @@ PUGI__NS_BEGIN
 			// Rewrite [position()=expr] with [expr]
 			// Note that this step has to go before classification to recognize [position()=1]
 			if ((_type == ast_filter || _type == ast_predicate) &&
+				_right && // workaround for clang static analyzer (_right is never null for ast_filter/ast_predicate)
 				_right->_type == ast_op_equal && _right->_left->_type == ast_func_position && _right->_right->_rettype == xpath_type_number)
 			{
 				_right = _right->_right;
 			}
 
 			// Classify filter/predicate ops to perform various optimizations during evaluation
-			if (_type == ast_filter || _type == ast_predicate)
+			if ((_type == ast_filter || _type == ast_predicate) && _right) // workaround for clang static analyzer (_right is never null for ast_filter/ast_predicate)
 			{
 				assert(_test == predicate_default);
 
@@ -10893,8 +10894,8 @@ PUGI__NS_BEGIN
 			// The former is a full form of //foo, the latter is much faster since it executes the node test immediately
 			// Do a similar kind of rewrite for self/descendant/descendant-or-self axes
 			// Note that we only rewrite positionally invariant steps (//foo[1] != /descendant::foo[1])
-			if (_type == ast_step && (_axis == axis_child || _axis == axis_self || _axis == axis_descendant || _axis == axis_descendant_or_self) && _left &&
-				_left->_type == ast_step && _left->_axis == axis_descendant_or_self && _left->_test == nodetest_type_node && !_left->_right &&
+			if (_type == ast_step && (_axis == axis_child || _axis == axis_self || _axis == axis_descendant || _axis == axis_descendant_or_self) &&
+				_left && _left->_type == ast_step && _left->_axis == axis_descendant_or_self && _left->_test == nodetest_type_node && !_left->_right &&
 				is_posinv_step())
 			{
 				if (_axis == axis_child || _axis == axis_descendant)
@@ -10906,7 +10907,9 @@ PUGI__NS_BEGIN
 			}
 
 			// Use optimized lookup table implementation for translate() with constant arguments
-			if (_type == ast_func_translate && _right->_type == ast_string_constant && _right->_next->_type == ast_string_constant)
+			if (_type == ast_func_translate &&
+				_right && // workaround for clang static analyzer (_right is never null for ast_func_translate)
+				_right->_type == ast_string_constant && _right->_next->_type == ast_string_constant)
 			{
 				unsigned char* table = translate_table_generate(alloc, _right->_data.string, _right->_next->_data.string);
 
@@ -10919,6 +10922,7 @@ PUGI__NS_BEGIN
 
 			// Use optimized path for @attr = 'value' or @attr = $value
 			if (_type == ast_op_equal &&
+				_left && // workaround for clang static analyzer (_left is never null for ast_op_equal)
 				_left->_type == ast_step && _left->_axis == axis_attribute && _left->_test == nodetest_name && !_left->_left && !_left->_right &&
 				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->_rettype == xpath_type_string)))
 			{
