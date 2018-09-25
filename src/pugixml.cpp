@@ -12013,74 +12013,61 @@ namespace pugi
 
 		size_t size_ = static_cast<size_t>(end_ - begin_);
 
-		if (size_ <= 1)
+		// use internal buffer for 0 or 1 elements, heap buffer otherwise
+		xpath_node* storage = (size_ <= 1) ? _storage : static_cast<xpath_node*>(impl::xml_memory::allocate(size_ * sizeof(xpath_node)));
+
+		if (!storage)
 		{
-			// deallocate old buffer
-			if (_begin != &_storage) impl::xml_memory::deallocate(_begin);
-
-			// use internal buffer
-			if (begin_ != end_) _storage = *begin_;
-
-			_begin = &_storage;
-			_end = &_storage + size_;
-			_type = type_;
+		#ifdef PUGIXML_NO_EXCEPTIONS
+			return;
+		#else
+			throw std::bad_alloc();
+		#endif
 		}
-		else
-		{
-			// make heap copy
-			xpath_node* storage = static_cast<xpath_node*>(impl::xml_memory::allocate(size_ * sizeof(xpath_node)));
 
-			if (!storage)
-			{
-			#ifdef PUGIXML_NO_EXCEPTIONS
-				return;
-			#else
-				throw std::bad_alloc();
-			#endif
-			}
+		// deallocate old buffer
+		if (_begin != _storage)
+			impl::xml_memory::deallocate(_begin);
 
+		// size check is necessary because for begin_ = end_ = nullptr, memcpy is UB
+		if (size_)
 			memcpy(storage, begin_, size_ * sizeof(xpath_node));
 
-			// deallocate old buffer
-			if (_begin != &_storage) impl::xml_memory::deallocate(_begin);
-
-			// finalize
-			_begin = storage;
-			_end = storage + size_;
-			_type = type_;
-		}
+		_begin = storage;
+		_end = storage + size_;
+		_type = type_;
 	}
 
 #ifdef PUGIXML_HAS_MOVE
 	PUGI__FN void xpath_node_set::_move(xpath_node_set& rhs) PUGIXML_NOEXCEPT
 	{
 		_type = rhs._type;
-		_storage = rhs._storage;
-		_begin = (rhs._begin == &rhs._storage) ? &_storage : rhs._begin;
+		_storage[0] = rhs._storage[0];
+		_begin = (rhs._begin == rhs._storage) ? _storage : rhs._begin;
 		_end = _begin + (rhs._end - rhs._begin);
 
 		rhs._type = type_unsorted;
-		rhs._begin = &rhs._storage;
-		rhs._end = rhs._begin;
+		rhs._begin = rhs._storage;
+		rhs._end = rhs._storage;
 	}
 #endif
 
-	PUGI__FN xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(): _type(type_unsorted), _begin(_storage), _end(_storage)
 	{
 	}
 
-	PUGI__FN xpath_node_set::xpath_node_set(const_iterator begin_, const_iterator end_, type_t type_): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(const_iterator begin_, const_iterator end_, type_t type_): _type(type_unsorted), _begin(_storage), _end(_storage)
 	{
 		_assign(begin_, end_, type_);
 	}
 
 	PUGI__FN xpath_node_set::~xpath_node_set()
 	{
-		if (_begin != &_storage)
+		if (_begin != _storage)
 			impl::xml_memory::deallocate(_begin);
 	}
 
-	PUGI__FN xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(const xpath_node_set& ns): _type(type_unsorted), _begin(_storage), _end(_storage)
 	{
 		_assign(ns._begin, ns._end, ns._type);
 	}
@@ -12095,7 +12082,7 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
-	PUGI__FN xpath_node_set::xpath_node_set(xpath_node_set&& rhs) PUGIXML_NOEXCEPT: _type(type_unsorted), _begin(&_storage), _end(&_storage)
+	PUGI__FN xpath_node_set::xpath_node_set(xpath_node_set&& rhs) PUGIXML_NOEXCEPT: _type(type_unsorted), _begin(_storage), _end(_storage)
 	{
 		_move(rhs);
 	}
@@ -12104,7 +12091,7 @@ namespace pugi
 	{
 		if (this == &rhs) return *this;
 
-		if (_begin != &_storage)
+		if (_begin != _storage)
 			impl::xml_memory::deallocate(_begin);
 
 		_move(rhs);
