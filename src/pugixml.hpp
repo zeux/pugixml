@@ -1251,6 +1251,12 @@ namespace pugi
 	};
 
 	#ifndef PUGIXML_NO_EXCEPTIONS
+        #if defined(_MSC_VER)
+          // C4275 can be ignored in Visual C++ if you are deriving
+          // from a type in the Standard C++ Library
+          #pragma warning(push)
+          #pragma warning(disable: 4275)
+        #endif
 	// XPath exception class
 	class PUGIXML_CLASS xpath_exception: public std::exception
 	{
@@ -1267,6 +1273,9 @@ namespace pugi
 		// Get parse result
 		const xpath_parse_result& result() const;
 	};
+        #if defined(_MSC_VER)
+          #pragma warning(pop)
+        #endif
 	#endif
 
 	// XPath node class (either xml_node or xml_attribute)
