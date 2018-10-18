@@ -5173,7 +5173,7 @@ struct xml_stream_chunk
 template <typename T>
 PUGI__FN xml_parse_status load_stream_data_noseek(std::basic_istream<T>& stream, void** out_buffer, size_t* out_size)
 {
-	auto_deleter<xml_stream_chunk<T>> chunks(0, xml_stream_chunk<T>::destroy);
+	auto_deleter<xml_stream_chunk<T> > chunks(0, xml_stream_chunk<T>::destroy);
 
 	// read file to a chunk list
 	size_t total = 0;
@@ -5395,13 +5395,13 @@ PUGI__FN void xml_writer_file::write(const void* data, size_t size)
 }
 
 #ifndef PUGIXML_NO_STL
-PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<char, std::char_traits<char>>& stream)
+PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<char, std::char_traits<char> >& stream)
     : narrow_stream(&stream)
     , wide_stream(0)
 {
 }
 
-PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<wchar_t, std::char_traits<wchar_t>>& stream)
+PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream)
     : narrow_stream(0)
     , wide_stream(&stream)
 {
@@ -6754,14 +6754,14 @@ PUGI__FN void xml_node::print(xml_writer& writer, const char_t* indent, unsigned
 }
 
 #ifndef PUGIXML_NO_STL
-PUGI__FN void xml_node::print(std::basic_ostream<char, std::char_traits<char>>& stream, const char_t* indent, unsigned int flags, xml_encoding encoding, unsigned int depth) const
+PUGI__FN void xml_node::print(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent, unsigned int flags, xml_encoding encoding, unsigned int depth) const
 {
 	xml_writer_stream writer(stream);
 
 	print(writer, indent, flags, encoding, depth);
 }
 
-PUGI__FN void xml_node::print(std::basic_ostream<wchar_t, std::char_traits<wchar_t>>& stream, const char_t* indent, unsigned int flags, unsigned int depth) const
+PUGI__FN void xml_node::print(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent, unsigned int flags, unsigned int depth) const
 {
 	xml_writer_stream writer(stream);
 
@@ -7588,14 +7588,14 @@ PUGI__FN void xml_document::_move(xml_document& rhs) PUGIXML_NOEXCEPT_IF_NOT_COM
 #endif
 
 #ifndef PUGIXML_NO_STL
-PUGI__FN xml_parse_result xml_document::load(std::basic_istream<char, std::char_traits<char>>& stream, unsigned int options, xml_encoding encoding)
+PUGI__FN xml_parse_result xml_document::load(std::basic_istream<char, std::char_traits<char> >& stream, unsigned int options, xml_encoding encoding)
 {
 	reset();
 
 	return impl::load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding, &_buffer);
 }
 
-PUGI__FN xml_parse_result xml_document::load(std::basic_istream<wchar_t, std::char_traits<wchar_t>>& stream, unsigned int options)
+PUGI__FN xml_parse_result xml_document::load(std::basic_istream<wchar_t, std::char_traits<wchar_t> >& stream, unsigned int options)
 {
 	reset();
 
@@ -7692,14 +7692,14 @@ PUGI__FN void xml_document::save(xml_writer& writer, const char_t* indent, unsig
 }
 
 #ifndef PUGIXML_NO_STL
-PUGI__FN void xml_document::save(std::basic_ostream<char, std::char_traits<char>>& stream, const char_t* indent, unsigned int flags, xml_encoding encoding) const
+PUGI__FN void xml_document::save(std::basic_ostream<char, std::char_traits<char> >& stream, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 {
 	xml_writer_stream writer(stream);
 
 	save(writer, indent, flags, encoding);
 }
 
-PUGI__FN void xml_document::save(std::basic_ostream<wchar_t, std::char_traits<wchar_t>>& stream, const char_t* indent, unsigned int flags) const
+PUGI__FN void xml_document::save(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream, const char_t* indent, unsigned int flags) const
 {
 	xml_writer_stream writer(stream);
 
