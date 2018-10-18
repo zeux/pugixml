@@ -283,7 +283,7 @@ class xpath_variable_set;
 template <typename It>
 class xml_object_range
 {
-  public:
+public:
 	typedef It const_iterator;
 	typedef It iterator;
 
@@ -296,14 +296,14 @@ class xml_object_range
 	It begin() const { return _begin; }
 	It end() const { return _end; }
 
-  private:
+private:
 	It _begin, _end;
 };
 
 // Writer interface for node printing (see xml_node::print)
 class PUGIXML_CLASS xml_writer
 {
-  public:
+public:
 	virtual ~xml_writer() {}
 
 	// Write memory chunk into stream/file/whatever
@@ -313,13 +313,13 @@ class PUGIXML_CLASS xml_writer
 // xml_writer implementation for FILE*
 class PUGIXML_CLASS xml_writer_file : public xml_writer
 {
-  public:
+public:
 	// Construct writer from a FILE* object; void* is used to avoid header dependencies on stdio
 	xml_writer_file(void* file);
 
 	virtual void write(const void* data, size_t size) PUGIXML_OVERRIDE;
 
-  private:
+private:
 	void* file;
 };
 
@@ -327,14 +327,14 @@ class PUGIXML_CLASS xml_writer_file : public xml_writer
 // xml_writer implementation for streams
 class PUGIXML_CLASS xml_writer_stream : public xml_writer
 {
-  public:
+public:
 	// Construct writer from an output stream object
 	xml_writer_stream(std::basic_ostream<char, std::char_traits<char> >& stream);
 	xml_writer_stream(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream);
 
 	virtual void write(const void* data, size_t size) PUGIXML_OVERRIDE;
 
-  private:
+private:
 	std::basic_ostream<char, std::char_traits<char> >* narrow_stream;
 	std::basic_ostream<wchar_t, std::char_traits<wchar_t> >* wide_stream;
 };
@@ -346,12 +346,12 @@ class PUGIXML_CLASS xml_attribute
 	friend class xml_attribute_iterator;
 	friend class xml_node;
 
-  private:
+private:
 	xml_attribute_struct* _attr;
 
 	typedef void (*unspecified_bool_type)(xml_attribute***);
 
-  public:
+public:
 	// Default constructor. Constructs an empty attribute.
 	xml_attribute();
 
@@ -453,12 +453,12 @@ class PUGIXML_CLASS xml_node
 	friend class xml_node_iterator;
 	friend class xml_named_node_iterator;
 
-  protected:
+protected:
 	xml_node_struct* _root;
 
 	typedef void (*unspecified_bool_type)(xml_node***);
 
-  public:
+public:
 	// Default constructor. Constructs an empty node.
 	xml_node();
 
@@ -726,7 +726,7 @@ class PUGIXML_CLASS xml_text
 	xml_node_struct* _data_new();
 	xml_node_struct* _data() const;
 
-  public:
+public:
 	// Default constructor. Constructs an empty object.
 	xml_text();
 
@@ -806,13 +806,13 @@ class PUGIXML_CLASS xml_node_iterator
 {
 	friend class xml_node;
 
-  private:
+private:
 	mutable xml_node _wrap;
 	xml_node _parent;
 
 	xml_node_iterator(xml_node_struct* ref, xml_node_struct* parent);
 
-  public:
+public:
 	// Iterator traits
 	typedef ptrdiff_t difference_type;
 	typedef xml_node value_type;
@@ -848,13 +848,13 @@ class PUGIXML_CLASS xml_attribute_iterator
 {
 	friend class xml_node;
 
-  private:
+private:
 	mutable xml_attribute _wrap;
 	xml_node _parent;
 
 	xml_attribute_iterator(xml_attribute_struct* ref, xml_node_struct* parent);
 
-  public:
+public:
 	// Iterator traits
 	typedef ptrdiff_t difference_type;
 	typedef xml_attribute value_type;
@@ -890,7 +890,7 @@ class PUGIXML_CLASS xml_named_node_iterator
 {
 	friend class xml_node;
 
-  public:
+public:
 	// Iterator traits
 	typedef ptrdiff_t difference_type;
 	typedef xml_node value_type;
@@ -920,7 +920,7 @@ class PUGIXML_CLASS xml_named_node_iterator
 	const xml_named_node_iterator& operator--();
 	xml_named_node_iterator operator--(int);
 
-  private:
+private:
 	mutable xml_node _wrap;
 	xml_node _parent;
 	const char_t* _name;
@@ -933,14 +933,14 @@ class PUGIXML_CLASS xml_tree_walker
 {
 	friend class xml_node;
 
-  private:
+private:
 	int _depth;
 
-  protected:
+protected:
 	// Get current traversal depth
 	int depth() const;
 
-  public:
+public:
 	xml_tree_walker();
 	virtual ~xml_tree_walker();
 
@@ -1006,7 +1006,7 @@ struct PUGIXML_CLASS xml_parse_result
 // Document class (DOM tree root)
 class PUGIXML_CLASS xml_document : public xml_node
 {
-  private:
+private:
 	char_t* _buffer;
 
 	char _memory[192];
@@ -1019,7 +1019,7 @@ class PUGIXML_CLASS xml_document : public xml_node
 	void _destroy();
 	void _move(xml_document& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
 
-  public:
+public:
 	// Default constructor, makes empty document
 	xml_document();
 
@@ -1117,7 +1117,7 @@ class PUGIXML_CLASS xpath_variable
 {
 	friend class xpath_variable_set;
 
-  protected:
+protected:
 	xpath_value_type _type;
 	xpath_variable* _next;
 
@@ -1127,7 +1127,7 @@ class PUGIXML_CLASS xpath_variable
 	xpath_variable(const xpath_variable&);
 	xpath_variable& operator=(const xpath_variable&);
 
-  public:
+public:
 	// Get variable name
 	const char_t* name() const;
 
@@ -1150,7 +1150,7 @@ class PUGIXML_CLASS xpath_variable
 // A set of XPath variables
 class PUGIXML_CLASS xpath_variable_set
 {
-  private:
+private:
 	xpath_variable* _data[64];
 
 	void _assign(const xpath_variable_set& rhs);
@@ -1161,7 +1161,7 @@ class PUGIXML_CLASS xpath_variable_set
 	static bool _clone(xpath_variable* var, xpath_variable** out_result);
 	static void _destroy(xpath_variable* var);
 
-  public:
+public:
 	// Default constructor/destructor
 	xpath_variable_set();
 	~xpath_variable_set();
@@ -1193,7 +1193,7 @@ class PUGIXML_CLASS xpath_variable_set
 // A compiled XPath query object
 class PUGIXML_CLASS xpath_query
 {
-  private:
+private:
 	void* _impl;
 	xpath_parse_result _result;
 
@@ -1203,7 +1203,7 @@ class PUGIXML_CLASS xpath_query
 	xpath_query(const xpath_query&);
 	xpath_query& operator=(const xpath_query&);
 
-  public:
+public:
 	// Construct a compiled object from XPath expression.
 	// If PUGIXML_NO_EXCEPTIONS is not defined, throws xpath_exception on compilation errors.
 	explicit xpath_query(const char_t* query, xpath_variable_set* variables = 0);
@@ -1274,10 +1274,10 @@ class PUGIXML_CLASS xpath_query
 // XPath exception class
 class PUGIXML_CLASS xpath_exception : public std::exception
 {
-  private:
+private:
 	xpath_parse_result _result;
 
-  public:
+public:
 	// Construct exception from parse result
 	explicit xpath_exception(const xpath_parse_result& result);
 
@@ -1295,13 +1295,13 @@ class PUGIXML_CLASS xpath_exception : public std::exception
 // XPath node class (either xml_node or xml_attribute)
 class PUGIXML_CLASS xpath_node
 {
-  private:
+private:
 	xml_node _node;
 	xml_attribute _attribute;
 
 	typedef void (*unspecified_bool_type)(xpath_node***);
 
-  public:
+public:
 	// Default constructor; constructs empty XPath node
 	xpath_node();
 
@@ -1336,7 +1336,7 @@ bool PUGIXML_FUNCTION operator||(const xpath_node& lhs, bool rhs);
 // A fixed-size collection of XPath nodes
 class PUGIXML_CLASS xpath_node_set
 {
-  public:
+public:
 	// Collection type
 	enum type_t
 	{
@@ -1392,7 +1392,7 @@ class PUGIXML_CLASS xpath_node_set
 	// Check if collection is empty
 	bool empty() const;
 
-  private:
+private:
 	type_t _type;
 
 	xpath_node _storage[1];

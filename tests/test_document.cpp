@@ -204,7 +204,7 @@ TEST(document_load_stream_wide_error_previous)
 template <typename T>
 class char_array_buffer : public std::basic_streambuf<T>
 {
-  public:
+public:
 	char_array_buffer(T* begin, T* end)
 	{
 		this->setg(begin, begin, end);
@@ -310,7 +310,7 @@ TEST(document_load_stream_wide_nonseekable_out_of_memory_large)
 template <typename T>
 class seek_fail_buffer : public std::basic_streambuf<T>
 {
-  public:
+public:
 	int seeks;
 
 	seek_fail_buffer()
@@ -348,7 +348,7 @@ TEST(document_load_stream_wide_seekable_fail_seek)
 template <typename T>
 class tell_fail_buffer : public std::basic_streambuf<T>
 {
-  public:
+public:
 	int seeks;
 
 	tell_fail_buffer()
@@ -391,7 +391,7 @@ TEST(document_load_stream_wide_seekable_fail_tell)
 template <typename T>
 class read_fail_buffer : public std::basic_streambuf<T>
 {
-  public:
+public:
 	typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
 	{
 		throw std::runtime_error("underflow failed");
@@ -423,7 +423,7 @@ TEST(document_load_stream_wide_nonseekable_fail_read)
 template <typename T>
 class read_fail_seekable_buffer : public std::basic_streambuf<T>
 {
-  public:
+public:
 	typename std::basic_streambuf<T>::pos_type offset;
 
 	read_fail_seekable_buffer()

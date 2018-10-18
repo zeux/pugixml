@@ -320,7 +320,7 @@ PUGI__NS_END
 PUGI__NS_BEGIN
 class compact_hash_table
 {
-  public:
+public:
 	compact_hash_table()
 	    : _items(0)
 	    , _capacity(0)
@@ -375,7 +375,7 @@ class compact_hash_table
 		return true;
 	}
 
-  private:
+private:
 	struct item_t
 	{
 		const void* key;
@@ -793,7 +793,7 @@ static const uintptr_t compact_alignment = 1 << compact_alignment_log2;
 
 class compact_header
 {
-  public:
+public:
 	compact_header(xml_memory_page* page, unsigned int flags)
 	{
 		PUGI__STATIC_ASSERT(xml_memory_block_alignment == compact_alignment);
@@ -829,7 +829,7 @@ class compact_header
 		return const_cast<xml_memory_page*>(reinterpret_cast<const xml_memory_page*>(static_cast<const void*>(page)));
 	}
 
-  private:
+private:
 	unsigned char _page;
 	unsigned char _flags;
 };
@@ -856,7 +856,7 @@ PUGI__FN_NO_INLINE void compact_set_value(const void* object, T* value)
 template <typename T, int header_offset, int start = -126>
 class compact_pointer
 {
-  public:
+public:
 	compact_pointer()
 	    : _data(0)
 	{
@@ -913,14 +913,14 @@ class compact_pointer
 		return *this;
 	}
 
-  private:
+private:
 	unsigned char _data;
 };
 
 template <typename T, int header_offset>
 class compact_pointer_parent
 {
-  public:
+public:
 	compact_pointer_parent()
 	    : _data(0)
 	{
@@ -995,14 +995,14 @@ class compact_pointer_parent
 		return *this;
 	}
 
-  private:
+private:
 	uint16_t _data;
 };
 
 template <int header_offset, int base_offset>
 class compact_string
 {
-  public:
+public:
 	compact_string()
 	    : _data(0)
 	{
@@ -1088,7 +1088,7 @@ class compact_string
 			return 0;
 	}
 
-  private:
+private:
 	unsigned char _data;
 };
 PUGI__NS_END
@@ -3992,7 +3992,7 @@ class xml_buffered_writer
 	xml_buffered_writer(const xml_buffered_writer&);
 	xml_buffered_writer& operator=(const xml_buffered_writer&);
 
-  public:
+public:
 	xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding)
 	    : writer(writer_)
 	    , bufsize(0)
@@ -8242,7 +8242,7 @@ class xpath_string
 	{
 	}
 
-  public:
+public:
 	static xpath_string from_const(const char_t* str)
 	{
 		return xpath_string(str, false, 0);
@@ -9400,7 +9400,7 @@ class xpath_node_set_raw
 	xpath_node* _end;
 	xpath_node* _eos;
 
-  public:
+public:
 	xpath_node_set_raw()
 	    : _type(xpath_node_set::type_unsorted)
 	    , _begin(0)
@@ -9595,7 +9595,7 @@ class xpath_lexer
 
 	lexeme_t _cur_lexeme;
 
-  public:
+public:
 	explicit xpath_lexer(const char_t* query)
 	    : _cur(query)
 	{
@@ -10024,7 +10024,7 @@ const axis_t axis_to_type<N>::axis = N;
 
 class xpath_ast_node
 {
-  private:
+private:
 	// node type
 	char _type;
 	char _rettype;
@@ -10789,7 +10789,7 @@ class xpath_ast_node
 		return ns;
 	}
 
-  public:
+public:
 	xpath_ast_node(ast_type_t type, xpath_value_type rettype_, const char_t* value)
 	    : _type(static_cast<char>(type))
 	    , _rettype(static_cast<char>(rettype_))

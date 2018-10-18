@@ -108,7 +108,7 @@ struct dummy_fixture
 			CHECK(doc.load_string(PUGIXML_TEXT(xml), flags)); \
 		} \
 \
-	  private: \
+	private: \
 		test_fixture_##name(const test_fixture_##name&); \
 		test_fixture_##name& operator=(const test_fixture_##name&); \
 	}; \
