@@ -5,8 +5,8 @@
 
 #include "writer_string.hpp"
 
-#include <math.h>
 #include <float.h>
+#include <math.h>
 #include <string.h>
 #include <wchar.h>
 
@@ -33,10 +33,12 @@ static void build_document_order(std::vector<pugi::xpath_node>& result, pugi::xm
 			cur = cur.next_sibling();
 		else
 		{
-			while (cur && !cur.next_sibling()) cur = cur.parent();
+			while (cur && !cur.next_sibling())
+				cur = cur.parent();
 			cur = cur.next_sibling();
 
-			if (!cur) break;
+			if (!cur)
+				break;
 		}
 	}
 }
@@ -45,11 +47,11 @@ static void build_document_order(std::vector<pugi::xpath_node>& result, pugi::xm
 bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs)
 {
 	return (!lhs || !rhs) ? lhs == rhs :
-	#ifdef PUGIXML_WCHAR_MODE
-		wcscmp(lhs, rhs) == 0;
-	#else
-		strcmp(lhs, rhs) == 0;
-	#endif
+#ifdef PUGIXML_WCHAR_MODE
+	                      wcscmp(lhs, rhs) == 0;
+#else
+	                      strcmp(lhs, rhs) == 0;
+#endif
 }
 
 bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const pugi::char_t* indent, unsigned int flags)
@@ -83,7 +85,8 @@ static size_t strlength(const pugi::char_t* s)
 bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, const pugi::char_t* expected)
 {
 	pugi::xpath_query q(query, variables);
-	if (!q) return false;
+	if (!q)
+		return false;
 
 	const size_t capacity = 64;
 	pugi::char_t result[capacity];
@@ -104,7 +107,8 @@ bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, 
 bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, bool expected)
 {
 	pugi::xpath_query q(query, variables);
-	if (!q) return false;
+	if (!q)
+		return false;
 
 	return q.evaluate_boolean(node) == expected;
 }
@@ -112,7 +116,8 @@ bool test_xpath_boolean(const pugi::xpath_node& node, const pugi::char_t* query,
 bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, double expected)
 {
 	pugi::xpath_query q(query, variables);
-	if (!q) return false;
+	if (!q)
+		return false;
 
 	double value = q.evaluate_number(node);
 	double absolute_error = fabs(value - expected);
@@ -124,7 +129,8 @@ bool test_xpath_number(const pugi::xpath_node& node, const pugi::char_t* query, 
 bool test_xpath_number_nan(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables)
 {
 	pugi::xpath_query q(query, variables);
-	if (!q) return false;
+	if (!q)
+		return false;
 
 	return test_double_nan(q.evaluate_number(node));
 }
@@ -155,12 +161,15 @@ void xpath_node_set_tester::check(bool condition)
 	}
 }
 
-xpath_node_set_tester::xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message_): last(0), message(message_)
+xpath_node_set_tester::xpath_node_set_tester(const pugi::xpath_node_set& set, const char* message_)
+    : last(0)
+    , message(message_)
 {
 	result = set;
 
 	// only sort unsorted sets so that we're able to verify reverse order for some axes
-	if (result.type() == pugi::xpath_node_set::type_unsorted) result.sort();
+	if (result.type() == pugi::xpath_node_set::type_unsorted)
+		result.sort();
 
 	if (result.empty())
 	{

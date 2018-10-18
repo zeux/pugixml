@@ -73,9 +73,9 @@ TEST(as_wide_invalid)
 
 TEST(as_wide_string)
 {
-    std::string s = "abcd";
+	std::string s = "abcd";
 
-    CHECK(as_wide(s) == L"abcd");
+	CHECK(as_wide(s) == L"abcd");
 }
 
 TEST(as_utf8_empty)
@@ -110,11 +110,11 @@ TEST(as_utf8_valid_astral)
 	}
 	else
 	{
-	#ifdef U_LITERALS
+#ifdef U_LITERALS
 		CHECK(as_utf8(L"\uda1d\ude24 \udbc0\udfff") == "\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
-	#else
+#else
 		CHECK(as_utf8(L"\xda1d\xde24 \xdbc0\xdfff") == "\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
-	#endif
+#endif
 	}
 }
 
@@ -125,29 +125,29 @@ TEST(as_utf8_invalid)
 	if (wcharsize == 2)
 	{
 		// check non-terminated degenerate handling
-	#ifdef U_LITERALS
+#ifdef U_LITERALS
 		CHECK(as_utf8(L"a\uda1d") == "a");
 		CHECK(as_utf8(L"a\uda1d_") == "a_");
-	#else
+#else
 		CHECK(as_utf8(L"a\xda1d") == "a");
 		CHECK(as_utf8(L"a\xda1d_") == "a_");
-	#endif
+#endif
 
 		// check incorrect leading code
-	#ifdef U_LITERALS
+#ifdef U_LITERALS
 		CHECK(as_utf8(L"a\ude24") == "a");
 		CHECK(as_utf8(L"a\ude24_") == "a_");
-	#else
+#else
 		CHECK(as_utf8(L"a\xde24") == "a");
 		CHECK(as_utf8(L"a\xde24_") == "a_");
-	#endif
+#endif
 	}
 }
 
 TEST(as_utf8_string)
 {
-    std::basic_string<wchar_t> s = L"abcd";
+	std::basic_string<wchar_t> s = L"abcd";
 
-    CHECK(as_utf8(s) == "abcd");
+	CHECK(as_utf8(s) == "abcd");
 }
 #endif

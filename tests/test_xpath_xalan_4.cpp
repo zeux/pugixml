@@ -52,12 +52,12 @@ TEST_XML_FLAGS(xpath_xalan_position_2, "<doc><a test='true'><num>1</num></a><a><
 	CHECK_XPATH_NODESET(c, STR("processing-instruction()[2]")) % 34;
 	CHECK_XPATH_NODESET(c, STR("processing-instruction('pi')[2]")) % 34;
 	CHECK_XPATH_NODESET(c, STR("comment()[2]")) % 36;
-    CHECK_XPATH_NODESET(c, STR("a/*[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 29;
-    CHECK_XPATH_NODESET(c, STR("a/child::*[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 29;
-    CHECK_XPATH_NODESET(c, STR("a/descendant::*[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 31;
-    CHECK_XPATH_NODESET(c, STR("a/child::node()[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 29;
-    CHECK_XPATH_NODESET(c, STR("a/descendant::text()[last()]")) % 6 % 9 % 12 % 16 % 19 % 22 % 26 % 32;
-    CHECK_XPATH_NODESET(c, STR("child::comment()[last()]")) % 36;
+	CHECK_XPATH_NODESET(c, STR("a/*[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 29;
+	CHECK_XPATH_NODESET(c, STR("a/child::*[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 29;
+	CHECK_XPATH_NODESET(c, STR("a/descendant::*[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 31;
+	CHECK_XPATH_NODESET(c, STR("a/child::node()[last()]")) % 5 % 8 % 11 % 15 % 18 % 21 % 25 % 29;
+	CHECK_XPATH_NODESET(c, STR("a/descendant::text()[last()]")) % 6 % 9 % 12 % 16 % 19 % 22 % 26 % 32;
+	CHECK_XPATH_NODESET(c, STR("child::comment()[last()]")) % 36;
 }
 
 TEST_XML(xpath_xalan_position_3, "<article class='whitepaper' status='Note'><articleinfo><title>AAA</title><section id='info'><title>BBB</title><para>About this article</para><section revisionflag='added'><title>CCC</title><para>This is the section titled 'ZZZ'.</para><ednote who='KKK'><title>DDD</title><para>Don't worry.</para><section revisionflag='added'><title>EEE</title><para>This is the deep subsection.</para></section></ednote></section></section></articleinfo></article>")
@@ -110,7 +110,6 @@ TEST_XML(xpath_xalan_match_1, "<root><x spot='a' num='1'/><x spot='b' num='2'/><
 	CHECK_XPATH_NODESET(c, STR("x[(position() mod 2)=1][2][@num < 10]")) % 9;
 	CHECK_XPATH_NODESET(c, STR("x[(((((2*10)-4)+9) div 5) mod 3)]")) % 6;
 }
-
 
 TEST_XML(xpath_xalan_match_2, "<doc><l1><v2>doc-l1-v2</v2><x2>doc-l1-x2</x2><l2><v3>doc-l1-l2-v3</v3><w3>doc-l1-l2-w3</w3><x3>doc-l1-l2-x3</x3><y3>doc-l1-l2-y3</y3><l3><v4>doc-l1-l2-l3-v4</v4><x4>doc-l1-l2-l3-x4</x4></l3></l2></l1></doc>")
 {

@@ -5,7 +5,7 @@
 
 #include <string>
 
-struct xml_writer_string: public pugi::xml_writer
+struct xml_writer_string : public pugi::xml_writer
 {
 	std::string contents;
 

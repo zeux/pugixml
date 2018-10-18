@@ -322,16 +322,16 @@ TEST(xpath_xalan_math_5)
 	CHECK_XPATH_NUMBER(c, STR("10+5+25+20+15+50+35+40"), 200);
 	CHECK_XPATH_NUMBER(c, STR("100-9-7-4-17-18-5"), 40);
 	CHECK_XPATH_NUMBER(c, STR("3*2+5*4-4*2-1"), 17);
-    CHECK_XPATH_NUMBER(c, STR("6*5-8*2+5*2"), 24);
-    CHECK_XPATH_NUMBER(c, STR("10*5-4*2+6*1 -3*3"), 39);
+	CHECK_XPATH_NUMBER(c, STR("6*5-8*2+5*2"), 24);
+	CHECK_XPATH_NUMBER(c, STR("10*5-4*2+6*1 -3*3"), 39);
 
-    CHECK_XPATH_NUMBER(c, STR("(24 div 3 +2) div (40 div 8 -3)"), 5);
-    CHECK_XPATH_NUMBER(c, STR("80 div 2 + 12 div 2 - 4 div 2"), 44);
-    CHECK_XPATH_NUMBER(c, STR("70 div 10 - 18 div 6 + 10 div 2"), 9);
+	CHECK_XPATH_NUMBER(c, STR("(24 div 3 +2) div (40 div 8 -3)"), 5);
+	CHECK_XPATH_NUMBER(c, STR("80 div 2 + 12 div 2 - 4 div 2"), 44);
+	CHECK_XPATH_NUMBER(c, STR("70 div 10 - 18 div 6 + 10 div 2"), 9);
 
-    CHECK_XPATH_NUMBER(c, STR("48 mod 17 - 2 mod 9 + 13 mod 5"), 15);
-    CHECK_XPATH_NUMBER(c, STR("56 mod round(5*2+1.444) - 6 mod 4 + 7 mod 4"), 2);
-    CHECK_XPATH_NUMBER(c, STR("(77 mod 10 + 5 mod 8) mod 10"), 2);
+	CHECK_XPATH_NUMBER(c, STR("48 mod 17 - 2 mod 9 + 13 mod 5"), 15);
+	CHECK_XPATH_NUMBER(c, STR("56 mod round(5*2+1.444) - 6 mod 4 + 7 mod 4"), 2);
+	CHECK_XPATH_NUMBER(c, STR("(77 mod 10 + 5 mod 8) mod 10"), 2);
 }
 
 TEST_XML(xpath_xalan_math_6, "<doc><n1>3</n1><n2>7</n2><n3>x</n3></doc>")

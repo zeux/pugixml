@@ -15,19 +15,19 @@
 #include <fstream>
 #include <sstream>
 
-#include <string>
 #include <algorithm>
+#include <string>
 
 #ifndef PUGIXML_NO_EXCEPTIONS
-#	include <stdexcept>
+#include <stdexcept>
 #endif
 
 #ifdef __MINGW32__
-#	include <io.h> // for unlink in C++0x mode
+#include <io.h> // for unlink in C++0x mode
 #endif
 
 #if defined(__CELLOS_LV2__) || defined(ANDROID) || defined(_GLIBCXX_HAVE_UNISTD_H) || defined(__APPLE__)
-#	include <unistd.h> // for unlink
+#include <unistd.h> // for unlink
 #endif
 
 using namespace pugi;
@@ -35,7 +35,8 @@ using namespace pugi;
 static bool load_file_in_memory(const char* path, char*& data, size_t& size)
 {
 	FILE* file = fopen(path, "rb");
-	if (!file) return false;
+	if (!file)
+		return false;
 
 	fseek(file, 0, SEEK_END);
 	long length = ftell(file);
@@ -53,15 +54,16 @@ static bool load_file_in_memory(const char* path, char*& data, size_t& size)
 
 static bool test_file_contents(const char* path, const char* data, size_t size)
 {
-    char* fdata;
-    size_t fsize;
-    if (!load_file_in_memory(path, fdata, fsize)) return false;
+	char* fdata;
+	size_t fsize;
+	if (!load_file_in_memory(path, fdata, fsize))
+		return false;
 
-    bool result = (size == fsize && memcmp(data, fdata, size) == 0);
+	bool result = (size == fsize && memcmp(data, fdata, size) == 0);
 
-    delete[] fdata;
+	delete[] fdata;
 
-    return result;
+	return result;
 }
 
 TEST(document_create_empty)
@@ -199,114 +201,120 @@ TEST(document_load_stream_wide_error_previous)
 	CHECK(!doc.first_child());
 }
 
-template <typename T> class char_array_buffer: public std::basic_streambuf<T>
+template <typename T>
+class char_array_buffer : public std::basic_streambuf<T>
 {
-public:
-    char_array_buffer(T* begin, T* end)
-    {
-        this->setg(begin, begin, end);
-    }
+  public:
+	char_array_buffer(T* begin, T* end)
+	{
+		this->setg(begin, begin, end);
+	}
 };
 
 TEST(document_load_stream_nonseekable)
 {
-    char contents[] = "<node />";
-    char_array_buffer<char> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
-    std::istream in(&buffer);
+	char contents[] = "<node />";
+	char_array_buffer<char> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+	std::istream in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in));
-    CHECK_NODE(doc, STR("<node/>"));
+	xml_document doc;
+	CHECK(doc.load(in));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_stream_wide_nonseekable)
 {
-    wchar_t contents[] = L"<node />";
-    char_array_buffer<wchar_t> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
-    std::basic_istream<wchar_t> in(&buffer);
+	wchar_t contents[] = L"<node />";
+	char_array_buffer<wchar_t> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+	std::basic_istream<wchar_t> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in));
-    CHECK_NODE(doc, STR("<node/>"));
+	xml_document doc;
+	CHECK(doc.load(in));
+	CHECK_NODE(doc, STR("<node/>"));
 }
 
 TEST(document_load_stream_nonseekable_large)
 {
 	std::basic_string<char_t> str;
 	str += STR("<node>");
-	for (int i = 0; i < 10000; ++i) str += STR("<node/>");
+	for (int i = 0; i < 10000; ++i)
+		str += STR("<node/>");
 	str += STR("</node>");
 
-    char_array_buffer<char_t> buffer(&str[0], &str[0] + str.length());
-    std::basic_istream<char_t> in(&buffer);
+	char_array_buffer<char_t> buffer(&str[0], &str[0] + str.length());
+	std::basic_istream<char_t> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in));
-    CHECK_NODE(doc, str.c_str());
+	xml_document doc;
+	CHECK(doc.load(in));
+	CHECK_NODE(doc, str.c_str());
 }
 
 TEST(document_load_stream_nonseekable_out_of_memory)
 {
-    char contents[] = "<node />";
-    char_array_buffer<char> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
-    std::istream in(&buffer);
+	char contents[] = "<node />";
+	char_array_buffer<char> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+	std::istream in(&buffer);
 
-    test_runner::_memory_fail_threshold = 1;
+	test_runner::_memory_fail_threshold = 1;
 
-    xml_document doc;
-    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+	xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
 TEST(document_load_stream_wide_nonseekable_out_of_memory)
 {
-    wchar_t contents[] = L"<node />";
-    char_array_buffer<wchar_t> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
-    std::basic_istream<wchar_t> in(&buffer);
+	wchar_t contents[] = L"<node />";
+	char_array_buffer<wchar_t> buffer(contents, contents + sizeof(contents) / sizeof(contents[0]));
+	std::basic_istream<wchar_t> in(&buffer);
 
-    test_runner::_memory_fail_threshold = 1;
+	test_runner::_memory_fail_threshold = 1;
 
-    xml_document doc;
-    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+	xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
 TEST(document_load_stream_nonseekable_out_of_memory_large)
 {
 	std::basic_string<char> str;
 	str += "<node>";
-	for (int i = 0; i < 10000; ++i) str += "<node />";
+	for (int i = 0; i < 10000; ++i)
+		str += "<node />";
 	str += "</node>";
 
-    char_array_buffer<char> buffer(&str[0], &str[0] + str.length());
-    std::basic_istream<char> in(&buffer);
+	char_array_buffer<char> buffer(&str[0], &str[0] + str.length());
+	std::basic_istream<char> in(&buffer);
 
-    test_runner::_memory_fail_threshold = 32768 * 3 + 4096;
+	test_runner::_memory_fail_threshold = 32768 * 3 + 4096;
 
-    xml_document doc;
-    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+	xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
 TEST(document_load_stream_wide_nonseekable_out_of_memory_large)
 {
 	std::basic_string<wchar_t> str;
 	str += L"<node>";
-	for (int i = 0; i < 10000; ++i) str += L"<node />";
+	for (int i = 0; i < 10000; ++i)
+		str += L"<node />";
 	str += L"</node>";
 
-    char_array_buffer<wchar_t> buffer(&str[0], &str[0] + str.length());
-    std::basic_istream<wchar_t> in(&buffer);
+	char_array_buffer<wchar_t> buffer(&str[0], &str[0] + str.length());
+	std::basic_istream<wchar_t> in(&buffer);
 
-    test_runner::_memory_fail_threshold = 32768 * 3 * sizeof(wchar_t) + 4096;
+	test_runner::_memory_fail_threshold = 32768 * 3 * sizeof(wchar_t) + 4096;
 
-    xml_document doc;
-    CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
+	xml_document doc;
+	CHECK_ALLOC_FAIL(CHECK(doc.load(in).status == status_out_of_memory));
 }
 
-template <typename T> class seek_fail_buffer: public std::basic_streambuf<T>
+template <typename T>
+class seek_fail_buffer : public std::basic_streambuf<T>
 {
-public:
+  public:
 	int seeks;
 
-	seek_fail_buffer(): seeks(0)
+	seek_fail_buffer()
+	    : seeks(0)
 	{
 	}
 
@@ -321,28 +329,30 @@ public:
 
 TEST(document_load_stream_seekable_fail_seek)
 {
-    seek_fail_buffer<char> buffer;
-    std::basic_istream<char> in(&buffer);
+	seek_fail_buffer<char> buffer;
+	std::basic_istream<char> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 
 TEST(document_load_stream_wide_seekable_fail_seek)
 {
-    seek_fail_buffer<wchar_t> buffer;
-    std::basic_istream<wchar_t> in(&buffer);
+	seek_fail_buffer<wchar_t> buffer;
+	std::basic_istream<wchar_t> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 
-template <typename T> class tell_fail_buffer: public std::basic_streambuf<T>
+template <typename T>
+class tell_fail_buffer : public std::basic_streambuf<T>
 {
-public:
+  public:
 	int seeks;
 
-	tell_fail_buffer(): seeks(0)
+	tell_fail_buffer()
+	    : seeks(0)
 	{
 	}
 
@@ -361,80 +371,89 @@ public:
 
 TEST(document_load_stream_seekable_fail_tell)
 {
-    tell_fail_buffer<char> buffer;
-    std::basic_istream<char> in(&buffer);
+	tell_fail_buffer<char> buffer;
+	std::basic_istream<char> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 
 TEST(document_load_stream_wide_seekable_fail_tell)
 {
-    tell_fail_buffer<wchar_t> buffer;
-    std::basic_istream<wchar_t> in(&buffer);
+	tell_fail_buffer<wchar_t> buffer;
+	std::basic_istream<wchar_t> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 
 #ifndef PUGIXML_NO_EXCEPTIONS
-template <typename T> class read_fail_buffer: public std::basic_streambuf<T>
+template <typename T>
+class read_fail_buffer : public std::basic_streambuf<T>
 {
-public:
-    typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
+  public:
+	typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
 	{
 		throw std::runtime_error("underflow failed");
 
-	#ifdef __DMC__
+#ifdef __DMC__
 		return 0;
-	#endif
+#endif
 	}
 };
 
 TEST(document_load_stream_nonseekable_fail_read)
 {
-    read_fail_buffer<char> buffer;
-    std::basic_istream<char> in(&buffer);
+	read_fail_buffer<char> buffer;
+	std::basic_istream<char> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 
 TEST(document_load_stream_wide_nonseekable_fail_read)
 {
-    read_fail_buffer<wchar_t> buffer;
-    std::basic_istream<wchar_t> in(&buffer);
+	read_fail_buffer<wchar_t> buffer;
+	std::basic_istream<wchar_t> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 
-template <typename T> class read_fail_seekable_buffer: public std::basic_streambuf<T>
+template <typename T>
+class read_fail_seekable_buffer : public std::basic_streambuf<T>
 {
-public:
+  public:
 	typename std::basic_streambuf<T>::pos_type offset;
 
-    read_fail_seekable_buffer(): offset(0)
-    {
-    }
+	read_fail_seekable_buffer()
+	    : offset(0)
+	{
+	}
 
-    typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
+	typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
 	{
 		throw std::runtime_error("underflow failed");
 
-	#ifdef __DMC__
+#ifdef __DMC__
 		return 0;
-	#endif
+#endif
 	}
 
 	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type off, std::ios_base::seekdir dir, std::ios_base::openmode) PUGIXML_OVERRIDE
 	{
 		switch (dir)
 		{
-		case std::ios_base::beg: offset = off; break;
-		case std::ios_base::cur: offset += off; break;
-		case std::ios_base::end: offset = 16 + off; break;
-		default: ;
+		case std::ios_base::beg:
+			offset = off;
+			break;
+		case std::ios_base::cur:
+			offset += off;
+			break;
+		case std::ios_base::end:
+			offset = 16 + off;
+			break;
+		default:;
 		}
 		return offset;
 	}
@@ -448,20 +467,20 @@ public:
 
 TEST(document_load_stream_seekable_fail_read)
 {
-    read_fail_seekable_buffer<char> buffer;
-    std::basic_istream<char> in(&buffer);
+	read_fail_seekable_buffer<char> buffer;
+	std::basic_istream<char> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 
 TEST(document_load_stream_wide_seekable_fail_read)
 {
-    read_fail_seekable_buffer<wchar_t> buffer;
-    std::basic_istream<wchar_t> in(&buffer);
+	read_fail_seekable_buffer<wchar_t> buffer;
+	std::basic_istream<wchar_t> in(&buffer);
 
-    xml_document doc;
-    CHECK(doc.load(in).status == status_io_error);
+	xml_document doc;
+	CHECK(doc.load(in).status == status_io_error);
 }
 #endif
 #endif
@@ -498,7 +517,8 @@ TEST(document_load_file_large)
 
 	std::basic_string<char_t> str;
 	str += STR("<node>");
-	for (int i = 0; i < 10000; ++i) str += STR("<node/>");
+	for (int i = 0; i < 10000; ++i)
+		str += STR("<node/>");
 	str += STR("</node>");
 
 	CHECK_NODE(doc, str.c_str());
@@ -744,9 +764,9 @@ struct temp_file
 
 	~temp_file()
 	{
-	#ifndef _WIN32_WCE
+#ifndef _WIN32_WCE
 		CHECK(unlink(path) == 0);
-	#endif
+#endif
 	}
 };
 
@@ -784,10 +804,10 @@ TEST_XML(document_save_file_text, "<node/>")
 	temp_file f;
 
 	CHECK(doc.save_file(f.path, STR(""), format_no_declaration | format_save_file_text));
-    CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
+	CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
 
 	CHECK(doc.save_file(f.path, STR(""), format_no_declaration));
-    CHECK(test_file_contents(f.path, "<node />\n", 9));
+	CHECK(test_file_contents(f.path, "<node />\n", 9));
 }
 
 TEST_XML(document_save_file_wide_text, "<node/>")
@@ -799,10 +819,10 @@ TEST_XML(document_save_file_wide_text, "<node/>")
 	std::copy(f.path, f.path + strlen(f.path) + 1, wpath + 0);
 
 	CHECK(doc.save_file(wpath, STR(""), format_no_declaration | format_save_file_text));
-    CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
+	CHECK(test_file_contents(f.path, "<node />\n", 9) || test_file_contents(f.path, "<node />\r\n", 10));
 
 	CHECK(doc.save_file(wpath, STR(""), format_no_declaration));
-    CHECK(test_file_contents(f.path, "<node />\n", 9));
+	CHECK(test_file_contents(f.path, "<node />\n", 9));
 }
 
 TEST_XML(document_save_file_leak, "<node/>")
@@ -926,32 +946,30 @@ inline void check_utftest_document(const xml_document& doc)
 TEST(document_load_file_convert_auto)
 {
 	const char* files[] =
-	{
-		"tests/data/utftest_utf16_be.xml",
-		"tests/data/utftest_utf16_be_bom.xml",
-		"tests/data/utftest_utf16_be_nodecl.xml",
-		"tests/data/utftest_utf16_le.xml",
-		"tests/data/utftest_utf16_le_bom.xml",
-		"tests/data/utftest_utf16_le_nodecl.xml",
-		"tests/data/utftest_utf32_be.xml",
-		"tests/data/utftest_utf32_be_bom.xml",
-		"tests/data/utftest_utf32_be_nodecl.xml",
-		"tests/data/utftest_utf32_le.xml",
-		"tests/data/utftest_utf32_le_bom.xml",
-		"tests/data/utftest_utf32_le_nodecl.xml",
-		"tests/data/utftest_utf8.xml",
-		"tests/data/utftest_utf8_bom.xml",
-		"tests/data/utftest_utf8_nodecl.xml"
-	};
+	    {
+	        "tests/data/utftest_utf16_be.xml",
+	        "tests/data/utftest_utf16_be_bom.xml",
+	        "tests/data/utftest_utf16_be_nodecl.xml",
+	        "tests/data/utftest_utf16_le.xml",
+	        "tests/data/utftest_utf16_le_bom.xml",
+	        "tests/data/utftest_utf16_le_nodecl.xml",
+	        "tests/data/utftest_utf32_be.xml",
+	        "tests/data/utftest_utf32_be_bom.xml",
+	        "tests/data/utftest_utf32_be_nodecl.xml",
+	        "tests/data/utftest_utf32_le.xml",
+	        "tests/data/utftest_utf32_le_bom.xml",
+	        "tests/data/utftest_utf32_le_nodecl.xml",
+	        "tests/data/utftest_utf8.xml",
+	        "tests/data/utftest_utf8_bom.xml",
+	        "tests/data/utftest_utf8_nodecl.xml"};
 
 	xml_encoding encodings[] =
-	{
-		encoding_utf16_be, encoding_utf16_be, encoding_utf16_be,
-		encoding_utf16_le, encoding_utf16_le, encoding_utf16_le,
-		encoding_utf32_be, encoding_utf32_be, encoding_utf32_be,
-		encoding_utf32_le, encoding_utf32_le, encoding_utf32_le,
-		encoding_utf8, encoding_utf8, encoding_utf8
-	};
+	    {
+	        encoding_utf16_be, encoding_utf16_be, encoding_utf16_be,
+	        encoding_utf16_le, encoding_utf16_le, encoding_utf16_le,
+	        encoding_utf32_be, encoding_utf32_be, encoding_utf32_be,
+	        encoding_utf32_le, encoding_utf32_le, encoding_utf32_le,
+	        encoding_utf8, encoding_utf8, encoding_utf8};
 
 	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
 	{
@@ -967,32 +985,30 @@ TEST(document_load_file_convert_auto)
 TEST(document_load_file_convert_specific)
 {
 	const char* files[] =
-	{
-		"tests/data/utftest_utf16_be.xml",
-		"tests/data/utftest_utf16_be_bom.xml",
-		"tests/data/utftest_utf16_be_nodecl.xml",
-		"tests/data/utftest_utf16_le.xml",
-		"tests/data/utftest_utf16_le_bom.xml",
-		"tests/data/utftest_utf16_le_nodecl.xml",
-		"tests/data/utftest_utf32_be.xml",
-		"tests/data/utftest_utf32_be_bom.xml",
-		"tests/data/utftest_utf32_be_nodecl.xml",
-		"tests/data/utftest_utf32_le.xml",
-		"tests/data/utftest_utf32_le_bom.xml",
-		"tests/data/utftest_utf32_le_nodecl.xml",
-		"tests/data/utftest_utf8.xml",
-		"tests/data/utftest_utf8_bom.xml",
-		"tests/data/utftest_utf8_nodecl.xml"
-	};
+	    {
+	        "tests/data/utftest_utf16_be.xml",
+	        "tests/data/utftest_utf16_be_bom.xml",
+	        "tests/data/utftest_utf16_be_nodecl.xml",
+	        "tests/data/utftest_utf16_le.xml",
+	        "tests/data/utftest_utf16_le_bom.xml",
+	        "tests/data/utftest_utf16_le_nodecl.xml",
+	        "tests/data/utftest_utf32_be.xml",
+	        "tests/data/utftest_utf32_be_bom.xml",
+	        "tests/data/utftest_utf32_be_nodecl.xml",
+	        "tests/data/utftest_utf32_le.xml",
+	        "tests/data/utftest_utf32_le_bom.xml",
+	        "tests/data/utftest_utf32_le_nodecl.xml",
+	        "tests/data/utftest_utf8.xml",
+	        "tests/data/utftest_utf8_bom.xml",
+	        "tests/data/utftest_utf8_nodecl.xml"};
 
 	xml_encoding encodings[] =
-	{
-		encoding_utf16_be, encoding_utf16_be, encoding_utf16_be,
-		encoding_utf16_le, encoding_utf16_le, encoding_utf16_le,
-		encoding_utf32_be, encoding_utf32_be, encoding_utf32_be,
-		encoding_utf32_le, encoding_utf32_le, encoding_utf32_le,
-		encoding_utf8, encoding_utf8, encoding_utf8
-	};
+	    {
+	        encoding_utf16_be, encoding_utf16_be, encoding_utf16_be,
+	        encoding_utf16_le, encoding_utf16_le, encoding_utf16_le,
+	        encoding_utf32_be, encoding_utf32_be, encoding_utf32_be,
+	        encoding_utf32_le, encoding_utf32_le, encoding_utf32_le,
+	        encoding_utf8, encoding_utf8, encoding_utf8};
 
 	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
 	{
@@ -1021,30 +1037,28 @@ TEST(document_load_file_convert_specific)
 TEST(document_load_file_convert_native_endianness)
 {
 	const char* files[2][6] =
-	{
-		{
-			"tests/data/utftest_utf16_be.xml",
-			"tests/data/utftest_utf16_be_bom.xml",
-			"tests/data/utftest_utf16_be_nodecl.xml",
-			"tests/data/utftest_utf32_be.xml",
-			"tests/data/utftest_utf32_be_bom.xml",
-			"tests/data/utftest_utf32_be_nodecl.xml",
-		},
-		{
-			"tests/data/utftest_utf16_le.xml",
-			"tests/data/utftest_utf16_le_bom.xml",
-			"tests/data/utftest_utf16_le_nodecl.xml",
-			"tests/data/utftest_utf32_le.xml",
-			"tests/data/utftest_utf32_le_bom.xml",
-			"tests/data/utftest_utf32_le_nodecl.xml",
-		}
-	};
+	    {
+	        {
+	            "tests/data/utftest_utf16_be.xml",
+	            "tests/data/utftest_utf16_be_bom.xml",
+	            "tests/data/utftest_utf16_be_nodecl.xml",
+	            "tests/data/utftest_utf32_be.xml",
+	            "tests/data/utftest_utf32_be_bom.xml",
+	            "tests/data/utftest_utf32_be_nodecl.xml",
+	        },
+	        {
+	            "tests/data/utftest_utf16_le.xml",
+	            "tests/data/utftest_utf16_le_bom.xml",
+	            "tests/data/utftest_utf16_le_nodecl.xml",
+	            "tests/data/utftest_utf32_le.xml",
+	            "tests/data/utftest_utf32_le_bom.xml",
+	            "tests/data/utftest_utf32_le_nodecl.xml",
+	        }};
 
 	xml_encoding encodings[] =
-	{
-		encoding_utf16, encoding_utf16, encoding_utf16,
-		encoding_utf32, encoding_utf32, encoding_utf32
-	};
+	    {
+	        encoding_utf16, encoding_utf16, encoding_utf16,
+	        encoding_utf32, encoding_utf32, encoding_utf32};
 
 	for (unsigned int i = 0; i < sizeof(files[0]) / sizeof(files[0][0]); ++i)
 	{
@@ -1084,24 +1098,22 @@ TEST(document_load_file_convert_native_endianness)
 
 struct file_data_t
 {
-    const char* path;
-    xml_encoding encoding;
+	const char* path;
+	xml_encoding encoding;
 
-    char* data;
-    size_t size;
+	char* data;
+	size_t size;
 };
-
 
 TEST(document_contents_preserve)
 {
 	file_data_t files[] =
-	{
-		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
-		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
-		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
-		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
-		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0}
-	};
+	    {
+	        {"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
+	        {"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
+	        {"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
+	        {"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
+	        {"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0}};
 
 	// load files in memory
 	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
@@ -1133,10 +1145,9 @@ TEST(document_contents_preserve)
 TEST(document_contents_preserve_latin1)
 {
 	file_data_t files[] =
-	{
-		{"tests/data/latintest_utf8.xml", encoding_utf8, 0, 0},
-		{"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}
-	};
+	    {
+	        {"tests/data/latintest_utf8.xml", encoding_utf8, 0, 0},
+	        {"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}};
 
 	// load files in memory
 	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
@@ -1216,18 +1227,17 @@ TEST(document_convert_invalid_utf16)
 TEST(document_load_buffer_empty)
 {
 	xml_encoding encodings[] =
-	{
-		encoding_auto,
-		encoding_utf8,
-		encoding_utf16_le,
-		encoding_utf16_be,
-		encoding_utf16,
-		encoding_utf32_le,
-		encoding_utf32_be,
-		encoding_utf32,
-		encoding_wchar,
-        encoding_latin1
-	};
+	    {
+	        encoding_auto,
+	        encoding_utf8,
+	        encoding_utf16_le,
+	        encoding_utf16_be,
+	        encoding_utf16,
+	        encoding_utf32_le,
+	        encoding_utf32_be,
+	        encoding_utf32,
+	        encoding_wchar,
+	        encoding_latin1};
 
 	char buffer[1];
 
@@ -1252,18 +1262,17 @@ TEST(document_load_buffer_empty)
 TEST(document_load_buffer_empty_fragment)
 {
 	xml_encoding encodings[] =
-	{
-		encoding_auto,
-		encoding_utf8,
-		encoding_utf16_le,
-		encoding_utf16_be,
-		encoding_utf16,
-		encoding_utf32_le,
-		encoding_utf32_be,
-		encoding_utf32,
-		encoding_wchar,
-        encoding_latin1
-	};
+	    {
+	        encoding_auto,
+	        encoding_utf8,
+	        encoding_utf16_le,
+	        encoding_utf16_be,
+	        encoding_utf16,
+	        encoding_utf32_le,
+	        encoding_utf32_be,
+	        encoding_utf32,
+	        encoding_wchar,
+	        encoding_latin1};
 
 	char buffer[1];
 
@@ -1390,91 +1399,92 @@ TEST(document_load_buffer_inplace_short)
 #ifndef PUGIXML_NO_EXCEPTIONS
 TEST(document_load_exceptions)
 {
-    bool thrown = false;
+	bool thrown = false;
 
-    try
-    {
-        xml_document doc;
-        if (!doc.load_string(STR("<node attribute='value"))) throw std::bad_alloc();
+	try
+	{
+		xml_document doc;
+		if (!doc.load_string(STR("<node attribute='value")))
+			throw std::bad_alloc();
 
-        CHECK_FORCE_FAIL("Expected parsing failure");
-    }
-    catch (const std::bad_alloc&)
-    {
-        thrown = true;
-    }
+		CHECK_FORCE_FAIL("Expected parsing failure");
+	}
+	catch (const std::bad_alloc&)
+	{
+		thrown = true;
+	}
 
-    CHECK(thrown);
+	CHECK(thrown);
 }
 #endif
 
 TEST_XML_FLAGS(document_element, "<?xml version='1.0'?><node><child/></node><!---->", parse_default | parse_declaration | parse_comments)
 {
-    CHECK(doc.document_element() == doc.child(STR("node")));
+	CHECK(doc.document_element() == doc.child(STR("node")));
 }
 
 TEST_XML_FLAGS(document_element_absent, "<!---->", parse_comments | parse_fragment)
 {
-    CHECK(doc.document_element() == xml_node());
+	CHECK(doc.document_element() == xml_node());
 }
 
 TEST_XML(document_reset, "<node><child/></node>")
 {
-    CHECK(doc.first_child());
+	CHECK(doc.first_child());
 
-    doc.reset();
-    CHECK(!doc.first_child());
-    CHECK_NODE(doc, STR(""));
+	doc.reset();
+	CHECK(!doc.first_child());
+	CHECK_NODE(doc, STR(""));
 
-    doc.reset();
-    CHECK(!doc.first_child());
-    CHECK_NODE(doc, STR(""));
+	doc.reset();
+	CHECK(!doc.first_child());
+	CHECK_NODE(doc, STR(""));
 
-    CHECK(doc.load_string(STR("<node/>")));
-    CHECK(doc.first_child());
-    CHECK_NODE(doc, STR("<node/>"));
+	CHECK(doc.load_string(STR("<node/>")));
+	CHECK(doc.first_child());
+	CHECK_NODE(doc, STR("<node/>"));
 
-    doc.reset();
-    CHECK(!doc.first_child());
-    CHECK_NODE(doc, STR(""));
+	doc.reset();
+	CHECK(!doc.first_child());
+	CHECK_NODE(doc, STR(""));
 }
 
 TEST(document_reset_empty)
 {
-    xml_document doc;
+	xml_document doc;
 
-    doc.reset();
-    CHECK(!doc.first_child());
-    CHECK_NODE(doc, STR(""));
+	doc.reset();
+	CHECK(!doc.first_child());
+	CHECK_NODE(doc, STR(""));
 }
 
 TEST_XML(document_reset_copy, "<node><child/></node>")
 {
-    xml_document doc2;
+	xml_document doc2;
 
-    CHECK_NODE(doc2, STR(""));
+	CHECK_NODE(doc2, STR(""));
 
-    doc2.reset(doc);
+	doc2.reset(doc);
 
-    CHECK_NODE(doc2, STR("<node><child/></node>"));
-    CHECK(doc.first_child() != doc2.first_child());
+	CHECK_NODE(doc2, STR("<node><child/></node>"));
+	CHECK(doc.first_child() != doc2.first_child());
 
-    doc.reset(doc2);
+	doc.reset(doc2);
 
-    CHECK_NODE(doc, STR("<node><child/></node>"));
-    CHECK(doc.first_child() != doc2.first_child());
+	CHECK_NODE(doc, STR("<node><child/></node>"));
+	CHECK(doc.first_child() != doc2.first_child());
 
-    CHECK(doc.first_child().offset_debug() == -1);
+	CHECK(doc.first_child().offset_debug() == -1);
 }
 
 TEST_XML(document_reset_copy_self, "<node><child/></node>")
 {
-    CHECK_NODE(doc, STR("<node><child/></node>"));
+	CHECK_NODE(doc, STR("<node><child/></node>"));
 
-    doc.reset(doc);
+	doc.reset(doc);
 
-    CHECK(!doc.first_child());
-    CHECK_NODE(doc, STR(""));
+	CHECK(!doc.first_child());
+	CHECK_NODE(doc, STR(""));
 }
 
 TEST(document_load_buffer_utf_truncated)
@@ -1487,20 +1497,20 @@ TEST(document_load_buffer_utf_truncated)
 
 	struct document_data_t
 	{
-	    xml_encoding encoding;
+		xml_encoding encoding;
 
-	    const unsigned char* data;
-	    size_t size;
+		const unsigned char* data;
+		size_t size;
 	};
 
 	const document_data_t data[] =
-	{
-		{ encoding_utf8, utf8, sizeof(utf8) },
-		{ encoding_utf16_be, utf16_be, sizeof(utf16_be) },
-		{ encoding_utf16_le, utf16_le, sizeof(utf16_le) },
-		{ encoding_utf32_be, utf32_be, sizeof(utf32_be) },
-		{ encoding_utf32_le, utf32_le, sizeof(utf32_le) },
-	};
+	    {
+	        {encoding_utf8, utf8, sizeof(utf8)},
+	        {encoding_utf16_be, utf16_be, sizeof(utf16_be)},
+	        {encoding_utf16_le, utf16_le, sizeof(utf16_le)},
+	        {encoding_utf32_be, utf32_be, sizeof(utf32_be)},
+	        {encoding_utf32_le, utf32_le, sizeof(utf32_le)},
+	    };
 
 	for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); ++i)
 	{
@@ -1520,11 +1530,11 @@ TEST(document_load_buffer_utf_truncated)
 
 				const char_t* name = doc.first_child().name();
 
-			#ifdef PUGIXML_WCHAR_MODE
+#ifdef PUGIXML_WCHAR_MODE
 				CHECK(name[0] == 0x20ac && name[1] == 0);
-			#else
+#else
 				CHECK_STRING(name, "\xe2\x82\xac");
-			#endif
+#endif
 			}
 			else
 			{
@@ -1565,11 +1575,11 @@ TEST(document_load_stream_truncated)
 			{
 				const char_t* name = doc.first_child().name();
 
-			#ifdef PUGIXML_WCHAR_MODE
+#ifdef PUGIXML_WCHAR_MODE
 				CHECK(name[0] == 0x20ac && name[1] == 0);
-			#else
+#else
 				CHECK_STRING(name, "\xe2\x82\xac");
-			#endif
+#endif
 			}
 		}
 	}
@@ -1594,14 +1604,13 @@ TEST(document_alignment)
 TEST(document_convert_out_of_memory)
 {
 	file_data_t files[] =
-	{
-		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
-		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
-		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
-		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
-		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0},
-		{"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}
-	};
+	    {
+	        {"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
+	        {"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
+	        {"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
+	        {"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
+	        {"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0},
+	        {"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}};
 
 	// load files in memory
 	for (unsigned int i = 0; i < sizeof(files) / sizeof(files[0]); ++i)
@@ -1761,7 +1770,7 @@ TEST(document_move_empty_zero_alloc)
 	test_runner::_memory_fail_threshold = 1;
 
 	for (int i = 1; i < 32; ++i)
-		docs[i] = std::move(docs[i-1]);
+		docs[i] = std::move(docs[i - 1]);
 
 	delete[] docs;
 }
@@ -1776,7 +1785,7 @@ TEST(document_move_repeated_zero_alloc)
 	test_runner::_memory_fail_threshold = 1;
 
 	for (int i = 1; i < 32; ++i)
-		docs[i] = std::move(docs[i-1]);
+		docs[i] = std::move(docs[i - 1]);
 
 	for (int i = 0; i < 31; ++i)
 		CHECK(!docs[i].first_child());
@@ -1797,15 +1806,15 @@ TEST(document_move_compact_fail)
 	int safe_count = 21;
 
 	for (int i = 1; i <= safe_count; ++i)
-		docs[i] = std::move(docs[i-1]);
+		docs[i] = std::move(docs[i - 1]);
 
-	CHECK_ALLOC_FAIL(docs[safe_count+1] = std::move(docs[safe_count]));
+	CHECK_ALLOC_FAIL(docs[safe_count + 1] = std::move(docs[safe_count]));
 
 	for (int i = 0; i < safe_count; ++i)
 		CHECK(!docs[i].first_child());
 
 	CHECK_NODE(docs[safe_count], STR("<node><child/></node>"));
-	CHECK(!docs[safe_count+1].first_child());
+	CHECK(!docs[safe_count + 1].first_child());
 }
 #endif
 #endif

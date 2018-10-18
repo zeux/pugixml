@@ -1,21 +1,21 @@
-#include "test.hpp"
 #include "allocator.hpp"
+#include "test.hpp"
 
+#include <assert.h>
+#include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <float.h>
-#include <assert.h>
 
 #include <string>
 
 #ifndef PUGIXML_NO_EXCEPTIONS
-#   include <exception>
+#include <exception>
 #endif
 
 #ifdef _WIN32_WCE
-#   undef DebugBreak
-#   pragma warning(disable: 4201) // nonstandard extension used: nameless struct/union
-#   include <windows.h>
+#undef DebugBreak
+#pragma warning(disable : 4201) // nonstandard extension used: nameless struct/union
+#include <windows.h>
 #endif
 
 test_runner* test_runner::_tests = 0;
@@ -41,7 +41,8 @@ static void* custom_allocate(size_t size)
 	else
 	{
 		void* ptr = memory_allocate(size);
-		if (!ptr) return 0;
+		if (!ptr)
+			return 0;
 
 		g_memory_total_size += memory_size(ptr);
 		g_memory_total_count++;
@@ -89,9 +90,9 @@ static void replace_memory_management()
 
 namespace std
 {
-	_CRTIMP2 _Prhand _Raise_handler;
-	_CRTIMP2 void __cdecl _Throw(const exception&) {}
-}
+_CRTIMP2 _Prhand _Raise_handler;
+_CRTIMP2 void __cdecl _Throw(const exception&) {}
+} // namespace std
 #endif
 
 static bool run_test(test_runner* test, const char* test_name, pugi::allocation_function allocate)
@@ -109,15 +110,15 @@ static bool run_test(test_runner* test, const char* test_name, pugi::allocation_
 		pugi::set_memory_management_functions(allocate, custom_deallocate);
 
 #ifdef _MSC_VER
-#	pragma warning(push)
-#	pragma warning(disable: 4611) // interaction between _setjmp and C++ object destruction is non-portable
-#   pragma warning(disable: 4793) // function compiled as native: presence of '_setjmp' makes a function unmanaged
+#pragma warning(push)
+#pragma warning(disable : 4611) // interaction between _setjmp and C++ object destruction is non-portable
+#pragma warning(disable : 4793) // function compiled as native: presence of '_setjmp' makes a function unmanaged
 #endif
 
 		volatile int result = setjmp(test_runner::_failure_buffer);
 
 #ifdef _MSC_VER
-#	pragma warning(pop)
+#pragma warning(pop)
 #endif
 
 		if (result)
@@ -193,10 +194,10 @@ int main(int, char** argv)
 		if (g_memory_fail_triggered)
 		{
 			// run tests that trigger memory failures twice - with an allocator that returns NULL and with an allocator that throws
-		#ifndef PUGIXML_NO_EXCEPTIONS
+#ifndef PUGIXML_NO_EXCEPTIONS
 			total++;
 			passed += run_test(test, (test->_name + std::string(" (throw)")).c_str(), custom_allocate_throw);
-		#endif
+#endif
 		}
 	}
 

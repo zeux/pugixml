@@ -3,8 +3,8 @@
 #include "test.hpp"
 
 #include <string.h>
-#include <wchar.h>
 #include <string>
+#include <wchar.h>
 
 using namespace pugi;
 
@@ -30,21 +30,28 @@ static bool test_doctype_wf(const char_t* decl)
 	xml_document doc;
 
 	// standalone
-	if (!load_concat(doc, decl) || !doc.first_child().empty()) return false;
+	if (!load_concat(doc, decl) || !doc.first_child().empty())
+		return false;
 
 	// pcdata pre/postfix
-	if (!load_concat(doc, STR("a"), decl) || !test_node(doc, STR("a"), STR(""), format_raw)) return false;
-	if (!load_concat(doc, decl, STR("b")) || !test_node(doc, STR("b"), STR(""), format_raw)) return false;
-	if (!load_concat(doc, STR("a"), decl, STR("b")) || !test_node(doc, STR("ab"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("a"), decl) || !test_node(doc, STR("a"), STR(""), format_raw))
+		return false;
+	if (!load_concat(doc, decl, STR("b")) || !test_node(doc, STR("b"), STR(""), format_raw))
+		return false;
+	if (!load_concat(doc, STR("a"), decl, STR("b")) || !test_node(doc, STR("ab"), STR(""), format_raw))
+		return false;
 
 	// node pre/postfix
-	if (!load_concat(doc, STR("<nodea/>"), decl) || !test_node(doc, STR("<nodea/>"), STR(""), format_raw)) return false;
-	if (!load_concat(doc, decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodeb/>"), STR(""), format_raw)) return false;
-	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea/><nodeb/>"), STR(""), format_raw)) return false;
+	if (!load_concat(doc, STR("<nodea/>"), decl) || !test_node(doc, STR("<nodea/>"), STR(""), format_raw))
+		return false;
+	if (!load_concat(doc, decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodeb/>"), STR(""), format_raw))
+		return false;
+	if (!load_concat(doc, STR("<nodea/>"), decl, STR("<nodeb/>")) || !test_node(doc, STR("<nodea/><nodeb/>"), STR(""), format_raw))
+		return false;
 
-    // check load-store contents preservation
-    CHECK(doc.load_string(decl, parse_doctype | parse_fragment));
-    CHECK_NODE(doc, decl);
+	// check load-store contents preservation
+	CHECK(doc.load_string(decl, parse_doctype | parse_fragment));
+	CHECK_NODE(doc, decl);
 
 	return true;
 }
@@ -54,13 +61,16 @@ static bool test_doctype_nwf(const char_t* decl)
 	xml_document doc;
 
 	// standalone
-	if (load_concat(doc, decl).status != status_bad_doctype) return false;
+	if (load_concat(doc, decl).status != status_bad_doctype)
+		return false;
 
 	// pcdata postfix
-	if (load_concat(doc, decl, STR("b")).status != status_bad_doctype) return false;
+	if (load_concat(doc, decl, STR("b")).status != status_bad_doctype)
+		return false;
 
 	// node postfix
-	if (load_concat(doc, decl, STR("<nodeb/>")).status != status_bad_doctype) return false;
+	if (load_concat(doc, decl, STR("<nodeb/>")).status != status_bad_doctype)
+		return false;
 
 	return true;
 }
@@ -281,9 +291,9 @@ TEST(parse_doctype_xmlconf_oasis_1)
 	TEST_DOCTYPE_WF("<!DOCTYPE doc [ <!ELEMENT doc EMPTY> <!NOTATION not1 PUBLIC \"a b cdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\"> <!NOTATION not2 PUBLIC '0123456789-()+,./:=?;!*#@$_%'> <!NOTATION not3 PUBLIC \"0123456789-()+,.'/:=?;!*#@$_%\"> ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE doc SYSTEM \"p31pass1.dtd\" [<!ELEMENT doc EMPTY>]>");
 
-    // not actually a doctype :)
-    xml_document doc;
-    CHECK(doc.load_string(STR("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"), parse_full | parse_fragment) && doc.first_child().type() == node_comment && doc.last_child().type() == node_comment && doc.first_child().next_sibling() == doc.last_child());
+	// not actually a doctype :)
+	xml_document doc;
+	CHECK(doc.load_string(STR("<!--a <!DOCTYPE <?- ]]>-<[ CDATA [ \"- -'- -<doc>--> <!---->"), parse_full | parse_fragment) && doc.first_child().type() == node_comment && doc.last_child().type() == node_comment && doc.first_child().next_sibling() == doc.last_child());
 	CHECK(doc.load_string(STR("<?xmla <!DOCTYPE <[ CDATA [</doc> &a%b&#c?>"), parse_full | parse_fragment) && doc.first_child().type() == node_pi && doc.first_child() == doc.last_child());
 }
 
@@ -303,22 +313,22 @@ TEST(parse_doctype_xmlconf_xmltest_1)
 
 TEST_XML_FLAGS(parse_doctype_value, "<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]>", parse_fragment | parse_doctype)
 {
-    xml_node n = doc.first_child();
+	xml_node n = doc.first_child();
 
-    CHECK(n.type() == node_doctype);
-    CHECK_STRING(n.value(), STR("doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]"));
+	CHECK(n.type() == node_doctype);
+	CHECK_STRING(n.value(), STR("doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]"));
 }
 
 TEST(parse_doctype_error_toplevel)
 {
-    xml_document doc;
-    CHECK(doc.load_string(STR("<node><!DOCTYPE></node>")).status == status_bad_doctype);
-    CHECK(doc.load_string(STR("<node><!DOCTYPE></node>"), parse_doctype).status == status_bad_doctype);
+	xml_document doc;
+	CHECK(doc.load_string(STR("<node><!DOCTYPE></node>")).status == status_bad_doctype);
+	CHECK(doc.load_string(STR("<node><!DOCTYPE></node>"), parse_doctype).status == status_bad_doctype);
 }
 
 TEST(parse_doctype_error_ignore)
 {
-    xml_document doc;
+	xml_document doc;
 	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ ")).status == status_bad_doctype);
 	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ "), parse_doctype).status == status_bad_doctype);
 	CHECK(doc.load_string(STR("<!DOCTYPE root [ <![IGNORE[ <![INCLUDE[")).status == status_bad_doctype);

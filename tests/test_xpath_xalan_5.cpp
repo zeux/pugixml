@@ -111,7 +111,7 @@ TEST_XML(xpath_xalan_select_11, "<doc><sub1 pos='1'><child1>descendant number 1<
 
 TEST_XML(xpath_xalan_select_12, "<doc><sub pos='1'><child>child number 1</child><sub-sub pos='1sub'><child>grandchild number 1</child></sub-sub></sub><sub0 pos='2-no'><child>child number 2</child><sub pos='2.5'><child>grandchild number 2</child></sub></sub0><sub pos='3'><child>child number 3</child><subno pos='3.5-no'><child>grandchild number 3</child></subno></sub><sub0 pos='4-no'><child>child number 4</child><sub-sub pos='4sub'><child>grandchild number 4</child></sub-sub></sub0></doc>")
 {
-    CHECK_XPATH_NODESET(doc, STR("//child/ancestor-or-self::sub | //child/ancestor-or-self::sub-sub")) % 3 % 7 % 15 % 19 % 31;
+	CHECK_XPATH_NODESET(doc, STR("//child/ancestor-or-self::sub | //child/ancestor-or-self::sub-sub")) % 3 % 7 % 15 % 19 % 31;
 }
 
 TEST_XML(xpath_xalan_select_13, "<doc><book><author><name real='no'>Carmelo Montanez</name><chapters>Nine</chapters><bibliography></bibliography></author></book><book><author><name real='na'>David Marston</name><chapters>Seven</chapters><bibliography></bibliography></author></book><book><author><name real='yes'>Mary Brady</name><chapters>Ten</chapters><bibliography><author><name>Lynne Rosenthal</name><chapters>Five</chapters></author></bibliography></author></book></doc>")
@@ -154,17 +154,17 @@ TEST_XML(xpath_xalan_select_17, "<directions><north><dup1/><dup2/><south/><east/
 {
 	xml_node c = doc.child(STR("directions"));
 
-    CHECK_XPATH_NODESET(c, STR("north/* | north/dup1 | north/dup2")) % 4 % 5 % 6 % 7 % 8;
-    CHECK_XPATH_NODESET(c, STR("north/dup2 | north/dup1 | north/*")) % 4 % 5 % 6 % 7 % 8;
-    CHECK_XPATH_NODESET(c, STR("//north/dup2 | south/preceding-sibling::*[4]/* | north/dup1 | north/*")) % 4 % 5 % 6 % 7 % 8;
-    CHECK_XPATH_NODESET(c, STR("north/dup2 | south/preceding-sibling::*[4]/* | north/*")) % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(c, STR("north/* | north/dup1 | north/dup2")) % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(c, STR("north/dup2 | north/dup1 | north/*")) % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(c, STR("//north/dup2 | south/preceding-sibling::*[4]/* | north/dup1 | north/*")) % 4 % 5 % 6 % 7 % 8;
+	CHECK_XPATH_NODESET(c, STR("north/dup2 | south/preceding-sibling::*[4]/* | north/*")) % 4 % 5 % 6 % 7 % 8;
 }
 
 TEST_XML(xpath_xalan_select_18, "<para><font color='red'>Hello</font><font color='green'>There</font><font color='blue'>World</font></para>")
 {
-    CHECK_XPATH_NODESET(doc, STR("/para/font[@color='green']")) % 6;
-    CHECK_XPATH_NODESET(doc.child(STR("para")), STR("/para/font[@color='green']")) % 6;
-    CHECK_XPATH_NODESET(doc.child(STR("para")).last_child(), STR("/para/font[@color='green']")) % 6;
+	CHECK_XPATH_NODESET(doc, STR("/para/font[@color='green']")) % 6;
+	CHECK_XPATH_NODESET(doc.child(STR("para")), STR("/para/font[@color='green']")) % 6;
+	CHECK_XPATH_NODESET(doc.child(STR("para")).last_child(), STR("/para/font[@color='green']")) % 6;
 }
 
 TEST_XML_FLAGS(xpath_xalan_select_19, "<doc>1<a>in-a</a>2<!-- upper comment --><b>3<bb>4<bbb>5</bbb>6</bb>7</b><!-- lower comment -->8<c>in-c</c>9<?pi?></doc>", parse_default | parse_comments | parse_pi)

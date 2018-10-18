@@ -404,11 +404,11 @@ TEST(xpath_variables_name_case)
 TEST(xpath_variables_name_unicode)
 {
 #ifdef PUGIXML_WCHAR_MODE
-	#ifdef U_LITERALS
-		const char_t* name = L"\u0400\u203D";
-	#else
-		const char_t* name = L"\x0400\x203D";
-	#endif
+#ifdef U_LITERALS
+	const char_t* name = L"\u0400\u203D";
+#else
+	const char_t* name = L"\x0400\x203D";
+#endif
 #else
 	const char_t* name = "\xd0\x80\xe2\x80\xbd";
 #endif

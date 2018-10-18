@@ -1,7 +1,7 @@
 #include "test.hpp"
 
-#include "writer_string.hpp"
 #include "allocator.hpp"
+#include "writer_string.hpp"
 
 #include <string>
 #include <vector>
@@ -10,27 +10,27 @@ using namespace pugi;
 
 namespace
 {
-	int page_allocs = 0;
-	int page_deallocs = 0;
+int page_allocs = 0;
+int page_deallocs = 0;
 
-	bool is_page(size_t size)
-	{
-		return size >= 16384;
-	}
-
-	void* allocate(size_t size)
-	{
-		void* ptr = memory_allocate(size);
-		page_allocs += is_page(memory_size(ptr));
-		return ptr;
-	}
-
-	void deallocate(void* ptr)
-	{
-		page_deallocs += is_page(memory_size(ptr));
-		memory_deallocate(ptr);
-	}
+bool is_page(size_t size)
+{
+	return size >= 16384;
 }
+
+void* allocate(size_t size)
+{
+	void* ptr = memory_allocate(size);
+	page_allocs += is_page(memory_size(ptr));
+	return ptr;
+}
+
+void deallocate(void* ptr)
+{
+	page_deallocs += is_page(memory_size(ptr));
+	memory_deallocate(ptr);
+}
+} // namespace
 
 TEST(memory_custom_memory_management)
 {
@@ -116,7 +116,7 @@ TEST(memory_large_allocations)
 			}
 
 			// prune
-			for (node = doc.first_child(); node; )
+			for (node = doc.first_child(); node;)
 			{
 				xml_node next = node.next_sibling().next_sibling();
 
@@ -229,7 +229,8 @@ TEST(memory_string_allocate_decreasing)
 
 	std::basic_string<char_t> s = STR("ab");
 
-	for (int i = 0; i < 17; ++i) s += s;
+	for (int i = 0; i < 17; ++i)
+		s += s;
 
 	for (int j = 0; j < 17; ++j)
 	{
@@ -286,7 +287,8 @@ TEST(memory_string_allocate_decreasing_inplace)
 
 	std::basic_string<char_t> s = STR("ab");
 
-	for (int i = 0; i < 17; ++i) s += s;
+	for (int i = 0; i < 17; ++i)
+		s += s;
 
 	for (int j = 0; j < 17; ++j)
 	{

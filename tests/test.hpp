@@ -36,7 +36,8 @@ struct test_runner
 
 bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs);
 
-template <typename Node> inline bool test_node_name_value(const Node& node, const pugi::char_t* name, const pugi::char_t* value)
+template <typename Node>
+inline bool test_node_name_value(const Node& node, const pugi::char_t* name, const pugi::char_t* value)
 {
 	return test_string_equal(node.name(), name) && test_string_equal(node.value(), value);
 }
@@ -71,17 +72,22 @@ struct xpath_node_set_tester
 
 #endif
 
-struct dummy_fixture {};
+struct dummy_fixture
+{
+};
 
 #define TEST_FIXTURE(name, fixture) \
-	struct test_runner_helper_##name: fixture \
+	struct test_runner_helper_##name : fixture \
 	{ \
 		void run(); \
 	}; \
-	static struct test_runner_##name: test_runner \
+	static struct test_runner_##name : test_runner \
 	{ \
-		test_runner_##name(): test_runner(#name) {} \
-		\
+		test_runner_##name() \
+		    : test_runner(#name) \
+		{ \
+		} \
+\
 		virtual void run() PUGIXML_OVERRIDE \
 		{ \
 			test_runner_helper_##name helper; \
@@ -96,30 +102,34 @@ struct dummy_fixture {};
 	struct test_fixture_##name \
 	{ \
 		pugi::xml_document doc; \
-		\
+\
 		test_fixture_##name() \
 		{ \
 			CHECK(doc.load_string(PUGIXML_TEXT(xml), flags)); \
 		} \
-		\
-	private: \
+\
+	  private: \
 		test_fixture_##name(const test_fixture_##name&); \
 		test_fixture_##name& operator=(const test_fixture_##name&); \
 	}; \
-	\
+\
 	TEST_FIXTURE(name, test_fixture_##name)
 
 #define TEST_XML(name, xml) TEST_XML_FLAGS(name, xml, pugi::parse_default)
 
 #define CHECK_JOIN(text, file, line) text " at " file ":" #line
 #define CHECK_JOIN2(text, file, line) CHECK_JOIN(text, file, line)
-#define CHECK_TEXT(condition, text) if (condition) ; else test_runner::_failure_message = CHECK_JOIN2(text, __FILE__, __LINE__), longjmp(test_runner::_failure_buffer, 1)
+#define CHECK_TEXT(condition, text) \
+	if (condition) \
+		; \
+	else \
+		test_runner::_failure_message = CHECK_JOIN2(text, __FILE__, __LINE__), longjmp(test_runner::_failure_buffer, 1)
 #define CHECK_FORCE_FAIL(text) test_runner::_failure_message = CHECK_JOIN2(text, __FILE__, __LINE__), longjmp(test_runner::_failure_buffer, 1)
 
 #if (defined(_MSC_VER) && _MSC_VER == 1200) || defined(__MWERKS__) || (defined(__BORLANDC__) && __BORLANDC__ <= 0x540)
-#	define STRINGIZE(value) "??" // Some compilers have issues with stringizing expressions that contain strings w/escaping inside
+#define STRINGIZE(value) "??" // Some compilers have issues with stringizing expressions that contain strings w/escaping inside
 #else
-#	define STRINGIZE(value) #value
+#define STRINGIZE(value) #value
 #endif
 
 #define CHECK(condition) CHECK_TEXT(condition, STRINGIZE(condition) " is false")
@@ -147,9 +157,29 @@ struct dummy_fixture {};
 #endif
 
 #ifdef PUGIXML_NO_EXCEPTIONS
-#define CHECK_ALLOC_FAIL(code) do { CHECK(!test_runner::_memory_fail_triggered); code; CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false; } while (test_runner::_memory_fail_triggered)
+#define CHECK_ALLOC_FAIL(code) \
+	do \
+	{ \
+		CHECK(!test_runner::_memory_fail_triggered); \
+		code; \
+		CHECK(test_runner::_memory_fail_triggered); \
+		test_runner::_memory_fail_triggered = false; \
+	} while (test_runner::_memory_fail_triggered)
 #else
-#define CHECK_ALLOC_FAIL(code) do { CHECK(!test_runner::_memory_fail_triggered); try { code; } catch (std::bad_alloc&) {} CHECK(test_runner::_memory_fail_triggered); test_runner::_memory_fail_triggered = false; } while (test_runner::_memory_fail_triggered)
+#define CHECK_ALLOC_FAIL(code) \
+	do \
+	{ \
+		CHECK(!test_runner::_memory_fail_triggered); \
+		try \
+		{ \
+			code; \
+		} \
+		catch (std::bad_alloc&) \
+		{ \
+		} \
+		CHECK(test_runner::_memory_fail_triggered); \
+		test_runner::_memory_fail_triggered = false; \
+	} while (test_runner::_memory_fail_triggered)
 #endif
 
 #define STR(text) PUGIXML_TEXT(text)
@@ -161,7 +191,7 @@ struct dummy_fixture {};
 #if (defined(_MSC_VER) && _MSC_VER == 1200) || (defined(__INTEL_COMPILER) && __INTEL_COMPILER == 800) || defined(__BORLANDC__)
 // NaN comparison on MSVC6 is incorrect, see http://www.nabble.com/assertDoubleEquals,-NaN---Microsoft-Visual-Studio-6-td9137859.html
 // IC8 and BCC are also affected by the same bug
-#	define MSVC6_NAN_BUG
+#define MSVC6_NAN_BUG
 #endif
 
 inline wchar_t wchar_cast(unsigned int value)

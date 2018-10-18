@@ -3,9 +3,9 @@
 #include <limits>
 #include <string>
 
+#include <limits.h>
 #include <math.h>
 #include <string.h>
-#include <limits.h>
 
 using namespace pugi;
 
@@ -174,7 +174,7 @@ TEST_XML(dom_attr_assign_large_number_float, "<node attr='' />")
 	node.attribute(STR("attr")) = std::numeric_limits<float>::max();
 
 	CHECK(test_node(node, STR("<node attr=\"3.40282347e+038\"/>"), STR(""), format_raw) ||
-		  test_node(node, STR("<node attr=\"3.40282347e+38\"/>"), STR(""), format_raw));
+	      test_node(node, STR("<node attr=\"3.40282347e+38\"/>"), STR(""), format_raw));
 }
 
 TEST_XML(dom_attr_assign_large_number_double, "<node attr='' />")
@@ -880,12 +880,12 @@ TEST(dom_node_declaration_name)
 
 TEST(dom_node_declaration_attributes)
 {
-    xml_document doc;
-    xml_node node = doc.append_child(node_declaration);
-    node.append_attribute(STR("version")) = STR("1.0");
-    node.append_attribute(STR("encoding")) = STR("utf-8");
+	xml_document doc;
+	xml_node node = doc.append_child(node_declaration);
+	node.append_attribute(STR("version")) = STR("1.0");
+	node.append_attribute(STR("encoding")) = STR("utf-8");
 
-    CHECK_NODE(doc, STR("<?xml version=\"1.0\" encoding=\"utf-8\"?>"));
+	CHECK_NODE(doc, STR("<?xml version=\"1.0\" encoding=\"utf-8\"?>"));
 }
 
 TEST(dom_node_declaration_top_level)
@@ -926,7 +926,8 @@ TEST(dom_string_out_of_memory)
 	const unsigned int length = 65536;
 	static char_t string[length + 1];
 
-	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
+	for (unsigned int i = 0; i < length; ++i)
+		string[i] = 'a';
 	string[length] = 0;
 
 	xml_document doc;
@@ -976,8 +977,8 @@ TEST(dom_node_out_of_memory)
 	xml_attribute a = n.append_attribute(STR("a"));
 	CHECK(a);
 
-	CHECK_ALLOC_FAIL(while (n.append_child(node_comment)) { /* nop */ });
-	CHECK_ALLOC_FAIL(while (n.append_attribute(STR("b"))) { /* nop */ });
+	CHECK_ALLOC_FAIL(while (n.append_child(node_comment)){/* nop */});
+	CHECK_ALLOC_FAIL(while (n.append_attribute(STR("b"))){/* nop */});
 
 	// verify all node modification operations
 	CHECK_ALLOC_FAIL(CHECK(!n.append_child()));
@@ -1005,7 +1006,8 @@ TEST(dom_node_memory_limit)
 	const unsigned int length = 65536;
 	static char_t string[length + 1];
 
-	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
+	for (unsigned int i = 0; i < length; ++i)
+		string[i] = 'a';
 	string[length] = 0;
 
 	test_runner::_memory_fail_threshold = 32768 * 2 + sizeof(string);
@@ -1024,7 +1026,8 @@ TEST(dom_node_memory_limit_pi)
 	const unsigned int length = 65536;
 	static char_t string[length + 1];
 
-	for (unsigned int i = 0; i < length; ++i) string[i] = 'a';
+	for (unsigned int i = 0; i < length; ++i)
+		string[i] = 'a';
 	string[length] = 0;
 
 	test_runner::_memory_fail_threshold = 32768 * 2 + sizeof(string);
@@ -1073,15 +1076,15 @@ TEST(dom_node_doctype_copy)
 
 TEST(dom_node_doctype_value)
 {
-    xml_document doc;
-    xml_node node = doc.append_child(node_doctype);
+	xml_document doc;
+	xml_node node = doc.append_child(node_doctype);
 
-    CHECK(node.type() == node_doctype);
-    CHECK_STRING(node.value(), STR(""));
-    CHECK_NODE(node, STR("<!DOCTYPE>"));
+	CHECK(node.type() == node_doctype);
+	CHECK_STRING(node.value(), STR(""));
+	CHECK_NODE(node, STR("<!DOCTYPE>"));
 
-    CHECK(node.set_value(STR("id [ foo ]")));
-    CHECK_NODE(node, STR("<!DOCTYPE id [ foo ]>"));
+	CHECK(node.set_value(STR("id [ foo ]")));
+	CHECK_NODE(node, STR("<!DOCTYPE id [ foo ]>"));
 }
 
 TEST_XML(dom_node_append_buffer_native, "<node>test</node>")
@@ -1112,7 +1115,6 @@ TEST_XML(dom_node_append_buffer_convert, "<node>test</node>")
 	CHECK_NODE(doc, STR("<node>test<n/><n/></node>"));
 }
 
-
 TEST_XML(dom_node_append_buffer_remove, "<node>test</node>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -1127,15 +1129,21 @@ TEST_XML(dom_node_append_buffer_remove, "<node>test</node>")
 
 	CHECK_NODE(doc, STR("<node>test<child1 id=\"1\"/><child2>text</child2><child3/><child1 id=\"1\"/><child2>text</child2><child3/></node>"));
 
-	while (node.remove_child(STR("child2"))) {}
+	while (node.remove_child(STR("child2")))
+	{
+	}
 
 	CHECK_NODE(doc, STR("<node>test<child1 id=\"1\"/><child3/><child1 id=\"1\"/><child3/></node>"));
 
-	while (node.remove_child(STR("child1"))) {}
+	while (node.remove_child(STR("child1")))
+	{
+	}
 
 	CHECK_NODE(doc, STR("<node>test<child3/><child3/></node>"));
 
-	while (node.remove_child(STR("child3"))) {}
+	while (node.remove_child(STR("child3")))
+	{
+	}
 
 	CHECK_NODE(doc, STR("<node>test</node>"));
 
@@ -1665,7 +1673,8 @@ TEST(dom_node_copy_declaration_empty_name)
 	CHECK_STRING(decl2.name(), STR(""));
 }
 
-template <typename T> bool fp_equal(T lhs, T rhs)
+template <typename T>
+bool fp_equal(T lhs, T rhs)
 {
 	// Several compilers compare float/double values on x87 stack without proper rounding
 	// This causes roundtrip tests to fail, although they correctly preserve the data.
@@ -1703,13 +1712,13 @@ TEST(dom_fp_roundtrip_min_max_double)
 }
 
 const double fp_roundtrip_base[] =
-{
-	0.31830988618379067154,
-	0.43429448190325182765,
-	0.57721566490153286061,
-	0.69314718055994530942,
-	0.70710678118654752440,
-	0.78539816339744830962,
+    {
+        0.31830988618379067154,
+        0.43429448190325182765,
+        0.57721566490153286061,
+        0.69314718055994530942,
+        0.70710678118654752440,
+        0.78539816339744830962,
 };
 
 TEST(dom_fp_roundtrip_float)
@@ -1738,17 +1747,17 @@ TEST(dom_fp_roundtrip_double)
 	{
 		for (size_t i = 0; i < sizeof(fp_roundtrip_base) / sizeof(fp_roundtrip_base[0]); ++i)
 		{
-		#if (defined(_MSC_VER) && _MSC_VER < 1400) || defined(__MWERKS__)
+#if (defined(_MSC_VER) && _MSC_VER < 1400) || defined(__MWERKS__)
 			// Not all runtime libraries guarantee roundtripping for denormals
 			if (e == -1021 && fp_roundtrip_base[i] < 0.5)
 				continue;
-		#endif
+#endif
 
-		#ifdef __DMC__
+#ifdef __DMC__
 			// Digital Mars C does not roundtrip on exactly one combination
 			if (e == -12 && i == 1)
 				continue;
-		#endif
+#endif
 
 			double value = ldexp(fp_roundtrip_base[i], e);
 

@@ -2,9 +2,9 @@
 
 #include "writer_string.hpp"
 
-#include <string>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
 using namespace pugi;
 
@@ -199,11 +199,11 @@ TEST_XML(write_escape, "<node attr=''>text</node>")
 TEST_XML(write_escape_unicode, "<node attr='&#x3c00;'/>")
 {
 #ifdef PUGIXML_WCHAR_MODE
-	#ifdef U_LITERALS
-		CHECK_NODE(doc, STR("<node attr=\"\u3c00\"/>"));
-	#else
-		CHECK_NODE(doc, STR("<node attr=\"\x3c00\"/>"));
-	#endif
+#ifdef U_LITERALS
+	CHECK_NODE(doc, STR("<node attr=\"\u3c00\"/>"));
+#else
+	CHECK_NODE(doc, STR("<node attr=\"\x3c00\"/>"));
+#endif
 #else
 	CHECK_NODE(doc, STR("<node attr=\"\xe3\xb0\x80\"/>"));
 #endif
@@ -217,7 +217,7 @@ TEST_XML(write_no_escapes, "<node attr=''>text</node>")
 	CHECK_NODE_EX(doc, STR("<node attr=\"<>'\"&\x04\r\n\t\"><>'\"&\x04\r\n\t</node>"), STR(""), format_raw | format_no_escapes);
 }
 
-struct test_writer: xml_writer
+struct test_writer : xml_writer
 {
 	std::basic_string<char_t> contents;
 
@@ -302,7 +302,7 @@ TEST(write_encodings)
 		CHECK(v.size() == 10 && v[0] == '<' && v[1] == 0x54 && v[2] == 0xA2 && v[3] == 0x20AC && v[4] == wchar_cast(0xd852) && v[5] == wchar_cast(0xdf62) && v[6] == ' ' && v[7] == '/' && v[8] == '>' && v[9] == '\n');
 	}
 
-    CHECK(test_write_narrow(doc, format_default, encoding_latin1, "<\x54\xA2?? />\n", 9));
+	CHECK(test_write_narrow(doc, format_default, encoding_latin1, "<\x54\xA2?? />\n", 9));
 }
 
 #ifdef PUGIXML_WCHAR_MODE
@@ -313,7 +313,8 @@ TEST(write_encoding_huge)
 	// make a large utf16 name consisting of 6-byte char pairs (6 does not divide internal buffer size, so will need split correction)
 	std::string s_utf16 = std::string("\x00<", 2);
 
-	for (unsigned int i = 0; i < N; ++i) s_utf16 += "\x20\xAC\xd8\x52\xdf\x62";
+	for (unsigned int i = 0; i < N; ++i)
+		s_utf16 += "\x20\xAC\xd8\x52\xdf\x62";
 
 	s_utf16 += std::string("\x00/\x00>", 4);
 
@@ -322,7 +323,8 @@ TEST(write_encoding_huge)
 
 	std::string s_utf8 = "<";
 
-	for (unsigned int j = 0; j < N; ++j) s_utf8 += "\xE2\x82\xAC\xF0\xA4\xAD\xA2";
+	for (unsigned int j = 0; j < N; ++j)
+		s_utf8 += "\xE2\x82\xAC\xF0\xA4\xAD\xA2";
 
 	s_utf8 += " />\n";
 
@@ -340,7 +342,8 @@ TEST(write_encoding_huge_invalid)
 		// make a large utf16 name consisting of leading surrogate chars
 		std::basic_string<wchar_t> s_utf16;
 
-		for (unsigned int i = 0; i < N; ++i) s_utf16 += static_cast<wchar_t>(0xd852);
+		for (unsigned int i = 0; i < N; ++i)
+			s_utf16 += static_cast<wchar_t>(0xd852);
 
 		xml_document doc;
 		doc.append_child().set_name(s_utf16.c_str());
@@ -356,7 +359,8 @@ TEST(write_encoding_huge)
 	// make a large utf8 name consisting of 3-byte chars (3 does not divide internal buffer size, so will need split correction)
 	std::string s_utf8 = "<";
 
-	for (unsigned int i = 0; i < N; ++i) s_utf8 += "\xE2\x82\xAC";
+	for (unsigned int i = 0; i < N; ++i)
+		s_utf8 += "\xE2\x82\xAC";
 
 	s_utf8 += "/>";
 
@@ -365,7 +369,8 @@ TEST(write_encoding_huge)
 
 	std::string s_utf16 = std::string("\x00<", 2);
 
-	for (unsigned int j = 0; j < N; ++j) s_utf16 += "\x20\xAC";
+	for (unsigned int j = 0; j < N; ++j)
+		s_utf16 += "\x20\xAC";
 
 	s_utf16 += std::string("\x00 \x00/\x00>\x00\n", 8);
 
@@ -379,7 +384,8 @@ TEST(write_encoding_huge_invalid)
 	// make a large utf8 name consisting of non-leading chars
 	std::string s_utf8;
 
-	for (unsigned int i = 0; i < N; ++i) s_utf8 += "\x82";
+	for (unsigned int i = 0; i < N; ++i)
+		s_utf8 += "\x82";
 
 	xml_document doc;
 	doc.append_child().set_name(s_utf8.c_str());
@@ -416,22 +422,22 @@ TEST(write_unicode_invalid_utf16)
 	if (wcharsize == 2)
 	{
 		// check non-terminated degenerate handling
-	#ifdef U_LITERALS
+#ifdef U_LITERALS
 		CHECK(test_write_unicode_invalid(L"a\uda1d", "a"));
 		CHECK(test_write_unicode_invalid(L"a\uda1d_", "a_"));
-	#else
+#else
 		CHECK(test_write_unicode_invalid(L"a\xda1d", "a"));
 		CHECK(test_write_unicode_invalid(L"a\xda1d_", "a_"));
-	#endif
+#endif
 
 		// check incorrect leading code
-	#ifdef U_LITERALS
+#ifdef U_LITERALS
 		CHECK(test_write_unicode_invalid(L"a\ude24", "a"));
 		CHECK(test_write_unicode_invalid(L"a\ude24_", "a_"));
-	#else
+#else
 		CHECK(test_write_unicode_invalid(L"a\xde24", "a"));
 		CHECK(test_write_unicode_invalid(L"a\xde24_", "a_"));
-	#endif
+#endif
 	}
 }
 #else
@@ -569,19 +575,17 @@ TEST(write_pcdata_whitespace_fixedpoint)
 	const char_t* data = STR("<node>  test  <child>\n  <sub/>\n   </child>\n</node>");
 
 	static const unsigned int flags_parse[] =
-	{
-		0,
-		parse_ws_pcdata,
-		parse_ws_pcdata_single,
-		parse_trim_pcdata
-	};
+	    {
+	        0,
+	        parse_ws_pcdata,
+	        parse_ws_pcdata_single,
+	        parse_trim_pcdata};
 
 	static const unsigned int flags_format[] =
-	{
-		0,
-		format_raw,
-		format_indent
-	};
+	    {
+	        0,
+	        format_raw,
+	        format_indent};
 
 	for (unsigned int i = 0; i < sizeof(flags_parse) / sizeof(flags_parse[0]); ++i)
 	{
@@ -618,7 +622,7 @@ TEST_XML(write_no_empty_element_tags, "<node><child1/><child2>text</child2><chil
 
 TEST_XML_FLAGS(write_roundtrip, "<node><child1 attr1='value1' attr2='value2'/><child2 attr='value'>pre<![CDATA[data]]>mid&lt;text&amp;escape<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>", parse_full)
 {
-	const unsigned int flagset[] = { format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags };
+	const unsigned int flagset[] = {format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags};
 	size_t flagcount = sizeof(flagset) / sizeof(flagset[0]);
 
 	for (size_t i = 0; i < (size_t(1) << flagcount); ++i)
@@ -669,7 +673,7 @@ TEST(write_flush_coverage)
 }
 
 #ifndef PUGIXML_NO_EXCEPTIONS
-struct throwing_writer: xml_writer
+struct throwing_writer : xml_writer
 {
 	virtual void write(const void*, size_t) PUGIXML_OVERRIDE
 	{

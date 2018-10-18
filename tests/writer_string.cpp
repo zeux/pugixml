@@ -5,10 +5,12 @@
 static bool test_narrow(const std::string& result, const char* expected, size_t length)
 {
 	// check result
-	if (result != std::string(expected, expected + length)) return false;
+	if (result != std::string(expected, expected + length))
+		return false;
 
 	// check comparison operator (incorrect implementation can theoretically early-out on zero terminators...)
-	if (length > 0 && result == std::string(expected, expected + length - 1) + "?") return false;
+	if (length > 0 && result == std::string(expected, expected + length - 1) + "?")
+		return false;
 
 	return true;
 }
@@ -27,7 +29,7 @@ std::basic_string<wchar_t> xml_writer_string::as_wide() const
 {
 	CHECK(contents.size() % sizeof(wchar_t) == 0);
 
-    // round-trip pointer through void* to avoid pointer alignment warnings; contents data should be heap allocated => safe to cast
+	// round-trip pointer through void* to avoid pointer alignment warnings; contents data should be heap allocated => safe to cast
 	return std::basic_string<wchar_t>(static_cast<const wchar_t*>(static_cast<const void*>(contents.data())), contents.size() / sizeof(wchar_t));
 }
 
@@ -37,7 +39,7 @@ std::basic_string<pugi::char_t> xml_writer_string::as_string() const
 	CHECK(contents.size() % sizeof(pugi::char_t) == 0);
 #endif
 
-    // round-trip pointer through void* to avoid pointer alignment warnings; contents data should be heap allocated => safe to cast
+	// round-trip pointer through void* to avoid pointer alignment warnings; contents data should be heap allocated => safe to cast
 	return std::basic_string<pugi::char_t>(static_cast<const pugi::char_t*>(static_cast<const void*>(contents.data())), contents.size() / sizeof(pugi::char_t));
 }
 

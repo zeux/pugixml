@@ -57,7 +57,7 @@ TEST_XML(xpath_number_sum, "<node>123<child>789</child></node><node/>")
 	CHECK_XPATH_NUMBER(n, STR("sum(.)"), 123789); // 123 .. 789
 
 	CHECK_XPATH_NUMBER(n, STR("sum(./descendant-or-self::node())"), 125490); // node + 123 + child + 789 = 123789 + 123 + 789 + 789 = 125490
-	CHECK_XPATH_NUMBER(n, STR("sum(.//node())"), 1701); // 123 + child + 789 = 123 + 789 + 789
+	CHECK_XPATH_NUMBER(n, STR("sum(.//node())"), 1701);                      // 123 + child + 789 = 123 + 789 + 789
 	CHECK_XPATH_NUMBER_NAN(doc.last_child(), STR("sum(.)"));
 
 	// sum with 2 arguments
@@ -423,9 +423,9 @@ TEST(xpath_string_substring_after)
 
 TEST_XML(xpath_string_substring_after_heap, "<node>foo<child/>bar</node>")
 {
-    CHECK_XPATH_STRING(doc, STR("substring-after(node, 'fo')"), STR("obar"));
-    CHECK_XPATH_STRING(doc, STR("substring-after(node, 'fooba')"), STR("r"));
-    CHECK_XPATH_STRING(doc, STR("substring-after(node, 'foobar')"), STR(""));
+	CHECK_XPATH_STRING(doc, STR("substring-after(node, 'fo')"), STR("obar"));
+	CHECK_XPATH_STRING(doc, STR("substring-after(node, 'fooba')"), STR("r"));
+	CHECK_XPATH_STRING(doc, STR("substring-after(node, 'foobar')"), STR(""));
 }
 
 TEST(xpath_string_substring)
@@ -452,7 +452,7 @@ TEST(xpath_string_substring)
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 0 div 0)"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring('', 1)"), STR(""));
 	CHECK_XPATH_STRING(c, STR("substring('', 0)"), STR(""));
-    CHECK_XPATH_STRING(c, STR("substring(substring('internalexternalcorrect substring',9),9)"), STR("correct substring"));
+	CHECK_XPATH_STRING(c, STR("substring(substring('internalexternalcorrect substring',9),9)"), STR("correct substring"));
 
 	// substring with 3 arguments
 	CHECK_XPATH_STRING(c, STR("substring('abcd', 2, 1)"), STR("b"));
@@ -490,9 +490,9 @@ TEST(xpath_string_substring)
 
 TEST_XML(xpath_string_substring_heap, "<node>foo<child/>bar</node>")
 {
-    CHECK_XPATH_STRING(doc, STR("substring(node, 3)"), STR("obar"));
-    CHECK_XPATH_STRING(doc, STR("substring(node, 6)"), STR("r"));
-    CHECK_XPATH_STRING(doc, STR("substring(node, 7)"), STR(""));
+	CHECK_XPATH_STRING(doc, STR("substring(node, 3)"), STR("obar"));
+	CHECK_XPATH_STRING(doc, STR("substring(node, 6)"), STR("r"));
+	CHECK_XPATH_STRING(doc, STR("substring(node, 7)"), STR(""));
 }
 
 TEST_XML(xpath_string_string_length, "<node>123</node>")
@@ -590,7 +590,7 @@ TEST_XML(xpath_nodeset_last, "<node><c1/><c1/><c2/><c3/><c3/><c3/><c3/></node>")
 	// last with 0 arguments
 	CHECK_XPATH_NUMBER(n, STR("last()"), 1);
 	CHECK_XPATH_NODESET(n, STR("c1[last() = 1]"));
-	CHECK_XPATH_NODESET(n, STR("c1[last() = 2]")) % 3 % 4; // c1, c1
+	CHECK_XPATH_NODESET(n, STR("c1[last() = 2]")) % 3 % 4;                           // c1, c1
 	CHECK_XPATH_NODESET(n, STR("c2/preceding-sibling::node()[last() = 2]")) % 4 % 3; // c1, c1
 
 	// last with 1 argument
@@ -829,7 +829,8 @@ TEST(xpath_string_translate_table_out_of_memory)
 
 	for (size_t i = 0; i < count; ++i)
 	{
-		if (i != 0) query += STR(",");
+		if (i != 0)
+			query += STR(",");
 		query += STR("translate('a','a','A')");
 	}
 

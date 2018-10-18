@@ -5,7 +5,8 @@
 
 #include <utility>
 
-template <typename T> static void generic_bool_ops_test(const T& obj)
+template <typename T>
+static void generic_bool_ops_test(const T& obj)
 {
 	T null;
 
@@ -14,14 +15,14 @@ template <typename T> static void generic_bool_ops_test(const T& obj)
 	CHECK(!!obj);
 
 #ifdef _MSC_VER
-#   pragma warning(push)
-#   pragma warning(disable: 4800) // forcing value to bool 'true' or 'false' (performance warning) - we really want to just cast to bool instead of !!
+#pragma warning(push)
+#pragma warning(disable : 4800) // forcing value to bool 'true' or 'false' (performance warning) - we really want to just cast to bool instead of !!
 #endif
 
 	bool b1 = null, b2 = obj;
 
 #ifdef _MSC_VER
-#   pragma warning(pop)
+#pragma warning(pop)
 #endif
 
 	CHECK(!b1);
@@ -33,7 +34,8 @@ template <typename T> static void generic_bool_ops_test(const T& obj)
 	CHECK(obj || obj);
 }
 
-template <typename T> static void generic_eq_ops_test(const T& obj1, const T& obj2)
+template <typename T>
+static void generic_eq_ops_test(const T& obj1, const T& obj2)
 {
 	T null = T();
 
@@ -54,7 +56,8 @@ template <typename T> static void generic_eq_ops_test(const T& obj1, const T& ob
 	CHECK(!(T(obj1) != obj1));
 }
 
-template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
+template <typename T>
+static void generic_rel_ops_test(T obj1, T obj2)
 {
 	T null = T();
 
@@ -103,7 +106,8 @@ template <typename T> static void generic_rel_ops_test(T obj1, T obj2)
 	CHECK(!(obj1 >= obj2));
 }
 
-template <typename T> static void generic_empty_test(const T& obj)
+template <typename T>
+static void generic_empty_test(const T& obj)
 {
 	T null;
 

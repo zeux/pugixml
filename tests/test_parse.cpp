@@ -279,132 +279,132 @@ TEST(parse_ws_pcdata_parse)
 
 static int get_tree_node_count(xml_node n)
 {
-    int result = 1;
+	int result = 1;
 
-    for (xml_node c = n.first_child(); c; c = c.next_sibling())
-        result += get_tree_node_count(c);
+	for (xml_node c = n.first_child(); c; c = c.next_sibling())
+		result += get_tree_node_count(c);
 
-    return result;
+	return result;
 }
 
 TEST(parse_ws_pcdata_permutations)
 {
-    struct test_data_t
-    {
-        unsigned int mask; // 1 = default flags, 2 = parse_ws_pcdata, 4 = parse_ws_pcdata_single
-        const char_t* source;
-        const char_t* result;
-        int nodes; // negative if parsing should fail
-    };
+	struct test_data_t
+	{
+		unsigned int mask; // 1 = default flags, 2 = parse_ws_pcdata, 4 = parse_ws_pcdata_single
+		const char_t* source;
+		const char_t* result;
+		int nodes; // negative if parsing should fail
+	};
 
-    test_data_t test_data[] =
-    {
-        // external pcdata should be discarded (whitespace or not)
-        {7, STR("ext1<node/>"), STR("<node/>"), 2},
-        {7, STR("ext1<node/>ext2"), STR("<node/>"), 2},
-        {7, STR(" <node/>"), STR("<node/>"), 2},
-        {7, STR("<node/> "), STR("<node/>"), 2},
-        {7, STR(" <node/> "), STR("<node/>"), 2},
-        // inner pcdata should be preserved
-        {7, STR("<node>inner</node>"), STR("<node>inner</node>"), 3},
-        {7, STR("<node>inner1<child/>inner2</node>"), STR("<node>inner1<child/>inner2</node>"), 5},
-        {7, STR("<node>inner1<child>deep</child>inner2</node>"), STR("<node>inner1<child>deep</child>inner2</node>"), 6},
-        // empty pcdata nodes should never be created
-        {7, STR("<node>inner1<child></child>inner2</node>"), STR("<node>inner1<child/>inner2</node>"), 5},
-        {7, STR("<node><child></child>inner2</node>"), STR("<node><child/>inner2</node>"), 4},
-        {7, STR("<node>inner1<child></child></node>"), STR("<node>inner1<child/></node>"), 4},
-        {7, STR("<node><child></child></node>"), STR("<node><child/></node>"), 3},
-        // comments, pi or other nodes should not cause pcdata creation either
-        {7, STR("<node><!----><child><?pi?></child><![CDATA[x]]></node>"), STR("<node><child/><![CDATA[x]]></node>"), 4},
-        // leading/trailing pcdata whitespace should be preserved (note: this will change if parse_ws_pcdata_trim is introduced)
-        {7, STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), 6},
-        // whitespace-only pcdata preservation depends on the parsing mode
-        {1, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child/><child><deep/></child></node>"), 5},
-        {2, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t\n\t</node>"), 13},
-        {4, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child>   </child><child><deep>  </deep></child></node>"), 7},
-        // current implementation of parse_ws_pcdata_single has an unfortunate bug; reproduce it here
-        {4, STR("<node>\t\t<!---->\n\n</node>"), STR("<node>\n\n</node>"), 3},
-        // error case: terminate PCDATA in the middle
-        {7, STR("<node>abcdef"), STR("<node>abcdef</node>"), -3},
-        {5, STR("<node>      "), STR("<node/>"), -2},
-        {2, STR("<node>      "), STR("<node>      </node>"), -3},
-        // error case: terminate PCDATA as early as possible
-        {7, STR("<node>"), STR("<node/>"), -2},
-        {7, STR("<node>a"), STR("<node>a</node>"), -3},
-        {5, STR("<node> "), STR("<node/>"), -2},
-        {2, STR("<node> "), STR("<node> </node>"), -3},
-    };
+	test_data_t test_data[] =
+	    {
+	        // external pcdata should be discarded (whitespace or not)
+	        {7, STR("ext1<node/>"), STR("<node/>"), 2},
+	        {7, STR("ext1<node/>ext2"), STR("<node/>"), 2},
+	        {7, STR(" <node/>"), STR("<node/>"), 2},
+	        {7, STR("<node/> "), STR("<node/>"), 2},
+	        {7, STR(" <node/> "), STR("<node/>"), 2},
+	        // inner pcdata should be preserved
+	        {7, STR("<node>inner</node>"), STR("<node>inner</node>"), 3},
+	        {7, STR("<node>inner1<child/>inner2</node>"), STR("<node>inner1<child/>inner2</node>"), 5},
+	        {7, STR("<node>inner1<child>deep</child>inner2</node>"), STR("<node>inner1<child>deep</child>inner2</node>"), 6},
+	        // empty pcdata nodes should never be created
+	        {7, STR("<node>inner1<child></child>inner2</node>"), STR("<node>inner1<child/>inner2</node>"), 5},
+	        {7, STR("<node><child></child>inner2</node>"), STR("<node><child/>inner2</node>"), 4},
+	        {7, STR("<node>inner1<child></child></node>"), STR("<node>inner1<child/></node>"), 4},
+	        {7, STR("<node><child></child></node>"), STR("<node><child/></node>"), 3},
+	        // comments, pi or other nodes should not cause pcdata creation either
+	        {7, STR("<node><!----><child><?pi?></child><![CDATA[x]]></node>"), STR("<node><child/><![CDATA[x]]></node>"), 4},
+	        // leading/trailing pcdata whitespace should be preserved (note: this will change if parse_ws_pcdata_trim is introduced)
+	        {7, STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), STR("<node>\t \tinner1<child> deep   </child>\t\ninner2\n\t</node>"), 6},
+	        // whitespace-only pcdata preservation depends on the parsing mode
+	        {1, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child/><child><deep/></child></node>"), 5},
+	        {2, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t\n\t</node>"), 13},
+	        {4, STR("<node>\n\t<child>   </child>\n\t<child> <deep>  </deep> </child>\n\t<!---->\n\t</node>"), STR("<node><child>   </child><child><deep>  </deep></child></node>"), 7},
+	        // current implementation of parse_ws_pcdata_single has an unfortunate bug; reproduce it here
+	        {4, STR("<node>\t\t<!---->\n\n</node>"), STR("<node>\n\n</node>"), 3},
+	        // error case: terminate PCDATA in the middle
+	        {7, STR("<node>abcdef"), STR("<node>abcdef</node>"), -3},
+	        {5, STR("<node>      "), STR("<node/>"), -2},
+	        {2, STR("<node>      "), STR("<node>      </node>"), -3},
+	        // error case: terminate PCDATA as early as possible
+	        {7, STR("<node>"), STR("<node/>"), -2},
+	        {7, STR("<node>a"), STR("<node>a</node>"), -3},
+	        {5, STR("<node> "), STR("<node/>"), -2},
+	        {2, STR("<node> "), STR("<node> </node>"), -3},
+	    };
 
-    for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
-    {
-        const test_data_t& td = test_data[i];
+	for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
+	{
+		const test_data_t& td = test_data[i];
 
-        for (int flag = 0; flag < 3; ++flag)
-        {
-            if (td.mask & (1 << flag))
-            {
-                unsigned int flags[] = {parse_default, parse_default | parse_ws_pcdata, parse_default | parse_ws_pcdata_single};
+		for (int flag = 0; flag < 3; ++flag)
+		{
+			if (td.mask & (1 << flag))
+			{
+				unsigned int flags[] = {parse_default, parse_default | parse_ws_pcdata, parse_default | parse_ws_pcdata_single};
 
-                xml_document doc;
-                CHECK((td.nodes > 0) == doc.load_string(td.source, flags[flag]));
-                CHECK_NODE(doc, td.result);
+				xml_document doc;
+				CHECK((td.nodes > 0) == doc.load_string(td.source, flags[flag]));
+				CHECK_NODE(doc, td.result);
 
-                int nodes = get_tree_node_count(doc);
-                CHECK((td.nodes < 0 ? -td.nodes : td.nodes) == nodes);
-            }
-        }
-    }
+				int nodes = get_tree_node_count(doc);
+				CHECK((td.nodes < 0 ? -td.nodes : td.nodes) == nodes);
+			}
+		}
+	}
 }
 
 TEST(parse_ws_pcdata_fragment_permutations)
 {
-    struct test_data_t
-    {
-        unsigned int mask; // 1 = default flags, 2 = parse_ws_pcdata, 4 = parse_ws_pcdata_single
-        const char_t* source;
-        const char_t* result;
-        int nodes; // negative if parsing should fail
-    };
+	struct test_data_t
+	{
+		unsigned int mask; // 1 = default flags, 2 = parse_ws_pcdata, 4 = parse_ws_pcdata_single
+		const char_t* source;
+		const char_t* result;
+		int nodes; // negative if parsing should fail
+	};
 
-    test_data_t test_data[] =
-    {
-        // external pcdata should be preserved
-        {7, STR("ext1"), STR("ext1"), 2},
-        {5, STR("    "), STR(""), 1},
-        {2, STR("    "), STR("    "), 2},
-        {7, STR("ext1<node/>"), STR("ext1<node/>"), 3},
-        {7, STR("<node/>ext2"), STR("<node/>ext2"), 3},
-        {7, STR("ext1<node/>ext2"), STR("ext1<node/>ext2"), 4},
-        {7, STR("ext1<node1/>ext2<node2/>ext3"), STR("ext1<node1/>ext2<node2/>ext3"), 6},
-        {5, STR(" <node/>"), STR("<node/>"), 2},
-        {2, STR(" <node/>"), STR(" <node/>"), 3},
-        {5, STR("<node/> "), STR("<node/>"), 2},
-        {2, STR("<node/> "), STR("<node/> "), 3},
-        {5, STR(" <node/> "), STR("<node/>"), 2},
-        {2, STR(" <node/> "), STR(" <node/> "), 4},
-        {5, STR(" <node1/> <node2/> "), STR("<node1/><node2/>"), 3},
-        {2, STR(" <node1/> <node2/> "), STR(" <node1/> <node2/> "), 6},
-    };
+	test_data_t test_data[] =
+	    {
+	        // external pcdata should be preserved
+	        {7, STR("ext1"), STR("ext1"), 2},
+	        {5, STR("    "), STR(""), 1},
+	        {2, STR("    "), STR("    "), 2},
+	        {7, STR("ext1<node/>"), STR("ext1<node/>"), 3},
+	        {7, STR("<node/>ext2"), STR("<node/>ext2"), 3},
+	        {7, STR("ext1<node/>ext2"), STR("ext1<node/>ext2"), 4},
+	        {7, STR("ext1<node1/>ext2<node2/>ext3"), STR("ext1<node1/>ext2<node2/>ext3"), 6},
+	        {5, STR(" <node/>"), STR("<node/>"), 2},
+	        {2, STR(" <node/>"), STR(" <node/>"), 3},
+	        {5, STR("<node/> "), STR("<node/>"), 2},
+	        {2, STR("<node/> "), STR("<node/> "), 3},
+	        {5, STR(" <node/> "), STR("<node/>"), 2},
+	        {2, STR(" <node/> "), STR(" <node/> "), 4},
+	        {5, STR(" <node1/> <node2/> "), STR("<node1/><node2/>"), 3},
+	        {2, STR(" <node1/> <node2/> "), STR(" <node1/> <node2/> "), 6},
+	    };
 
-    for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
-    {
-        const test_data_t& td = test_data[i];
+	for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
+	{
+		const test_data_t& td = test_data[i];
 
-        for (int flag = 0; flag < 3; ++flag)
-        {
-            if (td.mask & (1 << flag))
-            {
-                unsigned int flags[] = {parse_default, parse_default | parse_ws_pcdata, parse_default | parse_ws_pcdata_single};
+		for (int flag = 0; flag < 3; ++flag)
+		{
+			if (td.mask & (1 << flag))
+			{
+				unsigned int flags[] = {parse_default, parse_default | parse_ws_pcdata, parse_default | parse_ws_pcdata_single};
 
-                xml_document doc;
-                CHECK((td.nodes > 0) == doc.load_string(td.source, flags[flag] | parse_fragment));
-                CHECK_NODE(doc, td.result);
+				xml_document doc;
+				CHECK((td.nodes > 0) == doc.load_string(td.source, flags[flag] | parse_fragment));
+				CHECK_NODE(doc, td.result);
 
-                int nodes = get_tree_node_count(doc);
-                CHECK((td.nodes < 0 ? -td.nodes : td.nodes) == nodes);
-            }
-        }
-    }
+				int nodes = get_tree_node_count(doc);
+				CHECK((td.nodes < 0 ? -td.nodes : td.nodes) == nodes);
+			}
+		}
+	}
 }
 
 TEST(parse_pcdata_no_eol)
@@ -439,49 +439,48 @@ TEST(parse_pcdata_error)
 
 TEST(parse_pcdata_trim)
 {
-    struct test_data_t
-    {
-        const char_t* source;
-        const char_t* result;
-        unsigned int flags;
-    };
+	struct test_data_t
+	{
+		const char_t* source;
+		const char_t* result;
+		unsigned int flags;
+	};
 
-    test_data_t test_data[] =
-    {
-    	{ STR("<node> text</node>"), STR("text"), 0 },
-    	{ STR("<node>\t\n text</node>"), STR("text"), 0 },
-    	{ STR("<node>text </node>"), STR("text"), 0 },
-    	{ STR("<node>text \t\n</node>"), STR("text"), 0 },
-    	{ STR("<node>\r\n\t text \t\n\r</node>"), STR("text"), 0 },
-    	{ STR(" text"), STR("text"), parse_fragment },
-    	{ STR("\t\n text"), STR("text"), parse_fragment },
-    	{ STR("text "), STR("text"), parse_fragment },
-    	{ STR("text \t\n"), STR("text"), parse_fragment },
-    	{ STR("\r\n\t text \t\n\r"), STR("text"), parse_fragment },
-    	{ STR("<node>\r\n\t text \t\n\r more \r\n\t</node>"), STR("text \t\n\r more"), 0 },
-    	{ STR("<node>\r\n\t text \t\n\r more \r\n\t</node>"), STR("text \t\n\n more"), parse_eol },
-    	{ STR("<node>\r\n\t text \r\n\r\n\r\n\r\n\r\n\r\n\r\n more \r\n\t</node>"), STR("text \n\n\n\n\n\n\n more"), parse_eol },
-    	{ STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&amp;&amp;&amp;&amp;&amp;&amp;&amp;"), 0 },
-    	{ STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&&&&&&&"), parse_escapes },
-        { STR("     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    "), STR("test&&&&&&&"), parse_fragment | parse_escapes },
-        { STR("<node>\r\n\t text \t\n\r m&amp;&amp;e \r\n\t</node>"), STR("text \t\n\n m&&e"), parse_eol | parse_escapes }
-    };
+	test_data_t test_data[] =
+	    {
+	        {STR("<node> text</node>"), STR("text"), 0},
+	        {STR("<node>\t\n text</node>"), STR("text"), 0},
+	        {STR("<node>text </node>"), STR("text"), 0},
+	        {STR("<node>text \t\n</node>"), STR("text"), 0},
+	        {STR("<node>\r\n\t text \t\n\r</node>"), STR("text"), 0},
+	        {STR(" text"), STR("text"), parse_fragment},
+	        {STR("\t\n text"), STR("text"), parse_fragment},
+	        {STR("text "), STR("text"), parse_fragment},
+	        {STR("text \t\n"), STR("text"), parse_fragment},
+	        {STR("\r\n\t text \t\n\r"), STR("text"), parse_fragment},
+	        {STR("<node>\r\n\t text \t\n\r more \r\n\t</node>"), STR("text \t\n\r more"), 0},
+	        {STR("<node>\r\n\t text \t\n\r more \r\n\t</node>"), STR("text \t\n\n more"), parse_eol},
+	        {STR("<node>\r\n\t text \r\n\r\n\r\n\r\n\r\n\r\n\r\n more \r\n\t</node>"), STR("text \n\n\n\n\n\n\n more"), parse_eol},
+	        {STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&amp;&amp;&amp;&amp;&amp;&amp;&amp;"), 0},
+	        {STR("<node>     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    </node>"), STR("test&&&&&&&"), parse_escapes},
+	        {STR("     test&amp;&amp;&amp;&amp;&amp;&amp;&amp;    "), STR("test&&&&&&&"), parse_fragment | parse_escapes},
+	        {STR("<node>\r\n\t text \t\n\r m&amp;&amp;e \r\n\t</node>"), STR("text \t\n\n m&&e"), parse_eol | parse_escapes}};
 
-    for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
-    {
-        const test_data_t& td = test_data[i];
+	for (size_t i = 0; i < sizeof(test_data) / sizeof(test_data[0]); ++i)
+	{
+		const test_data_t& td = test_data[i];
 
-        xml_document doc;
-        CHECK(doc.load_string(td.source, td.flags | parse_trim_pcdata));
+		xml_document doc;
+		CHECK(doc.load_string(td.source, td.flags | parse_trim_pcdata));
 
-        const char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
-        CHECK_STRING(value, td.result);
-    }
+		const char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
+		CHECK_STRING(value, td.result);
+	}
 }
 
 TEST(parse_pcdata_trim_empty)
 {
-	unsigned int flags[] = { 0, parse_ws_pcdata, parse_ws_pcdata_single, parse_ws_pcdata | parse_ws_pcdata_single };
+	unsigned int flags[] = {0, parse_ws_pcdata, parse_ws_pcdata_single, parse_ws_pcdata | parse_ws_pcdata_single};
 
 	for (size_t i = 0; i < sizeof(flags) / sizeof(flags[0]); ++i)
 	{
@@ -695,7 +694,6 @@ TEST(parse_attribute_variations)
 					CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
 				}
 }
-
 
 TEST(parse_attribute_error)
 {
@@ -926,10 +924,10 @@ TEST(parse_out_of_memory_halfway_node)
 
 	for (unsigned int i = 0; i < count; ++i)
 	{
-		text[4*i + 0] = '<';
-		text[4*i + 1] = 'n';
-		text[4*i + 2] = '/';
-		text[4*i + 3] = '>';
+		text[4 * i + 0] = '<';
+		text[4 * i + 1] = 'n';
+		text[4 * i + 2] = '/';
+		text[4 * i + 3] = '>';
 	}
 
 	test_runner::_memory_fail_threshold = 65536;
@@ -949,11 +947,11 @@ TEST(parse_out_of_memory_halfway_attr)
 
 	for (unsigned int i = 0; i < count; ++i)
 	{
-		text[5*i + 2] = ' ';
-		text[5*i + 3] = 'a';
-		text[5*i + 4] = '=';
-		text[5*i + 5] = '"';
-		text[5*i + 6] = '"';
+		text[5 * i + 2] = ' ';
+		text[5 * i + 3] = 'a';
+		text[5 * i + 4] = '=';
+		text[5 * i + 5] = '"';
+		text[5 * i + 6] = '"';
 	}
 
 	text[5 * count + 2] = '/';
@@ -984,10 +982,10 @@ TEST(parse_out_of_memory_allocator_state_sync)
 
 	for (unsigned int i = 0; i < count; ++i)
 	{
-		text[4*i + 0] = '<';
-		text[4*i + 1] = 'n';
-		text[4*i + 2] = '/';
-		text[4*i + 3] = '>';
+		text[4 * i + 0] = '<';
+		text[4 * i + 1] = 'n';
+		text[4 * i + 2] = '/';
+		text[4 * i + 3] = '>';
 	}
 
 	test_runner::_memory_fail_threshold = 65536;
@@ -1072,18 +1070,18 @@ TEST(parse_bom_fragment)
 	};
 
 	const test_data_t data[] =
-	{
-		{ encoding_utf8, "\xef\xbb\xbf", 3, STR("") },
-		{ encoding_utf8, "\xef\xbb\xbftest", 7, STR("test") },
-		{ encoding_utf16_be, "\xfe\xff", 2, STR("") },
-		{ encoding_utf16_be, "\xfe\xff\x00t\x00o\x00s\x00t", 10, STR("tost") },
-		{ encoding_utf16_le, "\xff\xfe", 2, STR("") },
-		{ encoding_utf16_le, "\xff\xfet\x00o\x00s\x00t\x00", 10, STR("tost") },
-		{ encoding_utf32_be, "\x00\x00\xfe\xff", 4, STR("") },
-		{ encoding_utf32_be, "\x00\x00\xfe\xff\x00\x00\x00t\x00\x00\x00o\x00\x00\x00s\x00\x00\x00t", 20, STR("tost") },
-		{ encoding_utf32_le, "\xff\xfe\x00\x00", 4, STR("") },
-		{ encoding_utf32_le, "\xff\xfe\x00\x00t\x00\x00\x00o\x00\x00\x00s\x00\x00\x00t\x00\x00\x00", 20, STR("tost") },
-	};
+	    {
+	        {encoding_utf8, "\xef\xbb\xbf", 3, STR("")},
+	        {encoding_utf8, "\xef\xbb\xbftest", 7, STR("test")},
+	        {encoding_utf16_be, "\xfe\xff", 2, STR("")},
+	        {encoding_utf16_be, "\xfe\xff\x00t\x00o\x00s\x00t", 10, STR("tost")},
+	        {encoding_utf16_le, "\xff\xfe", 2, STR("")},
+	        {encoding_utf16_le, "\xff\xfet\x00o\x00s\x00t\x00", 10, STR("tost")},
+	        {encoding_utf32_be, "\x00\x00\xfe\xff", 4, STR("")},
+	        {encoding_utf32_be, "\x00\x00\xfe\xff\x00\x00\x00t\x00\x00\x00o\x00\x00\x00s\x00\x00\x00t", 20, STR("tost")},
+	        {encoding_utf32_le, "\xff\xfe\x00\x00", 4, STR("")},
+	        {encoding_utf32_le, "\xff\xfe\x00\x00t\x00\x00\x00o\x00\x00\x00s\x00\x00\x00t\x00\x00\x00", 20, STR("tost")},
+	    };
 
 	for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); ++i)
 	{
@@ -1171,12 +1169,11 @@ TEST(parse_close_tag_eof)
 TEST(parse_fuzz_doctype)
 {
 	unsigned char data[] =
-	{
-		0x3b, 0x3c, 0x21, 0x44, 0x4f, 0x43, 0x54, 0x59, 0x50, 0x45, 0xef, 0xbb, 0xbf, 0x3c, 0x3f, 0x78,
-		0x6d, 0x6c, 0x20, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x3d, 0x22, 0x31, 0x2e, 0x30, 0x22,
-		0x3f, 0x3e, 0x3c, 0x21, 0x2d, 0x2d, 0x20, 0xe9, 0x80, 0xb1, 0xe5, 0xa0, 0xb1, 0xe3, 0x82, 0xb4,
-		0xe3, 0x83, 0xb3, 0x20, 0xef, 0x83, 0x97, 0xe3, 0xa9, 0x2a, 0x20, 0x2d, 0x2d, 0x3e
-	};
+	    {
+	        0x3b, 0x3c, 0x21, 0x44, 0x4f, 0x43, 0x54, 0x59, 0x50, 0x45, 0xef, 0xbb, 0xbf, 0x3c, 0x3f, 0x78,
+	        0x6d, 0x6c, 0x20, 0x76, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x3d, 0x22, 0x31, 0x2e, 0x30, 0x22,
+	        0x3f, 0x3e, 0x3c, 0x21, 0x2d, 0x2d, 0x20, 0xe9, 0x80, 0xb1, 0xe5, 0xa0, 0xb1, 0xe3, 0x82, 0xb4,
+	        0xe3, 0x83, 0xb3, 0x20, 0xef, 0x83, 0x97, 0xe3, 0xa9, 0x2a, 0x20, 0x2d, 0x2d, 0x3e};
 
 	xml_document doc;
 	CHECK(doc.load_buffer(data, sizeof(data)).status == status_bad_doctype);
@@ -1215,9 +1212,9 @@ TEST(parse_embed_pcdata)
 		CHECK_STRING(child.child_value(), STR("outer"));
 		CHECK_STRING(child.child_value(STR("inner2")), STR("value2"));
 
-	#ifndef PUGIXML_NO_XPATH
+#ifndef PUGIXML_NO_XPATH
 		CHECK_XPATH_NUMBER(doc, STR("count(node/child/*[starts-with(., 'value')])"), 2);
-	#endif
+#endif
 
 		CHECK_NODE(doc, STR("<node><key>value</key><child><inner1>value1</inner1><inner2>value2</inner2>outer</child><two>text<data/></two></node>"));
 		CHECK_NODE_EX(doc, STR("<node>\n<key>value</key>\n<child>\n<inner1>value1</inner1>\n<inner2>value2</inner2>outer</child>\n<two>text<data />\n</two>\n</node>\n"), STR("\t"), 0);
@@ -1286,23 +1283,23 @@ TEST(parse_encoding_detect_auto)
 	};
 
 	const data_t data[] =
-	{
-		// BOM
-		{ "\x00\x00\xfe\xff", 4, encoding_utf32_be },
-		{ "\xff\xfe\x00\x00", 4, encoding_utf32_le },
-		{ "\xfe\xff  ", 4, encoding_utf16_be },
-		{ "\xff\xfe  ", 4, encoding_utf16_le },
-		{ "\xef\xbb\xbf ", 4, encoding_utf8 },
-		// automatic tag detection for < or <?
-		{ "\x00\x00\x00<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>", 16, encoding_utf32_be },
-		{ "<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>\x00\x00\x00", 16, encoding_utf32_le },
-		{ "\x00<\x00?\x00n\x00?\x00>", 10, encoding_utf16_be },
-		{ "<\x00?\x00n\x00?\x00>\x00", 10, encoding_utf16_le },
-		{ "\x00<\x00n\x00/\x00>", 8, encoding_utf16_be },
-		{ "<\x00n\x00/\x00>\x00", 8, encoding_utf16_le },
-		// <?xml encoding
-		{ "<?xml encoding='latin1'?>", 25, encoding_latin1 },
-	};
+	    {
+	        // BOM
+	        {"\x00\x00\xfe\xff", 4, encoding_utf32_be},
+	        {"\xff\xfe\x00\x00", 4, encoding_utf32_le},
+	        {"\xfe\xff  ", 4, encoding_utf16_be},
+	        {"\xff\xfe  ", 4, encoding_utf16_le},
+	        {"\xef\xbb\xbf ", 4, encoding_utf8},
+	        // automatic tag detection for < or <?
+	        {"\x00\x00\x00<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>", 16, encoding_utf32_be},
+	        {"<\x00\x00\x00n\x00\x00\x00/\x00\x00\x00>\x00\x00\x00", 16, encoding_utf32_le},
+	        {"\x00<\x00?\x00n\x00?\x00>", 10, encoding_utf16_be},
+	        {"<\x00?\x00n\x00?\x00>\x00", 10, encoding_utf16_le},
+	        {"\x00<\x00n\x00/\x00>", 8, encoding_utf16_be},
+	        {"<\x00n\x00/\x00>\x00", 8, encoding_utf16_le},
+	        // <?xml encoding
+	        {"<?xml encoding='latin1'?>", 25, encoding_latin1},
+	    };
 
 	for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); ++i)
 	{
@@ -1324,27 +1321,27 @@ TEST(parse_encoding_detect_auto_incomplete)
 	};
 
 	const data_t data[] =
-	{
-		// BOM
-		{ "\x00\x00\xfe ", 4, encoding_utf8 },
-		{ "\x00\x00  ", 4, encoding_utf8 },
-		{ "\xff\xfe\x00 ", 4, encoding_utf16_le },
-		{ "\xfe   ", 4, encoding_utf8 },
-		{ "\xff   ", 4, encoding_utf8 },
-		{ "\xef\xbb  ", 4, encoding_utf8 },
-		{ "\xef   ", 4, encoding_utf8 },
-		// automatic tag detection for < or <?
-		{ "\x00\x00\x00 ", 4, encoding_utf8 },
-		{ "<\x00\x00n/\x00>\x00", 8, encoding_utf16_le },
-		{ "\x00<n\x00\x00/\x00>", 8, encoding_utf16_be },
-		{ "<\x00?n/\x00>\x00", 8, encoding_utf16_le },
-		{ "\x00 ", 2, encoding_utf8 },
-		// <?xml encoding
-		{ "<?xmC encoding='latin1'?>", 25, encoding_utf8 },
-		{ "<?xBC encoding='latin1'?>", 25, encoding_utf8 },
-		{ "<?ABC encoding='latin1'?>", 25, encoding_utf8 },
-		{ "<_ABC encoding='latin1'/>", 25, encoding_utf8 },
-	};
+	    {
+	        // BOM
+	        {"\x00\x00\xfe ", 4, encoding_utf8},
+	        {"\x00\x00  ", 4, encoding_utf8},
+	        {"\xff\xfe\x00 ", 4, encoding_utf16_le},
+	        {"\xfe   ", 4, encoding_utf8},
+	        {"\xff   ", 4, encoding_utf8},
+	        {"\xef\xbb  ", 4, encoding_utf8},
+	        {"\xef   ", 4, encoding_utf8},
+	        // automatic tag detection for < or <?
+	        {"\x00\x00\x00 ", 4, encoding_utf8},
+	        {"<\x00\x00n/\x00>\x00", 8, encoding_utf16_le},
+	        {"\x00<n\x00\x00/\x00>", 8, encoding_utf16_be},
+	        {"<\x00?n/\x00>\x00", 8, encoding_utf16_le},
+	        {"\x00 ", 2, encoding_utf8},
+	        // <?xml encoding
+	        {"<?xmC encoding='latin1'?>", 25, encoding_utf8},
+	        {"<?xBC encoding='latin1'?>", 25, encoding_utf8},
+	        {"<?ABC encoding='latin1'?>", 25, encoding_utf8},
+	        {"<_ABC encoding='latin1'/>", 25, encoding_utf8},
+	    };
 
 	for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); ++i)
 	{

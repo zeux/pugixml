@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size)
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size)
 {
 	char* text = new char[Size + 1];
 	memcpy(text, Data, Size);

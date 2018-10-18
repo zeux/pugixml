@@ -4,8 +4,8 @@
 
 #include "test.hpp"
 
-#include <string>
 #include <algorithm>
+#include <string>
 
 using namespace pugi;
 

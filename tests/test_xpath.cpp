@@ -5,10 +5,10 @@
 #include <string.h>
 #include <wchar.h>
 
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <limits>
+#include <string>
+#include <vector>
 
 using namespace pugi;
 
@@ -24,7 +24,8 @@ TEST(xpath_allocator_many_pages)
 {
 	std::basic_string<char_t> query = STR("0");
 
-	for (int i = 0; i < 128; ++i) query += STR("+string-length('abcdefgh')");
+	for (int i = 0; i < 128; ++i)
+		query += STR("+string-length('abcdefgh')");
 
 	CHECK_XPATH_NUMBER(xml_node(), query.c_str(), 1024);
 }
@@ -33,7 +34,8 @@ TEST(xpath_allocator_large_page)
 {
 	std::basic_string<char_t> query;
 
-	for (int i = 0; i < 1024; ++i) query += STR("abcdefgh");
+	for (int i = 0; i < 1024; ++i)
+		query += STR("abcdefgh");
 
 	CHECK_XPATH_NUMBER(xml_node(), (STR("string-length('") + query + STR("')")).c_str(), 8192);
 }
@@ -147,10 +149,10 @@ TEST(xpath_sort_random_medium)
 {
 	xml_document doc;
 	load_document_copy(doc, STR("<node>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("</node>"));
+	                            STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                    STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                        STR("</node>"));
 
 	xpath_node_set ns = doc.select_nodes(STR("//node() | //@*"));
 
@@ -162,24 +164,25 @@ TEST(xpath_sort_random_medium)
 
 	xpath_node_set_tester tester(copy, "sorted order failed");
 
-	for (unsigned int i = 2; i < 39; ++i) tester % i;
+	for (unsigned int i = 2; i < 39; ++i)
+		tester % i;
 }
 
 TEST(xpath_sort_random_large)
 {
 	xml_document doc;
 	load_document_copy(doc, STR("<node>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
-		STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>"));
+	                            STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                    STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                        STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                            STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                                STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                                    STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                                        STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                                            STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                                                STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2><child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2>")
+	                                                                    STR("<child1 attr1='value1' attr2='value2'/><child2 attr1='value1'>test</child2></node>"));
 
 	xpath_node_set ns = doc.select_nodes(STR("//node() | //@*"));
 
@@ -191,7 +194,8 @@ TEST(xpath_sort_random_large)
 
 	xpath_node_set_tester tester(copy, "sorted order failed");
 
-	for (unsigned int i = 2; i < 129; ++i) tester % i;
+	for (unsigned int i = 2; i < 129; ++i)
+		tester % i;
 }
 
 TEST(xpath_long_numbers_parse)
@@ -247,7 +251,8 @@ TEST(xpath_denorm_numbers)
 	// 10^-318 - double denormal
 	for (int i = 0; i < 106; ++i)
 	{
-		if (i != 0) query += STR(" * ");
+		if (i != 0)
+			query += STR(" * ");
 		query += STR("0.001");
 	}
 
@@ -282,7 +287,7 @@ TEST_XML(xpath_rexml_2, "<a:x xmlns:a='1'><a:y p='p' q='q'><a:z>zzz</a:z></a:y><
 TEST_XML(xpath_rexml_3, "<article><section role='subdivision' id='1'><para>free flowing text.</para></section><section role='division'><section role='subdivision' id='2'><para>free flowing text.</para></section><section role='division'><para>free flowing text.</para></section></section></article>")
 {
 	CHECK_XPATH_NODESET(doc, STR("//section[../self::section[@role=\"division\"]]")) % 10 % 15;
-    CHECK_XPATH_NODESET(doc, STR("//section[@role=\"subdivision\" and not(../self::section[@role=\"division\"])]")) % 3;
+	CHECK_XPATH_NODESET(doc, STR("//section[@role=\"subdivision\" and not(../self::section[@role=\"division\"])]")) % 3;
 	CHECK_XPATH_NODESET(doc, STR("//section[@role=\"subdivision\"][not(../self::section[@role=\"division\"])]")) % 3;
 }
 
@@ -716,7 +721,7 @@ TEST(xpath_sort_crossdoc_different_depth)
 TEST_XML(xpath_sort_empty_node, "<node><child1/><child2/></node>")
 {
 	xml_node n = doc.child(STR("node"));
-	xpath_node nodes[] = { n.child(STR("child2")), xml_node(), n.child(STR("child1")), xml_node() };
+	xpath_node nodes[] = {n.child(STR("child2")), xml_node(), n.child(STR("child1")), xml_node()};
 	xpath_node_set ns(nodes, nodes + sizeof(nodes) / sizeof(nodes[0]));
 
 	ns.sort();
@@ -728,9 +733,10 @@ TEST(xpath_allocate_string_out_of_memory)
 {
 	std::basic_string<char_t> query;
 
-	for (int i = 0; i < 1024; ++i) query += STR("abcdefgh");
+	for (int i = 0; i < 1024; ++i)
+		query += STR("abcdefgh");
 
-	test_runner::_memory_fail_threshold = 8*1024;
+	test_runner::_memory_fail_threshold = 8 * 1024;
 
 #ifndef __DMC__ // DigitalMars exception handling crashes instead of catching the exception...
 	CHECK_ALLOC_FAIL(CHECK(!xpath_query(query.c_str())));

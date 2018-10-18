@@ -4,28 +4,34 @@
 
 #include "test.hpp"
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include <wchar.h>
 
-#include <utility>
-#include <vector>
 #include <iterator>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "helpers.hpp"
 
 using namespace pugi;
 
 #ifdef PUGIXML_NO_STL
-template <typename I> static I move_iter(I base, int n)
+template <typename I>
+static I move_iter(I base, int n)
 {
-	if (n > 0) while (n--) ++base;
-	else while (n++) --base;
+	if (n > 0)
+		while (n--)
+			++base;
+	else
+		while (n++)
+			--base;
 	return base;
 }
 #else
-template <typename I> static I move_iter(I base, int n)
+template <typename I>
+static I move_iter(I base, int n)
 {
 	std::advance(base, n);
 	return base;
@@ -237,18 +243,18 @@ TEST_XML(dom_attr_as_ullong_hex, "<node attr1='0777' attr2='0x5ab' attr3='0XFf' 
 
 TEST(dom_attr_defaults)
 {
-    xml_attribute attr;
+	xml_attribute attr;
 
-    CHECK_STRING(attr.as_string(STR("foo")), STR("foo"));
-    CHECK(attr.as_int(42) == 42);
-    CHECK(attr.as_uint(42) == 42);
-    CHECK(attr.as_double(42) == 42);
-    CHECK(attr.as_float(42) == 42);
-    CHECK(attr.as_bool(true) == true);
+	CHECK_STRING(attr.as_string(STR("foo")), STR("foo"));
+	CHECK(attr.as_int(42) == 42);
+	CHECK(attr.as_uint(42) == 42);
+	CHECK(attr.as_double(42) == 42);
+	CHECK(attr.as_float(42) == 42);
+	CHECK(attr.as_bool(true) == true);
 
 #ifdef PUGIXML_HAS_LONG_LONG
-    CHECK(attr.as_llong(42) == 42);
-    CHECK(attr.as_ullong(42) == 42);
+	CHECK(attr.as_llong(42) == 42);
+	CHECK(attr.as_ullong(42) == 42);
 #endif
 }
 
@@ -339,18 +345,18 @@ TEST_XML(dom_attr_iterator_invalidate, "<node><node1 attr1='0'/><node2 attr1='0'
 
 TEST_XML(dom_attr_iterator_const, "<node attr1='0' attr2='1'/>")
 {
-    xml_node node = doc.child(STR("node"));
+	xml_node node = doc.child(STR("node"));
 
-    const xml_attribute_iterator i1 = node.attributes_begin();
-    const xml_attribute_iterator i2 = ++xml_attribute_iterator(i1);
-    const xml_attribute_iterator i3 = ++xml_attribute_iterator(i2);
+	const xml_attribute_iterator i1 = node.attributes_begin();
+	const xml_attribute_iterator i2 = ++xml_attribute_iterator(i1);
+	const xml_attribute_iterator i3 = ++xml_attribute_iterator(i2);
 
-    CHECK(*i1 == node.attribute(STR("attr1")));
-    CHECK(*i2 == node.attribute(STR("attr2")));
-    CHECK(i3 == node.attributes_end());
+	CHECK(*i1 == node.attribute(STR("attr1")));
+	CHECK(*i2 == node.attribute(STR("attr2")));
+	CHECK(i3 == node.attributes_end());
 
-    CHECK_STRING(i1->name(), STR("attr1"));
-    CHECK_STRING(i2->name(), STR("attr2"));
+	CHECK_STRING(i1->name(), STR("attr1"));
+	CHECK_STRING(i2->name(), STR("attr2"));
 }
 
 TEST_XML(dom_node_bool_ops, "<node/>")
@@ -461,18 +467,18 @@ TEST_XML(dom_node_iterator_invalidate, "<node><node1><child1/></node1><node2><ch
 
 TEST_XML(dom_node_iterator_const, "<node><child1/><child2/></node>")
 {
-    xml_node node = doc.child(STR("node"));
+	xml_node node = doc.child(STR("node"));
 
-    const xml_node_iterator i1 = node.begin();
-    const xml_node_iterator i2 = ++xml_node_iterator(i1);
-    const xml_node_iterator i3 = ++xml_node_iterator(i2);
+	const xml_node_iterator i1 = node.begin();
+	const xml_node_iterator i2 = ++xml_node_iterator(i1);
+	const xml_node_iterator i3 = ++xml_node_iterator(i2);
 
-    CHECK(*i1 == node.child(STR("child1")));
-    CHECK(*i2 == node.child(STR("child2")));
-    CHECK(i3 == node.end());
+	CHECK(*i1 == node.child(STR("child1")));
+	CHECK(*i2 == node.child(STR("child2")));
+	CHECK(i3 == node.end());
 
-    CHECK_STRING(i1->name(), STR("child1"));
-    CHECK_STRING(i2->name(), STR("child2"));
+	CHECK_STRING(i1->name(), STR("child1"));
+	CHECK_STRING(i2->name(), STR("child2"));
 }
 
 TEST_XML(dom_node_parent, "<node><child/></node>")
@@ -659,11 +665,13 @@ struct find_predicate_const
 {
 	bool result;
 
-	find_predicate_const(bool result_): result(result_)
+	find_predicate_const(bool result_)
+	    : result(result_)
 	{
 	}
 
-	template <typename T> bool operator()(const T&) const
+	template <typename T>
+	bool operator()(const T&) const
 	{
 		return result;
 	}
@@ -673,18 +681,20 @@ struct find_predicate_prefix
 {
 	const char_t* prefix;
 
-	find_predicate_prefix(const char_t* prefix_): prefix(prefix_)
+	find_predicate_prefix(const char_t* prefix_)
+	    : prefix(prefix_)
 	{
 	}
 
-	template <typename T> bool operator()(const T& obj) const
+	template <typename T>
+	bool operator()(const T& obj) const
 	{
-	#ifdef PUGIXML_WCHAR_MODE
+#ifdef PUGIXML_WCHAR_MODE
 		// can't use wcsncmp here because of a bug in DMC
 		return std::basic_string<char_t>(obj.name()).compare(0, wcslen(prefix), prefix) == 0;
-	#else
+#else
 		return strncmp(obj.name(), prefix, strlen(prefix)) == 0;
-	#endif
+#endif
 	}
 };
 
@@ -782,13 +792,15 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 	CHECK(doc.first_element_by_path(STR("//node")) == doc.child(STR("node")));
 }
 
-struct test_walker: xml_tree_walker
+struct test_walker : xml_tree_walker
 {
 	std::basic_string<char_t> log;
 	unsigned int call_count;
 	unsigned int stop_count;
 
-	test_walker(unsigned int stop_count_ = 0): call_count(0), stop_count(stop_count_)
+	test_walker(unsigned int stop_count_ = 0)
+	    : call_count(0)
+	    , stop_count(stop_count_)
 	{
 	}
 
@@ -797,14 +809,14 @@ struct test_walker: xml_tree_walker
 		char buf[32];
 		sprintf(buf, "%d", depth());
 
-	#ifdef PUGIXML_WCHAR_MODE
+#ifdef PUGIXML_WCHAR_MODE
 		wchar_t wbuf[32];
 		std::copy(buf, buf + strlen(buf) + 1, &wbuf[0]);
 
 		return std::basic_string<char_t>(wbuf);
-	#else
+#else
 		return std::basic_string<char_t>(buf);
-	#endif
+#endif
 	}
 
 	virtual bool begin(xml_node& node) PUGIXML_OVERRIDE
@@ -935,7 +947,7 @@ TEST_XML_FLAGS(dom_offset_debug, "<?xml?><!DOCTYPE><?pi?><!--comment--><node>pcd
 
 TEST(dom_offset_debug_encoding)
 {
-	char buf[] = { 0, '<', 0, 'n', 0, '/', 0, '>' };
+	char buf[] = {0, '<', 0, 'n', 0, '/', 0, '>'};
 
 	xml_document doc;
 	CHECK(doc.load_buffer(buf, sizeof(buf)));
@@ -979,17 +991,17 @@ TEST_XML(dom_internal_object, "<node attr='value'>value</node>")
 	CHECK(xml_node().internal_object() == 0);
 	CHECK(xml_attribute().internal_object() == 0);
 
-    CHECK(node.internal_object() != 0);
-    CHECK(value.internal_object() != 0);
-    CHECK(node.internal_object() != value.internal_object());
+	CHECK(node.internal_object() != 0);
+	CHECK(value.internal_object() != 0);
+	CHECK(node.internal_object() != value.internal_object());
 
-    CHECK(attr.internal_object() != 0);
+	CHECK(attr.internal_object() != 0);
 
-    xml_node node_copy = node;
-    CHECK(node_copy.internal_object() == node.internal_object());
+	xml_node node_copy = node;
+	CHECK(node_copy.internal_object() == node.internal_object());
 
-    xml_attribute attr_copy = attr;
-    CHECK(attr_copy.internal_object() == attr.internal_object());
+	xml_attribute attr_copy = attr;
+	CHECK(attr_copy.internal_object() == attr.internal_object());
 }
 
 TEST_XML(dom_hash_value, "<node attr='value'>value</node>")
@@ -1001,17 +1013,17 @@ TEST_XML(dom_hash_value, "<node attr='value'>value</node>")
 	CHECK(xml_node().hash_value() == 0);
 	CHECK(xml_attribute().hash_value() == 0);
 
-    CHECK(node.hash_value() != 0);
-    CHECK(value.hash_value() != 0);
-    CHECK(node.hash_value() != value.hash_value());
+	CHECK(node.hash_value() != 0);
+	CHECK(value.hash_value() != 0);
+	CHECK(node.hash_value() != value.hash_value());
 
-    CHECK(attr.hash_value() != 0);
+	CHECK(attr.hash_value() != 0);
 
-    xml_node node_copy = node;
-    CHECK(node_copy.hash_value() == node.hash_value());
+	xml_node node_copy = node;
+	CHECK(node_copy.hash_value() == node.hash_value());
 
-    xml_attribute attr_copy = attr;
-    CHECK(attr_copy.hash_value() == attr.hash_value());
+	xml_attribute attr_copy = attr;
+	CHECK(attr_copy.hash_value() == attr.hash_value());
 }
 
 TEST_XML(dom_node_named_iterator, "<node><node1><child/></node1><node2><child/><child/></node2><node3/><node4><child/><x/></node4></node>")
@@ -1121,15 +1133,15 @@ TEST_XML(dom_ranged_for, "<node attr1='1' attr2='2'><test>3</test><fake>5</fake>
 {
 	int index = 1;
 
-	for (xml_node n: doc.children())
+	for (xml_node n : doc.children())
 	{
-		for (xml_attribute a: n.attributes())
+		for (xml_attribute a : n.attributes())
 		{
 			CHECK(a.as_int() == index);
 			index++;
 		}
 
-		for (xml_node c: n.children(STR("test")))
+		for (xml_node c : n.children(STR("test")))
 		{
 			CHECK(c.text().as_int() == index);
 			index++;

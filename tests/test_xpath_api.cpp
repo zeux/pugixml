@@ -141,10 +141,10 @@ TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 
 TEST(xpath_api_nodeset_copy_empty)
 {
-    xpath_node_set set;
-    xpath_node_set set2 = set;
-    xpath_node_set set3;
-    set3 = set;
+	xpath_node_set set;
+	xpath_node_set set2 = set;
+	xpath_node_set set3;
+	set3 = set;
 }
 
 TEST_XML(xpath_api_evaluate, "<node attr='3'/>")
@@ -429,7 +429,6 @@ TEST_XML(xpath_api_nodeset_move_ctor, "<node><foo/><foo/><bar/></node>")
 	CHECK(move.type() == xpath_node_set::type_sorted_reverse);
 	CHECK(move[1] == doc.first_child().first_child());
 }
-
 
 TEST_XML(xpath_api_nodeset_move_ctor_single, "<node><foo/><foo/><bar/></node>")
 {
