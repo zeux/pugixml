@@ -74,6 +74,9 @@ release: build/pugixml-$(VERSION).tar.gz build/pugixml-$(VERSION).zip
 
 docs: docs/quickstart.html docs/manual.html
 
+format:
+	clang-format -i src/*.cpp src/*.hpp tests/*.cpp tests/*.hpp
+
 build/pugixml-%: .FORCE | $(RELEASE)
 	@mkdir -p $(BUILD)
 	TIMESTAMP=`git show v$(VERSION) -s --format=%ct` && python scripts/archive.py $@ pugixml-$(VERSION) $$TIMESTAMP $|
