@@ -10922,7 +10922,7 @@ PUGI__NS_BEGIN
 
 			// Use optimized path for @attr = 'value' or @attr = $value
 			if (_type == ast_op_equal &&
-				_left && // workaround for clang static analyzer (_left is never null for ast_op_equal)
+				_left && _right && // workaround for clang static analyzer and Coverity (_left and _right are never null for ast_op_equal)
 				_left->_type == ast_step && _left->_axis == axis_attribute && _left->_test == nodetest_name && !_left->_left && !_left->_right &&
 				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->_rettype == xpath_type_string)))
 			{
