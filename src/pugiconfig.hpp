@@ -2,7 +2,7 @@
  * pugixml parser - version 1.9
  * --------------------------------------------------------
  * Copyright (C) 2006-2018, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
- * Report bugs and download new versions at http://pugixml.org/
+ * Report bugs and download new versions at https://pugixml.org/
  *
  * This library is distributed under the MIT License. See notice at the end
  * of this file.
