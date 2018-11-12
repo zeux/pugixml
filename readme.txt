@@ -1,7 +1,7 @@
 pugixml 1.9 - an XML processing library
 
 Copyright (C) 2006-2018, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
-Report bugs and download new versions at http://pugixml.org/
+Report bugs and download new versions at https://pugixml.org/
 
 This is the distribution of pugixml, which is a C++ XML processing library,
 which consists of a DOM-like interface with rich traversal/modification
