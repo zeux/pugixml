@@ -4688,6 +4688,7 @@ PUGI__NS_BEGIN
 		char_t* buffer = 0;
 		size_t length = 0;
 
+		// coverity[var_deref_model]
 		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
 
 		// delete original buffer if we performed a conversion
@@ -10080,6 +10081,7 @@ PUGI__NS_BEGIN
 			const bool axis_reverse = (axis == axis_ancestor || axis == axis_ancestor_or_self || axis == axis_preceding || axis == axis_preceding_sibling);
 			const xpath_node_set::type_t axis_type = axis_reverse ? xpath_node_set::type_sorted_reverse : xpath_node_set::type_sorted;
 
+			// coverity[mixed_enums]
 			bool once =
 				(axis == axis_attribute && _test == nodetest_name) ||
 				(!_right && eval_once(axis_type, eval)) ||
@@ -10863,6 +10865,7 @@ PUGI__NS_BEGIN
 			if (_next)
 				_next->optimize(alloc);
 
+			// coverity[var_deref_model]
 			optimize_self(alloc);
 		}
 
