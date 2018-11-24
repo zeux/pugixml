@@ -4656,7 +4656,7 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, float value)
 	{
 		char buf[128];
-		PUGI__SNPRINTF(buf, "%.9g", value);
+		PUGI__SNPRINTF(buf, "%.9g", double(value));
 
 		return set_value_ascii(dest, header, header_mask, buf);
 	}
@@ -8070,7 +8070,7 @@ PUGI__NS_BEGIN
 		typedef uint32_t UI; // BCC5 workaround
 		union { float f; UI i; } u;
 		u.i = 0x7fc00000;
-		return u.f;
+		return double(u.f);
 	#else
 		// fallback
 		const volatile double zero = 0.0;

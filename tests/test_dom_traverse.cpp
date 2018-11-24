@@ -150,12 +150,12 @@ TEST_XML(dom_attr_as_float, "<node attr1='0' attr2='1' attr3='0.12' attr4='-5.1'
 	xml_node node = doc.child(STR("node"));
 
 	CHECK(xml_attribute().as_float() == 0);
-	CHECK_DOUBLE(node.attribute(STR("attr1")).as_float(), 0);
-	CHECK_DOUBLE(node.attribute(STR("attr2")).as_float(), 1);
-	CHECK_DOUBLE(node.attribute(STR("attr3")).as_float(), 0.12);
-	CHECK_DOUBLE(node.attribute(STR("attr4")).as_float(), -5.1);
-	CHECK_DOUBLE(node.attribute(STR("attr5")).as_float(), 3e-4);
-	CHECK_DOUBLE(node.attribute(STR("attr6")).as_float(), 3.14159265358979323846);
+	CHECK_DOUBLE(double(node.attribute(STR("attr1")).as_float()), 0);
+	CHECK_DOUBLE(double(node.attribute(STR("attr2")).as_float()), 1);
+	CHECK_DOUBLE(double(node.attribute(STR("attr3")).as_float()), 0.12);
+	CHECK_DOUBLE(double(node.attribute(STR("attr4")).as_float()), -5.1);
+	CHECK_DOUBLE(double(node.attribute(STR("attr5")).as_float()), 3e-4);
+	CHECK_DOUBLE(double(node.attribute(STR("attr6")).as_float()), 3.14159265358979323846);
 }
 
 TEST_XML(dom_attr_as_double, "<node attr1='0' attr2='1' attr3='0.12' attr4='-5.1' attr5='3e-4' attr6='3.14159265358979323846'/>")

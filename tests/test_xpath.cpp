@@ -205,8 +205,8 @@ TEST(xpath_long_numbers_parse)
 	xml_node c;
 
 	// check parsing
-	CHECK_XPATH_NUMBER(c, str_flt_max, std::numeric_limits<float>::max());
-	CHECK_XPATH_NUMBER(c, str_flt_max_dec, std::numeric_limits<float>::max());
+	CHECK_XPATH_NUMBER(c, str_flt_max, double(std::numeric_limits<float>::max()));
+	CHECK_XPATH_NUMBER(c, str_flt_max_dec, double(std::numeric_limits<float>::max()));
 	CHECK_XPATH_NUMBER(c, str_dbl_max, std::numeric_limits<double>::max());
 	CHECK_XPATH_NUMBER(c, str_dbl_max_dec, std::numeric_limits<double>::max());
 }

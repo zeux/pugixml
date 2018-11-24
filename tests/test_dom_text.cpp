@@ -124,12 +124,12 @@ TEST_XML(dom_text_as_float, "<node><text1>0</text1><text2>1</text2><text3>0.12</
 	xml_node node = doc.child(STR("node"));
 
 	CHECK(xml_text().as_float() == 0);
-	CHECK_DOUBLE(node.child(STR("text1")).text().as_float(), 0);
-	CHECK_DOUBLE(node.child(STR("text2")).text().as_float(), 1);
-	CHECK_DOUBLE(node.child(STR("text3")).text().as_float(), 0.12);
-	CHECK_DOUBLE(node.child(STR("text4")).text().as_float(), -5.1);
-	CHECK_DOUBLE(node.child(STR("text5")).text().as_float(), 3e-4);
-	CHECK_DOUBLE(node.child(STR("text6")).text().as_float(), 3.14159265358979323846);
+	CHECK_DOUBLE(double(node.child(STR("text1")).text().as_float()), 0);
+	CHECK_DOUBLE(double(node.child(STR("text2")).text().as_float()), 1);
+	CHECK_DOUBLE(double(node.child(STR("text3")).text().as_float()), 0.12);
+	CHECK_DOUBLE(double(node.child(STR("text4")).text().as_float()), -5.1);
+	CHECK_DOUBLE(double(node.child(STR("text5")).text().as_float()), 3e-4);
+	CHECK_DOUBLE(double(node.child(STR("text6")).text().as_float()), 3.14159265358979323846);
 }
 
 TEST_XML(dom_text_as_double, "<node><text1>0</text1><text2>1</text2><text3>0.12</text3><text4>-5.1</text4><text5>3e-4</text5><text6>3.14159265358979323846</text6></node>")
