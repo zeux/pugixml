@@ -590,14 +590,12 @@ TEST(document_load_file_wide_out_of_memory)
 	CHECK(result.status == status_out_of_memory || result.status == status_file_not_found);
 }
 
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__APPLE__)
 TEST(document_load_file_special_folder)
 {
 	xml_document doc;
 	xml_parse_result result = doc.load_file(".");
-	// status_out_of_memory is somewhat counter-intuitive but on Linux ftell returns LONG_MAX for directories
-	// on some Debian systems the folder is also read as empty, hence status_no_document_element check
-	CHECK(result.status == status_file_not_found || result.status == status_io_error || result.status == status_out_of_memory || result.status == status_no_document_element);
+	CHECK(result.status == status_io_error);
 }
 #endif
 
