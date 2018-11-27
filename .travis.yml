@@ -18,6 +18,7 @@ env:
   - DEFINES=PUGIXML_NO_EXCEPTIONS
 script:
   - make test cxxstd=c++11 defines=$DEFINES config=coverage -j2
+  - if [[ "$CXX" == "clang++" ]]; then make test cxxstd=c++11 defines=$DEFINES config=sanitize -j2; fi
   - make test cxxstd=c++11 defines=$DEFINES config=release -j2
   - make test cxxstd=c++98 defines=$DEFINES config=debug -j2
 
