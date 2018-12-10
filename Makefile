@@ -58,6 +58,7 @@ test: $(EXECUTABLE)
 	./$(EXECUTABLE)
 	@gcov -b -o $(BUILD)/src/ pugixml.cpp.gcda | sed -e '/./{H;$!d;}' -e 'x;/pugixml.cpp/!d;'
 	@find . -name '*.gcov' -and -not -name 'pugixml.cpp.gcov' -exec rm {} +
+	@sed -i -e "s/#####\(.*\)\(\/\/ unreachable.*\)/    1\1\2/" pugixml.cpp.gcov
 else
 test: $(EXECUTABLE)
 	./$(EXECUTABLE)
