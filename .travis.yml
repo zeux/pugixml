@@ -18,11 +18,10 @@ env:
   - DEFINES=PUGIXML_NO_EXCEPTIONS
 
 script:
-  - make test cxxstd=c++11 defines=$DEFINES config=coverage -j2
+  - if [[ ! ( "$CXX" == "clang++" && "$TRAVIS_OS_NAME" == "linux" ) ]]; then make test cxxstd=c++11 defines=$DEFINES config=coverage -j2; fi
   - if [[ "$CXX" == "clang++" ]]; then make test cxxstd=c++11 defines=$DEFINES config=sanitize -j2; fi
   - make test cxxstd=c++11 defines=$DEFINES config=release -j2
   - make test cxxstd=c++98 defines=$DEFINES config=debug -j2
 
 after_success:
-  - sed -e "s/#####\(.*\)\(\/\/ unreachable.*\)/    1\1\2/" -i pugixml.cpp.gcov
   - bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov
