@@ -5482,12 +5482,12 @@ namespace pugi
 		return (_root && _root->value) ? _root->value + 0 : PUGIXML_TEXT("");
 	}
 
-	PUGI__FN xml_node xml_node::operator[](const char_t* name)
+	PUGI__FN xml_node xml_node::operator[](const char_t* name_)
 	{
 		if (!_root) return xml_node();
-		xml_node n = child(name);
+		xml_node n = child(name_);
 		if (n) return n;
-		return append_child(name);
+		return append_child(name_);
 	}
 
 	PUGI__FN xml_node xml_node::child(const char_t* name_) const
