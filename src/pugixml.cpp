@@ -5485,9 +5485,9 @@ namespace pugi
 	PUGI__FN xml_node xml_node::operator[](const char_t* name)
 	{
 		if (!_root) return xml_node();
-		xml_node n = this->child(name);
+		xml_node n = child(name);
 		if (n) return n;
-		return this->append_child(name);
+		return append_child(name);
 	}
 
 	PUGI__FN xml_node xml_node::child(const char_t* name_) const
