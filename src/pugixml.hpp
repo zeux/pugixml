@@ -509,9 +509,9 @@ namespace pugi
 
 		// Get text object for the current node
 		xml_text text() const;
-
-        // Ensure child, more convinently for config updating
-        xml_node operator[](const char_t* name);
+		
+		// Get child, if not exist, create it, more conveniently for config updating
+		xml_node operator[](const char_t* name);
 
 		// Get child, attribute or next/previous sibling with the specified name
 		xml_node child(const char_t* name) const;
