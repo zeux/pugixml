@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(pugixml VERSION 1.9)
 
-option(BUILD_SHARED_LIBS "Build shared library" OFF)
-option(BUILD_STATIC_LIBS "Build static library" ON)
+option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
 option(USE_VERSIONED_LIBDIR "Use a private subdirectory to install the headers and libs" OFF)
 option(USE_POSTFIX "Use separate postfix for each configuration to make sure you can install multiple build outputs" OFF)
@@ -40,11 +39,8 @@ endif()
 
 if(BUILD_SHARED_LIBS)
 	add_library(pugixml SHARED ${HEADERS} ${SOURCES})
-endif()
-
-if(BUILD_STATIC_LIBS)
-  add_library(pugixmlstatic STATIC ${HEADERS} ${SOURCES})
-  set_target_properties(pugixmlstatic PROPERTIES OUTPUT_NAME pugixml)
+else()
+	add_library(pugixml STATIC ${HEADERS} ${SOURCES})
 endif()
 
 # Export symbols for shared library builds
@@ -72,7 +68,7 @@ if(USE_POSTFIX AND CMAKE_CONFIGURATION_TYPES)
 	set_target_properties(pugixml PROPERTIES DEBUG_POSTFIX "_d" MINSIZEREL_POSTFIX "_m" RELWITHDEBINFO_POSTFIX "_r")
 endif()
 
-install(TARGETS pugixml pugixmlstatic EXPORT pugixml-config
+install(TARGETS pugixml EXPORT pugixml-config
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
