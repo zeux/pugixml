@@ -39,8 +39,14 @@ if(DEFINED BUILD_DEFINES)
 endif()
 
 if(BUILD_SHARED_AND_STATIC_LIBS)
-    add_library(pugixml-static SHARED ${HEADERS} ${SOURCES})
-    add_library(pugixml-shared STATIC ${HEADERS} ${SOURCES})
+	set(LIBRARY pugixml-static pugixml-shared)
+else()
+	set(LIBRARY pugixml)
+endif()
+
+if(BUILD_SHARED_AND_STATIC_LIBS)
+    add_library(pugixml-static STATIC ${HEADERS} ${SOURCES})
+    add_library(pugixml-shared SHARED ${HEADERS} ${SOURCES})
 else()
   if(BUILD_SHARED_LIBS)
     add_library(pugixml SHARED ${HEADERS} ${SOURCES})
@@ -58,65 +64,32 @@ if(BUILD_SHARED_LIBS AND MSVC)
 	target_compile_definitions(pugixml PRIVATE "PUGIXML_API=__declspec(dllexport)")
 endif()
 
-# Enable C++11 long long for compilers that are capable of it
-if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_long_long_type;")
-  if(BUILD_SHARED_AND_STATIC_LIBS)
-    target_compile_features(pugixml-shared PUBLIC cxx_long_long_type)
-    target_compile_features(pugixml-static PUBLIC cxx_long_long_type)	
-  else()
-    target_compile_features(pugixml PUBLIC cxx_long_long_type)
-  endif()
-endif()
-
-if(BUILD_SHARED_AND_STATIC_LIBS)
-  set_target_properties(pugixml-static PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
-  set_target_properties(pugixml-shared PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
-else()
-  set_target_properties(pugixml PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
-endif()
-
 if(USE_VERSIONED_LIBDIR)
 	# Install library into its own directory under LIBDIR
 	set(INSTALL_SUFFIX /pugixml-${pugixml_VERSION})
 endif()
 
-if(BUILD_SHARED_AND_STATIC_LIBS)
-  target_include_directories(pugixml-static PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>)
-  target_include_directories(pugixml-shared PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>)
-else()
-  target_include_directories(pugixml PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>)
-endif()
+foreach(TARGET ${LIBRARY})
+	# Enable C++11 long long for compilers that are capable of it
+	if(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} STRLESS 3.1 AND ";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_long_long_type;")
+	  target_compile_features(${TARGET} PUBLIC cxx_long_long_type)
+	endif()
 
-if(USE_POSTFIX AND CMAKE_CONFIGURATION_TYPES)
-  if(BUILD_SHARED_AND_STATIC_LIBS)
-    set_target_properties(pugixml-static PROPERTIES DEBUG_POSTFIX "_d" MINSIZEREL_POSTFIX "_m" RELWITHDEBINFO_POSTFIX "_r")
-    set_target_properties(pugixml-shared PROPERTIES DEBUG_POSTFIX "_d" MINSIZEREL_POSTFIX "_m" RELWITHDEBINFO_POSTFIX "_r")
-  else()
-    set_target_properties(pugixml PROPERTIES DEBUG_POSTFIX "_d" MINSIZEREL_POSTFIX "_m" RELWITHDEBINFO_POSTFIX "_r")
-  endif()
-endif()
+	set_target_properties(${TARGET} PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
 
-if(BUILD_SHARED_AND_STATIC_LIBS)
-  install(TARGETS pugixml-static EXPORT pugixml-config
+	target_include_directories(${TARGET} PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/src>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX}>)
+
+	if(USE_POSTFIX AND CMAKE_CONFIGURATION_TYPES)
+		set_target_properties(${TARGET} PROPERTIES DEBUG_POSTFIX "_d" MINSIZEREL_POSTFIX "_m" RELWITHDEBINFO_POSTFIX "_r")
+	endif()
+endforeach()
+
+install(TARGETS ${LIBRARY} EXPORT pugixml-config
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-  install(TARGETS pugixml-shared EXPORT pugixml-config
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-else()
-  install(TARGETS pugixml EXPORT pugixml-config
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}${INSTALL_SUFFIX}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
 
 install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${INSTALL_SUFFIX})
 install(EXPORT pugixml-config DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
@@ -130,11 +103,10 @@ if(BUILD_TESTS)
 	list(REMOVE_ITEM TEST_SOURCES ${FUZZ_SOURCES})
 
 	add_executable(check ${TEST_SOURCES})
-  if(BUILD_SHARED_AND_STATIC_LIBS)
-    target_link_libraries(check pugixml-shared)
-    target_link_libraries(check pugixml-static)
-  else()
-    target_link_libraries(check pugixml)
-  endif()
+	if(BUILD_SHARED_AND_STATIC_LIBS)
+		target_link_libraries(check pugixml-static)
+	else()
+		target_link_libraries(check pugixml)
+	endif()
 	add_custom_command(TARGET check POST_BUILD COMMAND check WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
