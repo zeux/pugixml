@@ -435,6 +435,24 @@ TEST_XML(xpath_operators_union, "<node><employee/><employee secretary=''/><emplo
 	CHECK_XPATH_NODESET(n, STR(". | tail/preceding-sibling::employee | .")) % 2 % 3 % 4 % 6 % 8 % 11;
 }
 
+TEST_XML(xpath_operators_union_order, "<node />")
+{
+	xml_node n = doc.child(STR("node"));
+
+	n.append_child(STR("c"));
+	n.prepend_child(STR("b"));
+	n.append_child(STR("d"));
+	n.prepend_child(STR("a"));
+
+	xpath_node_set ns = n.select_nodes(STR("d | d | b | c | b | a | c | d | b"));
+
+	CHECK(ns.size() == 4);
+	CHECK_STRING(ns[0].node().name(), STR("d"));
+	CHECK_STRING(ns[1].node().name(), STR("b"));
+	CHECK_STRING(ns[2].node().name(), STR("c"));
+	CHECK_STRING(ns[3].node().name(), STR("a"));
+}
+
 TEST(xpath_operators_union_error)
 {
 	CHECK_XPATH_FAIL(STR(". | true()"));
