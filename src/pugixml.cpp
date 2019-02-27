@@ -7465,6 +7465,41 @@ PUGI__NS_BEGIN
 		// insertion sort small chunk
 		insertion_sort(begin, end, pred);
 	}
+
+	PUGI__FN bool hash_insert(const void** table, size_t size, const void* key)
+	{
+		assert(key);
+
+		unsigned int h = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key));
+
+		// MurmurHash3 32-bit finalizer
+		h ^= h >> 16;
+		h *= 0x85ebca6bu;
+		h ^= h >> 13;
+		h *= 0xc2b2ae35u;
+		h ^= h >> 16;
+
+		size_t hashmod = size - 1;
+		size_t bucket = h & hashmod;
+
+		for (size_t probe = 0; probe <= hashmod; ++probe)
+		{
+			if (table[bucket] == 0)
+			{
+				table[bucket] = key;
+				return true;
+			}
+
+			if (table[bucket] == key)
+				return false;
+
+			// hash collision, quadratic probing
+			bucket = (bucket + probe + 1) & hashmod;
+		}
+
+		assert(false && "Hash table is full"); // unreachable
+		return false;
+	}
 PUGI__NS_END
 
 // Allocator used for AST and evaluation stacks
@@ -8051,15 +8086,6 @@ PUGI__NS_BEGIN
 			if (!ln || !rn) return ln < rn;
 
 			return node_is_before(ln.internal_object(), rn.internal_object());
-		}
-	};
-
-	struct duplicate_comparator
-	{
-		bool operator()(const xpath_node& lhs, const xpath_node& rhs) const
-		{
-			if (lhs.attribute()) return rhs.attribute() ? lhs.attribute() < rhs.attribute() : true;
-			else return rhs.attribute() ? false : lhs.node() < rhs.node();
 		}
 	};
 
@@ -8850,12 +8876,42 @@ PUGI__NS_BEGIN
 			_end = pos;
 		}
 
-		void remove_duplicates()
+		void remove_duplicates(xpath_allocator* alloc)
 		{
-			if (_type == xpath_node_set::type_unsorted)
-				sort(_begin, _end, duplicate_comparator());
+			if (_type == xpath_node_set::type_unsorted && _end - _begin > 2)
+			{
+				xpath_allocator_capture cr(alloc);
 
-			_end = unique(_begin, _end);
+				size_t size_ = static_cast<size_t>(_end - _begin);
+
+				size_t hash_size = 1;
+				while (hash_size < size_ + size_ / 2) hash_size *= 2;
+
+				const void** hash_data = static_cast<const void**>(alloc->allocate(hash_size * sizeof(void**)));
+				if (!hash_data) return;
+
+				memset(hash_data, 0, hash_size * sizeof(const void**));
+
+				xpath_node* write = _begin;
+
+				for (xpath_node* it = _begin; it != _end; ++it)
+				{
+					const void* attr = it->attribute().internal_object();
+					const void* node = it->node().internal_object();
+					const void* key = attr ? attr : node;
+
+					if (key && hash_insert(hash_data, hash_size, key))
+					{
+						*write++ = *it;
+					}
+				}
+
+				_end = write;
+			}
+			else
+			{
+				_end = unique(_begin, _end);
+			}
 		}
 
 		xpath_node_set::type_t type() const
@@ -10117,7 +10173,7 @@ PUGI__NS_BEGIN
 			// child, attribute and self axes always generate unique set of nodes
 			// for other axis, if the set stayed sorted, it stayed unique because the traversal algorithms do not visit the same node twice
 			if (axis != axis_child && axis != axis_attribute && axis != axis_self && ns.type() == xpath_node_set::type_unsorted)
-				ns.remove_duplicates();
+				ns.remove_duplicates(stack.temp);
 
 			return ns;
 		}
@@ -10744,7 +10800,7 @@ PUGI__NS_BEGIN
 				ls.set_type(xpath_node_set::type_unsorted);
 
 				ls.append(rs.begin(), rs.end(), stack.result);
-				ls.remove_duplicates();
+				ls.remove_duplicates(stack.temp);
 
 				return ls;
 			}
