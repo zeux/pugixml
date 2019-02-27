@@ -10737,16 +10737,16 @@ PUGI__NS_BEGIN
 
 				xpath_stack swapped_stack = {stack.temp, stack.result};
 
-				xpath_node_set_raw ls = _left->eval_node_set(c, swapped_stack, eval);
-				xpath_node_set_raw rs = _right->eval_node_set(c, stack, eval);
+				xpath_node_set_raw ls = _left->eval_node_set(c, stack, eval);
+				xpath_node_set_raw rs = _right->eval_node_set(c, swapped_stack, eval);
 
 				// we can optimize merging two sorted sets, but this is a very rare operation, so don't bother
-				rs.set_type(xpath_node_set::type_unsorted);
+				ls.set_type(xpath_node_set::type_unsorted);
 
-				rs.append(ls.begin(), ls.end(), stack.result);
-				rs.remove_duplicates();
+				ls.append(rs.begin(), rs.end(), stack.result);
+				ls.remove_duplicates();
 
-				return rs;
+				return ls;
 			}
 
 			case ast_filter:
