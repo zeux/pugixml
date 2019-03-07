@@ -252,6 +252,9 @@ namespace pugi
 	// Don't output empty element tags, instead writing an explicit start and end tag even if there are no children. This flag is off by default.
 	const unsigned int format_no_empty_element_tags = 0x80;
 
+	// Skip characters belonging to range [0; 32) instead of "&#xNN;" encoding. This flag is off by default.
+	const unsigned int format_skip_control_chars = 0x100;
+
 	// The default set of formatting flags.
 	// Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;
