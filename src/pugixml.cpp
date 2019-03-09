@@ -3903,7 +3903,7 @@ PUGI__NS_BEGIN
 		xml_encoding encoding;
 	};
 
-	PUGI__FN void text_output_escaped(xml_buffered_writer& writer, const char_t* s, chartypex_t type)
+	PUGI__FN void text_output_escaped(xml_buffered_writer& writer, const char_t* s, chartypex_t type, unsigned int flags)
 	{
 		while (*s)
 		{
@@ -3938,7 +3938,8 @@ PUGI__NS_BEGIN
 					unsigned int ch = static_cast<unsigned int>(*s++);
 					assert(ch < 32);
 
-					writer.write('&', '#', static_cast<char_t>((ch / 10) + '0'), static_cast<char_t>((ch % 10) + '0'), ';');
+					if (!(flags & format_skip_control_chars))
+						writer.write('&', '#', static_cast<char_t>((ch / 10) + '0'), static_cast<char_t>((ch % 10) + '0'), ';');
 				}
 			}
 		}
@@ -3949,7 +3950,7 @@ PUGI__NS_BEGIN
 		if (flags & format_no_escapes)
 			writer.write_string(s);
 		else
-			text_output_escaped(writer, s, type);
+			text_output_escaped(writer, s, type, flags);
 	}
 
 	PUGI__FN void text_output_cdata(xml_buffered_writer& writer, const char_t* s)

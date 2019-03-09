@@ -1704,6 +1704,8 @@ These flags control the resulting tree contents:
 
 * [[format_no_empty_element_tags]]`format_no_empty_element_tags` determines if start/end tags should be output instead of empty element tags for empty elements (that is, elements with no children). This flag is *off* by default.
 
+* [[format_skip_control_chars]]`format_skip_control_chars` enables skipping characters belonging to range [0; 32) instead of "&#xNN;" encoding. This flag is *off* by default.
+
 These flags control the additional output information:
 
 * [[format_no_declaration]]`format_no_declaration` disables default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.
@@ -2659,6 +2661,7 @@ const unsigned int +++<a href="#format_no_empty_element_tags">format_no_empty_el
 const unsigned int +++<a href="#format_no_escapes">format_no_escapes</a>+++
 const unsigned int +++<a href="#format_raw">format_raw</a>+++
 const unsigned int +++<a href="#format_save_file_text">format_save_file_text</a>+++
+const unsigned int +++<a href="#format_skip_control_chars">format_skip_control_chars</a>+++
 const unsigned int +++<a href="#format_write_bom">format_write_bom</a>+++
 
 // Parsing options bit flags:
