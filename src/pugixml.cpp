@@ -7333,14 +7333,14 @@ PUGI__NS_BEGIN
 		}
 	};
 
-	template <typename T> void swap(T& lhs, T& rhs)
+	template <typename T> inline void swap(T& lhs, T& rhs)
 	{
 		T temp = lhs;
 		lhs = rhs;
 		rhs = temp;
 	}
 
-	template <typename I, typename Pred> I min_element(I begin, I end, const Pred& pred)
+	template <typename I, typename Pred> PUGI__FN I min_element(I begin, I end, const Pred& pred)
 	{
 		I result = begin;
 
@@ -7351,17 +7351,20 @@ PUGI__NS_BEGIN
 		return result;
 	}
 
-	template <typename I> void reverse(I begin, I end)
+	template <typename I> PUGI__FN void reverse(I begin, I end)
 	{
-		while (end - begin > 1) swap(*begin++, *--end);
+		while (end - begin > 1)
+			swap(*begin++, *--end);
 	}
 
-	template <typename I> I unique(I begin, I end)
+	template <typename I> PUGI__FN I unique(I begin, I end)
 	{
 		// fast skip head
-		while (end - begin > 1 && *begin != *(begin + 1)) begin++;
+		while (end - begin > 1 && *begin != *(begin + 1))
+			begin++;
 
-		if (begin == end) return begin;
+		if (begin == end)
+			return begin;
 
 		// last written element
 		I write = begin++;
@@ -7379,7 +7382,7 @@ PUGI__NS_BEGIN
 		return write + 1;
 	}
 
-	template <typename T, typename Pred> void insertion_sort(T* begin, T* end, const Pred& pred)
+	template <typename T, typename Pred> PUGI__FN void insertion_sort(T* begin, T* end, const Pred& pred)
 	{
 		if (begin == end)
 			return;
@@ -7401,16 +7404,19 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	template <typename I, typename Pred> I median3(I first, I middle, I last, const Pred& pred)
+	template <typename I, typename Pred> inline I median3(I first, I middle, I last, const Pred& pred)
 	{
-		if (pred(*middle, *first)) swap(middle, first);
-		if (pred(*last, *middle)) swap(last, middle);
-		if (pred(*middle, *first)) swap(middle, first);
+		if (pred(*middle, *first))
+			swap(middle, first);
+		if (pred(*last, *middle))
+			swap(last, middle);
+		if (pred(*middle, *first))
+			swap(middle, first);
 
 		return middle;
 	}
 
-	template <typename T, typename Pred> void partition3(T* begin, T* end, T pivot, const Pred& pred, T** out_eqbeg, T** out_eqend)
+	template <typename T, typename Pred> PUGI__FN void partition3(T* begin, T* end, T pivot, const Pred& pred, T** out_eqbeg, T** out_eqend)
 	{
 		// invariant: array is split into 4 groups: = < ? > (each variable denotes the boundary between the groups)
 		T* eq = begin;
@@ -7437,7 +7443,7 @@ PUGI__NS_BEGIN
 		*out_eqend = gt;
 	}
 
-	template <typename I, typename Pred> void sort(I begin, I end, const Pred& pred)
+	template <typename I, typename Pred> PUGI__FN void sort(I begin, I end, const Pred& pred)
 	{
 		// sort large chunks
 		while (end - begin > 16)
