@@ -13,8 +13,6 @@ automatically during parsing/saving).
 
 The distribution contains the following folders:
 
-	contrib/ - various contributions to pugixml
-
 	docs/ - documentation
 		docs/samples - pugixml usage examples
 		docs/quickstart.html - quick start guide
