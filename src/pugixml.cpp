@@ -5046,6 +5046,15 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
+	PUGI__FN void xml_string_writer::write(const void* data, size_t size)
+	{
+	    char* pXML = new char[size + 1];
+	    memset(pXML, 0, size + 1);
+	    memcpy(pXML, data, size);
+	    xml->append(pXML);
+	    delete[] pXML;
+	}
+	
 	PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<char, std::char_traits<char> >& stream): narrow_stream(&stream), wide_stream(0)
 	{
 	}
