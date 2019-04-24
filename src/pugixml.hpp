@@ -324,6 +324,16 @@ namespace pugi
 	};
 
 	#ifndef PUGIXML_NO_STL
+	//xml_writer implementation for string
+	class PUGIXML_CLASS xml_string_writer :public xml_writer
+	{
+	public:
+	    xml_string_writer(std::string &str):xml(&str){};
+	    virtual void write(const void* data, size_t size) PUGIXML_OVERRIDE;
+	private:
+	    std::string* xml;
+	};
+	
 	// xml_writer implementation for streams
 	class PUGIXML_CLASS xml_writer_stream: public xml_writer
 	{
