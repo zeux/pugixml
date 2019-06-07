@@ -632,7 +632,7 @@ TEST_XML(write_no_empty_element_tags, "<node><child1/><child2>text</child2><chil
 
 TEST_XML_FLAGS(write_roundtrip, "<node><child1 attr1='value1' attr2='value2'/><child2 attr='value'>pre<![CDATA[data]]>mid&lt;text&amp;escape<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>", parse_full)
 {
-	const unsigned int flagset[] = { format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags };
+	const unsigned int flagset[] = { format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags, format_attribute_single_quote };
 	size_t flagcount = sizeof(flagset) / sizeof(flagset[0]);
 
 	for (size_t i = 0; i < (size_t(1) << flagcount); ++i)
