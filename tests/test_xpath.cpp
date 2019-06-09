@@ -11,11 +11,11 @@
 #include <limits>
 
 //  std::random_shuffle is deprecated in c++14, is removed in c++17.
-# if defined(__cplusplus) && (__cplusplus >= 201402L)
-# include <random>
-# define PUGIXML_SHUFFLE(rng)  std::shuffle(rng.begin(), rng.end(), std::default_random_engine{std::random_device{}()})
-# else
-# define PUGIXML_SHUFFLE(rng)  std::random_shuffle(rng.begin(), rng.end())
+#if defined(__cplusplus) && (__cplusplus >= 201402L)
+#  include <random>
+#  define PUGIXML_SHUFFLE(rng)  std::shuffle(rng.begin(), rng.end(), std::default_random_engine{std::random_device{}()})
+#else
+#  define PUGIXML_SHUFFLE(rng)  std::random_shuffle(rng.begin(), rng.end())
 #endif
 
 using namespace pugi;
