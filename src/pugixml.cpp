@@ -1861,7 +1861,7 @@ PUGI__NS_BEGIN
 	enum chartypex_t
 	{
 		ctx_special_pcdata = 1,   // Any symbol >= 0 and < 32 (except \t, \r, \n), &, <, >
-		ctx_special_attr = 2,     // Any symbol >= 0 and < 32, &, <, >, "
+		ctx_special_attr = 2,     // Any symbol >= 0 and < 32, &, <, >, ", '
 		ctx_start_symbol = 4,	  // Any symbol > 127, a-z, A-Z, _
 		ctx_digit = 8,			  // 0-9
 		ctx_symbol = 16			  // Any symbol > 127, a-z, A-Z, 0-9, _, -, .
@@ -1871,7 +1871,7 @@ PUGI__NS_BEGIN
 	{
 		3,  3,  3,  3,  3,  3,  3,  3,     3,  2,  2,  3,  3,  2,  3,  3,     // 0-15
 		3,  3,  3,  3,  3,  3,  3,  3,     3,  3,  3,  3,  3,  3,  3,  3,     // 16-31
-		0,  0,  2,  0,  0,  0,  3,  0,     0,  0,  0,  0,  0, 16, 16,  0,     // 32-47
+		0,  0,  2,  0,  0,  0,  3,  2,     0,  0,  0,  0,  0, 16, 16,  0,     // 32-47
 		24, 24, 24, 24, 24, 24, 24, 24,    24, 24, 0,  0,  3,  0,  3,  0,     // 48-63
 
 		0,  20, 20, 20, 20, 20, 20, 20,    20, 20, 20, 20, 20, 20, 20, 20,    // 64-79
@@ -3933,6 +3933,10 @@ PUGI__NS_BEGIN
 					writer.write('&', 'q', 'u', 'o', 't', ';');
 					++s;
 					break;
+				case '\'':
+					writer.write('&', 'a', 'p', 'o', 's', ';');
+					++s;
+					break;
 				default: // s is not a usual symbol
 				{
 					unsigned int ch = static_cast<unsigned int>(*s++);
@@ -4064,6 +4068,7 @@ PUGI__NS_BEGIN
 	PUGI__FN void node_output_attributes(xml_buffered_writer& writer, xml_node_struct* node, const char_t* indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
+		const char_t enquotation_char = (flags & format_attribute_single_quote) ? '\'' : '"';
 
 		for (xml_attribute_struct* a = node->first_attribute; a; a = a->next_attribute)
 		{
@@ -4079,12 +4084,12 @@ PUGI__NS_BEGIN
 			}
 
 			writer.write_string(a->name ? a->name + 0 : default_name);
-			writer.write('=', '"');
+			writer.write('=', enquotation_char);
 
 			if (a->value)
 				text_output(writer, a->value, ctx_special_attr, flags);
 
-			writer.write('"');
+			writer.write(enquotation_char);
 		}
 	}
 

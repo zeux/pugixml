@@ -193,7 +193,7 @@ TEST_XML(write_escape, "<node attr=''>text</node>")
 	doc.child(STR("node")).attribute(STR("attr")) = STR("<>'\"&\x04\r\n\t");
 	doc.child(STR("node")).first_child().set_value(STR("<>'\"&\x04\r\n\t"));
 
-	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;'&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\r\n\t</node>"));
+	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;&apos;&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\r\n\t</node>"));
 }
 
 TEST_XML(write_escape_roundtrip, "<node attr=''>text</node>")
@@ -207,7 +207,7 @@ TEST_XML(write_escape_roundtrip, "<node attr=''>text</node>")
 
 	// Note: this string is almost identical to the string from write_escape with the exception of \r
 	// \r in PCDATA doesn't roundtrip because it has to go through newline conversion (which could be disabled, but is active by default)
-	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;'&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\n\t</node>"));
+	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;&apos;&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\n\t</node>"));
 }
 
 TEST_XML(write_escape_unicode, "<node attr='&#x3c00;'/>")
@@ -632,7 +632,7 @@ TEST_XML(write_no_empty_element_tags, "<node><child1/><child2>text</child2><chil
 
 TEST_XML_FLAGS(write_roundtrip, "<node><child1 attr1='value1' attr2='value2'/><child2 attr='value'>pre<![CDATA[data]]>mid&lt;text&amp;escape<!--comment--><test/>post<?pi value?>fin</child2><child3/></node>", parse_full)
 {
-	const unsigned int flagset[] = { format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags };
+	const unsigned int flagset[] = { format_indent, format_raw, format_no_declaration, format_indent_attributes, format_no_empty_element_tags, format_attribute_single_quote };
 	size_t flagcount = sizeof(flagset) / sizeof(flagset[0]);
 
 	for (size_t i = 0; i < (size_t(1) << flagcount); ++i)

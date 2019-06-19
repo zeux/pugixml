@@ -1706,6 +1706,8 @@ These flags control the resulting tree contents:
 
 * [[format_skip_control_chars]]`format_skip_control_chars` enables skipping characters belonging to range [0; 32) instead of "&#xNN;" encoding. This flag is *off* by default.
 
+* [[format_attribute_single_quote]]`format_attribute_single_quote` enables using single quotes `'` instead of double quotes `"` for enclosing attribute values. This flag is *off* by default.
+
 These flags control the additional output information:
 
 * [[format_no_declaration]]`format_no_declaration` disables default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.

@@ -255,6 +255,9 @@ namespace pugi
 	// Skip characters belonging to range [0; 32) instead of "&#xNN;" encoding. This flag is off by default.
 	const unsigned int format_skip_control_chars = 0x100;
 
+	// Use single quotes ' instead of double quotes " for enclosing attribute values. This flag is off by default.
+	const unsigned int format_attribute_single_quote = 0x200;
+
 	// The default set of formatting flags.
 	// Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;
