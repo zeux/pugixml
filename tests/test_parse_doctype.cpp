@@ -221,7 +221,7 @@ TEST(parse_doctype_xmlconf_ibm_2)
 	TEST_DOCTYPE_NWF("<!DOCTYPE animal [ <!ELEMENT animal ANY> <!ENTITY % parameterE \"A music file ?>\"> <?music %parameterE; ]>");
 	TEST_DOCTYPE_NWF("<!DOCTYPE animal [ <!ELEMENT animal ANY> <!ENTITY % parameterE \"leopard EMPTY>\"> <!ELEMENT %parameterE; ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT root ANY> <!ATTLIST root attr1 CDATA #IMPLIED> <!ATTLIST root attr2 CDATA #IMPLIED> <!ENTITY withlt \"have <lessthan> inside\"> <!ENTITY aIndirect \"&withlt;\"> ]>");
-	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT root (#PCDATA)> <!--* Mising Name S contentspec in elementdecl *--> <!ELEMENT > ]>");
+	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT root (#PCDATA)> <!--* Missing Name S contentspec in elementdecl *--> <!ELEMENT > ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT root (#PCDATA)> <!ELEMENT a ANY> <!ELEMENT b ANY> <!--* extra separator in seq *--> <!ELEMENT aElement ((a|b),,a)? > ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE root [ <!ELEMENT root (#PCDATA)> <!ELEMENT a ANY> <!--* Missing white space before Name in AttDef *--> <!ATTLIST a attr1 CDATA \"default\"attr2 ID #required> ]>");
 	TEST_DOCTYPE_WF("<!DOCTYPE test [ <!ELEMENT test ANY> <!ELEMENT one EMPTY> <!ELEMENT two EMPTY> <!NOTATION this SYSTEM \"alpha\"> <!ATTLIST three attr NOTATION (\"this\") #IMPLIED> ]>");

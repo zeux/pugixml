@@ -194,7 +194,7 @@ TEST_XML(xpath_operators_equality_node_set_node_set, "<node><c1><v>a</v><v>b</v>
 	CHECK_XPATH_BOOLEAN(n, STR("c1/v != c3/v"), true);
 	CHECK_XPATH_BOOLEAN(n, STR("c2/v != c3/v"), true);
 	CHECK_XPATH_BOOLEAN(n, STR("c1/v != c4/v"), true);
-	CHECK_XPATH_BOOLEAN(n, STR("c1/v != c5/v"), true); // (a, b) != (a, b), since a != b, as per XPath spec (comparison operators are so not intutive)
+	CHECK_XPATH_BOOLEAN(n, STR("c1/v != c5/v"), true); // (a, b) != (a, b), since a != b, as per XPath spec (comparison operators are so not intuitive)
 	CHECK_XPATH_BOOLEAN(n, STR("c3/v != c6/v"), false);
 	CHECK_XPATH_BOOLEAN(n, STR("c1/v != x"), false);
 	CHECK_XPATH_BOOLEAN(n, STR("x != c1/v"), false);
