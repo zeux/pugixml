@@ -123,7 +123,7 @@ TEST_XML(xpath_api_nodeset_copy, "<node><foo/><foo/></node>")
 
 	xpath_node_set copy3;
 	copy3 = set;
-	copy3 = copy3;
+	copy3 = xpath_node_set(copy3);
 	CHECK(copy3.size() == 2);
 	CHECK_STRING(copy3[0].node().name(), STR("foo"));
 

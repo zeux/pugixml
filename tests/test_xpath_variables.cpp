@@ -454,7 +454,7 @@ TEST_XML(xpath_variables_copy, "<node />")
 
 	CHECK_XPATH_STRING_VAR(xml_node(), STR("substring($c, count($d[$a]) + $b)"), &set2, STR("ring"));
 
-	set3 = set3;
+	set3 = xpath_variable_set(set3);
 
 	CHECK_XPATH_STRING_VAR(xml_node(), STR("substring($c, count($d[$a]) + $b)"), &set2, STR("ring"));
 
