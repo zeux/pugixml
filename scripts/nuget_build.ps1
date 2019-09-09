@@ -34,14 +34,31 @@ cd $scriptdir
 Force-Copy "../src/pugiconfig.hpp" "nuget/build/native/include/pugiconfig.hpp"
 Force-Copy "../src/pugixml.hpp" "nuget/build/native/include/pugixml.hpp"
 
-Build-Version "vs2013" "v120" "dynamic"
-Build-Version "vs2013" "v120" "static"
+if ($args[0] -eq 2019){
+	Build-Version "vs2019" "v142" "dynamic"
+	Build-Version "vs2019" "v142" "static"
 
-Build-Version "vs2015" "v140" "dynamic"
-Build-Version "vs2015" "v140" "static"
+} elseif ($args[0] -eq 2017){
+	Build-Version "vs2017" "v141" "dynamic"
+	Build-Version "vs2017" "v141" "static"
 
-Build-Version "vs2017" "v141" "dynamic"
-Build-Version "vs2017" "v141" "static"
+	Build-Version "vs2015" "v140" "dynamic"
+	Build-Version "vs2015" "v140" "static"
+
+	Build-Version "vs2013" "v120" "dynamic"
+	Build-Version "vs2013" "v120" "static"
+
+} elseif($args[0] -eq 2015){
+	Build-Version "vs2015" "v140" "dynamic"
+	Build-Version "vs2015" "v140" "static"
+
+	Build-Version "vs2013" "v120" "dynamic"
+	Build-Version "vs2013" "v120" "static"
+
+} elseif($args[0] -eq 2013){
+	Build-Version "vs2013" "v120" "dynamic"
+	Build-Version "vs2013" "v120" "static"
+}
 
 Run-Command "nuget pack nuget"
 

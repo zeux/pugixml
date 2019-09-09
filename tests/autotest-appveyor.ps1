@@ -23,6 +23,10 @@ foreach ($vs in $args)
 			$vsdevcmdarch = if ($arch -eq "x64") { "amd64" } else { "x86" }
 			Invoke-CmdScript "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat" "-arch=$vsdevcmdarch"
 		}
+		elseif ($vs -eq 19){
+			$vsdevcmdarch = if ($arch -eq "x64") { "amd64" } else { "x86" }
+			Invoke-CmdScript "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat" "-arch=$vsdevcmdarch"
+		}
 		else
 		{
 			Invoke-CmdScript "C:\Program Files (x86)\Microsoft Visual Studio $vs.0\VC\vcvarsall.bat" $arch
