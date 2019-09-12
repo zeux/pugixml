@@ -3930,11 +3930,17 @@ PUGI__NS_BEGIN
 					++s;
 					break;
 				case '"':
-					writer.write('&', 'q', 'u', 'o', 't', ';');
+					if (flags & format_attribute_single_quote)
+						writer.write('"');
+					else
+						writer.write('&', 'q', 'u', 'o', 't', ';');
 					++s;
 					break;
 				case '\'':
-					writer.write('&', 'a', 'p', 'o', 's', ';');
+					if (flags & format_attribute_single_quote)
+						writer.write('&', 'a', 'p', 'o', 's', ';');
+					else
+						writer.write('\'');
 					++s;
 					break;
 				default: // s is not a usual symbol

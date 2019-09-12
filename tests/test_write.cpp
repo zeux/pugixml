@@ -193,7 +193,8 @@ TEST_XML(write_escape, "<node attr=''>text</node>")
 	doc.child(STR("node")).attribute(STR("attr")) = STR("<>'\"&\x04\r\n\t");
 	doc.child(STR("node")).first_child().set_value(STR("<>'\"&\x04\r\n\t"));
 
-	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;&apos;&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\r\n\t</node>"));
+	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;'&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\r\n\t</node>"));
+	CHECK_NODE_EX(doc, STR("<node attr='&lt;&gt;&apos;\"&amp;&#04;&#13;&#10;&#09;'>&lt;&gt;'\"&amp;&#04;\r\n\t</node>"), STR(""), format_raw | format_attribute_single_quote);
 }
 
 TEST_XML(write_escape_roundtrip, "<node attr=''>text</node>")
@@ -207,7 +208,8 @@ TEST_XML(write_escape_roundtrip, "<node attr=''>text</node>")
 
 	// Note: this string is almost identical to the string from write_escape with the exception of \r
 	// \r in PCDATA doesn't roundtrip because it has to go through newline conversion (which could be disabled, but is active by default)
-	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;&apos;&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\n\t</node>"));
+	CHECK_NODE(doc, STR("<node attr=\"&lt;&gt;'&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\n\t</node>"));
+	CHECK_NODE_EX(doc, STR("<node attr='&lt;&gt;&apos;\"&amp;&#04;&#13;&#10;&#09;'>&lt;&gt;'\"&amp;&#04;\n\t</node>"), STR(""), format_raw | format_attribute_single_quote);
 }
 
 TEST_XML(write_escape_unicode, "<node attr='&#x3c00;'/>")
