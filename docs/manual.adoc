@@ -2131,6 +2131,31 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.10]]
+=== v1.10 ^2019-09-15^
+
+Maintenance release. Changes:
+
+* Behavior changes:
+	. Tab characters (ASCII 9) in attribute values are now encoded as '&#9;' to survive roundtripping
+	. `>` characters are no longer escaped in attribute values
+
+* New features:
+	. Add Visual Studio .natvis files to improve debugging experience
+	. CMake improvements (USE_POSTFIX and BUILD_SHARED_AND_STATIC_LIBS options for building multiple versions and pkg-config tweaks)
+	. Add format_skip_control_chars formatting flag to skip non-printable ASCII characters that are invalid to use in well-formed XML files
+	. Add format_attribute_single_quote formatting flag to use single quotes for attribute values instead of default double quotes.
+
+* XPath improvements:
+	. XPath union now results in a stable order that doesn't depend on memory allocations; crucially, this may require sorting the output of XPath query operation if you rely on the document-ordered traversal
+	. Improve performance of XPath union operation, making it ~2x faster
+
+* Compatibility improvements:
+	. Fix Visual Studio warnings when built in a DLL configuration
+	. Fix static analysis false positives in Coverity and clang
+	. Fix Wdouble-promotion warnings in gcc
+	. Add Visual Studio 2019 support for NuGet packages
+
 [[v1.9]]
 === v1.9 ^2018-04-04^
 
@@ -2655,6 +2680,7 @@ enum +++<a href="#xpath_value_type">xpath_value_type</a>+++
 [source,subs="+macros"]
 ----
 // Formatting options bit flags:
+const unsigned int +++<a href="#format_attribute_single_quote">format_attribute_single_quote</a>+++
 const unsigned int +++<a href="#format_default">format_default</a>+++
 const unsigned int +++<a href="#format_indent">format_indent</a>+++
 const unsigned int +++<a href="#format_indent_attributes">format_indent_attributes</a>+++
