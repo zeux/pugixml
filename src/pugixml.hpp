@@ -1,5 +1,5 @@
 /**
- * pugixml parser - version 1.9
+ * pugixml parser - version 1.10
  * --------------------------------------------------------
  * Copyright (C) 2006-2019, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
@@ -12,8 +12,9 @@
  */
 
 #ifndef PUGIXML_VERSION
-// Define version macro; evaluates to major * 100 + minor * 10 + patch so that it's safe to use in less-than comparisons
-#	define PUGIXML_VERSION 190
+// Define version macro; evaluates to major * 1000 + minor * 10 + patch so that it's safe to use in less-than comparisons
+// Note: pugixml used major * 100 + minor * 10 + patch format up until 1.9 (which had version identifier 190); starting from pugixml 1.10, the minor version number is two digits
+#	define PUGIXML_VERSION 1100
 #endif
 
 // Include user configuration file (this can define various configuration macros)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(pugixml VERSION 1.9)
+project(pugixml VERSION 1.10)
 
 option(BUILD_SHARED_AND_STATIC_LIBS "Build both shared and static libraries" OFF)
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)

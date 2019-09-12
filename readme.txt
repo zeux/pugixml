@@ -1,4 +1,4 @@
-pugixml 1.9 - an XML processing library
+pugixml 1.10 - an XML processing library
 
 Copyright (C) 2006-2019, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
 Report bugs and download new versions at https://pugixml.org/
