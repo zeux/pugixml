@@ -4,7 +4,7 @@ include::config.adoc[]
 [[introduction]]
 == Introduction
 
-http://pugixml.org/[pugixml] is a light-weight C{plus}{plus} XML processing library. It consists of a DOM-like interface with rich traversal/modification capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and an XPath 1.0 implementation for complex data-driven tree queries. Full Unicode support is also available, with two Unicode interface variants and conversions between different Unicode encodings (which happen automatically during parsing/saving). The library is extremely portable and easy to integrate and use. pugixml is developed and maintained since 2006 and has many users. All code is distributed under the <<license,MIT license>>, making it completely free to use in both open-source and proprietary applications.
+https://pugixml.org/[pugixml] is a light-weight C{plus}{plus} XML processing library. It consists of a DOM-like interface with rich traversal/modification capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and an XPath 1.0 implementation for complex data-driven tree queries. Full Unicode support is also available, with two Unicode interface variants and conversions between different Unicode encodings (which happen automatically during parsing/saving). The library is extremely portable and easy to integrate and use. pugixml is developed and maintained since 2006 and has many users. All code is distributed under the <<license,MIT license>>, making it completely free to use in both open-source and proprietary applications.
 
 pugixml enables very fast, convenient and memory-efficient XML document processing. However, since pugixml has a DOM parser, it can't process XML documents that do not fit in memory; also the parser is a non-validating one, so if you need DTD/Schema validation, the library is not for you.
 
@@ -25,7 +25,7 @@ The distribution contains library source, documentation (the guide you're readin
 
 The complete pugixml source consists of three files - one source file, `pugixml.cpp`, and two header files, `pugixml.hpp` and `pugiconfig.hpp`. `pugixml.hpp` is the primary header which you need to include in order to use pugixml classes/functions. The rest of this guide assumes that `pugixml.hpp` is either in the current directory or in one of include directories of your projects, so that `#include "pugixml.hpp"` can find the header; however you can also use relative path (i.e. `#include "../libs/pugixml/src/pugixml.hpp"`) or include directory-relative path (i.e. `#include <xml/thirdparty/pugixml/src/pugixml.hpp>`).
 
-The easiest way to build pugixml is to compile the source file, `pugixml.cpp`, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio footnote:[All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add `pugixml.cpp` to one of your projects. There are other building methods available, including building pugixml as a standalone static/shared library; link:manual.html#install.building[read the manual] for further information.
+The easiest way to build pugixml is to compile the source file, `pugixml.cpp`, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio footnote:[All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just *add `pugixml.cpp` to one of your projects*. There are other building methods available, including building pugixml as a standalone static/shared library; link:manual.html#install.building[read the manual] for further information.
 
 [[dom]]
 == Document object model
@@ -255,7 +255,7 @@ If filing an issue is not possible due to privacy or other concerns, you can con
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2018 Arseny Kapoulkine
+Copyright (c) 2006-2019 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -282,6 +282,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 This means that you can freely use pugixml in your applications, both open-source and proprietary. If you use pugixml in a product, it is sufficient to add an acknowledgment like this to the product distribution:
 
 ....
-This software is based on pugixml library (http://pugixml.org).
-pugixml is Copyright (C) 2006-2018 Arseny Kapoulkine.
+This software is based on pugixml library (https://pugixml.org).
+pugixml is Copyright (C) 2006-2019 Arseny Kapoulkine.
 ....

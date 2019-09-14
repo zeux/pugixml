@@ -8,7 +8,7 @@ include::config.adoc[]
 [[overview.introduction]]
 === Introduction
 
-http://pugixml.org/[pugixml] is a light-weight C{plus}{plus} XML processing library. It consists of a DOM-like interface with rich traversal/modification capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and an <<xpath,XPath 1.0 implementation>> for complex data-driven tree queries. Full Unicode support is also available, with <<dom.unicode,two Unicode interface variants>> and conversions between different Unicode encodings (which happen automatically during parsing/saving). The library is <<install.portability,extremely portable>> and easy to integrate and use. pugixml is developed and maintained since 2006 and has many users. All code is distributed under the <<overview.license,MIT license>>, making it completely free to use in both open-source and proprietary applications.
+https://pugixml.org/[pugixml] is a light-weight C{plus}{plus} XML processing library. It consists of a DOM-like interface with rich traversal/modification capabilities, an extremely fast XML parser which constructs the DOM tree from an XML file/buffer, and an <<xpath,XPath 1.0 implementation>> for complex data-driven tree queries. Full Unicode support is also available, with <<dom.unicode,two Unicode interface variants>> and conversions between different Unicode encodings (which happen automatically during parsing/saving). The library is <<install.portability,extremely portable>> and easy to integrate and use. pugixml is developed and maintained since 2006 and has many users. All code is distributed under the <<overview.license,MIT license>>, making it completely free to use in both open-source and proprietary applications.
 
 pugixml enables very fast, convenient and memory-efficient XML document processing. However, since pugixml has a DOM parser, it can't process XML documents that do not fit in memory; also the parser is a non-validating one, so if you need DTD or XML Schema validation, the library is not for you.
 
@@ -46,7 +46,7 @@ Thanks to *Vyacheslav Egorov* for documentation proofreading and fuzz testing.
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2018 Arseny Kapoulkine
+Copyright (c) 2006-2019 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -73,8 +73,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 This means that you can freely use pugixml in your applications, both open-source and proprietary. If you use pugixml in a product, it is sufficient to add an acknowledgment like this to the product distribution:
 
 ....
-This software is based on pugixml library (http://pugixml.org).
-pugixml is Copyright (C) 2006-2018 Arseny Kapoulkine.
+This software is based on pugixml library (https://pugixml.org).
+pugixml is Copyright (C) 2006-2019 Arseny Kapoulkine.
 ....
 
 [[install]]
@@ -148,7 +148,7 @@ The complete pugixml source consists of three files - one source file, `pugixml.
 [[install.building.embed]]
 ==== Building pugixml as a part of another static library/executable
 
-The easiest way to build pugixml is to compile the source file, `pugixml.cpp`, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio footnote:[All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just add `pugixml.cpp` to one of your projects.
+The easiest way to build pugixml is to compile the source file, `pugixml.cpp`, along with the existing library/executable. This process depends on the method of building your application; for example, if you're using Microsoft Visual Studio footnote:[All trademarks used are properties of their respective owners.], Apple Xcode, Code::Blocks or any other IDE, just *add `pugixml.cpp` to one of your projects*.
 
 If you're using Microsoft Visual Studio and the project has precompiled headers turned on, you'll see the following error messages:
 
@@ -380,7 +380,7 @@ There is a special value of `xml_node` type, known as null node or empty node (s
 Both `xml_node` and `xml_attribute` have the default constructor which initializes them to null objects.
 
 [[xml_attribute::comparison]][[xml_node::comparison]]
-`xml_node` and `xml_attribute` try to behave like pointers, that is, they can be compared with other objects of the same type, making it possible to use them as keys in associative containers. All handles to the same underlying object are equal, and any two handles to different underlying objects are not equal. Null handles only compare as equal to themselves. The result of relational comparison can not be reliably determined from the order of nodes in file or in any other way. Do not use relational comparison operators except for search optimization (i.e. associative container keys).
+`xml_node` and `xml_attribute` try to behave like pointers, that is, they can be compared with other objects of the same type, making it possible to use them as keys in associative containers. All handles to the same underlying object are equal, and any two handles to different underlying objects are not equal. Null handles only compare as equal to null handles. The result of relational comparison can not be reliably determined from the order of nodes in file or in any other way. Do not use relational comparison operators except for search optimization (i.e. associative container keys).
 
 [[xml_attribute::hash_value]][[xml_node::hash_value]]
 If you want to use `xml_node` or `xml_attribute` objects as keys in hash-based associative containers, you can use the `hash_value` member functions. They return the hash values that are guaranteed to be the same for all handles to the same underlying object. The hash value for null handles is 0. Note that hash value does not depend on the content of the node, only on the location of the underlying structure in memory - this means that loading the same document twice will likely produce different hash values, and copying the node will not preserve the hash.
@@ -1008,6 +1008,13 @@ This is an example of using these functions (link:samples/traverse_rangefor.cpp[
 [source,indent=0]
 ----
 include::samples/traverse_rangefor.cpp[tags=code]
+----
+
+While using `children()` makes the intent of the code clear, note that each node can be treated as a container of child nodes, since it provides `begin()`/`end()` member functions described in the next section. Because of this, you can iterate through node's children simply by using the node itself:
+
+[source]
+----
+for (pugi::xml_node child: tool)
 ----
 
 [[access.iterators]]
@@ -1697,6 +1704,10 @@ These flags control the resulting tree contents:
 
 * [[format_no_empty_element_tags]]`format_no_empty_element_tags` determines if start/end tags should be output instead of empty element tags for empty elements (that is, elements with no children). This flag is *off* by default.
 
+* [[format_skip_control_chars]]`format_skip_control_chars` enables skipping characters belonging to range [0; 32) instead of "&#xNN;" encoding. This flag is *off* by default.
+
+* [[format_attribute_single_quote]]`format_attribute_single_quote` enables using single quotes `'` instead of double quotes `"` for enclosing attribute values. This flag is *off* by default.
+
 These flags control the additional output information:
 
 * [[format_no_declaration]]`format_no_declaration` disables default node declaration output. By default, if the document is saved via `save` or `save_file` function, and it does not have any document declaration, a default declaration is output before the document contents. Enabling this flag disables this declaration. This flag has no effect in `xml_node::print` functions: they never output the default declaration. This flag is *off* by default.
@@ -2119,6 +2130,31 @@ Because of the differences in document object models, performance considerations
 == Changelog
 
 :!numbered:
+
+[[v1.10]]
+=== v1.10 ^2019-09-15^
+
+Maintenance release. Changes:
+
+* Behavior changes:
+	. Tab characters (ASCII 9) in attribute values are now encoded as '&#9;' to survive roundtripping
+	. `>` characters are no longer escaped in attribute values
+
+* New features:
+	. Add Visual Studio .natvis files to improve debugging experience
+	. CMake improvements (USE_POSTFIX and BUILD_SHARED_AND_STATIC_LIBS options for building multiple versions and pkg-config tweaks)
+	. Add format_skip_control_chars formatting flag to skip non-printable ASCII characters that are invalid to use in well-formed XML files
+	. Add format_attribute_single_quote formatting flag to use single quotes for attribute values instead of default double quotes.
+
+* XPath improvements:
+	. XPath union now results in a stable order that doesn't depend on memory allocations; crucially, this may require sorting the output of XPath query operation if you rely on the document-ordered traversal
+	. Improve performance of XPath union operation, making it ~2x faster
+
+* Compatibility improvements:
+	. Fix Visual Studio warnings when built in a DLL configuration
+	. Fix static analysis false positives in Coverity and clang
+	. Fix Wdouble-promotion warnings in gcc
+	. Add Visual Studio 2019 support for NuGet packages
 
 [[v1.9]]
 === v1.9 ^2018-04-04^
@@ -2644,6 +2680,7 @@ enum +++<a href="#xpath_value_type">xpath_value_type</a>+++
 [source,subs="+macros"]
 ----
 // Formatting options bit flags:
+const unsigned int +++<a href="#format_attribute_single_quote">format_attribute_single_quote</a>+++
 const unsigned int +++<a href="#format_default">format_default</a>+++
 const unsigned int +++<a href="#format_indent">format_indent</a>+++
 const unsigned int +++<a href="#format_indent_attributes">format_indent_attributes</a>+++
@@ -2652,6 +2689,7 @@ const unsigned int +++<a href="#format_no_empty_element_tags">format_no_empty_el
 const unsigned int +++<a href="#format_no_escapes">format_no_escapes</a>+++
 const unsigned int +++<a href="#format_raw">format_raw</a>+++
 const unsigned int +++<a href="#format_save_file_text">format_save_file_text</a>+++
+const unsigned int +++<a href="#format_skip_control_chars">format_skip_control_chars</a>+++
 const unsigned int +++<a href="#format_write_bom">format_write_bom</a>+++
 
 // Parsing options bit flags:
