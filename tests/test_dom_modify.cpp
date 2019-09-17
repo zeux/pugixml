@@ -494,6 +494,7 @@ TEST_XML(dom_node_remove_attribute, "<node a1='v1' a2='v2' a3='v3'><child a4='v4
 
 TEST_XML(dom_node_remove_attributes, "<node a1='v1' a2='v2' a3='v3'><child a4='v4'/></node>")
 {
+	CHECK(!xml_node().remove_attributes());
 	xml_node node = doc.child(STR("node"));
 	xml_node child = node.child(STR("child"));
 
@@ -721,6 +722,7 @@ TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node
 
 TEST_XML(dom_node_remove_children, "<node><n1/><n2/><n3/><child><n4/></child></node>")
 {
+	CHECK(!xml_node().remove_children());
 	xml_node node = doc.child(STR("node"));
 	xml_node child = node.child(STR("child"));
 

@@ -6061,17 +6061,22 @@ namespace pugi
 
 	PUGI__FN bool xml_node::remove_attributes()
 	{
-		for (xml_attribute_struct* attr = this->_root->first_attribute; attr; attr = attr->next_attribute)
+		if (!_root) return false;
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return false;
+
+		for (xml_attribute_struct* attr = _root->first_attribute; attr;)
 		{
-			if (!_root || !attr) return false;
+			if (!attr) return false;			
 			if (!impl::is_attribute_of(attr, _root)) return false;
 
-			impl::xml_allocator& alloc = impl::get_allocator(_root);
-			if (!alloc.reserve()) return false;
+			xml_attribute_struct* next = attr->next_attribute;
 
 			impl::destroy_attribute(attr, alloc);
+
+			attr = next;
 		}
-		this->_root->first_attribute = 0;
+		_root->first_attribute = 0;
 
 		return true;
 	}
@@ -6096,16 +6101,21 @@ namespace pugi
 
 	PUGI__FN bool xml_node::remove_children()
 	{
-		for (xml_node_struct* child = this->_root->first_child; child; child = child->next_sibling)
+		if (!_root) return false;
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return false;
+
+		for (xml_node_struct* child = _root->first_child; child; )
 		{
-			if (!_root || !child || child->parent != _root) return false;
+			xml_node_struct* next = child->next_sibling;
 
-			impl::xml_allocator& alloc = impl::get_allocator(_root);
-			if (!alloc.reserve()) return false;
+			destroy_node(child, alloc);
 
-			impl::destroy_node(child, alloc);
+			child = next;
 		}
-		this->_root->first_child = 0;
+
+		_root->first_child = 0;
 
 		return true;
 	}
