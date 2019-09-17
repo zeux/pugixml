@@ -6071,7 +6071,7 @@ namespace pugi
 
 			impl::destroy_attribute(attr, alloc);
 		}
-		this->_root->first_attribute = nullptr;
+		this->_root->first_attribute = 0;
 
 		return true;
 	}
@@ -6105,7 +6105,7 @@ namespace pugi
 
 			impl::destroy_node(child, alloc);
 		}
-		this->_root->first_child = nullptr;
+		this->_root->first_child = 0;
 
 		return true;
 	}
