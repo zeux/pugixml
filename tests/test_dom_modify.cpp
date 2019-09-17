@@ -492,6 +492,18 @@ TEST_XML(dom_node_remove_attribute, "<node a1='v1' a2='v2' a3='v3'><child a4='v4
 	CHECK_NODE(doc, STR("<node a2=\"v2\"><child/></node>"));
 }
 
+TEST_XML(dom_node_remove_attributes, "<node a1='v1' a2='v2' a3='v3'><child a4='v4'/></node>")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_node child = node.child(STR("child"));
+
+	CHECK(child.remove_attributes());
+	CHECK_NODE(child, STR("<child/>"));
+
+	CHECK(node.remove_attributes());
+	CHECK_NODE(node, STR("<node><child/></node>"));
+}
+
 TEST_XML(dom_node_prepend_child, "<node>foo<child/></node>")
 {
 	CHECK(xml_node().prepend_child() == xml_node());
@@ -705,6 +717,18 @@ TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node
 	CHECK(child.remove_child(STR("n4")));
 
 	CHECK_NODE(doc, STR("<node><n2/><child/></node>"));
+}
+
+TEST_XML(dom_node_remove_children, "<node><n1/><n2/><n3/><child><n4/></child></node>")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_node child = node.child(STR("child"));
+
+	CHECK(child.remove_children());
+	CHECK_NODE(child, STR("<child/>"));
+
+	CHECK(node.remove_children());
+	CHECK_NODE(node, STR("<node/>"));
 }
 
 TEST_XML(dom_node_remove_child_complex, "<node id='1'><n1 id1='1' id2='2'/><n2/><n3/><child><n4/></child></node>")
