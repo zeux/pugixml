@@ -6062,20 +6062,19 @@ namespace pugi
 	PUGI__FN bool xml_node::remove_attributes()
 	{
 		if (!_root) return false;
+		
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return false;
 
 		for (xml_attribute_struct* attr = _root->first_attribute; attr;)
 		{
-			if (!attr) return false;			
-			if (!impl::is_attribute_of(attr, _root)) return false;
-
 			xml_attribute_struct* next = attr->next_attribute;
 
 			impl::destroy_attribute(attr, alloc);
 
 			attr = next;
 		}
+
 		_root->first_attribute = 0;
 
 		return true;
