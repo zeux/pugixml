@@ -6059,6 +6059,27 @@ namespace pugi
 		return true;
 	}
 
+	PUGI__FN bool xml_node::remove_attributes()
+	{
+		if (!_root) return false;
+		
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return false;
+
+		for (xml_attribute_struct* attr = _root->first_attribute; attr;)
+		{
+			xml_attribute_struct* next = attr->next_attribute;
+
+			impl::destroy_attribute(attr, alloc);
+
+			attr = next;
+		}
+
+		_root->first_attribute = 0;
+
+		return true;
+	}
+
 	PUGI__FN bool xml_node::remove_child(const char_t* name_)
 	{
 		return remove_child(child(name_));
@@ -6073,6 +6094,27 @@ namespace pugi
 
 		impl::remove_node(n._root);
 		impl::destroy_node(n._root, alloc);
+
+		return true;
+	}
+
+	PUGI__FN bool xml_node::remove_children()
+	{
+		if (!_root) return false;
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return false;
+
+		for (xml_node_struct* child = _root->first_child; child; )
+		{
+			xml_node_struct* next = child->next_sibling;
+
+			destroy_node(child, alloc);
+
+			child = next;
+		}
+
+		_root->first_child = 0;
 
 		return true;
 	}

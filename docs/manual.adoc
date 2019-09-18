@@ -1378,16 +1378,18 @@ include::samples/modify_add.cpp[tags=code]
 [[modify.remove]]
 === Removing nodes/attributes
 
-[[xml_node::remove_attribute]][[xml_node::remove_child]]
+[[xml_node::remove_attribute]][[xml_node::remove_attributes]][[xml_node::remove_child]][[xml_node::remove_children]]
 If you do not want your document to contain some node or attribute, you can remove it with one of the following functions:
 
 [source]
 ----
 bool xml_node::remove_attribute(const xml_attribute& a);
+bool xml_node::remove_attributes();
 bool xml_node::remove_child(const xml_node& n);
+bool xml_node::remove_children();
 ----
 
-`remove_attribute` removes the attribute from the attribute list of the node, and returns the operation result. `remove_child` removes the child node with the entire subtree (including all descendant nodes and attributes) from the document, and returns the operation result. Removing fails if one of the following is true:
+`remove_attribute` removes the attribute from the attribute list of the node, and returns the operation result. `remove_child` removes the child node with the entire subtree (including all descendant nodes and attributes) from the document, and returns the operation result. `remove_attributes` removes all the attributes of the node, and returns the operation result. `remove_children` removes all the child nodes of the node, and returns the operation result. Removing fails if one of the following is true:
 
 * The node the function is called on is null;
 * The attribute/node to be removed is null;
@@ -2868,8 +2870,10 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_node::remove_attribute">remove_attribute</a>+++(const xml_attribute& a);
     bool +++<a href="#xml_node::remove_attribute">remove_attribute</a>+++(const char_t* name);
+    bool +++<a href="#xml_node::remove_attributes">remove_attributes</a>+++();
     bool +++<a href="#xml_node::remove_child">remove_child</a>+++(const xml_node& n);
     bool +++<a href="#xml_node::remove_child">remove_child</a>+++(const char_t* name);
+    bool +++<a href="#xml_node::remove_children">remove_children</a>+++();
 
     xml_parse_result +++<a href="#xml_node::append_buffer">append_buffer</a>+++(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
