@@ -6066,7 +6066,7 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return false;
 
-		for (xml_attribute_struct* attr = _root->first_attribute; attr;)
+		for (xml_attribute_struct* attr = _root->first_attribute; attr; )
 		{
 			xml_attribute_struct* next = attr->next_attribute;
 
@@ -6109,7 +6109,7 @@ namespace pugi
 		{
 			xml_node_struct* next = child->next_sibling;
 
-			destroy_node(child, alloc);
+			impl::destroy_node(child, alloc);
 
 			child = next;
 		}

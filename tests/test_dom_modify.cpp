@@ -505,6 +505,23 @@ TEST_XML(dom_node_remove_attributes, "<node a1='v1' a2='v2' a3='v3'><child a4='v
 	CHECK_NODE(node, STR("<node><child/></node>"));
 }
 
+TEST_XML(dom_node_remove_attributes_lots, "<node/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	// this test makes sure we generate at least 2 pages (64K) worth of attribute data
+	// so that we can trigger page deallocation to make sure code is memory safe
+	for (size_t i = 0; i < 10000; ++i)
+		node.append_attribute(STR("a")) = STR("v");
+
+	CHECK_STRING(node.attribute(STR("a")).value(), STR("v"));
+
+	CHECK(node.remove_attributes());
+
+	CHECK_STRING(node.attribute(STR("a")).value(), STR(""));
+	CHECK_NODE(node, STR("<node/>"));
+}
+
 TEST_XML(dom_node_prepend_child, "<node>foo<child/></node>")
 {
 	CHECK(xml_node().prepend_child() == xml_node());
@@ -730,6 +747,23 @@ TEST_XML(dom_node_remove_children, "<node><n1/><n2/><n3/><child><n4/></child></n
 	CHECK_NODE(child, STR("<child/>"));
 
 	CHECK(node.remove_children());
+	CHECK_NODE(node, STR("<node/>"));
+}
+
+TEST_XML(dom_node_remove_children_lots, "<node/>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	// this test makes sure we generate at least 2 pages (64K) worth of node data
+	// so that we can trigger page deallocation to make sure code is memory safe
+	for (size_t i = 0; i < 10000; ++i)
+		node.append_child().set_name(STR("n"));
+
+	CHECK(node.child(STR("n")));
+
+	CHECK(node.remove_children());
+
+	CHECK(!node.child(STR("n")));
 	CHECK_NODE(node, STR("<node/>"));
 }
 
