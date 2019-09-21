@@ -1771,6 +1771,11 @@ TEST(dom_fp_double_custom_precision)
 	attr.set_value(std::numeric_limits<double>::min(), 20);
 	CHECK(fp_equal(attr.as_double(), std::numeric_limits<double>::min()));
 
+	attr.set_value(1.0f, 5);
+	CHECK(fp_equal(attr.as_double(), static_cast<double>(1.0f)));
+	attr.set_value(3.1415926f, 3);
+	CHECK(!fp_equal(attr.as_double(), static_cast<double>(3.1415926f)));
+
 	node.text().set(std::numeric_limits<double>::max());
 	CHECK(fp_equal(node.text().as_double(), std::numeric_limits<double>::max()));
 }

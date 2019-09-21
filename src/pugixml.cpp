@@ -5338,11 +5338,25 @@ namespace pugi
 		return impl::set_value_integer<unsigned long>(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, false);
 	}
 
+	PUGI__FN bool xml_attribute::set_value(double rhs)
+	{
+		if (!_attr) return false;
+
+		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, default_double_precision);
+	}
+
 	PUGI__FN bool xml_attribute::set_value(double rhs, int precision)
 	{
 		if (!_attr) return false;
 
 		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, precision);
+	}
+
+	PUGI__FN bool xml_attribute::set_value(float rhs)
+	{
+		if (!_attr) return false;
+
+		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, default_float_precision);
 	}
 
 	PUGI__FN bool xml_attribute::set_value(float rhs, int precision)
