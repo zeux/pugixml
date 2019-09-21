@@ -31,8 +31,9 @@ mark_as_advanced(CLEAR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
 
 set(HEADERS src/pugixml.hpp src/pugiconfig.hpp)
 set(SOURCES src/pugixml.cpp)
+
 if(BUILD_SHARED_LIBS AND MSVC)
-	set(PUGIXML_WINDLL_SRCS	src/win32/pugixml.rc)
+	set(PUGIXML_WINDLL_SRCS	scripts/pugixml_dll.rc)
 endif()
 
 if(DEFINED BUILD_DEFINES)

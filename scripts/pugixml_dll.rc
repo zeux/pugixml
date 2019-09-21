@@ -1,11 +1,9 @@
 #include <winver.h>
-//#include "../pugixml.hpp"
-// TODO these defines should be moved to ../pugixml.hpp
-//   but when included pugixml.hpp(131): error RC2104: undefined keyword or key name: typedef
-# define PUGIXML_VERSION_MAJOR 1
-# define PUGIXML_VERSION_MINOR 10
-# define PUGIXML_VERSION_PATCH 0
-# define PUGIXML_VERSION_NUMBER "1.10.0\0"
+
+#define PUGIXML_VERSION_MAJOR 1
+#define PUGIXML_VERSION_MINOR 10
+#define PUGIXML_VERSION_PATCH 0
+#define PUGIXML_VERSION_NUMBER "1.10.0\0"
 
 #ifdef GCC_WINDRES
 VS_VERSION_INFO		VERSIONINFO
