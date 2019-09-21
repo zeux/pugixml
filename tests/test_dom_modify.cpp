@@ -1762,6 +1762,19 @@ TEST(dom_fp_roundtrip_min_max_double)
 	CHECK(fp_equal(node.text().as_double(), std::numeric_limits<double>::max()));
 }
 
+TEST(dom_fp_double_custom_precision)
+{
+	xml_document doc;
+	xml_node node = doc.append_child(STR("node"));
+	xml_attribute attr = node.append_attribute(STR("attr"));
+
+	attr.set_value(std::numeric_limits<double>::min(), 20);
+	CHECK(fp_equal(attr.as_double(), std::numeric_limits<double>::min()));
+
+	node.text().set(std::numeric_limits<double>::max());
+	CHECK(fp_equal(node.text().as_double(), std::numeric_limits<double>::max()));
+}
+
 const double fp_roundtrip_base[] =
 {
 	0.31830988618379067154,
