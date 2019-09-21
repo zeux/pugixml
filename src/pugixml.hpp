@@ -772,7 +772,9 @@ namespace pugi
 		bool set(long rhs);
 		bool set(unsigned long rhs);
 		bool set(double rhs);
+		bool set(double rhs, int precision);
 		bool set(float rhs);
+		bool set(float rhs, int precision);
 		bool set(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG

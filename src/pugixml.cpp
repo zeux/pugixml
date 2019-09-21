@@ -6562,11 +6562,25 @@ namespace pugi
 		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs, default_float_precision) : false;
 	}
 
+	PUGI__FN bool xml_text::set(float rhs, int precision)
+	{
+		xml_node_struct* dn = _data_new();
+
+		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs, precision) : false;
+	}
+
 	PUGI__FN bool xml_text::set(double rhs)
 	{
 		xml_node_struct* dn = _data_new();
 
 		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs, default_double_precision) : false;
+	}
+
+	PUGI__FN bool xml_text::set(double rhs, int precision)
+	{
+		xml_node_struct* dn = _data_new();
+
+		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs, precision) : false;
 	}
 
 	PUGI__FN bool xml_text::set(bool rhs)
