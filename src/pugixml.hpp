@@ -263,6 +263,9 @@ namespace pugi
 	// Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;
 
+	const int default_double_precision = 17;
+	const int default_float_precision = 9;
+
 	// Forward declarations
 	struct xml_attribute_struct;
 	struct xml_node_struct;
@@ -410,7 +413,9 @@ namespace pugi
 		bool set_value(long rhs);
 		bool set_value(unsigned long rhs);
 		bool set_value(double rhs);
+		bool set_value(double rhs, int precision);
 		bool set_value(float rhs);
+		bool set_value(float rhs, int precision);
 		bool set_value(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
@@ -767,7 +772,9 @@ namespace pugi
 		bool set(long rhs);
 		bool set(unsigned long rhs);
 		bool set(double rhs);
+		bool set(double rhs, int precision);
 		bool set(float rhs);
+		bool set(float rhs, int precision);
 		bool set(bool rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG

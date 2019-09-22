@@ -1762,6 +1762,31 @@ TEST(dom_fp_roundtrip_min_max_double)
 	CHECK(fp_equal(node.text().as_double(), std::numeric_limits<double>::max()));
 }
 
+TEST(dom_fp_double_custom_precision)
+{
+	xml_document doc;
+	xml_node node = doc.append_child(STR("node"));
+	xml_attribute attr = node.append_attribute(STR("attr"));
+
+	attr.set_value(std::numeric_limits<double>::min(), 20);
+	CHECK(fp_equal(attr.as_double(), std::numeric_limits<double>::min()));
+
+	attr.set_value(1.0f, 5);
+	CHECK(fp_equal(attr.as_double(), static_cast<double>(1.0f)));
+
+	attr.set_value(3.1415926f, 3);
+	CHECK(!fp_equal(attr.as_double(), static_cast<double>(3.1415926f)));
+
+	node.text().set(1.0f, 5);
+	CHECK(fp_equal(node.text().as_double(), static_cast<double>(1.0f)));
+
+	node.text().set(3.1415926f, 3);
+	CHECK(!fp_equal(node.text().as_double(), static_cast<double>(3.1415926f)));
+
+	node.text().set(std::numeric_limits<double>::max(), 20);
+	CHECK(fp_equal(node.text().as_double(), std::numeric_limits<double>::max()));
+}
+
 const double fp_roundtrip_base[] =
 {
 	0.31830988618379067154,
