@@ -1,32 +1,41 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.4)
+project(pugixml VERSION 1.10 LANGUAGES CXX)
 
-project(pugixml VERSION 1.10)
+include(CMakePackageConfigHelpers)
+include(CMakeDependentOption)
+include(GNUInstallDirs)
+include(CTest)
+
+
+cmake_dependent_option(USE_VERSIONED_LIBDIR
+  "Use a private subdirectory to install the headers and libraries" OFF
+  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
+
+cmake_dependent_option(USE_POSTFIX
+  "Use separate postfix for each configuration to make sure you can install multiple build outputs" OFF
+  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
+
+cmake_dependent_option(STATIC_CRT
+  "Use static MSVC RT libraries" OFF
+  "MSVC" OFF)
+
+# This is used to backport a CMake 3.15 feature
+if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY
+    MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<BOOL:${STATIC_CRT}>>:DLL>)
+endif()
+
+if (NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 
 option(BUILD_SHARED_AND_STATIC_LIBS "Build both shared and static libraries" OFF)
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 option(BUILD_TESTS "Build tests" OFF)
-option(USE_VERSIONED_LIBDIR "Use a private subdirectory to install the headers and libs" OFF)
-option(USE_POSTFIX "Use separate postfix for each configuration to make sure you can install multiple build outputs" OFF)
 
 set(BUILD_DEFINES "" CACHE STRING "Build defines")
 
-if(MSVC)
-	option(STATIC_CRT "Use static CRT libraries" OFF)
-
-	# Rewrite command line flags to use /MT if necessary
-	if(STATIC_CRT)
-		foreach(flag_var
-				CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-				CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-			if(${flag_var} MATCHES "/MD")
-				string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-			endif(${flag_var} MATCHES "/MD")
-		endforeach(flag_var)
-	endif()
-endif()
-
 # Pre-defines standard install locations on *nix systems.
-include(GNUInstallDirs)
 mark_as_advanced(CLEAR CMAKE_INSTALL_LIBDIR CMAKE_INSTALL_INCLUDEDIR)
 
 set(HEADERS src/pugixml.hpp src/pugiconfig.hpp)
