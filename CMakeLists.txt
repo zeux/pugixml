@@ -29,7 +29,7 @@ option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 
 set(BUILD_DEFINES CACHE STRING "Build defines")
 
-# This is used to backport a CMake 3.15 feature
+# This is used to backport a CMake 3.15 feature, but is also forwards compatible
 if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
   set(CMAKE_MSVC_RUNTIME_LIBRARY
     MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<BOOL:${STATIC_CRT}>>:DLL>)
@@ -49,18 +49,20 @@ if (USE_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX _d)
 endif()
 
-# Generator expressions to make backporting more readable
-set(should-backport-msvc-rt $<VERSION_LESS:${CMAKE_VERSION},3.15>)
-set(msvc-rt $<TARGET_PROPERTY:MSVC_RUNTIME_LIBRARY>)
-set(msvc-rt-mtd-shared $<STREQUAL:${msvc-rt},MultiThreadedDebugDLL>)
-set(msvc-rt-mtd-static $<STREQUAL:${msvc-rt},MultiThreadedDebug>)
-set(msvc-rt-mt-shared $<STREQUAL:${msvc-rt},MultiThreadedDLL>)
-set(msvc-rt-mt-static $<STREQUAL:${msvc-rt},MultiThreaded>)
+if (CMAKE_VERSION VERSION_LESS 3.15)
+  set(msvc-rt $<TARGET_PROPERTY:MSVC_RUNTIME_LIBRARY>)
 
-set(msvc-rt-mtd-shared $<AND:${should-backport-msvc-rt},${msvc-rt-mtd-shared}>)
-set(msvc-rt-mtd-static $<AND:${should-backport-msvc-rt},${msvc-rt-mtd-static}>)
-set(msvc-rt-mt-shared $<AND:${should-backport-msvc-rt},${msvc-rt-mt-shared}>)
-set(msvc-rt-mt-static $<AND:${should-backport-msvc-rt},${msvc-rt-mt-static}>)
+  set(msvc-rt-mtd-shared $<STREQUAL:${msvc-rt},MultiThreadedDebugDLL>)
+  set(msvc-rt-mtd-static $<STREQUAL:${msvc-rt},MultiThreadedDebug>)
+  set(msvc-rt-mt-shared $<STREQUAL:${msvc-rt},MultiThreadedDLL>)
+  set(msvc-rt-mt-static $<STREQUAL:${msvc-rt},MultiThreaded>)
+  unset(msvc-rt)
+
+  set(msvc-rt-mtd-shared $<${msvc-rt-mtd-shared}:-MDd>)
+  set(msvc-rt-mtd-static $<${msvc-rt-mtd-static}:-MTd>)
+  set(msvc-rt-mt-shared $<${msvc-rt-mt-shared}:-MD>)
+  set(msvc-rt-mt-static $<${msvc-rt-mt-static}:-MT>)
+endif()
 
 set(build-shared $<BOOL:${BUILD_SHARED_LIBS}>)
 set(build-both $<BOOL:${BUILD_SHARED_AND_STATIC_LIBS}>)
@@ -133,16 +135,16 @@ target_compile_definitions(pugixml
 
 target_compile_options(pugixml-shared
   PRIVATE
-    $<${msvc-rt-mtd-shared}:-MDd>
-    $<${msvc-rt-mtd-static}:-MTd>
-    $<${msvc-rt-mt-shared}:-MD>
-    $<${msvc-rt-mt-static}:-MT>)
+    ${msvc-rt-mtd-shared}
+    ${msvc-rt-mtd-static}
+    ${msvc-rt-mt-shared}
+    ${msvc-rt-mt-static})
 target_compile_options(pugixml
   PRIVATE
-    $<${msvc-rt-mtd-shared}:-MDd>
-    $<${msvc-rt-mtd-static}:-MTd>
-    $<${msvc-rt-mt-shared}:-MD>
-    $<${msvc-rt-mt-static}:-MT>)
+    ${msvc-rt-mtd-shared}
+    ${msvc-rt-mtd-static}
+    ${msvc-rt-mt-shared}
+    ${msvc-rt-mt-static})
 
 configure_package_config_file(
   "${PROJECT_SOURCE_DIR}/scripts/pugixml-config.cmake.in"
