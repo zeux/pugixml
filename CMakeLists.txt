@@ -145,7 +145,7 @@ target_compile_options(pugixml
     $<${msvc-rt-mt-static}:-MT>)
 
 configure_package_config_file(
-  "${PROJECT_SOURCE_DIR}/pugixml-config.cmake.in"
+  "${PROJECT_SOURCE_DIR}/scripts/pugixml-config.cmake.in"
   "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}
   NO_CHECK_REQUIRED_COMPONENTS_MACRO
@@ -194,7 +194,8 @@ if (BUILD_TESTS)
   file(GLOB fuzz-sources ${fuzz-pattern})
   list(REMOVE_ITEM test-sources ${fuzz-sources})
 
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+  add_custom_target(check
+    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure)
 
   add_executable(pugixml-check ${test-sources})
   add_test(NAME pugixml::test
