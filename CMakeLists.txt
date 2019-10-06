@@ -173,10 +173,10 @@ install(EXPORT pugixml-targets
 install(FILES
   "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
   "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/pugixml)
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
 
 install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/pkgconfig)
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 install(
   FILES
