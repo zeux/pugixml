@@ -208,19 +208,3 @@ if (BUILD_TESTS)
     PRIVATE
       $<IF:${build-both},pugixml::static,pugixml::pugixml>)
 endif()
-
-#[[
-
-if(BUILD_TESTS)
-	file(GLOB TEST_SOURCES tests/*.cpp)
-	file(GLOB FUZZ_SOURCES tests/fuzz_*.cpp)
-	list(REMOVE_ITEM TEST_SOURCES ${FUZZ_SOURCES})
-
-	add_executable(check ${TEST_SOURCES})
-	if(BUILD_SHARED_AND_STATIC_LIBS)
-		target_link_libraries(check pugixml-static)
-	else()
-		target_link_libraries(check pugixml)
-	endif()
-	add_custom_command(TARGET check POST_BUILD COMMAND check WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-endif()]]
