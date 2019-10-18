@@ -149,7 +149,7 @@ target_compile_options(pugixml
 configure_package_config_file(
   "${PROJECT_SOURCE_DIR}/scripts/pugixml-config.cmake.in"
   "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
-  INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}
   NO_CHECK_REQUIRED_COMPONENTS_MACRO
   NO_SET_AND_CHECK_MACRO)
 
@@ -168,7 +168,7 @@ install(TARGETS ${install-targets}
 
 install(EXPORT pugixml-targets
   NAMESPACE pugixml::
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/cmake/pugixml)
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml)
 
 install(FILES
   "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
