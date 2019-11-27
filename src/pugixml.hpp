@@ -406,7 +406,7 @@ namespace pugi
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
        
-        template<typename _T> bool set_value(_T rhs);
+        template<typename _T> bool set_value(_T rhs) { return set_value<const char_t*>(rhs); }
 
         bool set_value(float rhs, int precision);
         bool set_value(double rhs, int precision);
@@ -756,7 +756,7 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set text (returns false if object is empty or there is not enough memory)
-        template<typename _T> bool set(_T rhs);
+        template<typename _T> bool set(_T rhs) { return set<const char_t*>(rhs); }
 
         bool set(float rhs, int precision);
         bool set(double rhs, int precision);
