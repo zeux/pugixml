@@ -5289,7 +5289,6 @@ namespace pugi
 
 		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, precision);
 	}
-
     
     template<> PUGI__FN bool xml_attribute::set_value<float>(float rhs)
 	{

@@ -762,8 +762,7 @@ namespace pugi
         bool set(double rhs, int precision);
 
 		// Set text (equivalent to set without error checking)
-        template<typename _T>
-		xml_text& operator=(_T rhs) { set(rhs); return *this; }
+        template<typename _T> xml_text& operator=(_T rhs) { set(rhs); return *this; }
 
 		// Get the data node (node_pcdata or node_cdata) for this object
 		xml_node data() const;
