@@ -405,38 +405,14 @@ namespace pugi
 
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
-		bool set_value(const char_t* rhs);
+       
+        template<typename _T> bool set_value(_T rhs);
 
-		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
-		bool set_value(int rhs);
-		bool set_value(unsigned int rhs);
-		bool set_value(long rhs);
-		bool set_value(unsigned long rhs);
-		bool set_value(double rhs);
-		bool set_value(double rhs, int precision);
-		bool set_value(float rhs);
-		bool set_value(float rhs, int precision);
-		bool set_value(bool rhs);
-
-	#ifdef PUGIXML_HAS_LONG_LONG
-		bool set_value(long long rhs);
-		bool set_value(unsigned long long rhs);
-	#endif
+        bool set_value(float rhs, int precision);
+        bool set_value(double rhs, int precision);
 
 		// Set attribute value (equivalent to set_value without error checking)
-		xml_attribute& operator=(const char_t* rhs);
-		xml_attribute& operator=(int rhs);
-		xml_attribute& operator=(unsigned int rhs);
-		xml_attribute& operator=(long rhs);
-		xml_attribute& operator=(unsigned long rhs);
-		xml_attribute& operator=(double rhs);
-		xml_attribute& operator=(float rhs);
-		xml_attribute& operator=(bool rhs);
-
-	#ifdef PUGIXML_HAS_LONG_LONG
-		xml_attribute& operator=(long long rhs);
-		xml_attribute& operator=(unsigned long long rhs);
-	#endif
+        template<typename _T> xml_attribute& operator=(_T rhs) { set_value<_T>(rhs); return *this; }
 
 		// Get next/previous attribute in the attribute list of the parent node
 		xml_attribute next_attribute() const;
@@ -453,6 +429,22 @@ namespace pugi
 	// Borland C++ workaround
 	bool PUGIXML_FUNCTION operator&&(const xml_attribute& lhs, bool rhs);
 	bool PUGIXML_FUNCTION operator||(const xml_attribute& lhs, bool rhs);
+#endif
+
+    template<> bool xml_attribute::set_value<const char_t*>(const char_t* rhs);
+
+    // Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
+    template<> bool xml_attribute::set_value<int>(int rhs);
+    template<> bool xml_attribute::set_value<unsigned int>(unsigned int rhs);
+    template<> bool xml_attribute::set_value<long>(long rhs);
+    template<> bool xml_attribute::set_value<unsigned long>(unsigned long rhs);
+    template<> bool xml_attribute::set_value<double>(double rhs);
+    template<> bool xml_attribute::set_value<float>(float rhs);
+    template<> bool xml_attribute::set_value<bool>(bool rhs);
+
+#ifdef PUGIXML_HAS_LONG_LONG
+    template<> bool xml_attribute::set_value<long long>(long long rhs);
+    template<> bool xml_attribute::set_value<unsigned long long>(unsigned long long rhs);
 #endif
 
 	// A light-weight handle for manipulating nodes in DOM tree
@@ -764,42 +756,35 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set text (returns false if object is empty or there is not enough memory)
-		bool set(const char_t* rhs);
+        template<typename _T> bool set(_T rhs);
 
-		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
-		bool set(int rhs);
-		bool set(unsigned int rhs);
-		bool set(long rhs);
-		bool set(unsigned long rhs);
-		bool set(double rhs);
-		bool set(double rhs, int precision);
-		bool set(float rhs);
-		bool set(float rhs, int precision);
-		bool set(bool rhs);
-
-	#ifdef PUGIXML_HAS_LONG_LONG
-		bool set(long long rhs);
-		bool set(unsigned long long rhs);
-	#endif
+        bool set(float rhs, int precision);
+        bool set(double rhs, int precision);
 
 		// Set text (equivalent to set without error checking)
-		xml_text& operator=(const char_t* rhs);
-		xml_text& operator=(int rhs);
-		xml_text& operator=(unsigned int rhs);
-		xml_text& operator=(long rhs);
-		xml_text& operator=(unsigned long rhs);
-		xml_text& operator=(double rhs);
-		xml_text& operator=(float rhs);
-		xml_text& operator=(bool rhs);
-
-	#ifdef PUGIXML_HAS_LONG_LONG
-		xml_text& operator=(long long rhs);
-		xml_text& operator=(unsigned long long rhs);
-	#endif
+        template<typename _T>
+		xml_text& operator=(_T rhs) { set(rhs); return *this; }
 
 		// Get the data node (node_pcdata or node_cdata) for this object
 		xml_node data() const;
 	};
+    
+    // Set text (returns false if object is empty or there is not enough memory)
+    template<> bool xml_text::set<const char_t*>(const char_t* rhs);
+
+    // Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
+    template<> bool xml_text::set<int>(int rhs);
+    template<> bool xml_text::set<unsigned int>(unsigned int rhs);
+    template<> bool xml_text::set<long>(long rhs);
+    template<> bool xml_text::set<unsigned long>(unsigned long rhs);
+    template<> bool xml_text::set<double>(double rhs);
+    template<> bool xml_text::set<float>(float rhs);
+    template<> bool xml_text::set<bool>(bool rhs);
+
+#ifdef PUGIXML_HAS_LONG_LONG
+    template<> bool xml_text::set<long long>(long long rhs);
+    template<> bool xml_text::set<unsigned long long>(unsigned long long rhs);
+#endif
 
 #ifdef __BORLANDC__
 	// Borland C++ workaround
