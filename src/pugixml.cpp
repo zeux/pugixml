@@ -6233,16 +6233,9 @@ namespace pugi
 
 	PUGI__FN xml_node xml_node::first_element_by_path(const char_t* path_, char_t delimiter) const
 	{
-		xml_node found = *this; // Current search context.
+		xml_node context = path_[0] == delimiter ? root() : *this;
 
-		if (!_root || !path_[0]) return found;
-
-		if (path_[0] == delimiter)
-		{
-			// Absolute path; e.g. '/foo/bar'
-			found = found.root();
-			++path_;
-		}
+		if (!context._root) return xml_node();
 
 		const char_t* path_segment = path_;
 
@@ -6252,29 +6245,27 @@ namespace pugi
 
 		while (*path_segment_end && *path_segment_end != delimiter) ++path_segment_end;
 
-		if (path_segment == path_segment_end) return found;
+		if (path_segment == path_segment_end) return context;
 
 		const char_t* next_segment = path_segment_end;
 
 		while (*next_segment == delimiter) ++next_segment;
 
 		if (*path_segment == '.' && path_segment + 1 == path_segment_end)
-			return found.first_element_by_path(next_segment, delimiter);
+			return context.first_element_by_path(next_segment, delimiter);
 		else if (*path_segment == '.' && *(path_segment+1) == '.' && path_segment + 2 == path_segment_end)
-			return found.parent().first_element_by_path(next_segment, delimiter);
+			return context.parent().first_element_by_path(next_segment, delimiter);
 		else
 		{
-            if (found._root) {
-                for (xml_node_struct* j = found._root->first_child; j; j = j->next_sibling)
-                {
-                    if (j->name && impl::strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
-                    {
-                        xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
+			for (xml_node_struct* j = context._root->first_child; j; j = j->next_sibling)
+			{
+				if (j->name && impl::strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
+				{
+					xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
 
-                        if (subsearch) return subsearch;
-                    }
-                }
-            }
+					if (subsearch) return subsearch;
+				}
+			}
 
 			return xml_node();
 		}
