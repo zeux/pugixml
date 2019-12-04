@@ -6264,15 +6264,17 @@ namespace pugi
 			return found.parent().first_element_by_path(next_segment, delimiter);
 		else
 		{
-			for (xml_node_struct* j = found._root->first_child; j; j = j->next_sibling)
-			{
-				if (j->name && impl::strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
-				{
-					xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
+            if (found._root) {
+                for (xml_node_struct* j = found._root->first_child; j; j = j->next_sibling)
+                {
+                    if (j->name && impl::strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
+                    {
+                        xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
 
-					if (subsearch) return subsearch;
-				}
-			}
+                        if (subsearch) return subsearch;
+                    }
+                }
+            }
 
 			return xml_node();
 		}
