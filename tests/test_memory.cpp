@@ -30,6 +30,47 @@ namespace
 		page_deallocs += is_page(memory_size(ptr));
 		memory_deallocate(ptr);
 	}
+
+	void* null_allocate(size_t)
+	{
+#ifndef PUGIXML_NO_EXCEPTIONS
+		throw std::runtime_error("null_allocate was invoked");
+#else
+		return 0;
+#endif
+	}
+
+	void null_deallocate(void*)
+	{
+#ifndef PUGIXML_NO_EXCEPTIONS
+		throw std::runtime_error("null_deallocate was invoked");
+#endif
+	}
+
+	class test_memory_pool : public pugi::xml_memory_pool
+	{
+	public:
+
+		test_memory_pool(pugi::allocation_function alloc, pugi::deallocation_function dealloc) PUGIXML_NOEXCEPT
+			: _allocate(alloc)
+			, _deallocate(dealloc)
+		{
+		}
+
+		void* allocate(size_t size) PUGIXML_OVERRIDE
+		{
+			return _allocate(size);
+		}
+
+		void deallocate(void* ptr) PUGIXML_OVERRIDE
+		{
+			_deallocate(ptr);
+		}
+
+	private:
+		pugi::allocation_function _allocate;
+		pugi::deallocation_function _deallocate;
+	};
 }
 
 TEST(memory_custom_memory_management)
@@ -46,6 +87,53 @@ TEST(memory_custom_memory_management)
 	{
 		// parse document
 		xml_document doc;
+
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		CHECK(doc.load_string(STR("<node />")));
+
+		CHECK(page_allocs == 1 && page_deallocs == 0);
+
+		// modify document (no new page)
+		CHECK(doc.first_child().set_name(STR("foobars")));
+		CHECK(page_allocs == 1 && page_deallocs == 0);
+
+		// modify document (new page)
+		std::basic_string<char_t> s(65536, 'x');
+
+		CHECK(doc.first_child().set_name(s.c_str()));
+		CHECK(page_allocs == 2 && page_deallocs == 0);
+
+		// modify document (new page, old one should die)
+		s += s;
+
+		CHECK(doc.first_child().set_name(s.c_str()));
+		CHECK(page_allocs == 3 && page_deallocs == 1);
+	}
+
+	CHECK(page_allocs == 3 && page_deallocs == 3);
+
+	// restore old functions
+	set_memory_management_functions(old_allocate, old_deallocate);
+}
+
+TEST(memory_pool_custom_memory_management)
+{
+	page_allocs = page_deallocs = 0;
+
+	// remember old functions
+	allocation_function old_allocate = get_memory_allocation_function();
+	deallocation_function old_deallocate = get_memory_deallocation_function();
+
+	// replace functions with non-allocating ones
+	set_memory_management_functions(null_allocate, null_deallocate);
+
+	{
+		// create custom memory pool
+		test_memory_pool pool(allocate, deallocate);
+
+		// parse document
+		xml_document doc(pool);
 
 		CHECK(page_allocs == 0 && page_deallocs == 0);
 
@@ -140,6 +228,73 @@ TEST(memory_large_allocations)
 	set_memory_management_functions(old_allocate, old_deallocate);
 }
 
+TEST(memory_pool_large_allocations)
+{
+	page_allocs = page_deallocs = 0;
+
+	// remember old functions
+	allocation_function old_allocate = get_memory_allocation_function();
+	deallocation_function old_deallocate = get_memory_deallocation_function();
+
+	// replace functions with non-allocating ones
+	set_memory_management_functions(null_allocate, null_deallocate);
+
+	{
+		// create custom memory pool
+		test_memory_pool pool(allocate, deallocate);
+
+		xml_document doc(pool);
+
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		// initial fill
+		for (size_t i = 0; i < 128; ++i)
+		{
+			std::basic_string<char_t> s(i * 128, 'x');
+
+			CHECK(doc.append_child(node_pcdata).set_value(s.c_str()));
+		}
+
+		CHECK(page_allocs > 0 && page_deallocs == 0);
+
+		// grow-prune loop
+		while (doc.first_child())
+		{
+			xml_node node;
+
+			// grow
+			for (node = doc.first_child(); node; node = node.next_sibling())
+			{
+				std::basic_string<char_t> s = node.value();
+
+				CHECK(node.set_value((s + s).c_str()));
+			}
+
+			// prune
+			for (node = doc.first_child(); node; )
+			{
+				xml_node next = node.next_sibling().next_sibling();
+
+				node.parent().remove_child(node);
+
+				node = next;
+			}
+		}
+
+		CHECK(page_allocs == page_deallocs + 1); // only one live page left (it waits for new allocations)
+
+		char buffer;
+		CHECK(doc.load_buffer_inplace(&buffer, 0, parse_fragment, get_native_encoding()));
+
+		CHECK(page_allocs == page_deallocs); // no live pages left
+	}
+
+	CHECK(page_allocs == page_deallocs); // everything is freed
+
+	// restore old functions
+	set_memory_management_functions(old_allocate, old_deallocate);
+}
+
 TEST(memory_page_management)
 {
 	page_allocs = page_deallocs = 0;
@@ -153,6 +308,66 @@ TEST(memory_page_management)
 
 	{
 		xml_document doc;
+
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		// initial fill
+		std::vector<xml_node> nodes;
+
+		for (size_t i = 0; i < 4000; ++i)
+		{
+			xml_node node = doc.append_child(STR("n"));
+			CHECK(node);
+
+			nodes.push_back(node);
+		}
+
+		CHECK(page_allocs > 0 && page_deallocs == 0);
+
+		// grow-prune loop
+		size_t offset = 0;
+		size_t prime = 15485863;
+
+		while (nodes.size() > 0)
+		{
+			offset = (offset + prime) % nodes.size();
+
+			doc.remove_child(nodes[offset]);
+
+			nodes[offset] = nodes.back();
+			nodes.pop_back();
+		}
+
+		CHECK(page_allocs == page_deallocs + 1); // only one live page left (it waits for new allocations)
+
+		char buffer;
+		CHECK(doc.load_buffer_inplace(&buffer, 0, parse_fragment, get_native_encoding()));
+
+		CHECK(page_allocs == page_deallocs); // no live pages left
+	}
+
+	CHECK(page_allocs == page_deallocs); // everything is freed
+
+	// restore old functions
+	set_memory_management_functions(old_allocate, old_deallocate);
+}
+
+TEST(memory_resource_page_management)
+{
+	page_allocs = page_deallocs = 0;
+
+	// remember old functions
+	allocation_function old_allocate = get_memory_allocation_function();
+	deallocation_function old_deallocate = get_memory_deallocation_function();
+
+	// replace functions with non-allocating ones
+	set_memory_management_functions(null_allocate, null_deallocate);
+
+	{
+		// create custom memory pool
+		test_memory_pool pool(allocate, deallocate);
+
+		xml_document doc(pool);
 
 		CHECK(page_allocs == 0 && page_deallocs == 0);
 
@@ -300,4 +515,56 @@ TEST(memory_string_allocate_decreasing_inplace)
 	std::string result = save_narrow(doc, format_no_declaration | format_raw, encoding_utf8);
 
 	CHECK(result == "x");
+}
+
+TEST(monotonic_memory_pool_management)
+{
+	page_allocs = page_deallocs = 0;
+
+	// remember old functions
+	allocation_function old_allocate = get_memory_allocation_function();
+	deallocation_function old_deallocate = get_memory_deallocation_function();
+
+	// replace functions with non-allocating ones
+	set_memory_management_functions(null_allocate, null_deallocate);
+
+	const size_t buffer_size = 512 * 1024;
+	void* buffer = old_allocate(buffer_size);
+
+	{
+		// create custom memory pool
+		xml_monotonic_memory_pool pool(buffer, buffer_size);
+
+		// parse document
+		xml_document doc(pool);
+
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		CHECK(doc.load_string(STR("<node />")));
+
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		// modify document (no new page)
+		CHECK(doc.first_child().set_name(STR("foobars")));
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		// modify document (new page)
+		std::basic_string<char_t> s(65536, 'x');
+
+		CHECK(doc.first_child().set_name(s.c_str()));
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+
+		// modify document (new page, old one should die)
+		s += s;
+
+		CHECK(doc.first_child().set_name(s.c_str()));
+		CHECK(page_allocs == 0 && page_deallocs == 0);
+	}
+
+	CHECK(page_allocs == 0 && page_deallocs == 0);
+
+	old_deallocate(buffer);
+
+	// restore old functions
+	set_memory_management_functions(old_allocate, old_deallocate);
 }

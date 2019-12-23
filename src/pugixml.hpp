@@ -307,6 +307,31 @@ namespace pugi
 		It _begin, _end;
 	};
 
+	// Interface for pool allocators
+	class PUGIXML_CLASS xml_memory_pool
+	{
+	public:
+		virtual ~xml_memory_pool() {}
+
+		virtual void* allocate(size_t size) = 0;
+		virtual void deallocate(void* ptr) = 0;
+	};
+
+	// Non-owning allocate-only fixed size memory pool, deallocation is no-op
+	// Requires buffer of at least PUGIXML_MEMORY_PAGE_SIZE bytes for xml_document construction
+	class PUGIXML_CLASS xml_monotonic_memory_pool : public xml_memory_pool
+	{
+	public:
+		xml_monotonic_memory_pool(void* buffer, size_t size) PUGIXML_NOEXCEPT : _buffer(buffer), _capacity(size) {}
+
+		virtual void* allocate(size_t size) PUGIXML_OVERRIDE;
+		virtual void deallocate(void*) PUGIXML_OVERRIDE {}
+
+	private:
+		void* _buffer;
+		size_t _capacity;
+	};
+
 	// Writer interface for node printing (see xml_node::print)
 	class PUGIXML_CLASS xml_writer
 	{
@@ -1021,13 +1046,16 @@ namespace pugi
 		xml_document(const xml_document&);
 		xml_document& operator=(const xml_document&);
 
-		void _create();
-		void _destroy();
+		void _create(xml_memory_pool* pool);
+		xml_memory_pool* _destroy();
 		void _move(xml_document& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
 
 	public:
 		// Default constructor, makes empty document
 		xml_document();
+
+		// Create empty document using supplied memory pool
+		explicit xml_document(xml_memory_pool& pool);
 
 		// Destructor, invalidates all node/attribute handles to this document
 		~xml_document();
