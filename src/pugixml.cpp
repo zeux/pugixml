@@ -10414,6 +10414,8 @@ PUGI__NS_BEGIN
 
 				if (_rettype == xpath_type_boolean)
 					return _data.variable->get_boolean();
+
+				// variable needs to be converted to the correct type, this is handled by the default statement below
 			}
 
 			// fallthrough
@@ -10549,6 +10551,8 @@ PUGI__NS_BEGIN
 
 				if (_rettype == xpath_type_number)
 					return _data.variable->get_number();
+
+				// variable needs to be converted to the correct type, this is handled by the default statement below
 			}
 
 			// fallthrough
@@ -10833,6 +10837,8 @@ PUGI__NS_BEGIN
 
 				if (_rettype == xpath_type_string)
 					return xpath_string::from_const(_data.variable->get_string());
+
+				// variable needs to be converted to the correct type, this is handled by the default statement below
 			}
 
 			// fallthrough
@@ -10982,6 +10988,8 @@ PUGI__NS_BEGIN
 
 					return ns;
 				}
+
+				// variable needs to be converted to the correct type, this is handled by the default statement below
 			}
 
 			// fallthrough
