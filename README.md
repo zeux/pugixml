@@ -17,6 +17,19 @@ Documentation for the current release of pugixml is available on-line as two sep
 
 You’re advised to start with the quick-start guide; however, many important library features are either not described in it at all or only mentioned briefly; if you require more information you should read the complete manual.
 
+## Building pugixml with VCPKG
+
+You can build and install pugixml using [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+
+    git clone https://github.com/Microsoft/vcpkg.git
+    cd vcpkg
+    ./bootstrap-vcpkg.sh
+    ./vcpkg integrate install
+    ./vcpkg install pugixml
+
+The pugixml port in vcpkg is kept up to date by Microsoft team members and community contributors.
+If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ## Example
 
 Here's an example of how code using pugixml looks; it opens an XML file, goes over all Tool nodes and prints tools that have a Timeout attribute greater than 0:
