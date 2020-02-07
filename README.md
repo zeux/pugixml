@@ -17,7 +17,7 @@ Documentation for the current release of pugixml is available on-line as two sep
 
 You’re advised to start with the quick-start guide; however, many important library features are either not described in it at all or only mentioned briefly; if you require more information you should read the complete manual.
 
-## Building pugixml with VCPKG
+## Building pugixml with vcpkg
 
 You can build and install pugixml using [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
 
