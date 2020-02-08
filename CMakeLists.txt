@@ -87,7 +87,8 @@ set_target_properties(pugixml-shared pugixml-static pugixml
     EXCLUDE_FROM_ALL ON
     POSITION_INDEPENDENT_CODE ON
     SOVERSION ${PROJECT_VERSION_MAJOR}
-    VERSION ${PROJECT_VERSION})
+    VERSION ${PROJECT_VERSION}
+    OUTPUT_NAME pugixml)
 
 # XXX: EXCLUDE_FROM_ALL cannot be set via a generator expression! :(
 if (BUILD_SHARED_AND_STATIC_LIBS)
