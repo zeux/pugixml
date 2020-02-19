@@ -10415,36 +10415,37 @@ PUGI__NS_BEGIN
 				if (_rettype == xpath_type_boolean)
 					return _data.variable->get_boolean();
 
-				// variable needs to be converted to the correct type, this is handled by the default statement below
+				// variable needs to be converted to the correct type, this is handled by the fallthrough block below
+				break;
 			}
 
-			// fallthrough
 			default:
-			{
-				switch (_rettype)
-				{
-				case xpath_type_number:
-					return convert_number_to_boolean(eval_number(c, stack));
-
-				case xpath_type_string:
-				{
-					xpath_allocator_capture cr(stack.result);
-
-					return !eval_string(c, stack).empty();
-				}
-
-				case xpath_type_node_set:
-				{
-					xpath_allocator_capture cr(stack.result);
-
-					return !eval_node_set(c, stack, nodeset_eval_any).empty();
-				}
-
-				default:
-					assert(false && "Wrong expression for return type boolean"); // unreachable
-					return false;
-				}
+				;
 			}
+
+			// none of the ast types that return the value directly matched, we need to perform type conversion
+			switch (_rettype)
+			{
+			case xpath_type_number:
+				return convert_number_to_boolean(eval_number(c, stack));
+
+			case xpath_type_string:
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return !eval_string(c, stack).empty();
+			}
+
+			case xpath_type_node_set:
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return !eval_node_set(c, stack, nodeset_eval_any).empty();
+			}
+
+			default:
+				assert(false && "Wrong expression for return type boolean"); // unreachable
+				return false;
 			}
 		}
 
@@ -10552,37 +10553,37 @@ PUGI__NS_BEGIN
 				if (_rettype == xpath_type_number)
 					return _data.variable->get_number();
 
-				// variable needs to be converted to the correct type, this is handled by the default statement below
+				// variable needs to be converted to the correct type, this is handled by the fallthrough block below
+				break;
 			}
 
-			// fallthrough
 			default:
-			{
-				switch (_rettype)
-				{
-				case xpath_type_boolean:
-					return eval_boolean(c, stack) ? 1 : 0;
-
-				case xpath_type_string:
-				{
-					xpath_allocator_capture cr(stack.result);
-
-					return convert_string_to_number(eval_string(c, stack).c_str());
-				}
-
-				case xpath_type_node_set:
-				{
-					xpath_allocator_capture cr(stack.result);
-
-					return convert_string_to_number(eval_string(c, stack).c_str());
-				}
-
-				default:
-					assert(false && "Wrong expression for return type number"); // unreachable
-					return 0;
-				}
-
+				;
 			}
+
+			// none of the ast types that return the value directly matched, we need to perform type conversion
+			switch (_rettype)
+			{
+			case xpath_type_boolean:
+				return eval_boolean(c, stack) ? 1 : 0;
+
+			case xpath_type_string:
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return convert_string_to_number(eval_string(c, stack).c_str());
+			}
+
+			case xpath_type_node_set:
+			{
+				xpath_allocator_capture cr(stack.result);
+
+				return convert_string_to_number(eval_string(c, stack).c_str());
+			}
+
+			default:
+				assert(false && "Wrong expression for return type number"); // unreachable
+				return 0;
 			}
 		}
 
@@ -10838,35 +10839,36 @@ PUGI__NS_BEGIN
 				if (_rettype == xpath_type_string)
 					return xpath_string::from_const(_data.variable->get_string());
 
-				// variable needs to be converted to the correct type, this is handled by the default statement below
+				// variable needs to be converted to the correct type, this is handled by the fallthrough block below
+				break;
 			}
 
-			// fallthrough
 			default:
-			{
-				switch (_rettype)
-				{
-				case xpath_type_boolean:
-					return xpath_string::from_const(eval_boolean(c, stack) ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
-
-				case xpath_type_number:
-					return convert_number_to_string(eval_number(c, stack), stack.result);
-
-				case xpath_type_node_set:
-				{
-					xpath_allocator_capture cr(stack.temp);
-
-					xpath_stack swapped_stack = {stack.temp, stack.result};
-
-					xpath_node_set_raw ns = eval_node_set(c, swapped_stack, nodeset_eval_first);
-					return ns.empty() ? xpath_string() : string_value(ns.first(), stack.result);
-				}
-
-				default:
-					assert(false && "Wrong expression for return type string"); // unreachable
-					return xpath_string();
-				}
+				;
 			}
+
+			// none of the ast types that return the value directly matched, we need to perform type conversion
+			switch (_rettype)
+			{
+			case xpath_type_boolean:
+				return xpath_string::from_const(eval_boolean(c, stack) ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"));
+
+			case xpath_type_number:
+				return convert_number_to_string(eval_number(c, stack), stack.result);
+
+			case xpath_type_node_set:
+			{
+				xpath_allocator_capture cr(stack.temp);
+
+				xpath_stack swapped_stack = {stack.temp, stack.result};
+
+				xpath_node_set_raw ns = eval_node_set(c, swapped_stack, nodeset_eval_first);
+				return ns.empty() ? xpath_string() : string_value(ns.first(), stack.result);
+			}
+
+			default:
+				assert(false && "Wrong expression for return type string"); // unreachable
+				return xpath_string();
 			}
 		}
 
@@ -10989,14 +10991,17 @@ PUGI__NS_BEGIN
 					return ns;
 				}
 
-				// variable needs to be converted to the correct type, this is handled by the default statement below
+				// variable needs to be converted to the correct type, this is handled by the fallthrough block below
+				break;
 			}
 
-			// fallthrough
 			default:
-				assert(false && "Wrong expression for return type node set"); // unreachable
-				return xpath_node_set_raw();
+				;
 			}
+
+			// none of the ast types that return the value directly matched, but conversions to node set are invalid
+			assert(false && "Wrong expression for return type node set"); // unreachable
+			return xpath_node_set_raw();
 		}
 
 		void optimize(xpath_allocator* alloc)
