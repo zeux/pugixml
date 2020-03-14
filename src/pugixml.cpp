@@ -5496,6 +5496,11 @@ namespace pugi
 		return (_root >= r._root);
 	}
 
+	PUGI__FN xml_node xml_node::operator[](const char_t* name_)
+	{
+		return append_child(name_);
+	}
+
 	PUGI__FN bool xml_node::empty() const
 	{
 		return !_root;

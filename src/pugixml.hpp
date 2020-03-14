@@ -488,6 +488,8 @@ namespace pugi
 		bool operator<=(const xml_node& r) const;
 		bool operator>=(const xml_node& r) const;
 
+		xml_node operator[](const char_t* name_);
+
 		// Check if node is empty.
 		bool empty() const;
 
