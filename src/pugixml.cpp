@@ -5501,6 +5501,14 @@ namespace pugi
 		return append_child(name_);
 	}
 
+	PUGI__FN xml_node& xml_node::operator=(const char_t* rhs)
+	{
+		xml_node node = append_child(node_pcdata);
+
+		node.set_value(rhs);
+		return *this;
+	}
+
 	PUGI__FN bool xml_node::empty() const
 	{
 		return !_root;
