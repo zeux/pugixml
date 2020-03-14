@@ -5691,6 +5691,16 @@ namespace pugi
 		return impl::strcpy_insitu(_root->value, _root->header, impl::xml_memory_page_value_allocated_mask, rhs, impl::strlength(rhs));
 	}
 
+	PUGI__FN bool xml_node::set_value(const bool rhs)
+	{
+	#ifdef PUGIXML_WCHAR_MODE
+		const char_t* text = rhs ? L"true" : L"false";
+	#else
+		const char_t* text = rhs ? "true" : "false";
+	#endif
+		return set_value(text);
+	}
+
 	PUGI__FN xml_attribute xml_node::append_attribute(const char_t* name_)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
