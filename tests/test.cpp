@@ -58,6 +58,11 @@ bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const p
 
 	node.print(writer, indent, flags, get_native_encoding());
 
+	if (writer.as_string() != contents)
+	{
+		printf("found: %s\n", writer.as_string().c_str());
+	}
+
 	return writer.as_string() == contents;
 }
 

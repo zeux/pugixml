@@ -3903,53 +3903,114 @@ PUGI__NS_BEGIN
 		xml_encoding encoding;
 	};
 
+	template <typename U> PUGI__FN PUGI__UNSIGNED_OVERFLOW char_t* integer_to_string(char_t* begin, char_t* end, U value, bool negative)
+	{
+		char_t* result = end - 1;
+		U rest = negative ? 0 - value : value;
+
+		do
+		{
+			*result-- = static_cast<char_t>('0' + (rest % 10));
+			rest /= 10;
+		}
+		while (rest);
+
+		assert(result >= begin);
+		(void)begin;
+
+		*result = '-';
+
+		return result + !negative;
+	}
+
+	static void char_output_escaped(xml_buffered_writer& writer, const char_t c, chartypex_t type, unsigned int flags)
+	{
+		switch (c)
+		{
+			case '&':
+				writer.write('&', 'a', 'm', 'p', ';');
+				break;
+			case '<':
+				writer.write('&', 'l', 't', ';');
+				break;
+			case '>':
+				writer.write('&', 'g', 't', ';');
+				break;
+			case '"':
+				if (flags & format_attribute_single_quote)
+					writer.write('"');
+				else
+					writer.write('&', 'q', 'u', 'o', 't', ';');
+				break;
+			case '\'':
+				if (flags & format_attribute_single_quote)
+					writer.write('&', 'a', 'p', 'o', 's', ';');
+				else
+					writer.write('\'');
+				break;
+			default:
+			{
+				if (PUGI__IS_CHARTYPEX(c, type))
+				{
+					unsigned int ch = static_cast<unsigned int>(c);
+					assert(ch < 32);
+
+					// handle control codes
+					if (!(flags & format_skip_control_chars))
+						writer.write('&', '#', static_cast<char_t>((ch / 10) + '0'), static_cast<char_t>((ch % 10) + '0'), ';');
+				}
+				else
+					writer.write(c);
+			}
+		}
+	}
+
 	PUGI__FN void text_output_escaped(xml_buffered_writer& writer, const char_t* s, chartypex_t type, unsigned int flags)
 	{
 		while (*s)
 		{
-			const char_t* prev = s;
-
-			// While *s is a usual symbol
-			PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPEX(ss, type));
-
-			writer.write_buffer(prev, static_cast<size_t>(s - prev));
-
-			switch (*s)
+			if (flags & format_escape_nonascii)
 			{
-				case 0: break;
-				case '&':
-					writer.write('&', 'a', 'm', 'p', ';');
-					++s;
-					break;
-				case '<':
-					writer.write('&', 'l', 't', ';');
-					++s;
-					break;
-				case '>':
-					writer.write('&', 'g', 't', ';');
-					++s;
-					break;
-				case '"':
-					if (flags & format_attribute_single_quote)
-						writer.write('"');
-					else
-						writer.write('&', 'q', 'u', 'o', 't', ';');
-					++s;
-					break;
-				case '\'':
-					if (flags & format_attribute_single_quote)
-						writer.write('&', 'a', 'p', 'o', 's', ';');
-					else
-						writer.write('\'');
-					++s;
-					break;
-				default: // s is not a usual symbol
-				{
-					unsigned int ch = static_cast<unsigned int>(*s++);
-					assert(ch < 32);
+				int cplen = 1;
+				if (((*s) & 0xf8) == 0xf0) cplen = 4;
+				else if (((*s) & 0xf0) == 0xe0) cplen = 3;
+				else if (((*s) & 0xe0) == 0xc0) cplen = 2;
 
-					if (!(flags & format_skip_control_chars))
-						writer.write('&', '#', static_cast<char_t>((ch / 10) + '0'), static_cast<char_t>((ch % 10) + '0'), ';');
+				if (cplen == 1)
+				{
+					char_output_escaped(writer, *s, type, flags);
+					++s;
+				}
+				else
+				{
+					unsigned int value = static_cast<unsigned char>((*s) & (0xff >> (cplen + 1))) << ((cplen - 1) * 6);
+					++s;
+					for (int len = cplen -1; len && *s != 0; --len)
+					{
+						value |= (static_cast<unsigned char>(*s) - 0x80) << ((len - 1) * 6);
+						++s;
+					}
+					writer.write('&', '#');
+					char_t buf[8];
+					char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
+					char_t* begin = integer_to_string<unsigned int>(buf, end, value, false);
+					writer.write_buffer(begin, static_cast<size_t>(end - begin));
+					writer.write(';');
+				}
+			}
+			else
+			{
+				const char_t* prev = s;
+
+				// While *s is a usual symbol
+				PUGI__SCANWHILE_UNROLL(!PUGI__IS_CHARTYPEX(ss, type));
+
+				writer.write_buffer(prev, static_cast<size_t>(s - prev));
+
+				if (*s != 0)
+				{
+					char_output_escaped(writer, *s, type, flags);
+					++s;
 				}
 			}
 		}
@@ -4624,26 +4685,6 @@ PUGI__NS_BEGIN
 		return string_to_integer<unsigned long long>(value, 0, ULLONG_MAX);
 	}
 #endif
-
-	template <typename U> PUGI__FN PUGI__UNSIGNED_OVERFLOW char_t* integer_to_string(char_t* begin, char_t* end, U value, bool negative)
-	{
-		char_t* result = end - 1;
-		U rest = negative ? 0 - value : value;
-
-		do
-		{
-			*result-- = static_cast<char_t>('0' + (rest % 10));
-			rest /= 10;
-		}
-		while (rest);
-
-		assert(result >= begin);
-		(void)begin;
-
-		*result = '-';
-
-		return result + !negative;
-	}
 
 	// set value with conversion functions
 	template <typename String, typename Header>

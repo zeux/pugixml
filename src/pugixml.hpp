@@ -259,6 +259,9 @@ namespace pugi
 	// Use single quotes ' instead of double quotes " for enclosing attribute values. This flag is off by default.
 	const unsigned int format_attribute_single_quote = 0x200;
 
+	// Escape non-ascii attribute values and PCDATA contents. This flag is off by default.
+	const unsigned int format_escape_nonascii = 0x400;
+
 	// The default set of formatting flags.
 	// Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;

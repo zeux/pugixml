@@ -188,13 +188,28 @@ TEST(write_doctype_null)
 	CHECK_NODE(doc, STR("<!DOCTYPE>"));
 }
 
-TEST_XML(write_escape, "<node attr=''>text</node>")
+TEST_XML(write_escape_1, "<node attr=''>text</node>")
 {
 	doc.child(STR("node")).attribute(STR("attr")) = STR("<>'\"&\x04\r\n\t");
 	doc.child(STR("node")).first_child().set_value(STR("<>'\"&\x04\r\n\t"));
 
 	CHECK_NODE(doc, STR("<node attr=\"&lt;>'&quot;&amp;&#04;&#13;&#10;&#09;\">&lt;&gt;'\"&amp;&#04;\r\n\t</node>"));
+}
+
+TEST_XML(write_escape_2, "<node attr=''>text</node>")
+{
+	doc.child(STR("node")).attribute(STR("attr")) = STR("<>'\"&\x04\r\n\t");
+	doc.child(STR("node")).first_child().set_value(STR("<>'\"&\x04\r\n\t"));
+
 	CHECK_NODE_EX(doc, STR("<node attr='&lt;>&apos;\"&amp;&#04;&#13;&#10;&#09;'>&lt;&gt;'\"&amp;&#04;\r\n\t</node>"), STR(""), format_raw | format_attribute_single_quote);
+}
+
+TEST_XML(write_escape_3, "<node attr=''>text</node>")
+{
+	doc.child(STR("node")).attribute(STR("attr")) = STR("<>'\"&äöü");
+	doc.child(STR("node")).first_child().set_value(STR("<>'\"&äöü"));
+
+	CHECK_NODE_EX(doc, STR("<node attr=\"&lt;&gt;'&quot;&amp;&#228;&#246;&#252;\">&lt;&gt;'&quot;&amp;&#228;&#246;&#252;</node>"), STR(""), format_raw | format_escape_nonascii);
 }
 
 TEST_XML(write_escape_roundtrip, "<node attr=''>text</node>")
