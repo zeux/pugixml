@@ -174,6 +174,9 @@ install(EXPORT pugixml-targets
   NAMESPACE pugixml::
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
 
+export(EXPORT pugixml-targets
+  NAMESPACE pugixml::)
+
 install(FILES
   "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
   "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
