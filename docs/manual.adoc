@@ -270,7 +270,7 @@ The XML document is represented with a tree data structure. The root of the tree
 [[xml_node_type]]
 The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
 
-* Document node ([[node_document]]`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to <<xml_document,xml_document>> class; note that <<xml_document,xml_document>> is a sub-class of <<xml_node,xml_node>>, so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation.
+* Document node ([[node_document]]`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to <<xml_document,xml_document>> class; note that <<xml_document,xml_document>> is a sub-class of <<xml_node,xml_node>>, so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation. Document generally has one child element node (see [[xml_document::document_element]]`document_element()`), although documents parsed from XML fragments (see [[parse_fragment]]`parse_fragment`) can have more than one.
 
 * Element/tag node ([[node_element]]`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element nodes is as follows:
 +
@@ -749,7 +749,7 @@ These flags control the resulting tree contents:
 * [[parse_embed_pcdata]]`parse_embed_pcdata` determines if PCDATA contents is to be saved as element values. Normally element nodes have names but not values; this flag forces the parser to store the contents as a value if PCDATA is the first child of the element node (otherwise PCDATA node is created as usual). This can significantly reduce the memory required for documents with many PCDATA nodes. To retrieve the data you can use `xml_node::value()` on the element nodes or any of the higher-level functions like `child_value` or `text`. This flag is *off* by default.
 Since this flag significantly changes the DOM structure it is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments. This flag is *off* by default.
 
-* [[parse_fragment]]`parse_fragment` determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid. This flag is *off* by default.
+* [[parse_fragment]]`parse_fragment` determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid and permits multiple top-level element nodes. This flag is *off* by default.
 
 CAUTION: Using in-place parsing (<<xml_document::load_buffer_inplace,load_buffer_inplace>>) with `parse_fragment` flag may result in the loss of the last character of the buffer if it is a part of PCDATA. Since PCDATA values are null-terminated strings, the only way to resolve this is to provide a null-terminated buffer as an input to `load_buffer_inplace` - i.e. `doc.load_buffer_inplace("test\0", 5, pugi::parse_default | pugi::parse_fragment)`.
 
@@ -818,6 +818,7 @@ As for rejecting invalid XML documents, there are a number of incompatibilities 
 * XML data is not required to begin with document declaration; additionally, document declaration can appear after comments and other nodes.
 * Invalid document type declarations are silently ignored in some cases.
 * Unicode validation is not performed so invalid UTF sequences are not rejected.
+* Document can contain multiple top-level element nodes.
 
 [[access]]
 == Accessing document data
