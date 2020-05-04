@@ -16,19 +16,19 @@
 
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <assert.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef PUGIXML_WCHAR_MODE
 #	include <wchar.h>
 #endif
 
 #ifndef PUGIXML_NO_XPATH
-#	include <math.h>
 #	include <float.h>
+#	include <math.h>
 #endif
 
 #ifndef PUGIXML_NO_STL
