@@ -16,19 +16,19 @@
 
 #include "pugixml.hpp"
 
-#include <assert.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cassert>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef PUGIXML_WCHAR_MODE
-#	include <wchar.h>
+#	include <cwchar>
 #endif
 
 #ifndef PUGIXML_NO_XPATH
-#	include <float.h>
-#	include <math.h>
+#	include <cfloat>
+#	include <cmath>
 #endif
 
 #ifndef PUGIXML_NO_STL
@@ -176,7 +176,7 @@ namespace pugi
 	typedef unsigned __int32 uint32_t;
 }
 #else
-#	include <stdint.h>
+#	include <cstdint>
 #endif
 
 // Memory allocation
