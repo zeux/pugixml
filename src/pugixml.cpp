@@ -1129,7 +1129,7 @@ namespace pugi
 
 		xml_attribute_struct* first_attribute;
 	};
-}
+}  // namespace pugi
 #endif
 
 PUGI__NS_BEGIN
@@ -7355,7 +7355,7 @@ namespace pugi
 	{
 		return impl::xml_memory::deallocate;
 	}
-}
+}  // namespace pugi
 
 #if !defined(PUGIXML_NO_STL) && (defined(_MSC_VER) || defined(__ICC))
 namespace std
@@ -12950,7 +12950,7 @@ namespace pugi
 	{
 		return query.evaluate_node(*this);
 	}
-}
+}  // namespace pugi
 
 #endif
 
