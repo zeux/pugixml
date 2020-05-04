@@ -4626,7 +4626,7 @@ PUGI__NS_BEGIN
 	}
 #endif
 
-	template <typename U> PUGI__FN PUGI__UNSIGNED_OVERFLOW char_t* integer_to_string(char_t* begin, char_t* end, U value, bool negative)
+	template <typename U> PUGI__FN PUGI__UNSIGNED_OVERFLOW char_t* integer_to_string(const char_t* begin, char_t* end, U value, bool negative)
 	{
 		char_t* result = end - 1;
 		U rest = negative ? 0 - value : value;
@@ -8262,7 +8262,7 @@ PUGI__NS_BEGIN
 		return (value != 0 && !is_nan(value));
 	}
 
-	PUGI__FN void truncate_zeros(char* begin, char* end)
+	PUGI__FN void truncate_zeros(const char* begin, char* end)
 	{
 		while (begin != end && end[-1] == '0') end--;
 
