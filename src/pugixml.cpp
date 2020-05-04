@@ -7582,9 +7582,9 @@ PUGI__NS_BEGIN
 
 		// MurmurHash3 32-bit finalizer
 		h ^= h >> 16;
-		h *= 0x85ebca6bu;
+		h *= 0x85ebca6bU;
 		h ^= h >> 13;
-		h *= 0xc2b2ae35u;
+		h *= 0xc2b2ae35U;
 		h ^= h >> 16;
 
 		size_t hashmod = size - 1;
