@@ -447,7 +447,7 @@ PUGI__NS_BEGIN
 #else
 	#define PUGI__GETHEADER_IMPL(object, page, flags) (((reinterpret_cast<char*>(object) - reinterpret_cast<char*>(page)) << 8) | (flags))
 	// this macro casts pointers through void* to avoid 'cast increases required alignment of target type' warnings
-	#define PUGI__GETPAGE_IMPL(header) static_cast<impl::xml_memory_page*>(const_cast<void*>(static_cast<const void*>(reinterpret_cast<const char*>(&header) - (header >> 8))))
+	#define PUGI__GETPAGE_IMPL(header) static_cast<impl::xml_memory_page*>(const_cast<void*>(static_cast<const void*>(reinterpret_cast<const char*>(&(header)) - ((header) >> 8))))
 #endif
 
 	#define PUGI__GETPAGE(n) PUGI__GETPAGE_IMPL((n)->header)
@@ -1893,7 +1893,7 @@ PUGI__NS_BEGIN
 #ifdef PUGIXML_WCHAR_MODE
 	#define PUGI__IS_CHARTYPE_IMPL(c, ct, table) ((static_cast<unsigned int>(c) < 128 ? table[static_cast<unsigned int>(c)] : table[128]) & (ct))
 #else
-	#define PUGI__IS_CHARTYPE_IMPL(c, ct, table) (table[static_cast<unsigned char>(c)] & (ct))
+	#define PUGI__IS_CHARTYPE_IMPL(c, ct, table) ((table)[static_cast<unsigned char>(c)] & (ct))
 #endif
 
 	#define PUGI__IS_CHARTYPE(c, ct) PUGI__IS_CHARTYPE_IMPL(c, ct, chartype_table)
@@ -1918,7 +1918,7 @@ PUGI__NS_BEGIN
 
 	PUGI__FN bool parse_declaration_encoding(const uint8_t* data, size_t size, const uint8_t*& out_encoding, size_t& out_length)
 	{
-	#define PUGI__SCANCHAR(ch) { if (offset >= size || data[offset] != ch) return false; offset++; }
+	#define PUGI__SCANCHAR(ch) { if (offset >= size || data[offset] != (ch)) return false; offset++; }
 	#define PUGI__SCANCHARTYPE(ct) { while (offset < size && PUGI__IS_CHARTYPE(data[offset], ct)) offset++; }
 
 		// check if we have a non-empty XML declaration
@@ -2594,7 +2594,7 @@ PUGI__NS_BEGIN
 	#define PUGI__SCANWHILE(X)          { while (X) ++s; }
 	#define PUGI__SCANWHILE_UNROLL(X)   { for (;;) { char_t ss = s[0]; if (PUGI__UNLIKELY(!(X))) { break; } ss = s[1]; if (PUGI__UNLIKELY(!(X))) { s += 1; break; } ss = s[2]; if (PUGI__UNLIKELY(!(X))) { s += 2; break; } ss = s[3]; if (PUGI__UNLIKELY(!(X))) { s += 3; break; } s += 4; } }
 	#define PUGI__ENDSEG()              { ch = *s; *s = 0; ++s; }
-	#define PUGI__THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(0)
+	#define PUGI__THROW_ERROR(err, m)   return error_offset = (m), error_status = (err), static_cast<char_t*>(0)
 	#define PUGI__CHECK_ERROR(err, m)   { if (*s == 0) PUGI__THROW_ERROR(err, m); }
 
 	PUGI__FN char_t* strconv_comment(char_t* s, char_t endch)
