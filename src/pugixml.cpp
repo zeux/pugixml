@@ -378,7 +378,7 @@ PUGI__NS_BEGIN
 
 		static PUGI__UNSIGNED_OVERFLOW unsigned int hash(const void* key)
 		{
-			unsigned int h = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key));
+			unsigned int h = static_cast<unsigned int>(reinterpret_cast<uintptr_t>(key) & 0xffffffff);
 
 			// MurmurHash3 32-bit finalizer
 			h ^= h >> 16;
