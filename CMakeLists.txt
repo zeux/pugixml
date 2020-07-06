@@ -100,9 +100,6 @@ if (NOT BUILD_SHARED_LIBS OR BUILD_SHARED_AND_STATIC_LIBS)
   target_include_directories(pugixml-static
     PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
-  target_compile_definitions(pugixml-static
-    PRIVATE
-      $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>)
   target_compile_options(pugixml-static
     PRIVATE
       ${msvc-rt-mtd-shared}
