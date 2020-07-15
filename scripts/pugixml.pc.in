@@ -8,4 +8,4 @@ Description: Light-weight, simple and fast XML parser for C++ with XPath support
 URL: https://pugixml.org/
 Version: @pugixml_VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lpugixml
+Libs: -L${libdir} -lpugixml@LIB_POSTFIX@
