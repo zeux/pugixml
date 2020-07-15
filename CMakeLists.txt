@@ -142,6 +142,16 @@ write_basic_package_version_file(
   "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
   COMPATIBILITY SameMajorVersion)
 
+if (USE_POSTFIX)
+  if(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
+    set(LIB_POSTFIX ${CMAKE_RELWITHDEBINFO_POSTFIX})
+  elseif(CMAKE_BUILD_TYPE MATCHES MinSizeRel)
+    set(LIB_POSTFIX ${CMAKE_MINSIZEREL_POSTFIX})
+  elseif(CMAKE_BUILD_TYPE MATCHES Debug)
+    set(LIB_POSTFIX ${CMAKE_DEBUG_POSTFIX})
+  endif()
+endif()
+
 configure_file(scripts/pugixml.pc.in pugixml.pc @ONLY)
 
 if (NOT DEFINED PUGIXML_RUNTIME_COMPONENT)
