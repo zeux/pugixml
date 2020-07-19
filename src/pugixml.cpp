@@ -4981,7 +4981,20 @@ PUGI__NS_BEGIN
 #if defined(PUGI__MSVC_CRT_VERSION) || defined(__BORLANDC__) || (defined(__MINGW32__) && (!defined(__STRICT_ANSI__) || defined(__MINGW64_VERSION_MAJOR)))
 	PUGI__FN FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
 	{
+#if defined(_MSC_VER) && _MSC_VER >= 1900 
+		FILE* file = nullptr;
+		if (_wfopen_s(&file, path, mode) == 0)
+		{
+			return file;
+		}
+		else
+		{
+			return nullptr;
+		}
+#else
 		return _wfopen(path, mode);
+#endif
+
 	}
 #else
 	PUGI__FN char* convert_path_heap(const wchar_t* str)
@@ -7187,7 +7200,22 @@ namespace pugi
 		reset();
 
 		using impl::auto_deleter; // MSVC7 workaround
+
+
+#if defined(_MSC_VER) && _MSC_VER >= 1900 
+		FILE* filePtr = nullptr;
+		auto success = fopen_s(&filePtr, path_, "rb") == 0;
+		auto_deleter<FILE> file(filePtr, impl::close_file);
+
+		if (success == false)
+		{
+			xml_parse_result res{};
+			res.status = status_file_not_found;
+			return res;
+		}
+#else //_MSC_VER >= 1900 
 		auto_deleter<FILE> file(fopen(path_, "rb"), impl::close_file);
+#endif
 
 		return impl::load_file_impl(static_cast<impl::xml_document_struct*>(_root), file.data, options, encoding, &_buffer);
 	}
@@ -7270,7 +7298,21 @@ namespace pugi
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
 	{
 		using impl::auto_deleter; // MSVC7 workaround
+
+#if defined(_MSC_VER) && _MSC_VER >= 1900 
+		FILE* filePtr = nullptr;
+		auto success = fopen_s(&filePtr, path_, (flags & format_save_file_text) ? "w" : "wb") == 0;
+		
+		auto_deleter<FILE> file(filePtr, impl::close_file);
+
+		if (success == false)
+		{
+			return false;
+		}
+#else //_MSC_VER >= 1900 
 		auto_deleter<FILE> file(fopen(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::close_file);
+#endif
+
 
 		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
 	}
