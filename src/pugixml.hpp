@@ -275,6 +275,9 @@ namespace pugi
 	const int default_double_precision = 17;
 	const int default_float_precision = 9;
 
+	// memory allocation alignment requirement for memory allocators
+	const size_t memory_allocation_alignment = sizeof(double) > sizeof(void*) ? sizeof(double) : sizeof(void*);
+
 	// Forward declarations
 	struct xml_attribute_struct;
 	struct xml_node_struct;
@@ -314,6 +317,71 @@ namespace pugi
 
 	private:
 		It _begin, _end;
+	};
+
+	// Interface for pool allocators
+	// 'pugi::memory_allocation_alignment' provides alignment requirements
+	class PUGIXML_CLASS xml_memory_pool
+	{
+	public:
+		virtual ~xml_memory_pool() {}
+
+		virtual void* allocate(size_t size) = 0;
+		virtual void deallocate(void* ptr) = 0;
+	};
+
+	// Non-owning allocate-only fixed size memory pool, deallocation is no-op
+	// Size must be at least PUGIXML_MEMORY_PAGE_SIZE bytes for xml_document construction
+	class PUGIXML_CLASS xml_monotonic_memory_pool : public xml_memory_pool
+	{
+	public:
+		xml_monotonic_memory_pool(void* buffer, size_t size) PUGIXML_NOEXCEPT;
+
+		virtual void* allocate(size_t size) PUGIXML_OVERRIDE;
+		virtual void deallocate(void* ptr) PUGIXML_OVERRIDE;
+
+	private:
+		void* _buffer;
+		size_t _capacity;
+	};
+
+	// Adapter for allocators with std::pmr::memory_resource-like interface
+	// The overhead equals 'pugi::memory_allocation_alignment' bytes per allocation
+	template<typename Resource>
+	class memory_resource_adapter : public xml_memory_pool
+	{
+	public:
+		explicit memory_resource_adapter(Resource* resource) PUGIXML_NOEXCEPT : _resource(resource) {}
+
+		virtual void* allocate(size_t size) PUGIXML_OVERRIDE
+		{
+			void* result = _resource->allocate(size + pugi::memory_allocation_alignment, pugi::memory_allocation_alignment);
+			if (!result) return 0;
+
+			size_t* block_size = reinterpret_cast<size_t*>(result);
+			*block_size = size;
+
+			return static_cast<char*>(result) + pugi::memory_allocation_alignment;
+		}
+
+		virtual void deallocate(void* ptr) PUGIXML_OVERRIDE
+		{
+			if (!ptr) return;
+
+			size_t size = memory_size(ptr);
+
+			_resource->deallocate(static_cast<char*>(ptr) - pugi::memory_allocation_alignment, size + pugi::memory_allocation_alignment, pugi::memory_allocation_alignment);
+		}
+
+	private:
+		static size_t memory_size(void* ptr) PUGIXML_NOEXCEPT
+		{
+			// this function casts pointers through void* to avoid 'cast increases required alignment of target type' warnings
+			size_t* block_size = reinterpret_cast<size_t*>(static_cast<void*>(static_cast<char*>(ptr) - pugi::memory_allocation_alignment));
+			return *block_size;
+		}
+
+		Resource* _resource;
 	};
 
 	// Writer interface for node printing (see xml_node::print)
@@ -1030,13 +1098,20 @@ namespace pugi
 		xml_document(const xml_document&);
 		xml_document& operator=(const xml_document&);
 
+		xml_memory_pool* _get_memory_pool() const PUGIXML_NOEXCEPT;
+
 		void _create();
+		void _create_using_pool(xml_memory_pool* pool);
 		void _destroy();
+		xml_memory_pool* _destroy_release_pool();
 		void _move(xml_document& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
 
 	public:
 		// Default constructor, makes empty document
 		xml_document();
+
+		// Create empty document using supplied memory pool
+		explicit xml_document(xml_memory_pool& pool);
 
 		// Destructor, invalidates all node/attribute handles to this document
 		~xml_document();
@@ -1044,6 +1119,7 @@ namespace pugi
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
 		xml_document(xml_document&& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
+		// the operation is exception safe only when objects use the same memory pools
 		xml_document& operator=(xml_document&& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT;
 	#endif
 
@@ -1173,7 +1249,9 @@ namespace pugi
 
 		xpath_variable* _find(const char_t* name) const;
 
+		static bool _clone(xpath_variable* var, xpath_variable** out_result, xml_memory_pool* pool);
 		static bool _clone(xpath_variable* var, xpath_variable** out_result);
+		static void _destroy(xpath_variable* var, xml_memory_pool* pool);
 		static void _destroy(xpath_variable* var);
 
 	public:
@@ -1218,10 +1296,17 @@ namespace pugi
 		xpath_query(const xpath_query&);
 		xpath_query& operator=(const xpath_query&);
 
+		void _construct(xml_memory_pool* pool, const char_t* query, xpath_variable_set* variables);
+		xml_memory_pool* _get_memory_pool() const PUGIXML_NOEXCEPT;
+
 	public:
 		// Construct a compiled object from XPath expression.
 		// If PUGIXML_NO_EXCEPTIONS is not defined, throws xpath_exception on compilation errors.
 		explicit xpath_query(const char_t* query, xpath_variable_set* variables = PUGIXML_NULL);
+
+		// Construct a compiled object from XPath expression using supplied memory pool.
+		// If PUGIXML_NO_EXCEPTIONS is not defined, throws xpath_exception on compilation errors.
+		xpath_query(xml_memory_pool& pool, const char_t* query, xpath_variable_set* variables = 0);
 
 		// Constructor
 		xpath_query();
@@ -1232,6 +1317,8 @@ namespace pugi
 	#ifdef PUGIXML_HAS_MOVE
 		// Move semantics support
 		xpath_query(xpath_query&& rhs) PUGIXML_NOEXCEPT;
+		// currently move assignment operator cannot properly hanle situation when memory pools are different
+		// object ends up referring to rhs' memory pool
 		xpath_query& operator=(xpath_query&& rhs) PUGIXML_NOEXCEPT;
 	#endif
 
