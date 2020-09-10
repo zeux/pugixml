@@ -394,7 +394,7 @@ static std::basic_string<char_t> rep(const std::basic_string<char_t>& base, size
 
 TEST(xpath_parse_depth_limit)
 {
-	const size_t limit = 5000;
+	const size_t limit = 1500;
 
 	CHECK_XPATH_FAIL((rep(STR("("), limit) + STR("1") + rep(STR(")"), limit)).c_str());
 	CHECK_XPATH_FAIL((STR("(id('a'))") + rep(STR("[1]"), limit)).c_str());
