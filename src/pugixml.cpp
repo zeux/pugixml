@@ -11143,6 +11143,14 @@ PUGI__NS_BEGIN
 		}
 	};
 
+	static const size_t xpath_ast_depth_limit =
+	#ifdef PUGIXML_XPATH_DEPTH_LIMIT
+		PUGIXML_XPATH_DEPTH_LIMIT
+	#else
+		1024
+	#endif
+		;
+
 	struct xpath_parser
 	{
 		xpath_allocator* _alloc;
@@ -11154,6 +11162,8 @@ PUGI__NS_BEGIN
 		xpath_parse_result* _result;
 
 		char_t _scratch[32];
+
+		size_t _depth;
 
 		xpath_ast_node* error(const char* message)
 		{
@@ -11169,6 +11179,11 @@ PUGI__NS_BEGIN
 			*_alloc->_error = true;
 
 			return 0;
+		}
+
+		xpath_ast_node* error_rec()
+		{
+			return error("Exceeded maximum allowed query depth");
 		}
 
 		void* alloc_node()
@@ -11563,9 +11578,14 @@ PUGI__NS_BEGIN
 			xpath_ast_node* n = parse_primary_expression();
 			if (!n) return 0;
 
+			size_t old_depth = _depth;
+
 			while (_lexer.current() == lex_open_square_brace)
 			{
 				_lexer.next();
+
+				if (++_depth > xpath_ast_depth_limit)
+					return error_rec();
 
 				if (n->rettype() != xpath_type_node_set)
 					return error("Predicate has to be applied to node set");
@@ -11581,6 +11601,8 @@ PUGI__NS_BEGIN
 
 				_lexer.next();
 			}
+
+			_depth = old_depth;
 
 			return n;
 		}
@@ -11733,11 +11755,16 @@ PUGI__NS_BEGIN
 			xpath_ast_node* n = alloc_node(ast_step, set, axis, nt_type, nt_name_copy);
 			if (!n) return 0;
 
+			size_t old_depth = _depth;
+
 			xpath_ast_node* last = 0;
 
 			while (_lexer.current() == lex_open_square_brace)
 			{
 				_lexer.next();
+
+				if (++_depth > xpath_ast_depth_limit)
+					return error_rec();
 
 				xpath_ast_node* expr = parse_expression();
 				if (!expr) return 0;
@@ -11755,6 +11782,8 @@ PUGI__NS_BEGIN
 				last = pred;
 			}
 
+			_depth = old_depth;
+
 			return n;
 		}
 
@@ -11764,10 +11793,15 @@ PUGI__NS_BEGIN
 			xpath_ast_node* n = parse_step(set);
 			if (!n) return 0;
 
+			size_t old_depth = _depth;
+
 			while (_lexer.current() == lex_slash || _lexer.current() == lex_double_slash)
 			{
 				lexeme_t l = _lexer.current();
 				_lexer.next();
+
+				if (++_depth > xpath_ast_depth_limit)
+					return error_rec();
 
 				if (l == lex_double_slash)
 				{
@@ -11778,6 +11812,8 @@ PUGI__NS_BEGIN
 				n = parse_step(n);
 				if (!n) return 0;
 			}
+
+			_depth = old_depth;
 
 			return n;
 		}
@@ -11964,6 +12000,9 @@ PUGI__NS_BEGIN
 			{
 				_lexer.next();
 
+				if (++_depth > xpath_ast_depth_limit)
+					return error_rec();
+
 				xpath_ast_node* rhs = parse_path_or_unary_expression();
 				if (!rhs) return 0;
 
@@ -12009,13 +12048,22 @@ PUGI__NS_BEGIN
 		//						  | MultiplicativeExpr 'mod' UnaryExpr
 		xpath_ast_node* parse_expression(int limit = 0)
 		{
+			size_t old_depth = _depth;
+
+			if (++_depth > xpath_ast_depth_limit)
+				return error_rec();
+
 			xpath_ast_node* n = parse_path_or_unary_expression();
 			if (!n) return 0;
 
-			return parse_expression_rec(n, limit);
+			n = parse_expression_rec(n, limit);
+
+			_depth = old_depth;
+
+			return n;
 		}
 
-		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result)
+		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result), _depth(0)
 		{
 		}
 
@@ -12023,6 +12071,8 @@ PUGI__NS_BEGIN
 		{
 			xpath_ast_node* n = parse_expression();
 			if (!n) return 0;
+
+			assert(_depth == 0);
 
 			// check if there are unparsed tokens left
 			if (_lexer.current() != lex_eof)
