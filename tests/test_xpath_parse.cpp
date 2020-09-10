@@ -381,6 +381,28 @@ TEST(xpath_parse_oom_propagation)
 	}
 }
 
+static std::basic_string<char_t> rep(const std::basic_string<char_t>& base, size_t count)
+{
+	std::basic_string<char_t> result;
+	result.reserve(base.size() * count);
+
+	for (size_t i = 0; i < count; ++i)
+		result += base;
+
+	return result;
+}
+
+TEST(xpath_parse_depth_limit)
+{
+	const size_t limit = 5000;
+
+	CHECK_XPATH_FAIL((rep(STR("("), limit) + "1" + rep(STR(")"), limit)).c_str());
+	CHECK_XPATH_FAIL(("(id('a'))" + rep(STR("[1]"), limit)).c_str());
+	CHECK_XPATH_FAIL(("/foo" + rep(STR("[1]"), limit)).c_str());
+	CHECK_XPATH_FAIL(("/foo" + rep(STR("/x"), limit)).c_str());
+	CHECK_XPATH_FAIL(("1" + rep(STR("+1"), limit)).c_str());
+}
+
 TEST_XML(xpath_parse_location_path, "<node><child/></node>")
 {
 	CHECK_XPATH_NODESET(doc, STR("/node")) % 2;
