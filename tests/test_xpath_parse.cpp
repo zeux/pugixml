@@ -396,11 +396,11 @@ TEST(xpath_parse_depth_limit)
 {
 	const size_t limit = 5000;
 
-	CHECK_XPATH_FAIL((rep(STR("("), limit) + "1" + rep(STR(")"), limit)).c_str());
-	CHECK_XPATH_FAIL(("(id('a'))" + rep(STR("[1]"), limit)).c_str());
-	CHECK_XPATH_FAIL(("/foo" + rep(STR("[1]"), limit)).c_str());
-	CHECK_XPATH_FAIL(("/foo" + rep(STR("/x"), limit)).c_str());
-	CHECK_XPATH_FAIL(("1" + rep(STR("+1"), limit)).c_str());
+	CHECK_XPATH_FAIL((rep(STR("("), limit) + STR("1") + rep(STR(")"), limit)).c_str());
+	CHECK_XPATH_FAIL((STR("(id('a'))") + rep(STR("[1]"), limit)).c_str());
+	CHECK_XPATH_FAIL((STR("/foo") + rep(STR("[1]"), limit)).c_str());
+	CHECK_XPATH_FAIL((STR("/foo") + rep(STR("/x"), limit)).c_str());
+	CHECK_XPATH_FAIL((STR("1") + rep(STR("+1"), limit)).c_str());
 }
 
 TEST_XML(xpath_parse_location_path, "<node><child/></node>")
