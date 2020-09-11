@@ -401,6 +401,7 @@ TEST(xpath_parse_depth_limit)
 	CHECK_XPATH_FAIL((STR("/foo") + rep(STR("[1]"), limit)).c_str());
 	CHECK_XPATH_FAIL((STR("/foo") + rep(STR("/x"), limit)).c_str());
 	CHECK_XPATH_FAIL((STR("1") + rep(STR("+1"), limit)).c_str());
+	CHECK_XPATH_FAIL((STR("concat(") + rep(STR("1,"), limit) + STR("1)")).c_str());
 }
 
 TEST_XML(xpath_parse_location_path, "<node><child/></node>")

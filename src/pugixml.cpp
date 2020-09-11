@@ -11541,6 +11541,8 @@ PUGI__NS_BEGIN
 					return error("Unrecognized function call");
 				_lexer.next();
 
+				size_t old_depth = _depth;
+
 				while (_lexer.current() != lex_close_brace)
 				{
 					if (argc > 0)
@@ -11549,6 +11551,9 @@ PUGI__NS_BEGIN
 							return error("No comma between function arguments");
 						_lexer.next();
 					}
+
+					if (++_depth > xpath_ast_depth_limit)
+						return error_rec();
 
 					xpath_ast_node* n = parse_expression();
 					if (!n) return 0;
@@ -11561,6 +11566,8 @@ PUGI__NS_BEGIN
 				}
 
 				_lexer.next();
+
+				_depth = old_depth;
 
 				return parse_function(function, argc, args);
 			}
