@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(pugixml VERSION 1.10 LANGUAGES CXX)
+project(pugixml VERSION 1.11 LANGUAGES CXX)
 
 include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
