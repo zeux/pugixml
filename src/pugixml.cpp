@@ -6142,13 +6142,13 @@ namespace pugi
 		impl::xml_allocator& alloc = impl::get_allocator(_root);
 		if (!alloc.reserve()) return false;
 
-		for (xml_node_struct* child = _root->first_child; child; )
+		for (xml_node_struct* cur = _root->first_child; cur; )
 		{
-			xml_node_struct* next = child->next_sibling;
+			xml_node_struct* next = cur->next_sibling;
 
-			impl::destroy_node(child, alloc);
+			impl::destroy_node(cur, alloc);
 
-			child = next;
+			cur = next;
 		}
 
 		_root->first_child = 0;
