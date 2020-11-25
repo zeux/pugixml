@@ -661,7 +661,9 @@ TEST_XML(xpath_variables_type_conversion, "<node>15</node>")
 	CHECK_XPATH_BOOLEAN_VAR(xml_node(), STR("string($b) = '42'"), &set, true);
 
 	CHECK_XPATH_BOOLEAN_VAR(xml_node(), STR("boolean($c) = true()"), &set, true);
+#ifndef MSVC6_NAN_BUG
 	CHECK_XPATH_BOOLEAN_VAR(xml_node(), STR("number($c) = 0"), &set, false);
+#endif
 	CHECK_XPATH_BOOLEAN_VAR(xml_node(), STR("string($c) = 'test'"), &set, true);
 
 	CHECK_XPATH_BOOLEAN_VAR(xml_node(), STR("boolean($d) = true()"), &set, true);
