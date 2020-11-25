@@ -2138,6 +2138,24 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.11]]
+=== v1.11 ^2020-11-26^
+
+Maintenance release. Changes:
+
+* New features:
+	. Add xml_node::remove_attributes and xml_node::remove_children
+	. Add a way to customize floating point precision via xml_attribute::set and xml_text::set overloads
+
+* XPath improvements:
+	. XPath parser now limits recursion depth which prevents stack overflow on malicious queries
+
+* Compatibility improvements:
+	. Fix Visual Studio warnings when built using clang-cl compiler
+	. Fix Wconversion warnings in gcc
+	. Fix Wzero-as-null-pointer-constant warnings in pugixml.hpp
+	. Work around several static analysis false positives
+
 [[v1.10]]
 === v1.10 ^2019-09-15^
 
