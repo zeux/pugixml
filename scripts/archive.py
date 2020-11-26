@@ -1,18 +1,18 @@
+import io
 import os.path
 import sys
 import tarfile
 import time
 import zipfile
-import StringIO
 
 def read_file(path, use_crlf):
 	with open(path, 'rb') as file:
 		data = file.read()
 
-	if '\0' not in data:
-		data = data.replace('\r', '')
+	if b'\0' not in data:
+		data = data.replace(b'\r', b'')
 		if use_crlf:
-			data = data.replace('\n', '\r\n')
+			data = data.replace(b'\n', b'\r\n')
 
 	return data
 
@@ -24,7 +24,7 @@ def write_zip(target, arcprefix, timestamp, sources):
 			info = zipfile.ZipInfo(path)
 			info.date_time = time.localtime(timestamp)
 			info.compress_type = zipfile.ZIP_DEFLATED
-			info.external_attr = 0644 << 16L
+			info.external_attr = 0o644 << 16
 			archive.writestr(info, data)
 
 def write_tar(target, arcprefix, timestamp, sources, compression):
@@ -35,7 +35,7 @@ def write_tar(target, arcprefix, timestamp, sources, compression):
 			info = tarfile.TarInfo(path)
 			info.size = len(data)
 			info.mtime = timestamp
-			archive.addfile(info, StringIO.StringIO(data))
+			archive.addfile(info, io.BytesIO(data))
 
 if len(sys.argv) < 5:
 	raise RuntimeError('Usage: python archive.py <target> <archive prefix> <timestamp> <source files>')
