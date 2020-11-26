@@ -46,7 +46,7 @@ Thanks to *Vyacheslav Egorov* for documentation proofreading and fuzz testing.
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2019 Arseny Kapoulkine
+Copyright (c) 2006-2020 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -74,7 +74,7 @@ This means that you can freely use pugixml in your applications, both open-sourc
 
 ....
 This software is based on pugixml library (https://pugixml.org).
-pugixml is Copyright (C) 2006-2019 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2020 Arseny Kapoulkine.
 ....
 
 [[install]]
@@ -270,7 +270,7 @@ The XML document is represented with a tree data structure. The root of the tree
 [[xml_node_type]]
 The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
 
-* Document node ([[node_document]]`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to <<xml_document,xml_document>> class; note that <<xml_document,xml_document>> is a sub-class of <<xml_node,xml_node>>, so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation.
+* Document node ([[node_document]]`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to <<xml_document,xml_document>> class; note that <<xml_document,xml_document>> is a sub-class of <<xml_node,xml_node>>, so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation. Document generally has one child element node (see [[xml_document::document_element]]`document_element()`), although documents parsed from XML fragments (see [[parse_fragment]]`parse_fragment`) can have more than one.
 
 * Element/tag node ([[node_element]]`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element nodes is as follows:
 +
@@ -749,7 +749,7 @@ These flags control the resulting tree contents:
 * [[parse_embed_pcdata]]`parse_embed_pcdata` determines if PCDATA contents is to be saved as element values. Normally element nodes have names but not values; this flag forces the parser to store the contents as a value if PCDATA is the first child of the element node (otherwise PCDATA node is created as usual). This can significantly reduce the memory required for documents with many PCDATA nodes. To retrieve the data you can use `xml_node::value()` on the element nodes or any of the higher-level functions like `child_value` or `text`. This flag is *off* by default.
 Since this flag significantly changes the DOM structure it is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments. This flag is *off* by default.
 
-* [[parse_fragment]]`parse_fragment` determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid. This flag is *off* by default.
+* [[parse_fragment]]`parse_fragment` determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid and permits multiple top-level element nodes. This flag is *off* by default.
 
 CAUTION: Using in-place parsing (<<xml_document::load_buffer_inplace,load_buffer_inplace>>) with `parse_fragment` flag may result in the loss of the last character of the buffer if it is a part of PCDATA. Since PCDATA values are null-terminated strings, the only way to resolve this is to provide a null-terminated buffer as an input to `load_buffer_inplace` - i.e. `doc.load_buffer_inplace("test\0", 5, pugi::parse_default | pugi::parse_fragment)`.
 
@@ -818,6 +818,7 @@ As for rejecting invalid XML documents, there are a number of incompatibilities 
 * XML data is not required to begin with document declaration; additionally, document declaration can appear after comments and other nodes.
 * Invalid document type declarations are silently ignored in some cases.
 * Unicode validation is not performed so invalid UTF sequences are not rejected.
+* Document can contain multiple top-level element nodes.
 
 [[access]]
 == Accessing document data
@@ -1287,7 +1288,9 @@ bool xml_attribute::set_value(unsigned int rhs);
 bool xml_attribute::set_value(long rhs);
 bool xml_attribute::set_value(unsigned long rhs);
 bool xml_attribute::set_value(double rhs);
+bool xml_attribute::set_value(double rhs, int precision);
 bool xml_attribute::set_value(float rhs);
+bool xml_attribute::set_value(float rhs, int precision);
 bool xml_attribute::set_value(bool rhs);
 bool xml_attribute::set_value(long long rhs);
 bool xml_attribute::set_value(unsigned long long rhs);
@@ -1378,16 +1381,18 @@ include::samples/modify_add.cpp[tags=code]
 [[modify.remove]]
 === Removing nodes/attributes
 
-[[xml_node::remove_attribute]][[xml_node::remove_child]]
+[[xml_node::remove_attribute]][[xml_node::remove_attributes]][[xml_node::remove_child]][[xml_node::remove_children]]
 If you do not want your document to contain some node or attribute, you can remove it with one of the following functions:
 
 [source]
 ----
 bool xml_node::remove_attribute(const xml_attribute& a);
+bool xml_node::remove_attributes();
 bool xml_node::remove_child(const xml_node& n);
+bool xml_node::remove_children();
 ----
 
-`remove_attribute` removes the attribute from the attribute list of the node, and returns the operation result. `remove_child` removes the child node with the entire subtree (including all descendant nodes and attributes) from the document, and returns the operation result. Removing fails if one of the following is true:
+`remove_attribute` removes the attribute from the attribute list of the node, and returns the operation result. `remove_child` removes the child node with the entire subtree (including all descendant nodes and attributes) from the document, and returns the operation result. `remove_attributes` removes all the attributes of the node, and returns the operation result. `remove_children` removes all the child nodes of the node, and returns the operation result. Removing fails if one of the following is true:
 
 * The node the function is called on is null;
 * The attribute/node to be removed is null;
@@ -1437,7 +1442,9 @@ bool xml_text::set(unsigned int rhs);
 bool xml_text::set(long rhs);
 bool xml_text::set(unsigned long rhs);
 bool xml_text::set(double rhs);
+bool xml_text::set(double rhs, int precision);
 bool xml_text::set(float rhs);
+bool xml_text::set(float rhs, int precision);
 bool xml_text::set(bool rhs);
 bool xml_text::set(long long rhs);
 bool xml_text::set(unsigned long long rhs);
@@ -2130,6 +2137,24 @@ Because of the differences in document object models, performance considerations
 == Changelog
 
 :!numbered:
+
+[[v1.11]]
+=== v1.11 ^2020-11-26^
+
+Maintenance release. Changes:
+
+* New features:
+	. Add xml_node::remove_attributes and xml_node::remove_children
+	. Add a way to customize floating point precision via xml_attribute::set and xml_text::set overloads
+
+* XPath improvements:
+	. XPath parser now limits recursion depth which prevents stack overflow on malicious queries
+
+* Compatibility improvements:
+	. Fix Visual Studio warnings when built using clang-cl compiler
+	. Fix Wconversion warnings in gcc
+	. Fix Wzero-as-null-pointer-constant warnings in pugixml.hpp
+	. Work around several static analysis false positives
 
 [[v1.10]]
 === v1.10 ^2019-09-15^
@@ -2868,8 +2893,10 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_node::remove_attribute">remove_attribute</a>+++(const xml_attribute& a);
     bool +++<a href="#xml_node::remove_attribute">remove_attribute</a>+++(const char_t* name);
+    bool +++<a href="#xml_node::remove_attributes">remove_attributes</a>+++();
     bool +++<a href="#xml_node::remove_child">remove_child</a>+++(const xml_node& n);
     bool +++<a href="#xml_node::remove_child">remove_child</a>+++(const char_t* name);
+    bool +++<a href="#xml_node::remove_children">remove_children</a>+++();
 
     xml_parse_result +++<a href="#xml_node::append_buffer">append_buffer</a>+++(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
 
