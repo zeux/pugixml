@@ -2156,6 +2156,9 @@ Maintenance release. Changes:
 	. Fix Wzero-as-null-pointer-constant warnings in pugixml.hpp
 	. Work around several static analysis false positives
 
+* Build system changes
+	. The CMake package for pugixml now provides a `pugixml::pugixml` target rather than a `pugixml` target. A compatibility `pugixml` target is provided if at least version 1.11 is not requested.
+
 [[v1.10]]
 === v1.10 ^2019-09-15^
 
