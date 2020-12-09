@@ -27,6 +27,44 @@ option(BUILD_SHARED_AND_STATIC_LIBS "Build both shared and static libraries" OFF
  # Technically not needed for this file. This is builtin.
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF) 
 
+# Options from the pugiconfig.hpp file.
+
+option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
+option(PUGIXML_COMPACT "Enable compact mode" OFF)
+option(PUGIXML_NO_XPATH "Disable XPath" OFF)
+option(PUGIXML_NO_STL "Disable STL" OFF)
+option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
+option(PUGIXML_HEADER_ONLY "Switch to header only" OFF)
+option(PUGIXML_HAS_LONG_LONG "Enable long long support" OFF)
+
+# Tune these to adjust memory-related behaviour
+set(PUGIXML_MEMORY_PAGE_SIZE 32768)
+set(PUGIXML_MEMORY_OUTPUT_STACK 10240)
+set(PUGIXML_MEMORY_XPATH_PAGE_SIZE 4096)
+
+# Tune this to adjust max nesting for XPath queries
+set(PUGIXML_XPATH_DEPTH_LIMIT 1024)
+
+# Set these to control attributes for public classes/functions (Not 100% sure if these will work.)
+
+option(PUGIXML_OVERRIDE_API "Export all public symbols from DLL" OFF)
+option(PUGIXML_OVERRIDE_CLASS "Import all classes from DLL" OFF)
+option(PUGIXML_OVERRIDE_FUNCTION "Set calling conventions to all public functions to fastcall" OFF)
+
+if(${PUGIXML_OVERRIDE_API})
+	set(PUGIXML_API __declspec(dllexport))
+endif()
+
+if(${PUGIXML_OVERRIDE_CLASS})
+	set(PUGIXML_CLASS __declspec(dllimport)
+endif()
+
+if(${PUGIXML_OVERRIDE_FUNCTION})
+	set(PUGIXML_FUNCTION __fastcall)
+endif()
+
+# End of options
+
 set(BUILD_DEFINES CACHE STRING "Build defines")
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
