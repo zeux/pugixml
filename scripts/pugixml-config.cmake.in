@@ -6,5 +6,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/pugixml-targets.cmake")
 # version or not requesting one at all), provide the old imported target name
 # for compatibility.
 if (NOT DEFINED PACKAGE_FIND_VERSION OR PACKAGE_FIND_VERSION VERSION_LESS "1.11")
-  add_library(pugixml ALIAS pugixml::pugixml)
+  add_library(pugixml INTERFACE IMPORTED)
+  target_link_libraries(pugixml INTERFACE pugixml::pugixml)
 endif ()
