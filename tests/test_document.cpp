@@ -889,7 +889,7 @@ TEST(document_parse_result_description)
 	{
 		result.status = static_cast<xml_parse_status>(i);
 
-		CHECK(result.description() != 0);
+		CHECK(result.description() != PUGIXML_NULL);
 		CHECK(result.description()[0] != 0);
 	}
 }
@@ -1098,11 +1098,11 @@ TEST(document_contents_preserve)
 {
 	file_data_t files[] =
 	{
-		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
-		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
-		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
-		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
-		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0}
+		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, PUGIXML_NULL, 0}
 	};
 
 	// load files in memory
@@ -1136,8 +1136,8 @@ TEST(document_contents_preserve_latin1)
 {
 	file_data_t files[] =
 	{
-		{"tests/data/latintest_utf8.xml", encoding_utf8, 0, 0},
-		{"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}
+		{"tests/data/latintest_utf8.xml", encoding_utf8, PUGIXML_NULL, 0},
+		{"tests/data/latintest_latin1.xml", encoding_latin1, PUGIXML_NULL, 0}
 	};
 
 	// load files in memory
@@ -1239,15 +1239,15 @@ TEST(document_load_buffer_empty)
 
 		xml_document doc;
 		CHECK(doc.load_buffer(buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
-		CHECK(doc.load_buffer(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
+		CHECK(doc.load_buffer(PUGIXML_NULL, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 
 		CHECK(doc.load_buffer_inplace(buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
-		CHECK(doc.load_buffer_inplace(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
+		CHECK(doc.load_buffer_inplace(PUGIXML_NULL, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 
 		void* own_buffer = get_memory_allocation_function()(1);
 
 		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
-		CHECK(doc.load_buffer_inplace_own(0, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
+		CHECK(doc.load_buffer_inplace_own(PUGIXML_NULL, 0, parse_default, encoding).status == status_no_document_element && !doc.first_child());
 	}
 }
 
@@ -1275,15 +1275,15 @@ TEST(document_load_buffer_empty_fragment)
 
 		xml_document doc;
 		CHECK(doc.load_buffer(buffer, 0, parse_fragment, encoding) && !doc.first_child());
-		CHECK(doc.load_buffer(0, 0, parse_fragment, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer(PUGIXML_NULL, 0, parse_fragment, encoding) && !doc.first_child());
 
 		CHECK(doc.load_buffer_inplace(buffer, 0, parse_fragment, encoding) && !doc.first_child());
-		CHECK(doc.load_buffer_inplace(0, 0, parse_fragment, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace(PUGIXML_NULL, 0, parse_fragment, encoding) && !doc.first_child());
 
 		void* own_buffer = get_memory_allocation_function()(1);
 
 		CHECK(doc.load_buffer_inplace_own(own_buffer, 0, parse_fragment, encoding) && !doc.first_child());
-		CHECK(doc.load_buffer_inplace_own(0, 0, parse_fragment, encoding) && !doc.first_child());
+		CHECK(doc.load_buffer_inplace_own(PUGIXML_NULL, 0, parse_fragment, encoding) && !doc.first_child());
 	}
 }
 
@@ -1291,11 +1291,11 @@ TEST(document_load_buffer_null)
 {
 	xml_document doc;
 
-	CHECK(doc.load_buffer(0, 12).status == status_io_error && !doc.first_child());
-	CHECK(doc.load_buffer(0, 12, parse_fragment).status == status_io_error && !doc.first_child());
+	CHECK(doc.load_buffer(PUGIXML_NULL, 12).status == status_io_error && !doc.first_child());
+	CHECK(doc.load_buffer(PUGIXML_NULL, 12, parse_fragment).status == status_io_error && !doc.first_child());
 
-	CHECK(doc.load_buffer_inplace(0, 12).status == status_io_error && !doc.first_child());
-	CHECK(doc.load_buffer_inplace_own(0, 12).status == status_io_error && !doc.first_child());
+	CHECK(doc.load_buffer_inplace(PUGIXML_NULL, 12).status == status_io_error && !doc.first_child());
+	CHECK(doc.load_buffer_inplace_own(PUGIXML_NULL, 12).status == status_io_error && !doc.first_child());
 }
 
 TEST(document_progressive_truncation)
@@ -1350,7 +1350,7 @@ TEST(document_load_buffer_short)
 	CHECK(doc.load_buffer(data + 2, 2).status == status_no_document_element);
 	CHECK(doc.load_buffer(data + 3, 1).status == status_no_document_element);
 	CHECK(doc.load_buffer(data + 4, 0).status == status_no_document_element);
-	CHECK(doc.load_buffer(0, 0).status == status_no_document_element);
+	CHECK(doc.load_buffer(PUGIXML_NULL, 0).status == status_no_document_element);
 
 	delete[] data;
 }
@@ -1367,7 +1367,7 @@ TEST(document_load_buffer_short_fragment)
 	CHECK(doc.load_buffer(data + 2, 2, parse_fragment) && test_string_equal(doc.text().get(), STR("cd")));
 	CHECK(doc.load_buffer(data + 3, 1, parse_fragment) && test_string_equal(doc.text().get(), STR("d")));
 	CHECK(doc.load_buffer(data + 4, 0, parse_fragment) && !doc.first_child());
-	CHECK(doc.load_buffer(0, 0, parse_fragment) && !doc.first_child());
+	CHECK(doc.load_buffer(PUGIXML_NULL, 0, parse_fragment) && !doc.first_child());
 
 	delete[] data;
 }
@@ -1384,7 +1384,7 @@ TEST(document_load_buffer_inplace_short)
 	CHECK(doc.load_buffer_inplace(data + 2, 2).status == status_no_document_element);
 	CHECK(doc.load_buffer_inplace(data + 3, 1).status == status_no_document_element);
 	CHECK(doc.load_buffer_inplace(data + 4, 0).status == status_no_document_element);
-	CHECK(doc.load_buffer_inplace(0, 0).status == status_no_document_element);
+	CHECK(doc.load_buffer_inplace(PUGIXML_NULL, 0).status == status_no_document_element);
 
 	delete[] data;
 }
@@ -1597,12 +1597,12 @@ TEST(document_convert_out_of_memory)
 {
 	file_data_t files[] =
 	{
-		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, 0, 0},
-		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, 0, 0},
-		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, 0, 0},
-		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, 0, 0},
-		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, 0, 0},
-		{"tests/data/latintest_latin1.xml", encoding_latin1, 0, 0}
+		{"tests/data/utftest_utf16_be_clean.xml", encoding_utf16_be, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf16_le_clean.xml", encoding_utf16_le, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf32_be_clean.xml", encoding_utf32_be, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf32_le_clean.xml", encoding_utf32_le, PUGIXML_NULL, 0},
+		{"tests/data/utftest_utf8_clean.xml", encoding_utf8, PUGIXML_NULL, 0},
+		{"tests/data/latintest_latin1.xml", encoding_latin1, PUGIXML_NULL, 0}
 	};
 
 	// load files in memory

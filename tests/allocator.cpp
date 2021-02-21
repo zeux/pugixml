@@ -15,6 +15,15 @@
 #	endif
 #endif
 
+// If C++ is 2011 or higher, use 'nullptr'
+#ifndef PUGIXML_NULL
+#	if __cplusplus >= 201103
+#		define PUGIXML_NULL nullptr
+#	else
+#		define PUGIXML_NULL 0
+#	endif
+#endif
+
 // Low-level allocation functions
 #if defined(_WIN32) || defined(_WIN64)
 #	ifdef __MWERKS__
@@ -93,7 +102,6 @@ namespace
 	void* allocate_page_aligned(size_t size)
 	{
 		void* result = malloc(size + page_size);
-
 		return reinterpret_cast<void*>(align_to_page(reinterpret_cast<size_t>(result)));
 	}
 
@@ -102,7 +110,7 @@ namespace
 		size_t aligned_size = align_to_page(size);
 
 		void* ptr = allocate_page_aligned(aligned_size + page_size);
-		if (!ptr) return 0;
+		if (!ptr) return PUGIXML_NULL;
 
 		char* end = static_cast<char*>(ptr) + aligned_size;
 
@@ -147,7 +155,7 @@ const size_t memory_alignment = sizeof(double) > sizeof(void*) ? sizeof(double) 
 void* memory_allocate(size_t size)
 {
 	void* result = allocate(size + memory_alignment);
-	if (!result) return 0;
+	if (!result) return PUGIXML_NULL;
 
 	memcpy(result, &size, sizeof(size_t));
 

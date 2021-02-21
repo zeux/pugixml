@@ -17,6 +17,10 @@ RELEASE=$(filter-out scripts/archive.py docs/%.adoc,$(shell git ls-files docs sc
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-align -Wcast-qual -Wold-style-cast -Wdouble-promotion
 LDFLAGS=
 
+ifneq ($(cxxstd),c++98)
+	CXXFLAGS+=-Wzero-as-null-pointer-constant
+endif
+
 ifeq ($(config),release)
 	CXXFLAGS+=-O3 -DNDEBUG
 endif
