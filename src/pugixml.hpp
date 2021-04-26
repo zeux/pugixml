@@ -312,6 +312,8 @@ namespace pugi
 		It begin() const { return _begin; }
 		It end() const { return _end; }
 
+		bool empty() const { return _begin == _end; }
+
 	private:
 		It _begin, _end;
 	};
