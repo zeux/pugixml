@@ -1806,4 +1806,15 @@ TEST(document_move_compact_fail)
 	CHECK(!docs[safe_count+1].first_child());
 }
 #endif
+
+TEST(document_move_assign_empty)
+{
+	xml_document doc;
+	doc.append_child(STR("node"));
+
+	doc = xml_document();
+	doc.append_child(STR("node2"));
+
+	CHECK_NODE(doc, "<node2/>");
+}
 #endif

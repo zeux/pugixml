@@ -526,7 +526,8 @@ PUGI__NS_BEGIN
 			xml_memory_page* page = xml_memory_page::construct(memory);
 			assert(page);
 
-			page->allocator = _root->allocator;
+			assert(this == _root->allocator);
+			page->allocator = this;
 
 			return page;
 		}
@@ -7091,8 +7092,12 @@ namespace pugi
 	#endif
 
 		// move allocation state
-		doc->_root = other->_root;
-		doc->_busy_size = other->_busy_size;
+		// note that other->_root may point to the embedded document page, in which case we should keep original (empty) state
+		if (other->_root != PUGI__GETPAGE(other))
+		{
+			doc->_root = other->_root;
+			doc->_busy_size = other->_busy_size;
+		}
 
 		// move buffer state
 		doc->buffer = other->buffer;
