@@ -11822,14 +11822,16 @@ PUGI__NS_BEGIN
 				lexeme_t l = _lexer.current();
 				_lexer.next();
 
-				if (++_depth > xpath_ast_depth_limit)
-					return error_rec();
-
 				if (l == lex_double_slash)
 				{
 					n = alloc_node(ast_step, n, axis_descendant_or_self, nodetest_type_node, 0);
 					if (!n) return 0;
+
+					++_depth;
 				}
+
+				if (++_depth > xpath_ast_depth_limit)
+					return error_rec();
 
 				n = parse_step(n);
 				if (!n) return 0;
