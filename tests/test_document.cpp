@@ -1815,6 +1815,6 @@ TEST(document_move_assign_empty)
 	doc = xml_document();
 	doc.append_child(STR("node2"));
 
-	CHECK_NODE(doc, "<node2/>");
+	CHECK_NODE(doc, STR("<node2/>"));
 }
 #endif
