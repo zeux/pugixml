@@ -23,6 +23,9 @@ cmake_dependent_option(PUGIXML_BUILD_TESTS
   "Build pugixml tests" OFF
   "BUILD_TESTING;CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
 
+# Custom build defines
+set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines")
+
 option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS "Build both shared and static libraries" OFF)
  
  # Expose option to build PUGIXML as static even when the global BUILD_SHARED_LIBS variable is set
@@ -42,6 +45,12 @@ endif()
 
 if (NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
+endif()
+
+if (DEFINED PUGIXML_BUILD_DEFINES)
+  foreach(DEFINE ${PUGIXML_BUILD_DEFINES})
+    add_definitions("-D" ${DEFINE})
+  endforeach()
 endif()
 
 if (PUGIXML_USE_POSTFIX)
