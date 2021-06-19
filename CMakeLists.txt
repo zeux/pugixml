@@ -24,7 +24,8 @@ cmake_dependent_option(PUGIXML_BUILD_TESTS
   "BUILD_TESTING;CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
 
 # Custom build defines
-set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines")
+set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
+separate_arguments(PUGIXML_BUILD_DEFINES)
 
 option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS "Build both shared and static libraries" OFF)
  
@@ -45,12 +46,6 @@ endif()
 
 if (NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
-endif()
-
-if (DEFINED PUGIXML_BUILD_DEFINES)
-  foreach(DEFINE ${PUGIXML_BUILD_DEFINES})
-    add_definitions("-D" ${DEFINE})
-  endforeach()
 endif()
 
 if (PUGIXML_USE_POSTFIX)
@@ -90,6 +85,8 @@ if (PUGIXML_BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
     PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
   target_compile_definitions(pugixml-shared
+    PUBLIC
+      ${PUGIXML_BUILD_DEFINES}
     PRIVATE
       $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>)
   target_compile_options(pugixml-shared
@@ -110,6 +107,9 @@ if (NOT PUGIXML_BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
   target_include_directories(pugixml-static
     PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
+    target_compile_definitions(pugixml-static
+    PUBLIC
+      ${PUGIXML_BUILD_DEFINES})
   target_compile_options(pugixml-static
     PRIVATE
       ${msvc-rt-mtd-shared}
