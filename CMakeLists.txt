@@ -27,12 +27,13 @@ cmake_dependent_option(PUGIXML_BUILD_TESTS
 set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
 separate_arguments(PUGIXML_BUILD_DEFINES)
 
-option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS "Build both shared and static libraries" OFF)
- 
- # Expose option to build PUGIXML as static even when the global BUILD_SHARED_LIBS variable is set
-cmake_dependent_option(PUGIXML_BUILD_SHARED_LIBS 
-  "Build shared instead of static library" OFF
-  "BUILD_SHARED_LIBS" ON)
+# Technically not needed for this file. This is builtin CMAKE global variable.
+option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF) 
+
+# Expose option to build PUGIXML as static as well when the global BUILD_SHARED_LIBS variable is set
+cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
+  "Build both shared and static libraries" OFF
+  "BUILD_SHARED_LIBS" OFF)
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
 if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
@@ -73,7 +74,7 @@ set(versioned-dir $<$<BOOL:${PUGIXML_USE_VERSIONED_LIBDIR}>:/pugixml-${PROJECT_V
 
 set(libs)
 
-if (PUGIXML_BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
+if (BUILD_SHARED_LIBS)
   add_library(pugixml-shared SHARED
     ${PROJECT_SOURCE_DIR}/scripts/pugixml_dll.rc
     ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
@@ -97,7 +98,7 @@ if (PUGIXML_BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
       ${msvc-rt-mt-static})
 endif()
 
-if (NOT PUGIXML_BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
+if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
   add_library(pugixml-static STATIC
     ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
   add_library(pugixml::static ALIAS pugixml-static)
@@ -118,7 +119,7 @@ if (NOT PUGIXML_BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
       ${msvc-rt-mt-static})
 endif()
 
-if (PUGIXML_BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS)
   set(pugixml-alias pugixml-shared)
 else()
   set(pugixml-alias pugixml-static)
