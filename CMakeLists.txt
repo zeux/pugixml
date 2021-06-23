@@ -34,6 +34,76 @@ option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
   "Build both shared and static libraries" OFF
   "BUILD_SHARED_LIBS" OFF)
+  
+# Expose options from the pugiconfig.hpp file.
+option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
+if (PUGIXML_WCHAR_MODE)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_WCHAR_MODE)
+endif()
+
+option(PUGIXML_COMPACT "Enable compact mode" OFF)
+if (PUGIXML_COMPACT)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_COMPACT)
+endif()
+
+option(PUGIXML_NO_XPATH "Disable XPath" OFF)
+if (PUGIXML_NO_XPATH)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_XPATH)
+endif()
+
+option(PUGIXML_NO_STL "Disable STL" OFF)
+if (PUGIXML_NO_STL)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_STL)
+endif()
+
+option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
+if (PUGIXML_NO_EXCEPTIONS)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_EXCEPTIONS)
+endif()
+
+option(PUGIXML_HEADER_ONLY "Switch to header only" OFF)
+if (PUGIXML_HEADER_ONLY)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_HEADER_ONLY)
+endif()
+
+option(PUGIXML_HAS_LONG_LONG "Enable long long support" OFF)
+if (PUGIXML_HAS_LONG_LONG)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_HAS_LONG_LONG)
+endif()
+
+# Tune these to adjust memory-related behaviour
+if (DEFINED PUGIXML_MEMORY_PAGE_SIZE)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_MEMORY_PAGE_SIZE=${PUGIXML_MEMORY_PAGE_SIZE})
+endif()
+
+if(DEFINED PUGIXML_MEMORY_OUTPUT_STACK)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_MEMORY_OUTPUT_STACK=${PUGIXML_MEMORY_OUTPUT_STACK})
+endif()
+
+if (DEFINED PUGIXML_MEMORY_XPATH_PAGE_SIZE)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_MEMORY_XPATH_PAGE_SIZE=${PUGIXML_MEMORY_XPATH_PAGE_SIZE})
+endif()
+
+# Tune this to adjust max nesting for XPath queries
+if (DEFINED PUGIXML_XPATH_DEPTH_LIMIT)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_XPATH_DEPTH_LIMIT=${PUGIXML_XPATH_DEPTH_LIMIT})
+endif()
+
+# Set these to control attributes for public classes/functions
+option(PUGIXML_OVERRIDE_API "Export all public symbols from DLL" OFF)
+if(PUGIXML_OVERRIDE_API)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_API=__declspec(dllexport))
+endif()
+
+option(PUGIXML_OVERRIDE_CLASS "Import all classes from DLL" OFF)
+if(PUGIXML_OVERRIDE_CLASS)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_CLASS=__declspec(dllimport))
+endif()
+
+option(PUGIXML_OVERRIDE_FUNCTION "Set calling conventions to all public functions to fastcall" OFF)
+if(PUGIXML_OVERRIDE_FUNCTION)
+  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_FUNCTION=__fastcall)
+endif()
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
 if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
