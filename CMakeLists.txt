@@ -35,35 +35,15 @@ cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
   "Build both shared and static libraries" OFF
   "BUILD_SHARED_LIBS" OFF)
   
-# Expose options from the pugiconfig.hpp file.
+# Expose options from the pugiconfig.hpp
 option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
-if (PUGIXML_WCHAR_MODE)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_WCHAR_MODE)
-endif()
-
 option(PUGIXML_COMPACT "Enable compact mode" OFF)
-if (PUGIXML_COMPACT)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_COMPACT)
-endif()
 
+# Advanced options from pugiconfig.hpp
 option(PUGIXML_NO_XPATH "Disable XPath" OFF)
-if (PUGIXML_NO_XPATH)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_XPATH)
-endif()
-mark_as_advanced(PUGIXML_NO_XPATH)
-
 option(PUGIXML_NO_STL "Disable STL" OFF)
-if (PUGIXML_NO_STL)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_STL)
-endif()
-mark_as_advanced(PUGIXML_NO_STL)
-
 option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
-if (PUGIXML_NO_EXCEPTIONS)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_EXCEPTIONS)
-endif()
-mark_as_advanced(PUGIXML_NO_EXCEPTIONS)
-
+mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
 
 # Tune these to adjust memory-related behaviour
 if (DEFINED PUGIXML_MEMORY_PAGE_SIZE)
@@ -137,7 +117,12 @@ if (BUILD_SHARED_LIBS)
     PUBLIC
       ${PUGIXML_BUILD_DEFINES}
     PRIVATE
-      $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>)
+      $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>
+      $<$<BOOL:PUGIXML_WCHAR_MODE>:PUGIXML_WCHAR_MODE>
+      $<$<BOOL:PUGIXML_COMPACT>:PUGIXML_COMPACT>
+      $<$<BOOL:PUGIXML_NO_XPATH>:PUGIXML_NO_XPATH>
+      $<$<BOOL:PUGIXML_NO_STL>:PUGIXML_NO_STL>
+      $<$<BOOL:PUGIXML_NO_EXCEPTIONS>:PUGIXML_NO_EXCEPTIONS>)
   target_compile_options(pugixml-shared
     PRIVATE
       ${msvc-rt-mtd-shared}
@@ -158,7 +143,13 @@ if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
     target_compile_definitions(pugixml-static
     PUBLIC
-      ${PUGIXML_BUILD_DEFINES})
+      ${PUGIXML_BUILD_DEFINES}
+    PRIVATE
+      $<$<BOOL:PUGIXML_WCHAR_MODE>:PUGIXML_WCHAR_MODE>
+      $<$<BOOL:PUGIXML_COMPACT>:PUGIXML_COMPACT>
+      $<$<BOOL:PUGIXML_NO_XPATH>:PUGIXML_NO_XPATH>
+      $<$<BOOL:PUGIXML_NO_STL>:PUGIXML_NO_STL>
+      $<$<BOOL:PUGIXML_NO_EXCEPTIONS>:PUGIXML_NO_EXCEPTIONS>)
   target_compile_options(pugixml-static
     PRIVATE
       ${msvc-rt-mtd-shared}
