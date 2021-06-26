@@ -50,26 +50,20 @@ option(PUGIXML_NO_XPATH "Disable XPath" OFF)
 if (PUGIXML_NO_XPATH)
   list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_XPATH)
 endif()
+mark_as_advanced(PUGIXML_NO_XPATH)
 
 option(PUGIXML_NO_STL "Disable STL" OFF)
 if (PUGIXML_NO_STL)
   list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_STL)
 endif()
+mark_as_advanced(PUGIXML_NO_STL)
 
 option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
 if (PUGIXML_NO_EXCEPTIONS)
   list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_NO_EXCEPTIONS)
 endif()
+mark_as_advanced(PUGIXML_NO_EXCEPTIONS)
 
-option(PUGIXML_HEADER_ONLY "Switch to header only" OFF)
-if (PUGIXML_HEADER_ONLY)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_HEADER_ONLY)
-endif()
-
-option(PUGIXML_HAS_LONG_LONG "Enable long long support" OFF)
-if (PUGIXML_HAS_LONG_LONG)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_HAS_LONG_LONG)
-endif()
 
 # Tune these to adjust memory-related behaviour
 if (DEFINED PUGIXML_MEMORY_PAGE_SIZE)
@@ -87,22 +81,6 @@ endif()
 # Tune this to adjust max nesting for XPath queries
 if (DEFINED PUGIXML_XPATH_DEPTH_LIMIT)
   list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_XPATH_DEPTH_LIMIT=${PUGIXML_XPATH_DEPTH_LIMIT})
-endif()
-
-# Set these to control attributes for public classes/functions
-option(PUGIXML_OVERRIDE_API "Export all public symbols from DLL" OFF)
-if(PUGIXML_OVERRIDE_API)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_API=__declspec(dllexport))
-endif()
-
-option(PUGIXML_OVERRIDE_CLASS "Import all classes from DLL" OFF)
-if(PUGIXML_OVERRIDE_CLASS)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_CLASS=__declspec(dllimport))
-endif()
-
-option(PUGIXML_OVERRIDE_FUNCTION "Set calling conventions to all public functions to fastcall" OFF)
-if(PUGIXML_OVERRIDE_FUNCTION)
-  list(APPEND PUGIXML_BUILD_DEFINES PUGIXML_FUNCTION=__fastcall)
 endif()
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
