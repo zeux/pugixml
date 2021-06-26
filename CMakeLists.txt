@@ -5,7 +5,9 @@ include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
 include(GNUInstallDirs)
 include(CTest)
+include(CheckTypeSize)
 
+check_type_size("long long" LONG_LONG LANGUAGE CXX)
 
 cmake_dependent_option(PUGIXML_USE_VERSIONED_LIBDIR
   "Use a private subdirectory to install the headers and libraries" OFF
@@ -118,6 +120,7 @@ if (BUILD_SHARED_LIBS)
       ${PUGIXML_BUILD_DEFINES}
     PRIVATE
       $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>
+      $<$<BOOL:HAVE_LONG_LONG>:PUGIXML_HAS_LONG_LONG>
       $<$<BOOL:PUGIXML_WCHAR_MODE>:PUGIXML_WCHAR_MODE>
       $<$<BOOL:PUGIXML_COMPACT>:PUGIXML_COMPACT>
       $<$<BOOL:PUGIXML_NO_XPATH>:PUGIXML_NO_XPATH>
@@ -145,6 +148,7 @@ if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
     PUBLIC
       ${PUGIXML_BUILD_DEFINES}
     PRIVATE
+      $<$<BOOL:HAVE_LONG_LONG>:PUGIXML_HAS_LONG_LONG>
       $<$<BOOL:PUGIXML_WCHAR_MODE>:PUGIXML_WCHAR_MODE>
       $<$<BOOL:PUGIXML_COMPACT>:PUGIXML_COMPACT>
       $<$<BOOL:PUGIXML_NO_XPATH>:PUGIXML_NO_XPATH>
