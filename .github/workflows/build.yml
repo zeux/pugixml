@@ -1,0 +1,49 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  unix:
+    strategy:
+      matrix:
+        os: [ubuntu, macos]
+        compiler: [g++, clang++]
+        defines: [standard, PUGIXML_WCHAR_MODE, PUGIXML_COMPACT, PUGIXML_NO_EXCEPTIONS]
+        exclude:
+          - os: macos
+            compiler: g++
+    name: ${{matrix.os}}
+    runs-on: ${{matrix.os}}-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: make test
+      run: |
+        set CXX=${{matrix.compiler}}
+        set DEFINES=${{matrix.defines}}
+        make test cxxstd=c++11 defines=$DEFINES config=release -j2
+        make test cxxstd=c++98 defines=$DEFINES config=debug -j2
+        make test defines=$DEFINES config=sanitize -j2
+    - name: make coverage
+      if: ${{matrix.os == 'ubuntu' && matrix.compiler == 'clang++'}}
+      run: |
+        set DEFINES=${{matrix.defines}}
+        make test defines=$DEFINES config=coverage -j2
+        bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov -X search -t ${{secrets.CODECOV_TOKEN}} -B ${{github.ref}}
+
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        arch: [Win32, x64]
+        defines: [standard, PUGIXML_WCHAR_MODE, PUGIXML_COMPACT, PUGIXML_NO_EXCEPTIONS]
+    steps:
+    - uses: actions/checkout@v1
+    - name: cmake configure
+      run: cmake . -DPUGIXML_BUILD_TESTS=ON -DPUGIXML_BUILD_DEFINES=${{matrix.defines}} -A ${{matrix.arch}}
+    - name: cmake test
+      shell: bash # necessary for fail-fast
+      run: |
+        cmake --build . -- -property:Configuration=Debug -verbosity:minimal
+        Debug/pugixml-check.exe
+        cmake --build . -- -property:Configuration=Release -verbosity:minimal
+        Release/pugixml-check.exe
