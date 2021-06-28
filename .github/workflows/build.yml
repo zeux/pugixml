@@ -26,8 +26,8 @@ jobs:
         make test cxxstd=c++98 defines=${{matrix.defines}} config=debug -j2
         make test defines=${{matrix.defines}} config=sanitize -j2
     - name: make coverage
-      if: ${{matrix.os == 'ubuntu' && matrix.compiler == 'clang++'}}
       run: |
+        export CXX=${{matrix.compiler}}
         make test defines=${{matrix.defines}} config=coverage -j2
         bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov -X search -t ${{secrets.CODECOV_TOKEN}} -B ${{github.ref}}
 
