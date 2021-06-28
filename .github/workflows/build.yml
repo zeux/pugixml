@@ -42,7 +42,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: cmake configure
-      run: cmake . -DPUGIXML_BUILD_TESTS=ON -DPUGIXML_BUILD_DEFINES=${{matrix.defines}} -A ${{matrix.arch}}
+      run: cmake . -DPUGIXML_BUILD_TESTS=ON -D${{matrix.defines}}=ON -A ${{matrix.arch}}
     - name: cmake test
       shell: bash # necessary for fail-fast
       run: |
