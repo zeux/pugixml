@@ -18,16 +18,14 @@ jobs:
     - uses: actions/checkout@v1
     - name: make test
       run: |
-        set CXX=${{matrix.compiler}}
-        set DEFINES=${{matrix.defines}}
-        make test cxxstd=c++11 defines=$DEFINES config=release -j2
-        make test cxxstd=c++98 defines=$DEFINES config=debug -j2
-        make test defines=$DEFINES config=sanitize -j2
+        export CXX=${{matrix.compiler}}
+        make test cxxstd=c++11 defines=${{matrix.defines}} config=release -j2
+        make test cxxstd=c++98 defines=${{matrix.defines}} config=debug -j2
+        make test defines=${{matrix.defines}} config=sanitize -j2
     - name: make coverage
       if: ${{matrix.os == 'ubuntu' && matrix.compiler == 'clang++'}}
       run: |
-        set DEFINES=${{matrix.defines}}
-        make test defines=$DEFINES config=coverage -j2
+        make test defines=${{matrix.defines}} config=coverage -j2
         bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov -X search -t ${{secrets.CODECOV_TOKEN}} -B ${{github.ref}}
 
   windows:
