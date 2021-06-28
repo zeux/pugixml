@@ -16,6 +16,7 @@ jobs:
         exclude:
           - os: macos
             compiler: g++
+    name: ${{matrix.os}} (${{matrix.compiler}}, ${{matrix.defines}})
     runs-on: ${{matrix.os}}-latest
     steps:
     - uses: actions/checkout@v1
@@ -26,6 +27,7 @@ jobs:
         make test cxxstd=c++98 defines=${{matrix.defines}} config=debug -j2
         make test defines=${{matrix.defines}} config=sanitize -j2
     - name: make coverage
+      if: ${{!(matrix.os == 'ubuntu' && matrix.compiler == 'clang++')}} # linux/clang produces coverage info gcov can't parse
       run: |
         export CXX=${{matrix.compiler}}
         make test defines=${{matrix.defines}} config=coverage -j2
