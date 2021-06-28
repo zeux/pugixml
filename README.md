@@ -1,4 +1,4 @@
-pugixml [![Build Status](https://travis-ci.org/zeux/pugixml.svg?branch=master)](https://travis-ci.org/zeux/pugixml) [![Build status](https://ci.appveyor.com/api/projects/status/9hdks1doqvq8pwe7/branch/master?svg=true)](https://ci.appveyor.com/project/zeux/pugixml) [![codecov.io](https://codecov.io/github/zeux/pugixml/coverage.svg?branch=master)](https://codecov.io/github/zeux/pugixml?branch=master) ![MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+pugixml [![Actions Status](https://github.com/zeux/pugixml/workflows/build/badge.svg)](https://github.com/zeux/pugixml/actions) [![Build status](https://ci.appveyor.com/api/projects/status/9hdks1doqvq8pwe7/branch/master?svg=true)](https://ci.appveyor.com/project/zeux/pugixml) [![codecov.io](https://codecov.io/github/zeux/pugixml/coverage.svg?branch=master)](https://codecov.io/github/zeux/pugixml?branch=master) ![MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 =======
 
 pugixml is a C++ XML processing library, which consists of a DOM-like interface with rich traversal/modification
