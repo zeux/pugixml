@@ -955,10 +955,10 @@ In main(), the XML file is loaded into an xml_document object:
 
 [source]
 ----
-    if ( !doc.load_file(argv[1], parse_full & ~parse_escapes ) ){
-		cout << "Error occurred parsing file!" << endl; 
-		return -1;
-	}
+if ( !doc.load_file(argv[1], parse_full & ~parse_escapes ) ){
+	cout << "Error occurred parsing file!" << endl; 
+	return -1;
+}
 ----
 
 Note that parsing flags are added to instuct pugixml to load the entire contents of the file and to leave entity references in their original form, rather than expanding them into entities.
@@ -967,17 +967,17 @@ The first node of the file, containing the XML declaration, is obtained by a cal
 
 [source]
 ----
-    xml_node cur_node= doc.first_child();
+xml_node cur_node= doc.first_child();
 ----
 
 The remaining top level nodes in the file can be extracted using a simple loop that relies on the call to next_sibling():
 
 [source]
 ----
-	while( cur_node ){
-		printNode( cur_node, 0 );
-		cur_node= cur_node.next_sibling();
-	}	
+while( cur_node ){
+	printNode( cur_node, 0 );
+	cur_node= cur_node.next_sibling();
+}	
 ----
 
 The prototype of the printNode function follows:
@@ -991,7 +991,7 @@ The tabs parameter is used simply to output the contents of the file in blocked 
 
 [source]
 ----
-	cout << "Declaration node-- name: " << node.name();
+cout << "Declaration node-- name: " << node.name();
 ----
 
 The attributes are printed by a call to the printAttributes() function. printAttributes() obtains the first attribute by calling first_attribute() on the declaration node; it obtains the rest by calling next_attribute() on each attribute object:
