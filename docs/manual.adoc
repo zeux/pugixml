@@ -946,6 +946,85 @@ This is an example of using these functions, along with node data retrieval ones
 include::samples/traverse_base.cpp[tags=data]
 ----
 
+[[access.primitive_traversal]]
+=== Primitive recursive traversal to view contents of file
+
+Using the API, you can traverse and view the entire contents of an XML file. A simple example of a recursive traversal follows; the source code can be found in traverse_tree.cpp.
+
+In main(), the XML file is loaded into an xml_document object:
+
+[source]
+----
+    if ( !doc.load_file(argv[1], parse_full & ~parse_escapes ) ){
+		cout << "Error occurred parsing file!" << endl; 
+		return -1;
+	}
+----
+
+Note that parsing flags are added to instuct pugixml to load the entire contents of the file and to leave entity references in their original form, rather than expanding them into entities.
+
+The first node of the file, containing the XML declaration, is obtained by a call to first_child():
+
+[source]
+----
+    xml_node cur_node= doc.first_child();
+----
+
+The remaining top level nodes in the file can be extracted using a simple loop that relies on the call to next_sibling():
+
+[source]
+----
+	while( cur_node ){
+		printNode( cur_node, 0 );
+		cur_node= cur_node.next_sibling();
+	}	
+----
+
+The prototype of the printNode function follows:
+
+[source]
+----
+void printNode( xml_node cur_node, int tabs ); 
+----
+
+The tabs parameter is used simply to output the contents of the file in blocked fashion. The function switches based on the node type. For each case, the appropriate functions are called that extract the content of the node and print it. For example, the XML declaration node, having type 'pugi::node_declaration', contains a name and attributes. The name is printed by a call to the printDeclarationNode() function, which contains a single line:
+
+[source]
+----
+	cout << "Declaration node-- name: " << node.name();
+----
+
+The attributes are printed by a call to the printAttributes() function. printAttributes() obtains the first attribute by calling first_attribute() on the declaration node; it obtains the rest by calling next_attribute() on each attribute object:
+
+[source]
+----
+void printAttributes( xml_node node ){
+	xml_attribute cur_attribute= node.first_attribute();
+	while ( cur_attribute ){
+		cout <<  "; ";
+		cout << "Attribute-- name: " << cur_attribute.name() << ", content: " << cur_attribute.value();
+		cur_attribute= cur_attribute.next_attribute();
+	}
+}
+----
+
+As shown, each attribute is printed using a call to name(), followed by a call to value().
+
+XML elements-- the predominant tags in an XML file, are of type 'pugi::node_element'. This type also has a name and, optionally, attributes. Elements may also contain children nodes, which are accessed using the printChildNodes() function. This function obtains a reference to the first child by calling the aptly named first_child() function. It traverses the list of children by calling the next_sibling() function on each child node:
+
+[source]
+----
+void printChildNodes( xml_node parent_node, int tabs ){
+	xml_node cur_node= parent_node.first_child();
+	while ( cur_node ){
+		printNode( cur_node, tabs );
+		cur_node= cur_node.next_sibling();
+	}
+}
+----
+
+This code sample was devised, in part, to demonstrate how each aspect of every type of node can be accessed. Other recursive approaches for accessing content are discussed below.
+
 [[access.contents]]
 === Contents-based traversal functions
 
