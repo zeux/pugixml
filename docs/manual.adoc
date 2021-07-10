@@ -1604,12 +1604,12 @@ bool xml_document::save_file(const char* path, const char_t* indent = "\t", unsi
 bool xml_document::save_file(const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 ----
 
-These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see <<saving.options>>) and output data encoding (see <<saving.encoding>>). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc.
+These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see <<saving.options>>) and output data encoding (see <<saving.encoding>>). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc. The functions return `true` on success and `false` if the file could not be opened or written to.
 
 File path is passed to the system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
 
 [[xml_writer_file]]
-`save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns `false`. Calling `save_file` is equivalent to creating an `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see <<saving.writer>> for writer interface details.
+`save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. Calling `save_file` is equivalent to creating an `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see <<saving.writer>> for writer interface details.
 
 This is a simple example of saving XML document to file (link:samples/save_file.cpp[]):
 

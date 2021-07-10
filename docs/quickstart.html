@@ -754,7 +754,7 @@ All pugixml classes and functions are located in <code>pugi</code> namespace; yo
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nl">simple_walker</span><span class="tok-p">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_tree_walker</span>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nc">simple_walker</span><span class="tok-o">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_tree_walker</span>
 <span class="tok-p">{</span>
     <span class="tok-k">virtual</span> <span class="tok-kt">bool</span> <span class="tok-n">for_each</span><span class="tok-p">(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span><span class="tok-o">&amp;</span> <span class="tok-n">node</span><span class="tok-p">)</span>
     <span class="tok-p">{</span>
@@ -951,11 +951,11 @@ XPath functions throw <code>xpath_exception</code> objects on error; the sample 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nl">xml_string_writer</span><span class="tok-p">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_writer</span>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nc">xml_string_writer</span><span class="tok-o">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_writer</span>
 <span class="tok-p">{</span>
     <span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">string</span> <span class="tok-n">result</span><span class="tok-p">;</span>
 
-    <span class="tok-k">virtual</span> <span class="tok-kt">void</span> <span class="tok-nf">write</span><span class="tok-p">(</span><span class="tok-k">const</span> <span class="tok-kt">void</span><span class="tok-o">*</span> <span class="tok-n">data</span><span class="tok-p">,</span> <span class="tok-kt">size_t</span> <span class="tok-n">size</span><span class="tok-p">)</span>
+    <span class="tok-k">virtual</span> <span class="tok-kt">void</span> <span class="tok-n">write</span><span class="tok-p">(</span><span class="tok-k">const</span> <span class="tok-kt">void</span><span class="tok-o">*</span> <span class="tok-n">data</span><span class="tok-p">,</span> <span class="tok-kt">size_t</span> <span class="tok-n">size</span><span class="tok-p">)</span>
     <span class="tok-p">{</span>
         <span class="tok-n">result</span><span class="tok-p">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-k">static_cast</span><span class="tok-o">&lt;</span><span class="tok-k">const</span> <span class="tok-kt">char</span><span class="tok-o">*&gt;</span><span class="tok-p">(</span><span class="tok-n">data</span><span class="tok-p">),</span> <span class="tok-n">size</span><span class="tok-p">);</span>
     <span class="tok-p">}</span>
@@ -1030,12 +1030,17 @@ pugixml is Copyright (C) 2006-2020 Arseny Kapoulkine.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-11-26 00:58:43 -0800
+Last updated 2021-06-27 18:48:58 -0700
 </div>
 </div>
 <style>
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
-pre.pygments  { background: #f8f8f8; }
+pre.pygments { background: #f8f8f8; }
 pre.pygments .tok-c { color: #408080; font-style: italic } /* Comment */
 pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
 pre.pygments .tok-k { color: #008000; font-weight: bold } /* Keyword */

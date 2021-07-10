@@ -1571,14 +1571,14 @@ Sometimes XML data should be loaded from some other source than a file, i.e. HTT
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-n">xml_parse_result</span>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nc">xml_parse_result</span>
 <span class="tok-p">{</span>
     <span class="tok-n">xml_parse_status</span> <span class="tok-n">status</span><span class="tok-p">;</span>
     <span class="tok-kt">ptrdiff_t</span> <span class="tok-n">offset</span><span class="tok-p">;</span>
     <span class="tok-n">xml_encoding</span> <span class="tok-n">encoding</span><span class="tok-p">;</span>
 
     <span class="tok-k">operator</span> <span class="tok-nf">bool</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
-    <span class="tok-k">const</span> <span class="tok-kt">char</span><span class="tok-o">*</span> <span class="tok-nf">description</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
+    <span class="tok-k">const</span> <span class="tok-kt">char</span><span class="tok-o">*</span> <span class="tok-n">description</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
 <span class="tok-p">};</span></code></pre>
 </div>
 </div>
@@ -2276,8 +2276,8 @@ Node and attribute iterators are somewhere in the middle between const and non-c
 <span class="tok-p">{</span>
 <span class="tok-k">public</span><span class="tok-o">:</span>
     <span class="tok-k">virtual</span> <span class="tok-kt">bool</span> <span class="tok-n">begin</span><span class="tok-p">(</span><span class="tok-n">xml_node</span><span class="tok-o">&amp;</span> <span class="tok-n">node</span><span class="tok-p">);</span>
-    <span class="tok-k">virtual</span> <span class="tok-kt">bool</span> <span class="tok-nf">for_each</span><span class="tok-p">(</span><span class="tok-n">xml_node</span><span class="tok-o">&amp;</span> <span class="tok-n">node</span><span class="tok-p">)</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">;</span>
-    <span class="tok-k">virtual</span> <span class="tok-kt">bool</span> <span class="tok-nf">end</span><span class="tok-p">(</span><span class="tok-n">xml_node</span><span class="tok-o">&amp;</span> <span class="tok-n">node</span><span class="tok-p">);</span>
+    <span class="tok-k">virtual</span> <span class="tok-kt">bool</span> <span class="tok-n">for_each</span><span class="tok-p">(</span><span class="tok-n">xml_node</span><span class="tok-o">&amp;</span> <span class="tok-n">node</span><span class="tok-p">)</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">;</span>
+    <span class="tok-k">virtual</span> <span class="tok-kt">bool</span> <span class="tok-n">end</span><span class="tok-p">(</span><span class="tok-n">xml_node</span><span class="tok-o">&amp;</span> <span class="tok-n">node</span><span class="tok-p">);</span>
 
     <span class="tok-kt">int</span> <span class="tok-nf">depth</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
 <span class="tok-p">};</span>
@@ -2313,7 +2313,7 @@ The traversal is launched by calling <code>traverse</code> function on traversal
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nl">simple_walker</span><span class="tok-p">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_tree_walker</span>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nc">simple_walker</span><span class="tok-o">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_tree_walker</span>
 <span class="tok-p">{</span>
     <span class="tok-k">virtual</span> <span class="tok-kt">bool</span> <span class="tok-n">for_each</span><span class="tok-p">(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span><span class="tok-o">&amp;</span> <span class="tok-n">node</span><span class="tok-p">)</span>
     <span class="tok-p">{</span>
@@ -2341,9 +2341,9 @@ While there are existing functions for getting a node/attribute with known conte
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-n">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_attribute</span> <span class="tok-n">xml_node</span><span class="tok-o">::</span><span class="tok-n">find_attribute</span><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
-<span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-n">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <span class="tok-n">xml_node</span><span class="tok-o">::</span><span class="tok-n">find_child</span><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
-<span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-n">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <span class="tok-n">xml_node</span><span class="tok-o">::</span><span class="tok-n">find_node</span><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span></code></pre>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-nc">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_attribute</span> <span class="tok-n">xml_node</span><span class="tok-o">::</span><span class="tok-n">find_attribute</span><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
+<span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-nc">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <span class="tok-n">xml_node</span><span class="tok-o">::</span><span class="tok-n">find_child</span><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
+<span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-nc">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <span class="tok-n">xml_node</span><span class="tok-o">::</span><span class="tok-n">find_node</span><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2368,14 +2368,14 @@ While there are existing functions for getting a node/attribute with known conte
     <span class="tok-k">return</span> <span class="tok-n">node</span><span class="tok-p">.</span><span class="tok-n">attribute</span><span class="tok-p">(</span><span class="tok-s">&quot;Timeout&quot;</span><span class="tok-p">).</span><span class="tok-n">as_int</span><span class="tok-p">()</span> <span class="tok-o">&lt;</span> <span class="tok-mi">20</span><span class="tok-p">;</span>
 <span class="tok-p">}</span>
 
-<span class="tok-k">struct</span> <span class="tok-n">allow_remote_predicate</span>
+<span class="tok-k">struct</span> <span class="tok-nc">allow_remote_predicate</span>
 <span class="tok-p">{</span>
-    <span class="tok-kt">bool</span> <span class="tok-k">operator</span><span class="tok-p">()(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_attribute</span> <span class="tok-n">attr</span><span class="tok-p">)</span> <span class="tok-k">const</span>
+    <span class="tok-kt">bool</span> <span class="tok-nf">operator</span><span class="tok-p">()(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_attribute</span> <span class="tok-n">attr</span><span class="tok-p">)</span> <span class="tok-k">const</span>
     <span class="tok-p">{</span>
         <span class="tok-k">return</span> <span class="tok-n">strcmp</span><span class="tok-p">(</span><span class="tok-n">attr</span><span class="tok-p">.</span><span class="tok-n">name</span><span class="tok-p">(),</span> <span class="tok-s">&quot;AllowRemote&quot;</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-mi">0</span><span class="tok-p">;</span>
     <span class="tok-p">}</span>
 
-    <span class="tok-kt">bool</span> <span class="tok-k">operator</span><span class="tok-p">()(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span> <span class="tok-n">node</span><span class="tok-p">)</span> <span class="tok-k">const</span>
+    <span class="tok-kt">bool</span> <span class="tok-nf">operator</span><span class="tok-p">()(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span> <span class="tok-n">node</span><span class="tok-p">)</span> <span class="tok-k">const</span>
     <span class="tok-p">{</span>
         <span class="tok-k">return</span> <span class="tok-n">node</span><span class="tok-p">.</span><span class="tok-n">attribute</span><span class="tok-p">(</span><span class="tok-s">&quot;AllowRemote&quot;</span><span class="tok-p">).</span><span class="tok-n">as_bool</span><span class="tok-p">();</span>
     <span class="tok-p">}</span>
@@ -3120,13 +3120,13 @@ If you want to save the whole document to a file, you can use one of the followi
 </div>
 </div>
 <div class="paragraph">
-<p>These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see <a href="#saving.options">Output options</a>) and output data encoding (see <a href="#saving.encoding">Encodings</a>). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc.</p>
+<p>These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see <a href="#saving.options">Output options</a>) and output data encoding (see <a href="#saving.encoding">Encodings</a>). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc. The functions return <code>true</code> on success and <code>false</code> if the file could not be opened or written to.</p>
 </div>
 <div class="paragraph">
 <p>File path is passed to the system file opening function as is in case of the first function (which accepts <code>const char* path</code>); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.</p>
 </div>
 <div id="xml_writer_file" class="paragraph">
-<p><code>save_file</code> opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns <code>false</code>. Calling <code>save_file</code> is equivalent to creating an <code>xml_writer_file</code> object with <code>FILE*</code> handle as the only constructor argument and then calling <code>save</code>; see <a href="#saving.writer">Saving document via writer interface</a> for writer interface details.</p>
+<p><code>save_file</code> opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. Calling <code>save_file</code> is equivalent to creating an <code>xml_writer_file</code> object with <code>FILE*</code> handle as the only constructor argument and then calling <code>save</code>; see <a href="#saving.writer">Saving document via writer interface</a> for writer interface details.</p>
 </div>
 <div class="paragraph">
 <p>This is a simple example of saving XML document to file (<a href="samples/save_file.cpp" class="bare">samples/save_file.cpp</a>):</p>
@@ -3194,11 +3194,11 @@ All of the above saving functions are implemented in terms of writer interface. 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nl">xml_string_writer</span><span class="tok-p">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_writer</span>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nc">xml_string_writer</span><span class="tok-o">:</span> <span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_writer</span>
 <span class="tok-p">{</span>
     <span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">string</span> <span class="tok-n">result</span><span class="tok-p">;</span>
 
-    <span class="tok-k">virtual</span> <span class="tok-kt">void</span> <span class="tok-nf">write</span><span class="tok-p">(</span><span class="tok-k">const</span> <span class="tok-kt">void</span><span class="tok-o">*</span> <span class="tok-n">data</span><span class="tok-p">,</span> <span class="tok-kt">size_t</span> <span class="tok-n">size</span><span class="tok-p">)</span>
+    <span class="tok-k">virtual</span> <span class="tok-kt">void</span> <span class="tok-n">write</span><span class="tok-p">(</span><span class="tok-k">const</span> <span class="tok-kt">void</span><span class="tok-o">*</span> <span class="tok-n">data</span><span class="tok-p">,</span> <span class="tok-kt">size_t</span> <span class="tok-n">size</span><span class="tok-p">)</span>
     <span class="tok-p">{</span>
         <span class="tok-n">result</span><span class="tok-p">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-k">static_cast</span><span class="tok-o">&lt;</span><span class="tok-k">const</span> <span class="tok-kt">char</span><span class="tok-o">*&gt;</span><span class="tok-p">(</span><span class="tok-n">data</span><span class="tok-p">),</span> <span class="tok-n">size</span><span class="tok-p">);</span>
     <span class="tok-p">}</span>
@@ -3509,7 +3509,7 @@ The order of iteration depends on the order of nodes inside the set; the order c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">enum</span> <span class="tok-n">xpath_node_set</span><span class="tok-o">::</span><span class="tok-n">type_t</span> <span class="tok-p">{</span><span class="tok-n">type_unsorted</span><span class="tok-p">,</span> <span class="tok-n">type_sorted</span><span class="tok-p">,</span> <span class="tok-n">type_sorted_reverse</span><span class="tok-p">};</span>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">enum</span> <span class="tok-nc">xpath_node_set</span><span class="tok-o">::</span><span class="tok-n">type_t</span> <span class="tok-p">{</span><span class="tok-n">type_unsorted</span><span class="tok-p">,</span> <span class="tok-n">type_sorted</span><span class="tok-p">,</span> <span class="tok-n">type_sorted_reverse</span><span class="tok-p">};</span>
 <span class="tok-n">type_t</span> <span class="tok-n">xpath_node_set</span><span class="tok-o">::</span><span class="tok-n">type</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span></code></pre>
 </div>
 </div>
@@ -3896,13 +3896,13 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-n">xpath_parse_result</span>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">struct</span> <span class="tok-nc">xpath_parse_result</span>
 <span class="tok-p">{</span>
     <span class="tok-k">const</span> <span class="tok-kt">char</span><span class="tok-o">*</span> <span class="tok-n">error</span><span class="tok-p">;</span>
     <span class="tok-kt">ptrdiff_t</span> <span class="tok-n">offset</span><span class="tok-p">;</span>
 
     <span class="tok-k">operator</span> <span class="tok-nf">bool</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
-    <span class="tok-k">const</span> <span class="tok-kt">char</span><span class="tok-o">*</span> <span class="tok-nf">description</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
+    <span class="tok-k">const</span> <span class="tok-kt">char</span><span class="tok-o">*</span> <span class="tok-n">description</span><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
 <span class="tok-p">};</span></code></pre>
 </div>
 </div>
@@ -5604,9 +5604,9 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 
     <span class="tok-kt">bool</span> <a href="#xml_node::traverse">traverse</a><span class="tok-p">(</span><span class="tok-n">xml_tree_walker</span><span class="tok-o">&amp;</span> <span class="tok-n">walker</span><span class="tok-p">);</span>
 
-    <span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-n">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_attribute</span> <a href="#xml_node::find_attribute">find_attribute</a><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
-    <span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-n">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <a href="#xml_node::find_child">find_child</a><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
-    <span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-n">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <a href="#xml_node::find_node">find_node</a><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
+    <span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-nc">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_attribute</span> <a href="#xml_node::find_attribute">find_attribute</a><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
+    <span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-nc">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <a href="#xml_node::find_child">find_child</a><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
+    <span class="tok-k">template</span> <span class="tok-o">&lt;</span><span class="tok-k">typename</span> <span class="tok-nc">Predicate</span><span class="tok-o">&gt;</span> <span class="tok-n">xml_node</span> <a href="#xml_node::find_node">find_node</a><span class="tok-p">(</span><span class="tok-n">Predicate</span> <span class="tok-n">pred</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
 
     <span class="tok-n">string_t</span> <a href="#xml_node::path">path</a><span class="tok-p">(</span><span class="tok-n">char_t</span> <span class="tok-n">delimiter</span> <span class="tok-o">=</span> <span class="tok-sc">&#39;/&#39;</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
     <span class="tok-n">xml_node</span> <a href="#xml_node::first_element_by_path">xml_node::first_element_by_path</a><span class="tok-p">(</span><span class="tok-k">const</span> <span class="tok-n">char_t</span><span class="tok-o">*</span> <span class="tok-n">path</span><span class="tok-p">,</span> <span class="tok-n">char_t</span> <span class="tok-n">delimiter</span> <span class="tok-o">=</span> <span class="tok-sc">&#39;/&#39;</span><span class="tok-p">)</span> <span class="tok-k">const</span><span class="tok-p">;</span>
@@ -5815,7 +5815,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 
     <span class="tok-n">xpath_node</span> <a href="#xpath_node_set::first">first</a><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
 
-    <span class="tok-k">enum</span> <span class="tok-n">type_t</span> <span class="tok-p">{</span><a href="#xpath_node_set::type_unsorted">type_unsorted</a><span class="tok-p">,</span> <a href="#xpath_node_set::type_sorted">type_sorted</a><span class="tok-p">,</span> <a href="#xpath_node_set::type_sorted_reverse">type_sorted_reverse</a><span class="tok-p">};</span>
+    <span class="tok-k">enum</span> <span class="tok-nc">type_t</span> <span class="tok-p">{</span><a href="#xpath_node_set::type_unsorted">type_unsorted</a><span class="tok-p">,</span> <a href="#xpath_node_set::type_sorted">type_sorted</a><span class="tok-p">,</span> <a href="#xpath_node_set::type_sorted_reverse">type_sorted_reverse</a><span class="tok-p">};</span>
     <span class="tok-n">type_t</span> <a href="#xpath_node_set::type">type</a><span class="tok-p">()</span> <span class="tok-k">const</span><span class="tok-p">;</span>
     <span class="tok-kt">void</span> <a href="#xpath_node_set::sort">sort</a><span class="tok-p">(</span><span class="tok-kt">bool</span> <span class="tok-n">reverse</span> <span class="tok-o">=</span> <span class="tok-nb">false</span><span class="tok-p">);</span>
 
@@ -5871,12 +5871,17 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-12-04 16:29:50 -0800
+Last updated 2021-07-09 17:24:17 -0700
 </div>
 </div>
 <style>
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
-pre.pygments  { background: #f8f8f8; }
+pre.pygments { background: #f8f8f8; }
 pre.pygments .tok-c { color: #408080; font-style: italic } /* Comment */
 pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
 pre.pygments .tok-k { color: #008000; font-weight: bold } /* Keyword */
