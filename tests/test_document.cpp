@@ -616,6 +616,15 @@ TEST_XML(document_save, "<node/>")
 	CHECK(writer.as_string() == STR("<node/>"));
 }
 
+TEST_XML(document_save_no_space_before_closing_slash, "<node/>")
+{
+	xml_writer_string writer;
+
+	doc.save(writer, STR(""), format_no_declaration | format_no_whitespace_before_closing_slash, get_native_encoding());
+
+	CHECK(writer.as_string() == STR("<node/>\n"));
+}
+
 #ifndef PUGIXML_NO_STL
 TEST_XML(document_save_stream, "<node/>")
 {

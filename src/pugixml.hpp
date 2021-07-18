@@ -268,6 +268,9 @@ namespace pugi
 	// Use single quotes ' instead of double quotes " for enclosing attribute values. This flag is off by default.
 	const unsigned int format_attribute_single_quote = 0x200;
 
+	// Do not insert whitespace before a closing slash. This flag is off by default.
+	const unsigned int format_no_whitespace_before_closing_slash = 0x400;
+
 	// The default set of formatting flags.
 	// Nodes are indented depending on their depth in DOM tree, a default declaration is output if document has none.
 	const unsigned int format_default = format_indent;
