@@ -1321,8 +1321,8 @@ TEST_XML(dom_node_append_buffer_empty, "<node />")
 	CHECK(node.append_buffer("", 0).status == status_no_document_element);
 	CHECK(node.append_buffer("", 0, parse_fragment).status == status_ok);
 
-	CHECK(node.append_buffer(0, 0).status == status_no_document_element);
-	CHECK(node.append_buffer(0, 0, parse_fragment).status == status_ok);
+	CHECK(node.append_buffer(PUGIXML_NULL, 0).status == status_no_document_element);
+	CHECK(node.append_buffer(PUGIXML_NULL, 0, parse_fragment).status == status_ok);
 
 	CHECK_NODE(doc, STR("<node/>"));
 }

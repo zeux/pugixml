@@ -198,7 +198,7 @@ TEST_XML(xpath_api_evaluate_fail, "<node attr='3'/>")
 	CHECK(q.evaluate_boolean(doc) == false);
 	CHECK_DOUBLE_NAN(q.evaluate_number(doc));
 
-	CHECK(q.evaluate_string(0, 0, doc) == 1); // null terminator
+	CHECK(q.evaluate_string(PUGIXML_NULL, 0, doc) == 1); // null terminator
 
 #ifndef PUGIXML_NO_STL
 	CHECK(q.evaluate_string(doc).empty());
@@ -277,7 +277,7 @@ TEST(xpath_api_evaluate_string)
 	// test for empty buffer
 	std::basic_string<char_t> s5 = base;
 	CHECK(q.evaluate_string(&s5[0], 0, xml_node()) == 11 && memcmp(&s5[0], STR("xxxxxxxxxxxxxxxx"), 16 * sizeof(char_t)) == 0);
-	CHECK(q.evaluate_string(0, 0, xml_node()) == 11);
+	CHECK(q.evaluate_string(PUGIXML_NULL, 0, xml_node()) == 11);
 }
 
 TEST(xpath_api_return_type)
@@ -315,7 +315,7 @@ TEST(xpath_api_query_result)
 	xpath_query q(STR("node"));
 
 	CHECK(q.result());
-	CHECK(q.result().error == 0);
+	CHECK(q.result().error == PUGIXML_NULL);
 	CHECK(q.result().offset == 0);
 	CHECK(strcmp(q.result().description(), "No error") == 0);
 }
@@ -337,7 +337,7 @@ TEST(xpath_api_query_result_fail)
 		xpath_parse_result result = q.result();
 
 		CHECK(!result);
-		CHECK(result.error != 0 && result.error[0] != 0);
+		CHECK(result.error != PUGIXML_NULL && result.error[0] != 0);
 		CHECK(result.description() == result.error);
 		CHECK(result.offset == 13);
 

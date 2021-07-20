@@ -164,7 +164,7 @@ xpath_node_set_tester::xpath_node_set_tester(const pugi::xpath_node_set& set, co
 
 	if (result.empty())
 	{
-		document_order = 0;
+		document_order = PUGIXML_NULL;
 		document_size = 0;
 	}
 	else

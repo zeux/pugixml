@@ -138,12 +138,12 @@ struct dummy_fixture {};
 #define CHECK_XPATH_NODESET_VAR(node, query, variables) xpath_node_set_tester(pugi::xpath_query(query, variables).evaluate_node_set(node), CHECK_JOIN2(STRINGIZE(query) " does not evaluate to expected set in context " STRINGIZE(node), __FILE__, __LINE__))
 #define CHECK_XPATH_FAIL_VAR(query, variables) CHECK_TEXT(test_xpath_fail_compile(query, variables), STRINGIZE(query) " should not compile")
 
-#define CHECK_XPATH_STRING(node, query, expected) CHECK_XPATH_STRING_VAR(node, query, 0, expected)
-#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_XPATH_BOOLEAN_VAR(node, query, 0, expected)
-#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_XPATH_NUMBER_VAR(node, query, 0, expected)
-#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_XPATH_NUMBER_NAN_VAR(node, query, 0)
-#define CHECK_XPATH_NODESET(node, query) CHECK_XPATH_NODESET_VAR(node, query, 0)
-#define CHECK_XPATH_FAIL(query) CHECK_XPATH_FAIL_VAR(query, 0)
+#define CHECK_XPATH_STRING(node, query, expected) CHECK_XPATH_STRING_VAR(node, query, PUGIXML_NULL, expected)
+#define CHECK_XPATH_BOOLEAN(node, query, expected) CHECK_XPATH_BOOLEAN_VAR(node, query, PUGIXML_NULL, expected)
+#define CHECK_XPATH_NUMBER(node, query, expected) CHECK_XPATH_NUMBER_VAR(node, query, PUGIXML_NULL, expected)
+#define CHECK_XPATH_NUMBER_NAN(node, query) CHECK_XPATH_NUMBER_NAN_VAR(node, query, PUGIXML_NULL)
+#define CHECK_XPATH_NODESET(node, query) CHECK_XPATH_NODESET_VAR(node, query, PUGIXML_NULL)
+#define CHECK_XPATH_FAIL(query) CHECK_XPATH_FAIL_VAR(query, PUGIXML_NULL)
 #endif
 
 #ifdef PUGIXML_NO_EXCEPTIONS

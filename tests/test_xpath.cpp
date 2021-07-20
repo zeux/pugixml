@@ -408,7 +408,7 @@ TEST_XML(xpath_out_of_memory_evaluate, "<n/>")
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(doc).empty()));
 #endif
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, doc) == 1));
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node(doc) == xpath_node()));
 	CHECK_ALLOC_FAIL(CHECK(q.evaluate_node_set(doc).empty()));
 }
@@ -424,7 +424,7 @@ TEST(xpath_out_of_memory_evaluate_concat)
 
 	xpath_query q(query.c_str());
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, xml_node()) == 1));
 }
 
 TEST(xpath_out_of_memory_evaluate_concat_list)
@@ -440,7 +440,7 @@ TEST(xpath_out_of_memory_evaluate_concat_list)
 
 	test_runner::_memory_fail_threshold = 1;
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, xml_node()) == 1));
 }
 
 TEST(xpath_out_of_memory_evaluate_substring)
@@ -454,7 +454,7 @@ TEST(xpath_out_of_memory_evaluate_substring)
 
 	xpath_query q(query.c_str());
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, xml_node()) == 1));
 }
 
 TEST_XML(xpath_out_of_memory_evaluate_union, "<node />")
@@ -508,7 +508,7 @@ TEST_XML(xpath_out_of_memory_evaluate_normalize_space_0, "<node> a b c d e f g h
 
 	xpath_query q(STR("concat(normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space(), normalize-space())"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc.first_child()) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, doc.first_child()) == 1));
 }
 
 TEST_XML(xpath_out_of_memory_evaluate_normalize_space_1, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
@@ -517,7 +517,7 @@ TEST_XML(xpath_out_of_memory_evaluate_normalize_space_1, "<node> a b c d e f g h
 
 	xpath_query q(STR("concat(normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node), normalize-space(node))"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, doc) == 1));
 }
 
 TEST_XML(xpath_out_of_memory_evaluate_translate, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
@@ -526,7 +526,7 @@ TEST_XML(xpath_out_of_memory_evaluate_translate, "<node> a b c d e f g h i j k l
 
 	xpath_query q(STR("concat(translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'), translate(node, 'a', '\xe9'))"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, doc) == 1));
 }
 
 TEST_XML(xpath_out_of_memory_evaluate_translate_table, "<node> a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z a b c d e f g h i j k l m n o p q r s t u v w x y z </node>")
@@ -535,7 +535,7 @@ TEST_XML(xpath_out_of_memory_evaluate_translate_table, "<node> a b c d e f g h i
 
 	xpath_query q(STR("concat(translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'), translate(node, 'a', 'A'))"));
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, doc) == 1));
 }
 
 TEST(xpath_out_of_memory_evaluate_string_append)
@@ -555,7 +555,7 @@ TEST(xpath_out_of_memory_evaluate_string_append)
 	xpath_query q(STR("string(n)"));
 	CHECK(q);
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, doc) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, doc) == 1));
 }
 
 TEST(xpath_out_of_memory_evaluate_number_to_string)
@@ -567,7 +567,7 @@ TEST(xpath_out_of_memory_evaluate_number_to_string)
 
 	xpath_query q(STR("concat($x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x, $x)"), &vars);
 
-	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(0, 0, xml_node()) == 1));
+	CHECK_ALLOC_FAIL(CHECK(q.evaluate_string(PUGIXML_NULL, 0, xml_node()) == 1));
 }
 
 TEST(xpath_memory_concat_massive)
@@ -579,7 +579,7 @@ TEST(xpath_memory_concat_massive)
 		node.append_child(STR("c")).text().set(i % 10);
 
 	xpath_query q(STR("/"));
-	size_t size = q.evaluate_string(0, 0, node);
+	size_t size = q.evaluate_string(PUGIXML_NULL, 0, node);
 
 	CHECK(size == 5001);
 }
