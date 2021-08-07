@@ -6,7 +6,6 @@ include(CMakeDependentOption)
 include(GNUInstallDirs)
 include(CTest)
 
-
 cmake_dependent_option(PUGIXML_USE_VERSIONED_LIBDIR
   "Use a private subdirectory to install the headers and libraries" OFF
   "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
@@ -34,6 +33,23 @@ option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
   "Build both shared and static libraries" OFF
   "BUILD_SHARED_LIBS" OFF)
+  
+# Expose options from the pugiconfig.hpp
+option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
+option(PUGIXML_COMPACT "Enable compact mode" OFF)
+
+# Advanced options from pugiconfig.hpp
+option(PUGIXML_NO_XPATH "Disable XPath" OFF)
+option(PUGIXML_NO_STL "Disable STL" OFF)
+option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
+mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
+
+set(PUGIXML_PUBLIC_DEFINITIONS
+  $<$<BOOL:${PUGIXML_WCHAR_MODE}>:PUGIXML_WCHAR_MODE>
+  $<$<BOOL:${PUGIXML_COMPACT}>:PUGIXML_COMPACT>
+  $<$<BOOL:${PUGIXML_NO_XPATH}>:PUGIXML_NO_XPATH>
+  $<$<BOOL:${PUGIXML_NO_STL}>:PUGIXML_NO_STL>
+  $<$<BOOL:${PUGIXML_NO_EXCEPTIONS}>:PUGIXML_NO_EXCEPTIONS>)
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
 if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
@@ -88,6 +104,7 @@ if (BUILD_SHARED_LIBS)
   target_compile_definitions(pugixml-shared
     PUBLIC
       ${PUGIXML_BUILD_DEFINES}
+      ${PUGIXML_PUBLIC_DEFINITIONS}
     PRIVATE
       $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>)
   target_compile_options(pugixml-shared
@@ -108,9 +125,10 @@ if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
   target_include_directories(pugixml-static
     PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
-    target_compile_definitions(pugixml-static
+  target_compile_definitions(pugixml-static
     PUBLIC
-      ${PUGIXML_BUILD_DEFINES})
+      ${PUGIXML_BUILD_DEFINES}
+      ${PUGIXML_PUBLIC_DEFINITIONS})
   target_compile_options(pugixml-static
     PRIVATE
       ${msvc-rt-mtd-shared}
