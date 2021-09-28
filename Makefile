@@ -77,7 +77,7 @@ docs: docs/quickstart.html docs/manual.html
 
 build/pugixml-%: .FORCE | $(RELEASE)
 	@mkdir -p $(BUILD)
-	TIMESTAMP=`git show v$(VERSION) -s --format=%ct` && python scripts/archive.py $@ pugixml-$(VERSION) $$TIMESTAMP $|
+	TIMESTAMP=`git show v$(VERSION) -s --format=%ct` && python3 scripts/archive.py $@ pugixml-$(VERSION) $$TIMESTAMP $|
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@

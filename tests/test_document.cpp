@@ -22,12 +22,11 @@
 #	include <stdexcept>
 #endif
 
-#ifdef __MINGW32__
-#	include <io.h> // for unlink in C++0x mode
-#endif
-
-#if defined(__CELLOS_LV2__) || defined(ANDROID) || defined(_GLIBCXX_HAVE_UNISTD_H) || defined(__APPLE__)
-#	include <unistd.h> // for unlink
+// for unlink
+#ifdef _WIN32
+#	include <io.h>
+#else
+#	include <unistd.h>
 #endif
 
 using namespace pugi;
@@ -1806,4 +1805,15 @@ TEST(document_move_compact_fail)
 	CHECK(!docs[safe_count+1].first_child());
 }
 #endif
+
+TEST(document_move_assign_empty)
+{
+	xml_document doc;
+	doc.append_child(STR("node"));
+
+	doc = xml_document();
+	doc.append_child(STR("node2"));
+
+	CHECK_NODE(doc, STR("<node2/>"));
+}
 #endif

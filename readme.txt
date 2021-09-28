@@ -1,6 +1,6 @@
-pugixml 1.10 - an XML processing library
+pugixml 1.11 - an XML processing library
 
-Copyright (C) 2006-2019, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+Copyright (C) 2006-2020, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
 Report bugs and download new versions at https://pugixml.org/
 
 This is the distribution of pugixml, which is a C++ XML processing library,

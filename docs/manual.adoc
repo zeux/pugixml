@@ -46,7 +46,7 @@ Thanks to *Vyacheslav Egorov* for documentation proofreading and fuzz testing.
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2019 Arseny Kapoulkine
+Copyright (c) 2006-2020 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -74,7 +74,7 @@ This means that you can freely use pugixml in your applications, both open-sourc
 
 ....
 This software is based on pugixml library (https://pugixml.org).
-pugixml is Copyright (C) 2006-2019 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2020 Arseny Kapoulkine.
 ....
 
 [[install]]
@@ -1683,12 +1683,12 @@ bool xml_document::save_file(const char* path, const char_t* indent = "\t", unsi
 bool xml_document::save_file(const wchar_t* path, const char_t* indent = "\t", unsigned int flags = format_default, xml_encoding encoding = encoding_auto) const;
 ----
 
-These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see <<saving.options>>) and output data encoding (see <<saving.encoding>>). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc.
+These functions accept file path as its first argument, and also three optional arguments, which specify indentation and other output options (see <<saving.options>>) and output data encoding (see <<saving.encoding>>). The path has the target operating system format, so it can be a relative or absolute one, it should have the delimiters of the target system, it should have the exact case if the target file system is case-sensitive, etc. The functions return `true` on success and `false` if the file could not be opened or written to.
 
 File path is passed to the system file opening function as is in case of the first function (which accepts `const char* path`); the second function either uses a special file opening function if it is provided by the runtime library or converts the path to UTF-8 and uses the system file opening function.
 
 [[xml_writer_file]]
-`save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. If the file could not be opened, the function returns `false`. Calling `save_file` is equivalent to creating an `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see <<saving.writer>> for writer interface details.
+`save_file` opens the target file for writing, outputs the requested header (by default a document declaration is output, unless the document already has one), and then saves the document contents. Calling `save_file` is equivalent to creating an `xml_writer_file` object with `FILE*` handle as the only constructor argument and then calling `save`; see <<saving.writer>> for writer interface details.
 
 This is a simple example of saving XML document to file (link:samples/save_file.cpp[]):
 
@@ -2216,6 +2216,27 @@ Because of the differences in document object models, performance considerations
 == Changelog
 
 :!numbered:
+
+[[v1.11]]
+=== v1.11 ^2020-11-26^
+
+Maintenance release. Changes:
+
+* New features:
+	. Add xml_node::remove_attributes and xml_node::remove_children
+	. Add a way to customize floating point precision via xml_attribute::set and xml_text::set overloads
+
+* XPath improvements:
+	. XPath parser now limits recursion depth which prevents stack overflow on malicious queries
+
+* Compatibility improvements:
+	. Fix Visual Studio warnings when built using clang-cl compiler
+	. Fix Wconversion warnings in gcc
+	. Fix Wzero-as-null-pointer-constant warnings in pugixml.hpp
+	. Work around several static analysis false positives
+
+* Build system changes
+	. The CMake package for pugixml now provides a `pugixml::pugixml` target rather than a `pugixml` target. A compatibility `pugixml` target is provided if at least version 1.11 is not requested.
 
 [[v1.10]]
 === v1.10 ^2019-09-15^
