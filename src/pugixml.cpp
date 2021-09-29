@@ -5694,7 +5694,7 @@ namespace pugi
 		return impl::strcpy_insitu(_root->value, _root->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length());
 	}
 
-	PUGI__FN xml_attribute xml_node::append_attribute(const char_t* name_)
+	PUGI__FN xml_attribute xml_node::append_attribute(string_view name_)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
@@ -5711,7 +5711,7 @@ namespace pugi
 		return a;
 	}
 
-	PUGI__FN xml_attribute xml_node::prepend_attribute(const char_t* name_)
+	PUGI__FN xml_attribute xml_node::prepend_attribute(string_view name_)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
@@ -5728,7 +5728,7 @@ namespace pugi
 		return a;
 	}
 
-	PUGI__FN xml_attribute xml_node::insert_attribute_after(const char_t* name_, const xml_attribute& attr)
+	PUGI__FN xml_attribute xml_node::insert_attribute_after(string_view name_, const xml_attribute& attr)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
@@ -5746,7 +5746,7 @@ namespace pugi
 		return a;
 	}
 
-	PUGI__FN xml_attribute xml_node::insert_attribute_before(const char_t* name_, const xml_attribute& attr)
+	PUGI__FN xml_attribute xml_node::insert_attribute_before(string_view name_, const xml_attribute& attr)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
@@ -5904,7 +5904,7 @@ namespace pugi
 		return n;
 	}
 
-	PUGI__FN xml_node xml_node::append_child(const char_t* name_)
+	PUGI__FN xml_node xml_node::append_child(string_view name_)
 	{
 		xml_node result = append_child(node_element);
 
@@ -5913,7 +5913,7 @@ namespace pugi
 		return result;
 	}
 
-	PUGI__FN xml_node xml_node::prepend_child(const char_t* name_)
+	PUGI__FN xml_node xml_node::prepend_child(string_view name_)
 	{
 		xml_node result = prepend_child(node_element);
 
@@ -5922,7 +5922,7 @@ namespace pugi
 		return result;
 	}
 
-	PUGI__FN xml_node xml_node::insert_child_after(const char_t* name_, const xml_node& node)
+	PUGI__FN xml_node xml_node::insert_child_after(string_view name_, const xml_node& node)
 	{
 		xml_node result = insert_child_after(node_element, node);
 
@@ -5931,7 +5931,7 @@ namespace pugi
 		return result;
 	}
 
-	PUGI__FN xml_node xml_node::insert_child_before(const char_t* name_, const xml_node& node)
+	PUGI__FN xml_node xml_node::insert_child_before(string_view name_, const xml_node& node)
 	{
 		xml_node result = insert_child_before(node_element, node);
 
