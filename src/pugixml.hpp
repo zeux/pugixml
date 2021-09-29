@@ -291,6 +291,18 @@ namespace pugi {
 #endif
 } // namespace pugi
 
+// explicit boolean type
+namespace pugi {
+	struct boolean {
+		boolean() : value(false) {}
+		explicit boolean(bool bval) : value(bval) {}
+		bool value;
+		operator bool() const { return value; }
+	};
+	static const boolean true_value{ true };
+	static const boolean false_value{ false };
+}
+
 // The PugiXML namespace
 namespace pugi
 {
@@ -578,7 +590,7 @@ namespace pugi
 		bool set_value(double rhs, int precision);
 		bool set_value(float rhs);
 		bool set_value(float rhs, int precision);
-		bool set_value(bool rhs);
+		bool set_value(boolean rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
 		bool set_value(long long rhs);
@@ -586,14 +598,14 @@ namespace pugi
 	#endif
 
 		// Set attribute value (equivalent to set_value without error checking)
-		xml_attribute& operator=(const char_t* rhs);
+		xml_attribute& operator=(string_view rhs);
 		xml_attribute& operator=(int rhs);
 		xml_attribute& operator=(unsigned int rhs);
 		xml_attribute& operator=(long rhs);
 		xml_attribute& operator=(unsigned long rhs);
 		xml_attribute& operator=(double rhs);
 		xml_attribute& operator=(float rhs);
-		xml_attribute& operator=(bool rhs);
+		xml_attribute& operator=(boolean rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
 		xml_attribute& operator=(long long rhs);
@@ -926,7 +938,7 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set text (returns false if object is empty or there is not enough memory)
-		bool set(const char_t* rhs);
+		bool set(string_view rhs);
 
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set(int rhs);
@@ -937,7 +949,7 @@ namespace pugi
 		bool set(double rhs, int precision);
 		bool set(float rhs);
 		bool set(float rhs, int precision);
-		bool set(bool rhs);
+		bool set(boolean rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
 		bool set(long long rhs);
@@ -945,14 +957,14 @@ namespace pugi
 	#endif
 
 		// Set text (equivalent to set without error checking)
-		xml_text& operator=(const char_t* rhs);
+		xml_text& operator=(string_view rhs);
 		xml_text& operator=(int rhs);
 		xml_text& operator=(unsigned int rhs);
 		xml_text& operator=(long rhs);
 		xml_text& operator=(unsigned long rhs);
 		xml_text& operator=(double rhs);
 		xml_text& operator=(float rhs);
-		xml_text& operator=(bool rhs);
+		xml_text& operator=(boolean rhs);
 
 	#ifdef PUGIXML_HAS_LONG_LONG
 		xml_text& operator=(long long rhs);

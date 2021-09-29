@@ -30,8 +30,8 @@ TEST_XML(dom_attr_assign, "<node/>")
 	node.append_attribute(STR("attr7")) = 0.25f;
 	xml_attribute() = 0.25f;
 
-	node.append_attribute(STR("attr8")) = true;
-	xml_attribute() = true;
+	node.append_attribute(STR("attr8")) = true_value;
+	xml_attribute() = true_value;
 
 	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\"/>"));
 }
@@ -67,8 +67,8 @@ TEST_XML(dom_attr_set_value, "<node/>")
 	CHECK(node.append_attribute(STR("attr7")).set_value(0.25f));
 	CHECK(!xml_attribute().set_value(0.25f));
 
-	CHECK(node.append_attribute(STR("attr8")).set_value(true));
-	CHECK(!xml_attribute().set_value(true));
+	CHECK(node.append_attribute(STR("attr8")).set_value(true_value));
+	CHECK(!xml_attribute().set_value(true_value));
 
 	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\"/>"));
 }

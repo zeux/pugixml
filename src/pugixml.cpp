@@ -5258,7 +5258,7 @@ namespace pugi
 		return _attr;
 	}
 
-	PUGI__FN xml_attribute& xml_attribute::operator=(const char_t* rhs)
+	PUGI__FN xml_attribute& xml_attribute::operator=(string_view rhs)
 	{
 		set_value(rhs);
 		return *this;
@@ -5300,7 +5300,7 @@ namespace pugi
 		return *this;
 	}
 
-	PUGI__FN xml_attribute& xml_attribute::operator=(bool rhs)
+	PUGI__FN xml_attribute& xml_attribute::operator=(boolean rhs)
 	{
 		set_value(rhs);
 		return *this;
@@ -5390,7 +5390,7 @@ namespace pugi
 		return impl::set_value_convert(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, precision);
 	}
 
-	PUGI__FN bool xml_attribute::set_value(bool rhs)
+	PUGI__FN bool xml_attribute::set_value(boolean rhs)
 	{
 		if (!_attr) return false;
 
@@ -6537,11 +6537,11 @@ namespace pugi
 	}
 #endif
 
-	PUGI__FN bool xml_text::set(const char_t* rhs)
+	PUGI__FN bool xml_text::set(string_view rhs)
 	{
 		xml_node_struct* dn = _data_new();
 
-		return dn ? impl::strcpy_insitu(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs, impl::strlength(rhs)) : false;
+		return dn ? impl::strcpy_insitu(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length()) : false;
 	}
 
 	PUGI__FN bool xml_text::set(int rhs)
@@ -6600,7 +6600,7 @@ namespace pugi
 		return dn ? impl::set_value_convert(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs, precision) : false;
 	}
 
-	PUGI__FN bool xml_text::set(bool rhs)
+	PUGI__FN bool xml_text::set(boolean rhs)
 	{
 		xml_node_struct* dn = _data_new();
 
@@ -6623,7 +6623,7 @@ namespace pugi
 	}
 #endif
 
-	PUGI__FN xml_text& xml_text::operator=(const char_t* rhs)
+	PUGI__FN xml_text& xml_text::operator=(string_view rhs)
 	{
 		set(rhs);
 		return *this;
@@ -6665,7 +6665,7 @@ namespace pugi
 		return *this;
 	}
 
-	PUGI__FN xml_text& xml_text::operator=(bool rhs)
+	PUGI__FN xml_text& xml_text::operator=(boolean rhs)
 	{
 		set(rhs);
 		return *this;
