@@ -139,18 +139,8 @@
 #	define PUGIXML_CHAR char
 #endif
 
-namespace pugi
-{
-	// Character type used for all internal storage and operations; depends on PUGIXML_WCHAR_MODE
-	typedef PUGIXML_CHAR char_t;
 
-#ifndef PUGIXML_NO_STL
-	// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
-	typedef std::basic_string<PUGIXML_CHAR, std::char_traits<PUGIXML_CHAR>, std::allocator<PUGIXML_CHAR> > string_t;
-#endif
-}
-
-// string_view
+// The string_view
 namespace pugi {
 #if defined(PUGI_CXX17_FEATURES) && PUGI_CXX17_FEATURES
 	template <typename C, typename T = std::char_traits<C>>
@@ -291,7 +281,8 @@ namespace pugi {
 #endif
 } // namespace pugi
 
-// explicit boolean type
+// The explicit boolean type to avoid compiler ambiguous match const char_t* as scalar type 'bool',
+// because we preferred compiler match const char_t* as string_view_t
 namespace pugi {
 	struct boolean {
 		boolean() : value(false) {}
@@ -301,6 +292,20 @@ namespace pugi {
 	};
 	static const boolean true_value{ true };
 	static const boolean false_value{ false };
+} // namespace pugi
+
+namespace pugi
+{
+	// Character type used for all internal storage and operations; depends on PUGIXML_WCHAR_MODE
+	typedef PUGIXML_CHAR char_t;
+
+#ifndef PUGIXML_NO_STL
+	// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
+	typedef std::basic_string<PUGIXML_CHAR, std::char_traits<PUGIXML_CHAR>, std::allocator<PUGIXML_CHAR> > string_t;
+#endif
+
+	// string_view type used for operations that work with pugi::string_view, depends on PUGIXML_WCHAR_MODE
+	typedef pugi::basic_string_view<char_t, std::char_traits<char_t> > string_view_t;
 }
 
 // The PugiXML namespace
@@ -578,8 +583,8 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
-		bool set_name(string_view rhs);
-		bool set_value(string_view rhs);
+		bool set_name(string_view_t rhs);
+		bool set_value(string_view_t rhs);
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set_value(int rhs);
@@ -598,7 +603,7 @@ namespace pugi
 	#endif
 
 		// Set attribute value (equivalent to set_value without error checking)
-		xml_attribute& operator=(string_view rhs);
+		xml_attribute& operator=(string_view_t rhs);
 		xml_attribute& operator=(int rhs);
 		xml_attribute& operator=(unsigned int rhs);
 		xml_attribute& operator=(long rhs);
@@ -712,14 +717,14 @@ namespace pugi
 		const char_t* child_value(const char_t* name) const;
 
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
-		bool set_name(string_view rhs);
-		bool set_value(string_view rhs);
+		bool set_name(string_view_t rhs);
+		bool set_value(string_view_t rhs);
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
-		xml_attribute append_attribute(string_view name);
-		xml_attribute prepend_attribute(string_view name);
-		xml_attribute insert_attribute_after(string_view name, const xml_attribute& attr);
-		xml_attribute insert_attribute_before(string_view name, const xml_attribute& attr);
+		xml_attribute append_attribute(string_view_t name);
+		xml_attribute prepend_attribute(string_view_t name);
+		xml_attribute insert_attribute_after(string_view_t name, const xml_attribute& attr);
+		xml_attribute insert_attribute_before(string_view_t name, const xml_attribute& attr);
 
 		// Add a copy of the specified attribute. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_copy(const xml_attribute& proto);
@@ -734,10 +739,10 @@ namespace pugi
 		xml_node insert_child_before(xml_node_type type, const xml_node& node);
 
 		// Add child element with specified name. Returns added node, or empty node on errors.
-		xml_node append_child(string_view name);
-		xml_node prepend_child(string_view name);
-		xml_node insert_child_after(string_view name, const xml_node& node);
-		xml_node insert_child_before(string_view name, const xml_node& node);
+		xml_node append_child(string_view_t name);
+		xml_node prepend_child(string_view_t name);
+		xml_node insert_child_after(string_view_t name, const xml_node& node);
+		xml_node insert_child_before(string_view_t name, const xml_node& node);
 
 		// Add a copy of the specified node as a child. Returns added node, or empty node on errors.
 		xml_node append_copy(const xml_node& proto);
@@ -938,7 +943,7 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set text (returns false if object is empty or there is not enough memory)
-		bool set(string_view rhs);
+		bool set(string_view_t rhs);
 
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set(int rhs);
@@ -957,7 +962,7 @@ namespace pugi
 	#endif
 
 		// Set text (equivalent to set without error checking)
-		xml_text& operator=(string_view rhs);
+		xml_text& operator=(string_view_t rhs);
 		xml_text& operator=(int rhs);
 		xml_text& operator=(unsigned int rhs);
 		xml_text& operator=(long rhs);
