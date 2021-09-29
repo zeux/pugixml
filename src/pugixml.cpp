@@ -4648,18 +4648,18 @@ PUGI__NS_BEGIN
 
 	// set value with conversion functions
 	template <typename String, typename Header>
-	PUGI__FN bool set_value_ascii(String& dest, Header& header, uintptr_t header_mask, char* buf)
+	PUGI__FN bool set_value_ascii(String& dest, Header& header, uintptr_t header_mask, char* buf, size_t len)
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		char_t wbuf[128];
-		assert(strlen(buf) < sizeof(wbuf) / sizeof(wbuf[0]));
+		assert(len < sizeof(wbuf) / sizeof(wbuf[0]));
 
 		size_t offset = 0;
 		for (; buf[offset]; ++offset) wbuf[offset] = buf[offset];
 
 		return strcpy_insitu(dest, header, header_mask, wbuf, offset);
 	#else
-		return strcpy_insitu(dest, header, header_mask, buf, strlen(buf));
+		return strcpy_insitu(dest, header, header_mask, buf, len);
 	#endif
 	}
 
@@ -4677,18 +4677,18 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, float value, int precision)
 	{
 		char buf[128];
-		PUGI__SNPRINTF(buf, "%.*g", precision, double(value));
+		int n = PUGI__SNPRINTF(buf, "%.*g", precision, double(value));
 
-		return set_value_ascii(dest, header, header_mask, buf);
+		return set_value_ascii(dest, header, header_mask, buf, n);
 	}
 
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_convert(String& dest, Header& header, uintptr_t header_mask, double value, int precision)
 	{
 		char buf[128];
-		PUGI__SNPRINTF(buf, "%.*g", precision, value);
+		int n = PUGI__SNPRINTF(buf, "%.*g", precision, value);
 
-		return set_value_ascii(dest, header, header_mask, buf);
+		return set_value_ascii(dest, header, header_mask, buf, n);
 	}
 
 	template <typename String, typename Header>
