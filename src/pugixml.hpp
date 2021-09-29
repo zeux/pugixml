@@ -147,9 +147,6 @@ namespace pugi {
 	using basic_string_view = std::basic_string_view<C, T>;
 	typedef std::string_view string_view;
 	typedef std::wstring_view wstring_view;
-	typedef std::u16string_view u16string_view;
-	typedef std::u32string_view u32string_view;
-	typedef std::hash<std::string_view> string_view_hash;
 #else
 	template <typename Char, typename Traits = std::char_traits<Char>>
 	struct basic_string_view {
@@ -273,11 +270,8 @@ namespace std {
 } // namespace std
 
 namespace pugi {
-	using string_view = basic_string_view<char>;
-	using wstring_view = basic_string_view<wchar_t>;
-	using u16string_view = basic_string_view<char16_t>;
-	using u32string_view = basic_string_view<char32_t>;
-	using string_view_hash = std::hash<string_view>;
+	typedef basic_string_view<char> string_view;
+	typedef basic_string_view<wchar_t> wstring_view;
 #endif
 } // namespace pugi
 
