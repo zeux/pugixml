@@ -143,12 +143,12 @@
 // The string_view
 namespace pugi {
 #if defined(PUGI_CXX17_FEATURES) && PUGI_CXX17_FEATURES
-	template <typename C, typename T = std::char_traits<C>>
+	template <typename C, typename T = std::char_traits<C> >
 	using basic_string_view = std::basic_string_view<C, T>;
 	typedef std::string_view string_view;
 	typedef std::wstring_view wstring_view;
 #else
-	template <typename Char, typename Traits = std::char_traits<Char>>
+	template <typename Char, typename Traits = std::char_traits<Char> >
 	struct basic_string_view {
 		std::size_t s;
 		const Char* p;
@@ -231,7 +231,7 @@ namespace pugi {
 		}
 	};
 
-	template <typename Ch, typename Tr = std::char_traits<Ch>>
+	template <typename Ch, typename Tr = std::char_traits<Ch> >
 	struct basic_string_view_hash {
 		typedef basic_string_view<Ch, Tr> argument_type;
 		typedef std::size_t result_type;
