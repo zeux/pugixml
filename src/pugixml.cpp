@@ -432,7 +432,6 @@ PUGI__NS_BEGIN
 #endif
 
 	// extra metadata bits
-    static const uintptr_t xml_memory_page_const_buffer_mask = 128;
 	static const uintptr_t xml_memory_page_contents_shared_mask = 64;
 	static const uintptr_t xml_memory_page_name_allocated_mask = 32;
 	static const uintptr_t xml_memory_page_value_allocated_mask = 16;
