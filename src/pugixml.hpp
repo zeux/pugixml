@@ -150,17 +150,17 @@ namespace pugi {
 #else
 	template <typename Char, typename Traits = std::char_traits<Char> >
 	struct basic_string_view {
-		std::size_t s;
 		const Char* p;
-
+		std::size_t s;
+		
 		basic_string_view(const std::string& r)
-			: basic_string_view(r.data(), r.size()) {
+			: p(r.data()), s(r.size()) {
 		}
 		basic_string_view(const Char* ptr)
-			: basic_string_view(ptr, Traits::length(ptr)) {
+			: p(ptr), s(Traits::length(ptr)) {
 		}
 		basic_string_view(const Char* ptr, std::size_t sz)
-			: s(sz), p(ptr) {
+			: p(ptr), s(sz) {
 		}
 
 		static int compare(const Char* lhs_p, std::size_t lhs_sz, const Char* rhs_p, std::size_t rhs_sz) {
@@ -242,9 +242,6 @@ namespace pugi {
 		}
 
 		result_type operator()(const argument_type& r) const {
-#if defined(SOL_USE_BOOST) && SOL_USE_BOOST
-			return boost::hash_range(r.begin(), r.end());
-#else
 			// Modified, from libstdc++
 			// An implementation attempt at Fowler No Voll, 1a.
 			// Supposedly, used in MSVC,
@@ -259,7 +256,6 @@ namespace pugi {
 				hash *= static_cast<size_t>(1099511628211ULL);
 			}
 			return hash;
-#endif
 		}
 	};
 } // namespace pugi
