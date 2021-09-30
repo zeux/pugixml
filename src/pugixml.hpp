@@ -262,7 +262,7 @@ namespace pugi {
 
 namespace std {
 	template <typename Ch, typename Tr>
-	struct hash< ::pugi::basic_string_view<Ch, Tr> > : ::pugi::basic_string_view_hash<Ch, Tr> {};
+	struct hash<pugi::basic_string_view<Ch, Tr> > : pugi::basic_string_view_hash<Ch, Tr> {};
 } // namespace std
 
 namespace pugi {
