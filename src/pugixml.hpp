@@ -230,40 +230,7 @@ namespace pugi {
 			return !(*this == r);
 		}
 	};
-
-	template <typename Ch, typename Tr = std::char_traits<Ch> >
-	struct basic_string_view_hash {
-		typedef basic_string_view<Ch, Tr> argument_type;
-		typedef std::size_t result_type;
-
-		template <typename Al>
-		result_type operator()(const std::basic_string<Ch, Tr, Al>& r) const {
-			return (*this)(argument_type(r.c_str(), r.size()));
-		}
-
-		result_type operator()(const argument_type& r) const {
-			// Modified, from libstdc++
-			// An implementation attempt at Fowler No Voll, 1a.
-			// Supposedly, used in MSVC,
-			// GCC (libstdc++) uses MurmurHash of some sort for 64-bit though...?
-			// But, well. Can't win them all, right?
-			// This should normally only apply when NOT using boost,
-			// so this should almost never be tapped into...
-			std::size_t hash = 0;
-			const unsigned char* cptr = reinterpret_cast<const unsigned char*>(r.data());
-			for (std::size_t sz = r.size(); sz != 0; --sz) {
-				hash ^= static_cast<size_t>(*cptr++);
-				hash *= static_cast<size_t>(1099511628211ULL);
-			}
-			return hash;
-		}
-	};
 } // namespace pugi
-
-namespace std {
-	template <typename Ch, typename Tr>
-	struct hash<pugi::basic_string_view<Ch, Tr> > : pugi::basic_string_view_hash<Ch, Tr> {};
-} // namespace std
 
 namespace pugi {
 	typedef basic_string_view<char> string_view;
