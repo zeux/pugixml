@@ -432,6 +432,7 @@ PUGI__NS_BEGIN
 #endif
 
 	// extra metadata bits
+    static const uintptr_t xml_memory_page_const_buffer_mask = 128;
 	static const uintptr_t xml_memory_page_contents_shared_mask = 64;
 	static const uintptr_t xml_memory_page_name_allocated_mask = 32;
 	static const uintptr_t xml_memory_page_value_allocated_mask = 16;
@@ -2354,9 +2355,9 @@ PUGI__NS_BEGIN
 	}
 
 	template <typename String, typename Header>
-	PUGI__FN bool strcpy_insitu(String& dest, Header& header, uintptr_t header_mask, const char_t* source, size_t source_length)
+	PUGI__FN bool strcpy_insitu(String& dest, Header& header, uintptr_t header_mask, const char_t* source, size_t source_length, bool shallow_copy = false)
 	{
-		if (source_length == 0)
+		if (source_length == 0 || shallow_copy)
 		{
 			// empty string and null pointer are equivalent, so just deallocate old memory
 			xml_allocator* alloc = PUGI__GETPAGE_IMPL(header)->allocator;
@@ -2364,7 +2365,7 @@ PUGI__NS_BEGIN
 			if (header & header_mask) alloc->deallocate_string(dest);
 
 			// mark the string as not allocated
-			dest = 0;
+			dest = !shallow_copy ? nullptr : const_cast<String>(source);
 			header &= ~header_mask;
 
 			return true;
@@ -5320,18 +5321,18 @@ namespace pugi
 	}
 #endif
 
-	PUGI__FN bool xml_attribute::set_name(string_view_t rhs)
+	PUGI__FN bool xml_attribute::set_name(string_view_t rhs, bool shallow_copy)
 	{
 		if (!_attr) return false;
 
-		return impl::strcpy_insitu(_attr->name, _attr->header, impl::xml_memory_page_name_allocated_mask, rhs.data(), rhs.length());
+		return impl::strcpy_insitu(_attr->name, _attr->header, impl::xml_memory_page_name_allocated_mask, rhs.data(), rhs.length(), shallow_copy);
 	}
 
-	PUGI__FN bool xml_attribute::set_value(string_view_t rhs)
+	PUGI__FN bool xml_attribute::set_value(string_view_t rhs, bool shallow_copy)
 	{
 		if (!_attr) return false;
 
-		return impl::strcpy_insitu(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length());
+		return impl::strcpy_insitu(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length(), shallow_copy);
 	}
 
 	PUGI__FN bool xml_attribute::set_value(int rhs)
@@ -5674,27 +5675,27 @@ namespace pugi
 		return _root && _root->first_child ? xml_node(_root->first_child->prev_sibling_c) : xml_node();
 	}
 
-	PUGI__FN bool xml_node::set_name(string_view_t rhs)
+	PUGI__FN bool xml_node::set_name(string_view_t rhs, bool shallow_copy)
 	{
 		xml_node_type type_ = _root ? PUGI__NODETYPE(_root) : node_null;
 
 		if (type_ != node_element && type_ != node_pi && type_ != node_declaration)
 			return false;
 
-		return impl::strcpy_insitu(_root->name, _root->header, impl::xml_memory_page_name_allocated_mask, rhs.data(), rhs.length());
+		return impl::strcpy_insitu(_root->name, _root->header, impl::xml_memory_page_name_allocated_mask, rhs.data(), rhs.length(), shallow_copy);
 	}
 
-	PUGI__FN bool xml_node::set_value(string_view_t rhs)
+	PUGI__FN bool xml_node::set_value(string_view_t rhs, bool shallow_copy)
 	{
 		xml_node_type type_ = _root ? PUGI__NODETYPE(_root) : node_null;
 
 		if (type_ != node_pcdata && type_ != node_cdata && type_ != node_comment && type_ != node_pi && type_ != node_doctype)
 			return false;
 
-		return impl::strcpy_insitu(_root->value, _root->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length());
+		return impl::strcpy_insitu(_root->value, _root->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length(), shallow_copy);
 	}
 
-	PUGI__FN xml_attribute xml_node::append_attribute(string_view_t name_)
+	PUGI__FN xml_attribute xml_node::append_attribute(string_view_t name_, bool shallow_copy)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
@@ -5706,12 +5707,12 @@ namespace pugi
 
 		impl::append_attribute(a._attr, _root);
 
-		a.set_name(name_);
+		a.set_name(name_, shallow_copy);
 
 		return a;
 	}
 
-	PUGI__FN xml_attribute xml_node::prepend_attribute(string_view_t name_)
+	PUGI__FN xml_attribute xml_node::prepend_attribute(string_view_t name_, bool shallow_copy)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 
@@ -5723,12 +5724,12 @@ namespace pugi
 
 		impl::prepend_attribute(a._attr, _root);
 
-		a.set_name(name_);
+		a.set_name(name_, shallow_copy);
 
 		return a;
 	}
 
-	PUGI__FN xml_attribute xml_node::insert_attribute_after(string_view_t name_, const xml_attribute& attr)
+	PUGI__FN xml_attribute xml_node::insert_attribute_after(string_view_t name_, const xml_attribute& attr, bool shallow_copy)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
@@ -5741,12 +5742,12 @@ namespace pugi
 
 		impl::insert_attribute_after(a._attr, attr._attr, _root);
 
-		a.set_name(name_);
+		a.set_name(name_, shallow_copy);
 
 		return a;
 	}
 
-	PUGI__FN xml_attribute xml_node::insert_attribute_before(string_view_t name_, const xml_attribute& attr)
+	PUGI__FN xml_attribute xml_node::insert_attribute_before(string_view_t name_, const xml_attribute& attr, bool shallow_copy)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
 		if (!attr || !impl::is_attribute_of(attr._attr, _root)) return xml_attribute();
@@ -5759,7 +5760,7 @@ namespace pugi
 
 		impl::insert_attribute_before(a._attr, attr._attr, _root);
 
-		a.set_name(name_);
+		a.set_name(name_, shallow_copy);
 
 		return a;
 	}
@@ -5846,7 +5847,7 @@ namespace pugi
 
 		impl::append_node(n._root, _root);
 
-		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"), true);
 
 		return n;
 	}
@@ -5863,7 +5864,7 @@ namespace pugi
 
 		impl::prepend_node(n._root, _root);
 
-		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"), true);
 
 		return n;
 	}
@@ -5881,7 +5882,7 @@ namespace pugi
 
 		impl::insert_node_before(n._root, node._root);
 
-		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"), true);
 
 		return n;
 	}
@@ -5899,43 +5900,43 @@ namespace pugi
 
 		impl::insert_node_after(n._root, node._root);
 
-		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"));
+		if (type_ == node_declaration) n.set_name(PUGIXML_TEXT("xml"), true);
 
 		return n;
 	}
 
-	PUGI__FN xml_node xml_node::append_child(string_view_t name_)
+	PUGI__FN xml_node xml_node::append_child(string_view_t name_, bool shallow_copy)
 	{
 		xml_node result = append_child(node_element);
 
-		result.set_name(name_);
+		result.set_name(name_, shallow_copy);
 
 		return result;
 	}
 
-	PUGI__FN xml_node xml_node::prepend_child(string_view_t name_)
+	PUGI__FN xml_node xml_node::prepend_child(string_view_t name_, bool shallow_copy)
 	{
 		xml_node result = prepend_child(node_element);
 
-		result.set_name(name_);
+		result.set_name(name_, shallow_copy);
 
 		return result;
 	}
 
-	PUGI__FN xml_node xml_node::insert_child_after(string_view_t name_, const xml_node& node)
+	PUGI__FN xml_node xml_node::insert_child_after(string_view_t name_, const xml_node& node, bool shallow_copy)
 	{
 		xml_node result = insert_child_after(node_element, node);
 
-		result.set_name(name_);
+		result.set_name(name_, shallow_copy);
 
 		return result;
 	}
 
-	PUGI__FN xml_node xml_node::insert_child_before(string_view_t name_, const xml_node& node)
+	PUGI__FN xml_node xml_node::insert_child_before(string_view_t name_, const xml_node& node, bool shallow_copy)
 	{
 		xml_node result = insert_child_before(node_element, node);
 
-		result.set_name(name_);
+		result.set_name(name_, shallow_copy);
 
 		return result;
 	}
@@ -6537,11 +6538,11 @@ namespace pugi
 	}
 #endif
 
-	PUGI__FN bool xml_text::set(string_view_t rhs)
+	PUGI__FN bool xml_text::set(string_view_t rhs, bool shallow_copy)
 	{
 		xml_node_struct* dn = _data_new();
 
-		return dn ? impl::strcpy_insitu(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length()) : false;
+		return dn ? impl::strcpy_insitu(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length(), shallow_copy) : false;
 	}
 
 	PUGI__FN bool xml_text::set(int rhs)

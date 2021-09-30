@@ -540,8 +540,8 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
-		bool set_name(string_view_t rhs);
-		bool set_value(string_view_t rhs);
+		bool set_name(string_view_t rhs, bool shallow_copy = false);
+		bool set_value(string_view_t rhs, bool shallow_copy = false);
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set_value(int rhs);
@@ -674,14 +674,14 @@ namespace pugi
 		const char_t* child_value(const char_t* name) const;
 
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
-		bool set_name(string_view_t rhs);
-		bool set_value(string_view_t rhs);
+		bool set_name(string_view_t rhs, bool shallow_copy = false);
+		bool set_value(string_view_t rhs, bool shallow_copy = false);
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
-		xml_attribute append_attribute(string_view_t name);
-		xml_attribute prepend_attribute(string_view_t name);
-		xml_attribute insert_attribute_after(string_view_t name, const xml_attribute& attr);
-		xml_attribute insert_attribute_before(string_view_t name, const xml_attribute& attr);
+		xml_attribute append_attribute(string_view_t name, bool shallow_copy = false);
+		xml_attribute prepend_attribute(string_view_t name, bool shallow_copy = false);
+		xml_attribute insert_attribute_after(string_view_t name, const xml_attribute& attr, bool shallow_copy = false);
+		xml_attribute insert_attribute_before(string_view_t name, const xml_attribute& attr, bool shallow_copy = false);
 
 		// Add a copy of the specified attribute. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_copy(const xml_attribute& proto);
@@ -696,10 +696,10 @@ namespace pugi
 		xml_node insert_child_before(xml_node_type type, const xml_node& node);
 
 		// Add child element with specified name. Returns added node, or empty node on errors.
-		xml_node append_child(string_view_t name);
-		xml_node prepend_child(string_view_t name);
-		xml_node insert_child_after(string_view_t name, const xml_node& node);
-		xml_node insert_child_before(string_view_t name, const xml_node& node);
+		xml_node append_child(string_view_t name, bool shallow_copy = false);
+		xml_node prepend_child(string_view_t name, bool shallow_copy = false);
+		xml_node insert_child_after(string_view_t name, const xml_node& node, bool shallow_copy = false);
+		xml_node insert_child_before(string_view_t name, const xml_node& node, bool shallow_copy = false);
 
 		// Add a copy of the specified node as a child. Returns added node, or empty node on errors.
 		xml_node append_copy(const xml_node& proto);
@@ -900,7 +900,7 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set text (returns false if object is empty or there is not enough memory)
-		bool set(string_view_t rhs);
+		bool set(string_view_t rhs, bool shallow_copy = false);
 
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set(int rhs);
