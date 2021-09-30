@@ -2365,7 +2365,7 @@ PUGI__NS_BEGIN
 			if (header & header_mask) alloc->deallocate_string(dest);
 
 			// mark the string as not allocated
-			dest = !shallow_copy ? nullptr : const_cast<String>(source);
+			dest = source_length ? nullptr : const_cast<String>(source);
 			header &= ~header_mask;
 
 			return true;
