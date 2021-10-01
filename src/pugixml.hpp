@@ -247,8 +247,8 @@ namespace pugi {
 		bool value;
 		operator bool() const { return value; }
 	};
-	static const boolean true_value(true);
-	static const boolean false_value(false);
+	static const boolean (true_value)(true);
+	static const boolean (false_value)(false);
 } // namespace pugi
 
 namespace pugi
