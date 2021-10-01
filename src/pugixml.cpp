@@ -2345,8 +2345,7 @@ PUGI__NS_BEGIN
 		size_t target_length = strlength(target);
 
 		// always reuse document buffer memory if possible
-		if ((header & header_mask) == 0) 
-			return target_length >= length;
+		if ((header & header_mask) == 0) return target_length >= length;
 
 		// reuse heap memory if waste is not too great
 		const size_t reuse_threshold = 32;
@@ -2368,7 +2367,7 @@ PUGI__NS_BEGIN
 			dest = source_length == 0 ? 0 : const_cast<char_t*>(source);
 			header &= ~header_mask;
 
-			// since strcpy_insitu can reuse document buffer memory we need to mark both dest as shared
+			// mark dest as shared to avoid reuse document buffer memory
 			header |= xml_memory_page_contents_shared_mask;
 
 			return true;
@@ -2401,6 +2400,9 @@ PUGI__NS_BEGIN
 			// the string is now allocated, so set the flag
 			dest = buf;
 			header |= header_mask;
+
+			// remove dest shared mask for continue reuse document buffer memory
+			header &= ~xml_memory_page_contents_shared_mask;
 
 			return true;
 		}
