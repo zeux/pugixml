@@ -432,14 +432,17 @@ PUGI__NS_BEGIN
 #endif
 
 	// extra metadata bits
+    static const uintptr_t xml_memory_page_contents_const_mask = 128;
 	static const uintptr_t xml_memory_page_contents_shared_mask = 64;
 	static const uintptr_t xml_memory_page_name_allocated_mask = 32;
 	static const uintptr_t xml_memory_page_value_allocated_mask = 16;
 	static const uintptr_t xml_memory_page_type_mask = 15;
 
 	// combined masks for string uniqueness
+	static const uintptr_t xml_memory_page_contents_const_or_shared_mask = xml_memory_page_contents_const_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_contents_shared_mask;
+
 
 #ifdef PUGIXML_COMPACT
 	#define PUGI__GETHEADER_IMPL(object, page, flags) // unused
@@ -2340,7 +2343,7 @@ PUGI__NS_BEGIN
 	inline bool strcpy_insitu_allow(size_t length, const Header& header, uintptr_t header_mask, char_t* target)
 	{
 		// never reuse shared memory
-		if (header & xml_memory_page_contents_shared_mask) return false;
+		if (header & xml_memory_page_contents_const_or_shared_mask) return false;
 
 		size_t target_length = strlength(target);
 
@@ -2368,7 +2371,7 @@ PUGI__NS_BEGIN
 			header &= ~header_mask;
 
 			// mark dest as shared to avoid reuse document buffer memory
-			header |= xml_memory_page_contents_shared_mask;
+			header |= xml_memory_page_contents_const_mask;
 
 			return true;
 		}
@@ -2402,7 +2405,7 @@ PUGI__NS_BEGIN
 			header |= header_mask;
 
 			// remove dest shared mask for continue reuse document buffer memory
-			header &= ~xml_memory_page_contents_shared_mask;
+			header &= ~xml_memory_page_contents_const_mask;
 
 			return true;
 		}
