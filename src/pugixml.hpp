@@ -273,6 +273,8 @@ namespace pugi
 	typedef pugi::basic_string_view<char_t, std::char_traits<char_t> > string_view_t;
 }
 
+#define PUGIXML_EMPTY_SV pugi::string_view_t(PUGIXML_TEXT(""), 0)
+
 // The PugiXML namespace
 namespace pugi
 {
@@ -532,7 +534,7 @@ namespace pugi
 		string_view_t value() const;
 
 		// Get attribute value, or the default value if attribute is empty
-		string_view_t as_string(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
+		string_view_t as_string(string_view_t def = PUGIXML_EMPTY_SV) const;
 
 		// Get attribute value as a number, or the default value if conversion did not succeed or attribute is empty
 		int as_int(int def = 0) const;
@@ -892,7 +894,7 @@ namespace pugi
 		string_view_t get() const;
 
 		// Get text, or the default value if object is empty
-		string_view_t as_string(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
+		string_view_t as_string(string_view_t def = PUGIXML_EMPTY_SV) const;
 
 		// Get text as a number, or the default value if conversion did not succeed or object is empty
 		int as_int(int def = 0) const;

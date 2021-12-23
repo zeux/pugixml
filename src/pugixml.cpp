@@ -1099,16 +1099,20 @@ namespace pugi
 			header = PUGI__GETHEADER_IMPL(this, page, 0);
 		}
 
-		inline string_view_t name_sv() const {
+		inline string_view_t unsafe_name_sv() const {
 			return string_view_t(name, name_len);
 		}
 
-		inline string_view_t value_sv() const {
+		inline string_view_t unsafe_value_sv() const {
 			return string_view_t(value, value_len);
 		}
 
+		inline string_view_t value_sv() const {
+			return value ? unsafe_value_sv() : PUGIXML_EMPTY_SV;
+		}
+
 		inline bool equals_name(string_view_t rhs) const {
-			return name && name_sv() == rhs;
+			return name && unsafe_name_sv() == rhs;
 		}
 
 		inline bool equals_value(string_view_t rhs) const {
@@ -1134,16 +1138,20 @@ namespace pugi
 			header = PUGI__GETHEADER_IMPL(this, page, type);
 		}
 
-		inline string_view_t name_sv() const {
-			return name ? string_view_t(name, name_len) : string_view_t(PUGIXML_TEXT(""), 0);
+		inline string_view_t unsafe_name_sv() const {
+			return string_view_t(name, name_len);
+		}
+
+		inline string_view_t unsafe_value_sv() const {
+			return string_view_t(value, value_len);
 		}
 
 		inline string_view_t value_sv() const {
-			return value ? string_view_t(value, value_len) : string_view_t(PUGIXML_TEXT(""), 0);
+			return value ? unsafe_value_sv() : PUGIXML_EMPTY_SV;
 		}
 
 		inline bool equals_name(string_view_t rhs) const {
-			return name && name_sv() == rhs;
+			return name && unsafe_name_sv() == rhs;
 		}
 
 		uintptr_t header;
@@ -5259,7 +5267,7 @@ namespace pugi
 
 	PUGI__FN string_view_t xml_attribute::as_string(string_view_t def) const
 	{
-		return (_attr && _attr->value) ? _attr->value_sv() : def;
+		return (_attr && _attr->value) ? _attr->unsafe_value_sv() : def;
 	}
 
 	PUGI__FN int xml_attribute::as_int(int def) const
@@ -5306,12 +5314,12 @@ namespace pugi
 
 	PUGI__FN string_view_t xml_attribute::name() const
 	{
-		return (_attr && _attr->name) ? _attr->name_sv() : string_view_t(PUGIXML_TEXT(""), 0);
+		return (_attr && _attr->name) ? _attr->unsafe_name_sv() : PUGIXML_EMPTY_SV;
 	}
 
 	PUGI__FN string_view_t xml_attribute::value() const
 	{
-		return (_attr && _attr->value) ? _attr->value_sv() : string_view_t(PUGIXML_TEXT(""), 0);
+		return (_attr && _attr->value) ? _attr->unsafe_value_sv() : PUGIXML_EMPTY_SV;
 	}
 
 	PUGI__FN size_t xml_attribute::hash_value() const
@@ -5585,7 +5593,7 @@ namespace pugi
 
 	PUGI__FN string_view_t xml_node::name() const
 	{
-		return (_root && _root->name) ? _root->name_sv() : string_view_t(PUGIXML_TEXT(""), 0);
+		return (_root && _root->name) ? _root->unsafe_name_sv() : PUGIXML_EMPTY_SV;
 	}
 
 	PUGI__FN xml_node_type xml_node::type() const
@@ -5595,7 +5603,7 @@ namespace pugi
 
 	PUGI__FN string_view_t xml_node::value() const
 	{
-		return (_root && _root->value) ? _root->value_sv() : string_view_t(PUGIXML_TEXT(""), 0);
+		return (_root && _root->value) ? _root->unsafe_value_sv() : PUGIXML_EMPTY_SV;
 	}
 
 	PUGI__FN xml_node xml_node::child(const string_view_t name_) const
@@ -5702,7 +5710,7 @@ namespace pugi
 
 	PUGI__FN string_view_t xml_node::child_value() const
 	{
-		if (!_root) return string_view_t(PUGIXML_TEXT(""), 0);
+		if (!_root) return PUGIXML_EMPTY_SV;
 
 		// element nodes can have value if parse_embed_pcdata was used
 		if (PUGI__NODETYPE(_root) == node_element && _root->value)
@@ -5712,7 +5720,7 @@ namespace pugi
 			if (impl::is_text_node(i) && i->value)
 				return i->value_sv();
 
-		return string_view_t(PUGIXML_TEXT(""), 0);
+		return PUGIXML_EMPTY_SV;
 	}
 
 	PUGI__FN string_view_t xml_node::child_value(string_view_t name_) const
@@ -6542,14 +6550,14 @@ namespace pugi
 	{
 		xml_node_struct* d = _data();
 
-		return (d && d->value) ? d->value_sv() : string_view_t(PUGIXML_TEXT(""), 0);
+		return (d && d->value) ? d->unsafe_value_sv() : PUGIXML_EMPTY_SV;
 	}
 
 	PUGI__FN string_view_t xml_text::as_string(string_view_t def) const
 	{
 		xml_node_struct* d = _data();
 
-		return (d && d->value) ? d->value_sv() : def;
+		return (d && d->value) ? d->unsafe_value_sv() : def;
 	}
 
 	PUGI__FN int xml_text::as_int(int def) const
