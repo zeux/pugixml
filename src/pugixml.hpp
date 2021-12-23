@@ -520,10 +520,14 @@ namespace pugi
 
 		// Get attribute name/value, or "" if attribute is empty
 		const char_t* name() const;
+		string_view_t name_sv() const;
+
 		const char_t* value() const;
+		string_view_t value_sv() const;
 
 		// Get attribute value, or the default value if attribute is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
+		string_view_t as_string_sv(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
 
 		// Get attribute value as a number, or the default value if conversion did not succeed or attribute is empty
 		int as_int(int def = 0) const;
@@ -632,10 +636,12 @@ namespace pugi
 
 		// Get node name, or "" if node is empty or it has no name
 		const char_t* name() const;
+		string_view_t name_sv() const;
 
 		// Get node value, or "" if node is empty or it has no value
 		// Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
 		const char_t* value() const;
+		string_view_t value_sv() const;
 
 		// Get attribute list
 		xml_attribute first_attribute() const;
@@ -669,9 +675,11 @@ namespace pugi
 
 		// Get child value of current node; that is, value of the first child node of type PCDATA/CDATA
 		const char_t* child_value() const;
+		string_view_t child_value_sv() const;
 
 		// Get child value of child with specified name. Equivalent to child(name).child_value().
 		const char_t* child_value(const char_t* name) const;
+		string_view_t child_value_sv(const char_t* name) const;
 
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(string_view_t rhs, bool shallow_copy = false);
@@ -881,9 +889,11 @@ namespace pugi
 
 		// Get text, or "" if object is empty
 		const char_t* get() const;
+		string_view_t get_sv() const;
 
 		// Get text, or the default value if object is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
+		string_view_t as_string_sv(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
 
 		// Get text as a number, or the default value if conversion did not succeed or object is empty
 		int as_int(int def = 0) const;

@@ -3132,7 +3132,7 @@ PUGI__NS_BEGIN
 							PUGI__SCANFOR(s[0] == ']' && s[1] == ']' && PUGI__ENDSWITH(s[2], '>'));
 							PUGI__CHECK_ERROR(status_bad_cdata, s);
 
-							cursor->value_len = s - cursor->value;
+							cursor->value_len = static_cast<int>(s - cursor->value);
 							*s++ = '\0'; // Zero-terminate this segment.
 						}
 					}
@@ -5230,6 +5230,11 @@ namespace pugi
 		return (_attr && _attr->value) ? _attr->value + 0 : def;
 	}
 
+	PUGI__FN string_view_t xml_attribute::as_string_sv(string_view_t def) const
+	{
+		return (_attr && _attr->value) ? string_view_t(_attr->value + 0, _attr->value_len) : def;
+	}
+
 	PUGI__FN int xml_attribute::as_int(int def) const
 	{
 		return (_attr && _attr->value) ? impl::get_value_int(_attr->value) : def;
@@ -5277,9 +5282,19 @@ namespace pugi
 		return (_attr && _attr->name) ? _attr->name + 0 : PUGIXML_TEXT("");
 	}
 
+	PUGI__FN string_view_t xml_attribute::name_sv() const
+	{
+		return (_attr && _attr->name) ? string_view_t(_attr->name + 0, _attr->name_len) : string_view_t(PUGIXML_TEXT(""), 0);
+	}
+
 	PUGI__FN const char_t* xml_attribute::value() const
 	{
 		return (_attr && _attr->value) ? _attr->value + 0 : PUGIXML_TEXT("");
+	}
+
+	PUGI__FN string_view_t xml_attribute::value_sv() const
+	{
+		return (_attr && _attr->value) ? string_view_t(_attr->value + 0, _attr->value_len) : string_view_t(PUGIXML_TEXT(""), 0);
 	}
 
 	PUGI__FN size_t xml_attribute::hash_value() const
@@ -5556,6 +5571,11 @@ namespace pugi
 		return (_root && _root->name) ? _root->name + 0 : PUGIXML_TEXT("");
 	}
 
+	PUGI__FN string_view_t xml_node::name_sv() const
+	{
+		return (_root && _root->name) ? string_view_t(_root->name + 0, _root->name_len) : string_view_t(PUGIXML_TEXT(""), 0);
+	}
+
 	PUGI__FN xml_node_type xml_node::type() const
 	{
 		return _root ? PUGI__NODETYPE(_root) : node_null;
@@ -5564,6 +5584,11 @@ namespace pugi
 	PUGI__FN const char_t* xml_node::value() const
 	{
 		return (_root && _root->value) ? _root->value + 0 : PUGIXML_TEXT("");
+	}
+
+	PUGI__FN string_view_t xml_node::value_sv() const
+	{
+		return (_root && _root->value) ? string_view_t(_root->value + 0, _root->value_len) : string_view_t(PUGIXML_TEXT(""), 0);
 	}
 
 	PUGI__FN xml_node xml_node::child(const char_t* name_) const
@@ -5683,9 +5708,29 @@ namespace pugi
 		return PUGIXML_TEXT("");
 	}
 
+	PUGI__FN string_view_t xml_node::child_value_sv() const
+	{
+		if (!_root) return string_view_t(PUGIXML_TEXT(""), 0);
+
+		// element nodes can have value if parse_embed_pcdata was used
+		if (PUGI__NODETYPE(_root) == node_element && _root->value)
+			return string_view_t(_root->value, _root->value_len);
+
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+			if (impl::is_text_node(i) && i->value)
+				return string_view_t(i->value, i->value_len);
+
+		return string_view_t(PUGIXML_TEXT(""), 0);
+	}
+
 	PUGI__FN const char_t* xml_node::child_value(const char_t* name_) const
 	{
 		return child(name_).child_value();
+	}
+
+	PUGI__FN string_view_t xml_node::child_value_sv(const char_t* name_) const
+	{
+		return child(name_).child_value_sv();
 	}
 
 	PUGI__FN xml_attribute xml_node::first_attribute() const
@@ -6513,11 +6558,25 @@ namespace pugi
 		return (d && d->value) ? d->value + 0 : PUGIXML_TEXT("");
 	}
 
+	PUGI__FN string_view_t xml_text::get_sv() const
+	{
+		xml_node_struct* d = _data();
+
+		return (d && d->value) ? string_view_t(d->value + 0, d->value_len) : string_view_t(PUGIXML_TEXT(""), 0);
+	}
+
 	PUGI__FN const char_t* xml_text::as_string(const char_t* def) const
 	{
 		xml_node_struct* d = _data();
 
 		return (d && d->value) ? d->value + 0 : def;
+	}
+
+	PUGI__FN string_view_t xml_text::as_string_sv(string_view_t def) const
+	{
+		xml_node_struct* d = _data();
+
+		return (d && d->value) ? string_view_t(d->value + 0, d->value_len) : def;
 	}
 
 	PUGI__FN int xml_text::as_int(int def) const
