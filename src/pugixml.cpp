@@ -2620,7 +2620,7 @@ PUGI__NS_BEGIN
 			}
 			else if (s[0] == '-' && s[1] == '-' && PUGI__ENDSWITH(s[2], '>')) // comment ends here
 			{
-				auto end = g.flush(s);
+				char_t* end = g.flush(s);
 				*end = '\0';
 				len = static_cast<int>(end - begin);
 
@@ -2652,7 +2652,7 @@ PUGI__NS_BEGIN
 			}
 			else if (s[0] == ']' && s[1] == ']' && PUGI__ENDSWITH(s[2], '>')) // CDATA ends here
 			{
-				auto end = g.flush(s);
+				char_t* end = g.flush(s);
 				*end = '\0';
 				len = static_cast<int>(end - begin);
 
@@ -2811,7 +2811,7 @@ PUGI__NS_BEGIN
 
 				if (*s == end_quote)
 				{
-					auto end = g.flush(s);
+					char_t* end = g.flush(s);
 					*end = '\0';
 					len = static_cast<int>(end - begin);
 
@@ -2851,7 +2851,7 @@ PUGI__NS_BEGIN
 
 				if (*s == end_quote)
 				{
-					auto end = g.flush(s);
+					char_t* end = g.flush(s);
 					*end = '\0';
 					len = static_cast<int>(end - begin);
 
@@ -2887,7 +2887,7 @@ PUGI__NS_BEGIN
 
 				if (*s == end_quote)
 				{
-					auto end = g.flush(s);
+					char_t* end = g.flush(s);
 					*end = '\0';
 					len = static_cast<int>(end - begin);
 
