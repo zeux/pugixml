@@ -4685,6 +4685,7 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_ascii(String& dest, Header& header, uintptr_t header_mask, char* buf, size_t len)
 	{
 	#ifdef PUGIXML_WCHAR_MODE
+		(void)len;
 		char_t wbuf[128];
 		assert(len < sizeof(wbuf) / sizeof(wbuf[0]));
 
