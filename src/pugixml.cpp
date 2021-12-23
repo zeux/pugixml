@@ -432,12 +432,14 @@ PUGI__NS_BEGIN
 #endif
 
 	// extra metadata bits
+	static const uintptr_t xml_memory_page_contents_const_mask = 128;
 	static const uintptr_t xml_memory_page_contents_shared_mask = 64;
 	static const uintptr_t xml_memory_page_name_allocated_mask = 32;
 	static const uintptr_t xml_memory_page_value_allocated_mask = 16;
 	static const uintptr_t xml_memory_page_type_mask = 15;
 
 	// combined masks for string uniqueness
+	static const uintptr_t xml_memory_page_contents_const_or_shared_mask = xml_memory_page_contents_const_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_name_allocated_or_shared_mask = xml_memory_page_name_allocated_mask | xml_memory_page_contents_shared_mask;
 	static const uintptr_t xml_memory_page_value_allocated_or_shared_mask = xml_memory_page_value_allocated_mask | xml_memory_page_contents_shared_mask;
 
@@ -2381,7 +2383,7 @@ PUGI__NS_BEGIN
 	inline bool strcpy_insitu_allow(size_t length, const Header& header, uintptr_t header_mask, char_t* target)
 	{
 		// never reuse shared memory
-		if (header & xml_memory_page_contents_shared_mask) return false;
+		if (header & xml_memory_page_contents_const_or_shared_mask) return false;
 
 		size_t target_length = strlength(target);
 
@@ -2409,6 +2411,9 @@ PUGI__NS_BEGIN
 			// mark the string as not allocated
 			dest = source_length == 0 ? NULL : const_cast<String>(source);
 			header &= ~header_mask;
+
+			// mark dest as shared to avoid reuse document buffer memory
+			header |= xml_memory_page_contents_const_mask;
 
 			return true;
 		}
@@ -2440,6 +2445,9 @@ PUGI__NS_BEGIN
 			// the string is now allocated, so set the flag
 			dest = buf;
 			header |= header_mask;
+
+			// remove dest shared mask for continue reuse document buffer memory
+			header &= ~xml_memory_page_contents_const_mask;
 
 			return true;
 		}
@@ -4768,7 +4776,7 @@ PUGI__NS_BEGIN
 	template <typename String, typename Header>
 	PUGI__FN bool set_value_bool(String& dest, int& dest_len, Header& header, uintptr_t header_mask, bool value)
 	{
-		return strcpy_insitu(dest, dest_len, header, header_mask, value ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"), value ? 4 : 5);
+		return strcpy_insitu(dest, dest_len, header, header_mask, value ? PUGIXML_TEXT("true") : PUGIXML_TEXT("false"), value ? 4 : 5, true);
 	}
 
 	PUGI__FN xml_parse_result load_buffer_impl(xml_document_struct* doc, xml_node_struct* root, void* contents, size_t size, unsigned int options, xml_encoding encoding, bool is_mutable, bool own, char_t** out_buffer)
