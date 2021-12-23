@@ -206,9 +206,9 @@ int main(int, char** argv)
 	unsigned int failed = total - passed;
 
 	if (failed != 0)
-		printf("FAILURE: %u out of %u tests failed, cost %g(s).\n", failed, total, (clock() - start) / (double)CLOCKS_PER_SEC);
+		printf("FAILURE: %u out of %u tests failed, cost %g(s).\n", failed, total, (clock() - start) / static_cast<double>(CLOCKS_PER_SEC));
 	else
-		printf("Success: %u tests passed, cost %g(s).\n", total, (clock() - start) / (double)CLOCKS_PER_SEC);
+		printf("Success: %u tests passed, cost %g(s).\n", total, (clock() - start) / static_cast<double>(CLOCKS_PER_SEC));
 
 	return failed;
 }
