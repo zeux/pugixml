@@ -4424,7 +4424,7 @@ PUGI__NS_BEGIN
 	}
 
 	template <typename String, typename Header>
-	PUGI__FN void node_copy_string(String& dest, int& len, Header& header, uintptr_t header_mask, char_t* source, Header& source_header, xml_allocator* alloc)
+	PUGI__FN void node_copy_string(String& dest, int& dest_len, Header& header, uintptr_t header_mask, char_t* source, int source_len, Header& source_header, xml_allocator* alloc)
 	{
 		assert(!dest && (header & header_mask) == 0);
 
@@ -4439,14 +4439,14 @@ PUGI__NS_BEGIN
 				source_header |= xml_memory_page_contents_shared_mask;
 			}
 			else
-				strcpy_insitu(dest, len, header, header_mask, source, strlength(source));
+				strcpy_insitu(dest, dest_len, header, header_mask, source, source_len);
 		}
 	}
 
 	PUGI__FN void node_copy_contents(xml_node_struct* dn, xml_node_struct* sn, xml_allocator* shared_alloc)
 	{
-		node_copy_string(dn->name, dn->name_len, dn->header, xml_memory_page_name_allocated_mask, sn->name, sn->header, shared_alloc);
-		node_copy_string(dn->value, dn->value_len, dn->header, xml_memory_page_value_allocated_mask, sn->value, sn->header, shared_alloc);
+		node_copy_string(dn->name, dn->name_len, dn->header, xml_memory_page_name_allocated_mask, sn->name, sn->name_len, sn->header, shared_alloc);
+		node_copy_string(dn->value, dn->value_len, dn->header, xml_memory_page_value_allocated_mask, sn->value, sn->value_len, sn->header, shared_alloc);
 
 		for (xml_attribute_struct* sa = sn->first_attribute; sa; sa = sa->next_attribute)
 		{
@@ -4454,8 +4454,8 @@ PUGI__NS_BEGIN
 
 			if (da)
 			{
-				node_copy_string(da->name, da->name_len, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
-				node_copy_string(da->value, da->value_len, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+				node_copy_string(da->name, da->name_len, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->name_len, sa->header, shared_alloc);
+				node_copy_string(da->value, da->value_len, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->value_len, sa->header, shared_alloc);
 			}
 		}
 	}
@@ -4519,8 +4519,8 @@ PUGI__NS_BEGIN
 		xml_allocator& alloc = get_allocator(da);
 		xml_allocator* shared_alloc = (&alloc == &get_allocator(sa)) ? &alloc : 0;
 
-		node_copy_string(da->name, da->name_len, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->header, shared_alloc);
-		node_copy_string(da->value, da->value_len, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->header, shared_alloc);
+		node_copy_string(da->name, da->name_len, da->header, xml_memory_page_name_allocated_mask, sa->name, sa->name_len, sa->header, shared_alloc);
+		node_copy_string(da->value, da->value_len, da->header, xml_memory_page_value_allocated_mask, sa->value, sa->value_len, sa->header, shared_alloc);
 	}
 
 	inline bool is_text_node(xml_node_struct* node)
