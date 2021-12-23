@@ -2409,7 +2409,7 @@ PUGI__NS_BEGIN
 			if (header & header_mask) alloc->deallocate_string(dest);
 
 			// mark the string as not allocated
-			dest = source_length == 0 ? NULL : const_cast<String>(source);
+			dest = source_length == 0 ? NULL : const_cast<char_t*>(source);
 			header &= ~header_mask;
 
 			// mark dest as shared to avoid reuse document buffer memory
