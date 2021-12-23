@@ -202,6 +202,14 @@ namespace pugi {
 			return size();
 		}
 
+		bool empty() const {
+			return 0 == s;
+		}
+
+		const Char& operator[](size_t index) const {
+			return p[index];
+		}
+
 		operator std::basic_string<Char, Traits>() const {
 			return std::basic_string<Char, Traits>(data(), size());
 		}
@@ -519,15 +527,12 @@ namespace pugi
 		bool empty() const;
 
 		// Get attribute name/value, or "" if attribute is empty
-		const char_t* name() const;
-		string_view_t name_sv() const;
+		string_view_t name() const;
 
-		const char_t* value() const;
-		string_view_t value_sv() const;
+		string_view_t value() const;
 
 		// Get attribute value, or the default value if attribute is empty
-		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
-		string_view_t as_string_sv(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
+		string_view_t as_string(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
 
 		// Get attribute value as a number, or the default value if conversion did not succeed or attribute is empty
 		int as_int(int def = 0) const;
@@ -635,13 +640,11 @@ namespace pugi
 		xml_node_type type() const;
 
 		// Get node name, or "" if node is empty or it has no name
-		const char_t* name() const;
-		string_view_t name_sv() const;
+		string_view_t name() const;
 
 		// Get node value, or "" if node is empty or it has no value
 		// Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
-		const char_t* value() const;
-		string_view_t value_sv() const;
+		string_view_t value() const;
 
 		// Get attribute list
 		xml_attribute first_attribute() const;
@@ -665,21 +668,19 @@ namespace pugi
 		xml_text text() const;
 
 		// Get child, attribute or next/previous sibling with the specified name
-		xml_node child(const char_t* name) const;
-		xml_attribute attribute(const char_t* name) const;
-		xml_node next_sibling(const char_t* name) const;
-		xml_node previous_sibling(const char_t* name) const;
+		xml_node child(string_view_t name) const;
+		xml_attribute attribute(string_view_t name) const;
+		xml_node next_sibling(string_view_t name) const;
+		xml_node previous_sibling(string_view_t name) const;
 
 		// Get attribute, starting the search from a hint (and updating hint so that searching for a sequence of attributes is fast)
-		xml_attribute attribute(const char_t* name, xml_attribute& hint) const;
+		xml_attribute attribute(string_view_t name, xml_attribute& hint) const;
 
 		// Get child value of current node; that is, value of the first child node of type PCDATA/CDATA
-		const char_t* child_value() const;
-		string_view_t child_value_sv() const;
+		string_view_t child_value() const;
 
 		// Get child value of child with specified name. Equivalent to child(name).child_value().
-		const char_t* child_value(const char_t* name) const;
-		string_view_t child_value_sv(const char_t* name) const;
+		string_view_t child_value(string_view_t name) const;
 
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(string_view_t rhs, bool shallow_copy = false);
@@ -723,14 +724,14 @@ namespace pugi
 
 		// Remove specified attribute
 		bool remove_attribute(const xml_attribute& a);
-		bool remove_attribute(const char_t* name);
+		bool remove_attribute(string_view_t name);
 
 		// Remove all attributes
 		bool remove_attributes();
 
 		// Remove specified child
 		bool remove_child(const xml_node& n);
-		bool remove_child(const char_t* name);
+		bool remove_child(string_view_t name);
 
 		// Remove all children
 		bool remove_children();
@@ -789,8 +790,8 @@ namespace pugi
 		}
 
 		// Find child node by attribute name/value
-		xml_node find_child_by_attribute(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
-		xml_node find_child_by_attribute(const char_t* attr_name, const char_t* attr_value) const;
+		xml_node find_child_by_attribute(string_view_t name, string_view_t attr_name, string_view_t attr_value) const;
+		xml_node find_child_by_attribute(string_view_t attr_name, string_view_t attr_value) const;
 
 	#ifndef PUGIXML_NO_STL
 		// Get the absolute node path from root as a text string.
@@ -841,7 +842,7 @@ namespace pugi
 
 		// Range-based for support
 		xml_object_range<xml_node_iterator> children() const;
-		xml_object_range<xml_named_node_iterator> children(const char_t* name) const;
+		xml_object_range<xml_named_node_iterator> children(string_view_t name) const;
 		xml_object_range<xml_attribute_iterator> attributes() const;
 
 		// Get node offset in parsed file/string (in char_t units) for debugging purposes
@@ -888,12 +889,10 @@ namespace pugi
 		bool empty() const;
 
 		// Get text, or "" if object is empty
-		const char_t* get() const;
-		string_view_t get_sv() const;
+		string_view_t get() const;
 
 		// Get text, or the default value if object is empty
-		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
-		string_view_t as_string_sv(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
+		string_view_t as_string(string_view_t def = string_view_t(PUGIXML_TEXT(""), 0)) const;
 
 		// Get text as a number, or the default value if conversion did not succeed or object is empty
 		int as_int(int def = 0) const;
@@ -1057,7 +1056,7 @@ namespace pugi
 		xml_named_node_iterator();
 
 		// Construct an iterator which points to the specified node
-		xml_named_node_iterator(const xml_node& node, const char_t* name);
+		xml_named_node_iterator(const xml_node& node, string_view_t name);
 
 		// Iterator operators
 		bool operator==(const xml_named_node_iterator& rhs) const;
@@ -1076,8 +1075,9 @@ namespace pugi
 		mutable xml_node _wrap;
 		xml_node _parent;
 		const char_t* _name;
+		int _name_len;
 
-		xml_named_node_iterator(xml_node_struct* ref, xml_node_struct* parent, const char_t* name);
+		xml_named_node_iterator(xml_node_struct* ref, xml_node_struct* parent, string_view_t name);
 	};
 
 	// Abstract tree walker class (see xml_node::traverse)

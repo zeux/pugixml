@@ -905,7 +905,7 @@ inline void check_utftest_document(const xml_document& doc)
 	CHECK(static_cast<unsigned int>(doc.last_child().last_child().name()[0]) >= 0x80);
 
 	// check magic string
-	const char_t* v = doc.last_child().child(STR("Heavy")).previous_sibling().child_value();
+	string_view_t v = doc.last_child().child(STR("Heavy")).previous_sibling().child_value();
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(v[0] == 0x4e16 && v[1] == 0x754c && v[2] == 0x6709 && v[3] == 0x5f88 && v[4] == 0x591a && v[5] == wchar_cast(0x8bed) && v[6] == wchar_cast(0x8a00));
@@ -1515,7 +1515,7 @@ TEST(document_load_buffer_utf_truncated)
 			{
 				CHECK(res);
 
-				const char_t* name = doc.first_child().name();
+				string_view_t name = doc.first_child().name();
 
 			#ifdef PUGIXML_WCHAR_MODE
 				CHECK(name[0] == 0x20ac && name[1] == 0);
@@ -1560,7 +1560,7 @@ TEST(document_load_stream_truncated)
 			}
 			else
 			{
-				const char_t* name = doc.first_child().name();
+				string_view_t name = doc.first_child().name();
 
 			#ifdef PUGIXML_WCHAR_MODE
 				CHECK(name[0] == 0x20ac && name[1] == 0);

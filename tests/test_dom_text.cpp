@@ -215,7 +215,7 @@ TEST_XML(dom_text_get_no_state, "<node/>")
     xml_text t = node.text();
 
     CHECK(!t);
-    CHECK(t.get() && *t.get() == 0);
+    CHECK(t.get().data() && *t.get().data() == 0);
     CHECK(!node.first_child());
 
     node.append_child(node_pcdata);

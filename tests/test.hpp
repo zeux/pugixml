@@ -34,7 +34,10 @@ struct test_runner
 	static const char* _temp_path;
 };
 
-bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs);
+inline bool test_string_equal(pugi::string_view_t lhs, const pugi::char_t* rhs)
+{
+	return lhs == rhs;
+}
 
 template <typename Node> inline bool test_node_name_value(const Node& node, const pugi::char_t* name, const pugi::char_t* value)
 {
