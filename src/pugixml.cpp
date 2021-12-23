@@ -1104,6 +1104,9 @@ namespace pugi
 		char_t*	name;
 		char_t*	value;
 
+		int name_len;
+		int value_len;
+
 		xml_attribute_struct* prev_attribute_c;
 		xml_attribute_struct* next_attribute;
 	};
@@ -1119,6 +1122,8 @@ namespace pugi
 
 		char_t* name;
 		char_t* value;
+		int name_len;
+		int value_len;
 
 		xml_node_struct* parent;
 
@@ -2593,13 +2598,15 @@ PUGI__NS_BEGIN
 	#define PUGI__SCANFOR(X)            { while (*s != 0 && !(X)) ++s; }
 	#define PUGI__SCANWHILE(X)          { while (X) ++s; }
 	#define PUGI__SCANWHILE_UNROLL(X)   { for (;;) { char_t ss = s[0]; if (PUGI__UNLIKELY(!(X))) { break; } ss = s[1]; if (PUGI__UNLIKELY(!(X))) { s += 1; break; } ss = s[2]; if (PUGI__UNLIKELY(!(X))) { s += 2; break; } ss = s[3]; if (PUGI__UNLIKELY(!(X))) { s += 3; break; } s += 4; } }
-	#define PUGI__ENDSEG()              { ch = *s; *s = 0; ++s; }
+    #define PUGI__ENDSEG(p,v)          { ch = *s; p->v##_len = static_cast<int>(s - p->v); *s = '\0'; ++s; }
 	#define PUGI__THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(0)
 	#define PUGI__CHECK_ERROR(err, m)   { if (*s == 0) PUGI__THROW_ERROR(err, m); }
 
-	PUGI__FN char_t* strconv_comment(char_t* s, char_t endch)
+	PUGI__FN char_t* strconv_comment(char_t* s, char_t endch, int& len)
 	{
 		gap g;
+
+		char_t* begin = s;
 
 		while (true)
 		{
@@ -2613,7 +2620,9 @@ PUGI__NS_BEGIN
 			}
 			else if (s[0] == '-' && s[1] == '-' && PUGI__ENDSWITH(s[2], '>')) // comment ends here
 			{
-				*g.flush(s) = 0;
+				auto end = g.flush(s);
+				*end = '\0';
+				len = static_cast<int>(end - begin);
 
 				return s + (s[2] == '>' ? 3 : 2);
 			}
@@ -2625,9 +2634,11 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	PUGI__FN char_t* strconv_cdata(char_t* s, char_t endch)
+	PUGI__FN char_t* strconv_cdata(char_t* s, char_t endch, int& len)
 	{
 		gap g;
+
+		char_t* begin = s;
 
 		while (true)
 		{
@@ -2641,7 +2652,9 @@ PUGI__NS_BEGIN
 			}
 			else if (s[0] == ']' && s[1] == ']' && PUGI__ENDSWITH(s[2], '>')) // CDATA ends here
 			{
-				*g.flush(s) = 0;
+				auto end = g.flush(s);
+				*end = '\0';
+				len = static_cast<int>(end - begin);
 
 				return s + 1;
 			}
@@ -2653,11 +2666,11 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	typedef char_t* (*strconv_pcdata_t)(char_t*);
+	typedef char_t* (*strconv_pcdata_t)(char_t*, int& len);
 
 	template <typename opt_trim, typename opt_eol, typename opt_escape> struct strconv_pcdata_impl
 	{
-		static char_t* parse(char_t* s)
+		static char_t* parse(char_t* s, int& len)
 		{
 			gap g;
 
@@ -2675,7 +2688,8 @@ PUGI__NS_BEGIN
 						while (end > begin && PUGI__IS_CHARTYPE(end[-1], ct_space))
 							--end;
 
-					*end = 0;
+					*end = '\0';
+					len = static_cast<int>(end - begin);
 
 					return s + 1;
 				}
@@ -2697,7 +2711,8 @@ PUGI__NS_BEGIN
 						while (end > begin && PUGI__IS_CHARTYPE(end[-1], ct_space))
 							--end;
 
-					*end = 0;
+					*end = '\0';
+					len = static_cast<int>(end - begin);
 
 					return s;
 				}
@@ -2724,13 +2739,15 @@ PUGI__NS_BEGIN
 		}
 	}
 
-	typedef char_t* (*strconv_attribute_t)(char_t*, char_t);
+	typedef char_t* (*strconv_attribute_t)(char_t*, char_t, int& len);
 
 	template <typename opt_escape> struct strconv_attribute_impl
 	{
-		static char_t* parse_wnorm(char_t* s, char_t end_quote)
+		static char_t* parse_wnorm(char_t* s, char_t end_quote, int& len)
 		{
 			gap g;
+
+			char_t* begin = s;
 
 			// trim leading whitespaces
 			if (PUGI__IS_CHARTYPE(*s, ct_space))
@@ -2751,8 +2768,10 @@ PUGI__NS_BEGIN
 				{
 					char_t* str = g.flush(s);
 
-					do *str-- = 0;
+					do *str-- = '\0';
 					while (PUGI__IS_CHARTYPE(*str, ct_space));
+
+					len = static_cast<int>(str + 1 - begin);
 
 					return s + 1;
 				}
@@ -2780,9 +2799,11 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		static char_t* parse_wconv(char_t* s, char_t end_quote)
+		static char_t* parse_wconv(char_t* s, char_t end_quote, int& len)
 		{
 			gap g;
+
+			char_t* begin = s;
 
 			while (true)
 			{
@@ -2790,7 +2811,9 @@ PUGI__NS_BEGIN
 
 				if (*s == end_quote)
 				{
-					*g.flush(s) = 0;
+					auto end = g.flush(s);
+					*end = '\0';
+					len = static_cast<int>(end - begin);
 
 					return s + 1;
 				}
@@ -2816,9 +2839,11 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		static char_t* parse_eol(char_t* s, char_t end_quote)
+		static char_t* parse_eol(char_t* s, char_t end_quote, int& len)
 		{
 			gap g;
+
+			char_t* begin = s;
 
 			while (true)
 			{
@@ -2826,7 +2851,9 @@ PUGI__NS_BEGIN
 
 				if (*s == end_quote)
 				{
-					*g.flush(s) = 0;
+					auto end = g.flush(s);
+					*end = '\0';
+					len = static_cast<int>(end - begin);
 
 					return s + 1;
 				}
@@ -2848,9 +2875,11 @@ PUGI__NS_BEGIN
 			}
 		}
 
-		static char_t* parse_simple(char_t* s, char_t end_quote)
+		static char_t* parse_simple(char_t* s, char_t end_quote, int& len)
 		{
 			gap g;
+
+			char_t* begin = s;
 
 			while (true)
 			{
@@ -2858,7 +2887,9 @@ PUGI__NS_BEGIN
 
 				if (*s == end_quote)
 				{
-					*g.flush(s) = 0;
+					auto end = g.flush(s);
+					*end = '\0';
+					len = static_cast<int>(end - begin);
 
 					return s + 1;
 				}
@@ -3058,7 +3089,7 @@ PUGI__NS_BEGIN
 
 					if (PUGI__OPTSET(parse_eol) && PUGI__OPTSET(parse_comments))
 					{
-						s = strconv_comment(s, endch);
+						s = strconv_comment(s, endch, cursor->value_len);
 
 						if (!s) PUGI__THROW_ERROR(status_bad_comment, cursor->value);
 					}
@@ -3068,9 +3099,10 @@ PUGI__NS_BEGIN
 						PUGI__SCANFOR(s[0] == '-' && s[1] == '-' && PUGI__ENDSWITH(s[2], '>'));
 						PUGI__CHECK_ERROR(status_bad_comment, s);
 
-						if (PUGI__OPTSET(parse_comments))
-							*s = 0; // Zero-terminate this segment at the first terminating '-'.
-
+						if (PUGI__OPTSET(parse_comments)) {
+							*s = '\0'; // Zero-terminate this segment at the first terminating '-'.
+							cursor->value_len = static_cast<int>(s - cursor->value);
+						}
 						s += (s[2] == '>' ? 3 : 2); // Step over the '\0->'.
 					}
 				}
@@ -3090,7 +3122,7 @@ PUGI__NS_BEGIN
 
 						if (PUGI__OPTSET(parse_eol))
 						{
-							s = strconv_cdata(s, endch);
+							s = strconv_cdata(s, endch, cursor->value_len);
 
 							if (!s) PUGI__THROW_ERROR(status_bad_cdata, cursor->value);
 						}
@@ -3100,7 +3132,8 @@ PUGI__NS_BEGIN
 							PUGI__SCANFOR(s[0] == ']' && s[1] == ']' && PUGI__ENDSWITH(s[2], '>'));
 							PUGI__CHECK_ERROR(status_bad_cdata, s);
 
-							*s++ = 0; // Zero-terminate this segment.
+							cursor->value_len = s - cursor->value;
+							*s++ = '\0'; // Zero-terminate this segment.
 						}
 					}
 					else // Flagged for discard, but we still have to scan for the terminator.
@@ -3128,7 +3161,7 @@ PUGI__NS_BEGIN
 				if (!s) return s;
 
 				assert((*s == 0 && endch == '>') || *s == '>');
-				if (*s) *s++ = 0;
+				if (*s) *s++ = '\0';
 
 				if (PUGI__OPTSET(parse_doctype))
 				{
@@ -3137,6 +3170,7 @@ PUGI__NS_BEGIN
 					PUGI__PUSHNODE(node_doctype);
 
 					cursor->value = mark;
+					cursor->value_len = static_cast<int>(s - mark - 1);
 				}
 			}
 			else if (*s == 0 && endch == '-') PUGI__THROW_ERROR(status_bad_comment, s);
@@ -3182,7 +3216,7 @@ PUGI__NS_BEGIN
 
 				cursor->name = target;
 
-				PUGI__ENDSEG();
+				PUGI__ENDSEG(cursor, name);
 
 				// parse value/attributes
 				if (ch == '?')
@@ -3215,10 +3249,8 @@ PUGI__NS_BEGIN
 					{
 						// store value and step over >
 						cursor->value = value;
-
+						PUGI__ENDSEG(cursor, value);
 						PUGI__POPNODE();
-
-						PUGI__ENDSEG();
 
 						s += (*s == '>');
 					}
@@ -3263,7 +3295,7 @@ PUGI__NS_BEGIN
 						cursor->name = s;
 
 						PUGI__SCANWHILE_UNROLL(PUGI__IS_CHARTYPE(ss, ct_symbol)); // Scan for a terminator.
-						PUGI__ENDSEG(); // Save char in 'ch', terminate & step over.
+						PUGI__ENDSEG(cursor, name); // Save char in 'ch', terminate & step over.
 
 						if (ch == '>')
 						{
@@ -3284,7 +3316,7 @@ PUGI__NS_BEGIN
 									a->name = s; // Save the offset.
 
 									PUGI__SCANWHILE_UNROLL(PUGI__IS_CHARTYPE(ss, ct_symbol)); // Scan for a terminator.
-									PUGI__ENDSEG(); // Save char in 'ch', terminate & step over.
+									PUGI__ENDSEG(a, name); // Save char in 'ch', terminate & step over.
 
 									if (PUGI__IS_CHARTYPE(ch, ct_space))
 									{
@@ -3304,7 +3336,7 @@ PUGI__NS_BEGIN
 											++s; // Step over the quote.
 											a->value = s; // Save the offset.
 
-											s = strconv_attribute(s, ch);
+											s = strconv_attribute(s, ch, a->value_len);
 
 											if (!s) PUGI__THROW_ERROR(status_bad_attribute, a->value);
 
@@ -3442,20 +3474,22 @@ PUGI__NS_BEGIN
 
 					if (cursor->parent || PUGI__OPTSET(parse_fragment))
 					{
+						pugi::xml_node_struct* target;
 						if (PUGI__OPTSET(parse_embed_pcdata) && cursor->parent && !cursor->first_child && !cursor->value)
 						{
-							cursor->value = s; // Save the offset.
+							target = cursor; // cursor->value = s; // Save the offset.
 						}
 						else
 						{
 							PUGI__PUSHNODE(node_pcdata); // Append a new node on the tree.
 
-							cursor->value = s; // Save the offset.
+							target = cursor; // cursor->value = s; // Save the offset.
 
 							PUGI__POPNODE(); // Pop since this is a standalone.
 						}
 
-						s = strconv_pcdata(s);
+						target->value = s;
+						s = strconv_pcdata(s, target->value_len);
 
 						if (!*s) break;
 					}
@@ -8376,7 +8410,7 @@ PUGI__NS_BEGIN
 
 		// zero-terminate
 		assert(s < result + result_size);
-		*s = 0;
+		*s = '\0';
 
 		return xpath_string::from_heap_preallocated(result, s);
 	}
