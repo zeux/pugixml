@@ -563,7 +563,7 @@ TEST(parse_escapes_unicode)
 	CHECK(doc.load_string(STR("<node>&#x03B3;&#x03b3;&#x24B62;</node>"), parse_minimal | parse_escapes));
 
 #ifdef PUGIXML_WCHAR_MODE
-	const char_t* v = doc.child_value(STR("node"));
+	string_view_t v = doc.child_value(STR("node"));
 
 	size_t wcharsize = sizeof(wchar_t);
 

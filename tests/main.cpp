@@ -8,6 +8,8 @@
 
 #include <string>
 
+#include <time.h>
+
 #ifndef PUGIXML_NO_EXCEPTIONS
 #   include <exception>
 #endif
@@ -170,6 +172,7 @@ int main(int, char** argv)
 #ifdef __BORLANDC__
 	_control87(MCW_EM | PC_53, MCW_EM | MCW_PC);
 #endif
+	clock_t start = clock();
 
 	// setup temp path as the executable folder
 	std::string temp = argv[0];
@@ -203,9 +206,9 @@ int main(int, char** argv)
 	unsigned int failed = total - passed;
 
 	if (failed != 0)
-		printf("FAILURE: %u out of %u tests failed.\n", failed, total);
+		printf("FAILURE: %u out of %u tests failed, cost %g(s).\n", failed, total, (clock() - start) / (double)CLOCKS_PER_SEC);
 	else
-		printf("Success: %u tests passed.\n", total);
+		printf("Success: %u tests passed, cost %g(s).\n", total, (clock() - start) / (double)CLOCKS_PER_SEC);
 
 	return failed;
 }
