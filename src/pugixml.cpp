@@ -1053,7 +1053,27 @@ namespace pugi
 	{
 		xml_attribute_struct(impl::xml_memory_page* page): header(page, 0), namevalue_base(0)
 		{
-			PUGI__STATIC_ASSERT(sizeof(xml_attribute_struct) == 8);
+			PUGI__STATIC_ASSERT(sizeof(xml_attribute_struct) == 8 + 8);
+		}
+
+		inline string_view_t unsafe_name_sv() const {
+			return string_view_t(name, name_len);
+		}
+
+		inline string_view_t unsafe_value_sv() const {
+			return string_view_t(value, value_len);
+		}
+
+		inline string_view_t value_sv() const {
+			return value ? unsafe_value_sv() : PUGIXML_EMPTY_SV;
+		}
+
+		inline bool equals_name(string_view_t rhs) const {
+			return name && unsafe_name_sv() == rhs;
+		}
+
+		inline bool equals_value(string_view_t rhs) const {
+			return value_sv() == rhs;
 		}
 
 		impl::compact_header header;
@@ -1065,13 +1085,32 @@ namespace pugi
 
 		impl::compact_pointer<xml_attribute_struct, 6> prev_attribute_c;
 		impl::compact_pointer<xml_attribute_struct, 7, 0> next_attribute;
+
+		int name_len;
+		int value_len;
 	};
 
 	struct xml_node_struct
 	{
 		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(page, type), namevalue_base(0)
 		{
-			PUGI__STATIC_ASSERT(sizeof(xml_node_struct) == 12);
+			PUGI__STATIC_ASSERT(sizeof(xml_node_struct) == 12 + 8);
+		}
+
+		inline string_view_t unsafe_name_sv() const {
+			return string_view_t(name, name_len);
+		}
+
+		inline string_view_t unsafe_value_sv() const {
+			return string_view_t(value, value_len);
+		}
+
+		inline string_view_t value_sv() const {
+			return value ? unsafe_value_sv() : PUGIXML_EMPTY_SV;
+		}
+
+		inline bool equals_name(string_view_t rhs) const {
+			return name && unsafe_name_sv() == rhs;
 		}
 
 		impl::compact_header header;
@@ -1089,6 +1128,9 @@ namespace pugi
 		impl::compact_pointer<xml_node_struct, 10, 0> next_sibling;
 
 		impl::compact_pointer<xml_attribute_struct, 11, 0> first_attribute;
+
+		int name_len;
+		int value_len;
 	};
 }
 #else
