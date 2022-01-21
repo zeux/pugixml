@@ -70,23 +70,23 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>vs2019\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>vs2019\$(Platform)_$(Configuration)\</IntDir>
+    <OutDir>vs2022\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>vs2022\$(Platform)_$(Configuration)\</IntDir>
     <TargetName>pugixml</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>vs2019\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>vs2019\$(Platform)_$(Configuration)\</IntDir>
+    <OutDir>vs2022\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>vs2022\$(Platform)_$(Configuration)\</IntDir>
     <TargetName>pugixml</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>vs2019\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>vs2019\$(Platform)_$(Configuration)\</IntDir>
+    <OutDir>vs2022\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>vs2022\$(Platform)_$(Configuration)\</IntDir>
     <TargetName>pugixml</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>vs2019\$(Platform)_$(Configuration)\</OutDir>
-    <IntDir>vs2019\$(Platform)_$(Configuration)\</IntDir>
+    <OutDir>vs2022\$(Platform)_$(Configuration)\</OutDir>
+    <IntDir>vs2022\$(Platform)_$(Configuration)\</IntDir>
     <TargetName>pugixml</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
