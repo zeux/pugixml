@@ -1,4 +1,5 @@
 image:
+  - Visual Studio 2022
   - Visual Studio 2019
   - Visual Studio 2017
   - Visual Studio 2015
@@ -10,11 +11,13 @@ build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2015") { .\scripts\nuget_build.ps1 2015}
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2017") { .\scripts\nuget_build.ps1 2017}
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2019") { .\scripts\nuget_build.ps1 2019}
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2022") { .\scripts\nuget_build.ps1 2022}
 
 test_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2015") { .\tests\autotest-appveyor.ps1 9 10 11 12 14 }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2017") { .\tests\autotest-appveyor.ps1 15 }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2019") { .\tests\autotest-appveyor.ps1 19 }
+  - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2022") { .\tests\autotest-appveyor.ps1 22 }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2015") { & C:\cygwin\bin\bash.exe -c "PATH=/usr/bin:/usr/local/bin:$PATH; make config=coverage test && bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov 2>&1" }
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2015") { & C:\cygwin\bin\bash.exe -c "PATH=/usr/bin:/usr/local/bin:$PATH; make config=coverage defines=PUGIXML_WCHAR_MODE test && bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov 2>&1" }
 
