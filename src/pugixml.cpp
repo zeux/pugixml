@@ -40,6 +40,16 @@
 // For placement new
 #include <new>
 
+// c++17 and more detection for std::from_chars
+#if (!defined(PUGIXML_HAS_CXX17)) && ((__cplusplus >= 201703L) || \
+     (defined(_MSC_VER) && _MSC_VER >= 1911 && _MSVC_LANG >= 201703L))
+#	define PUGIXML_HAS_CXX17
+#endif
+
+#if defined(PUGIXML_HAS_CXX17)
+#	include <charconv>
+#endif
+
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable: 4127) // conditional expression is constant
@@ -4591,6 +4601,10 @@ PUGI__NS_BEGIN
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(value, 0);
+	#elif defined(PUGIXML_HAS_CXX17)
+		double result_double = 0.0;
+		std::from_chars(value, (value + strlen(value)), result_double);
+		return result_double;
 	#else
 		return strtod(value, 0);
 	#endif
@@ -4600,6 +4614,10 @@ PUGI__NS_BEGIN
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		return static_cast<float>(wcstod(value, 0));
+	#elif defined(PUGIXML_HAS_CXX17)
+		double result_double = 0.0;
+		std::from_chars(value, value + strlen(value), result_double);
+		return static_cast<float>(result_double);
 	#else
 		return static_cast<float>(strtod(value, 0));
 	#endif
@@ -8419,6 +8437,10 @@ PUGI__NS_BEGIN
 		// parse string
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(string, 0);
+	#elif defined(PUGIXML_HAS_CXX17)
+		double result_double = 0.0;
+		std::from_chars(string, string + strlen(string), result_double);
+		return static_cast<float>(result_double);
 	#else
 		return strtod(string, 0);
 	#endif
