@@ -7440,28 +7440,16 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
-	PUGI__FN std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str)
+	PUGI__FN std::string PUGIXML_FUNCTION as_utf8(const pugi::wstring_view& str)
 	{
-		assert(str);
-
-		return impl::as_utf8_impl(str, impl::strlength_wide(str));
+		return impl::as_utf8_impl(str.data(), str.length());
 	}
 
-	PUGI__FN std::string PUGIXML_FUNCTION as_utf8(const std::basic_string<wchar_t>& str)
+	PUGI__FN std::wstring PUGIXML_FUNCTION as_wide(const pugi::string_view& str)
 	{
-		return impl::as_utf8_impl(str.c_str(), str.size());
-	}
+		assert(str.data());
 
-	PUGI__FN std::basic_string<wchar_t> PUGIXML_FUNCTION as_wide(const char* str)
-	{
-		assert(str);
-
-		return impl::as_wide_impl(str, strlen(str));
-	}
-
-	PUGI__FN std::basic_string<wchar_t> PUGIXML_FUNCTION as_wide(const std::string& str)
-	{
-		return impl::as_wide_impl(str.c_str(), str.size());
+		return impl::as_wide_impl(str.data(), str.length());
 	}
 #endif
 
