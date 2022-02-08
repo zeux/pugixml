@@ -153,8 +153,8 @@ namespace pugi {
 		const Char* p;
 		std::size_t s;
 		
-		basic_string_view(const std::string& r)
-			: p(r.data()), s(r.size()) {
+		basic_string_view(const std::basic_string<Char, Traits>& r)
+			: p(r.c_str()), s(r.size()) {
 		}
 		basic_string_view(const Char* ptr)
 			: p(ptr), s(Traits::length(ptr)) {
