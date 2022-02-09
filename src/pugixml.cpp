@@ -6567,65 +6567,74 @@ namespace pugi
 	PUGI__FN const char_t* xml_text::get() const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? d->value + 0 : PUGIXML_TEXT("");
+		if (!d) return PUGIXML_TEXT("");
+		const char_t* value = d->value;
+		return value ? value : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN const char_t* xml_text::as_string(const char_t* def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? d->value + 0 : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? value : def;
 	}
 
 	PUGI__FN int xml_text::as_int(int def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? impl::get_value_int(d->value) : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? impl::get_value_int(value) : def;
 	}
 
 	PUGI__FN unsigned int xml_text::as_uint(unsigned int def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? impl::get_value_uint(d->value) : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? impl::get_value_uint(value) : def;
 	}
 
 	PUGI__FN double xml_text::as_double(double def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? impl::get_value_double(d->value) : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? impl::get_value_double(value) : def;
 	}
 
 	PUGI__FN float xml_text::as_float(float def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? impl::get_value_float(d->value) : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? impl::get_value_float(value) : def;
 	}
 
 	PUGI__FN bool xml_text::as_bool(bool def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? impl::get_value_bool(d->value) : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? impl::get_value_bool(value) : def;
 	}
 
 #ifdef PUGIXML_HAS_LONG_LONG
 	PUGI__FN long long xml_text::as_llong(long long def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? impl::get_value_llong(d->value) : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? impl::get_value_llong(value) : def;
 	}
 
 	PUGI__FN unsigned long long xml_text::as_ullong(unsigned long long def) const
 	{
 		xml_node_struct* d = _data();
-
-		return (d && d->value) ? impl::get_value_ullong(d->value) : def;
+		if (!d) return def;
+		const char_t* value = d->value;
+		return value ? impl::get_value_ullong(value) : def;
 	}
 #endif
 
