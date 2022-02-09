@@ -1,7 +1,7 @@
 name: pugixml.org
 description: Light-weight, simple and fast XML parser for C++ with XPath support
 url: https://pugixml.org/
-version: "1.11"
+version: "1.12"
 gems:
   - jekyll-redirect-from
 
