@@ -1276,12 +1276,14 @@ PUGI__NS_BEGIN
 
 		child->parent = parent;
 
-		if (node->next_sibling)
-			node->next_sibling->prev_sibling_c = child;
+		xml_node_struct* next = node->next_sibling;
+
+		if (next)
+			next->prev_sibling_c = child;
 		else
 			parent->first_child->prev_sibling_c = child;
 
-		child->next_sibling = node->next_sibling;
+		child->next_sibling = next;
 		child->prev_sibling_c = node;
 
 		node->next_sibling = child;
@@ -1293,12 +1295,14 @@ PUGI__NS_BEGIN
 
 		child->parent = parent;
 
-		if (node->prev_sibling_c->next_sibling)
-			node->prev_sibling_c->next_sibling = child;
+		xml_node_struct* prev = node->prev_sibling_c;
+
+		if (prev->next_sibling)
+			prev->next_sibling = child;
 		else
 			parent->first_child = child;
 
-		child->prev_sibling_c = node->prev_sibling_c;
+		child->prev_sibling_c = prev;
 		child->next_sibling = node;
 
 		node->prev_sibling_c = child;
@@ -1308,15 +1312,18 @@ PUGI__NS_BEGIN
 	{
 		xml_node_struct* parent = node->parent;
 
-		if (node->next_sibling)
-			node->next_sibling->prev_sibling_c = node->prev_sibling_c;
-		else
-			parent->first_child->prev_sibling_c = node->prev_sibling_c;
+		xml_node_struct* next = node->next_sibling;
+		xml_node_struct* prev = node->prev_sibling_c;
 
-		if (node->prev_sibling_c->next_sibling)
-			node->prev_sibling_c->next_sibling = node->next_sibling;
+		if (next)
+			next->prev_sibling_c = prev;
 		else
-			parent->first_child = node->next_sibling;
+			parent->first_child->prev_sibling_c = prev;
+
+		if (prev->next_sibling)
+			prev->next_sibling = next;
+		else
+			parent->first_child = next;
 
 		node->parent = 0;
 		node->prev_sibling_c = 0;
@@ -1360,39 +1367,46 @@ PUGI__NS_BEGIN
 
 	inline void insert_attribute_after(xml_attribute_struct* attr, xml_attribute_struct* place, xml_node_struct* node)
 	{
-		if (place->next_attribute)
-			place->next_attribute->prev_attribute_c = attr;
+		xml_attribute_struct* next = place->next_attribute;
+
+		if (next)
+			next->prev_attribute_c = attr;
 		else
 			node->first_attribute->prev_attribute_c = attr;
 
-		attr->next_attribute = place->next_attribute;
+		attr->next_attribute = next;
 		attr->prev_attribute_c = place;
 		place->next_attribute = attr;
 	}
 
 	inline void insert_attribute_before(xml_attribute_struct* attr, xml_attribute_struct* place, xml_node_struct* node)
 	{
-		if (place->prev_attribute_c->next_attribute)
-			place->prev_attribute_c->next_attribute = attr;
+		xml_attribute_struct* prev = place->prev_attribute_c;
+
+		if (prev->next_attribute)
+			prev->next_attribute = attr;
 		else
 			node->first_attribute = attr;
 
-		attr->prev_attribute_c = place->prev_attribute_c;
+		attr->prev_attribute_c = prev;
 		attr->next_attribute = place;
 		place->prev_attribute_c = attr;
 	}
 
 	inline void remove_attribute(xml_attribute_struct* attr, xml_node_struct* node)
 	{
-		if (attr->next_attribute)
-			attr->next_attribute->prev_attribute_c = attr->prev_attribute_c;
-		else
-			node->first_attribute->prev_attribute_c = attr->prev_attribute_c;
+		xml_attribute_struct* next = attr->next_attribute;
+		xml_attribute_struct* prev = attr->prev_attribute_c;
 
-		if (attr->prev_attribute_c->next_attribute)
-			attr->prev_attribute_c->next_attribute = attr->next_attribute;
+		if (next)
+			next->prev_attribute_c = prev;
 		else
-			node->first_attribute = attr->next_attribute;
+			node->first_attribute->prev_attribute_c = prev;
+
+		if (prev->next_attribute)
+			prev->next_attribute = next;
+		else
+			node->first_attribute = next;
 
 		attr->prev_attribute_c = 0;
 		attr->next_attribute = 0;
