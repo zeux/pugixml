@@ -5199,53 +5199,72 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_attribute::next_attribute() const
 	{
-		return _attr ? xml_attribute(_attr->next_attribute) : xml_attribute();
+		if (!_attr) return xml_attribute();
+		return xml_attribute(_attr->next_attribute);
 	}
 
 	PUGI__FN xml_attribute xml_attribute::previous_attribute() const
 	{
-		return _attr && _attr->prev_attribute_c->next_attribute ? xml_attribute(_attr->prev_attribute_c) : xml_attribute();
+		if (!_attr) return xml_attribute();
+		xml_attribute_struct* prev = _attr->prev_attribute_c;
+		return prev->next_attribute ? xml_attribute(prev) : xml_attribute();
 	}
 
 	PUGI__FN const char_t* xml_attribute::as_string(const char_t* def) const
 	{
-		return (_attr && _attr->value) ? _attr->value + 0 : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? value : def;
 	}
 
 	PUGI__FN int xml_attribute::as_int(int def) const
 	{
-		return (_attr && _attr->value) ? impl::get_value_int(_attr->value) : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? impl::get_value_int(value) : def;
 	}
 
 	PUGI__FN unsigned int xml_attribute::as_uint(unsigned int def) const
 	{
-		return (_attr && _attr->value) ? impl::get_value_uint(_attr->value) : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? impl::get_value_uint(value) : def;
 	}
 
 	PUGI__FN double xml_attribute::as_double(double def) const
 	{
-		return (_attr && _attr->value) ? impl::get_value_double(_attr->value) : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? impl::get_value_double(value) : def;
 	}
 
 	PUGI__FN float xml_attribute::as_float(float def) const
 	{
-		return (_attr && _attr->value) ? impl::get_value_float(_attr->value) : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? impl::get_value_float(value) : def;
 	}
 
 	PUGI__FN bool xml_attribute::as_bool(bool def) const
 	{
-		return (_attr && _attr->value) ? impl::get_value_bool(_attr->value) : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? impl::get_value_bool(value) : def;
 	}
 
 #ifdef PUGIXML_HAS_LONG_LONG
 	PUGI__FN long long xml_attribute::as_llong(long long def) const
 	{
-		return (_attr && _attr->value) ? impl::get_value_llong(_attr->value) : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? impl::get_value_llong(value) : def;
 	}
 
 	PUGI__FN unsigned long long xml_attribute::as_ullong(unsigned long long def) const
 	{
-		return (_attr && _attr->value) ? impl::get_value_ullong(_attr->value) : def;
+		if (!_attr) return def;
+		const char_t* value = _attr->value;
+		return value ? impl::get_value_ullong(value) : def;
 	}
 #endif
 
@@ -5256,12 +5275,16 @@ namespace pugi
 
 	PUGI__FN const char_t* xml_attribute::name() const
 	{
-		return (_attr && _attr->name) ? _attr->name + 0 : PUGIXML_TEXT("");
+		if (!_attr) return PUGIXML_TEXT("");
+		const char_t* name = _attr->name;
+		return name ? name : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN const char_t* xml_attribute::value() const
 	{
-		return (_attr && _attr->value) ? _attr->value + 0 : PUGIXML_TEXT("");
+		if (!_attr) return PUGIXML_TEXT("");
+		const char_t* value = _attr->value;
+		return value ? value : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN size_t xml_attribute::hash_value() const
@@ -5535,7 +5558,9 @@ namespace pugi
 
 	PUGI__FN const char_t* xml_node::name() const
 	{
-		return (_root && _root->name) ? _root->name + 0 : PUGIXML_TEXT("");
+		if (!_root) return PUGIXML_TEXT("");
+		const char_t* name = _root->name;
+		return name ? name : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN xml_node_type xml_node::type() const
@@ -5545,7 +5570,9 @@ namespace pugi
 
 	PUGI__FN const char_t* xml_node::value() const
 	{
-		return (_root && _root->value) ? _root->value + 0 : PUGIXML_TEXT("");
+		if (!_root) return PUGIXML_TEXT("");
+		const char_t* value = _root->value;
+		return value ? value : PUGIXML_TEXT("");
 	}
 
 	PUGI__FN xml_node xml_node::child(const char_t* name_) const
@@ -5553,7 +5580,11 @@ namespace pugi
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && impl::strequal(name_, i->name)) return xml_node(i);
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(name_, iname))
+				return xml_node(i);
+		}
 
 		return xml_node();
 	}
@@ -5563,8 +5594,11 @@ namespace pugi
 		if (!_root) return xml_attribute();
 
 		for (xml_attribute_struct* i = _root->first_attribute; i; i = i->next_attribute)
-			if (i->name && impl::strequal(name_, i->name))
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(name_, iname))
 				return xml_attribute(i);
+		}
 
 		return xml_attribute();
 	}
@@ -5574,7 +5608,11 @@ namespace pugi
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->next_sibling; i; i = i->next_sibling)
-			if (i->name && impl::strequal(name_, i->name)) return xml_node(i);
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(name_, iname))
+				return xml_node(i);
+		}
 
 		return xml_node();
 	}
@@ -5589,7 +5627,11 @@ namespace pugi
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->prev_sibling_c; i->next_sibling; i = i->prev_sibling_c)
-			if (i->name && impl::strequal(name_, i->name)) return xml_node(i);
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(name_, iname))
+				return xml_node(i);
+		}
 
 		return xml_node();
 	}
@@ -5605,24 +5647,30 @@ namespace pugi
 
 		// optimistically search from hint up until the end
 		for (xml_attribute_struct* i = hint; i; i = i->next_attribute)
-			if (i->name && impl::strequal(name_, i->name))
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(name_, iname))
 			{
 				// update hint to maximize efficiency of searching for consecutive attributes
 				hint_._attr = i->next_attribute;
 
 				return xml_attribute(i);
 			}
+		}
 
 		// wrap around and search from the first attribute until the hint
 		// 'j' null pointer check is technically redundant, but it prevents a crash in case the assertion above fails
 		for (xml_attribute_struct* j = _root->first_attribute; j && j != hint; j = j->next_attribute)
-			if (j->name && impl::strequal(name_, j->name))
+		{
+			const char_t* jname = j->name;
+			if (jname && impl::strequal(name_, jname))
 			{
 				// update hint to maximize efficiency of searching for consecutive attributes
 				hint_._attr = j->next_attribute;
 
 				return xml_attribute(j);
 			}
+		}
 
 		return xml_attribute();
 	}
@@ -5630,9 +5678,8 @@ namespace pugi
 	PUGI__FN xml_node xml_node::previous_sibling() const
 	{
 		if (!_root) return xml_node();
-
-		if (_root->prev_sibling_c->next_sibling) return xml_node(_root->prev_sibling_c);
-		else return xml_node();
+		xml_node_struct* prev = _root->prev_sibling_c;
+		return prev->next_sibling ? xml_node(prev) : xml_node();
 	}
 
 	PUGI__FN xml_node xml_node::parent() const
@@ -5659,8 +5706,11 @@ namespace pugi
 			return _root->value;
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (impl::is_text_node(i) && i->value)
-				return i->value;
+		{
+			const char_t* ivalue = i->value;
+			if (impl::is_text_node(i) && ivalue)
+				return ivalue;
+		}
 
 		return PUGIXML_TEXT("");
 	}
@@ -5672,22 +5722,28 @@ namespace pugi
 
 	PUGI__FN xml_attribute xml_node::first_attribute() const
 	{
-		return _root ? xml_attribute(_root->first_attribute) : xml_attribute();
+		if (!_root) return xml_attribute();
+		return xml_attribute(_root->first_attribute);
 	}
 
 	PUGI__FN xml_attribute xml_node::last_attribute() const
 	{
-		return _root && _root->first_attribute ? xml_attribute(_root->first_attribute->prev_attribute_c) : xml_attribute();
+		if (!_root) return xml_attribute();
+		xml_attribute_struct* first = _root->first_attribute;
+		return first ? xml_attribute(first->prev_attribute_c) : xml_attribute();
 	}
 
 	PUGI__FN xml_node xml_node::first_child() const
 	{
-		return _root ? xml_node(_root->first_child) : xml_node();
+		if (!_root) return xml_node();
+		return xml_node(_root->first_child);
 	}
 
 	PUGI__FN xml_node xml_node::last_child() const
 	{
-		return _root && _root->first_child ? xml_node(_root->first_child->prev_sibling_c) : xml_node();
+		if (!_root) return xml_node();
+		xml_node_struct* first = _root->first_child;
+		return first ? xml_node(first->prev_sibling_c) : xml_node();
 	}
 
 	PUGI__FN bool xml_node::set_name(const char_t* rhs)
@@ -6213,12 +6269,22 @@ namespace pugi
 		if (!_root) return xml_node();
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
-			if (i->name && impl::strequal(name_, i->name))
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(name_, iname))
 			{
 				for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-					if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value + 0 : PUGIXML_TEXT("")))
-						return xml_node(i);
+				{
+					const char_t* aname = a->name;
+					if (aname && impl::strequal(attr_name, aname))
+					{
+						const char_t* avalue = a->value;
+						if (impl::strequal(attr_value, avalue ? avalue : PUGIXML_TEXT("")))
+							return xml_node(i);
+					}
+				}
 			}
+		}
 
 		return xml_node();
 	}
@@ -6229,8 +6295,15 @@ namespace pugi
 
 		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
 			for (xml_attribute_struct* a = i->first_attribute; a; a = a->next_attribute)
-				if (a->name && impl::strequal(attr_name, a->name) && impl::strequal(attr_value, a->value ? a->value + 0 : PUGIXML_TEXT("")))
-					return xml_node(i);
+			{
+				const char_t* aname = a->name;
+				if (aname && impl::strequal(attr_name, aname))
+				{
+					const char_t* avalue = a->value;
+					if (impl::strequal(attr_value, avalue ? avalue : PUGIXML_TEXT("")))
+						return xml_node(i);
+				}
+			}
 
 		return xml_node();
 	}
@@ -6244,8 +6317,9 @@ namespace pugi
 
 		for (xml_node_struct* i = _root; i; i = i->parent)
 		{
+			const char_t* iname = i->name;
 			offset += (i != _root);
-			offset += i->name ? impl::strlength(i->name) : 0;
+			offset += iname ? impl::strlength(iname) : 0;
 		}
 
 		string_t result;
@@ -6256,12 +6330,13 @@ namespace pugi
 			if (j != _root)
 				result[--offset] = delimiter;
 
-			if (j->name)
+			const char_t* jname = j->name;
+			if (jname)
 			{
-				size_t length = impl::strlength(j->name);
+				size_t length = impl::strlength(jname);
 
 				offset -= length;
-				memcpy(&result[offset], j->name, length * sizeof(char_t));
+				memcpy(&result[offset], jname, length * sizeof(char_t));
 			}
 		}
 
@@ -6299,7 +6374,8 @@ namespace pugi
 		{
 			for (xml_node_struct* j = context._root->first_child; j; j = j->next_sibling)
 			{
-				if (j->name && impl::strequalrange(j->name, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
+				const char_t* jname = j->name;
+				if (jname && impl::strequalrange(jname, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
 				{
 					xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
 
