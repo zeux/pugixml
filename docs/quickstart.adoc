@@ -255,7 +255,7 @@ If filing an issue is not possible due to privacy or other concerns, you can con
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2020 Arseny Kapoulkine
+Copyright (c) 2006-2022 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -283,5 +283,5 @@ This means that you can freely use pugixml in your applications, both open-sourc
 
 ....
 This software is based on pugixml library (https://pugixml.org).
-pugixml is Copyright (C) 2006-2020 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2022 Arseny Kapoulkine.
 ....
