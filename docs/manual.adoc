@@ -46,7 +46,7 @@ Thanks to *Vyacheslav Egorov* for documentation proofreading and fuzz testing.
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2020 Arseny Kapoulkine
+Copyright (c) 2006-2022 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -74,7 +74,7 @@ This means that you can freely use pugixml in your applications, both open-sourc
 
 ....
 This software is based on pugixml library (https://pugixml.org).
-pugixml is Copyright (C) 2006-2020 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2022 Arseny Kapoulkine.
 ....
 
 [[install]]
@@ -2137,6 +2137,27 @@ Because of the differences in document object models, performance considerations
 == Changelog
 
 :!numbered:
+
+[[v1.12]]
+=== v1.12 ^2022-02-09^
+
+Maintenance release. Changes:
+
+* Bug fixes:
+    . Fix a bug in xml_document move construction when the source of the move is empty
+    . Fix const-correctness issues with iterator objects to support C++20 ranges
+
+* XPath improvements:
+    . Improved detection of overly complex queries that may result in stack overflow during parsing
+
+* Compatibility improvements:
+    . Fix Cygwin support for DLL builds
+    . Fix Windows CE support
+    . Add NuGet builds and project files for VS2022
+
+* Build system changes
+    . All CMake options now have the prefix `PUGIXML_`. This may require changing dependent build configurations.
+    . Many build settings are now exposed via CMake settings, most notably `PUGIXML_COMPACT` and `PUGIXML_WCHAR_MODE` can be set without changing `pugiconfig.hpp`
 
 [[v1.11]]
 === v1.11 ^2020-11-26^

@@ -35,7 +35,11 @@ Force-Copy "../src/pugiconfig.hpp" "nuget/build/native/include/pugiconfig.hpp"
 Force-Copy "../src/pugixml.hpp" "nuget/build/native/include/pugixml.hpp"
 Force-Copy "../src/pugixml.cpp" "nuget/build/native/include/pugixml.cpp"
 
-if ($args[0] -eq 2019){
+if ($args[0] -eq 2022){
+	Build-Version "vs2022" "v143" "dynamic"
+	Build-Version "vs2022" "v143" "static"
+
+} elseif ($args[0] -eq 2019){
 	Build-Version "vs2019" "v142" "dynamic"
 	Build-Version "vs2019" "v142" "static"
 

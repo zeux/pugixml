@@ -1,9 +1,9 @@
 #include <winver.h>
 
 #define PUGIXML_VERSION_MAJOR 1
-#define PUGIXML_VERSION_MINOR 11
+#define PUGIXML_VERSION_MINOR 12
 #define PUGIXML_VERSION_PATCH 0
-#define PUGIXML_VERSION_NUMBER "1.11.0\0"
+#define PUGIXML_VERSION_NUMBER "1.12.0\0"
 
 #if defined(GCC_WINDRES) || defined(__MINGW32__) || defined(__CYGWIN__)
 VS_VERSION_INFO		VERSIONINFO
@@ -31,7 +31,7 @@ BEGIN
       VALUE "FileDescription",	"pugixml library\0"
       VALUE "FileVersion",	PUGIXML_VERSION_NUMBER
       VALUE "InternalName",	"pugixml.dll\0"
-      VALUE "LegalCopyright",	"Copyright (C) 2006-2020, by Arseny Kapoulkine\0"
+      VALUE "LegalCopyright",	"Copyright (C) 2006-2022, by Arseny Kapoulkine\0"
       VALUE "OriginalFilename",	"pugixml.dll\0"
       VALUE "ProductName",	"pugixml\0"
       VALUE "ProductVersion",	PUGIXML_VERSION_NUMBER

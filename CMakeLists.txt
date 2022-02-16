@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(pugixml VERSION 1.11 LANGUAGES CXX)
+project(pugixml VERSION 1.12 LANGUAGES CXX)
 
 include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
@@ -33,7 +33,7 @@ option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
   "Build both shared and static libraries" OFF
   "BUILD_SHARED_LIBS" OFF)
-  
+
 # Expose options from the pugiconfig.hpp
 option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
 option(PUGIXML_COMPACT "Enable compact mode" OFF)
