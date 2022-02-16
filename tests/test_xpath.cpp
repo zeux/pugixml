@@ -10,14 +10,6 @@
 #include <algorithm>
 #include <limits>
 
-//  std::random_shuffle is deprecated in c++14, is removed in c++17.
-#if defined(__cplusplus) && (__cplusplus >= 201402L)
-#  include <random>
-#  define PUGIXML_SHUFFLE(rng)  std::shuffle(rng.begin(), rng.end(), std::default_random_engine{std::random_device{}()})
-#else
-#  define PUGIXML_SHUFFLE(rng)  std::random_shuffle(rng.begin(), rng.end())
-#endif
-
 using namespace pugi;
 
 static void load_document_copy(xml_document& doc, const char_t* text)
@@ -26,6 +18,22 @@ static void load_document_copy(xml_document& doc, const char_t* text)
 	CHECK(source.load_string(text));
 
 	doc.append_copy(source.first_child());
+}
+
+template <typename T>
+static void random_shuffle(std::vector<T>& v)
+{
+	size_t rng = 2147483647;
+
+	for (size_t i = v.size() - 1; i > 0; --i)
+	{
+		// Fisher-Yates shuffle
+		size_t j = rng % (i + 1);
+		std::swap(v[j], v[i]);
+
+		// LCG RNG, constants from Numerical Recipes
+		rng = rng * 1664525 + 1013904223;
+	}
 }
 
 TEST(xpath_allocator_many_pages)
@@ -163,7 +171,7 @@ TEST(xpath_sort_random_medium)
 	xpath_node_set ns = doc.select_nodes(STR("//node() | //@*"));
 
 	std::vector<xpath_node> nsv(ns.begin(), ns.end());
-	PUGIXML_SHUFFLE(nsv);
+	random_shuffle(nsv);
 
 	xpath_node_set copy(&nsv[0], &nsv[0] + nsv.size());
 	copy.sort();
@@ -192,7 +200,7 @@ TEST(xpath_sort_random_large)
 	xpath_node_set ns = doc.select_nodes(STR("//node() | //@*"));
 
 	std::vector<xpath_node> nsv(ns.begin(), ns.end());
-	PUGIXML_SHUFFLE(nsv);
+	random_shuffle(nsv);
 
 	xpath_node_set copy(&nsv[0], &nsv[0] + nsv.size());
 	copy.sort();
