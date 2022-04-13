@@ -416,6 +416,7 @@ namespace pugi
 
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
+		bool set_value(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs);
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
