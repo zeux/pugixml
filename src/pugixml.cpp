@@ -4707,16 +4707,18 @@ PUGI__NS_BEGIN
 		// get actual encoding
 		xml_encoding buffer_encoding = impl::get_buffer_encoding(encoding, contents, size);
 
+		// if convert_buffer below throws bad_alloc, we still need to deallocate contents if we own it
+		auto_deleter<void> contents_guard(own ? contents : 0, xml_memory::deallocate);
+
 		// get private buffer
 		char_t* buffer = 0;
 		size_t length = 0;
 
 		// coverity[var_deref_model]
-		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable))
-		{
-			if (own && contents) impl::xml_memory::deallocate(contents);
-			return impl::make_parse_result(status_out_of_memory);
-		}
+		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
+
+		// after this we either deallocate contents (below) or hold on to it via doc->buffer, so we don't need to guard it
+		contents_guard.release();
 
 		// delete original buffer if we performed a conversion
 		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
