@@ -14,7 +14,7 @@ The memory consumption is the peak value of allocated memory during the parsing 
 
 All tests were performed with Microsoft Visual Studio 2015, with all optimizations on and with all parsers operating in their default modes (i.e., no custom tuning has been performed). The timing results were recorded on a Intel Core i7 @ 2.67 GHz.
 
-Benchmarks are performed on nine different test files; all of them are in 1-20 Mb range and display a different range of markup/content ratios - e.g. there's a COLLADA file that has little markup, there's a book file that has almost no markup, there are some files where there is a lot of markup and almost no content, etc. The test files include a 10 Mb [XMark](http://www.xml-benchmark.org) test file.
+Benchmarks are performed on nine different test files; all of them are in 1-20 Mb range and display a different range of markup/content ratios - e.g. there's a COLLADA file that has little markup, there's a book file that has almost no markup, there are some files where there is a lot of markup and almost no content, etc. The test files include a 10 Mb XMark test file.
 
 Due to a number of test files all results are normalized using pugixml results as a baseline - the ratio between time or memory for a particular parser to pugixml is displayed (so if it's 1 or more then the parser is slower or takes more memory than pugixml). Note that the horizontal axis is using logarithmic scale.
 
