@@ -1817,3 +1817,39 @@ TEST(document_move_assign_empty)
 	CHECK_NODE(doc, STR("<node2/>"));
 }
 #endif
+
+TEST(document_load_buffer_convert_out_of_memory)
+{
+	const char* source = "<node>\xe7</node>";
+	size_t size = strlen(source);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document doc;
+
+	xml_parse_result result;
+	result.status = status_out_of_memory;
+	CHECK_ALLOC_FAIL(result = doc.load_buffer(source, size, pugi::parse_default, pugi::encoding_latin1));
+
+	CHECK(result.status == status_out_of_memory);
+}
+
+TEST(document_load_buffer_own_convert_out_of_memory)
+{
+	const char* source = "<node>\xe7</node>";
+	size_t size = strlen(source);
+
+	void* buffer = pugi::get_memory_allocation_function()(size);
+	CHECK(buffer);
+	memcpy(buffer, source, size);
+
+	test_runner::_memory_fail_threshold = 1;
+
+	xml_document doc;
+
+	xml_parse_result result;
+	result.status = status_out_of_memory;
+	CHECK_ALLOC_FAIL(result = doc.load_buffer_inplace_own(buffer, size, pugi::parse_default, pugi::encoding_latin1));
+
+	CHECK(result.status == status_out_of_memory);
+}
