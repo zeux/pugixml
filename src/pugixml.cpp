@@ -4712,7 +4712,11 @@ PUGI__NS_BEGIN
 		size_t length = 0;
 
 		// coverity[var_deref_model]
-		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
+		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable))
+		{
+			if (own && contents) impl::xml_memory::deallocate(contents);
+			return impl::make_parse_result(status_out_of_memory);
+		}
 
 		// delete original buffer if we performed a conversion
 		if (own && buffer != contents && contents) impl::xml_memory::deallocate(contents);
