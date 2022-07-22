@@ -736,7 +736,12 @@ struct temp_file
 	temp_file()
 	{
 		static int index = 0;
+
+	#if __cplusplus >= 201103
 		snprintf(path, sizeof(path), "%stempfile%d", test_runner::_temp_path, index++);
+	#else
+		sprintf(path, "%stempfile%d", test_runner::_temp_path, index++);
+	#endif
 	}
 
 	~temp_file()
