@@ -795,7 +795,7 @@ struct test_walker: xml_tree_walker
 	std::basic_string<char_t> depthstr() const
 	{
 		char buf[32];
-		sprintf(buf, "%d", depth());
+		snprintf(buf, sizeof(buf), "%d", depth());
 
 	#ifdef PUGIXML_WCHAR_MODE
 		wchar_t wbuf[32];

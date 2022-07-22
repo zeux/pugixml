@@ -736,7 +736,7 @@ struct temp_file
 	temp_file()
 	{
 		static int index = 0;
-		sprintf(path, "%stempfile%d", test_runner::_temp_path, index++);
+		snprintf(path, sizeof(path), "%stempfile%d", test_runner::_temp_path, index++);
 	}
 
 	~temp_file()
