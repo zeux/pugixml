@@ -115,6 +115,8 @@
 #ifndef PUGIXML_NULL
 #	if __cplusplus >= 201103
 #		define PUGIXML_NULL nullptr
+#	elif defined(_MSC_VER) && _MSC_VER >= 1600
+#		define PUGIXML_NULL nullptr
 #	else
 #		define PUGIXML_NULL 0
 #	endif
