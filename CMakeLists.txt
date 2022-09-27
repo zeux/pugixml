@@ -111,7 +111,9 @@ if (BUILD_SHARED_LIBS)
       ${PUGIXML_BUILD_DEFINES}
       ${PUGIXML_PUBLIC_DEFINITIONS}
     PRIVATE
-      $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>)
+      $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>
+      $<IF:$<CXX_COMPILER_ID:MSVC>,,PUGIXML_API=__attribute__\(\(visibility\("default"\)\)\)>
+    )
   target_compile_options(pugixml-shared
     PRIVATE
       ${msvc-rt-mtd-shared}
