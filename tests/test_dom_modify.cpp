@@ -209,6 +209,24 @@ TEST_XML(dom_node_set_value, "<node>text</node>")
 	CHECK_NODE(doc, STR("<node>no text</node>"));
 }
 
+TEST_XML(dom_node_set_value_partially_with_size, "<node>text</node>")
+{
+	CHECK(doc.child(STR("node")).first_child().set_value(STR("no text"), 2));
+	CHECK(!doc.child(STR("node")).set_value(STR("no text"), 2));
+	CHECK(!xml_node().set_value(STR("no text"), 2));
+
+	CHECK_NODE(doc, STR("<node>no</node>"));
+}
+
+TEST_XML(dom_node_set_value_with_size, "<node>text</node>")
+{
+	CHECK(doc.child(STR("node")).first_child().set_value(STR("no text"), 7));
+	CHECK(!doc.child(STR("node")).set_value(STR("no text"), 7));
+	CHECK(!xml_node().set_value(STR("no text"), 7));
+
+	CHECK_NODE(doc, STR("<node>no text</node>"));
+}
+
 TEST_XML(dom_node_set_value_allocated, "<node>text</node>")
 {
 	CHECK(doc.child(STR("node")).first_child().set_value(STR("no text")));
