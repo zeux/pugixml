@@ -70,7 +70,13 @@ TEST_XML(dom_attr_set_value, "<node/>")
 	CHECK(node.append_attribute(STR("attr8")).set_value(true));
 	CHECK(!xml_attribute().set_value(true));
 
-	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\"/>"));
+	CHECK(node.append_attribute(STR("attr9")).set_value(STR("v2"), 2));
+	CHECK(!xml_attribute().set_value(STR("v2")));
+
+	CHECK(node.append_attribute(STR("attr10")).set_value(STR("v3foobar"), 2));
+	CHECK(!xml_attribute().set_value(STR("v3")));
+
+	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" attr9=\"v2\" attr10=\"v3\"/>"));
 }
 
 #if LONG_MAX > 2147483647
