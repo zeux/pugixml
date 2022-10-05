@@ -38,15 +38,30 @@
 #	include <string>
 #endif
 
-#if (defined(__cplusplus) && __cplusplus == 201703L) || (defined(_MSC_VER) && _MSC_VER > 1900 && ((defined(_HAS_CXX17) && _HAS_CXX17 == 1) || (defined(_MSVC_LANG) && (_MSVC_LANG > 201402L))))
-#ifndef PUGI_CXX17_FEATURES
-#define PUGI_CXX17_FEATURES 1
-#endif // C++17 features macro
-#endif // C++17 features check
+// Tests whether compiler has c++17 support
+#if (defined(__cplusplus) && __cplusplus >= 201703L) || \
+    (defined(_MSC_VER) && _MSC_VER > 1900 &&            \
+     ((defined(_HAS_CXX17) && _HAS_CXX17 == 1) ||       \
+      (defined(_MSVC_LANG) && (_MSVC_LANG > 201402L))))
+#  ifndef PUGI_CXX_STD
+#    define PUGI_CXX_STD 17
+#  endif // C++17 features macro
+#endif   // C++17 features check
 
-#if defined(PUGI_CXX17_FEATURES) && PUGI_CXX17_FEATURES
-#include <string_view>
-#endif // C++17 features
+// Tests whether compiler has c++20 support
+#if (defined(__cplusplus) && __cplusplus > 201703L) || \
+    (defined(_MSC_VER) && _MSC_VER > 1900 &&           \
+     ((defined(_HAS_CXX20) && _HAS_CXX20 == 1) ||      \
+      (defined(_MSVC_LANG) && (_MSVC_LANG > 201703L))))
+#  ifdef PUGI_CXX_STD
+#    undef PUGI_CXX_STD
+#    define PUGI_CXX_STD 20
+#  endif // C++20 features macro
+#endif   // C++20 features check
+
+#if !defined(PUGI_CXX_STD)
+#  define PUGI_CXX_STD 11
+#endif
 
 // Macro for deprecated features
 #ifndef PUGIXML_DEPRECATED
@@ -142,7 +157,7 @@
 
 // The string_view
 namespace pugi {
-#if defined(PUGI_CXX17_FEATURES) && PUGI_CXX17_FEATURES
+#if PUGI_CXX_STD >= 17
 	template <typename C, typename T = std::char_traits<C> >
 	using basic_string_view = std::basic_string_view<C, T>;
 	typedef std::string_view string_view;
