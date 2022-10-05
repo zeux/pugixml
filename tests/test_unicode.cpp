@@ -146,7 +146,7 @@ TEST(as_utf8_invalid)
 
 TEST(as_utf8_string)
 {
-    std::basic_string<wchar_t> s = L"abcd";
+    std::wstring s = L"abcd";
 
     CHECK(as_utf8(s) == "abcd");
 }
