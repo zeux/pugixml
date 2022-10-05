@@ -55,8 +55,8 @@
       (defined(_MSVC_LANG) && (_MSVC_LANG > 201703L))))
 #  ifdef PUGI_CXX_STD
 #    undef PUGI_CXX_STD
+#  endif
 #    define PUGI_CXX_STD 20
-#  endif // C++20 features macro
 #endif   // C++20 features check
 
 #if !defined(PUGI_CXX_STD)
