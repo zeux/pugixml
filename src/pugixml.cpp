@@ -5381,7 +5381,9 @@ namespace pugi
 
 	PUGI__FN bool xml_attribute::set_value(const char_t* rhs)
 	{
-		return set_value(rhs, impl::strlength(rhs));
+		if (!_attr) return false;
+
+		return impl::strcpy_insitu(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, impl::strlength(rhs));
 	}
 
 	PUGI__FN bool xml_attribute::set_value(int rhs)
