@@ -418,6 +418,7 @@ namespace pugi
 
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
+		bool set_value(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs);
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
@@ -552,6 +553,7 @@ namespace pugi
 
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(const char_t* rhs);
+		bool set_value(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs);
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
@@ -777,6 +779,7 @@ namespace pugi
 		bool as_bool(bool def = false) const;
 
 		// Set text (returns false if object is empty or there is not enough memory)
+		bool set(const char_t* rhs, size_t sz);
 		bool set(const char_t* rhs);
 
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
