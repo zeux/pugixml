@@ -5070,7 +5070,7 @@ PUGI__NS_BEGIN
 		xml_writer_file writer(file);
 		doc.save(writer, indent, flags, encoding);
 
-		return ferror(file) == 0;
+		return fflush(file) == 0 && ferror(file) == 0;
 	}
 
 	struct name_null_sentry
@@ -7423,7 +7423,7 @@ namespace pugi
 		using impl::auto_deleter; // MSVC7 workaround
 		auto_deleter<FILE> file(impl::open_file(path_, (flags & format_save_file_text) ? "w" : "wb"), impl::close_file);
 
-		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
+		return impl::save_file_impl(*this, file.data, indent, flags, encoding) && fclose(file.release()) == 0;
 	}
 
 	PUGI__FN bool xml_document::save_file(const wchar_t* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
@@ -7431,7 +7431,7 @@ namespace pugi
 		using impl::auto_deleter; // MSVC7 workaround
 		auto_deleter<FILE> file(impl::open_file_wide(path_, (flags & format_save_file_text) ? L"w" : L"wb"), impl::close_file);
 
-		return impl::save_file_impl(*this, file.data, indent, flags, encoding);
+		return impl::save_file_impl(*this, file.data, indent, flags, encoding) && fclose(file.release()) == 0;
 	}
 
 	PUGI__FN xml_node xml_document::document_element() const
