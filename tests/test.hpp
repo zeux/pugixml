@@ -9,6 +9,8 @@
 #include <new>
 #endif
 
+#include <string>
+
 struct test_runner
 {
 	test_runner(const char* name)
@@ -153,6 +155,39 @@ struct dummy_fixture {};
 #endif
 
 #define STR(text) PUGIXML_TEXT(text)
+
+#ifdef PUGIXML_CHAR8_MODE
+#	if defined(__clang__) || defined(__GNUC__)
+#		define ALIASING_BARRIER(ptr) asm volatile("" : : "rm"(ptr) : "memory")
+#	else
+#		define ALIASING_BARRIER(ptr)
+#	endif
+inline const char8_t* char_cast(const char* bytes)
+{
+	ALIASING_BARRIER(bytes);
+	return reinterpret_cast<const char8_t*>(bytes);
+}
+#endif
+
+#ifdef PUGIXML_WCHAR_MODE
+#define RAW(text) L ## text
+#elif defined(PUGIXML_CHAR8_MODE)
+#define RAW(text) char_cast(text)
+#else
+#define RAW(text) text
+#endif
+
+#if defined(PUGIXML_CHAR8_MODE)
+#define U8RAW(text) char_cast(text)
+#else
+#define U8RAW(text) text
+#endif
+
+#ifdef PUGIXML_CHAR8_MODE
+#define U8STR(text) u8 ## text
+#else
+#define U8STR(text) text
+#endif
 
 #if defined(__DMC__) || defined(__BORLANDC__)
 #define U_LITERALS // DMC does not understand \x01234 (it parses first three digits), but understands \u01234

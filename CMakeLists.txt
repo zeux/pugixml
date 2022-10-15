@@ -36,6 +36,7 @@ cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
 
 # Expose options from the pugiconfig.hpp
 option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
+option(PUGIXML_CHAR8_MODE "Enable char8_t mode" OFF)
 option(PUGIXML_COMPACT "Enable compact mode" OFF)
 
 # Advanced options from pugiconfig.hpp
@@ -51,6 +52,7 @@ endif()
 
 set(PUGIXML_PUBLIC_DEFINITIONS
   $<$<BOOL:${PUGIXML_WCHAR_MODE}>:PUGIXML_WCHAR_MODE>
+  $<$<BOOL:${PUGIXML_CHAR8_MODE}>:PUGIXML_CHAR8_MODE>
   $<$<BOOL:${PUGIXML_COMPACT}>:PUGIXML_COMPACT>
   $<$<BOOL:${PUGIXML_NO_XPATH}>:PUGIXML_NO_XPATH>
   $<$<BOOL:${PUGIXML_NO_STL}>:PUGIXML_NO_STL>

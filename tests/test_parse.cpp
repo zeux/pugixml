@@ -568,6 +568,8 @@ TEST(parse_escapes_unicode)
 	size_t wcharsize = sizeof(wchar_t);
 
 	CHECK(v[0] == 0x3b3 && v[1] == 0x3b3 && (wcharsize == 2 ? v[2] == wchar_cast(0xd852) && v[3] == wchar_cast(0xdf62) : v[2] == wchar_cast(0x24b62)));
+#elif defined(PUGIXML_CHAR8_MODE)
+	CHECK_STRING(doc.child_value(STR("node")), u8"\u03B3\u03B3\U00024B62");
 #else
 	CHECK_STRING(doc.child_value(STR("node")), "\xce\xb3\xce\xb3\xf0\xa4\xad\xa2");
 #endif
@@ -1104,6 +1106,8 @@ TEST(parse_bom_fragment_invalid_utf8)
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(value[0] == wchar_cast(0xfefb) && value[1] == 0);
+#elif defined(PUGIXML_CHAR8_MODE)
+	CHECK(value[0] == 0xef && value[1] == 0xbb && value[2] == 0xbb);
 #else
 	CHECK_STRING(value, "\xef\xbb\xbb");
 #endif
@@ -1119,6 +1123,8 @@ TEST(parse_bom_fragment_invalid_utf16)
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(value[0] == wchar_cast(0xfffe) && value[1] == 0);
+#elif defined(PUGIXML_CHAR8_MODE)
+	CHECK(value[0] == 0xef && value[1] == 0xbf && value[2] == 0xbe);
 #else
 	CHECK_STRING(value, "\xef\xbf\xbe");
 #endif
@@ -1134,6 +1140,8 @@ TEST(parse_bom_fragment_invalid_utf32)
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(value[0] == wchar_cast(0xffff) && value[1] == 0);
+#elif defined(PUGIXML_CHAR8_MODE)
+	CHECK(value[0] == 0xef && value[1] == 0xbf && value[2] == 0xbf);
 #else
 	CHECK_STRING(value, "\xef\xbf\xbf");
 #endif

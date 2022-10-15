@@ -217,6 +217,8 @@ PUGI__NS_BEGIN
 
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcslen(s);
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return strlen(reinterpret_cast<const char*>(s));
 	#else
 		return strlen(s);
 	#endif
@@ -229,6 +231,8 @@ PUGI__NS_BEGIN
 
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcscmp(src, dst) == 0;
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return strcmp(reinterpret_cast<const char*>(src), reinterpret_cast<const char*>(dst)) == 0;
 	#else
 		return strcmp(src, dst) == 0;
 	#endif
@@ -2300,7 +2304,7 @@ PUGI__NS_BEGIN
 		return wchar_decoder::process(str, length, 0, utf8_counter());
 	}
 
-	PUGI__FN void as_utf8_end(char* buffer, size_t size, const wchar_t* str, size_t length)
+	PUGI__FN void as_utf8_end(u8char_t* buffer, size_t size, const wchar_t* str, size_t length)
 	{
 		// convert to utf8
 		uint8_t* begin = reinterpret_cast<uint8_t*>(buffer);
@@ -2312,13 +2316,13 @@ PUGI__NS_BEGIN
 	}
 
 #ifndef PUGIXML_NO_STL
-	PUGI__FN std::string as_utf8_impl(const wchar_t* str, size_t length)
+	PUGI__FN std::basic_string<u8char_t> as_utf8_impl(const wchar_t* str, size_t length)
 	{
 		// first pass: get length in utf8 characters
 		size_t size = as_utf8_begin(str, length);
 
 		// allocate resulting string
-		std::string result;
+		std::basic_string<u8char_t> result;
 		result.resize(size);
 
 		// second pass: convert to utf8
@@ -3503,7 +3507,7 @@ PUGI__NS_BEGIN
 	#else
 		static char_t* parse_skip_bom(char_t* s)
 		{
-			return (s[0] == '\xef' && s[1] == '\xbb' && s[2] == '\xbf') ? s + 3 : s;
+			return (s[0] == char_t('\xef') && s[1] == char_t('\xbb') && s[2] == char_t('\xbf')) ? s + 3 : s;
 		}
 	#endif
 
@@ -4607,6 +4611,8 @@ PUGI__NS_BEGIN
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(value, 0);
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return strtod(reinterpret_cast<const char*>(value), 0);
 	#else
 		return strtod(value, 0);
 	#endif
@@ -4616,6 +4622,8 @@ PUGI__NS_BEGIN
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		return static_cast<float>(wcstod(value, 0));
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return static_cast<float>(strtod(reinterpret_cast<const char*>(value), 0));
 	#else
 		return static_cast<float>(strtod(value, 0));
 	#endif
@@ -4674,6 +4682,8 @@ PUGI__NS_BEGIN
 		for (; buf[offset]; ++offset) wbuf[offset] = buf[offset];
 
 		return strcpy_insitu(dest, header, header_mask, wbuf, offset);
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return strcpy_insitu(dest, header, header_mask, reinterpret_cast<const char8_t*>(buf), strlen(reinterpret_cast<const char*>(buf)));
 	#else
 		return strcpy_insitu(dest, header, header_mask, buf, strlen(buf));
 	#endif
@@ -5104,12 +5114,24 @@ namespace pugi
 
 #ifndef PUGIXML_NO_STL
 	PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<char, std::char_traits<char> >& stream): narrow_stream(&stream), wide_stream(0)
+	#ifdef PUGIXML_CHAR8_MODE
+		, utf8_stream(0)
+	#endif
 	{
 	}
 
 	PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<wchar_t, std::char_traits<wchar_t> >& stream): narrow_stream(0), wide_stream(&stream)
+	#ifdef PUGIXML_CHAR8_MODE
+		, utf8_stream(0)
+	#endif
 	{
 	}
+
+	#ifdef PUGIXML_CHAR8_MODE
+	PUGI__FN xml_writer_stream::xml_writer_stream(std::basic_ostream<char8_t, std::char_traits<char8_t> >& stream): narrow_stream(0), wide_stream(0), utf8_stream(&stream)
+	{
+	}
+	#endif
 
 	PUGI__FN void xml_writer_stream::write(const void* data, size_t size)
 	{
@@ -5118,6 +5140,13 @@ namespace pugi
 			assert(!wide_stream);
 			narrow_stream->write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));
 		}
+		#ifdef PUGIXML_CHAR8_MODE
+		else if (utf8_stream)
+		{
+			assert(!wide_stream);
+			utf8_stream->write(reinterpret_cast<const char8_t*>(data), static_cast<std::streamsize>(size));
+		}
+		#endif
 		else
 		{
 			assert(wide_stream);
@@ -6492,6 +6521,15 @@ namespace pugi
 
 		print(writer, indent, flags, encoding_wchar, depth);
 	}
+
+	#ifdef PUGIXML_CHAR8_MODE
+	PUGI__FN void xml_node::print(std::basic_ostream<char8_t, std::char_traits<char8_t> >& stream, const char_t* indent, unsigned int flags, unsigned int depth) const
+	{
+		xml_writer_stream writer(stream);
+
+		print(writer, indent, flags, encoding_wchar, depth);
+	}
+	#endif
 #endif
 
 	PUGI__FN ptrdiff_t xml_node::offset_debug() const
@@ -7314,6 +7352,15 @@ namespace pugi
 
 		return impl::load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding_wchar, &_buffer);
 	}
+
+	#ifdef PUGIXML_CHAR8_MODE
+	PUGI__FN xml_parse_result xml_document::load(std::basic_istream<char8_t, std::char_traits<char8_t> >& stream, unsigned int options)
+	{
+		reset();
+
+		return impl::load_stream_impl(static_cast<impl::xml_document_struct*>(_root), stream, options, encoding_utf8, &_buffer);
+	}
+	#endif
 #endif
 
 	PUGI__FN xml_parse_result xml_document::load_string(const char_t* contents, unsigned int options)
@@ -7416,6 +7463,15 @@ namespace pugi
 
 		save(writer, indent, flags, encoding_wchar);
 	}
+
+	#ifdef PUGIXML_CHAR8_MODE
+	PUGI__FN void xml_document::save(std::basic_ostream<char8_t, std::char_traits<char8_t> >& stream, const char_t* indent, unsigned int flags) const
+	{
+		xml_writer_stream writer(stream);
+
+		save(writer, indent, flags, encoding_wchar);
+	}
+	#endif
 #endif
 
 	PUGI__FN bool xml_document::save_file(const char* path_, const char_t* indent, unsigned int flags, xml_encoding encoding) const
@@ -7446,14 +7502,14 @@ namespace pugi
 	}
 
 #ifndef PUGIXML_NO_STL
-	PUGI__FN std::string PUGIXML_FUNCTION as_utf8(const wchar_t* str)
+	PUGI__FN std::basic_string<u8char_t> PUGIXML_FUNCTION as_utf8(const wchar_t* str)
 	{
 		assert(str);
 
 		return impl::as_utf8_impl(str, impl::strlength_wide(str));
 	}
 
-	PUGI__FN std::string PUGIXML_FUNCTION as_utf8(const std::basic_string<wchar_t>& str)
+	PUGI__FN std::basic_string<u8char_t> PUGIXML_FUNCTION as_utf8(const std::basic_string<wchar_t>& str)
 	{
 		return impl::as_utf8_impl(str.c_str(), str.size());
 	}
@@ -8094,6 +8150,9 @@ PUGI__NS_BEGIN
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcschr(s, c);
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return reinterpret_cast<const char8_t*>(
+			strchr(reinterpret_cast<const char*>(s), static_cast<char>(c)));
 	#else
 		return strchr(s, c);
 	#endif
@@ -8104,6 +8163,9 @@ PUGI__NS_BEGIN
 	#ifdef PUGIXML_WCHAR_MODE
 		// MSVC6 wcsstr bug workaround (if s is empty it always returns 0)
 		return (*p == 0) ? s : wcsstr(s, p);
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return reinterpret_cast<const char8_t*>(
+			strstr(reinterpret_cast<const char*>(s), reinterpret_cast<const char*>(p)));
 	#else
 		return strstr(s, p);
 	#endif
@@ -8550,6 +8612,8 @@ PUGI__NS_BEGIN
 		// parse string
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(string, 0);
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return strtod(reinterpret_cast<const char*>(string), 0);
 	#else
 		return strtod(string, 0);
 	#endif

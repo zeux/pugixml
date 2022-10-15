@@ -410,7 +410,7 @@ TEST(xpath_variables_name_unicode)
 		const char_t* name = L"\x0400\x203D";
 	#endif
 #else
-	const char_t* name = "\xd0\x80\xe2\x80\xbd";
+	const char_t* name = STR("\xd0\x80\xe2\x80\xbd");
 #endif
 
 	xpath_variable_set set;

@@ -17,6 +17,9 @@
 // Uncomment this to enable wchar_t mode
 // #define PUGIXML_WCHAR_MODE
 
+// Uncomment this to enable char8_t mode
+//#define PUGIXML_CHAR8_MODE
+
 // Uncomment this to enable compact mode
 // #define PUGIXML_COMPACT
 

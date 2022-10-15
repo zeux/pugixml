@@ -220,6 +220,8 @@ TEST_XML(write_escape_unicode, "<node attr='&#x3c00;'/>")
 	#else
 		CHECK_NODE(doc, STR("<node attr=\"\x3c00\"/>"));
 	#endif
+#elif defined(PUGIXML_CHAR8_MODE)
+	CHECK_NODE(doc, STR("<node attr=\"\u3c00\"/>"));
 #else
 	CHECK_NODE(doc, STR("<node attr=\"\xe3\xb0\x80\"/>"));
 #endif
@@ -370,11 +372,11 @@ TEST(write_encoding_huge)
 	const unsigned int N = 16000;
 
 	// make a large utf8 name consisting of 3-byte chars (3 does not divide internal buffer size, so will need split correction)
-	std::string s_utf8 = "<";
+	std::basic_string<pugi::char_t> s_utf8 = STR("<");
 
-	for (unsigned int i = 0; i < N; ++i) s_utf8 += "\xE2\x82\xAC";
+	for (unsigned int i = 0; i < N; ++i) s_utf8 += RAW("\xE2\x82\xAC");
 
-	s_utf8 += "/>";
+	s_utf8 += STR("/>");
 
 	xml_document doc;
 	CHECK(doc.load_buffer(&s_utf8[0], s_utf8.length(), parse_default, encoding_utf8));
@@ -393,9 +395,9 @@ TEST(write_encoding_huge_invalid)
 	const unsigned int N = 16000;
 
 	// make a large utf8 name consisting of non-leading chars
-	std::string s_utf8;
+	std::basic_string<pugi::char_t> s_utf8;
 
-	for (unsigned int i = 0; i < N; ++i) s_utf8 += "\x82";
+	for (unsigned int i = 0; i < N; ++i) s_utf8 += RAW("\x82");
 
 	xml_document doc;
 	doc.append_child().set_name(s_utf8.c_str());
@@ -451,7 +453,7 @@ TEST(write_unicode_invalid_utf16)
 	}
 }
 #else
-static bool test_write_unicode_invalid(const char* name, const wchar_t* expected)
+static bool test_write_unicode_invalid(const char_t* name, const wchar_t* expected)
 {
 	xml_document doc;
 	doc.append_child(node_pcdata).set_value(name);
@@ -462,31 +464,31 @@ static bool test_write_unicode_invalid(const char* name, const wchar_t* expected
 TEST(write_unicode_invalid_utf8)
 {
 	// invalid 1-byte input
-	CHECK(test_write_unicode_invalid("a\xb0", L"a"));
-	CHECK(test_write_unicode_invalid("a\xb0_", L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xb0"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xb0_"), L"a_"));
 
 	// invalid 2-byte input
-	CHECK(test_write_unicode_invalid("a\xc0", L"a"));
-	CHECK(test_write_unicode_invalid("a\xd0", L"a"));
-	CHECK(test_write_unicode_invalid("a\xc0_", L"a_"));
-	CHECK(test_write_unicode_invalid("a\xd0_", L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xc0"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xd0"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xc0_"), L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xd0_"), L"a_"));
 
 	// invalid 3-byte input
-	CHECK(test_write_unicode_invalid("a\xe2\x80", L"a"));
-	CHECK(test_write_unicode_invalid("a\xe2", L"a"));
-	CHECK(test_write_unicode_invalid("a\xe2\x80_", L"a_"));
-	CHECK(test_write_unicode_invalid("a\xe2_", L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xe2\x80"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xe2"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xe2\x80_"), L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xe2_"), L"a_"));
 
 	// invalid 4-byte input
-	CHECK(test_write_unicode_invalid("a\xf2\x97\x98", L"a"));
-	CHECK(test_write_unicode_invalid("a\xf2\x97", L"a"));
-	CHECK(test_write_unicode_invalid("a\xf2", L"a"));
-	CHECK(test_write_unicode_invalid("a\xf2\x97\x98_", L"a_"));
-	CHECK(test_write_unicode_invalid("a\xf2\x97_", L"a_"));
-	CHECK(test_write_unicode_invalid("a\xf2_", L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xf2\x97\x98"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xf2\x97"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xf2"), L"a"));
+	CHECK(test_write_unicode_invalid(RAW("a\xf2\x97\x98_"), L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xf2\x97_"), L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xf2_"), L"a_"));
 
 	// invalid 5-byte input
-	CHECK(test_write_unicode_invalid("a\xf8_", L"a_"));
+	CHECK(test_write_unicode_invalid(RAW("a\xf8_"), L"a_"));
 }
 #endif
 
