@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
     <id>pugixml</id>
-    <version>1.12.0-appveyor</version>
+    <version>1.13.0-appveyor</version>
     <title>pugixml</title>
     <authors>Arseny Kapoulkine</authors>
     <owners>Arseny Kapoulkine</owners>
