@@ -1254,6 +1254,7 @@ As discussed before, nodes can have name and value, both of which are strings. D
 ----
 bool xml_node::set_name(const char_t* rhs);
 bool xml_node::set_value(const char_t* rhs);
+bool xml_node::set_value(const char_t* rhs, size_t size);
 ----
 
 Both functions try to set the name/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a <<node_pcdata,node_pcdata>> node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
@@ -1275,6 +1276,7 @@ All attributes have name and value, both of which are strings (value may be empt
 ----
 bool xml_attribute::set_name(const char_t* rhs);
 bool xml_attribute::set_value(const char_t* rhs);
+bool xml_attribute::set_value(const char_t* rhs, size_t size);
 ----
 
 Both functions try to set the name/value to the specified string, and return the operation result. The operation fails if the attribute handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
@@ -1428,6 +1430,7 @@ Once you have an `xml_text` object, you can set the text contents using the foll
 [source]
 ----
 bool xml_text::set(const char_t* rhs);
+bool xml_text::set(const char_t* rhs, size_t size);
 ----
 
 This function tries to set the contents to the specified string, and returns the operation result. The operation fails if the text object was retrieved from a node that can not have a value and is not an element node (i.e. it is a <<node_declaration,node_declaration>> node), if the text object is empty, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to this function). Note that if the text object was retrieved from an element node, this function creates the PCDATA child node if necessary (i.e. if the element node does not have a PCDATA/CDATA child already).
@@ -2138,6 +2141,23 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.13]]
+=== v1.13 ^2022-11-01^
+
+Maintenance release. Changes:
+
+* Improvements:
+    . `xml_attribute::set_value`, `xml_node::set_value` and `xml_text::set` now have overloads that accept pointer to non-null-terminated string and size
+    . Improve performance of tree traversal when using compact mode (`PUGIXML_COMPACT`)
+
+* Bug fixes:
+    . Fix error handling in `xml_document::save_file` that could result in the function succeeding while running out of disk space
+    . Fix memory leak during error handling of some out-of-memory conditions during `xml_document::load`
+
+* Compatibility improvements:
+    . Fix exported symbols in CMake DLL builds when using CMake
+    . Fix exported symbols in CMake shared object builds when using -fvisibility=hidden
+
 [[v1.12]]
 === v1.12 ^2022-02-09^
 
@@ -2798,6 +2818,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_attribute::set_name">set_name</a>+++(const char_t* rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs);
+    bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs, size_t size);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(int rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(unsigned int rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(long rhs);
@@ -2884,6 +2905,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_node::set_name">set_name</a>+++(const char_t* rhs);
     bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs);
+    bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs, size_t size);
 
     xml_attribute +++<a href="#xml_node::append_attribute">append_attribute</a>+++(const char_t* name);
     xml_attribute +++<a href="#xml_node::prepend_attribute">prepend_attribute</a>+++(const char_t* name);
@@ -2996,16 +3018,17 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     unsigned long long +++<a href="#xml_text::as_ullong">as_ullong</a>+++(unsigned long long def = 0) const;
 
     bool +++<a href="#xml_text::set">set</a>+++(const char_t* rhs);
+    bool +++<a href="#xml_text::set">set</a>+++(const char_t* rhs, size_t size);
 
-    bool +++<a href="#xml_text::set">set</a>+++(int rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(unsigned int rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(long rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(unsigned long rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(double rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(float rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(bool rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(long long rhs);
-    bool +++<a href="#xml_text::set">set</a>+++(unsigned long long rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(int rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(unsigned int rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(long rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(unsigned long rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(double rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(float rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(bool rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(long long rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(unsigned long long rhs);
 
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(const char_t* rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(int rhs);
