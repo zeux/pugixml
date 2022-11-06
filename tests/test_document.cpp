@@ -737,7 +737,7 @@ struct temp_file
 	{
 		static int index = 0;
 
-	#if __cplusplus >= 201103
+	#if __cplusplus >= 201103 || defined(__APPLE__) // Xcode 14 warns about use of sprintf in C++98 builds
 		snprintf(path, sizeof(path), "%stempfile%d", test_runner::_temp_path, index++);
 	#else
 		sprintf(path, "%stempfile%d", test_runner::_temp_path, index++);
