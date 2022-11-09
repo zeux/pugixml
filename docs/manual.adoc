@@ -969,6 +969,28 @@ xml_node xml_node::previous_sibling(const char_t* name) const;
 for (pugi::xml_node tool = tools.child("Tool"); tool; tool = tool.next_sibling("Tool"))
 ----
 
+[[xml_node::attribute_hinted]]
+`attribute` function needs to look for the target attribute by name. If a node has many attributes, finding each by name can be time consuming. If you have an idea of how attributes are ordered in the node, you can use a faster function:
+
+[source]
+----
+xml_attribute xml_node::attribute(const char_t* name, xml_attribute& hint) const;
+----
+
+The extra `hint` argument is used to guess where the attribute might be, and is updated to the location of the next attribute so that if you search for multiple attributes in the right order, the performance is maximized. Note that `hint` has to be either null or has to belong to the node, otherwise the behavior is undefined.
+
+You can use this function as follows:
+
+[source]
+----
+xml_attribute hint;
+xml_attribute id = node.attribute("id", hint);
+xml_attribute name = node.attribute("name", hint);
+xml_attribute version = node.attribute("version", hint);
+----
+
+This code is correct regardless of the order of the attributes, but it's faster if `"id"`, `"name"` and `"version"` occur in that order.
+
 [[xml_node::find_child_by_attribute]]
 Occasionally the needed node is specified not by the unique name but instead by the value of some attribute; for example, it is common to have node collections with each node having a unique id: `<group><item id="1"/> <item id="2"/></group>`. There are two functions for finding child nodes based on the attribute values:
 
@@ -2877,6 +2899,9 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     xml_attribute +++<a href="#xml_node::attribute">attribute</a>+++(const char_t* name) const;
     xml_node +++<a href="#xml_node::next_sibling_name">next_sibling</a>+++(const char_t* name) const;
     xml_node +++<a href="#xml_node::previous_sibling_name">previous_sibling</a>+++(const char_t* name) const;
+
+    xml_attribute +++<a href="#xml_node::attribute_hinted">attribute</a>+++(const char_t* name, xml_attribute& hint) const;
+
     xml_node +++<a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a>+++(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
     xml_node +++<a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a>+++(const char_t* attr_name, const char_t* attr_value) const;
 
