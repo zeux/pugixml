@@ -152,9 +152,8 @@ if (BUILD_SHARED_LIBS)
 else()
   set(pugixml-alias pugixml-static)
 endif()
-add_library(pugixml INTERFACE)
-target_link_libraries(pugixml INTERFACE ${pugixml-alias})
-add_library(pugixml::pugixml ALIAS pugixml)
+add_library(pugixml ALIAS ${pugixml-alias})
+add_library(pugixml::pugixml ALIAS ${pugixml-alias})
 
 set_target_properties(${libs}
   PROPERTIES
@@ -168,7 +167,7 @@ set_target_properties(${libs}
 set_target_properties(${libs}
   PROPERTIES
     EXCLUDE_FROM_ALL OFF)
-set(install-targets pugixml ${libs})
+set(install-targets ${install-targets} ${libs})
 
 configure_package_config_file(
   "${PROJECT_SOURCE_DIR}/scripts/pugixml-config.cmake.in"
