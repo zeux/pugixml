@@ -1275,6 +1275,7 @@ As discussed before, nodes can have name and value, both of which are strings. D
 [source]
 ----
 bool xml_node::set_name(const char_t* rhs);
+bool xml_node::set_name(const char_t* rhs, size_t sz)
 bool xml_node::set_value(const char_t* rhs);
 bool xml_node::set_value(const char_t* rhs, size_t size);
 ----
@@ -1297,6 +1298,7 @@ All attributes have name and value, both of which are strings (value may be empt
 [source]
 ----
 bool xml_attribute::set_name(const char_t* rhs);
+bool xml_attribute::set_name(const char_t* rhs, size_t sz)
 bool xml_attribute::set_value(const char_t* rhs);
 bool xml_attribute::set_value(const char_t* rhs, size_t size);
 ----

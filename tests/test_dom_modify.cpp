@@ -46,6 +46,16 @@ TEST_XML(dom_attr_set_name, "<node attr='value' />")
 	CHECK_NODE(doc, STR("<node n=\"value\"/>"));
 }
 
+TEST_XML(dom_attr_set_name_with_size, "<node attr='value' />")
+{
+	xml_attribute attr = doc.child(STR("node")).attribute(STR("attr"));
+
+	CHECK(attr.set_name(STR("n1234"), 1));
+	CHECK(!xml_attribute().set_name(STR("nfail"), 1));
+
+	CHECK_NODE(doc, STR("<node n=\"value\"/>"));
+}
+
 TEST_XML(dom_attr_set_value, "<node/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -202,6 +212,15 @@ TEST_XML(dom_node_set_name, "<node>text</node>")
 	CHECK(doc.child(STR("node")).set_name(STR("n")));
 	CHECK(!doc.child(STR("node")).first_child().set_name(STR("n")));
 	CHECK(!xml_node().set_name(STR("n")));
+
+	CHECK_NODE(doc, STR("<n>text</n>"));
+}
+
+TEST_XML(dom_node_set_name_with_size, "<node>text</node>")
+{
+	CHECK(doc.child(STR("node")).set_name(STR("nlongname"), 1));
+	CHECK(!doc.child(STR("node")).first_child().set_name(STR("n42"), 1));
+	CHECK(!xml_node().set_name(STR("nanothername"), 1));
 
 	CHECK_NODE(doc, STR("<n>text</n>"));
 }

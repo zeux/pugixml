@@ -418,6 +418,7 @@ namespace pugi
 
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
+		bool set_name(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs);
 
@@ -553,6 +554,7 @@ namespace pugi
 
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(const char_t* rhs);
+		bool set_name(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs, size_t sz);
 		bool set_value(const char_t* rhs);
 

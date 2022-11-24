@@ -5401,6 +5401,13 @@ namespace pugi
 		return impl::strcpy_insitu(_attr->name, _attr->header, impl::xml_memory_page_name_allocated_mask, rhs, impl::strlength(rhs));
 	}
 
+	PUGI_IMPL_FN bool xml_attribute::set_name(const char_t* rhs, size_t sz)
+	{
+		if (!_attr) return false;
+
+		return impl::strcpy_insitu(_attr->name, _attr->header, impl::xml_memory_page_name_allocated_mask, rhs, sz);
+	}
+
 	PUGI_IMPL_FN bool xml_attribute::set_value(const char_t* rhs, size_t sz)
 	{
 		if (!_attr) return false;
@@ -5796,6 +5803,16 @@ namespace pugi
 			return false;
 
 		return impl::strcpy_insitu(_root->name, _root->header, impl::xml_memory_page_name_allocated_mask, rhs, impl::strlength(rhs));
+	}
+
+	PUGI_IMPL_FN bool xml_node::set_name(const char_t* rhs, size_t sz)
+	{
+		xml_node_type type_ = _root ? PUGI_IMPL_NODETYPE(_root) : node_null;
+
+		if (type_ != node_element && type_ != node_pi && type_ != node_declaration)
+			return false;
+
+		return impl::strcpy_insitu(_root->name, _root->header, impl::xml_memory_page_name_allocated_mask, rhs, sz);
 	}
 
 	PUGI_IMPL_FN bool xml_node::set_value(const char_t* rhs, size_t sz)
