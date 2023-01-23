@@ -712,8 +712,11 @@ namespace pugi
 
 		// Range-based for support
 		xml_object_range<xml_node_iterator> children() const;
-		xml_object_range<xml_named_node_iterator> children(const char_t* name) const;
 		xml_object_range<xml_attribute_iterator> attributes() const;
+
+		// Range-based for support for all children with the specified name
+		// Note: name pointer must have a longer lifetime than the returned object; be careful with passing temporaries!
+		xml_object_range<xml_named_node_iterator> children(const char_t* name) const;
 
 		// Get node offset in parsed file/string (in char_t units) for debugging purposes
 		ptrdiff_t offset_debug() const;
@@ -927,6 +930,7 @@ namespace pugi
 		xml_named_node_iterator();
 
 		// Construct an iterator which points to the specified node
+		// Note: name pointer is stored in the iterator and must have a longer lifetime than iterator itself
 		xml_named_node_iterator(const xml_node& node, const char_t* name);
 
 		// Iterator operators
