@@ -570,7 +570,7 @@ namespace pugi
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(string_view_t rhs, boolean shallow_copy = pugi::false_value);
 		bool set_value(string_view_t rhs, boolean shallow_copy = pugi::false_value);
-		bool set_value(char_t*, size_t sz); // 1.13 ABI compatible
+		bool set_value(const char_t*, size_t sz); // 1.13 ABI compatible
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set_value(int rhs);
@@ -705,7 +705,7 @@ namespace pugi
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(string_view_t rhs, boolean shallow_copy = pugi::false_value);
 		bool set_value(string_view_t rhs, boolean shallow_copy = pugi::false_value);
-		bool set_value(char_t* rhs, size_t sz); // 1.13 ABI compatible
+		bool set_value(const char_t* rhs, size_t sz); // 1.13 ABI compatible
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_attribute(string_view_t name, boolean shallow_copy = pugi::false_value);
@@ -934,7 +934,7 @@ namespace pugi
 
 		// Set text (returns false if object is empty or there is not enough memory)
 		bool set(string_view_t rhs, boolean shallow_copy = pugi::false_value);
-		bool set(char_t* rhs, size_t sz); // 1.13 ABI compatible
+		bool set(const char_t* rhs, size_t sz); // 1.13 ABI compatible
 
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set(int rhs);

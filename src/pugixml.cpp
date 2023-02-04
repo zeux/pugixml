@@ -5499,7 +5499,7 @@ namespace pugi
 		return impl::strcpy_insitu(_attr->value, _attr->value_len, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length(), shallow_copy);
 	}
 
-	PUGI__FN bool xml_attribute::set_value(char_t* rhs, size_t sz)
+	PUGI__FN bool xml_attribute::set_value(const char_t* rhs, size_t sz)
 	{
 		return set_value(string_view_t{rhs, sz });
 	}
@@ -5872,7 +5872,7 @@ namespace pugi
 		return impl::strcpy_insitu(_root->value, _root->value_len, _root->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length(), shallow_copy);
 	}
 
-	PUGI__FN bool xml_node::set_value(char_t* rhs, size_t sz)
+	PUGI__FN bool xml_node::set_value(const char_t* rhs, size_t sz)
 	{
 		return set_value(string_view_t{ rhs, sz });
 	}
@@ -6737,7 +6737,7 @@ namespace pugi
 		return dn ? impl::strcpy_insitu(dn->value, dn->value_len, dn->header, impl::xml_memory_page_value_allocated_mask, rhs.data(), rhs.length(), shallow_copy) : false;
 	}
 
-	PUGI__FN bool xml_text::set(char_t* rhs, size_t sz)
+	PUGI__FN bool xml_text::set(const char_t* rhs, size_t sz)
 	{
 		return set(string_view_t{ rhs, sz });
 	}
