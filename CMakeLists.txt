@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(pugixml VERSION 1.12 LANGUAGES CXX)
+project(pugixml VERSION 1.13 LANGUAGES CXX)
 
 include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
@@ -101,6 +101,10 @@ if (BUILD_SHARED_LIBS)
     ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
   add_library(pugixml::shared ALIAS pugixml-shared)
   list(APPEND libs pugixml-shared)
+  string(CONCAT pugixml.msvc $<OR:
+    $<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>,
+    $<CXX_COMPILER_ID:MSVC>
+  >)
 
   set_property(TARGET pugixml-shared PROPERTY EXPORT_NAME shared)
   target_include_directories(pugixml-shared
@@ -111,7 +115,8 @@ if (BUILD_SHARED_LIBS)
       ${PUGIXML_BUILD_DEFINES}
       ${PUGIXML_PUBLIC_DEFINITIONS}
     PRIVATE
-      $<$<CXX_COMPILER_ID:MSVC>:PUGIXML_API=__declspec\(dllexport\)>)
+      PUGIXML_API=$<IF:${pugixml.msvc},__declspec\(dllexport\),__attribute__\(\(visibility\("default"\)\)\)>
+    )
   target_compile_options(pugixml-shared
     PRIVATE
       ${msvc-rt-mtd-shared}
