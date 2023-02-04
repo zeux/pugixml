@@ -795,7 +795,12 @@ struct test_walker: xml_tree_walker
 	std::basic_string<char_t> depthstr() const
 	{
 		char buf[32];
+
+	#if __cplusplus >= 201103 || defined(__APPLE__) // Xcode 14 warns about use of sprintf in C++98 builds
+		snprintf(buf, sizeof(buf), "%d", depth());
+	#else
 		sprintf(buf, "%d", depth());
+	#endif
 
 	#ifdef PUGIXML_WCHAR_MODE
 		wchar_t wbuf[32];
