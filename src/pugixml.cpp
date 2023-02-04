@@ -5501,7 +5501,7 @@ namespace pugi
 
 	PUGI__FN bool xml_attribute::set_value(const char_t* rhs, size_t sz)
 	{
-		return set_value(string_view_t{rhs, sz });
+		return set_value(string_view_t(rhs, sz ));
 	}
 
 	PUGI__FN bool xml_attribute::set_value(int rhs)
@@ -5874,7 +5874,7 @@ namespace pugi
 
 	PUGI__FN bool xml_node::set_value(const char_t* rhs, size_t sz)
 	{
-		return set_value(string_view_t{ rhs, sz });
+		return set_value(string_view_t( rhs, sz ));
 	}
 
 	PUGI__FN xml_attribute xml_node::append_attribute(string_view_t name_, boolean shallow_copy)
@@ -6739,7 +6739,7 @@ namespace pugi
 
 	PUGI__FN bool xml_text::set(const char_t* rhs, size_t sz)
 	{
-		return set(string_view_t{ rhs, sz });
+		return set(string_view_t( rhs, sz ));
 	}
 
 	PUGI__FN bool xml_text::set(int rhs)
