@@ -27,7 +27,7 @@ set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
 separate_arguments(PUGIXML_BUILD_DEFINES)
 
 # Technically not needed for this file. This is builtin CMAKE global variable.
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF) 
+option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 
 # Expose option to build PUGIXML as static as well when the global BUILD_SHARED_LIBS variable is set
 cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
@@ -43,6 +43,9 @@ option(PUGIXML_NO_XPATH "Disable XPath" OFF)
 option(PUGIXML_NO_STL "Disable STL" OFF)
 option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
 mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
+
+# Other options
+option(PUGIXML_HEADER_DIRS_AS_SYSTEM "Expose headers as system includes." ON)
 
 # Policy configuration
 if(POLICY CMP0091)
@@ -95,6 +98,12 @@ set(versioned-dir $<$<BOOL:${PUGIXML_USE_VERSIONED_LIBDIR}>:/pugixml-${PROJECT_V
 
 set(libs)
 
+# Optionally mark header include idrectoriess as SYSTEM
+set(PUGIXML_SYSTEM_HEADERS_ATTRIBUTE "")
+if (PUGIXML_EXPOSE_HEADERS_AS_SYSTEM)
+    set(PUGIXML_SYSTEM_HEADERS_ATTRIBUTE SYSTEM)
+endif ()
+
 if (BUILD_SHARED_LIBS)
   add_library(pugixml-shared SHARED
     ${PROJECT_SOURCE_DIR}/scripts/pugixml_dll.rc
@@ -108,6 +117,7 @@ if (BUILD_SHARED_LIBS)
 
   set_property(TARGET pugixml-shared PROPERTY EXPORT_NAME shared)
   target_include_directories(pugixml-shared
+    ${PUGIXML_SYSTEM_HEADERS_ATTRIBUTE}
     PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
   target_compile_definitions(pugixml-shared
@@ -133,6 +143,7 @@ if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
 
   set_property(TARGET pugixml-static PROPERTY EXPORT_NAME static)
   target_include_directories(pugixml-static
+    ${PUGIXML_SYSTEM_HEADERS_ATTRIBUTE}
     PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
   target_compile_definitions(pugixml-static
