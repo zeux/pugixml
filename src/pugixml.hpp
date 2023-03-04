@@ -324,7 +324,7 @@ namespace pugi
 	class PUGIXML_CLASS xml_writer
 	{
 	public:
-		virtual ~xml_writer() {}
+		virtual ~xml_writer();
 
 		// Write memory chunk into stream/file/whatever
 		virtual void write(const void* data, size_t size) = 0;

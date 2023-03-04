@@ -5111,6 +5111,10 @@ PUGI_IMPL_NS_END
 
 namespace pugi
 {
+	PUGI_IMPL_FN xml_writer::~xml_writer()
+	{
+	}
+
 	PUGI_IMPL_FN xml_writer_file::xml_writer_file(void* file_): file(file_)
 	{
 	}
