@@ -6,7 +6,7 @@ defines=standard
 cxxstd=c++11
 # set cxxstd=any to disable use of -std=...
 
-BUILD=build/make-$(CXX)-$(config)-$(defines)-$(cxxstd)
+BUILD=build/make-$(firstword $(CXX))-$(config)-$(defines)-$(cxxstd)
 
 SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
