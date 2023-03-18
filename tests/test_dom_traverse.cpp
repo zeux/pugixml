@@ -682,6 +682,8 @@ struct find_predicate_prefix
 	#ifdef PUGIXML_WCHAR_MODE
 		// can't use wcsncmp here because of a bug in DMC
 		return std::basic_string<char_t>(obj.name()).compare(0, wcslen(prefix), prefix) == 0;
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return strncmp(reinterpret_cast<const char*>(obj.name()), reinterpret_cast<const char*>(prefix), strlen(reinterpret_cast<const char*>(prefix))) == 0;
 	#else
 		return strncmp(obj.name(), prefix, strlen(prefix)) == 0;
 	#endif
@@ -807,6 +809,8 @@ struct test_walker: xml_tree_walker
 		std::copy(buf, buf + strlen(buf) + 1, &wbuf[0]);
 
 		return std::basic_string<char_t>(wbuf);
+	#elif defined(PUGIXML_CHAR8_MODE)
+		return std::basic_string<char_t>(char_cast(buf));
 	#else
 		return std::basic_string<char_t>(buf);
 	#endif

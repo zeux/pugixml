@@ -919,6 +919,8 @@ inline void check_utftest_document(const xml_document& doc)
 	size_t wcharsize = sizeof(wchar_t);
 
 	CHECK(wcharsize == 2 ? (v[7] == wchar_cast(0xd852) && v[8] == wchar_cast(0xdf62)) : (v[7] == wchar_cast(0x24b62)));
+#elif defined(PUGIXML_CHAR8_MODE)
+	CHECK_STRING(v, u8"\u4E16\u754C\u6709\u5F88\u591A\u8BED\u8A00\U00024B62");
 #else
 	// unicode string
 	CHECK_STRING(v, "\xe4\xb8\x96\xe7\x95\x8c\xe6\x9c\x89\xe5\xbe\x88\xe5\xa4\x9a\xe8\xaf\xad\xe8\xa8\x80\xf0\xa4\xad\xa2");
@@ -1524,6 +1526,8 @@ TEST(document_load_buffer_utf_truncated)
 
 			#ifdef PUGIXML_WCHAR_MODE
 				CHECK(name[0] == 0x20ac && name[1] == 0);
+			#elif defined(PUGIXML_CHAR8_MODE)
+				CHECK_STRING(name, u8"\u20AC");
 			#else
 				CHECK_STRING(name, "\xe2\x82\xac");
 			#endif
@@ -1569,6 +1573,8 @@ TEST(document_load_stream_truncated)
 
 			#ifdef PUGIXML_WCHAR_MODE
 				CHECK(name[0] == 0x20ac && name[1] == 0);
+			#elif defined(PUGIXML_CHAR8_MODE)
+				CHECK_STRING(name, u8"\u20AC");
 			#else
 				CHECK_STRING(name, "\xe2\x82\xac");
 			#endif

@@ -80,16 +80,16 @@ TEST(as_wide_string)
 
 TEST(as_utf8_empty)
 {
-	CHECK(as_utf8(L"") == "");
+	CHECK(as_utf8(L"") == U8STR(""));
 }
 
 TEST(as_utf8_valid_basic)
 {
 	// valid 1-byte, 2-byte and 3-byte outputs
 #ifdef U_LITERALS
-	CHECK(as_utf8(L"?\u0400\u203D") == "?\xd0\x80\xe2\x80\xbd");
+	CHECK(as_utf8(L"?\u0400\u203D") == U8RAW("?\xd0\x80\xe2\x80\xbd"));
 #else
-	CHECK(as_utf8(L"?\x0400\x203D") == "?\xd0\x80\xe2\x80\xbd");
+	CHECK(as_utf8(L"?\x0400\x203D") == U8RAW("?\xd0\x80\xe2\x80\xbd"));
 #endif
 }
 
@@ -106,14 +106,14 @@ TEST(as_utf8_valid_astral)
 		s[1] = ' ';
 		s[2] = wchar_cast(0x1003ff);
 
-		CHECK(as_utf8(s.c_str()) == "\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
+		CHECK(as_utf8(s.c_str()) == U8RAW("\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf"));
 	}
 	else
 	{
 	#ifdef U_LITERALS
-		CHECK(as_utf8(L"\uda1d\ude24 \udbc0\udfff") == "\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
+		CHECK(as_utf8(L"\uda1d\ude24 \udbc0\udfff") == U8RAW("\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf"));
 	#else
-		CHECK(as_utf8(L"\xda1d\xde24 \xdbc0\xdfff") == "\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf");
+		CHECK(as_utf8(L"\xda1d\xde24 \xdbc0\xdfff") == U8RAW("\xf2\x97\x98\xa4 \xf4\x80\x8f\xbf"));
 	#endif
 	}
 }
@@ -129,17 +129,17 @@ TEST(as_utf8_invalid)
 		CHECK(as_utf8(L"a\uda1d") == "a");
 		CHECK(as_utf8(L"a\uda1d_") == "a_");
 	#else
-		CHECK(as_utf8(L"a\xda1d") == "a");
-		CHECK(as_utf8(L"a\xda1d_") == "a_");
+		CHECK(as_utf8(L"a\xda1d") == U8STR("a"));
+		CHECK(as_utf8(L"a\xda1d_") == U8STR("a_"));
 	#endif
 
 		// check incorrect leading code
 	#ifdef U_LITERALS
-		CHECK(as_utf8(L"a\ude24") == "a");
-		CHECK(as_utf8(L"a\ude24_") == "a_");
+		CHECK(as_utf8(L"a\ude24") == STR("a"));
+		CHECK(as_utf8(L"a\ude24_") == STR("a_"));
 	#else
-		CHECK(as_utf8(L"a\xde24") == "a");
-		CHECK(as_utf8(L"a\xde24_") == "a_");
+		CHECK(as_utf8(L"a\xde24") == U8STR("a"));
+		CHECK(as_utf8(L"a\xde24_") == U8STR("a_"));
 	#endif
 	}
 }
@@ -148,6 +148,6 @@ TEST(as_utf8_string)
 {
     std::basic_string<wchar_t> s = L"abcd";
 
-    CHECK(as_utf8(s) == "abcd");
+    CHECK(as_utf8(s) == U8STR("abcd"));
 }
 #endif

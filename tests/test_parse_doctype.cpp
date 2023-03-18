@@ -16,6 +16,10 @@ static xml_parse_result load_concat(xml_document& doc, const char_t* a, const ch
 	wcscpy(buffer, a);
 	wcscat(buffer, b);
 	wcscat(buffer, c);
+#elif defined(PUGIXML_CHAR8_MODE)
+	strcpy(reinterpret_cast<char*>(buffer), reinterpret_cast<const char*>(a));
+	strcat(reinterpret_cast<char*>(buffer), reinterpret_cast<const char*>(b));
+	strcat(reinterpret_cast<char*>(buffer), reinterpret_cast<const char*>(c));
 #else
 	strcpy(buffer, a);
 	strcat(buffer, b);

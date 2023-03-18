@@ -228,6 +228,8 @@ pugixml uses several defines to control the compilation process. There are two w
 
 [[PUGIXML_WCHAR_MODE]]`PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See <<dom.unicode>> for more details.
 
+[[PUGIXML_CHAR8_MODE]]`PUGIXML_CHAR8_MODE` define makes the UTF-8 style interface use `char8_t` instead of `char`.
+
 [[PUGIXML_COMPACT]]`PUGIXML_COMPACT` define activates a different internal representation of document storage that is much more memory efficient for documents with a lot of markup (i.e. nodes and attributes), but is slightly slower to parse and access. For details see <<dom.memory.compact>>.
 
 [[PUGIXML_NO_XPATH]]`PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation. This option is provided in case you do not need XPath functionality and need to save code space.
@@ -399,7 +401,7 @@ Nodes and attributes do not exist without a document tree, so you can't create t
 [[dom.unicode]]
 === Unicode interface
 
-There are two choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The choice is controlled via <<PUGIXML_WCHAR_MODE,PUGIXML_WCHAR_MODE>> define; you can set it via `pugiconfig.hpp` or via preprocessor options, as discussed in <<install.building.config>>. If this define is set, the wchar_t interface is used; otherwise (by default) the char interface is used. The exact wide character encoding is assumed to be either UTF-16 or UTF-32 and is determined based on the size of `wchar_t` type.
+There are three choices of interface and internal representation when configuring pugixml: you can either choose the UTF-8 (also called char) interface or UTF-16/32 (also called wchar_t) one. The UTF-8 interface can either use char (the default) or char8_t. The choice is controlled via the <<PUGIXML_WCHAR_MODE,PUGIXML_WCHAR_MODE>> and <<PUGIXML_CHAR8_MODE,PUGIXML_CHAR8_MODE>> defines; you can set them via `pugiconfig.hpp` or via preprocessor options, as discussed in <<install.building.config>>. If `PUGIXML_WCHAR_MODE` is set, the wchar_t interface is used; otherwise, if `PUGIXML_CHAR8_MODE` is set, the char8_t interface is used; otherwise (by default) the char interface is used. The exact wide character encoding is assumed to be either UTF-16 or UTF-32 and is determined based on the size of `wchar_t` type.
 
 NOTE: If the size of `wchar_t` is 2, pugixml assumes UTF-16 encoding instead of UCS-2, which means that some characters are represented as two code points.
 
@@ -411,6 +413,14 @@ const char* xml_node::name() const;
 bool xml_node::set_name(const char* value);
 ----
 
+like this in char8_t mode:
+
+[source]
+----
+const char8_t* xml_node::name() const;
+bool xml_node::set_name(const char8_t* value);
+----
+
 and like this in wchar_t mode:
 
 [source]
@@ -420,7 +430,7 @@ bool xml_node::set_name(const wchar_t* value);
 ----
 
 [[char_t]][[string_t]]
-There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode.
+There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode, `std::u8string` in char8_t mode, and to `std::wstring` in wchar_t mode.
 
 In addition to the interface, the internal implementation changes to store XML data as `pugi::char_t`; this means that these two modes have different memory usage characteristics - generally UTF-8 mode is more memory and performance efficient, especially if `sizeof(wchar_t)` is 4. The conversion to `pugi::char_t` upon document loading and from `pugi::char_t` upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is non-ASCII, wchar_t mode is probably a better choice.
 
@@ -443,13 +453,15 @@ std::wstring as_wide(const std::string& str);
 
 [NOTE]
 ====
-Most examples in this documentation assume char interface and therefore will not compile with <<PUGIXML_WCHAR_MODE,PUGIXML_WCHAR_MODE>>. This is done to simplify the documentation; usually the only changes you'll have to make is to pass `wchar_t` string literals, i.e. instead of
+Most examples in this documentation assume char interface and therefore will not compile with <<PUGIXML_WCHAR_MODE,PUGIXML_WCHAR_MODE>> or <<PUGIXML_CHAR8_MODE,PUGIXML_CHAR8_MODE>>. This is done to simplify the documentation; usually the only changes you'll have to make is to pass the appropriate string literals, i.e. instead of
 
 `xml_node node = doc.child("bookstore").find_child_by_attribute("book", "id", "12345");`
 
 you'll have to use
 
 `xml_node node = doc.child(L"bookstore").find_child_by_attribute(L"book", L"id", L"12345");`
+
+in wchar_t mode.
 ====
 
 [[dom.thread]]

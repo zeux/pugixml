@@ -570,7 +570,7 @@ TEST(xpath_string_translate_table)
 
 	CHECK_XPATH_STRING(c, STR("translate('abcd\xe9 ', 'abc', 'ABC')"), STR("ABCd\xe9 "));
 	CHECK_XPATH_STRING(c, STR("translate('abcd\xe9 ', 'abc\xe9', 'ABC!')"), STR("ABCd! "));
-	CHECK_XPATH_STRING(c, STR("translate('abcd! ', 'abc!', 'ABC\xe9')"), STR("ABCd\xe9 "));
+	CHECK_XPATH_STRING(c, RAW("translate('abcd! ', 'abc!', 'ABC\xe9')"), RAW("ABCd\xe9 "));
 	CHECK_XPATH_STRING(c, STR("translate('abcde', concat('abc', 'd'), 'ABCD')"), STR("ABCDe"));
 	CHECK_XPATH_STRING(c, STR("translate('abcde', 'abcd', concat('ABC', 'D'))"), STR("ABCDe"));
 }

@@ -44,12 +44,11 @@ static void build_document_order(std::vector<pugi::xpath_node>& result, pugi::xm
 
 bool test_string_equal(const pugi::char_t* lhs, const pugi::char_t* rhs)
 {
-	return (!lhs || !rhs) ? lhs == rhs :
-	#ifdef PUGIXML_WCHAR_MODE
-		wcscmp(lhs, rhs) == 0;
-	#else
-		strcmp(lhs, rhs) == 0;
-	#endif
+	if (!lhs || !rhs) return lhs == rhs;
+	typedef std::char_traits<pugi::char_t> traits;
+	const size_t lhs_len = traits::length(lhs);
+	const size_t rhs_len = traits::length(rhs);
+	return lhs_len == rhs_len && traits::compare(lhs, rhs, lhs_len) == 0;
 }
 
 bool test_node(const pugi::xml_node& node, const pugi::char_t* contents, const pugi::char_t* indent, unsigned int flags)
@@ -73,11 +72,7 @@ bool test_double_nan(double value)
 #ifndef PUGIXML_NO_XPATH
 static size_t strlength(const pugi::char_t* s)
 {
-#ifdef PUGIXML_WCHAR_MODE
-	return wcslen(s);
-#else
-	return strlen(s);
-#endif
+	return std::char_traits<pugi::char_t>::length(s);
 }
 
 bool test_xpath_string(const pugi::xpath_node& node, const pugi::char_t* query, pugi::xpath_variable_set* variables, const pugi::char_t* expected)
