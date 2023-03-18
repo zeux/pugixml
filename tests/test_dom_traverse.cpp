@@ -681,9 +681,9 @@ struct find_predicate_prefix
 	{
 	#ifdef PUGIXML_WCHAR_MODE
 		// can't use wcsncmp here because of a bug in DMC
-		return std::basic_string<char_t>(obj.name()).compare(0, wcslen(prefix), prefix) == 0;
+		return std::basic_string<char_t>(obj.name().data()).compare(0, wcslen(prefix), prefix) == 0;
 	#else
-		return strncmp(obj.name(), prefix, strlen(prefix)) == 0;
+		return strncmp(obj.name().data(), prefix, strlen(prefix)) == 0;
 	#endif
 	}
 };

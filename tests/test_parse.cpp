@@ -474,7 +474,7 @@ TEST(parse_pcdata_trim)
         xml_document doc;
         CHECK(doc.load_string(td.source, td.flags | parse_trim_pcdata));
 
-        const char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
+        string_view_t value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
         CHECK_STRING(value, td.result);
     }
 }
@@ -563,7 +563,7 @@ TEST(parse_escapes_unicode)
 	CHECK(doc.load_string(STR("<node>&#x03B3;&#x03b3;&#x24B62;</node>"), parse_minimal | parse_escapes));
 
 #ifdef PUGIXML_WCHAR_MODE
-	const char_t* v = doc.child_value(STR("node"));
+	string_view_t v = doc.child_value(STR("node"));
 
 	size_t wcharsize = sizeof(wchar_t);
 
@@ -1100,7 +1100,7 @@ TEST(parse_bom_fragment_invalid_utf8)
 
 	CHECK(doc.load_buffer("\xef\xbb\xbb", 3, parse_fragment, encoding_utf8));
 
-	const char_t* value = doc.text().get();
+	string_view_t value = doc.text().get();
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(value[0] == wchar_cast(0xfefb) && value[1] == 0);
@@ -1115,7 +1115,7 @@ TEST(parse_bom_fragment_invalid_utf16)
 
 	CHECK(doc.load_buffer("\xff\xfe", 2, parse_fragment, encoding_utf16_be));
 
-	const char_t* value = doc.text().get();
+	string_view_t value = doc.text().get();
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(value[0] == wchar_cast(0xfffe) && value[1] == 0);
@@ -1130,7 +1130,7 @@ TEST(parse_bom_fragment_invalid_utf32)
 
 	CHECK(doc.load_buffer("\xff\xff\x00\x00", 4, parse_fragment, encoding_utf32_le));
 
-	const char_t* value = doc.text().get();
+	string_view_t value = doc.text().get();
 
 #ifdef PUGIXML_WCHAR_MODE
 	CHECK(value[0] == wchar_cast(0xffff) && value[1] == 0);

@@ -215,7 +215,7 @@ TEST_XML(dom_text_get_no_state, "<node/>")
     xml_text t = node.text();
 
     CHECK(!t);
-    CHECK(t.get() && *t.get() == 0);
+    CHECK(t.get().data() && *t.get().data() == 0);
     CHECK(!node.first_child());
 
     node.append_child(node_pcdata);
@@ -310,7 +310,7 @@ TEST_XML(dom_text_assign, "<node/>")
 	node.append_child(STR("text7")).text() = 0.25f;
 	xml_text() = 0.25f;
 
-	node.append_child(STR("text8")).text() = true;
+	node.append_child(STR("text8")).text() = true_value;
 	xml_text() = true;
 
 	CHECK_NODE(node, STR("<node><text1>v1</text1><text2>-2147483647</text2><text3>-2147483648</text3><text4>4294967295</text4><text5>4294967294</text5><text6>0.5</text6><text7>0.25</text7><text8>true</text8></node>"));
@@ -337,8 +337,8 @@ TEST_XML(dom_text_set_value, "<node/>")
 	CHECK(node.append_child(STR("text7")).text().set(0.25f));
 	CHECK(!xml_text().set(0.25f));
 
-	CHECK(node.append_child(STR("text8")).text().set(true));
-	CHECK(!xml_text().set(true));
+	CHECK(node.append_child(STR("text8")).text().set(true_value));
+	CHECK(!xml_text().set(true_value));
 
 	CHECK_NODE(node, STR("<node><text1>v1</text1><text2>-2147483647</text2><text3>-2147483648</text3><text4>4294967295</text4><text5>4294967294</text5><text6>0.5</text6><text7>0.25</text7><text8>true</text8></node>"));
 }

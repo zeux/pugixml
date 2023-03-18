@@ -110,7 +110,7 @@ TEST(memory_large_allocations)
 			// grow
 			for (node = doc.first_child(); node; node = node.next_sibling())
 			{
-				std::basic_string<char_t> s = node.value();
+				std::basic_string<char_t> s(node.value());
 
 				CHECK(node.set_value((s + s).c_str()));
 			}
