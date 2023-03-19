@@ -2374,6 +2374,8 @@ PUGI_IMPL_NS_BEGIN
 	template <typename String, typename Header>
 	PUGI_IMPL_FN bool strcpy_insitu(String& dest, Header& header, uintptr_t header_mask, const char_t* source, size_t source_length)
 	{
+		assert((header & header_mask) == 0 || dest); // header bit indicates whether dest was previously allocated
+
 		if (source_length == 0)
 		{
 			// empty string and null pointer are equivalent, so just deallocate old memory
@@ -4408,7 +4410,7 @@ PUGI_IMPL_NS_BEGIN
 	template <typename String, typename Header>
 	PUGI_IMPL_FN void node_copy_string(String& dest, Header& header, uintptr_t header_mask, char_t* source, Header& source_header, xml_allocator* alloc)
 	{
-		assert(!dest && (header & header_mask) == 0);
+		assert(!dest && (header & header_mask) == 0); // copies are performed into fresh nodes
 
 		if (source)
 		{
