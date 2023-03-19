@@ -1807,7 +1807,7 @@ You should use the usual bitwise arithmetics to manipulate the bitmask: to enabl
 Since this flag significantly changes the DOM structure it is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments. This flag is <strong>off</strong> by default.</p>
 </li>
 <li>
-<p><a id="parse_fragment"></a><code>parse_fragment</code> determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid and permits multiple top-level element nodes. This flag is <strong>off</strong> by default.</p>
+<p><a id="parse_fragment"></a><code>parse_fragment</code> determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid and permits multiple top-level element nodes (currently multiple top-level element nodes are also permitted when the flag is off, but that behavior should not be relied on). This flag is <strong>off</strong> by default.</p>
 </li>
 </ul>
 </div>
@@ -2206,6 +2206,31 @@ Since a lot of document traversal consists of finding the node/attribute with th
 <div class="content">
 <pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span><span class="tok-w"> </span><span class="tok-n">tool</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">tools</span><span class="tok-p">.</span><span class="tok-n">child</span><span class="tok-p">(</span><span class="tok-s">&quot;Tool&quot;</span><span class="tok-p">);</span><span class="tok-w"> </span><span class="tok-n">tool</span><span class="tok-p">;</span><span class="tok-w"> </span><span class="tok-n">tool</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">tool</span><span class="tok-p">.</span><span class="tok-n">next_sibling</span><span class="tok-p">(</span><span class="tok-s">&quot;Tool&quot;</span><span class="tok-p">))</span><span class="tok-w"></span></code></pre>
 </div>
+</div>
+<div id="xml_node::attribute_hinted" class="paragraph">
+<p><code>attribute</code> function needs to look for the target attribute by name. If a node has many attributes, finding each by name can be time consuming. If you have an idea of how attributes are ordered in the node, you can use a faster function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-n">xml_attribute</span><span class="tok-w"> </span><span class="tok-nf">xml_node::attribute</span><span class="tok-p">(</span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">name</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">xml_attribute</span><span class="tok-o">&amp;</span><span class="tok-w"> </span><span class="tok-n">hint</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-p">;</span><span class="tok-w"></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The extra <code>hint</code> argument is used to guess where the attribute might be, and is updated to the location of the next attribute so that if you search for multiple attributes in the right order, the performance is maximized. Note that <code>hint</code> has to be either null or has to belong to the node, otherwise the behavior is undefined.</p>
+</div>
+<div class="paragraph">
+<p>You can use this function as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-n">xml_attribute</span><span class="tok-w"> </span><span class="tok-n">hint</span><span class="tok-p">;</span><span class="tok-w"></span>
+<span class="tok-n">xml_attribute</span><span class="tok-w"> </span><span class="tok-n">id</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">node</span><span class="tok-p">.</span><span class="tok-n">attribute</span><span class="tok-p">(</span><span class="tok-s">&quot;id&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">hint</span><span class="tok-p">);</span><span class="tok-w"></span>
+<span class="tok-n">xml_attribute</span><span class="tok-w"> </span><span class="tok-n">name</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">node</span><span class="tok-p">.</span><span class="tok-n">attribute</span><span class="tok-p">(</span><span class="tok-s">&quot;name&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">hint</span><span class="tok-p">);</span><span class="tok-w"></span>
+<span class="tok-n">xml_attribute</span><span class="tok-w"> </span><span class="tok-n">version</span><span class="tok-w"> </span><span class="tok-o">=</span><span class="tok-w"> </span><span class="tok-n">node</span><span class="tok-p">.</span><span class="tok-n">attribute</span><span class="tok-p">(</span><span class="tok-s">&quot;version&quot;</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">hint</span><span class="tok-p">);</span><span class="tok-w"></span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This code is correct regardless of the order of the attributes, but it&#8217;s faster if <code>"id"</code>, <code>"name"</code> and <code>"version"</code> occur in that order.</p>
 </div>
 <div id="xml_node::find_child_by_attribute" class="paragraph">
 <p>Occasionally the needed node is specified not by the unique name but instead by the value of some attribute; for example, it is common to have node collections with each node having a unique id: <code>&lt;group&gt;&lt;item id="1"/&gt; &lt;item id="2"/&gt;&lt;/group&gt;</code>. There are two functions for finding child nodes based on the attribute values:</p>
@@ -5781,6 +5806,9 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <span class="tok-w">    </span><span class="tok-n">xml_attribute</span><span class="tok-w"> </span><a href="#xml_node::attribute">attribute</a><span class="tok-p">(</span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">name</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-p">;</span><span class="tok-w"></span>
 <span class="tok-w">    </span><span class="tok-n">xml_node</span><span class="tok-w"> </span><a href="#xml_node::next_sibling_name">next_sibling</a><span class="tok-p">(</span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">name</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-p">;</span><span class="tok-w"></span>
 <span class="tok-w">    </span><span class="tok-n">xml_node</span><span class="tok-w"> </span><a href="#xml_node::previous_sibling_name">previous_sibling</a><span class="tok-p">(</span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">name</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-p">;</span><span class="tok-w"></span>
+
+<span class="tok-w">    </span><span class="tok-n">xml_attribute</span><span class="tok-w"> </span><a href="#xml_node::attribute_hinted">attribute</a><span class="tok-p">(</span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">name</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-n">xml_attribute</span><span class="tok-o">&amp;</span><span class="tok-w"> </span><span class="tok-n">hint</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-p">;</span><span class="tok-w"></span>
+
 <span class="tok-w">    </span><span class="tok-n">xml_node</span><span class="tok-w"> </span><a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a><span class="tok-p">(</span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">name</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">attr_name</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">attr_value</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-p">;</span><span class="tok-w"></span>
 <span class="tok-w">    </span><span class="tok-n">xml_node</span><span class="tok-w"> </span><a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a><span class="tok-p">(</span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">attr_name</span><span class="tok-p">,</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-w"> </span><span class="tok-n">char_t</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">attr_value</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-k">const</span><span class="tok-p">;</span><span class="tok-w"></span>
 
@@ -6067,7 +6095,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-10-20 20:18:02 -0700
+Last updated 2023-03-19 15:41:08 -0700
 </div>
 </div>
 </body>
