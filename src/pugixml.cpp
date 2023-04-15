@@ -40,6 +40,11 @@
 // For placement new
 #include <new>
 
+// For load_file
+#if defined(__unix__) || defined(__APPLE__)
+#include <sys/stat.h>
+#endif
+
 #ifdef _MSC_VER
 #	pragma warning(push)
 #	pragma warning(disable: 4127) // conditional expression is constant
@@ -4759,7 +4764,17 @@ PUGI_IMPL_NS_BEGIN
 	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	PUGI_IMPL_FN xml_parse_status get_file_size(FILE* file, size_t& out_result)
 	{
-	#if defined(PUGI_IMPL_MSVC_CRT_VERSION) && PUGI_IMPL_MSVC_CRT_VERSION >= 1400
+	#if defined(__unix__) || defined(__APPLE__)
+		// this simultaneously retrieves the file size and file mode (to guard against loading non-files)
+		struct stat st;
+		if (fstat(fileno(file), &st) != 0) return status_io_error;
+
+		// anything that's not a regular file doesn't have a coherent length
+		if (!S_ISREG(st.st_mode)) return status_io_error;
+
+		typedef off_t length_type;
+		length_type length = st.st_size;
+	#elif defined(PUGI_IMPL_MSVC_CRT_VERSION) && PUGI_IMPL_MSVC_CRT_VERSION >= 1400
 		// there are 64-bit versions of fseek/ftell, let's use them
 		typedef __int64 length_type;
 
