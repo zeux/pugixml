@@ -41,7 +41,7 @@
 #include <new>
 
 // For load_file
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__)
 #include <sys/stat.h>
 #endif
 
@@ -4764,7 +4764,7 @@ PUGI_IMPL_NS_BEGIN
 	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	PUGI_IMPL_FN xml_parse_status get_file_size(FILE* file, size_t& out_result)
 	{
-	#if defined(__unix__) || defined(__APPLE__)
+	#if defined(__linux__) || defined(__APPLE__)
 		// this simultaneously retrieves the file size and file mode (to guard against loading non-files)
 		struct stat st;
 		if (fstat(fileno(file), &st) != 0) return status_io_error;
