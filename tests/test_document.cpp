@@ -589,7 +589,7 @@ TEST(document_load_file_wide_out_of_memory)
 	CHECK(result.status == status_out_of_memory || result.status == status_file_not_found);
 }
 
-#if defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__)
 TEST(document_load_file_special_folder)
 {
 	xml_document doc;
