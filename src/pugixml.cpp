@@ -129,6 +129,12 @@ using std::memmove;
 using std::memset;
 #endif
 
+// Old versions of GCC do not define ::malloc and ::free depending on header include order
+#if defined(__GNUC__) && (__GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ < 4))
+using std::malloc;
+using std::free;
+#endif
+
 // Some MinGW/GCC versions have headers that erroneously omit LLONG_MIN/LLONG_MAX/ULLONG_MAX definitions from limits.h in some configurations
 #if defined(PUGIXML_HAS_LONG_LONG) && defined(__GNUC__) && !defined(LLONG_MAX) && !defined(LLONG_MIN) && !defined(ULLONG_MAX)
 #	define LLONG_MIN (-LLONG_MAX - 1LL)
@@ -9950,7 +9956,8 @@ PUGI_IMPL_NS_BEGIN
 
 			xpath_node* last = ns.begin() + first;
 
-			xpath_context c(xpath_node(), 1, size);
+			xpath_node cn;
+			xpath_context c(cn, 1, size);
 
 			double er = expr->eval_number(c, stack);
 
