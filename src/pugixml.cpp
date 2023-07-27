@@ -8458,7 +8458,7 @@ PUGI_IMPL_NS_BEGIN
 
 		// extract mantissa string: skip sign
 		char* mantissa = buffer[0] == '-' ? buffer + 1 : buffer;
-		assert(mantissa[0] != '0' && mantissa[1] == '.');
+		assert(mantissa[0] != '0' && (mantissa[1] == '.' || mantissa[1] == ','));
 
 		// divide mantissa by 10 to eliminate integer part
 		mantissa[1] = mantissa[0];
