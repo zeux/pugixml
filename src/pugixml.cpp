@@ -270,6 +270,18 @@ PUGI_IMPL_NS_BEGIN
 		return static_cast<size_t>(end - s);
 	#endif
 	}
+
+	// concat two strings and store it in the first one 
+	PUGI_IMPL_FN void strconcat(char_t* dst,const char_t* src)
+	{
+		assert(dst && src);
+
+#ifdef PUGIXML_WCHAR_MODE
+		wcscat(dst, src);
+#else
+		strcat(dst, src);
+#endif
+	}
 PUGI_IMPL_NS_END
 
 // auto_ptr-like object for exception recovery
@@ -3479,11 +3491,21 @@ PUGI_IMPL_NS_BEGIN
 						}
 						else
 						{
-							PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
+							xml_node_struct* cursor_last_child = cursor->first_child ? cursor->first_child->prev_sibling_c + 0 : 0;
 
-							cursor->value = s; // Save the offset.
+							if(PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor_last_child && PUGI_IMPL_NODETYPE(cursor_last_child) == node_pcdata)
+							{
+								strconcat(cursor_last_child->value, s);
+								s = cursor_last_child->value;
+							}
+							else
+							{
+								PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
+								
+								cursor->value = s; // Save the offset.
 
-							PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
+								PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
+							}
 						}
 
 						s = strconv_pcdata(s);
