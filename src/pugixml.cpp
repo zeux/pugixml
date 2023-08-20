@@ -276,11 +276,11 @@ PUGI_IMPL_NS_BEGIN
 	{
 		assert(dst && src);
 
-#ifdef PUGIXML_WCHAR_MODE
+	#ifdef PUGIXML_WCHAR_MODE
 		wcscat(dst, src);
-#else
+	#else
 		strcat(dst, src);
-#endif
+	#endif
 	}
 PUGI_IMPL_NS_END
 

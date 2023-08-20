@@ -1252,6 +1252,53 @@ TEST_XML_FLAGS(parse_embed_pcdata_comment, "<n>text1<!---->text2</n>", parse_emb
 	CHECK_STRING(n.last_child().value(), STR("text2"));
 }
 
+TEST(parse_merge_pcdata)
+{
+
+	const unsigned int default_parse = parse_escapes | parse_wconv_attribute | parse_eol;
+
+	unsigned int flag_sets[] = {parse_cdata, parse_pi, parse_comments, parse_declaration};
+
+	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
+	{
+		xml_document doc;
+		const unsigned int flags = default_parse | parse_merge_pcdata | flag_sets[i];
+		xml_parse_result res = doc.load_string(STR("<node>First text<!-- here is a mesh node -->Second text<![CDATA[someothertext]]>some more text<?include somedata?>Last text</node>"), flags);
+		CHECK(res);
+
+		xml_node child = doc.child(STR("node"));
+
+		if (flags & parse_comments)
+		{
+			CHECK_STRING(doc.child(STR("node")).text().get(), STR("First text"));
+			CHECK_STRING(child.first_child().value(), STR("First text"));
+			CHECK(child.first_child().next_sibling().type() == node_comment);
+			CHECK_NODE(doc, STR("<node>First text<!-- here is a mesh node -->Second textsome more textLast text</node>"));
+		}
+		else if (flags & parse_cdata)
+		{
+			CHECK_STRING(doc.child(STR("node")).text().get(), STR("First textSecond text"));
+			CHECK_STRING(child.first_child().value(), STR("First textSecond text"));
+			CHECK(child.first_child().next_sibling().type() == node_cdata);
+			CHECK_NODE(doc, STR("<node>First textSecond text<![CDATA[someothertext]]>some more textLast text</node>"));
+		}
+		else if (flags & parse_pi)
+		{
+			CHECK_STRING(doc.child(STR("node")).text().get(), STR("First textSecond textsome more text"));
+			CHECK_STRING(child.first_child().value(), STR("First textSecond textsome more text"));
+			CHECK(child.first_child().next_sibling().type() == node_pi);
+			CHECK_NODE(doc, STR("<node>First textSecond textsome more text<?include somedata?>Last text</node>"));
+		}
+		else
+		{
+			CHECK(child.first_child() == child.last_child());
+			CHECK(child.first_child().type() == node_pcdata);
+			CHECK_NODE(doc, STR("<node>First textSecond textsome more textLast text</node>"));
+		}
+		CHECK(child.last_child().type() == node_pcdata);
+	}
+}
+
 TEST(parse_encoding_detect)
 {
 	char test[] = "<?xml version='1.0' encoding='utf-8'?><n/>";
