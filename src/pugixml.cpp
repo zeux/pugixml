@@ -272,7 +272,7 @@ PUGI_IMPL_NS_BEGIN
 	}
 
 	// concat two strings and store it in the first one 
-	PUGI_IMPL_FN void strconcat(char_t* dst,const char_t* src)
+	PUGI_IMPL_FN void strconcat(char_t* dst, const char_t* src)
 	{
 		assert(dst && src);
 
@@ -3485,9 +3485,13 @@ PUGI_IMPL_NS_BEGIN
 
 					if (cursor->parent || PUGI_IMPL_OPTSET(parse_fragment))
 					{
+						char_t* parsed_pcdata = s;
+
+						s = strconv_pcdata(s);
+
 						if (PUGI_IMPL_OPTSET(parse_embed_pcdata) && cursor->parent && !cursor->first_child && !cursor->value)
 						{
-							cursor->value = s; // Save the offset.
+							cursor->value = parsed_pcdata; // Save the offset.
 						}
 						else
 						{
@@ -3495,20 +3499,17 @@ PUGI_IMPL_NS_BEGIN
 
 							if(PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor_last_child && PUGI_IMPL_NODETYPE(cursor_last_child) == node_pcdata)
 							{
-								strconcat(cursor_last_child->value, s);
-								s = cursor_last_child->value;
+								strconcat(cursor_last_child->value, parsed_pcdata);//Appending PCDATA with the previous one
 							}
 							else
 							{
 								PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
 								
-								cursor->value = s; // Save the offset.
+								cursor->value = parsed_pcdata; // Save the offset.
 
 								PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
 							}
 						}
-
-						s = strconv_pcdata(s);
 
 						if (!*s) break;
 					}
