@@ -3493,20 +3493,17 @@ PUGI_IMPL_NS_BEGIN
 						{
 							cursor->value = parsed_pcdata; // Save the offset.
 						}
+						else if (PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor->first_child && PUGI_IMPL_NODETYPE(cursor->first_child->prev_sibling_c) == node_pcdata)
+						{
+							strconcat(cursor->first_child->prev_sibling_c->value, parsed_pcdata); // Append PCDATA to the previous one.
+						}
 						else
 						{
-							if (PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor->first_child && PUGI_IMPL_NODETYPE(cursor->first_child->prev_sibling_c) == node_pcdata)
-							{
-								strconcat(cursor->first_child->prev_sibling_c->value, parsed_pcdata); // Append PCDATA to the previous one.
-							}
-							else
-							{
-								PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
-								
-								cursor->value = parsed_pcdata; // Save the offset.
+							PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
 
-								PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
-							}
+							cursor->value = parsed_pcdata; // Save the offset.
+
+							PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
 						}
 
 						if (!*s) break;
