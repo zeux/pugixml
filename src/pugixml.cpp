@@ -271,7 +271,7 @@ PUGI_IMPL_NS_BEGIN
 	#endif
 	}
 
-	// concat two strings and store it in the first one 
+	// Append one string to another
 	PUGI_IMPL_FN void strconcat(char_t* dst, const char_t* src)
 	{
 		assert(dst && src);
@@ -3495,11 +3495,9 @@ PUGI_IMPL_NS_BEGIN
 						}
 						else
 						{
-							xml_node_struct* cursor_last_child = cursor->first_child ? cursor->first_child->prev_sibling_c + 0 : 0;
-
-							if(PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor_last_child && PUGI_IMPL_NODETYPE(cursor_last_child) == node_pcdata)
+							if (PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor->first_child && PUGI_IMPL_NODETYPE(cursor->first_child->prev_sibling_c) == node_pcdata)
 							{
-								strconcat(cursor_last_child->value, parsed_pcdata);//Appending PCDATA with the previous one
+								strconcat(cursor->first_child->prev_sibling_c->value, parsed_pcdata); // Append PCDATA to the previous one.
 							}
 							else
 							{
