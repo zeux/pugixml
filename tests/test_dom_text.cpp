@@ -247,6 +247,10 @@ TEST_XML(dom_text_set, "<node/>")
     CHECK(node.first_child().type() == node_pcdata);
     CHECK(node.first_child() == node.last_child());
     CHECK_NODE(node, STR("<node>foobarfoobar</node>"));
+
+    t.set(STR(""));
+    CHECK(node.first_child().type() == node_pcdata);
+    CHECK_NODE(node, STR("<node></node>"));
 }
 
 TEST_XML(dom_text_set_with_size, "<node/>")
@@ -267,6 +271,10 @@ TEST_XML(dom_text_set_with_size, "<node/>")
     CHECK(node.first_child().type() == node_pcdata);
     CHECK(node.first_child() == node.last_child());
     CHECK_NODE(node, STR("<node>foobarfoobar</node>"));
+
+    t.set(STR(""), 0);
+    CHECK(node.first_child().type() == node_pcdata);
+    CHECK_NODE(node, STR("<node></node>"));
 }
 
 TEST_XML(dom_text_set_partially_with_size, "<node/>")
@@ -287,6 +295,10 @@ TEST_XML(dom_text_set_partially_with_size, "<node/>")
     CHECK(node.first_child().type() == node_pcdata);
     CHECK(node.first_child() == node.last_child());
     CHECK_NODE(node, STR("<node>foo</node>"));
+
+    t.set(STR("foo"), 0);
+    CHECK(node.first_child().type() == node_pcdata);
+    CHECK_NODE(node, STR("<node></node>"));
 }
 
 TEST_XML(dom_text_assign, "<node/>")
