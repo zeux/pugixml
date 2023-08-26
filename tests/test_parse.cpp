@@ -1254,15 +1254,13 @@ TEST_XML_FLAGS(parse_embed_pcdata_comment, "<n>text1<!---->text2</n>", parse_emb
 
 TEST(parse_merge_pcdata)
 {
-
-	const unsigned int default_parse = parse_escapes | parse_wconv_attribute | parse_eol;
-
 	unsigned int flag_sets[] = {parse_cdata, parse_pi, parse_comments, parse_declaration};
 
 	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
 	{
+		unsigned int flags = parse_merge_pcdata | flag_sets[i];
+
 		xml_document doc;
-		const unsigned int flags = default_parse | parse_merge_pcdata | flag_sets[i];
 		xml_parse_result res = doc.load_string(STR("<node>First text<!-- here is a mesh node -->Second text<![CDATA[someothertext]]>some more text<?include somedata?>Last text</node>"), flags);
 		CHECK(res);
 
@@ -1270,21 +1268,18 @@ TEST(parse_merge_pcdata)
 
 		if (flags & parse_comments)
 		{
-			CHECK_STRING(doc.child(STR("node")).text().get(), STR("First text"));
 			CHECK_STRING(child.first_child().value(), STR("First text"));
 			CHECK(child.first_child().next_sibling().type() == node_comment);
 			CHECK_NODE(doc, STR("<node>First text<!-- here is a mesh node -->Second textsome more textLast text</node>"));
 		}
 		else if (flags & parse_cdata)
 		{
-			CHECK_STRING(doc.child(STR("node")).text().get(), STR("First textSecond text"));
 			CHECK_STRING(child.first_child().value(), STR("First textSecond text"));
 			CHECK(child.first_child().next_sibling().type() == node_cdata);
 			CHECK_NODE(doc, STR("<node>First textSecond text<![CDATA[someothertext]]>some more textLast text</node>"));
 		}
 		else if (flags & parse_pi)
 		{
-			CHECK_STRING(doc.child(STR("node")).text().get(), STR("First textSecond textsome more text"));
 			CHECK_STRING(child.first_child().value(), STR("First textSecond textsome more text"));
 			CHECK(child.first_child().next_sibling().type() == node_pi);
 			CHECK_NODE(doc, STR("<node>First textSecond textsome more text<?include somedata?>Last text</node>"));
@@ -1295,7 +1290,47 @@ TEST(parse_merge_pcdata)
 			CHECK(child.first_child().type() == node_pcdata);
 			CHECK_NODE(doc, STR("<node>First textSecond textsome more textLast text</node>"));
 		}
+
 		CHECK(child.last_child().type() == node_pcdata);
+	}
+}
+
+TEST(parse_merge_pcdata_escape)
+{
+	xml_document doc;
+	xml_parse_result res = doc.load_string(STR("<node>First &amp;lt; <!-- comment 1 --> Second &amp;gt; <!-- comment 2 --> Third &amp;quot;</node>"), parse_default | parse_merge_pcdata);
+	CHECK(res);
+
+	CHECK_STRING(doc.child(STR("node")).child_value(), STR("First &lt;  Second &gt;  Third &quot;"));
+}
+
+TEST(parse_merge_pcdata_whitespace)
+{
+	unsigned int flag_sets[] = {0, parse_ws_pcdata, parse_ws_pcdata_single};
+
+	for (unsigned int i = 0; i < sizeof(flag_sets) / sizeof(flag_sets[0]); ++i)
+	{
+		unsigned int flags = parse_merge_pcdata | flag_sets[i];
+
+		xml_document doc;
+		xml_parse_result res = doc.load_string(STR("<node><child1>  <!-- comment 1 -->\t<!-- comment 2 -->\n</child1><child2>text<!-- comment 1-->\t<!-- comment2 --> end</child2></node>"), flags);
+		CHECK(res);
+
+		if (flags & parse_ws_pcdata)
+		{
+			CHECK_STRING(doc.child(STR("node")).child(STR("child1")).child_value(), STR("  \t\n"));
+			CHECK_STRING(doc.child(STR("node")).child(STR("child2")).child_value(), STR("text\t end"));
+		}
+		else if (flags & parse_ws_pcdata_single)
+		{
+			CHECK_STRING(doc.child(STR("node")).child(STR("child1")).child_value(), STR("\n"));
+			CHECK_STRING(doc.child(STR("node")).child(STR("child2")).child_value(), STR("text end"));
+		}
+		else
+		{
+			CHECK(!doc.child(STR("node")).child(STR("child1")).first_child());
+			CHECK_STRING(doc.child(STR("node")).child(STR("child2")).child_value(), STR("text end"));
+		}
 	}
 }
 
