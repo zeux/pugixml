@@ -2841,6 +2841,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     unsigned long long +++<a href="#xml_attribute::as_ullong">as_ullong</a>+++(unsigned long long def = 0) const;
 
     bool +++<a href="#xml_attribute::set_name">set_name</a>+++(const char_t* rhs);
+    bool +++<a href="#xml_attribute::set_name">set_name</a>+++(const char_t* rhs, size_t size);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs, size_t size);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(int rhs);
@@ -2931,6 +2932,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     ptrdiff_t +++<a href="#xml_node::offset_debug">offset_debug</a>+++() const;
 
     bool +++<a href="#xml_node::set_name">set_name</a>+++(const char_t* rhs);
+    bool +++<a href="#xml_node::set_name">set_name</a>+++(const char_t* rhs, size_t size);
     bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs);
     bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs, size_t size);
 
