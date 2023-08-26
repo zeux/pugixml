@@ -1334,6 +1334,22 @@ TEST(parse_merge_pcdata_whitespace)
 	}
 }
 
+TEST(parse_merge_pcdata_append)
+{
+	xml_document doc;
+	doc.append_child(STR("node")).append_child(node_pcdata);
+	xml_parse_result res = doc.child(STR("node")).append_buffer("hello <!--comment-->world", 25, parse_merge_pcdata | parse_fragment);
+
+	CHECK(res.status == status_append_invalid_root);
+	CHECK_STRING(doc.child(STR("node")).first_child().value(), STR(""));
+
+	doc.child(STR("node")).remove_children();
+	res = doc.child(STR("node")).append_buffer("hello <!--comment-->world", 25, parse_merge_pcdata | parse_fragment);
+
+	CHECK(res.status == status_ok);
+	CHECK_STRING(doc.child(STR("node")).first_child().value(), STR("hello world"));
+}
+
 TEST(parse_encoding_detect)
 {
 	char test[] = "<?xml version='1.0' encoding='utf-8'?><n/>";

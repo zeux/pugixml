@@ -6307,6 +6307,9 @@ namespace pugi
 		// append_buffer is only valid for elements/documents
 		if (!impl::allow_insert_child(type(), node_element)) return impl::make_parse_result(status_append_invalid_root);
 
+		// append buffer can not merge PCDATA into existing PCDATA nodes
+		if ((options & parse_merge_pcdata) != 0 && last_child().type() == node_pcdata) return impl::make_parse_result(status_append_invalid_root);
+
 		// get document node
 		impl::xml_document_struct* doc = &impl::get_document(_root);
 
