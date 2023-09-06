@@ -3279,7 +3279,7 @@ PUGI_IMPL_NS_BEGIN
 			char_t ch = 0;
 			xml_node_struct* cursor = root;
 			char_t* mark = s;
-			char_t* merged = s;
+			char_t* merged_pcdata = s;
 
 			while (*s != 0)
 			{
@@ -3484,16 +3484,16 @@ PUGI_IMPL_NS_BEGIN
 						}
 						else if (PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor->first_child && PUGI_IMPL_NODETYPE(cursor->first_child->prev_sibling_c) == node_pcdata)
 						{
-							assert(merged >= cursor->first_child->prev_sibling_c->value);
+							assert(merged_pcdata >= cursor->first_child->prev_sibling_c->value);
 
 							// Catch up to the end of last parsed value; only needed for the first fragment.
-							merged += strlength(merged);
+							merged_pcdata += strlength(merged_pcdata);
 
 							size_t length = strlength(parsed_pcdata);
 
 							// Must use memmove instead of memcpy as this move may overlap
-							memmove(merged, parsed_pcdata, (length + 1) * sizeof(char_t));
-							merged += length;
+							memmove(merged_pcdata, parsed_pcdata, (length + 1) * sizeof(char_t));
+							merged_pcdata += length;
 						}
 						else
 						{
@@ -3501,7 +3501,7 @@ PUGI_IMPL_NS_BEGIN
 							PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
 
 							cursor->value = parsed_pcdata; // Save the offset.
-							merged = parsed_pcdata; // Used for parse_merge_pcdata above, cheaper to save unconditionally
+							merged_pcdata = parsed_pcdata; // Used for parse_merge_pcdata above, cheaper to save unconditionally
 
 							cursor = prev_cursor; // Pop since this is a standalone.
 						}
