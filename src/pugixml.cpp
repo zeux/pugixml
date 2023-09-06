@@ -3291,6 +3291,7 @@ PUGI_IMPL_NS_BEGIN
 			char_t ch = 0;
 			xml_node_struct* cursor = root;
 			char_t* mark = s;
+			char_t* merged = s;
 
 			while (*s != 0)
 			{
@@ -3495,13 +3496,17 @@ PUGI_IMPL_NS_BEGIN
 						}
 						else if (PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor->first_child && PUGI_IMPL_NODETYPE(cursor->first_child->prev_sibling_c) == node_pcdata)
 						{
-							strconcat(cursor->first_child->prev_sibling_c->value, parsed_pcdata); // Append PCDATA to the previous one.
+							assert(merged >= cursor->first_child->prev_sibling_c->value);
+
+							merged += strlength(merged);
+							strconcat(merged, parsed_pcdata); // Append PCDATA to the previous one.
 						}
 						else
 						{
 							PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
 
 							cursor->value = parsed_pcdata; // Save the offset.
+							merged = parsed_pcdata; // Used for parse_merge_pcdata above, cheaper to save unconditionally
 
 							PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
 						}
@@ -3584,7 +3589,7 @@ PUGI_IMPL_NS_BEGIN
 					return make_parse_result(status_unrecognized_tag, length - 1);
 
 				// check if there are any element nodes parsed
-				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling + 0 : root->first_child+ 0;
+				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling + 0 : root->first_child + 0;
 
 				if (!PUGI_IMPL_OPTSET(parse_fragment) && !has_element_node_siblings(first_root_child_parsed))
 					return make_parse_result(status_no_document_element, length - 1);
