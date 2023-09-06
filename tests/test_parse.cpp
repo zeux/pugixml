@@ -1350,6 +1350,14 @@ TEST(parse_merge_pcdata_append)
 	CHECK_STRING(doc.child(STR("node")).first_child().value(), STR("hello world"));
 }
 
+TEST(parse_merge_pcdata_overlap)
+{
+	xml_document doc;
+	xml_parse_result res = doc.load_string(STR("<node>short <!-- --> this string is very long so long that copying it will overlap itself</node>"), parse_merge_pcdata);
+	CHECK(res);
+	CHECK_STRING(doc.child_value(STR("node")), STR("short  this string is very long so long that copying it will overlap itself"));
+}
+
 TEST(parse_encoding_detect)
 {
 	char test[] = "<?xml version='1.0' encoding='utf-8'?><n/>";

@@ -270,18 +270,6 @@ PUGI_IMPL_NS_BEGIN
 		return static_cast<size_t>(end - s);
 	#endif
 	}
-
-	// Append one string to another
-	PUGI_IMPL_FN void strconcat(char_t* dst, const char_t* src)
-	{
-		assert(dst && src);
-
-	#ifdef PUGIXML_WCHAR_MODE
-		wcscat(dst, src);
-	#else
-		strcat(dst, src);
-	#endif
-	}
 PUGI_IMPL_NS_END
 
 // auto_ptr-like object for exception recovery
@@ -3498,8 +3486,14 @@ PUGI_IMPL_NS_BEGIN
 						{
 							assert(merged >= cursor->first_child->prev_sibling_c->value);
 
+							// Catch up to the end of last parsed value; only needed for the first fragment.
 							merged += strlength(merged);
-							strconcat(merged, parsed_pcdata); // Append PCDATA to the previous one.
+
+							size_t length = strlength(parsed_pcdata);
+
+							// Must use memmove instead of memcpy as this move may overlap
+							memmove(merged, parsed_pcdata, (length + 1) * sizeof(char_t));
+							merged += length;
 						}
 						else
 						{
