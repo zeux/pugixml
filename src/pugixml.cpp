@@ -3279,6 +3279,7 @@ PUGI_IMPL_NS_BEGIN
 			char_t ch = 0;
 			xml_node_struct* cursor = root;
 			char_t* mark = s;
+			char_t* merged_pcdata = s;
 
 			while (*s != 0)
 			{
@@ -3473,20 +3474,37 @@ PUGI_IMPL_NS_BEGIN
 
 					if (cursor->parent || PUGI_IMPL_OPTSET(parse_fragment))
 					{
+						char_t* parsed_pcdata = s;
+
+						s = strconv_pcdata(s);
+
 						if (PUGI_IMPL_OPTSET(parse_embed_pcdata) && cursor->parent && !cursor->first_child && !cursor->value)
 						{
-							cursor->value = s; // Save the offset.
+							cursor->value = parsed_pcdata; // Save the offset.
+						}
+						else if (PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor->first_child && PUGI_IMPL_NODETYPE(cursor->first_child->prev_sibling_c) == node_pcdata)
+						{
+							assert(merged_pcdata >= cursor->first_child->prev_sibling_c->value);
+
+							// Catch up to the end of last parsed value; only needed for the first fragment.
+							merged_pcdata += strlength(merged_pcdata);
+
+							size_t length = strlength(parsed_pcdata);
+
+							// Must use memmove instead of memcpy as this move may overlap
+							memmove(merged_pcdata, parsed_pcdata, (length + 1) * sizeof(char_t));
+							merged_pcdata += length;
 						}
 						else
 						{
+							xml_node_struct* prev_cursor = cursor;
 							PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
 
-							cursor->value = s; // Save the offset.
+							cursor->value = parsed_pcdata; // Save the offset.
+							merged_pcdata = parsed_pcdata; // Used for parse_merge_pcdata above, cheaper to save unconditionally
 
-							PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
+							cursor = prev_cursor; // Pop since this is a standalone.
 						}
-
-						s = strconv_pcdata(s);
 
 						if (!*s) break;
 					}
@@ -3566,7 +3584,7 @@ PUGI_IMPL_NS_BEGIN
 					return make_parse_result(status_unrecognized_tag, length - 1);
 
 				// check if there are any element nodes parsed
-				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling + 0 : root->first_child+ 0;
+				xml_node_struct* first_root_child_parsed = last_root_child ? last_root_child->next_sibling + 0 : root->first_child + 0;
 
 				if (!PUGI_IMPL_OPTSET(parse_fragment) && !has_element_node_siblings(first_root_child_parsed))
 					return make_parse_result(status_no_document_element, length - 1);
@@ -6302,6 +6320,9 @@ namespace pugi
 	{
 		// append_buffer is only valid for elements/documents
 		if (!impl::allow_insert_child(type(), node_element)) return impl::make_parse_result(status_append_invalid_root);
+
+		// append buffer can not merge PCDATA into existing PCDATA nodes
+		if ((options & parse_merge_pcdata) != 0 && last_child().type() == node_pcdata) return impl::make_parse_result(status_append_invalid_root);
 
 		// get document node
 		impl::xml_document_struct* doc = &impl::get_document(_root);
