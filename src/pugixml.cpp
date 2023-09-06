@@ -3503,12 +3503,13 @@ PUGI_IMPL_NS_BEGIN
 						}
 						else
 						{
+							xml_node_struct* prev_cursor = cursor;
 							PUGI_IMPL_PUSHNODE(node_pcdata); // Append a new node on the tree.
 
 							cursor->value = parsed_pcdata; // Save the offset.
 							merged = parsed_pcdata; // Used for parse_merge_pcdata above, cheaper to save unconditionally
 
-							PUGI_IMPL_POPNODE(); // Pop since this is a standalone.
+							cursor = prev_cursor; // Pop since this is a standalone.
 						}
 
 						if (!*s) break;
