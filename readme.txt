@@ -1,4 +1,4 @@
-pugixml 1.13 - an XML processing library
+pugixml 1.14 - an XML processing library
 
 Copyright (C) 2006-2023, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
 Report bugs and download new versions at https://pugixml.org/

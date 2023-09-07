@@ -1,5 +1,5 @@
 /**
- * pugixml parser - version 1.13
+ * pugixml parser - version 1.14
  * --------------------------------------------------------
  * Copyright (C) 2006-2023, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
