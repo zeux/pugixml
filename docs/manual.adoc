@@ -2167,6 +2167,26 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.14]]
+=== v1.14 ^2023-10-01^
+
+Maintenance release. Changes:
+
+* Improvements:
+    . `xml_attribute::set_name` and `xml_node::set_name` now have overloads that accept pointer to non-null-terminated string and size
+    . Implement `parse_merge_pcdata` parsing mode in which PCDATA contents is merged into a single node when original document had comments that were skipped during parsing
+    . `xml_document::load_file` now returns a more consistent error status when given a path to a folder
+
+* Bug fixes:
+    . Fix assertion in XPath number->string conversion when using non-English locales
+    . Fix PUGIXML_STATIC_CRT CMake option to correctly select static CRT when using MSVC and recent CMake
+
+* Compatibility improvements:
+    . Fix GCC 2.95/3.3 builds
+    . Fix CMake 3.27 deprecation warnings
+    . Fix XCode 14 sprintf deprecation warning when compiling in C++03 mode
+    . Fix clang/gcc warnings `-Wweak-vtables`, `-Wreserved-macro-identifier`
+
 [[v1.13]]
 === v1.13 ^2022-11-01^
 
