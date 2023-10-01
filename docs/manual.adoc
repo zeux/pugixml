@@ -46,7 +46,7 @@ Thanks to *Vyacheslav Egorov* for documentation proofreading and fuzz testing.
 The pugixml library is distributed under the MIT license:
 
 ....
-Copyright (c) 2006-2022 Arseny Kapoulkine
+Copyright (c) 2006-2023 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -74,7 +74,7 @@ This means that you can freely use pugixml in your applications, both open-sourc
 
 ....
 This software is based on pugixml library (https://pugixml.org).
-pugixml is Copyright (C) 2006-2022 Arseny Kapoulkine.
+pugixml is Copyright (C) 2006-2023 Arseny Kapoulkine.
 ....
 
 [[install]]
@@ -749,7 +749,9 @@ These flags control the resulting tree contents:
 * [[parse_embed_pcdata]]`parse_embed_pcdata` determines if PCDATA contents is to be saved as element values. Normally element nodes have names but not values; this flag forces the parser to store the contents as a value if PCDATA is the first child of the element node (otherwise PCDATA node is created as usual). This can significantly reduce the memory required for documents with many PCDATA nodes. To retrieve the data you can use `xml_node::value()` on the element nodes or any of the higher-level functions like `child_value` or `text`. This flag is *off* by default.
 Since this flag significantly changes the DOM structure it is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments. This flag is *off* by default.
 
-* [[parse_fragment]]`parse_fragment` determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid and permits multiple top-level element nodes. This flag is *off* by default.
+* [[parse_merge_pcdata]]`parse_merge_pcdata` determines if PCDATA contents is to be merged with the previous PCDATA node when no intermediary nodes are present between them. If the PCDATA contains CDATA sections, PI nodes, or comments in between, and either of the flags <<parse_cdata,parse_cdata>> ,<<parse_pi,parse_pi>> ,<<parse_comments,parse_comments>> is not set, the contents of the PCDATA node will be merged with the previous one. This flag is *off* by default.
+
+* [[parse_fragment]]`parse_fragment` determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid and permits multiple top-level element nodes (currently multiple top-level element nodes are also permitted when the flag is off, but that behavior should not be relied on). This flag is *off* by default.
 
 CAUTION: Using in-place parsing (<<xml_document::load_buffer_inplace,load_buffer_inplace>>) with `parse_fragment` flag may result in the loss of the last character of the buffer if it is a part of PCDATA. Since PCDATA values are null-terminated strings, the only way to resolve this is to provide a null-terminated buffer as an input to `load_buffer_inplace` - i.e. `doc.load_buffer_inplace("test\0", 5, pugi::parse_default | pugi::parse_fragment)`.
 
@@ -968,6 +970,28 @@ xml_node xml_node::previous_sibling(const char_t* name) const;
 ----
 for (pugi::xml_node tool = tools.child("Tool"); tool; tool = tool.next_sibling("Tool"))
 ----
+
+[[xml_node::attribute_hinted]]
+`attribute` function needs to look for the target attribute by name. If a node has many attributes, finding each by name can be time consuming. If you have an idea of how attributes are ordered in the node, you can use a faster function:
+
+[source]
+----
+xml_attribute xml_node::attribute(const char_t* name, xml_attribute& hint) const;
+----
+
+The extra `hint` argument is used to guess where the attribute might be, and is updated to the location of the next attribute so that if you search for multiple attributes in the right order, the performance is maximized. Note that `hint` has to be either null or has to belong to the node, otherwise the behavior is undefined.
+
+You can use this function as follows:
+
+[source]
+----
+xml_attribute hint;
+xml_attribute id = node.attribute("id", hint);
+xml_attribute name = node.attribute("name", hint);
+xml_attribute version = node.attribute("version", hint);
+----
+
+This code is correct regardless of the order of the attributes, but it's faster if `"id"`, `"name"` and `"version"` occur in that order.
 
 [[xml_node::find_child_by_attribute]]
 Occasionally the needed node is specified not by the unique name but instead by the value of some attribute; for example, it is common to have node collections with each node having a unique id: `<group><item id="1"/> <item id="2"/></group>`. There are two functions for finding child nodes based on the attribute values:
@@ -1253,6 +1277,7 @@ As discussed before, nodes can have name and value, both of which are strings. D
 [source]
 ----
 bool xml_node::set_name(const char_t* rhs);
+bool xml_node::set_name(const char_t* rhs, size_t sz)
 bool xml_node::set_value(const char_t* rhs);
 bool xml_node::set_value(const char_t* rhs, size_t size);
 ----
@@ -1275,6 +1300,7 @@ All attributes have name and value, both of which are strings (value may be empt
 [source]
 ----
 bool xml_attribute::set_name(const char_t* rhs);
+bool xml_attribute::set_name(const char_t* rhs, size_t sz)
 bool xml_attribute::set_value(const char_t* rhs);
 bool xml_attribute::set_value(const char_t* rhs, size_t size);
 ----
@@ -1768,7 +1794,7 @@ include::samples/save_declaration.cpp[tags=code]
 [[xpath]]
 == XPath
 
-If the task at hand is to select a subset of document nodes that match some criteria, it is possible to code a function using the existing traversal functionality for any practical criteria. However, often either a data-driven approach is desirable, in case the criteria are not predefined and come from a file, or it is inconvenient to use traversal interfaces and a higher-level DSL is required. There is a standard language for XML processing, XPath, that can be useful for these cases. pugixml implements an almost complete subset of XPath 1.0. Because of differences in document object model and some performance implications, there are minor violations of the official specifications, which can be found in <<xpath.w3c>>. The rest of this section describes the interface for XPath functionality. Please note that if you wish to learn to use XPath language, you have to look for other tutorials or manuals; for example, you can read http://www.w3schools.com/xpath/[W3Schools XPath tutorial], http://www.tizag.com/xmlTutorial/xpathtutorial.php[XPath tutorial at tizag.com], and http://www.w3.org/TR/xpath/[the XPath 1.0 specification].
+If the task at hand is to select a subset of document nodes that match some criteria, it is possible to code a function using the existing traversal functionality for any practical criteria. However, often either a data-driven approach is desirable, in case the criteria are not predefined and come from a file, or it is inconvenient to use traversal interfaces and a higher-level DSL is required. There is a standard language for XML processing, XPath, that can be useful for these cases. pugixml implements an almost complete subset of XPath 1.0. Because of differences in document object model and some performance implications, there are minor violations of the official specifications, which can be found in <<xpath.w3c>>. The rest of this section describes the interface for XPath functionality. Please note that if you wish to learn to use XPath language, you have to look for other tutorials or manuals; for example, you can read https://www.w3schools.com/xml/xpath_intro.asp[W3Schools XPath tutorial] or https://www.w3.org/TR/xpath-10/[the XPath 1.0 specification].
 
 [[xpath.types]]
 === XPath types
@@ -2140,6 +2166,26 @@ Because of the differences in document object models, performance considerations
 == Changelog
 
 :!numbered:
+
+[[v1.14]]
+=== v1.14 ^2023-10-01^
+
+Maintenance release. Changes:
+
+* Improvements:
+    . `xml_attribute::set_name` and `xml_node::set_name` now have overloads that accept pointer to non-null-terminated string and size
+    . Implement `parse_merge_pcdata` parsing mode in which PCDATA contents is merged into a single node when original document had comments that were skipped during parsing
+    . `xml_document::load_file` now returns a more consistent error status when given a path to a folder
+
+* Bug fixes:
+    . Fix assertion in XPath number->string conversion when using non-English locales
+    . Fix PUGIXML_STATIC_CRT CMake option to correctly select static CRT when using MSVC and recent CMake
+
+* Compatibility improvements:
+    . Fix GCC 2.95/3.3 builds
+    . Fix CMake 3.27 deprecation warnings
+    . Fix XCode 14 sprintf deprecation warning when compiling in C++03 mode
+    . Fix clang/gcc warnings `-Wweak-vtables`, `-Wreserved-macro-identifier`
 
 [[v1.13]]
 === v1.13 ^2022-11-01^
@@ -2777,6 +2823,7 @@ const unsigned int +++<a href="#parse_trim_pcdata">parse_trim_pcdata</a>+++
 const unsigned int +++<a href="#parse_ws_pcdata">parse_ws_pcdata</a>+++
 const unsigned int +++<a href="#parse_ws_pcdata_single">parse_ws_pcdata_single</a>+++
 const unsigned int +++<a href="#parse_embed_pcdata">parse_embed_pcdata</a>+++
+const unsigned int +++<a href="#parse_merge_pcdata">parse_merge_pcdata</a>+++
 const unsigned int +++<a href="#parse_wconv_attribute">parse_wconv_attribute</a>+++
 const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>+++
 ----
@@ -2817,6 +2864,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     unsigned long long +++<a href="#xml_attribute::as_ullong">as_ullong</a>+++(unsigned long long def = 0) const;
 
     bool +++<a href="#xml_attribute::set_name">set_name</a>+++(const char_t* rhs);
+    bool +++<a href="#xml_attribute::set_name">set_name</a>+++(const char_t* rhs, size_t size);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs, size_t size);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(int rhs);
@@ -2877,6 +2925,9 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     xml_attribute +++<a href="#xml_node::attribute">attribute</a>+++(const char_t* name) const;
     xml_node +++<a href="#xml_node::next_sibling_name">next_sibling</a>+++(const char_t* name) const;
     xml_node +++<a href="#xml_node::previous_sibling_name">previous_sibling</a>+++(const char_t* name) const;
+
+    xml_attribute +++<a href="#xml_node::attribute_hinted">attribute</a>+++(const char_t* name, xml_attribute& hint) const;
+
     xml_node +++<a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a>+++(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
     xml_node +++<a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a>+++(const char_t* attr_name, const char_t* attr_value) const;
 
@@ -2904,6 +2955,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     ptrdiff_t +++<a href="#xml_node::offset_debug">offset_debug</a>+++() const;
 
     bool +++<a href="#xml_node::set_name">set_name</a>+++(const char_t* rhs);
+    bool +++<a href="#xml_node::set_name">set_name</a>+++(const char_t* rhs, size_t size);
     bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs);
     bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs, size_t size);
 
