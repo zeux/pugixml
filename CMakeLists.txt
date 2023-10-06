@@ -10,7 +10,6 @@ project(pugixml VERSION 1.14 LANGUAGES CXX)
 include(CMakePackageConfigHelpers)
 include(CMakeDependentOption)
 include(GNUInstallDirs)
-include(CTest)
 
 cmake_dependent_option(PUGIXML_USE_VERSIONED_LIBDIR
   "Use a private subdirectory to install the headers and libraries" OFF
@@ -26,7 +25,7 @@ cmake_dependent_option(PUGIXML_STATIC_CRT
 
 cmake_dependent_option(PUGIXML_BUILD_TESTS
   "Build pugixml tests" OFF
-  "BUILD_TESTING;CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
+  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
 
 # Custom build defines
 set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
@@ -240,6 +239,7 @@ install(
     ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
 
 if (PUGIXML_BUILD_TESTS)
+  include(CTest)
   set(fuzz-pattern "tests/fuzz_*.cpp")
   set(test-pattern "tests/*.cpp")
   if (CMAKE_VERSION VERSION_GREATER 3.11)
