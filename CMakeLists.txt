@@ -25,7 +25,7 @@ cmake_dependent_option(PUGIXML_STATIC_CRT
 
 cmake_dependent_option(PUGIXML_BUILD_TESTS
   "Build pugixml tests" OFF
-  "BUILD_TESTING;CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
+  "CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR" OFF)
 
 # Custom build defines
 set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
