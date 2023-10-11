@@ -42,6 +42,7 @@ cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
 # Expose options from the pugiconfig.hpp
 option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
 option(PUGIXML_COMPACT "Enable compact mode" OFF)
+option(PUGIXML_INSTALL "Enable installation rules" ON)
 
 # Advanced options from pugiconfig.hpp
 option(PUGIXML_NO_XPATH "Disable XPath" OFF)
@@ -193,50 +194,53 @@ endif()
 
 configure_file(scripts/pugixml.pc.in pugixml.pc @ONLY)
 
-if (NOT DEFINED PUGIXML_RUNTIME_COMPONENT)
-  set(PUGIXML_RUNTIME_COMPONENT Runtime)
-endif()
-
-if (NOT DEFINED PUGIXML_LIBRARY_COMPONENT)
-  set(PUGIXML_LIBRARY_COMPONENT Library)
-endif()
-
-if (NOT DEFINED PUGIXML_DEVELOPMENT_COMPONENT)
-  set(PUGIXML_DEVELOPMENT_COMPONENT Development)
-endif()
-
-set(namelink-component)
-if (NOT CMAKE_VERSION VERSION_LESS 3.12)
-  set(namelink-component NAMELINK_COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
-endif()
-install(TARGETS ${install-targets}
-  EXPORT pugixml-targets
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${PUGIXML_RUNTIME_COMPONENT}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_LIBRARY_COMPONENT} ${namelink-component}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT}
-  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir})
-
-install(EXPORT pugixml-targets
+export(TARGETS ${install-targets}
   NAMESPACE pugixml::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  FILE pugixml-targets.cmake)
 
-export(EXPORT pugixml-targets
-  NAMESPACE pugixml::)
+if(PUGIXML_INSTALL)
+  if (NOT DEFINED PUGIXML_RUNTIME_COMPONENT)
+    set(PUGIXML_RUNTIME_COMPONENT Runtime)
+  endif()
 
-install(FILES
-  "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
-  "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  if (NOT DEFINED PUGIXML_LIBRARY_COMPONENT)
+    set(PUGIXML_LIBRARY_COMPONENT Library)
+  endif()
 
-install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  if (NOT DEFINED PUGIXML_DEVELOPMENT_COMPONENT)
+    set(PUGIXML_DEVELOPMENT_COMPONENT Development)
+  endif()
 
-install(
-  FILES
-    "${PROJECT_SOURCE_DIR}/src/pugiconfig.hpp"
-    "${PROJECT_SOURCE_DIR}/src/pugixml.hpp"
-  DESTINATION
-    ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  set(namelink-component)
+  if (NOT CMAKE_VERSION VERSION_LESS 3.12)
+    set(namelink-component NAMELINK_COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  endif()
+  install(TARGETS ${install-targets}
+    EXPORT pugixml-targets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${PUGIXML_RUNTIME_COMPONENT}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_LIBRARY_COMPONENT} ${namelink-component}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir})
+
+  install(EXPORT pugixml-targets
+    NAMESPACE pugixml::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+
+  install(FILES
+    "${PROJECT_BINARY_DIR}/pugixml-config-version.cmake"
+    "${PROJECT_BINARY_DIR}/pugixml-config.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pugixml COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+
+  install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+
+  install(
+    FILES
+      "${PROJECT_SOURCE_DIR}/src/pugiconfig.hpp"
+      "${PROJECT_SOURCE_DIR}/src/pugixml.hpp"
+    DESTINATION
+      ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+endif()
 
 if (PUGIXML_BUILD_TESTS)
   include(CTest)
