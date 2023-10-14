@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <limits.h>
 
-
 #ifdef PUGIXML_WCHAR_MODE
 #	include <wchar.h>
 #endif
@@ -2626,7 +2625,7 @@ PUGI_IMPL_NS_BEGIN
 	#define PUGI_IMPL_SCANWHILE(X)          { while (X) ++s; }
 	#define PUGI_IMPL_SCANWHILE_UNROLL(X)   { for (;;) { char_t ss = s[0]; if (PUGI_IMPL_UNLIKELY(!(X))) { break; } ss = s[1]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 1; break; } ss = s[2]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 2; break; } ss = s[3]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 3; break; } s += 4; } }
 	#define PUGI_IMPL_ENDSEG()              { ch = *s; *s = 0; ++s; }
-	#define PUGI_IMPL_THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(0)
+	#define PUGI_IMPL_THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(PUGIXML_NULL)
 	#define PUGI_IMPL_CHECK_ERROR(err, m)   { if (*s == 0) PUGI_IMPL_THROW_ERROR(err, m); }
 
 	PUGI_IMPL_FN char_t* strconv_comment(char_t* s, char_t endch)
@@ -8096,12 +8095,12 @@ PUGI_IMPL_NS_BEGIN
 			}
 		}
 
-		 const char_t* c_str() const
+        const char_t* c_str() const
 		{
 			return _buffer;
 		}
 
-		 size_t length() const
+        size_t length() const
 		{
 			return _uses_heap ? _length_heap : strlength(_buffer);
 		}
@@ -8124,7 +8123,7 @@ PUGI_IMPL_NS_BEGIN
 			return const_cast<char_t*>(_buffer);
 		}
 
-		 bool empty() const
+        bool empty() const
 		{
 			return *_buffer == 0;
 		}
