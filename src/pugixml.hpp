@@ -36,6 +36,7 @@
 #	include <iterator>
 #	include <iosfwd>
 #	include <string>
+#	include <string_view>
 #endif
 
 // Macro for deprecated features
@@ -139,6 +140,7 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string<PUGIXML_CHAR, std::char_traits<PUGIXML_CHAR>, std::allocator<PUGIXML_CHAR> > string_t;
+	typedef std::basic_string_view<PUGIXML_CHAR> string_view_t;
 #endif
 }
 
@@ -425,6 +427,7 @@ namespace pugi
 		bool set_name(const char_t* rhs, size_t size);
 		bool set_value(const char_t* rhs);
 		bool set_value(const char_t* rhs, size_t size);
+		bool set_value(string_view_t rhs);
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set_value(int rhs);
@@ -543,8 +546,10 @@ namespace pugi
 
 		// Get child, attribute or next/previous sibling with the specified name
 		xml_node child(const char_t* name) const;
+		xml_node child(const string_t& name) const;
 		xml_attribute attribute(const char_t* name) const;
 		xml_node next_sibling(const char_t* name) const;
+		xml_node next_sibling(const string_t& name) const;
 		xml_node previous_sibling(const char_t* name) const;
 
 		// Get attribute, starting the search from a hint (and updating hint so that searching for a sequence of attributes is fast)
@@ -564,6 +569,7 @@ namespace pugi
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_attribute(const char_t* name);
+		xml_attribute append_attribute(const string_t& name);
 		xml_attribute prepend_attribute(const char_t* name);
 		xml_attribute insert_attribute_after(const char_t* name, const xml_attribute& attr);
 		xml_attribute insert_attribute_before(const char_t* name, const xml_attribute& attr);
@@ -582,6 +588,7 @@ namespace pugi
 
 		// Add child element with specified name. Returns added node, or empty node on errors.
 		xml_node append_child(const char_t* name);
+		xml_node append_child(const string_t& name);
 		xml_node prepend_child(const char_t* name);
 		xml_node insert_child_after(const char_t* name, const xml_node& node);
 		xml_node insert_child_before(const char_t* name, const xml_node& node);
@@ -719,6 +726,7 @@ namespace pugi
 		// Range-based for support
 		xml_object_range<xml_node_iterator> children() const;
 		xml_object_range<xml_attribute_iterator> attributes() const;
+		xml_object_range<xml_named_node_iterator> children(const string_t& name) const;
 
 		// Range-based for support for all children with the specified name
 		// Note: name pointer must have a longer lifetime than the returned object; be careful with passing temporaries!
@@ -1081,6 +1089,7 @@ namespace pugi
 
 		// Load document from zero-terminated string. No encoding conversions are applied.
 		xml_parse_result load_string(const char_t* contents, unsigned int options = parse_default);
+		xml_parse_result load_string(string_view_t contents, unsigned int options = parse_default);
 
 		// Load document from file
 		xml_parse_result load_file(const char* path, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);

@@ -5440,6 +5440,11 @@ namespace pugi
 		return impl::strcpy_insitu(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, size);
 	}
 
+	PUGI_IMPL_FN bool xml_attribute::set_value(string_view_t rhs)
+	{
+		return set_value(rhs.data(), rhs.size());
+	}
+
 	PUGI_IMPL_FN bool xml_attribute::set_value(int rhs)
 	{
 		if (!_attr) return false;
@@ -5588,6 +5593,11 @@ namespace pugi
 		return xml_object_range<xml_attribute_iterator>(attributes_begin(), attributes_end());
 	}
 
+	PUGI_IMPL_FN xml_object_range<xml_named_node_iterator> xml_node::children(const string_t& name) const
+	{
+		return children(name.c_str());
+	}
+
 	PUGI_IMPL_FN bool xml_node::operator==(const xml_node& r) const
 	{
 		return (_root == r._root);
@@ -5656,6 +5666,11 @@ namespace pugi
 		return xml_node();
 	}
 
+	PUGI_IMPL_FN xml_node xml_node::child(const string_t& name) const
+	{
+		return child(name.c_str());
+	}
+
 	PUGI_IMPL_FN xml_attribute xml_node::attribute(const char_t* name_) const
 	{
 		if (!_root) return xml_attribute();
@@ -5682,6 +5697,11 @@ namespace pugi
 		}
 
 		return xml_node();
+	}
+
+	PUGI_IMPL_FN xml_node xml_node::next_sibling(const string_t& name) const
+	{
+		return next_sibling(name.c_str());
 	}
 
 	PUGI_IMPL_FN xml_node xml_node::next_sibling() const
@@ -5868,6 +5888,11 @@ namespace pugi
 		a.set_name(name_);
 
 		return a;
+	}
+
+	PUGI_IMPL_FN xml_attribute xml_node::append_attribute(const pugi::string_t& name)
+	{
+		return append_attribute(name.c_str());
 	}
 
 	PUGI_IMPL_FN xml_attribute xml_node::prepend_attribute(const char_t* name_)
@@ -6070,6 +6095,11 @@ namespace pugi
 		result.set_name(name_);
 
 		return result;
+	}
+
+	PUGI_IMPL_FN xml_node xml_node::append_child(const string_t& name)
+	{
+		return append_child(name.c_str());
 	}
 
 	PUGI_IMPL_FN xml_node xml_node::prepend_child(const char_t* name_)
@@ -7393,6 +7423,18 @@ namespace pugi
 	#endif
 
 		return load_buffer(contents, impl::strlength(contents) * sizeof(char_t), options, encoding);
+	}
+
+	PUGI_IMPL_FN xml_parse_result xml_document::load_string(string_view_t contents, unsigned int options)
+	{
+		// Force native encoding (skip autodetection)
+	#ifdef PUGIXML_WCHAR_MODE
+		xml_encoding encoding = encoding_wchar;
+	#else
+		xml_encoding encoding = encoding_utf8;
+	#endif
+
+		return load_buffer(contents.data(), contents.size() * sizeof(char_t), options, encoding);
 	}
 
 	PUGI_IMPL_FN xml_parse_result xml_document::load(const char_t* contents, unsigned int options)
