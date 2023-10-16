@@ -5048,8 +5048,8 @@ PUGI_IMPL_NS_BEGIN
 	PUGI_IMPL_FN FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
 	{
 #if defined(PUGI_IMPL_MSVC_CRT_VERSION) && PUGI_IMPL_MSVC_CRT_VERSION >= 1400
-		FILE* file = 0;
-		return _wfopen_s(&file, path, mode) == 0 ? file : 0;
+		FILE* file = NULL;
+		return _wfopen_s(&file, path, mode) == 0 ? file : NULL;
 #else
 		return _wfopen(path, mode);
 #endif
@@ -5099,8 +5099,8 @@ PUGI_IMPL_NS_BEGIN
 	PUGI_IMPL_FN FILE* open_file(const char* path, const char* mode)
 	{
 #if defined(PUGI_IMPL_MSVC_CRT_VERSION) && PUGI_IMPL_MSVC_CRT_VERSION >= 1400
-		FILE* file = 0;
-		return fopen_s(&file, path, mode) == 0 ? file : 0;
+		FILE* file = NULL;
+		return fopen_s(&file, path, mode) == 0 ? file : NULL;
 #else
 		return fopen(path, mode);
 #endif
