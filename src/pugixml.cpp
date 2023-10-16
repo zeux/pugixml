@@ -53,6 +53,11 @@
 #	pragma warning(disable: 4996) // this function or variable may be unsafe
 #endif
 
+#if defined(__clang__)
+#	pragma clang diagnostic push
+#	pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant" // NULL as null pointer constant
+#endif
+
 #if defined(_MSC_VER) && defined(__c2__)
 #	pragma clang diagnostic push
 #	pragma clang diagnostic ignored "-Wdeprecated" // this function or variable may be unsafe
@@ -13157,14 +13162,18 @@ namespace pugi
 #	pragma option pop
 #endif
 
+#if defined(_MSC_VER) && defined(__c2__)
+#	pragma clang diagnostic pop
+#endif
+
+#if defined(__clang__)
+#	pragma clang diagnostic pop
+#endif
+
 // Intel C++ does not properly keep warning state for function templates,
 // so popping warning state at the end of translation unit leads to warnings in the middle.
 #if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
 #	pragma warning(pop)
-#endif
-
-#if defined(_MSC_VER) && defined(__c2__)
-#	pragma clang diagnostic pop
 #endif
 
 // Undefine all local macros (makes sure we're not leaking macros in header-only mode)
