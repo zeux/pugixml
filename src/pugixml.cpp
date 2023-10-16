@@ -304,7 +304,7 @@ PUGI_IMPL_NS_BEGIN
 	class compact_hash_table
 	{
 	public:
-		compact_hash_table(): _items(0), _capacity(0), _count(0)
+		compact_hash_table(): _items(NULL), _capacity(0), _count(0)
 		{
 		}
 
@@ -313,7 +313,7 @@ PUGI_IMPL_NS_BEGIN
 			if (_items)
 			{
 				xml_memory::deallocate(_items);
-				_items = 0;
+				_items = NULL;
 				_capacity = 0;
 				_count = 0;
 			}
@@ -321,11 +321,11 @@ PUGI_IMPL_NS_BEGIN
 
 		void* find(const void* key)
 		{
-			if (_capacity == 0) return 0;
+			if (_capacity == 0) return NULL;
 
 			item_t* item = get_item(key);
 			assert(item);
-			assert(item->key == key || (item->key == 0 && item->value == 0));
+			assert(item->key == key || (item->key == NULL && item->value == NULL));
 
 			return item->value;
 		}
@@ -337,7 +337,7 @@ PUGI_IMPL_NS_BEGIN
 			item_t* item = get_item(key);
 			assert(item);
 
-			if (item->key == 0)
+			if (item->key == NULL)
 			{
 				_count++;
 				item->key = key;
@@ -380,7 +380,7 @@ PUGI_IMPL_NS_BEGIN
 			{
 				item_t& probe_item = _items[bucket];
 
-				if (probe_item.key == key || probe_item.key == 0)
+				if (probe_item.key == key || probe_item.key == NULL)
 					return &probe_item;
 
 				// hash collision, quadratic probing
@@ -388,7 +388,7 @@ PUGI_IMPL_NS_BEGIN
 			}
 
 			assert(false && "Hash table is full"); // unreachable
-			return 0;
+			return NULL;
 		}
 
 		static PUGI_IMPL_UNSIGNED_OVERFLOW unsigned int hash(const void* key)
@@ -483,9 +483,9 @@ PUGI_IMPL_NS_BEGIN
 			result->freed_size = 0;
 
 		#ifdef PUGIXML_COMPACT
-			result->compact_string_base = 0;
-			result->compact_shared_parent = 0;
-			result->compact_page_marker = 0;
+			result->compact_string_base = NULL;
+			result->compact_shared_parent = NULL;
+			result->compact_page_marker = NULL;
 		#endif
 
 			return result;
@@ -525,7 +525,7 @@ PUGI_IMPL_NS_BEGIN
 		xml_allocator(xml_memory_page* root): _root(root), _busy_size(root->busy_size)
 		{
 		#ifdef PUGIXML_COMPACT
-			_hash = 0;
+			_hash = NULL;
 		#endif
 		}
 
@@ -572,7 +572,7 @@ PUGI_IMPL_NS_BEGIN
 		void* allocate_object(size_t size, xml_memory_page*& out_page)
 		{
 			void* result = allocate_memory(size + sizeof(uint32_t), out_page);
-			if (!result) return 0;
+			if (!result) return NULL;
 
 			// adjust for marker
 			ptrdiff_t offset = static_cast<char*>(result) - reinterpret_cast<char*>(out_page->compact_page_marker);
@@ -628,9 +628,9 @@ PUGI_IMPL_NS_BEGIN
 
 				#ifdef PUGIXML_COMPACT
 					// reset compact state to maximize efficiency
-					page->compact_string_base = 0;
-					page->compact_shared_parent = 0;
-					page->compact_page_marker = 0;
+					page->compact_string_base = NULL;
+					page->compact_shared_parent = NULL;
+					page->compact_page_marker = NULL;
 				#endif
 
 					_busy_size = 0;
@@ -874,7 +874,7 @@ PUGI_IMPL_NS_BEGIN
 					return compact_get_value<header_offset, T>(this);
 			}
 			else
-				return 0;
+				return NULL;
 		}
 
 		T* operator->() const
@@ -917,7 +917,7 @@ PUGI_IMPL_NS_BEGIN
 				{
 					xml_memory_page* page = compact_get_page(this, header_offset);
 
-					if (PUGI_IMPL_UNLIKELY(page->compact_shared_parent == 0))
+					if (PUGI_IMPL_UNLIKELY(page->compact_shared_parent == NULL))
 						page->compact_shared_parent = value;
 
 					if (page->compact_shared_parent == value)
@@ -954,7 +954,7 @@ PUGI_IMPL_NS_BEGIN
 					return compact_get_value<header_offset, T>(this);
 			}
 			else
-				return 0;
+				return NULL;
 		}
 
 		T* operator->() const
@@ -984,7 +984,7 @@ PUGI_IMPL_NS_BEGIN
 			{
 				xml_memory_page* page = compact_get_page(this, header_offset);
 
-				if (PUGI_IMPL_UNLIKELY(page->compact_string_base == 0))
+				if (PUGI_IMPL_UNLIKELY(page->compact_string_base == NULL))
 					page->compact_string_base = value;
 
 				ptrdiff_t offset = value - page->compact_string_base;
@@ -1050,7 +1050,7 @@ PUGI_IMPL_NS_BEGIN
 				}
 			}
 			else
-				return 0;
+				return NULL;
 		}
 
 	private:
@@ -4639,7 +4639,7 @@ PUGI_IMPL_NS_BEGIN
 	PUGI_IMPL_FN double get_value_double(const char_t* value)
 	{
 	#ifdef PUGIXML_WCHAR_MODE
-		return wcstod(value, 0);
+		return wcstod(value, NULL);
 	#else
 		return strtod(value, NULL);
 	#endif
@@ -4648,7 +4648,7 @@ PUGI_IMPL_NS_BEGIN
 	PUGI_IMPL_FN float get_value_float(const char_t* value)
 	{
 	#ifdef PUGIXML_WCHAR_MODE
-		return static_cast<float>(wcstod(value, 0));
+		return static_cast<float>(wcstod(value, NULL));
 	#else
 		return static_cast<float>(strtod(value, NULL));
 	#endif
@@ -7308,7 +7308,7 @@ namespace pugi
 		doc->_hash = &doc->hash;
 
 		// make sure we don't access other hash up until the end when we reinitialize other document
-		other->_hash = 0;
+		other->_hash = NULL;
 	#endif
 
 		// move page structure
@@ -8616,7 +8616,7 @@ PUGI_IMPL_NS_BEGIN
 
 		// parse string
 	#ifdef PUGIXML_WCHAR_MODE
-		return wcstod(string, 0);
+		return wcstod(string, NULL);
 	#else
 		return strtod(string, NULL);
 	#endif
