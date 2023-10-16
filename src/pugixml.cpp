@@ -8100,12 +8100,12 @@ PUGI_IMPL_NS_BEGIN
 			}
 		}
 
-        const char_t* c_str() const
+		const char_t* c_str() const
 		{
 			return _buffer;
 		}
 
-        size_t length() const
+		size_t length() const
 		{
 			return _uses_heap ? _length_heap : strlength(_buffer);
 		}
@@ -8128,7 +8128,7 @@ PUGI_IMPL_NS_BEGIN
 			return const_cast<char_t*>(_buffer);
 		}
 
-        bool empty() const
+		bool empty() const
 		{
 			return *_buffer == 0;
 		}
