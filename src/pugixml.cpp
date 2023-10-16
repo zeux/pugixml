@@ -247,6 +247,16 @@ PUGI_IMPL_NS_BEGIN
 	#endif
 	}
 
+	// Compare lhs (0 terminated) with [rhs_begin, rhs_end)
+	PUGI_IMPL_FN bool strequal(const char_t* lhs, const char_t* rhs, size_t count)
+	{
+		for (size_t i = 0; i < count; ++i)
+			if (lhs[i] == 0 || lhs[i] != rhs[i])
+				return false;
+
+		return lhs[count] == 0;
+	}
+
 	// Compare lhs with [rhs_begin, rhs_end)
 	PUGI_IMPL_FN bool strequalrange(const char_t* lhs, const char_t* rhs, size_t count)
 	{
@@ -5656,6 +5666,20 @@ namespace pugi
 		return xml_node();
 	}
 
+	PUGI_IMPL_FN xml_node xml_node::child(const char_t* name_, size_t sz) const
+	{
+		if (!_root) return xml_node();
+
+		for (xml_node_struct* i = _root->first_child; i; i = i->next_sibling)
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(iname, name_, sz))
+				return xml_node(i);
+		}
+
+		return xml_node();
+	}
+
 	PUGI_IMPL_FN xml_attribute xml_node::attribute(const char_t* name_) const
 	{
 		if (!_root) return xml_attribute();
@@ -5664,6 +5688,20 @@ namespace pugi
 		{
 			const char_t* iname = i->name;
 			if (iname && impl::strequal(name_, iname))
+				return xml_attribute(i);
+		}
+
+		return xml_attribute();
+	}
+
+	PUGI_IMPL_FN xml_attribute xml_node::attribute(const char_t* name_, size_t sz) const
+	{
+		if (!_root) return xml_attribute();
+
+		for (xml_attribute_struct* i = _root->first_attribute; i; i = i->next_attribute)
+		{
+			const char_t* iname = i->name;
+			if (iname && impl::strequal(iname, name_, sz))
 				return xml_attribute(i);
 		}
 
@@ -5870,6 +5908,23 @@ namespace pugi
 		return a;
 	}
 
+	PUGI_IMPL_FN xml_attribute xml_node::append_attribute(const char_t* name_, size_t sz)
+	{
+		if (!impl::allow_insert_attribute(type())) return xml_attribute();
+
+		impl::xml_allocator& alloc = impl::get_allocator(_root);
+		if (!alloc.reserve()) return xml_attribute();
+
+		xml_attribute a(impl::allocate_attribute(alloc));
+		if (!a) return xml_attribute();
+
+		impl::append_attribute(a._attr, _root);
+
+		a.set_name(name_, sz);
+
+		return a;
+	}
+
 	PUGI_IMPL_FN xml_attribute xml_node::prepend_attribute(const char_t* name_)
 	{
 		if (!impl::allow_insert_attribute(type())) return xml_attribute();
@@ -6068,6 +6123,16 @@ namespace pugi
 		xml_node result = append_child(node_element);
 
 		result.set_name(name_);
+
+		return result;
+	}
+
+
+	PUGI_IMPL_FN xml_node xml_node::append_child(const char_t* name_, size_t sz)
+	{
+		xml_node result = append_child(node_element);
+
+		result.set_name(name_, sz);
 
 		return result;
 	}
