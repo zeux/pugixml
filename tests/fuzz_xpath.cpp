@@ -31,11 +31,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size)
 		pugi::xml_document doc;
 		doc.load_buffer(xml_buffer.data(), xml_buffer.size(), pugi::parse_full);
 
-		bool boolean = q.evaluate_boolean(doc);
-		double num = q.evaluate_number(doc);
-		pugi::string_t s = q.evaluate_string(doc);
-		pugi::xpath_node n = q.evaluate_node(doc);
-		pugi::xpath_node_set set = q.evaluate_node_set(doc);
+		q.evaluate_boolean(doc);
+		q.evaluate_number(doc);
+		q.evaluate_string(doc);
+		q.evaluate_node(doc);
+		q.evaluate_node_set(doc);
 	}
 #ifndef PUGIXML_NO_EXCEPTIONS
 	catch (pugi::xpath_exception&)
