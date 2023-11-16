@@ -45,7 +45,7 @@ foreach ($vs in $args)
 			Add-AppveyorTest $target -Outcome Running
 
 			Write-Output "# Building $target.exe"
-			& cmd /c "cl.exe /Fe$target.exe /EHsc /W4 /WX $deflist $sources 2>&1" | Tee-Object -Variable buildOutput
+			& cmd /c "cl.exe /MP /Fe$target.exe /EHsc /W4 /WX $deflist $sources 2>&1" | Tee-Object -Variable buildOutput
 
 			if ($?)
 			{
