@@ -573,7 +573,8 @@ TEST_XML(xpath_api_nodeset_move_assign_self, "<node><foo/><foo/><bar/></node>")
 
 	test_runner::_memory_fail_threshold = 1;
 
-	set = std::move(*&set);
+	xpath_node_set* self = &set;
+	set = std::move(*self);
 }
 
 TEST(xpath_api_query_move)
@@ -614,7 +615,8 @@ TEST(xpath_api_query_move)
 	CHECK(q4);
 	CHECK(q4.evaluate_boolean(c));
 
-	q4 = std::move(*&q4);
+	xpath_query* q4self = &q4;
+	q4 = std::move(*q4self);
 
 	CHECK(q4);
 	CHECK(q4.evaluate_boolean(c));
