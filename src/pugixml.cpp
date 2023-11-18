@@ -1114,7 +1114,7 @@ namespace pugi
 {
 	struct xml_attribute_struct
 	{
-		xml_attribute_struct(impl::xml_memory_page* page): name(NULL), value(NULL), prev_attribute_c(NULL), next_attribute(NULL)
+		xml_attribute_struct(impl::xml_memory_page* page): header(), name(NULL), value(NULL), prev_attribute_c(NULL), next_attribute(NULL)
 		{
 			header = PUGI_IMPL_GETHEADER_IMPL(this, page, 0);
 		}
@@ -1130,7 +1130,7 @@ namespace pugi
 
 	struct xml_node_struct
 	{
-		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): name(NULL), value(NULL), parent(NULL), first_child(NULL), prev_sibling_c(NULL), next_sibling(NULL), first_attribute(NULL)
+		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(), name(NULL), value(NULL), parent(NULL), first_child(NULL), prev_sibling_c(NULL), next_sibling(NULL), first_attribute(NULL)
 		{
 			header = PUGI_IMPL_GETHEADER_IMPL(this, page, type);
 		}
@@ -1956,7 +1956,7 @@ PUGI_IMPL_NS_BEGIN
 	#define PUGI_IMPL_SCANCHARTYPE(ct) { while (offset < size && PUGI_IMPL_IS_CHARTYPE(data[offset], ct)) offset++; }
 
 		// check if we have a non-empty XML declaration
-		if (size < 6 || !((data[0] == '<') & (data[1] == '?') & (data[2] == 'x') & (data[3] == 'm') & (data[4] == 'l') && PUGI_IMPL_IS_CHARTYPE(data[5], ct_space)))
+		if (size < 6 || !((data[0] == '<') && (data[1] == '?') && (data[2] == 'x') && (data[3] == 'm') && (data[4] == 'l') && PUGI_IMPL_IS_CHARTYPE(data[5], ct_space)))
 			return false;
 
 		// scan XML declaration until the encoding field
@@ -3750,7 +3750,7 @@ PUGI_IMPL_NS_BEGIN
 		xml_buffered_writer& operator=(const xml_buffered_writer&);
 
 	public:
-		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
+		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): buffer(), scratch(), writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
 		{
 			PUGI_IMPL_STATIC_ASSERT(bufcapacity >= 8);
 		}
@@ -3862,7 +3862,7 @@ PUGI_IMPL_NS_BEGIN
 		void write(char_t d0)
 		{
 			size_t offset = bufsize;
-			if (offset > bufcapacity - 1) offset = flush();
+			if (offset > static_cast<size_t>(bufcapacity) - 1) offset = flush();
 
 			buffer[offset + 0] = d0;
 			bufsize = offset + 1;
@@ -3871,7 +3871,7 @@ PUGI_IMPL_NS_BEGIN
 		void write(char_t d0, char_t d1)
 		{
 			size_t offset = bufsize;
-			if (offset > bufcapacity - 2) offset = flush();
+			if (offset > static_cast<size_t>(bufcapacity) - 2) offset = flush();
 
 			buffer[offset + 0] = d0;
 			buffer[offset + 1] = d1;
@@ -3881,7 +3881,7 @@ PUGI_IMPL_NS_BEGIN
 		void write(char_t d0, char_t d1, char_t d2)
 		{
 			size_t offset = bufsize;
-			if (offset > bufcapacity - 3) offset = flush();
+			if (offset > static_cast<size_t>(bufcapacity) - 3) offset = flush();
 
 			buffer[offset + 0] = d0;
 			buffer[offset + 1] = d1;
@@ -3892,7 +3892,7 @@ PUGI_IMPL_NS_BEGIN
 		void write(char_t d0, char_t d1, char_t d2, char_t d3)
 		{
 			size_t offset = bufsize;
-			if (offset > bufcapacity - 4) offset = flush();
+			if (offset > static_cast<size_t>(bufcapacity) - 4) offset = flush();
 
 			buffer[offset + 0] = d0;
 			buffer[offset + 1] = d1;
@@ -3904,7 +3904,7 @@ PUGI_IMPL_NS_BEGIN
 		void write(char_t d0, char_t d1, char_t d2, char_t d3, char_t d4)
 		{
 			size_t offset = bufsize;
-			if (offset > bufcapacity - 5) offset = flush();
+			if (offset > static_cast<size_t>(bufcapacity) - 5) offset = flush();
 
 			buffer[offset + 0] = d0;
 			buffer[offset + 1] = d1;
@@ -3917,7 +3917,7 @@ PUGI_IMPL_NS_BEGIN
 		void write(char_t d0, char_t d1, char_t d2, char_t d3, char_t d4, char_t d5)
 		{
 			size_t offset = bufsize;
-			if (offset > bufcapacity - 6) offset = flush();
+			if (offset > static_cast<size_t>(bufcapacity) - 6) offset = flush();
 
 			buffer[offset + 0] = d0;
 			buffer[offset + 1] = d1;
@@ -4521,7 +4521,8 @@ PUGI_IMPL_NS_BEGIN
 				}
 
 				sit = sit->parent;
-				dit = dit->parent;
+				if (dit)
+					dit = dit->parent;
 
 				// loop invariant: dit is inside the subtree rooted at dn while sit is inside sn
 				assert(sit == sn || dit);
@@ -4720,7 +4721,7 @@ PUGI_IMPL_NS_BEGIN
 	template <typename U, typename String, typename Header>
 	PUGI_IMPL_FN bool set_value_integer(String& dest, Header& header, uintptr_t header_mask, U value, bool negative)
 	{
-		char_t buf[64];
+		char_t buf[64] = "";
 		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
 		char_t* begin = integer_to_string(buf, end, value, negative);
 
@@ -4923,7 +4924,7 @@ PUGI_IMPL_NS_BEGIN
 			}
 		}
 
-		xml_stream_chunk(): next(NULL), size(0)
+		xml_stream_chunk(): next(NULL), size(0), data()
 		{
 		}
 
@@ -7757,7 +7758,8 @@ PUGI_IMPL_NS_BEGIN
 			I median = median3(begin, middle, end - 1, pred);
 
 			// partition in three chunks (< = >)
-			I eqbeg, eqend;
+			I eqbeg = I();
+			I eqend = I();
 			partition3(begin, end, *median, pred, &eqbeg, &eqend);
 
 			// loop on larger half
@@ -7950,7 +7952,7 @@ PUGI_IMPL_NS_BEGIN
 			_root_size = state._root_size;
 		}
 
-		void release()
+		void release() const
 		{
 			xpath_memory_block* cur = _root;
 			assert(cur);
@@ -8405,9 +8407,11 @@ PUGI_IMPL_NS_BEGIN
 	#if defined(__STDC_IEC_559__) || ((FLT_RADIX - 0 == 2) && (FLT_MAX_EXP - 0 == 128) && (FLT_MANT_DIG - 0 == 24))
 		PUGI_IMPL_STATIC_ASSERT(sizeof(float) == sizeof(uint32_t));
 		typedef uint32_t UI; // BCC5 workaround
-		union { float f; UI i; } u;
-		u.i = 0x7fc00000;
-		return double(u.f);
+		UI i = 0x7fc00000;
+		float f = 0.0f;
+		// using memcpy to avoid undefined behavior of union type punning.
+		std::memcpy(&f, &i, sizeof(UI));
+		return static_cast<double>(f);
 	#else
 		// fallback
 		const volatile double zero = 0.0;
@@ -8529,6 +8533,9 @@ PUGI_IMPL_NS_BEGIN
 		char* mantissa;
 		int exponent;
 		convert_number_to_mantissa_exponent(value, mantissa_buffer, &mantissa, &exponent);
+
+		// Ensure null termination for safe use of strlen
+		mantissa_buffer[sizeof(mantissa_buffer) - 1] = '\0';
 
 		// allocate a buffer of suitable length for the number
 		size_t result_size = strlen(mantissa_buffer) + (exponent > 0 ? exponent : -exponent) + 4;
@@ -8862,7 +8869,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_boolean: xpath_variable
 	{
-		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false)
+		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false), name("")
 		{
 		}
 
@@ -8872,7 +8879,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_number: xpath_variable
 	{
-		xpath_variable_number(): xpath_variable(xpath_type_number), value(0)
+		xpath_variable_number(): xpath_variable(xpath_type_number), value(0), name("")
 		{
 		}
 
@@ -8882,7 +8889,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_string: xpath_variable
 	{
-		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL)
+		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL), name("")
 		{
 		}
 
@@ -8897,7 +8904,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_node_set: xpath_variable
 	{
-		xpath_variable_node_set(): xpath_variable(xpath_type_node_set)
+		xpath_variable_node_set(): xpath_variable(xpath_type_node_set), name("")
 		{
 		}
 
@@ -10167,7 +10174,7 @@ PUGI_IMPL_NS_BEGIN
 			case axis_attribute:
 			{
 				for (xml_attribute_struct* a = n->first_attribute; a; a = a->next_attribute)
-					if (step_push(ns, a, n, alloc) & once)
+					if (step_push(ns, a, n, alloc) && once)
 						return;
 
 				break;
@@ -10176,7 +10183,7 @@ PUGI_IMPL_NS_BEGIN
 			case axis_child:
 			{
 				for (xml_node_struct* c = n->first_child; c; c = c->next_sibling)
-					if (step_push(ns, c, alloc) & once)
+					if (step_push(ns, c, alloc) && once)
 						return;
 
 				break;
@@ -10186,14 +10193,14 @@ PUGI_IMPL_NS_BEGIN
 			case axis_descendant_or_self:
 			{
 				if (axis == axis_descendant_or_self)
-					if (step_push(ns, n, alloc) & once)
+					if (step_push(ns, n, alloc) && once)
 						return;
 
 				xml_node_struct* cur = n->first_child;
 
 				while (cur)
 				{
-					if (step_push(ns, cur, alloc) & once)
+					if (step_push(ns, cur, alloc) && once)
 						return;
 
 					if (cur->first_child)
@@ -10217,7 +10224,7 @@ PUGI_IMPL_NS_BEGIN
 			case axis_following_sibling:
 			{
 				for (xml_node_struct* c = n->next_sibling; c; c = c->next_sibling)
-					if (step_push(ns, c, alloc) & once)
+					if (step_push(ns, c, alloc) && once)
 						return;
 
 				break;
@@ -10226,7 +10233,7 @@ PUGI_IMPL_NS_BEGIN
 			case axis_preceding_sibling:
 			{
 				for (xml_node_struct* c = n->prev_sibling_c; c->next_sibling; c = c->prev_sibling_c)
-					if (step_push(ns, c, alloc) & once)
+					if (step_push(ns, c, alloc) && once)
 						return;
 
 				break;
@@ -10248,7 +10255,7 @@ PUGI_IMPL_NS_BEGIN
 
 				while (cur)
 				{
-					if (step_push(ns, cur, alloc) & once)
+					if (step_push(ns, cur, alloc) && once)
 						return;
 
 					if (cur->first_child)
@@ -10290,7 +10297,7 @@ PUGI_IMPL_NS_BEGIN
 					else
 					{
 						// leaf node, can't be ancestor
-						if (step_push(ns, cur, alloc) & once)
+						if (step_push(ns, cur, alloc) && once)
 							return;
 
 						while (!cur->prev_sibling_c->next_sibling)
@@ -10300,7 +10307,7 @@ PUGI_IMPL_NS_BEGIN
 							if (!cur) return;
 
 							if (!node_is_ancestor(cur, n))
-								if (step_push(ns, cur, alloc) & once)
+								if (step_push(ns, cur, alloc) && once)
 									return;
 						}
 
@@ -10315,14 +10322,14 @@ PUGI_IMPL_NS_BEGIN
 			case axis_ancestor_or_self:
 			{
 				if (axis == axis_ancestor_or_self)
-					if (step_push(ns, n, alloc) & once)
+					if (step_push(ns, n, alloc) && once)
 						return;
 
 				xml_node_struct* cur = n->parent;
 
 				while (cur)
 				{
-					if (step_push(ns, cur, alloc) & once)
+					if (step_push(ns, cur, alloc) && once)
 						return;
 
 					cur = cur->parent;
@@ -10361,14 +10368,14 @@ PUGI_IMPL_NS_BEGIN
 			case axis_ancestor_or_self:
 			{
 				if (axis == axis_ancestor_or_self && _test == nodetest_type_node) // reject attributes based on principal node type test
-					if (step_push(ns, a, p, alloc) & once)
+					if (step_push(ns, a, p, alloc) && once)
 						return;
 
 				xml_node_struct* cur = p;
 
 				while (cur)
 				{
-					if (step_push(ns, cur, alloc) & once)
+					if (step_push(ns, cur, alloc) && once)
 						return;
 
 					cur = cur->parent;
@@ -10406,7 +10413,7 @@ PUGI_IMPL_NS_BEGIN
 						cur = cur->next_sibling;
 					}
 
-					if (step_push(ns, cur, alloc) & once)
+					if (step_push(ns, cur, alloc) && once)
 						return;
 				}
 
@@ -10513,7 +10520,7 @@ PUGI_IMPL_NS_BEGIN
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_value_type rettype_, xpath_ast_node* left = NULL, xpath_ast_node* right = NULL):
-			_type(static_cast<char>(type)), _rettype(static_cast<char>(rettype_)), _axis(0), _test(0), _left(left), _right(right), _next(NULL)
+			_type(static_cast<char>(type)), _rettype(static_cast<char>(rettype_)), _axis(0), _test(0), _left(left), _right(right), _next(NULL), _data()
 		{
 		}
 
@@ -10525,7 +10532,7 @@ PUGI_IMPL_NS_BEGIN
 		}
 
 		xpath_ast_node(ast_type_t type, xpath_ast_node* left, xpath_ast_node* right, predicate_t test):
-			_type(static_cast<char>(type)), _rettype(xpath_type_node_set), _axis(0), _test(static_cast<char>(test)), _left(left), _right(right), _next(NULL)
+			_type(static_cast<char>(type)), _rettype(xpath_type_node_set), _axis(0), _test(static_cast<char>(test)), _left(left), _right(right), _next(NULL), _data()
 		{
 			assert(type == ast_filter || type == ast_predicate);
 		}
@@ -12296,7 +12303,8 @@ PUGI_IMPL_NS_BEGIN
 			return n;
 		}
 
-		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): _alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result), _depth(0)
+		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): 
+			_alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result), _scratch(), _depth(0)
 		{
 		}
 
