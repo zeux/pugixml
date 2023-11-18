@@ -4721,7 +4721,7 @@ PUGI_IMPL_NS_BEGIN
 	template <typename U, typename String, typename Header>
 	PUGI_IMPL_FN bool set_value_integer(String& dest, Header& header, uintptr_t header_mask, U value, bool negative)
 	{
-		char_t buf[64] = "";
+		char_t buf[64]{};
 		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
 		char_t* begin = integer_to_string(buf, end, value, negative);
 
@@ -8410,7 +8410,7 @@ PUGI_IMPL_NS_BEGIN
 		UI i = 0x7fc00000;
 		float f = 0.0f;
 		// using memcpy to avoid undefined behavior of union type punning.
-		std::memcpy(&f, &i, sizeof(UI));
+		memcpy(&f, &i, sizeof(UI));
 		return static_cast<double>(f);
 	#else
 		// fallback
@@ -8528,7 +8528,7 @@ PUGI_IMPL_NS_BEGIN
 		if (special) return xpath_string::from_const(special);
 
 		// get mantissa + exponent form
-		char mantissa_buffer[32];
+		char mantissa_buffer[32]= "";
 
 		char* mantissa;
 		int exponent;
@@ -8869,7 +8869,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_boolean: xpath_variable
 	{
-		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false), name("")
+		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false), name()
 		{
 		}
 
@@ -8879,7 +8879,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_number: xpath_variable
 	{
-		xpath_variable_number(): xpath_variable(xpath_type_number), value(0), name("")
+		xpath_variable_number(): xpath_variable(xpath_type_number), value(0), name()
 		{
 		}
 
@@ -8889,7 +8889,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_string: xpath_variable
 	{
-		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL), name("")
+		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL), name()
 		{
 		}
 
@@ -8904,7 +8904,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_node_set: xpath_variable
 	{
-		xpath_variable_node_set(): xpath_variable(xpath_type_node_set), name("")
+		xpath_variable_node_set(): xpath_variable(xpath_type_node_set), name()
 		{
 		}
 
