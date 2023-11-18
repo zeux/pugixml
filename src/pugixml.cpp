@@ -3758,9 +3758,10 @@ PUGI_IMPL_NS_BEGIN
 		xml_buffered_writer& operator=(const xml_buffered_writer&);
 
 	public:
-		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): buffer(PUGIXML_EMPTY_STRING), scratch(), writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
+		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): scratch(), writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
 		{
 			PUGI_IMPL_STATIC_ASSERT(bufcapacity >= 8);
+			strcpy(buffer, PUGIXML_EMPTY_STRING);
 		}
 
 		size_t flush()
@@ -8878,8 +8879,9 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_boolean: xpath_variable
 	{
-		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false), name(PUGIXML_EMPTY_STRING)
+		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false)
 		{
+			strcpy(name, PUGIXML_EMPTY_STRING);
 		}
 
 		bool value;
@@ -8888,8 +8890,9 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_number: xpath_variable
 	{
-		xpath_variable_number(): xpath_variable(xpath_type_number), value(0), name(PUGIXML_EMPTY_STRING)
+		xpath_variable_number(): xpath_variable(xpath_type_number), value(0)
 		{
+			strcpy(name, PUGIXML_EMPTY_STRING);
 		}
 
 		double value;
@@ -8898,8 +8901,9 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_string: xpath_variable
 	{
-		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL), name(PUGIXML_EMPTY_STRING)
+		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL)
 		{
+			strcpy(name, PUGIXML_EMPTY_STRING);
 		}
 
 		~xpath_variable_string()
@@ -8913,8 +8917,9 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_node_set: xpath_variable
 	{
-		xpath_variable_node_set(): xpath_variable(xpath_type_node_set), name(PUGIXML_EMPTY_STRING)
+		xpath_variable_node_set(): xpath_variable(xpath_type_node_set)
 		{
+			strcpy(name, PUGIXML_EMPTY_STRING);
 		}
 
 		xpath_node_set value;
@@ -12313,8 +12318,9 @@ PUGI_IMPL_NS_BEGIN
 		}
 
 		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): 
-			_alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result), _scratch(PUGIXML_EMPTY_STRING), _depth(0)
+			_alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result), _depth(0)
 		{
+			strcpy(_scratch, PUGIXML_EMPTY_STRING);
 		}
 
 		xpath_ast_node* parse()
