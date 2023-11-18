@@ -4721,7 +4721,11 @@ PUGI_IMPL_NS_BEGIN
 	template <typename U, typename String, typename Header>
 	PUGI_IMPL_FN bool set_value_integer(String& dest, Header& header, uintptr_t header_mask, U value, bool negative)
 	{
-		char_t buf[64]{};
+	#ifdef PUGIXML_WCHAR_MODE
+		char_t buf[64] = L"";
+	#else 
+		char_t buf[64] = "";
+	#endif
 		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
 		char_t* begin = integer_to_string(buf, end, value, negative);
 
