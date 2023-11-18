@@ -275,6 +275,14 @@ PUGI_IMPL_NS_BEGIN
 		return static_cast<size_t>(end - s);
 	#endif
 	}
+
+	#ifdef PUGIXML_WCHAR_MODE
+		#define PUGIXML_EMPTY_STRING L""
+	#else 
+		#define PUGIXML_EMPTY_STRING ""
+	#endif
+
+
 PUGI_IMPL_NS_END
 
 // auto_ptr-like object for exception recovery
@@ -3750,7 +3758,7 @@ PUGI_IMPL_NS_BEGIN
 		xml_buffered_writer& operator=(const xml_buffered_writer&);
 
 	public:
-		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): buffer(), scratch(), writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
+		xml_buffered_writer(xml_writer& writer_, xml_encoding user_encoding): buffer(PUGIXML_EMPTY_STRING), scratch(), writer(writer_), bufsize(0), encoding(get_write_encoding(user_encoding))
 		{
 			PUGI_IMPL_STATIC_ASSERT(bufcapacity >= 8);
 		}
@@ -4721,11 +4729,8 @@ PUGI_IMPL_NS_BEGIN
 	template <typename U, typename String, typename Header>
 	PUGI_IMPL_FN bool set_value_integer(String& dest, Header& header, uintptr_t header_mask, U value, bool negative)
 	{
-	#ifdef PUGIXML_WCHAR_MODE
-		char_t buf[64] = L"";
-	#else 
-		char_t buf[64] = "";
-	#endif
+		char_t buf[64] = PUGIXML_EMPTY_STRING;
+
 		char_t* end = buf + sizeof(buf) / sizeof(buf[0]);
 		char_t* begin = integer_to_string(buf, end, value, negative);
 
@@ -4928,7 +4933,7 @@ PUGI_IMPL_NS_BEGIN
 			}
 		}
 
-		xml_stream_chunk(): next(NULL), size(0), data()
+		xml_stream_chunk(): next(NULL), size(0)
 		{
 		}
 
@@ -8873,7 +8878,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_boolean: xpath_variable
 	{
-		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false), name()
+		xpath_variable_boolean(): xpath_variable(xpath_type_boolean), value(false), name(PUGIXML_EMPTY_STRING)
 		{
 		}
 
@@ -8883,7 +8888,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_number: xpath_variable
 	{
-		xpath_variable_number(): xpath_variable(xpath_type_number), value(0), name()
+		xpath_variable_number(): xpath_variable(xpath_type_number), value(0), name(PUGIXML_EMPTY_STRING)
 		{
 		}
 
@@ -8893,7 +8898,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_string: xpath_variable
 	{
-		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL), name()
+		xpath_variable_string(): xpath_variable(xpath_type_string), value(NULL), name(PUGIXML_EMPTY_STRING)
 		{
 		}
 
@@ -8908,7 +8913,7 @@ PUGI_IMPL_NS_BEGIN
 
 	struct xpath_variable_node_set: xpath_variable
 	{
-		xpath_variable_node_set(): xpath_variable(xpath_type_node_set), name()
+		xpath_variable_node_set(): xpath_variable(xpath_type_node_set), name(PUGIXML_EMPTY_STRING)
 		{
 		}
 
@@ -12308,7 +12313,7 @@ PUGI_IMPL_NS_BEGIN
 		}
 
 		xpath_parser(const char_t* query, xpath_variable_set* variables, xpath_allocator* alloc, xpath_parse_result* result): 
-			_alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result), _scratch(), _depth(0)
+			_alloc(alloc), _lexer(query), _query(query), _variables(variables), _result(result), _scratch(PUGIXML_EMPTY_STRING), _depth(0)
 		{
 		}
 
