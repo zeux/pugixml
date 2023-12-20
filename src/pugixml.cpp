@@ -4801,7 +4801,8 @@ PUGI_IMPL_NS_BEGIN
 		// anything that's not a regular file doesn't have a coherent length
 		if (!S_ISREG(st.st_mode)) return status_io_error;
 
-		typedef off_t length_type;
+		// normally st_size is off_t, but Android NDK defines off_t as long (which is 32-bit when targeting x86 on Android) and st_size as long long
+		typedef long long length_type;
 		length_type length = st.st_size;
 	#elif defined(PUGI_IMPL_MSVC_CRT_VERSION) && PUGI_IMPL_MSVC_CRT_VERSION >= 1400
 		// there are 64-bit versions of fseek/ftell, let's use them
