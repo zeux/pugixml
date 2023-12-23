@@ -4790,6 +4790,20 @@ PUGI_IMPL_NS_BEGIN
 		return res;
 	}
 
+	template <typename T> PUGI_IMPL_FN xml_parse_status convert_file_size(T length, size_t& out_result)
+	{
+		// check for I/O errors
+		if (length < 0) return status_io_error;
+
+		// check for overflow
+		size_t result = static_cast<size_t>(length);
+
+		if (static_cast<T>(result) != length) return status_out_of_memory;
+
+		out_result = result;
+		return status_ok;
+	}
+
 	// we need to get length of entire file to load it in memory; the only (relatively) sane way to do it is via seek/tell trick
 	PUGI_IMPL_FN xml_parse_status get_file_size(FILE* file, size_t& out_result)
 	{
@@ -4801,44 +4815,31 @@ PUGI_IMPL_NS_BEGIN
 		// anything that's not a regular file doesn't have a coherent length
 		if (!S_ISREG(st.st_mode)) return status_io_error;
 
-		// normally st_size is off_t, but Android NDK defines off_t as long (which is 32-bit when targeting x86 on Android) and st_size as long long
-		typedef long long length_type;
-		length_type length = st.st_size;
+		xml_parse_status status = convert_file_size(st.st_size, out_result);
 	#elif defined(PUGI_IMPL_MSVC_CRT_VERSION) && PUGI_IMPL_MSVC_CRT_VERSION >= 1400
 		// there are 64-bit versions of fseek/ftell, let's use them
-		typedef __int64 length_type;
-
 		_fseeki64(file, 0, SEEK_END);
-		length_type length = _ftelli64(file);
+		__int64 length = _ftelli64(file);
 		_fseeki64(file, 0, SEEK_SET);
+
+		xml_parse_status status = convert_file_size(length, out_result);
 	#elif defined(__MINGW32__) && !defined(__NO_MINGW_LFS) && (!defined(__STRICT_ANSI__) || defined(__MINGW64_VERSION_MAJOR))
 		// there are 64-bit versions of fseek/ftell, let's use them
-		typedef off64_t length_type;
-
 		fseeko64(file, 0, SEEK_END);
-		length_type length = ftello64(file);
+		off64_t length = ftello64(file);
 		fseeko64(file, 0, SEEK_SET);
+
+		xml_parse_status status = convert_file_size(length, out_result);
 	#else
 		// if this is a 32-bit OS, long is enough; if this is a unix system, long is 64-bit, which is enough; otherwise we can't do anything anyway.
-		typedef long length_type;
-
 		fseek(file, 0, SEEK_END);
-		length_type length = ftell(file);
+		long length = ftell(file);
 		fseek(file, 0, SEEK_SET);
+
+		xml_parse_status status = convert_file_size(length, out_result);
 	#endif
 
-		// check for I/O errors
-		if (length < 0) return status_io_error;
-
-		// check for overflow
-		size_t result = static_cast<size_t>(length);
-
-		if (static_cast<length_type>(result) != length) return status_out_of_memory;
-
-		// finalize
-		out_result = result;
-
-		return status_ok;
+		return status;
 	}
 
 	// This function assumes that buffer has extra sizeof(char_t) writable bytes after size
