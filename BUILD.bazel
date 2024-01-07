@@ -1,0 +1,13 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "pugixml",
+    srcs = [
+        "src/pugiconfig.hpp",
+        "src/pugixml.cpp",
+    ],
+    hdrs = ["src/pugixml.hpp"],
+    includes = ["src/"],
+    strip_include_prefix = "src",
+    visibility = ["//visibility:public"],
+)
