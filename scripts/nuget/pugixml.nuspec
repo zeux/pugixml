@@ -14,7 +14,7 @@ pugixml is used by a lot of projects, both open-source and proprietary, for perf
 This package contains builds for VS2013, VS2015, VS2017, VS2019 and VS2022, for both statically linked and DLL CRT; you can switch the CRT linkage in Project -> Properties -> Referenced Packages -> pugixml.</description>
     <summary>Light-weight, simple and fast XML parser for C++ with XPath support</summary>
     <releaseNotes>https://pugixml.org/docs/manual.html#changes</releaseNotes>
-    <copyright>Copyright (c) 2006-2023 Arseny Kapoulkine</copyright>
+    <copyright>Copyright (c) 2006-2024 Arseny Kapoulkine</copyright>
     <tags>native nativepackage</tags>
   </metadata>
 </package>

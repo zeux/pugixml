@@ -31,7 +31,7 @@ BEGIN
       VALUE "FileDescription",	"pugixml library\0"
       VALUE "FileVersion",	PUGIXML_VERSION_NUMBER
       VALUE "InternalName",	"pugixml.dll\0"
-      VALUE "LegalCopyright",	"Copyright (C) 2006-2023, by Arseny Kapoulkine\0"
+      VALUE "LegalCopyright",	"Copyright (C) 2006-2024, by Arseny Kapoulkine\0"
       VALUE "OriginalFilename",	"pugixml.dll\0"
       VALUE "ProductName",	"pugixml\0"
       VALUE "ProductVersion",	PUGIXML_VERSION_NUMBER
