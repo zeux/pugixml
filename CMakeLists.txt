@@ -192,6 +192,17 @@ if (PUGIXML_USE_POSTFIX)
   endif()
 endif()
 
+# Handle both relative and absolute paths (e.g. NixOS) for a relocatable package
+if(IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+  set(PUGIXML_PC_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}")
+else()
+  set(PUGIXML_PC_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+endif()
+if(IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+  set(PUGIXML_PC_LIBDIR "${CMAKE_INSTALL_LIBDIR}")
+else()
+  set(PUGIXML_PC_LIBDIR "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+endif()
 configure_file(scripts/pugixml.pc.in pugixml.pc @ONLY)
 
 export(TARGETS ${install-targets}
