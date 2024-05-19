@@ -448,6 +448,7 @@ pre.pygments .tok-c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
 pre.pygments .tok-cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
 pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
 pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
 pre.pygments .tok-gr { color: #E40000 } /* Generic.Error */
 pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
 pre.pygments .tok-gi { color: #008400 } /* Generic.Inserted */
@@ -2300,7 +2301,20 @@ If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span><span class="tok-w"> </span><span class="tok-n">child</span><span class="tok-o">:</span><span class="tok-w"> </span><span class="tok-n">tool</span><span class="tok-p">)</span></code></pre>
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span><span class="tok-w"> </span><span class="tok-n">child</span><span class="tok-o">:</span><span class="tok-w"> </span><span class="tok-n">tool</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">...</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When using C&#43;&#43;20, you can also use nodes as well as objects returned by <code>children()</code> and <code>attributes()</code> functions as ranges:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">auto</span><span class="tok-w"> </span><span class="tok-n">tf</span><span class="tok-w"> </span><span class="tok-o">=</span>
+<span class="tok-w">    </span><span class="tok-n">tools</span><span class="tok-p">.</span><span class="tok-n">children</span><span class="tok-p">(</span><span class="tok-s">&quot;Tool&quot;</span><span class="tok-p">)</span>
+<span class="tok-w">    </span><span class="tok-o">|</span><span class="tok-w"> </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">views</span><span class="tok-o">::</span><span class="tok-n">filter</span><span class="tok-p">([](</span><span class="tok-k">auto</span><span class="tok-w"> </span><span class="tok-n">node</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">{</span><span class="tok-w"> </span><span class="tok-k">return</span><span class="tok-w"> </span><span class="tok-n">node</span><span class="tok-p">.</span><span class="tok-n">attribute</span><span class="tok-p">(</span><span class="tok-s">&quot;AllowRemote&quot;</span><span class="tok-p">).</span><span class="tok-n">as_bool</span><span class="tok-p">();</span><span class="tok-w"> </span><span class="tok-p">})</span>
+<span class="tok-w">    </span><span class="tok-o">|</span><span class="tok-w"> </span><span class="tok-n">std</span><span class="tok-o">::</span><span class="tok-n">views</span><span class="tok-o">::</span><span class="tok-n">reverse</span><span class="tok-p">;</span>
+
+<span class="tok-k">for</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-n">pugi</span><span class="tok-o">::</span><span class="tok-n">xml_node</span><span class="tok-w"> </span><span class="tok-n">tool</span><span class="tok-o">:</span><span class="tok-w"> </span><span class="tok-n">tf</span><span class="tok-p">)</span><span class="tok-w"> </span><span class="tok-p">...</span></code></pre>
 </div>
 </div>
 </div>
@@ -6153,7 +6167,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-01-26 09:23:09 -0800
+Last updated 2024-05-19 13:23:06 -0700
 </div>
 </div>
 </body>

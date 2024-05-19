@@ -1039,7 +1039,19 @@ While using `children()` makes the intent of the code clear, note that each node
 
 [source]
 ----
-for (pugi::xml_node child: tool)
+for (pugi::xml_node child: tool) ...
+----
+
+When using C{plus}{plus}20, you can also use nodes as well as objects returned by `children()` and `attributes()` functions as ranges:
+
+[source]
+----
+auto tf =
+    tools.children("Tool")
+    | std::views::filter([](auto node) { return node.attribute("AllowRemote").as_bool(); })
+    | std::views::reverse;
+
+for (pugi::xml_node tool: tf) ...
 ----
 
 [[access.iterators]]
