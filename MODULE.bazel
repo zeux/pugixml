@@ -1,0 +1,7 @@
+module(
+    name = "pugixml",
+    version = "1.14",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "rules_cc", version = "0.0.9")
