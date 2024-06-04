@@ -543,7 +543,9 @@ namespace pugi
 
 		// Get child, attribute or next/previous sibling with the specified name
 		xml_node child(const char_t* name) const;
+		xml_node child(const char_t* name, size_t sz) const;
 		xml_attribute attribute(const char_t* name) const;
+		xml_attribute attribute(const char_t* name, size_t) const;
 		xml_node next_sibling(const char_t* name) const;
 		xml_node previous_sibling(const char_t* name) const;
 
@@ -564,6 +566,7 @@ namespace pugi
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_attribute(const char_t* name);
+		xml_attribute append_attribute(const char_t* name, size_t sz);
 		xml_attribute prepend_attribute(const char_t* name);
 		xml_attribute insert_attribute_after(const char_t* name, const xml_attribute& attr);
 		xml_attribute insert_attribute_before(const char_t* name, const xml_attribute& attr);
@@ -582,6 +585,7 @@ namespace pugi
 
 		// Add child element with specified name. Returns added node, or empty node on errors.
 		xml_node append_child(const char_t* name);
+		xml_node append_child(const char_t* name, size_t sz);
 		xml_node prepend_child(const char_t* name);
 		xml_node insert_child_after(const char_t* name, const xml_node& node);
 		xml_node insert_child_before(const char_t* name, const xml_node& node);
