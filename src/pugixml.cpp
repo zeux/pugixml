@@ -5054,6 +5054,14 @@ PUGI_IMPL_NS_BEGIN
 #if defined(PUGI_IMPL_MSVC_CRT_VERSION) || defined(__BORLANDC__) || (defined(__MINGW32__) && (!defined(__STRICT_ANSI__) || defined(__MINGW64_VERSION_MAJOR)))
 	PUGI_IMPL_FN FILE* open_file_wide(const wchar_t* path, const wchar_t* mode)
 	{
+#ifdef PUGIXML_NO_STL
+		// ensure these symbols are consistently referenced to avoid 'unreferenced function' warnings
+		// note that generally these functions are used in STL builds, but PUGIXML_NO_STL leaves the only usage in convert_path_heap
+		(void)&as_utf8_begin;
+		(void)&as_utf8_end;
+		(void)&strlength_wide;
+#endif
+
 #if defined(PUGI_IMPL_MSVC_CRT_VERSION) && PUGI_IMPL_MSVC_CRT_VERSION >= 1400
 		FILE* file = NULL;
 		return _wfopen_s(&file, path, mode) == 0 ? file : NULL;
