@@ -2115,7 +2115,7 @@ By default, XPath functions throw `xpath_exception` object in case of errors; ad
 
 [source]
 ----
-virtual const char* xpath_exception::what() const throw();
+virtual const char* xpath_exception::what() const noexcept;
 const xpath_parse_result& xpath_exception::result() const;
 ----
 
@@ -3140,7 +3140,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     operator +++<a href="#xpath_query::unspecified_bool_type">unspecified_bool_type</a>+++() const;
 
 +++<span class="tok-k">class</span> <a href="#xpath_exception">xpath_exception</a>+++: public std::exception
-    virtual const char* +++<a href="#xpath_exception::what">what</a>+++() const throw();
+    virtual const char* +++<a href="#xpath_exception::what">what</a>+++() const noexcept;
 
     const xpath_parse_result& +++<a href="#xpath_exception::result">result</a>+++() const;
 

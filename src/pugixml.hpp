@@ -1314,7 +1314,7 @@ namespace pugi
 		explicit xpath_exception(const xpath_parse_result& result);
 
 		// Get error message
-		virtual const char* what() const throw() PUGIXML_OVERRIDE;
+		virtual const char* what() const PUGIXML_NOEXCEPT PUGIXML_OVERRIDE;
 
 		// Get parse result
 		const xpath_parse_result& result() const;
