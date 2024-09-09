@@ -122,6 +122,26 @@
 #	endif
 #endif
 
+// Detect if C++ standard supports 'string_view' (2017 or higher)
+#ifndef PUGI_STRING_VIEW_SUPPORTED
+#	if defined(__cpp_lib_string_view) || __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
+#		define PUGI_STRING_VIEW_SUPPORTED 1
+#	endif
+#endif
+// Enable 'string_view' support if requested and supported
+#ifndef PUGI_HAS_STRING_VIEW
+#	if defined(PUGI_ENABLE_STRING_VIEW) && !defined(PUGIXML_NO_STL)
+#		ifdef PUGI_STRING_VIEW_SUPPORTED
+#			define PUGI_HAS_STRING_VIEW
+#		else
+#			warning "Support for std::string_view was requested but is not supported by your C++ standard"
+#		endif
+#	endif
+#endif
+#ifdef PUGI_HAS_STRING_VIEW
+#	include <string_view>
+#endif
+
 // Character interface macros
 #ifdef PUGIXML_WCHAR_MODE
 #	define PUGIXML_TEXT(t) L ## t
