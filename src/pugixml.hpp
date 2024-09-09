@@ -160,6 +160,10 @@ namespace pugi
 	// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string<PUGIXML_CHAR> string_t;
 #endif
+
+#ifdef PUGI_HAS_STRING_VIEW
+	using string_view_t = std::basic_string_view<char_t>;
+#endif
 }
 
 // The PugiXML namespace
