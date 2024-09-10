@@ -5441,6 +5441,13 @@ namespace pugi
 		return impl::strcpy_insitu(_attr->name, _attr->header, impl::xml_memory_page_name_allocated_mask, rhs, size);
 	}
 
+#ifdef PUGI_HAS_STRING_VIEW
+	PUGI_IMPL_FN bool xml_attribute::set_name(const string_view_t rhs)
+	{
+		return set_name(rhs.data(), rhs.size());
+	}
+#endif
+
 	PUGI_IMPL_FN bool xml_attribute::set_value(const char_t* rhs)
 	{
 		if (!_attr) return false;
@@ -5454,6 +5461,13 @@ namespace pugi
 
 		return impl::strcpy_insitu(_attr->value, _attr->header, impl::xml_memory_page_value_allocated_mask, rhs, size);
 	}
+
+#ifdef PUGI_HAS_STRING_VIEW
+	PUGI_IMPL_FN bool xml_attribute::set_value(const string_view_t rhs)
+	{
+		return set_value(rhs.data(), rhs.size());
+	}
+#endif
 
 	PUGI_IMPL_FN bool xml_attribute::set_value(int rhs)
 	{
@@ -5848,6 +5862,13 @@ namespace pugi
 		return impl::strcpy_insitu(_root->name, _root->header, impl::xml_memory_page_name_allocated_mask, rhs, size);
 	}
 
+#ifdef PUGI_HAS_STRING_VIEW
+	PUGI_IMPL_FN bool xml_node::set_name(const string_view_t rhs)
+	{
+		return set_name(rhs.data(), rhd.size());
+	}
+#endif
+
 	PUGI_IMPL_FN bool xml_node::set_value(const char_t* rhs)
 	{
 		xml_node_type type_ = _root ? PUGI_IMPL_NODETYPE(_root) : node_null;
@@ -5867,6 +5888,13 @@ namespace pugi
 
 		return impl::strcpy_insitu(_root->value, _root->header, impl::xml_memory_page_value_allocated_mask, rhs, size);
 	}
+
+#ifdef PUGI_HAS_STRING_VIEW
+	PUGI_IMPL_FN bool xml_node::set_value(const string_view_t rhs)
+	{
+		return set_value(rhs.data(), rhs.value());
+	}
+#endif
 
 	PUGI_IMPL_FN xml_attribute xml_node::append_attribute(const char_t* name_)
 	{
@@ -6756,6 +6784,13 @@ namespace pugi
 
 		return dn ? impl::strcpy_insitu(dn->value, dn->header, impl::xml_memory_page_value_allocated_mask, rhs, size) : false;
 	}
+
+#ifdef PUGI_HAS_STRING_VIEW
+	PUGI_IMPL_FN bool xml_text::set(const string_view_t rhs)
+	{
+		return set(rhs.data(), rhs.size());
+	}
+#endif
 
 	PUGI_IMPL_FN bool xml_text::set(int rhs)
 	{
