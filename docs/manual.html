@@ -556,28 +556,28 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </li>
 <li><a href="#access">5. Accessing document data</a>
 <ul class="sectlevel2">
-<li><a href="#access.basic">Basic traversal functions</a></li>
-<li><a href="#access.nodedata">5.1. Getting node data</a></li>
-<li><a href="#access.attrdata">5.2. Getting attribute data</a></li>
-<li><a href="#access.contents">5.3. Contents-based traversal functions</a></li>
-<li><a href="#access.rangefor">5.4. Range-based for-loop support</a></li>
-<li><a href="#access.iterators">5.5. Traversing node/attribute lists via iterators</a></li>
-<li><a href="#access.walker">5.6. Recursive traversal with xml_tree_walker</a></li>
-<li><a href="#access.predicate">5.7. Searching for nodes/attributes with predicates</a></li>
-<li><a href="#access.text">5.8. Working with text contents</a></li>
-<li><a href="#access.misc">5.9. Miscellaneous functions</a></li>
+<li><a href="#access.basic">5.1. Basic traversal functions</a></li>
+<li><a href="#access.nodedata">5.2. Getting node data</a></li>
+<li><a href="#access.attrdata">5.3. Getting attribute data</a></li>
+<li><a href="#access.contents">5.4. Contents-based traversal functions</a></li>
+<li><a href="#access.rangefor">5.5. Range-based for-loop support</a></li>
+<li><a href="#access.iterators">5.6. Traversing node/attribute lists via iterators</a></li>
+<li><a href="#access.walker">5.7. Recursive traversal with xml_tree_walker</a></li>
+<li><a href="#access.predicate">5.8. Searching for nodes/attributes with predicates</a></li>
+<li><a href="#access.text">5.9. Working with text contents</a></li>
+<li><a href="#access.misc">5.10. Miscellaneous functions</a></li>
 </ul>
 </li>
 <li><a href="#modify">6. Modifying document data</a>
 <ul class="sectlevel2">
-<li><a href="#modify.nodedata">Setting node data</a></li>
-<li><a href="#modify.attrdata">6.1. Setting attribute data</a></li>
-<li><a href="#modify.add">6.2. Adding nodes/attributes</a></li>
-<li><a href="#modify.remove">6.3. Removing nodes/attributes</a></li>
-<li><a href="#modify.text">6.4. Working with text contents</a></li>
-<li><a href="#modify.clone">6.5. Cloning nodes/attributes</a></li>
-<li><a href="#modify.move">6.6. Moving nodes</a></li>
-<li><a href="#modify.fragments">6.7. Assembling document from fragments</a></li>
+<li><a href="#modify.nodedata">6.1. Setting node data</a></li>
+<li><a href="#modify.attrdata">6.2. Setting attribute data</a></li>
+<li><a href="#modify.add">6.3. Adding nodes/attributes</a></li>
+<li><a href="#modify.remove">6.4. Removing nodes/attributes</a></li>
+<li><a href="#modify.text">6.5. Working with text contents</a></li>
+<li><a href="#modify.clone">6.6. Cloning nodes/attributes</a></li>
+<li><a href="#modify.move">6.7. Moving nodes</a></li>
+<li><a href="#modify.fragments">6.8. Assembling document from fragments</a></li>
 </ul>
 </li>
 <li><a href="#saving">7. Saving document</a>
@@ -1998,7 +1998,7 @@ The current behavior for Unicode conversion is to skip all invalid UTF sequences
 <p>pugixml features an extensive interface for getting various types of data from the document and for traversing the document. This section provides documentation for all such functions that do not modify the tree except for XPath-related functions; see <a href="#xpath">XPath</a> for XPath reference. As discussed in <a href="#dom.cpp">C&#43;&#43; interface</a>, there are two types of handles to tree data - <a href="#xml_node">xml_node</a> and <a href="#xml_attribute">xml_attribute</a>. The handles have special null (empty) values which propagate through various functions and thus are useful for writing more concise code; see <a href="#node_null">this description</a> for details. The documentation in this section will explicitly state the results of all function in case of null inputs.</p>
 </div>
 <div class="sect2">
-<h3 id="access.basic"><a class="anchor" href="#access.basic"></a><a class="link" href="#access.basic">Basic traversal functions</a></h3>
+<h3 id="access.basic"><a class="anchor" href="#access.basic"></a><a class="link" href="#access.basic">5.1. Basic traversal functions</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::parent"></a><a id="xml_node::first_child"></a><a id="xml_node::last_child"></a><a id="xml_node::next_sibling"></a><a id="xml_node::previous_sibling"></a><a id="xml_node::first_attribute"></a><a id="xml_node::last_attribute"></a><a id="xml_attribute::next_attribute"></a><a id="xml_attribute::previous_attribute"></a>
 The internal representation of the document is a tree, where each node has a list of child nodes (the order of children corresponds to their order in the XML representation), and additionally element nodes have a list of attributes, which is also ordered. Several functions are provided in order to let you get from one node in the tree to the other. These functions roughly correspond to the internal representation, and thus are usually building blocks for other methods of traversing (i.e. XPath traversals are based on these functions).</p>
@@ -2055,7 +2055,7 @@ Because of memory consumption reasons, attributes do not have a link to their pa
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.nodedata"><a class="anchor" href="#access.nodedata"></a><a class="link" href="#access.nodedata">5.1. Getting node data</a></h3>
+<h3 id="access.nodedata"><a class="anchor" href="#access.nodedata"></a><a class="link" href="#access.nodedata">5.2. Getting node data</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::name"></a><a id="xml_node::value"></a>
 Apart from structural information (parent, child nodes, attributes), nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. <a href="#node_document">node_document</a> nodes do not have a name or value, <a href="#node_element">node_element</a> and <a href="#node_declaration">node_declaration</a> nodes always have a name but never have a value, <a href="#node_pcdata">node_pcdata</a>, <a href="#node_cdata">node_cdata</a>, <a href="#node_comment">node_comment</a> and <a href="#node_doctype">node_doctype</a> nodes never have a name but always have a value (it may be empty though), <a href="#node_pi">node_pi</a> nodes always have a name and a value (again, value may be empty). In order to get node&#8217;s name or value, you can use the following functions:</p>
@@ -2090,7 +2090,7 @@ Apart from structural information (parent, child nodes, attributes), nodes can h
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.attrdata"><a class="anchor" href="#access.attrdata"></a><a class="link" href="#access.attrdata">5.2. Getting attribute data</a></h3>
+<h3 id="access.attrdata"><a class="anchor" href="#access.attrdata"></a><a class="link" href="#access.attrdata">5.3. Getting attribute data</a></h3>
 <div class="paragraph">
 <p><a id="xml_attribute::name"></a><a id="xml_attribute::value"></a>
 All attributes have name and value, both of which are strings (value may be empty). There are two corresponding accessors, like for <code>xml_node</code>:</p>
@@ -2179,7 +2179,7 @@ Number conversion functions depend on current C locale as set with <code>setloca
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.contents"><a class="anchor" href="#access.contents"></a><a class="link" href="#access.contents">5.3. Contents-based traversal functions</a></h3>
+<h3 id="access.contents"><a class="anchor" href="#access.contents"></a><a class="link" href="#access.contents">5.4. Contents-based traversal functions</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::child"></a><a id="xml_node::attribute"></a><a id="xml_node::next_sibling_name"></a><a id="xml_node::previous_sibling_name"></a>
 Since a lot of document traversal consists of finding the node/attribute with the correct name, there are special functions for that purpose:</p>
@@ -2258,7 +2258,7 @@ Since a lot of document traversal consists of finding the node/attribute with th
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.rangefor"><a class="anchor" href="#access.rangefor"></a><a class="link" href="#access.rangefor">5.4. Range-based for-loop support</a></h3>
+<h3 id="access.rangefor"><a class="anchor" href="#access.rangefor"></a><a class="link" href="#access.rangefor">5.5. Range-based for-loop support</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::children"></a><a id="xml_node::attributes"></a>
 If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43;11 feature, at the time of writing it&#8217;s supported by Microsoft Visual Studio 2012+, GCC 4.6+ and Clang 3.0+), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with <a href="http://www.boost.org/libs/foreach/">Boost Foreach</a>, and possibly other pre-C&#43;&#43;11 foreach facilities.</p>
@@ -2319,7 +2319,7 @@ If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.iterators"><a class="anchor" href="#access.iterators"></a><a class="link" href="#access.iterators">5.5. Traversing node/attribute lists via iterators</a></h3>
+<h3 id="access.iterators"><a class="anchor" href="#access.iterators"></a><a class="link" href="#access.iterators">5.6. Traversing node/attribute lists via iterators</a></h3>
 <div class="paragraph">
 <p><a id="xml_node_iterator"></a><a id="xml_attribute_iterator"></a><a id="xml_node::begin"></a><a id="xml_node::end"></a><a id="xml_node::attributes_begin"></a><a id="xml_node::attributes_end"></a>
 Child node lists and attribute lists are simply double-linked lists; while you can use <code>previous_sibling</code>/<code>next_sibling</code> and other such functions for iteration, pugixml additionally provides node and attribute iterators, so that you can treat nodes as containers of other nodes or attributes:</p>
@@ -2379,7 +2379,7 @@ Node and attribute iterators are somewhere in the middle between const and non-c
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.walker"><a class="anchor" href="#access.walker"></a><a class="link" href="#access.walker">5.6. Recursive traversal with xml_tree_walker</a></h3>
+<h3 id="access.walker"><a class="anchor" href="#access.walker"></a><a class="link" href="#access.walker">5.7. Recursive traversal with xml_tree_walker</a></h3>
 <div id="xml_tree_walker" class="paragraph">
 <p>The methods described above allow traversal of immediate children of some node; if you want to do a deep tree traversal, you&#8217;ll have to do it via a recursive function or some equivalent method. However, pugixml provides a helper for depth-first traversal of a subtree. In order to use it, you have to implement <code>xml_tree_walker</code> interface and to call <code>traverse</code> function:</p>
 </div>
@@ -2447,7 +2447,7 @@ The traversal is launched by calling <code>traverse</code> function on traversal
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.predicate"><a class="anchor" href="#access.predicate"></a><a class="link" href="#access.predicate">5.7. Searching for nodes/attributes with predicates</a></h3>
+<h3 id="access.predicate"><a class="anchor" href="#access.predicate"></a><a class="link" href="#access.predicate">5.8. Searching for nodes/attributes with predicates</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::find_attribute"></a><a id="xml_node::find_child"></a><a id="xml_node::find_node"></a>
 While there are existing functions for getting a node/attribute with known contents, they are often not sufficient for simple queries. As an alternative for manual iteration through nodes/attributes until the needed one is found, you can make a predicate and call one of <code>find_</code> functions:</p>
@@ -2512,7 +2512,7 @@ While there are existing functions for getting a node/attribute with known conte
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.text"><a class="anchor" href="#access.text"></a><a class="link" href="#access.text">5.8. Working with text contents</a></h3>
+<h3 id="access.text"><a class="anchor" href="#access.text"></a><a class="link" href="#access.text">5.9. Working with text contents</a></h3>
 <div id="xml_text" class="paragraph">
 <p>It is common to store data as text contents of some node - i.e. <code>&lt;node&gt;&lt;description&gt;This is a node&lt;/description&gt;&lt;/node&gt;</code>. In this case, <code>&lt;description&gt;</code> node does not have a value, but instead has a child of type <a href="#node_pcdata">node_pcdata</a> with value <code>"This is a node"</code>. pugixml provides a special class, <code>xml_text</code>, to work with such data. Working with text objects to modify data is described in <a href="#modify.text">the documentation for modifying document data</a>; this section describes the access interface of <code>xml_text</code>.</p>
 </div>
@@ -2590,7 +2590,7 @@ If you need a non-empty string if the text object is empty, or if the text conte
 </div>
 </div>
 <div class="sect2">
-<h3 id="access.misc"><a class="anchor" href="#access.misc"></a><a class="link" href="#access.misc">5.9. Miscellaneous functions</a></h3>
+<h3 id="access.misc"><a class="anchor" href="#access.misc"></a><a class="link" href="#access.misc">5.10. Miscellaneous functions</a></h3>
 <div id="xml_node::root" class="paragraph">
 <p>If you need to get the document root of some node, you can use the following function:</p>
 </div>
@@ -2654,7 +2654,7 @@ While pugixml supports complex XPath expressions, sometimes a simple path handli
 <p>All member functions that change node/attribute data or structure are non-constant and thus can not be called on constant handles. However, you can easily convert constant handle to non-constant one by simple assignment: <code>void foo(const pugi::xml_node&amp; n) { pugi::xml_node nc = n; }</code>, so const-correctness here mainly provides additional documentation.</p>
 </div>
 <div class="sect2">
-<h3 id="modify.nodedata"><a class="anchor" href="#modify.nodedata"></a><a class="link" href="#modify.nodedata">Setting node data</a></h3>
+<h3 id="modify.nodedata"><a class="anchor" href="#modify.nodedata"></a><a class="link" href="#modify.nodedata">6.1. Setting node data</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::set_name"></a><a id="xml_node::set_value"></a>
 As discussed before, nodes can have name and value, both of which are strings. Depending on node type, name or value may be absent. <a href="#node_document">node_document</a> nodes do not have a name or value, <a href="#node_element">node_element</a> and <a href="#node_declaration">node_declaration</a> nodes always have a name but never have a value, <a href="#node_pcdata">node_pcdata</a>, <a href="#node_cdata">node_cdata</a>, <a href="#node_comment">node_comment</a> and <a href="#node_doctype">node_doctype</a> nodes never have a name but always have a value (it may be empty though), <a href="#node_pi">node_pi</a> nodes always have a name and a value (again, value may be empty). In order to set node&#8217;s name or value, you can use the following functions:</p>
@@ -2691,7 +2691,7 @@ As discussed before, nodes can have name and value, both of which are strings. D
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.attrdata"><a class="anchor" href="#modify.attrdata"></a><a class="link" href="#modify.attrdata">6.1. Setting attribute data</a></h3>
+<h3 id="modify.attrdata"><a class="anchor" href="#modify.attrdata"></a><a class="link" href="#modify.attrdata">6.2. Setting attribute data</a></h3>
 <div class="paragraph">
 <p><a id="xml_attribute::set_name"></a><a id="xml_attribute::set_value"></a>
 All attributes have name and value, both of which are strings (value may be empty). You can set them with the following functions:</p>
@@ -2794,7 +2794,7 @@ Number conversion functions depend on current C locale as set with <code>setloca
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.add"><a class="anchor" href="#modify.add"></a><a class="link" href="#modify.add">6.2. Adding nodes/attributes</a></h3>
+<h3 id="modify.add"><a class="anchor" href="#modify.add"></a><a class="link" href="#modify.add">6.3. Adding nodes/attributes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::prepend_attribute"></a><a id="xml_node::append_attribute"></a><a id="xml_node::insert_attribute_after"></a><a id="xml_node::insert_attribute_before"></a><a id="xml_node::prepend_child"></a><a id="xml_node::append_child"></a><a id="xml_node::insert_child_after"></a><a id="xml_node::insert_child_before"></a>
 Nodes and attributes do not exist without a document tree, so you can&#8217;t create them without adding them to some document. A node or attribute can be created at the end of node/attribute list or before/after some other node:</p>
@@ -2889,7 +2889,7 @@ Nodes and attributes do not exist without a document tree, so you can&#8217;t cr
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.remove"><a class="anchor" href="#modify.remove"></a><a class="link" href="#modify.remove">6.3. Removing nodes/attributes</a></h3>
+<h3 id="modify.remove"><a class="anchor" href="#modify.remove"></a><a class="link" href="#modify.remove">6.4. Removing nodes/attributes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::remove_attribute"></a><a id="xml_node::remove_attributes"></a><a id="xml_node::remove_child"></a><a id="xml_node::remove_children"></a>
 If you do not want your document to contain some node or attribute, you can remove it with one of the following functions:</p>
@@ -2953,7 +2953,7 @@ If you do not want your document to contain some node or attribute, you can remo
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.text"><a class="anchor" href="#modify.text"></a><a class="link" href="#modify.text">6.4. Working with text contents</a></h3>
+<h3 id="modify.text"><a class="anchor" href="#modify.text"></a><a class="link" href="#modify.text">6.5. Working with text contents</a></h3>
 <div class="paragraph">
 <p>pugixml provides a special class, <code>xml_text</code>, to work with text contents stored as a value of some node, i.e. <code>&lt;node&gt;&lt;description&gt;This is a node&lt;/description&gt;&lt;/node&gt;</code>. Working with text objects to retrieve data is described in <a href="#access.text">the documentation for accessing document data</a>; this section describes the modification interface of <code>xml_text</code>.</p>
 </div>
@@ -3025,7 +3025,7 @@ If you do not want your document to contain some node or attribute, you can remo
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.clone"><a class="anchor" href="#modify.clone"></a><a class="link" href="#modify.clone">6.5. Cloning nodes/attributes</a></h3>
+<h3 id="modify.clone"><a class="anchor" href="#modify.clone"></a><a class="link" href="#modify.clone">6.6. Cloning nodes/attributes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::prepend_copy"></a><a id="xml_node::append_copy"></a><a id="xml_node::insert_copy_after"></a><a id="xml_node::insert_copy_before"></a>
 With the help of previously described functions, it is possible to create trees with any contents and structure, including cloning the existing data. However since this is an often needed operation, pugixml provides built-in node/attribute cloning facilities. Since nodes and attributes do not exist without a document tree, you can&#8217;t create a standalone copy - you have to immediately insert it somewhere in the tree. For this, you can use one of the following functions:</p>
@@ -3121,7 +3121,7 @@ With the help of previously described functions, it is possible to create trees 
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.move"><a class="anchor" href="#modify.move"></a><a class="link" href="#modify.move">6.6. Moving nodes</a></h3>
+<h3 id="modify.move"><a class="anchor" href="#modify.move"></a><a class="link" href="#modify.move">6.7. Moving nodes</a></h3>
 <div class="paragraph">
 <p><a id="xml_node::prepend_move"></a><a id="xml_node::append_move"></a><a id="xml_node::insert_move_after"></a><a id="xml_node::insert_move_before"></a>
 Sometimes instead of cloning a node you need to move an existing node to a different position in a tree. This can be accomplished by copying the node and removing the original; however, this is expensive since it results in a lot of extra operations. For moving nodes within the same document tree, you can use of the following functions instead:</p>
@@ -3158,7 +3158,7 @@ Sometimes instead of cloning a node you need to move an existing node to a diffe
 </div>
 </div>
 <div class="sect2">
-<h3 id="modify.fragments"><a class="anchor" href="#modify.fragments"></a><a class="link" href="#modify.fragments">6.7. Assembling document from fragments</a></h3>
+<h3 id="modify.fragments"><a class="anchor" href="#modify.fragments"></a><a class="link" href="#modify.fragments">6.8. Assembling document from fragments</a></h3>
 <div id="xml_node::append_buffer" class="paragraph">
 <p>pugixml provides several ways to assemble an XML document from other XML documents. Assuming there is a set of document fragments, represented as in-memory buffers, the implementation choices are as follows:</p>
 </div>
@@ -6167,7 +6167,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-05-19 13:23:06 -0700
+Last updated 2024-09-11 21:14:27 -0700
 </div>
 </div>
 </body>
