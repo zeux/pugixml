@@ -6,10 +6,10 @@ defines=standard
 cxxstd=c++11
 # set cxxstd=any to disable use of -std=...
 
-BUILD=build/make-$(firstword $(CXX))-$(config)-$(defines)-$(cxxstd)
+BUILD=build
 
 SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
-EXECUTABLE=$(BUILD)/test
+LIBRARY=$(BUILD)/libpugixml.a
 
 VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
 RELEASE=$(filter-out scripts/archive.py docs/%.adoc,$(shell git ls-files docs scripts src CMakeLists.txt LICENSE.md readme.txt))
@@ -50,17 +50,21 @@ endif
 
 OBJECTS=$(SOURCES:%=$(BUILD)/%.o)
 
-all: $(EXECUTABLE)
+all: $(LIBRARY)
+
+$(LIBRARY): $(OBJECTS)
+	@mkdir -p $(dir $@)
+	$(AR) $(ARFLAGS) $@ $(OBJECTS)
 
 ifeq ($(config),coverage)
-test: $(EXECUTABLE)
+test: $(LIBRARY)
 	-@find $(BUILD) -name '*.gcda' -exec rm {} +
 	./$(EXECUTABLE)
 	@gcov -b -o $(BUILD)/src/ pugixml.cpp.gcda | sed -e '/./{H;$!d;}' -e 'x;/pugixml.cpp/!d;'
 	@find . -name '*.gcov' -and -not -name 'pugixml.cpp.gcov' -exec rm {} +
 	@sed -i -e "s/#####\(.*\)\(\/\/ unreachable.*\)/    1\1\2/" pugixml.cpp.gcov
 else
-test: $(EXECUTABLE)
+test: $(LIBRARY)
 	./$(EXECUTABLE)
 endif
 
@@ -78,9 +82,6 @@ docs: docs/quickstart.html docs/manual.html
 build/pugixml-%: .FORCE | $(RELEASE)
 	@mkdir -p $(BUILD)
 	TIMESTAMP=`git show v$(VERSION) -s --format=%ct` && python3 scripts/archive.py $@ pugixml-$(VERSION) $$TIMESTAMP $|
-
-$(EXECUTABLE): $(OBJECTS)
-	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
 $(BUILD)/fuzz_%: tests/fuzz_%.cpp src/pugixml.cpp
 	@mkdir -p $(BUILD)
