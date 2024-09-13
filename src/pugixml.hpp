@@ -122,15 +122,10 @@
 #	endif
 #endif
 
-// Detect if C++ standard supports 'string_view' (2017 or higher)
-#ifndef PUGI_STRING_VIEW_SUPPORTED
-#	if defined(__cpp_lib_string_view) || __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
-#		define PUGI_STRING_VIEW_SUPPORTED
-#	endif
-#endif
-// Enable 'string_view' support if requested and supported
+// Enable 'string_view' support if requested and supported (at least C++17)
 #ifndef PUGI_HAS_STRING_VIEW
-#	if defined(PUGI_STRING_VIEW_SUPPORTED) && defined(PUGI_ENABLE_STRING_VIEW) && !defined(PUGIXML_NO_STL)
+#	if (defined(__cpp_lib_string_view) || __cplusplus >= 201703L || defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) \
+		&& defined(PUGIXML_STRING_VIEW) && !defined(PUGIXML_NO_STL)
 #		define PUGI_HAS_STRING_VIEW
 #	endif
 #endif
@@ -1524,6 +1519,10 @@ namespace std
 #if defined(PUGIXML_HEADER_ONLY) && !defined(PUGIXML_SOURCE)
 #	define PUGIXML_SOURCE "pugixml.cpp"
 #	include PUGIXML_SOURCE
+#endif
+
+#ifdef PUGI_HAS_STRING_VIEW
+#	undef PUGI_HAS_STRING_VIEW
 #endif
 
 /**
