@@ -4,6 +4,7 @@ MAKEFLAGS+=-r
 config=debug
 defines=standard
 cxxstd=c++11
+pugiflags=
 # set cxxstd=any to disable use of -std=...
 
 BUILD=build/make-$(firstword $(CXX))-$(config)-$(defines)-$(cxxstd)
@@ -38,6 +39,10 @@ endif
 ifneq ($(defines),standard)
 	COMMA=,
 	CXXFLAGS+=-D $(subst $(COMMA), -D ,$(defines))
+endif
+
+ifneq ($(pugiflags),)
+	CXXFLAGS+=$(pugiflags)
 endif
 
 ifneq ($(findstring PUGIXML_NO_EXCEPTIONS,$(defines)),)
