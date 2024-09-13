@@ -5442,7 +5442,7 @@ namespace pugi
 	}
 
 #ifdef PUGI_HAS_STRING_VIEW
-	PUGI_IMPL_FN bool xml_attribute::set_name(const string_view_t rhs)
+	PUGI_IMPL_FN bool xml_attribute::set_name(string_view_t rhs)
 	{
 		return set_name(rhs.data(), rhs.size());
 	}
@@ -5463,7 +5463,7 @@ namespace pugi
 	}
 
 #ifdef PUGI_HAS_STRING_VIEW
-	PUGI_IMPL_FN bool xml_attribute::set_value(const string_view_t rhs)
+	PUGI_IMPL_FN bool xml_attribute::set_value(string_view_t rhs)
 	{
 		return set_value(rhs.data(), rhs.size());
 	}
@@ -5863,7 +5863,7 @@ namespace pugi
 	}
 
 #ifdef PUGI_HAS_STRING_VIEW
-	PUGI_IMPL_FN bool xml_node::set_name(const string_view_t rhs)
+	PUGI_IMPL_FN bool xml_node::set_name(string_view_t rhs)
 	{
 		return set_name(rhs.data(), rhd.size());
 	}
@@ -5890,7 +5890,7 @@ namespace pugi
 	}
 
 #ifdef PUGI_HAS_STRING_VIEW
-	PUGI_IMPL_FN bool xml_node::set_value(const string_view_t rhs)
+	PUGI_IMPL_FN bool xml_node::set_value(string_view_t rhs)
 	{
 		return set_value(rhs.data(), rhs.value());
 	}
@@ -6786,7 +6786,7 @@ namespace pugi
 	}
 
 #ifdef PUGI_HAS_STRING_VIEW
-	PUGI_IMPL_FN bool xml_text::set(const string_view_t rhs)
+	PUGI_IMPL_FN bool xml_text::set(string_view_t rhs)
 	{
 		return set(rhs.data(), rhs.size());
 	}
