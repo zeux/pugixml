@@ -26,6 +26,11 @@
 // Uncomment this to disable STL
 // #define PUGIXML_NO_STL
 
+// Uncomment this to enable support for std::string_view (requires C++17, PUGIXML_NO_STL will override this)
+// Note: In a future version of pugixml this macro will become obsolete.
+//       Support will then be enabled automatically if the used C++ standard supports it.
+// #define PUGIXML_STRING_VIEW
+
 // Uncomment this to disable exceptions
 // #define PUGIXML_NO_EXCEPTIONS
 
