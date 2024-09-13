@@ -159,7 +159,7 @@ namespace pugi
 
 #ifdef PUGI_HAS_STRING_VIEW
 	// String view type used for overloads of functions that accept strings; depends on PUGIXML_WCHAR_MODE
-	using string_view_t = std::basic_string_view<char_t>;
+	typedef std::basic_string_view<char_t> string_view_t;
 #endif
 }
 
