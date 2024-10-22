@@ -301,7 +301,7 @@ TEST_XML(dom_text_set_partially_with_size, "<node/>")
     CHECK_NODE(node, STR("<node></node>"));
 }
 
-#ifdef PUGI_HAS_STRING_VIEW
+#ifdef PUGIXML_HAS_STRING_VIEW
 TEST_XML(dom_text_set_with_string_view, "<node/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -398,7 +398,7 @@ TEST_XML(dom_text_set_value, "<node/>")
 	CHECK(node.append_child(STR("text1")).text().set(STR("v1")));
 	CHECK(!xml_text().set(STR("v1")));
 	CHECK(!xml_text().set(STR("v1"), 2));
-#ifdef PUGI_HAS_STRING_VIEW
+#ifdef PUGIXML_HAS_STRING_VIEW
 	CHECK(!xml_text().set(string_view_t(STR("v1"))));
 #endif
 
@@ -537,7 +537,7 @@ TEST_XML(dom_text_middle, "<node><c1>notthisone</c1>text<c2/></node>")
     CHECK(t.data() == node.last_child());
 }
 
-#ifdef PUGI_HAS_STRING_VIEW
+#ifdef PUGIXML_HAS_STRING_VIEW
 TEST_XML(dom_text_middle_string_view, "<node><c1>notthisone</c1>text<c2/></node>")
 {
 	xml_node node = doc.child(STR("node"));

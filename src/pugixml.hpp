@@ -41,14 +41,14 @@
 // Check if std::string_view is both requested and available
 #if defined(PUGIXML_STRING_VIEW) && !defined(PUGIXML_NO_STL)
 #	if __cplusplus >= 201703L
-#		define PUGI_HAS_STRING_VIEW
+#		define PUGIXML_HAS_STRING_VIEW
 #	elif defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
-#		define PUGI_HAS_STRING_VIEW
+#		define PUGIXML_HAS_STRING_VIEW
 #	endif
 #endif
 
 // Include string_view if appropriate
-#ifdef PUGI_HAS_STRING_VIEW
+#ifdef PUGIXML_HAS_STRING_VIEW
 #	include <string_view>
 #endif
 
@@ -155,7 +155,7 @@ namespace pugi
 	typedef std::basic_string<PUGIXML_CHAR> string_t;
 #endif
 
-#ifdef PUGI_HAS_STRING_VIEW
+#ifdef PUGIXML_HAS_STRING_VIEW
 	// String view type used for operations that can work with a length delimited string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string_view<PUGIXML_CHAR> string_view_t;
 #endif
@@ -442,12 +442,12 @@ namespace pugi
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
 		bool set_name(const char_t* rhs, size_t size);
-	#ifdef PUGI_HAS_STRING_VIEW
+	#ifdef PUGIXML_HAS_STRING_VIEW
 		bool set_name(string_view_t rhs);
 	#endif
 		bool set_value(const char_t* rhs);
 		bool set_value(const char_t* rhs, size_t size);
-	#ifdef PUGI_HAS_STRING_VIEW
+	#ifdef PUGIXML_HAS_STRING_VIEW
 		bool set_value(string_view_t rhs);
 	#endif
 
@@ -584,12 +584,12 @@ namespace pugi
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(const char_t* rhs);
 		bool set_name(const char_t* rhs, size_t size);
-	#ifdef PUGI_HAS_STRING_VIEW
+	#ifdef PUGIXML_HAS_STRING_VIEW
 		bool set_name(string_view_t rhs);
 	#endif
 		bool set_value(const char_t* rhs);
 		bool set_value(const char_t* rhs, size_t size);
-	#ifdef PUGI_HAS_STRING_VIEW
+	#ifdef PUGIXML_HAS_STRING_VIEW
 		bool set_value(string_view_t rhs);
 	#endif
 
@@ -821,7 +821,7 @@ namespace pugi
 		// Set text (returns false if object is empty or there is not enough memory)
 		bool set(const char_t* rhs);
 		bool set(const char_t* rhs, size_t size);
-	#ifdef PUGI_HAS_STRING_VIEW
+	#ifdef PUGIXML_HAS_STRING_VIEW
 		bool set(string_view_t rhs);
 	#endif
 
