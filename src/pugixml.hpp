@@ -38,6 +38,20 @@
 #	include <string>
 #endif
 
+// Check if std::string_view is both requested and available
+#if defined(PUGIXML_STRING_VIEW) && !defined(PUGIXML_NO_STL)
+#	if __cplusplus >= 201703L
+#		define PUGIXML_HAS_STRING_VIEW
+#	elif defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
+#		define PUGIXML_HAS_STRING_VIEW
+#	endif
+#endif
+
+// Include string_view if appropriate
+#ifdef PUGIXML_HAS_STRING_VIEW
+#	include <string_view>
+#endif
+
 // Macro for deprecated features
 #ifndef PUGIXML_DEPRECATED
 #	if defined(__GNUC__)
@@ -139,6 +153,11 @@ namespace pugi
 #ifndef PUGIXML_NO_STL
 	// String type used for operations that work with STL string; depends on PUGIXML_WCHAR_MODE
 	typedef std::basic_string<PUGIXML_CHAR> string_t;
+#endif
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+	// String view type used for operations that can work with a length delimited string; depends on PUGIXML_WCHAR_MODE
+	typedef std::basic_string_view<PUGIXML_CHAR> string_view_t;
 #endif
 }
 
@@ -423,8 +442,14 @@ namespace pugi
 		// Set attribute name/value (returns false if attribute is empty or there is not enough memory)
 		bool set_name(const char_t* rhs);
 		bool set_name(const char_t* rhs, size_t size);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		bool set_name(string_view_t rhs);
+	#endif
 		bool set_value(const char_t* rhs);
 		bool set_value(const char_t* rhs, size_t size);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		bool set_value(string_view_t rhs);
+	#endif
 
 		// Set attribute value with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set_value(int rhs);
@@ -559,8 +584,14 @@ namespace pugi
 		// Set node name/value (returns false if node is empty, there is not enough memory, or node can not have name/value)
 		bool set_name(const char_t* rhs);
 		bool set_name(const char_t* rhs, size_t size);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		bool set_name(string_view_t rhs);
+	#endif
 		bool set_value(const char_t* rhs);
 		bool set_value(const char_t* rhs, size_t size);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		bool set_value(string_view_t rhs);
+	#endif
 
 		// Add attribute with specified name. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_attribute(const char_t* name);
@@ -790,6 +821,9 @@ namespace pugi
 		// Set text (returns false if object is empty or there is not enough memory)
 		bool set(const char_t* rhs);
 		bool set(const char_t* rhs, size_t size);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		bool set(string_view_t rhs);
+	#endif
 
 		// Set text with type conversion (numbers are converted to strings, boolean is converted to "true"/"false")
 		bool set(int rhs);

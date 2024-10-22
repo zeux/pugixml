@@ -49,6 +49,11 @@
 // Uncomment this to enable long long support
 // #define PUGIXML_HAS_LONG_LONG
 
+// Uncomment this to enable support for std::string_view (requires c++17 and for PUGIXML_NO_STL to not be set)
+// Note: In a future version of pugixml this macro will become obsolete.
+//       Support will then be enabled automatically if the used C++ standard supports it.
+// #define PUGIXML_STRING_VIEW
+
 #endif
 
 /**

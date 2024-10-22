@@ -301,6 +301,69 @@ TEST_XML(dom_text_set_partially_with_size, "<node/>")
     CHECK_NODE(node, STR("<node></node>"));
 }
 
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_text_set_with_string_view, "<node/>")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_text t = node.text();
+
+	t.set(string_view_t(STR("")));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK_NODE(node, STR("<node></node>"));
+
+	t.set(string_view_t(STR("boo")));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK(node.first_child() == node.last_child());
+	CHECK_NODE(node, STR("<node>boo</node>"));
+
+	t.set(string_view_t(STR("foobarfoobar")));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK(node.first_child() == node.last_child());
+	CHECK_NODE(node, STR("<node>foobarfoobar</node>"));
+
+	t.set(string_view_t(STR("")));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK_NODE(node, STR("<node></node>"));
+
+	t.set(string_view_t(STR("something")));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK_NODE(node, STR("<node>something</node>"));
+
+	// empty string view (null data pointer)
+	t.set(string_view_t());
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK_NODE(node, STR("<node></node>"));
+
+	t.set(string_view_t(STR("afternulldata")));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK_NODE(node, STR("<node>afternulldata</node>"));
+}
+
+TEST_XML(dom_text_set_partially_with_string_view, "<node/>")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_text t = node.text();
+
+	t.set(string_view_t(STR("foo"), 0));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK_NODE(node, STR("<node></node>"));
+
+	t.set(string_view_t(STR("boofoo"), 3));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK(node.first_child() == node.last_child());
+	CHECK_NODE(node, STR("<node>boo</node>"));
+
+	t.set(string_view_t(STR("foobarfoobar"), 3));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK(node.first_child() == node.last_child());
+	CHECK_NODE(node, STR("<node>foo</node>"));
+
+	t.set(string_view_t(STR("foo"), 0));
+	CHECK(node.first_child().type() == node_pcdata);
+	CHECK_NODE(node, STR("<node></node>"));
+}
+#endif
+
 TEST_XML(dom_text_assign, "<node/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -334,6 +397,10 @@ TEST_XML(dom_text_set_value, "<node/>")
 
 	CHECK(node.append_child(STR("text1")).text().set(STR("v1")));
 	CHECK(!xml_text().set(STR("v1")));
+	CHECK(!xml_text().set(STR("v1"), 2));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(!xml_text().set(string_view_t(STR("v1"))));
+#endif
 
 	CHECK(node.append_child(STR("text2")).text().set(-2147483647));
 	CHECK(node.append_child(STR("text3")).text().set(-2147483647 - 1));
@@ -469,6 +536,29 @@ TEST_XML(dom_text_middle, "<node><c1>notthisone</c1>text<c2/></node>")
     CHECK_NODE(node, STR("<node><c1>notthisone</c1><c2/>yestext</node>"));
     CHECK(t.data() == node.last_child());
 }
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_text_middle_string_view, "<node><c1>notthisone</c1>text<c2/></node>")
+{
+	xml_node node = doc.child(STR("node"));
+	xml_text t = node.text();
+
+	CHECK_STRING(t.get(), STR("text"));
+	t.set(string_view_t(STR("notext")));
+
+	CHECK_NODE(node, STR("<node><c1>notthisone</c1>notext<c2/></node>"));
+	CHECK(node.remove_child(t.data()));
+
+	CHECK(!t);
+	CHECK_NODE(node, STR("<node><c1>notthisone</c1><c2/></node>"));
+
+	t.set(string_view_t(STR("yestext")));
+
+	CHECK(t);
+	CHECK_NODE(node, STR("<node><c1>notthisone</c1><c2/>yestext</node>"));
+	CHECK(t.data() == node.last_child());
+}
+#endif
 
 TEST_XML_FLAGS(dom_text_data, "<node><a>foo</a><b><![CDATA[bar]]></b><c><?pi value?></c><d/></node>", parse_default | parse_pi)
 {

@@ -56,6 +56,23 @@ TEST_XML(dom_attr_set_name_with_size, "<node attr='value' />")
 	CHECK_NODE(doc, STR("<node n=\"value\"/>"));
 }
 
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_attr_set_name_with_string_view, "<node attr='value' />")
+{
+	xml_attribute attr = doc.child(STR("node")).attribute(STR("attr"));
+
+	CHECK(attr.set_name(string_view_t()));
+	CHECK(!xml_attribute().set_name(string_view_t()));
+
+	CHECK_NODE(doc, STR("<node :anonymous=\"value\"/>"));
+
+	CHECK(attr.set_name(string_view_t(STR("n1234"), 1)));
+	CHECK(!xml_attribute().set_name(string_view_t(STR("nfail"), 1)));
+
+	CHECK_NODE(doc, STR("<node n=\"value\"/>"));
+}
+#endif
+
 TEST_XML(dom_attr_set_value, "<node/>")
 {
 	xml_node node = doc.child(STR("node"));
@@ -225,6 +242,25 @@ TEST_XML(dom_node_set_name_with_size, "<node>text</node>")
 	CHECK_NODE(doc, STR("<n>text</n>"));
 }
 
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_node_set_name_with_string_view, "<node>text</node>")
+{
+	xml_node node = doc.child(STR("node"));
+
+	CHECK(node.set_name(string_view_t()));
+	CHECK(!node.first_child().set_name(string_view_t(STR("n42"), 1)));
+	CHECK(!xml_node().set_name(string_view_t(STR("nanothername"), 1)));
+
+	CHECK_NODE(doc, STR("<:anonymous>text</:anonymous>"));
+
+	CHECK(node.set_name(string_view_t(STR("nlongname"), 1)));
+	CHECK(!doc.child(STR("node")).first_child().set_name(string_view_t(STR("n42"), 1)));
+	CHECK(!xml_node().set_name(string_view_t(STR("nanothername"), 1)));
+
+	CHECK_NODE(doc, STR("<n>text</n>"));
+}
+#endif
+
 TEST_XML(dom_node_set_value, "<node>text</node>")
 {
 	CHECK(doc.child(STR("node")).first_child().set_value(STR("no text")));
@@ -251,6 +287,26 @@ TEST_XML(dom_node_set_value_with_size, "<node>text</node>")
 
 	CHECK_NODE(doc, STR("<node>no text</node>"));
 }
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_node_set_value_partially_with_string_view, "<node>text</node>")
+{
+	CHECK(doc.child(STR("node")).first_child().set_value(string_view_t(STR("no text"), 2)));
+	CHECK(!doc.child(STR("node")).set_value(string_view_t(STR("no text"), 2)));
+	CHECK(!xml_node().set_value(string_view_t(STR("no text"), 2)));
+
+	CHECK_NODE(doc, STR("<node>no</node>"));
+}
+
+TEST_XML(dom_node_set_value_with_string_view, "<node>text</node>")
+{
+	CHECK(doc.child(STR("node")).first_child().set_value(string_view_t(STR("no text"), 7)));
+	CHECK(!doc.child(STR("node")).set_value(string_view_t(STR("no text"), 7)));
+	CHECK(!xml_node().set_value(string_view_t(STR("no text"), 7)));
+
+	CHECK_NODE(doc, STR("<node>no text</node>"));
+}
+#endif
 
 TEST_XML(dom_node_set_value_allocated, "<node>text</node>")
 {
