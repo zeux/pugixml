@@ -1392,7 +1392,7 @@ TEST_XML(dom_node_anonymous_child, "<node></node>")
 	xml_node node = doc.child(STR("node"));
 	CHECK_NAME_VALUE(node, STR("node"), STR(""));
 	node.set_name(STR(""));
-	CHECK_NODE(doc, "<:anonymous/>");
+	CHECK_NODE(doc, STR("<:anonymous/>"));
 	CHECK(doc.first_child() != xml_node());
 	CHECK_NAME_VALUE(doc.first_child(), STR(""), STR(""));
 
@@ -1400,7 +1400,7 @@ TEST_XML(dom_node_anonymous_child, "<node></node>")
 	CHECK(doc.child(STR("")) == xml_node());
 #ifdef PUGIXML_HAS_STRING_VIEW
 	CHECK(doc.child(string_view_t()) == xml_node());
-	CHECK(doc.child(string_view_t("hi", 0)) == xml_node());
+	CHECK(doc.child(string_view_t(STR("hi"), 0)) == xml_node());
 #endif
 }
 
@@ -1409,12 +1409,12 @@ TEST_XML(dom_node_anonymous_attribute, "<node attr='0'/>")
 	xml_attribute attr = doc.first_child().attribute(STR("attr"));
 	CHECK(attr != xml_attribute());
 	attr.set_name(STR(""));
-	CHECK_NODE(doc, "<node :anonymous=\"0\"/>");
+	CHECK_NODE(doc, STR("<node :anonymous=\"0\"/>"));
 	CHECK_NAME_VALUE(doc.first_child().first_attribute(), STR(""), STR("0"));
 
 	CHECK(doc.first_child().attribute(STR("")) == xml_attribute());
 #ifdef PUGIXML_STRING_VIEW
 	CHECK(doc.first_child().attribute(string_view_t()) == xml_attribute());
-	CHECK(doc.first_child().attribute(string_view_t("hi", 0)) == xml_attribute());
+	CHECK(doc.first_child().attribute(string_view_t(STR("hi"), 0)) == xml_attribute());
 #endif
 }
