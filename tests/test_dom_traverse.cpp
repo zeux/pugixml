@@ -1413,7 +1413,7 @@ TEST_XML(dom_node_anonymous_attribute, "<node attr='0'/>")
 	CHECK_NAME_VALUE(doc.first_child().first_attribute(), STR(""), STR("0"));
 
 	CHECK(doc.first_child().attribute(STR("")) == xml_attribute());
-#ifdef PUGIXML_STRING_VIEW
+#ifdef PUGIXML_HAS_STRING_VIEW
 	CHECK(doc.first_child().attribute(string_view_t()) == xml_attribute());
 	CHECK(doc.first_child().attribute(string_view_t(STR("hi"), 0)) == xml_attribute());
 #endif
