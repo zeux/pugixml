@@ -12700,7 +12700,7 @@ namespace pugi
 		assert(_result.error);
 	}
 
-	PUGI_IMPL_FN const char* xpath_exception::what() const throw()
+	PUGI_IMPL_FN const char* xpath_exception::what() const PUGIXML_NOEXCEPT
 	{
 		return _result.error;
 	}
