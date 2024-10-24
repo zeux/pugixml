@@ -7,8 +7,6 @@
 #include <string.h>
 #include <limits.h>
 
-#include "writer_string.hpp"
-
 using namespace pugi;
 
 TEST_XML(dom_attr_assign, "<node/>")
