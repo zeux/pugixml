@@ -388,7 +388,14 @@ TEST_XML(dom_text_assign, "<node/>")
 	node.append_child(STR("text8")).text() = true;
 	xml_text() = true;
 
-	CHECK_NODE(node, STR("<node><text1>v1</text1><text2>-2147483647</text2><text3>-2147483648</text3><text4>4294967295</text4><text5>4294967294</text5><text6>0.5</text6><text7>0.25</text7><text8>true</text8></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	node.append_child(string_view_t(STR("text9"))).text() = string_view_t(STR("v2"));
+	xml_text() = string_view_t(STR("text9"));
+#else
+	node.append_child(STR("text9")).text() = STR("v2");
+#endif
+
+	CHECK_NODE(node, STR("<node><text1>v1</text1><text2>-2147483647</text2><text3>-2147483648</text3><text4>4294967295</text4><text5>4294967294</text5><text6>0.5</text6><text7>0.25</text7><text8>true</text8><text9>v2</text9></node>"));
 }
 
 TEST_XML(dom_text_set_value, "<node/>")

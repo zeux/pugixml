@@ -33,7 +33,13 @@ TEST_XML(dom_attr_assign, "<node/>")
 	node.append_attribute(STR("attr8")) = true;
 	xml_attribute() = true;
 
-	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\"/>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	node.append_attribute(string_view_t(STR("attr9"))) = string_view_t(STR("v2"));
+#else
+	node.append_attribute(STR("attr9")) = STR("v2");
+#endif
+
+	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" attr9=\"v2\"/>"));
 }
 
 TEST_XML(dom_attr_set_name, "<node attr='value' />")
@@ -103,7 +109,14 @@ TEST_XML(dom_attr_set_value, "<node/>")
 	CHECK(node.append_attribute(STR("attr10")).set_value(STR("v3foobar"), 2));
 	CHECK(!xml_attribute().set_value(STR("v3")));
 
-	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" attr9=\"v2\" attr10=\"v3\"/>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(node.append_attribute(string_view_t(STR("attr11"))).set_value(string_view_t(STR("v4"))));
+	CHECK(!xml_attribute().set_value(string_view_t(STR("v4"))));
+#else
+	CHECK(node.append_attribute(STR("attr11")).set_value(STR("v4")));
+#endif
+
+	CHECK_NODE(node, STR("<node attr1=\"v1\" attr2=\"-2147483647\" attr3=\"-2147483648\" attr4=\"4294967295\" attr5=\"4294967294\" attr6=\"0.5\" attr7=\"0.25\" attr8=\"true\" attr9=\"v2\" attr10=\"v3\" attr11=\"v4\"/>"));
 }
 
 #if LONG_MAX > 2147483647
@@ -335,7 +348,15 @@ TEST_XML(dom_node_prepend_attribute, "<node><child/></node>")
 	CHECK(a3 && a1 != a3 && a2 != a3);
 	a3 = STR("v3");
 
-	CHECK_NODE(doc, STR("<node a2=\"v2\" a1=\"v1\"><child a3=\"v3\"/></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_attribute a4 = doc.child(STR("node")).child(STR("child")).prepend_attribute(string_view_t(STR("a4")));
+#else
+	xml_attribute a4 = doc.child(STR("node")).child(STR("child")).prepend_attribute(STR("a4"));
+#endif
+	CHECK(a4 && a1 != a4 && a2 != a4 && a3 != a4);
+	a4 = STR("v4");
+
+	CHECK_NODE(doc, STR("<node a2=\"v2\" a1=\"v1\"><child a4=\"v4\" a3=\"v3\"/></node>"));
 }
 
 TEST_XML(dom_node_append_attribute, "<node><child/></node>")
@@ -385,7 +406,17 @@ TEST_XML(dom_node_insert_attribute_after, "<node a1='v1'><child a2='v2'/></node>
 
 	CHECK(child.insert_attribute_after(STR("a"), a4) == xml_attribute());
 
-	CHECK_NODE(doc, STR("<node a1=\"v1\" a4=\"v4\" a3=\"v3\" a5=\"v5\"><child a2=\"v2\"/></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_attribute a6 = node.insert_attribute_after(string_view_t(STR("a6")), a5);
+	CHECK(child.insert_attribute_after(string_view_t(STR("a")), a5) == xml_attribute());
+#else
+	xml_attribute a6 = node.insert_attribute_after(STR("a6"), a5);
+	CHECK(child.insert_attribute_after(STR("a"), a5) == xml_attribute());
+#endif
+	CHECK(a6 && a6 != a5 && a6 != a4 && a6 != a3 && a6 != a2 && a6 != a1);
+	a6 = STR("v6");
+
+	CHECK_NODE(doc, STR("<node a1=\"v1\" a4=\"v4\" a3=\"v3\" a5=\"v5\" a6=\"v6\"><child a2=\"v2\"/></node>"));
 }
 
 TEST_XML(dom_node_insert_attribute_before, "<node a1='v1'><child a2='v2'/></node>")
@@ -415,7 +446,17 @@ TEST_XML(dom_node_insert_attribute_before, "<node a1='v1'><child a2='v2'/></node
 
 	CHECK(child.insert_attribute_before(STR("a"), a4) == xml_attribute());
 
-	CHECK_NODE(doc, STR("<node a5=\"v5\" a3=\"v3\" a4=\"v4\" a1=\"v1\"><child a2=\"v2\"/></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_attribute a6 = node.insert_attribute_before(string_view_t(STR("a6")), a1);
+	CHECK(child.insert_attribute_before(string_view_t(STR("a")), a4) == xml_attribute());
+#else
+	xml_attribute a6 = node.insert_attribute_before(STR("a6"), a1);
+	CHECK(child.insert_attribute_before(STR("a"), a4) == xml_attribute());
+#endif
+	CHECK(a6 && a6 != a5 && a6 != a4 && a6 != a3 && a6 != a2 && a6 != a1);
+	a6 = STR("v6");
+
+	CHECK_NODE(doc, STR("<node a5=\"v5\" a3=\"v3\" a4=\"v4\" a6=\"v6\" a1=\"v1\"><child a2=\"v2\"/></node>"));
 }
 
 TEST_XML(dom_node_prepend_copy_attribute, "<node a1='v1'><child a2='v2'/><child/></node>")
@@ -589,6 +630,14 @@ TEST_XML(dom_node_remove_attribute, "<node a1='v1' a2='v2' a3='v3'><child a4='v4
 	CHECK(child.remove_attribute(STR("a4")));
 
 	CHECK_NODE(doc, STR("<node a2=\"v2\"><child/></node>"));
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(!node.remove_attribute(string_view_t()));
+	CHECK(!node.remove_attribute(string_view_t(STR("a2"), 1)));
+	CHECK(node.remove_attribute(string_view_t(STR("a2extra"), 2)));
+
+	CHECK_NODE(doc, STR("<node><child/></node>"));
+#endif
 }
 
 TEST_XML(dom_node_remove_attributes, "<node a1='v1' a2='v2' a3='v3'><child a4='v4'/></node>")
@@ -747,6 +796,10 @@ TEST_XML(dom_node_prepend_child_name, "<node>foo<child/></node>")
 {
 	CHECK(xml_node().prepend_child(STR("")) == xml_node());
 	CHECK(doc.child(STR("node")).first_child().prepend_child(STR("")) == xml_node());
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(xml_node().prepend_child(string_view_t()) == xml_node());
+	CHECK(doc.child(STR("node")).first_child().prepend_child(string_view_t()) == xml_node());
+#endif
 
 	xml_node n1 = doc.child(STR("node")).prepend_child(STR("n1"));
 	CHECK(n1);
@@ -754,7 +807,14 @@ TEST_XML(dom_node_prepend_child_name, "<node>foo<child/></node>")
 	xml_node n2 = doc.child(STR("node")).prepend_child(STR("n2"));
 	CHECK(n2 && n1 != n2);
 
-	CHECK_NODE(doc, STR("<node><n2/><n1/>foo<child/></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_node n3 = doc.prepend_child(string_view_t(STR("n3")));
+#else
+	xml_node n3 = doc.prepend_child(STR("n3"));
+#endif
+	CHECK(n3 && n1 != n3 && n2 != n3);
+
+	CHECK_NODE(doc, STR("<n3/><node><n2/><n1/>foo<child/></node>"));
 }
 
 TEST_XML(dom_node_append_child_name, "<node>foo<child/></node>")
@@ -768,7 +828,14 @@ TEST_XML(dom_node_append_child_name, "<node>foo<child/></node>")
 	xml_node n2 = doc.child(STR("node")).append_child(STR("n2"));
 	CHECK(n2 && n1 != n2);
 
-	CHECK_NODE(doc, STR("<node>foo<child/><n1/><n2/></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_node n3 = doc.append_child(string_view_t(STR("n3")));
+#else
+	xml_node n3 = doc.append_child(STR("n3"));
+#endif
+	CHECK(n3 && n3 != n2 && n3 != n1);
+
+	CHECK_NODE(doc, STR("<node>foo<child/><n1/><n2/></node><n3/>"));
 }
 
 TEST_XML(dom_node_insert_child_after_name, "<node>foo<child/></node>")
@@ -790,7 +857,14 @@ TEST_XML(dom_node_insert_child_after_name, "<node>foo<child/></node>")
 
 	CHECK(child.insert_child_after(STR(""), n2) == xml_node());
 
-	CHECK_NODE(doc, STR("<node>foo<child/><n2/><n1/></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_node n3 = node.insert_child_after(string_view_t(STR("n3")), n1);
+#else
+	xml_node n3 = node.insert_child_after(STR("n3"), n1);
+#endif
+	CHECK(n3 && n3 != node && n3 != child && n3 != n2 && n3 != n1);
+
+	CHECK_NODE(doc, STR("<node>foo<child/><n2/><n1/><n3/></node>"));
 }
 
 TEST_XML(dom_node_insert_child_before_name, "<node>foo<child/></node>")
@@ -812,7 +886,14 @@ TEST_XML(dom_node_insert_child_before_name, "<node>foo<child/></node>")
 
 	CHECK(child.insert_child_before(STR(""), n2) == xml_node());
 
-	CHECK_NODE(doc, STR("<node>foo<n1/><n2/><child/></node>"));
+#ifdef PUGIXML_HAS_STRING_VIEW
+	xml_node n3 = node.insert_child_before(string_view_t(STR("n3")), child);
+#else
+	xml_node n3 = node.insert_child_before(STR("n3"), child);
+#endif
+	CHECK(n3 && n3 != node && n3 != child && n3 != n2 && n3 != n1);
+
+	CHECK_NODE(doc, STR("<node>foo<n1/><n2/><n3/><child/></node>"));
 }
 
 TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node>")
@@ -834,6 +915,20 @@ TEST_XML(dom_node_remove_child, "<node><n1/><n2/><n3/><child><n4/></child></node
 	CHECK(child.remove_child(STR("n4")));
 
 	CHECK_NODE(doc, STR("<node><n2/><child/></node>"));
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(!node.remove_child(string_view_t()));
+	CHECK(!node.remove_child(string_view_t(STR("child"), 3)));
+	CHECK(!node.remove_child(string_view_t(STR("n2"), 1)));
+
+	CHECK_NODE(doc, STR("<node><n2/><child/></node>"));
+
+	CHECK(node.remove_child(string_view_t(STR("child"))));
+	CHECK_NODE(doc, STR("<node><n2/></node>"));
+
+	CHECK(node.remove_child(string_view_t(STR("n2_notinview"), 2)));
+	CHECK_NODE(doc, STR("<node/>"));
+#endif
 }
 
 TEST_XML(dom_node_remove_children, "<node><n1/><n2/><n3/><child><n4/></child></node>")

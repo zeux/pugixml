@@ -536,6 +536,42 @@ TEST_XML(dom_node_child, "<node><child1/><child2/></node>")
 	CHECK(doc.child(STR("node")).child(STR("child2")) == doc.child(STR("node")).last_child());
 }
 
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_node_child_stringview, "<node><child1/><child2/></node>")
+{
+	CHECK(xml_node().child(string_view_t(STR("n"))) == xml_node());
+	CHECK(doc.child(string_view_t()) == xml_node());
+	CHECK(doc.child(string_view_t(STR("n"))) == xml_node());
+
+	xml_node node = doc.child(string_view_t(STR("node")));
+	CHECK_NAME_VALUE(node, STR("node"), STR(""));
+	CHECK(node.child(string_view_t(STR("child2"))) == node.last_child());
+
+	// verify only the characters in the view of the string view are included in the comparison
+	CHECK_NAME_VALUE(doc.child(string_view_t(STR("node_andextratext"), 4)), STR("node"), STR(""));
+	CHECK(doc.child(string_view_t(STR("node"), 2)) == xml_node());
+}
+
+TEST_XML(dom_node_child_interior_null, "<node><child1/><child2/></node>")
+{
+	const char_t name[] = STR("node\0extra");
+	size_t len = (sizeof(name) / sizeof(char_t)) - 1;
+	CHECK(len == 10);
+
+	xml_node node = doc.child(string_view_t(name, 4)); // "node" view excluding null
+	CHECK_NAME_VALUE(node, STR("node"), STR(""));
+	CHECK(doc.child(string_view_t(name, 5)) == xml_node()); // "node\0" view including null
+	CHECK(doc.child(string_view_t(name, len)) == xml_node()); // "node\0extra" view
+
+	node.set_name(string_view_t(name, len));
+	CHECK_NODE(doc, STR("<node><child1/><child2/></node>"));
+	CHECK_NAME_VALUE(node, STR("node"), STR(""));
+	CHECK_NAME_VALUE(doc.child(string_view_t(name, 4)), STR("node"), STR(""));  // "node" view excluding null
+	CHECK(doc.child(string_view_t(name, 5)) == xml_node()); // "node\0" view including null
+	CHECK(doc.child(string_view_t(name, len)) == xml_node()); // "node\0extra" view
+}
+#endif
+
 TEST_XML(dom_node_attribute, "<node attr1='0' attr2='1'/>")
 {
 	CHECK(xml_node().attribute(STR("a")) == xml_attribute());
@@ -546,6 +582,46 @@ TEST_XML(dom_node_attribute, "<node attr1='0' attr2='1'/>")
 	CHECK_NAME_VALUE(node.attribute(STR("attr1")), STR("attr1"), STR("0"));
 	CHECK(node.attribute(STR("attr2")) == node.last_attribute());
 }
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_node_attribute_stringview, "<node attr1='0' attr2='1'/>")
+{
+	CHECK(xml_node().attribute(string_view_t(STR("a"))) == xml_attribute());
+
+	xml_node node = doc.child(string_view_t(STR("node")));
+
+	CHECK(node.attribute(string_view_t()) == xml_attribute());
+	CHECK(node.attribute(string_view_t(STR("n"))) == xml_attribute());
+	CHECK_NAME_VALUE(node.attribute(string_view_t(STR("attr1"))), STR("attr1"), STR("0"));
+	CHECK(node.attribute(string_view_t(STR("attr2"))) == node.last_attribute());
+
+	// verify only the characters in the view of the string view are included in the comparison
+	CHECK_NAME_VALUE(node.attribute(string_view_t(STR("attr1_andextratext"), 5)), STR("attr1"), STR("0"));
+	CHECK(node.attribute(string_view_t(STR("attr1"), 2)) == xml_attribute());
+}
+
+TEST_XML(dom_node_attribute_interior_null, "<node attr1='0' attr2='1'/>")
+{
+	xml_node node = doc.child(STR("node"));
+	CHECK_NAME_VALUE(node, STR("node"), STR(""));
+
+	const char_t name[] = STR("attr2\0extra");
+	size_t len = (sizeof(name) / sizeof(char_t)) - 1;
+	CHECK(len == 11);
+	CHECK_NAME_VALUE(node.attribute(string_view_t(name, 5)), STR("attr2"), STR("1")); // "attr2" view excluding null
+	CHECK(node.attribute(string_view_t(name, 6)) == xml_attribute()); // "attr2\0" view including null
+	CHECK(node.attribute(string_view_t(name, len)) == xml_attribute()); // "attr2\0extra" view
+
+	xml_attribute attr = node.attribute(STR("attr2"));
+	CHECK_NAME_VALUE(attr, STR("attr2"), STR("1"));
+	attr.set_name(string_view_t(name, len));
+
+	CHECK_NODE(doc, STR("<node attr1=\"0\" attr2=\"1\"/>"));
+	CHECK_NAME_VALUE(node.attribute(string_view_t(name, 5)), STR("attr2"), STR("1")); // "attr2" view excluding null
+	CHECK(node.attribute(string_view_t(name, 6)) == xml_attribute()); // "attr2\0" view including null
+	CHECK(node.attribute(string_view_t(name, len)) == xml_attribute()); // "attr2\0extra" view
+}
+#endif
 
 TEST_XML(dom_node_next_previous_sibling, "<node><child1/><child2/><child3/></node>")
 {
@@ -567,9 +643,17 @@ TEST_XML(dom_node_next_previous_sibling, "<node><child1/><child2/><child3/></nod
 
 	CHECK(child1.next_sibling(STR("child3")) == child3);
 	CHECK(child1.next_sibling(STR("child")) == xml_node());
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(child1.next_sibling(string_view_t(STR("child3"))) == child3);
+	CHECK(child1.next_sibling(string_view_t(STR("child"))) == xml_node());
+#endif
 
 	CHECK(child3.previous_sibling(STR("child1")) == child1);
 	CHECK(child3.previous_sibling(STR("child")) == xml_node());
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(child3.previous_sibling(string_view_t(STR("child1"))) == child1);
+	CHECK(child3.previous_sibling(string_view_t(STR("child"))) == xml_node());
+#endif
 }
 
 TEST_XML(dom_node_child_value, "<node><novalue/><child1>value1</child1><child2>value2<n/></child2><child3><![CDATA[value3]]></child3>value4</node>")
@@ -1166,6 +1250,64 @@ TEST_XML(dom_node_attribute_hinted, "<node attr1='1' attr2='2' attr3='3' />")
 	CHECK(!node.attribute(STR("attr"), hint) && hint == attr2);
 }
 
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST_XML(dom_node_attribute_hinted_stringview, "<node attr1='1' attr2='2' attr3='3' />")
+{
+	xml_node node = doc.first_child();
+	string_view_t a1name = string_view_t(STR("attr1"));
+	string_view_t a2name = string_view_t(STR("attr2"));
+	string_view_t a3name = string_view_t(STR("attr3"));
+	xml_attribute attr1 = node.attribute(a1name);
+	xml_attribute attr2 = node.attribute(a2name);
+	xml_attribute attr3 = node.attribute(a3name);
+
+	xml_attribute hint;
+	CHECK(!xml_node().attribute(string_view_t(string_view_t(STR("test"))), hint) && !hint);
+
+	CHECK(node.attribute(a2name, hint) == attr2 && hint == attr3);
+	CHECK(node.attribute(a3name, hint) == attr3 && !hint);
+
+	CHECK(node.attribute(a1name, hint) == attr1 && hint == attr2);
+	CHECK(node.attribute(a2name, hint) == attr2 && hint == attr3);
+	CHECK(node.attribute(a1name, hint) == attr1 && hint == attr2);
+	CHECK(node.attribute(a1name, hint) == attr1 && hint == attr2);
+
+	CHECK(!node.attribute(string_view_t(), hint) && hint == attr2);
+	CHECK(!node.attribute(string_view_t(STR("attr1"), 4), hint) && hint == attr2); // "attr"
+	CHECK(node.attribute(string_view_t(STR("attr3_extra"), 5), hint) == attr3 && !hint); // "attr3"
+}
+
+TEST_XML(dom_node_attribute_hint_interior_null, "<node attr1='1' attr2='2' attr3='3' />")
+{
+	xml_node node = doc.first_child();
+
+	xml_attribute attr1 = node.attribute(STR("attr1"));
+	xml_attribute attr2 = node.attribute(STR("attr2"));
+	xml_attribute attr3 = node.attribute(STR("attr3"));
+
+	CHECK(node && attr1 && attr2 && attr3);
+
+	const char_t name[] = STR("attr2\0extra");
+	size_t len = (sizeof(name) / sizeof(char_t)) - 1;
+	CHECK(len == 11);
+
+	xml_attribute hint;
+	CHECK(node.attribute(string_view_t(name, 5), hint) == attr2 && hint == attr3); // "attr2"
+	CHECK(node.attribute(string_view_t(name, 5), hint) == attr2 && hint == attr3); // "attr2"
+
+	CHECK(!node.attribute(string_view_t(name, 6), hint) && hint == attr3); // "attr2\0"
+	CHECK(!node.attribute(string_view_t(name, len), hint) && hint == attr3); // "attr2\0extra"
+
+	attr2.set_name(string_view_t(name, len)); // attr2\0extra
+
+	CHECK(node.attribute(string_view_t(name, 5), hint) == attr2 && hint == attr3); // "attr2"
+	CHECK(node.attribute(string_view_t(name, 5), hint) == attr2 && hint == attr3); // "attr2"
+
+	CHECK(!node.attribute(string_view_t(name, 6), hint) && hint == attr3); // "attr2\0"
+	CHECK(!node.attribute(string_view_t(name, len), hint) && hint == attr3); // "attr2\0extra"
+}
+#endif
+
 TEST_XML(dom_as_int_overflow, "<node attr1='-2147483649' attr2='2147483648' attr3='-4294967296' />")
 {
 	xml_node node = doc.child(STR("node"));
@@ -1301,4 +1443,36 @@ TEST(dom_node_anonymous)
 	CHECK(doc.last_child().previous_sibling(STR("node")) == xml_node());
 	CHECK_STRING(doc.child_value(), STR(""));
 	CHECK_STRING(doc.last_child().child_value(), STR(""));
+}
+
+TEST_XML(dom_node_anonymous_child, "<node></node>")
+{
+	xml_node node = doc.child(STR("node"));
+	CHECK_NAME_VALUE(node, STR("node"), STR(""));
+	node.set_name(STR(""));
+	CHECK_NODE(doc, STR("<:anonymous/>"));
+	CHECK(doc.first_child() != xml_node());
+	CHECK_NAME_VALUE(doc.first_child(), STR(""), STR(""));
+
+	// searching for empty string does not find a node with empty name
+	CHECK(doc.child(STR("")) == xml_node());
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(doc.child(string_view_t()) == xml_node());
+	CHECK(doc.child(string_view_t(STR("hi"), 0)) == xml_node());
+#endif
+}
+
+TEST_XML(dom_node_anonymous_attribute, "<node attr='0'/>")
+{
+	xml_attribute attr = doc.first_child().attribute(STR("attr"));
+	CHECK(attr != xml_attribute());
+	attr.set_name(STR(""));
+	CHECK_NODE(doc, STR("<node :anonymous=\"0\"/>"));
+	CHECK_NAME_VALUE(doc.first_child().first_attribute(), STR(""), STR("0"));
+
+	CHECK(doc.first_child().attribute(STR("")) == xml_attribute());
+#ifdef PUGIXML_HAS_STRING_VIEW
+	CHECK(doc.first_child().attribute(string_view_t()) == xml_attribute());
+	CHECK(doc.first_child().attribute(string_view_t(STR("hi"), 0)) == xml_attribute());
+#endif
 }

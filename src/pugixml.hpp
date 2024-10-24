@@ -477,6 +477,10 @@ namespace pugi
 		xml_attribute& operator=(float rhs);
 		xml_attribute& operator=(bool rhs);
 
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_attribute& operator=(string_view_t rhs);
+	#endif
+
 	#ifdef PUGIXML_HAS_LONG_LONG
 		xml_attribute& operator=(long long rhs);
 		xml_attribute& operator=(unsigned long long rhs);
@@ -571,9 +575,18 @@ namespace pugi
 		xml_attribute attribute(const char_t* name) const;
 		xml_node next_sibling(const char_t* name) const;
 		xml_node previous_sibling(const char_t* name) const;
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_node child(string_view_t name) const;
+		xml_attribute attribute(string_view_t name) const;
+		xml_node next_sibling(string_view_t name) const;
+		xml_node previous_sibling(string_view_t name) const;
+	#endif
 
 		// Get attribute, starting the search from a hint (and updating hint so that searching for a sequence of attributes is fast)
 		xml_attribute attribute(const char_t* name, xml_attribute& hint) const;
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_attribute attribute(string_view_t name, xml_attribute& hint) const;
+	#endif
 
 		// Get child value of current node; that is, value of the first child node of type PCDATA/CDATA
 		const char_t* child_value() const;
@@ -598,6 +611,12 @@ namespace pugi
 		xml_attribute prepend_attribute(const char_t* name);
 		xml_attribute insert_attribute_after(const char_t* name, const xml_attribute& attr);
 		xml_attribute insert_attribute_before(const char_t* name, const xml_attribute& attr);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_attribute append_attribute(string_view_t name);
+		xml_attribute prepend_attribute(string_view_t name);
+		xml_attribute insert_attribute_after(string_view_t name, const xml_attribute& attr);
+		xml_attribute insert_attribute_before(string_view_t name, const xml_attribute& attr);
+	#endif
 
 		// Add a copy of the specified attribute. Returns added attribute, or empty attribute on errors.
 		xml_attribute append_copy(const xml_attribute& proto);
@@ -616,6 +635,12 @@ namespace pugi
 		xml_node prepend_child(const char_t* name);
 		xml_node insert_child_after(const char_t* name, const xml_node& node);
 		xml_node insert_child_before(const char_t* name, const xml_node& node);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_node append_child(string_view_t name);
+		xml_node prepend_child(string_view_t name);
+		xml_node insert_child_after(string_view_t, const xml_node& node);
+		xml_node insert_child_before(string_view_t name, const xml_node& node);
+	#endif
 
 		// Add a copy of the specified node as a child. Returns added node, or empty node on errors.
 		xml_node append_copy(const xml_node& proto);
@@ -632,6 +657,9 @@ namespace pugi
 		// Remove specified attribute
 		bool remove_attribute(const xml_attribute& a);
 		bool remove_attribute(const char_t* name);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		bool remove_attribute(string_view_t name);
+	#endif
 
 		// Remove all attributes
 		bool remove_attributes();
@@ -639,6 +667,9 @@ namespace pugi
 		// Remove specified child
 		bool remove_child(const xml_node& n);
 		bool remove_child(const char_t* name);
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		bool remove_child(string_view_t name);
+	#endif
 
 		// Remove all children
 		bool remove_children();
@@ -850,6 +881,10 @@ namespace pugi
 		xml_text& operator=(double rhs);
 		xml_text& operator=(float rhs);
 		xml_text& operator=(bool rhs);
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		xml_text& operator=(string_view_t rhs);
+	#endif
 
 	#ifdef PUGIXML_HAS_LONG_LONG
 		xml_text& operator=(long long rhs);
