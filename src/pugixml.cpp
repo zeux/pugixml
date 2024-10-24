@@ -253,19 +253,18 @@ PUGI_IMPL_NS_BEGIN
 	}
 
 #ifdef PUGIXML_HAS_STRING_VIEW
-	// Check if dst contains all of the characters in src followed by a null terminator,
-	// requiring that dst is a null terminated string.
+	// Check if the null-terminated dst string is equal to the entire contents of srcview
 	PUGI_IMPL_FN bool stringview_equal(string_view_t srcview, const char_t* dst)
 	{
-		// std::basic_string_view::compare(char*) has the right behavior, but it performs an up-front
-		// traversal of dst to compute its length.
+		// std::basic_string_view::compare(const char*) has the right behavior, but it performs an
+		// extra traversal of dst to compute its length.
 		assert(dst);
-		size_t srclen = srcview.size();
 		const char_t* src = srcview.data();
+		size_t srclen = srcview.size();
 
-		while (*dst && srclen && *src == *dst)
+		while (srclen && *dst && *src == *dst)
 		{
-			++src; --srclen; ++dst;
+			--srclen; ++dst; ++src; 
 		}
 		return srclen == 0 && *dst == 0;
 	}
