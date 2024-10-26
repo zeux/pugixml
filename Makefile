@@ -11,7 +11,7 @@ BUILD=build/make-$(firstword $(CXX))-$(config)-$(defines)-$(cxxstd)
 SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
 
-VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
+VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p; /version/q' src/pugiconfig.hpp)
 RELEASE=$(filter-out scripts/archive.py docs/%.adoc,$(shell git ls-files docs scripts src CMakeLists.txt LICENSE.md readme.txt))
 
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-align -Wcast-qual -Wold-style-cast -Wdouble-promotion
