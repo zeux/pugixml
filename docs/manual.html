@@ -1295,7 +1295,7 @@ If the size of <code>wchar_t</code> is 2, pugixml assumes UTF-16 encoding instea
 </div>
 <div class="paragraph">
 <p><a id="char_t"></a><a id="string_t"></a><a id="string_view_t"></a>
-There is a special type, <code>pugi::char_t</code>, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type <code>pugi::string_t</code>, which is defined as the STL string of the character type; it corresponds to <code>std::string</code> in char mode and to <code>std::wstring</code> in wchar_t mode. Similarly, <code>string_view_t</code> is defined to be <code>std::basic_string_view&lt;char_t&gt;</code>. Overloads for <code>string_view_t</code> are only available when building for c++17 or later.</p>
+There is a special type, <code>pugi::char_t</code>, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type <code>pugi::string_t</code>, which is defined as the STL string of the character type; it corresponds to <code>std::string</code> in char mode and to <code>std::wstring</code> in wchar_t mode. Similarly, <code>string_view_t</code> is defined to be <code>std::basic_string_view&lt;char_t&gt;</code>. Overloads for <code>string_view_t</code> are only available when building for c++17 or later (see <code>PUGIXML_HAS_STRING_VIEW</code>).</p>
 </div>
 <div class="paragraph">
 <p>In addition to the interface, the internal implementation changes to store XML data as <code>pugi::char_t</code>; this means that these two modes have different memory usage characteristics - generally UTF-8 mode is more memory and performance efficient, especially if <code>sizeof(wchar_t)</code> is 4. The conversion to <code>pugi::char_t</code> upon document loading and from <code>pugi::char_t</code> upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is non-ASCII, wchar_t mode is probably a better choice.</p>
@@ -6217,7 +6217,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-27 09:22:16 -0700
+Last updated 2024-10-27 09:31:16 -0700
 </div>
 </div>
 </body>
