@@ -1027,6 +1027,9 @@ In that example <code>PUGIXML_API</code> is inconsistent between several source 
 <div class="paragraph">
 <p><a id="PUGIXML_HAS_LONG_LONG"></a><code>PUGIXML_HAS_LONG_LONG</code> define enables support for <code>long long</code> type in pugixml. This define is automatically enabled if your platform is known to have <code>long long</code> support (i.e. has C&#43;&#43;11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports <code>long long</code> but in fact it does, you can enable the define manually.</p>
 </div>
+<div class="paragraph">
+<p><a id="PUGIXML_HAS_STRING_VIEW"></a><code>PUGIXML_HAS_STRING_VIEW</code> define enables function overloads that accept <code>std::basic_string_view</code> arguments. This define is automatically enabled if built targeting c++17 or later AND if <code>PUGIXML_STRING_VIEW</code> is also defined. The requirement to additionally define <code>PUGIXML_STRING_VIEW</code> will be retired in a future version.</p>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -5695,7 +5698,8 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <span class="tok-cp">#define <a href="#PUGIXML_MEMORY_OUTPUT_STACK">PUGIXML_MEMORY_OUTPUT_STACK</a></span>
 <span class="tok-cp">#define <a href="#PUGIXML_MEMORY_XPATH_PAGE_SIZE">PUGIXML_MEMORY_XPATH_PAGE_SIZE</a></span>
 <span class="tok-cp">#define <a href="#PUGIXML_HEADER_ONLY">PUGIXML_HEADER_ONLY</a></span>
-<span class="tok-cp">#define <a href="#PUGIXML_HAS_LONG_LONG">PUGIXML_HAS_LONG_LONG</a></span></code></pre>
+<span class="tok-cp">#define <a href="#PUGIXML_HAS_LONG_LONG">PUGIXML_HAS_LONG_LONG</a></span>
+<span class="tok-cp">#define <a href="#PUGIXML_HAS_STRING_VIEW">PUGIXML_HAS_STRING_VIEW</a></span></code></pre>
 </div>
 </div>
 </div>
@@ -5705,6 +5709,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <div class="content">
 <pre class="pygments highlight"><code data-lang="c++"><span></span><span class="tok-k">typedef</span><span class="tok-w"> </span><span class="tok-n">configuration</span><span class="tok-o">-</span><span class="tok-n">defined</span><span class="tok-o">-</span><span class="tok-n">type</span><span class="tok-w"> </span><a href="#char_t">char_t</a><span class="tok-p">;</span>
 <span class="tok-k">typedef</span><span class="tok-w"> </span><span class="tok-n">configuration</span><span class="tok-o">-</span><span class="tok-n">defined</span><span class="tok-o">-</span><span class="tok-n">type</span><span class="tok-w"> </span><a href="#string_t">string_t</a><span class="tok-p">;</span>
+<span class="tok-k">typedef</span><span class="tok-w"> </span><span class="tok-n">configuration</span><span class="tok-o">-</span><span class="tok-n">defined</span><span class="tok-o">-</span><span class="tok-n">type</span><span class="tok-w"> </span><a href="#string_view_t">string_view_t</a><span class="tok-p">;</span>
 <span class="tok-k">typedef</span><span class="tok-w"> </span><span class="tok-kt">void</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-o">*</span><a href="#allocation_function">allocation_function</a><span class="tok-p">)(</span><span class="tok-kt">size_t</span><span class="tok-w"> </span><span class="tok-n">size</span><span class="tok-p">);</span>
 <span class="tok-k">typedef</span><span class="tok-w"> </span><span class="tok-kt">void</span><span class="tok-w"> </span><span class="tok-p">(</span><span class="tok-o">*</span><a href="#deallocation_function">deallocation_function</a><span class="tok-p">)(</span><span class="tok-kt">void</span><span class="tok-o">*</span><span class="tok-w"> </span><span class="tok-n">ptr</span><span class="tok-p">);</span></code></pre>
 </div>
@@ -6212,7 +6217,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-26 09:14:36 -0700
+Last updated 2024-10-27 09:22:16 -0700
 </div>
 </div>
 </body>

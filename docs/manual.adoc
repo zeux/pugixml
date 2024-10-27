@@ -244,6 +244,8 @@ NOTE: In that example `PUGIXML_API` is inconsistent between several source files
 
 [[PUGIXML_HAS_LONG_LONG]]`PUGIXML_HAS_LONG_LONG` define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C{plus}{plus}11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
 
+[[PUGIXML_HAS_STRING_VIEW]]`PUGIXML_HAS_STRING_VIEW` define enables function overloads that accept `std::basic_string_view` arguments. This define is automatically enabled if built targeting c++17 or later AND if `PUGIXML_STRING_VIEW` is also defined. The requirement to additionally define `PUGIXML_STRING_VIEW` will be retired in a future version.
+
 [[install.portability]]
 === Portability
 
@@ -2755,6 +2757,7 @@ This is the reference for all macros, types, enumerations, classes and functions
 #define +++<a href="#PUGIXML_MEMORY_XPATH_PAGE_SIZE">PUGIXML_MEMORY_XPATH_PAGE_SIZE</a>+++
 #define +++<a href="#PUGIXML_HEADER_ONLY">PUGIXML_HEADER_ONLY</a>+++
 #define +++<a href="#PUGIXML_HAS_LONG_LONG">PUGIXML_HAS_LONG_LONG</a>+++
+#define +++<a href="#PUGIXML_HAS_STRING_VIEW">PUGIXML_HAS_STRING_VIEW</a>+++
 ----
 
 [[apiref.types]]
@@ -2764,6 +2767,7 @@ This is the reference for all macros, types, enumerations, classes and functions
 ----
 typedef configuration-defined-type +++<a href="#char_t">char_t</a>+++;
 typedef configuration-defined-type +++<a href="#string_t">string_t</a>+++;
+typedef configuration-defined-type +++<a href="#string_view_t">string_view_t</a>+++;
 typedef void* (*+++<a href="#allocation_function">allocation_function</a>+++)(size_t size);
 typedef void (*+++<a href="#deallocation_function">deallocation_function</a>+++)(void* ptr);
 ----
