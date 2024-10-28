@@ -244,6 +244,8 @@ NOTE: In that example `PUGIXML_API` is inconsistent between several source files
 
 [[PUGIXML_HAS_LONG_LONG]]`PUGIXML_HAS_LONG_LONG` define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C{plus}{plus}11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
 
+[[PUGIXML_HAS_STRING_VIEW]]`PUGIXML_HAS_STRING_VIEW` define enables function overloads that accept `std::basic_string_view` arguments. This define is automatically enabled if built targeting C++17 or later AND if `PUGIXML_STRING_VIEW` is also defined. The requirement to additionally define `PUGIXML_STRING_VIEW` will be retired in a future version.
+
 [[install.portability]]
 === Portability
 
@@ -419,8 +421,8 @@ const wchar_t* xml_node::name() const;
 bool xml_node::set_name(const wchar_t* value);
 ----
 
-[[char_t]][[string_t]]
-There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode.
+[[char_t]][[string_t]][[string_view_t]]
+There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode. Similarly, `string_view_t` is defined to be `std::basic_string_view<char_t>`. Overloads for `string_view_t` are only available when building for C++17 or later (see `PUGIXML_HAS_STRING_VIEW`).
 
 In addition to the interface, the internal implementation changes to store XML data as `pugi::char_t`; this means that these two modes have different memory usage characteristics - generally UTF-8 mode is more memory and performance efficient, especially if `sizeof(wchar_t)` is 4. The conversion to `pugi::char_t` upon document loading and from `pugi::char_t` upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is non-ASCII, wchar_t mode is probably a better choice.
 
@@ -957,9 +959,13 @@ Since a lot of document traversal consists of finding the node/attribute with th
 [source]
 ----
 xml_node xml_node::child(const char_t* name) const;
+xml_node xml_node::child(string_view_t name) const;
 xml_attribute xml_node::attribute(const char_t* name) const;
+xml_attribute xml_node::attribute(string_view_t name) const;
 xml_node xml_node::next_sibling(const char_t* name) const;
+xml_node xml_node::next_sibling(string_view_t name) const;
 xml_node xml_node::previous_sibling(const char_t* name) const;
+xml_node xml_node::previous_sibling(string_view_t name) const;
 ----
 
 `child` and `attribute` return the first child/attribute with the specified name; `next_sibling` and `previous_sibling` return the first sibling in the corresponding direction with the specified name. All string comparisons are case-sensitive. In case the node handle is null or there is no node/attribute with the specified name, null handle is returned.
@@ -977,6 +983,7 @@ for (pugi::xml_node tool = tools.child("Tool"); tool; tool = tool.next_sibling("
 [source]
 ----
 xml_attribute xml_node::attribute(const char_t* name, xml_attribute& hint) const;
+xml_attribute xml_node::attribute(string_view_t name, xml_attribute& hint) const;
 ----
 
 The extra `hint` argument is used to guess where the attribute might be, and is updated to the location of the next attribute so that if you search for multiple attributes in the right order, the performance is maximized. Note that `hint` has to be either null or has to belong to the node, otherwise the behavior is undefined.
@@ -1289,9 +1296,11 @@ As discussed before, nodes can have name and value, both of which are strings. D
 [source]
 ----
 bool xml_node::set_name(const char_t* rhs);
-bool xml_node::set_name(const char_t* rhs, size_t sz)
+bool xml_node::set_name(const char_t* rhs, size_t sz);
+bool xml_node::set_name(string_view_t rhs);
 bool xml_node::set_value(const char_t* rhs);
 bool xml_node::set_value(const char_t* rhs, size_t size);
+bool xml_node::set_value(string_view_t rhs);
 ----
 
 Both functions try to set the name/value to the specified string, and return the operation result. The operation fails if the node can not have name or value (for instance, when trying to call `set_name` on a <<node_pcdata,node_pcdata>> node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
@@ -1312,9 +1321,11 @@ All attributes have name and value, both of which are strings (value may be empt
 [source]
 ----
 bool xml_attribute::set_name(const char_t* rhs);
-bool xml_attribute::set_name(const char_t* rhs, size_t sz)
+bool xml_attribute::set_name(const char_t* rhs, size_t sz);
+bool xml_attribute::set_name(string_view_t rhs);
 bool xml_attribute::set_value(const char_t* rhs);
 bool xml_attribute::set_value(const char_t* rhs, size_t size);
+bool xml_attribute::set_value(string_view_t rhs);
 ----
 
 Both functions try to set the name/value to the specified string, and return the operation result. The operation fails if the attribute handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to these functions). The name/value content is not verified, so take care to use only valid XML names, or the document may become malformed.
@@ -1349,6 +1360,7 @@ For convenience, all `set_value` functions have the corresponding assignment ope
 [source]
 ----
 xml_attribute& xml_attribute::operator=(const char_t* rhs);
+xml_attribute& xml_attribute::operator=(string_view_t rhs);
 xml_attribute& xml_attribute::operator=(int rhs);
 xml_attribute& xml_attribute::operator=(unsigned int rhs);
 xml_attribute& xml_attribute::operator=(long rhs);
@@ -1378,9 +1390,13 @@ Nodes and attributes do not exist without a document tree, so you can't create t
 [source]
 ----
 xml_attribute xml_node::append_attribute(const char_t* name);
+xml_attribute xml_node::append_attribute(string_view_t name);
 xml_attribute xml_node::prepend_attribute(const char_t* name);
+xml_attribute xml_node::prepend_attribute(string_view_t name);
 xml_attribute xml_node::insert_attribute_after(const char_t* name, const xml_attribute& attr);
+xml_attribute xml_node::insert_attribute_after(string_view_t name, const xml_attribute& attr);
 xml_attribute xml_node::insert_attribute_before(const char_t* name, const xml_attribute& attr);
+xml_attribute xml_node::insert_attribute_before(string_view_t name, const xml_attribute& attr);
 
 xml_node xml_node::append_child(xml_node_type type = node_element);
 xml_node xml_node::prepend_child(xml_node_type type = node_element);
@@ -1388,9 +1404,13 @@ xml_node xml_node::insert_child_after(xml_node_type type, const xml_node& node);
 xml_node xml_node::insert_child_before(xml_node_type type, const xml_node& node);
 
 xml_node xml_node::append_child(const char_t* name);
+xml_node xml_node::append_child(string_view_t name);
 xml_node xml_node::prepend_child(const char_t* name);
+xml_node xml_node::prepend_child(string_view_t name);
 xml_node xml_node::insert_child_after(const char_t* name, const xml_node& node);
+xml_node xml_node::insert_child_after(string_view_t name, const xml_node& node);
 xml_node xml_node::insert_child_before(const char_t* name, const xml_node& node);
+xml_node xml_node::insert_child_before(string_view_t name, const xml_node& node);
 ----
 
 `append_attribute` and `append_child` create a new node/attribute at the end of the corresponding list of the node the method is called on; `prepend_attribute` and `prepend_child` create a new node/attribute at the beginning of the list; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node/attribute before or after the specified node/attribute.
@@ -1445,7 +1465,9 @@ If you want to remove the attribute or child node by its name, two additional he
 [source]
 ----
 bool xml_node::remove_attribute(const char_t* name);
+bool xml_node::remove_attribute(string_view_t name);
 bool xml_node::remove_child(const char_t* name);
+bool xml_node::remove_child(string_view_t name);
 ----
 
 These functions look for the first attribute or child with the specified name, and then remove it, returning the result. If there is no attribute or child with such name, the function returns `false`; if there are two nodes with the given name, only the first node is deleted. If you want to delete all nodes with the specified name, you can use code like this: `while (node.remove_child("tool")) ;`.
@@ -1469,6 +1491,7 @@ Once you have an `xml_text` object, you can set the text contents using the foll
 ----
 bool xml_text::set(const char_t* rhs);
 bool xml_text::set(const char_t* rhs, size_t size);
+bool xml_text::set(string_view_t rhs);
 ----
 
 This function tries to set the contents to the specified string, and returns the operation result. The operation fails if the text object was retrieved from a node that can not have a value and is not an element node (i.e. it is a <<node_declaration,node_declaration>> node), if the text object is empty, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to this function). Note that if the text object was retrieved from an element node, this function creates the PCDATA child node if necessary (i.e. if the element node does not have a PCDATA/CDATA child already).
@@ -1500,6 +1523,7 @@ For convenience, all `set` functions have the corresponding assignment operators
 [source]
 ----
 xml_text& xml_text::operator=(const char_t* rhs);
+xml_text& xml_text::operator=(string_view_t rhs);
 xml_text& xml_text::operator=(int rhs);
 xml_text& xml_text::operator=(unsigned int rhs);
 xml_text& xml_text::operator=(long rhs);
@@ -2733,6 +2757,7 @@ This is the reference for all macros, types, enumerations, classes and functions
 #define +++<a href="#PUGIXML_MEMORY_XPATH_PAGE_SIZE">PUGIXML_MEMORY_XPATH_PAGE_SIZE</a>+++
 #define +++<a href="#PUGIXML_HEADER_ONLY">PUGIXML_HEADER_ONLY</a>+++
 #define +++<a href="#PUGIXML_HAS_LONG_LONG">PUGIXML_HAS_LONG_LONG</a>+++
+#define +++<a href="#PUGIXML_HAS_STRING_VIEW">PUGIXML_HAS_STRING_VIEW</a>+++
 ----
 
 [[apiref.types]]
@@ -2742,6 +2767,7 @@ This is the reference for all macros, types, enumerations, classes and functions
 ----
 typedef configuration-defined-type +++<a href="#char_t">char_t</a>+++;
 typedef configuration-defined-type +++<a href="#string_t">string_t</a>+++;
+typedef configuration-defined-type +++<a href="#string_view_t">string_view_t</a>+++;
 typedef void* (*+++<a href="#allocation_function">allocation_function</a>+++)(size_t size);
 typedef void (*+++<a href="#deallocation_function">deallocation_function</a>+++)(void* ptr);
 ----
@@ -2877,8 +2903,10 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_attribute::set_name">set_name</a>+++(const char_t* rhs);
     bool +++<a href="#xml_attribute::set_name">set_name</a>+++(const char_t* rhs, size_t size);
+    bool +++<a href="#xml_attribute::set_name">set_name</a>+++(string_view_t rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(const char_t* rhs, size_t size);
+    bool +++<a href="#xml_attribute::set_value">set_value</a>+++(string_view_t rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(int rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(unsigned int rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(long rhs);
@@ -2890,6 +2918,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(unsigned long long rhs);
 
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(const char_t* rhs);
+    xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(string_view_t rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(int rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(unsigned int rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(long rhs);
@@ -2934,11 +2963,16 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     implementation-defined-type +++<a href="#xml_node::attributes">attributes</a>+++() const;
 
     xml_node +++<a href="#xml_node::child">child</a>+++(const char_t* name) const;
+    xml_node +++<a href="#xml_node::child">child</a>+++(string_view_t name) const;
     xml_attribute +++<a href="#xml_node::attribute">attribute</a>+++(const char_t* name) const;
+    xml_attribute +++<a href="#xml_node::attribute">attribute</a>+++(string_view_t name) const;
     xml_node +++<a href="#xml_node::next_sibling_name">next_sibling</a>+++(const char_t* name) const;
+    xml_node +++<a href="#xml_node::next_sibling_name">next_sibling</a>+++(string_view_t name) const;
     xml_node +++<a href="#xml_node::previous_sibling_name">previous_sibling</a>+++(const char_t* name) const;
+    xml_node +++<a href="#xml_node::previous_sibling_name">previous_sibling</a>+++(string_view_t name) const;
 
     xml_attribute +++<a href="#xml_node::attribute_hinted">attribute</a>+++(const char_t* name, xml_attribute& hint) const;
+    xml_attribute +++<a href="#xml_node::attribute_hinted">attribute</a>+++(string_view_t name, xml_attribute& hint) const;
 
     xml_node +++<a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a>+++(const char_t* name, const char_t* attr_name, const char_t* attr_value) const;
     xml_node +++<a href="#xml_node::find_child_by_attribute">find_child_by_attribute</a>+++(const char_t* attr_name, const char_t* attr_value) const;
@@ -2968,13 +3002,19 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_node::set_name">set_name</a>+++(const char_t* rhs);
     bool +++<a href="#xml_node::set_name">set_name</a>+++(const char_t* rhs, size_t size);
+    bool +++<a href="#xml_node::set_name">set_name</a>+++(string_view_t rhs);
     bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs);
     bool +++<a href="#xml_node::set_value">set_value</a>+++(const char_t* rhs, size_t size);
+    bool +++<a href="#xml_node::set_value">set_value</a>+++(string_view_t rhs);
 
     xml_attribute +++<a href="#xml_node::append_attribute">append_attribute</a>+++(const char_t* name);
+    xml_attribute +++<a href="#xml_node::append_attribute">append_attribute</a>+++(string_view_t name);
     xml_attribute +++<a href="#xml_node::prepend_attribute">prepend_attribute</a>+++(const char_t* name);
+    xml_attribute +++<a href="#xml_node::prepend_attribute">prepend_attribute</a>+++(string_view_t name);
     xml_attribute +++<a href="#xml_node::insert_attribute_after">insert_attribute_after</a>+++(const char_t* name, const xml_attribute& attr);
+    xml_attribute +++<a href="#xml_node::insert_attribute_after">insert_attribute_after</a>+++(string_view_t name, const xml_attribute& attr);
     xml_attribute +++<a href="#xml_node::insert_attribute_before">insert_attribute_before</a>+++(const char_t* name, const xml_attribute& attr);
+    xml_attribute +++<a href="#xml_node::insert_attribute_before">insert_attribute_before</a>+++(string_view_t name, const xml_attribute& attr);
 
     xml_node +++<a href="#xml_node::append_child">append_child</a>+++(xml_node_type type = node_element);
     xml_node +++<a href="#xml_node::prepend_child">prepend_child</a>+++(xml_node_type type = node_element);
@@ -2982,9 +3022,13 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     xml_node +++<a href="#xml_node::insert_child_before">insert_child_before</a>+++(xml_node_type type, const xml_node& node);
 
     xml_node +++<a href="#xml_node::append_child">append_child</a>+++(const char_t* name);
+    xml_node +++<a href="#xml_node::append_child">append_child</a>+++(string_view_t name);
     xml_node +++<a href="#xml_node::prepend_child">prepend_child</a>+++(const char_t* name);
+    xml_node +++<a href="#xml_node::prepend_child">prepend_child</a>+++(string_view_t name);
     xml_node +++<a href="#xml_node::insert_child_after">insert_child_after</a>+++(const char_t* name, const xml_node& node);
+    xml_node +++<a href="#xml_node::insert_child_after">insert_child_after</a>+++(string_view_t name, const xml_node& node);
     xml_node +++<a href="#xml_node::insert_child_before">insert_child_before</a>+++(const char_t* name, const xml_node& node);
+    xml_node +++<a href="#xml_node::insert_child_before">insert_child_before</a>+++(string_view_t name, const xml_node& node);
 
     xml_attribute +++<a href="#xml_node::append_copy">append_copy</a>+++(const xml_attribute& proto);
     xml_attribute +++<a href="#xml_node::prepend_copy">prepend_copy</a>+++(const xml_attribute& proto);
@@ -3003,9 +3047,11 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_node::remove_attribute">remove_attribute</a>+++(const xml_attribute& a);
     bool +++<a href="#xml_node::remove_attribute">remove_attribute</a>+++(const char_t* name);
+    bool +++<a href="#xml_node::remove_attribute">remove_attribute</a>+++(string_view_t name);
     bool +++<a href="#xml_node::remove_attributes">remove_attributes</a>+++();
     bool +++<a href="#xml_node::remove_child">remove_child</a>+++(const xml_node& n);
     bool +++<a href="#xml_node::remove_child">remove_child</a>+++(const char_t* name);
+    bool +++<a href="#xml_node::remove_child">remove_child</a>+++(string_view_t name);
     bool +++<a href="#xml_node::remove_children">remove_children</a>+++();
 
     xml_parse_result +++<a href="#xml_node::append_buffer">append_buffer</a>+++(const void* contents, size_t size, unsigned int options = parse_default, xml_encoding encoding = encoding_auto);
@@ -3083,6 +3129,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
     bool +++<a href="#xml_text::set">set</a>+++(const char_t* rhs);
     bool +++<a href="#xml_text::set">set</a>+++(const char_t* rhs, size_t size);
+    bool +++<a href="#xml_text::set">set</a>+++(string_view_t rhs);
 
     bool +++<a href="#xml_text::set_value">set</a>+++(int rhs);
     bool +++<a href="#xml_text::set_value">set</a>+++(unsigned int rhs);
@@ -3095,6 +3142,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     bool +++<a href="#xml_text::set_value">set</a>+++(unsigned long long rhs);
 
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(const char_t* rhs);
+    xml_text& +++<a href="#xml_text::assign">operator=</a>+++(string_view_t rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(int rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(unsigned int rhs);
     xml_text& +++<a href="#xml_text::assign">operator=</a>+++(long rhs);
