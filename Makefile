@@ -3,8 +3,7 @@ MAKEFLAGS+=-r
 
 config=debug
 defines=standard
-cxxstd=c++11
-# set cxxstd=any to disable use of -std=...
+cxxstd=any
 
 BUILD=build/make-$(firstword $(CXX))-$(config)-$(defines)-$(cxxstd)
 
