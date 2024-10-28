@@ -244,7 +244,7 @@ NOTE: In that example `PUGIXML_API` is inconsistent between several source files
 
 [[PUGIXML_HAS_LONG_LONG]]`PUGIXML_HAS_LONG_LONG` define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C{plus}{plus}11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
 
-[[PUGIXML_HAS_STRING_VIEW]]`PUGIXML_HAS_STRING_VIEW` define enables function overloads that accept `std::basic_string_view` arguments. This define is automatically enabled if built targeting c++17 or later AND if `PUGIXML_STRING_VIEW` is also defined. The requirement to additionally define `PUGIXML_STRING_VIEW` will be retired in a future version.
+[[PUGIXML_HAS_STRING_VIEW]]`PUGIXML_HAS_STRING_VIEW` define enables function overloads that accept `std::basic_string_view` arguments. This define is automatically enabled if built targeting C++17 or later AND if `PUGIXML_STRING_VIEW` is also defined. The requirement to additionally define `PUGIXML_STRING_VIEW` will be retired in a future version.
 
 [[install.portability]]
 === Portability
@@ -422,7 +422,7 @@ bool xml_node::set_name(const wchar_t* value);
 ----
 
 [[char_t]][[string_t]][[string_view_t]]
-There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode. Similarly, `string_view_t` is defined to be `std::basic_string_view<char_t>`. Overloads for `string_view_t` are only available when building for c++17 or later (see `PUGIXML_HAS_STRING_VIEW`).
+There is a special type, `pugi::char_t`, that is defined as the character type and depends on the library configuration; it will be also used in the documentation hereafter. There is also a type `pugi::string_t`, which is defined as the STL string of the character type; it corresponds to `std::string` in char mode and to `std::wstring` in wchar_t mode. Similarly, `string_view_t` is defined to be `std::basic_string_view<char_t>`. Overloads for `string_view_t` are only available when building for C++17 or later (see `PUGIXML_HAS_STRING_VIEW`).
 
 In addition to the interface, the internal implementation changes to store XML data as `pugi::char_t`; this means that these two modes have different memory usage characteristics - generally UTF-8 mode is more memory and performance efficient, especially if `sizeof(wchar_t)` is 4. The conversion to `pugi::char_t` upon document loading and from `pugi::char_t` upon document saving happen automatically, which also carries minor performance penalty. The general advice however is to select the character mode based on usage scenario, i.e. if UTF-8 is inconvenient to process and most of your XML data is non-ASCII, wchar_t mode is probably a better choice.
 
