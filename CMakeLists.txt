@@ -64,11 +64,13 @@ if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
     MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<BOOL:${PUGIXML_STATIC_CRT}>>:DLL>)
 endif()
 
-if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
+# Set the default C++ standard to C++17 if not set; CMake will automatically downgrade this if the compiler does not support it
+# When CMAKE_CXX_STANDARD_REQUIRED is set, we fall back to C++11 to avoid breaking older compilers
+if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED AND NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMAKE_VERSION VERSION_LESS 3.8)
 
-if (NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+elseif (NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
