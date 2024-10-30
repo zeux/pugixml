@@ -34,6 +34,22 @@ jobs:
         make test defines=${{matrix.defines}} config=coverage -j2
         bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov -X search -t ${{secrets.CODECOV_TOKEN}} -B ${{github.ref}}
 
+  unix-cmake:
+    strategy:
+      matrix:
+        os: [ubuntu, macos]
+    name: ${{matrix.os}} cmake
+    runs-on: ${{matrix.os}}-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: cmake configure
+      run: |
+        mkdir cmake && cd cmake
+        cmake .. -D PUGIXML_BUILD_TESTS=ON
+    - name: cmake test
+      run: |
+        make -C cmake -j2
+
   windows:
     runs-on: windows-latest
     strategy:
