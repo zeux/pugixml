@@ -244,7 +244,7 @@ NOTE: In that example `PUGIXML_API` is inconsistent between several source files
 
 [[PUGIXML_HAS_LONG_LONG]]`PUGIXML_HAS_LONG_LONG` define enables support for `long long` type in pugixml. This define is automatically enabled if your platform is known to have `long long` support (i.e. has C{plus}{plus}11 support or uses a reasonably modern version of a known compiler); if pugixml does not recognize that your platform supports `long long` but in fact it does, you can enable the define manually.
 
-[[PUGIXML_HAS_STRING_VIEW]]`PUGIXML_HAS_STRING_VIEW` define enables function overloads that accept `std::basic_string_view` arguments. This define is automatically enabled if built targeting C++17 or later AND if `PUGIXML_STRING_VIEW` is also defined. The requirement to additionally define `PUGIXML_STRING_VIEW` will be retired in a future version.
+[[PUGIXML_HAS_STRING_VIEW]]`PUGIXML_HAS_STRING_VIEW` define enables function overloads that accept `std::string_view` arguments. This define is automatically enabled if built targeting C{plus}{plus}17 or later; if pugixml does not recognize that your platform supports `std::string_view` but in fact it does, you can enable the define manually.
 
 [[install.portability]]
 === Portability
