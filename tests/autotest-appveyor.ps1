@@ -37,6 +37,8 @@ foreach ($vs in $args)
 
 		if (! $?) { throw "Error setting up VS$vs $arch" }
 
+		$cxx = if ($vs -ge 19) { "/std:c++17" } else { "" }
+
 		foreach ($defines in "standard", "PUGIXML_WCHAR_MODE", "PUGIXML_COMPACT")
 		{
 			$target = "tests_vs${vs}_${arch}_${defines}"
@@ -45,7 +47,7 @@ foreach ($vs in $args)
 			Add-AppveyorTest $target -Outcome Running
 
 			Write-Output "# Building $target.exe"
-			& cmd /c "cl.exe /MP /Fe$target.exe /EHsc /W4 /WX $deflist $sources 2>&1" | Tee-Object -Variable buildOutput
+			& cmd /c "cl.exe /MP /Fe$target.exe /EHsc /W4 /WX $cxx $deflist $sources 2>&1" | Tee-Object -Variable buildOutput
 
 			if ($?)
 			{
