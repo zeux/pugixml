@@ -46,13 +46,11 @@
 // Uncomment this to switch to header-only version
 // #define PUGIXML_HEADER_ONLY
 
-// Uncomment this to enable long long support
+// Uncomment this to enable long long support (usually enabled automatically)
 // #define PUGIXML_HAS_LONG_LONG
 
-// Uncomment this to enable support for std::string_view (requires c++17 and for PUGIXML_NO_STL to not be set)
-// Note: In a future version of pugixml this macro will become obsolete.
-//       Support will then be enabled automatically if the used C++ standard supports it.
-// #define PUGIXML_STRING_VIEW
+// Uncomment this to enable support for std::string_view (usually enabled automatically)
+// #define PUGIXML_HAS_STRING_VIEW
 
 #endif
 
