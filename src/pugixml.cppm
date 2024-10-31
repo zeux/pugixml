@@ -59,7 +59,13 @@ import std.compat;
 #	pragma clang diagnostic push
 #	pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #endif
+#if !defined(PUGIXML_HEADER_ONLY)
+extern "C++" {
+#endif
 #include <pugixml.hpp>
+#if !defined(PUGIXML_HEADER_ONLY)
+}
+#endif
 #if defined(__clang__)
 #	pragma clang diagnostic pop
 #endif
