@@ -160,7 +160,7 @@
 #		define PUGIXML_CONSTANT PUGIXML_CONSTEXPR11
 #	else
 #		define PUGIXML_CONSTANT const
-#endif
+#	endif
 #endif
 
 // Character interface macros
