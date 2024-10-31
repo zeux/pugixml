@@ -150,7 +150,7 @@
 
 // If C++ is 2011 or higher, add 'constexpr' qualifiers to constants
 // If C++ is 2017 or higher, add 'inline' qualifiers to constants
-// required for C++20 module
+// inline constexpr is required for C++20 module
 #ifndef PUGIXML_CONSTANT
 #	if __cplusplus >= 201703
 #		define PUGIXML_CONSTANT inline PUGIXML_CONSTEXPR11
