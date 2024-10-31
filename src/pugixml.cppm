@@ -67,5 +67,7 @@ import std.compat;
 
 module :private;
 
-#define PUGIXML_SOURCE "pugixml.cpp"
-#include PUGIXML_SOURCE
+#if defined(PUGIXML_HEADER_ONLY) && !defined(PUGIXML_SOURCE)
+#	define PUGIXML_SOURCE "pugixml.cpp"
+#	include PUGIXML_SOURCE
+#endif
