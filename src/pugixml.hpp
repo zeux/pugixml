@@ -21,19 +21,21 @@
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
+#ifndef PUGIXML_EXPORT_MODULE
 // Include stddef.h for size_t and ptrdiff_t
-#include <stddef.h>
+#	include <stddef.h>
 
 // Include exception header for XPath
-#if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
-#	include <exception>
-#endif
+#	if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
+#		include <exception>
+#	endif
 
 // Include STL headers
-#ifndef PUGIXML_NO_STL
-#	include <iterator>
-#	include <iosfwd>
-#	include <string>
+#	ifndef PUGIXML_NO_STL
+#		include <iterator>
+#		include <iosfwd>
+#		include <string>
+#	endif
 #endif
 
 // Check if std::string_view is available
@@ -46,8 +48,10 @@
 #endif
 
 // Include string_view if appropriate
-#ifdef PUGIXML_HAS_STRING_VIEW
-#	include <string_view>
+#ifndef PUGIXML_MODULE_EXPORT
+#	ifdef PUGIXML_HAS_STRING_VIEW
+#		include <string_view>
+#	endif
 #endif
 
 // Macro for deprecated features
@@ -148,11 +152,11 @@
 // If C++ is 2017 or higher, add 'inline' qualifiers for constants
 // required for C++20 module
 #ifndef PUGIXML_CONSTANT
-# if __cplusplus >= 201703
-#   define PUGIXML_CONSTANT inline PUGIXML_CONSTEXPR
-# else
-#   define PUGIXML_CONSTANT PUGIXML_CONSTEXPR
-# endif
+#	if __cplusplus >= 201703
+#		define PUGIXML_CONSTANT inline PUGIXML_CONSTEXPR
+#	else
+#		define PUGIXML_CONSTANT PUGIXML_CONSTEXPR
+#	endif
 #endif
 
 // Character interface macros
@@ -162,6 +166,10 @@
 #else
 #	define PUGIXML_TEXT(t) t
 #	define PUGIXML_CHAR char
+#endif
+
+#ifndef PUGIXML_MODULE_EXPORT
+#	define PUGIXML_MODULE_EXPORT
 #endif
 
 namespace pugi
@@ -181,7 +189,7 @@ namespace pugi
 }
 
 // The PugiXML namespace
-namespace pugi
+PUGIXML_MODULE_EXPORT namespace pugi
 {
 	// Tree node types
 	enum xml_node_type
