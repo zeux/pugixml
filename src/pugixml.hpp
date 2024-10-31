@@ -139,13 +139,13 @@
 #endif
 
 // If C++ is 2011 or higher, add 'constexpr' qualifiers
-#ifndef PUGIXML_CONSTEXPR
+#ifndef PUGIXML_CONSTEXPR11
 #	if __cplusplus >= 201103
-#		define PUGIXML_CONSTEXPR constexpr
+#		define PUGIXML_CONSTEXPR11 constexpr
 #	elif defined(_MSC_VER) && _MSC_VER >= 1910
-#		define PUGIXML_CONSTEXPR constexpr
+#		define PUGIXML_CONSTEXPR11 constexpr
 #	else
-#		define PUGIXML_CONSTEXPR const
+#		define PUGIXML_CONSTEXPR11
 #	endif
 #endif
 
@@ -153,10 +153,12 @@
 // required for C++20 module
 #ifndef PUGIXML_CONSTANT
 #	if __cplusplus >= 201703
-#		define PUGIXML_CONSTANT inline PUGIXML_CONSTEXPR
+#		define PUGIXML_CONSTANT inline PUGIXML_CONSTEXPR11
+#	elif __cplusplus >= 201103
+#		define PUGIXML_CONSTANT PUGIXML_CONSTEXPR11
 #	else
-#		define PUGIXML_CONSTANT PUGIXML_CONSTEXPR
-#	endif
+#		define PUGIXML_CONSTANT const
+#endif
 #endif
 
 // Character interface macros
