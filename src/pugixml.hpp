@@ -48,7 +48,7 @@
 #endif
 
 // Include string_view if appropriate
-#ifndef PUGIXML_MODULE_EXPORT
+#ifndef PUGIXML_EXPORT_MODULE
 #	ifdef PUGIXML_HAS_STRING_VIEW
 #		include <string_view>
 #	endif
