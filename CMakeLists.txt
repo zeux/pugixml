@@ -32,7 +32,7 @@ set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
 separate_arguments(PUGIXML_BUILD_DEFINES)
 
 # Technically not needed for this file. This is builtin CMAKE global variable.
-option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF) 
+option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 
 # Expose option to build PUGIXML as static as well when the global BUILD_SHARED_LIBS variable is set
 cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
@@ -48,8 +48,7 @@ option(PUGIXML_INSTALL "Enable installation rules" ON)
 option(PUGIXML_NO_XPATH "Disable XPath" OFF)
 option(PUGIXML_NO_STL "Disable STL" OFF)
 option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
-option(PUGIXML_STRING_VIEW "Enable std::string_view overloads" OFF) # requires C++17 and for PUGIXML_NO_STL to be OFF
-mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS PUGIXML_STRING_VIEW)
+mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
 
 set(PUGIXML_PUBLIC_DEFINITIONS
   $<$<BOOL:${PUGIXML_WCHAR_MODE}>:PUGIXML_WCHAR_MODE>
@@ -57,7 +56,6 @@ set(PUGIXML_PUBLIC_DEFINITIONS
   $<$<BOOL:${PUGIXML_NO_XPATH}>:PUGIXML_NO_XPATH>
   $<$<BOOL:${PUGIXML_NO_STL}>:PUGIXML_NO_STL>
   $<$<BOOL:${PUGIXML_NO_EXCEPTIONS}>:PUGIXML_NO_EXCEPTIONS>
-  $<$<BOOL:${PUGIXML_STRING_VIEW}>:PUGIXML_STRING_VIEW>
 )
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
@@ -66,15 +64,13 @@ if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
     MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<NOT:$<BOOL:${PUGIXML_STATIC_CRT}>>:DLL>)
 endif()
 
-if (PUGIXML_STRING_VIEW AND (NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17))
-  message(WARNING "PUGIXML_STRING_VIEW requires CMAKE_CXX_STANDARD to be set to 17 or later")
-endif()
+# Set the default C++ standard to C++17 if not set; CMake will automatically downgrade this if the compiler does not support it
+# When CMAKE_CXX_STANDARD_REQUIRED is set, we fall back to C++11 to avoid breaking older compilers
+if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED AND NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMAKE_VERSION VERSION_LESS 3.8)
 
-if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
-
-if (NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+elseif (NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 11)
 endif()
 

@@ -38,8 +38,8 @@
 #	include <string>
 #endif
 
-// Check if std::string_view is both requested and available
-#if defined(PUGIXML_STRING_VIEW) && !defined(PUGIXML_NO_STL)
+// Check if std::string_view is available
+#if !defined(PUGIXML_HAS_STRING_VIEW) && !defined(PUGIXML_NO_STL)
 #	if __cplusplus >= 201703L
 #		define PUGIXML_HAS_STRING_VIEW
 #	elif defined(_MSVC_LANG) && _MSVC_LANG >= 201703L
@@ -231,7 +231,7 @@ namespace pugi
 	// the document; this flag is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments.
 	// This flag is off by default.
 	const unsigned int parse_embed_pcdata = 0x2000;
-	
+
 	// This flag determines whether determines whether the the two pcdata should be merged or not, if no intermediatory data are parsed in the document.
 	// This flag is off by default.
 	const unsigned int parse_merge_pcdata = 0x4000;
