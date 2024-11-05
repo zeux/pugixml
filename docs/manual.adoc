@@ -461,9 +461,9 @@ Almost all functions in pugixml have the following thread-safety guarantees:
 
 * it is safe to call free (non-member) functions from multiple threads
 * it is safe to perform concurrent read-only accesses to the same tree (all constant member functions do not modify the tree)
-* it is safe to perform concurrent read/write accesses, if there is only one read or write access to the single tree at a time
+* it is safe to perform concurrent read/write accesses on multiple trees, as long as each tree is only accessed from a single thread at a time
 
-Concurrent modification and traversing of a single tree requires synchronization, for example via reader-writer lock. Modification includes altering document structure and altering individual node/attribute data, i.e. changing names/values.
+Concurrent read/write access to a single tree requires synchronization, for example via a reader-writer lock. Modification includes altering document structure and altering individual node/attribute data, i.e. changing names/values.
 
 The only exception is <<set_memory_management_functions,set_memory_management_functions>>; it modifies global variables and as such is not thread-safe. Its usage policy has more restrictions, see <<dom.memory.custom>>.
 

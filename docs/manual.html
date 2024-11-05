@@ -1356,12 +1356,12 @@ There are cases when you&#8217;ll have to convert string data between UTF-8 and 
 <p>it is safe to perform concurrent read-only accesses to the same tree (all constant member functions do not modify the tree)</p>
 </li>
 <li>
-<p>it is safe to perform concurrent read/write accesses, if there is only one read or write access to the single tree at a time</p>
+<p>it is safe to perform concurrent read/write accesses on multiple trees, as long as each tree is only accessed from a single thread at a time</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Concurrent modification and traversing of a single tree requires synchronization, for example via reader-writer lock. Modification includes altering document structure and altering individual node/attribute data, i.e. changing names/values.</p>
+<p>Concurrent read/write access to a single tree requires synchronization, for example via a reader-writer lock. Modification includes altering document structure and altering individual node/attribute data, i.e. changing names/values.</p>
 </div>
 <div class="paragraph">
 <p>The only exception is <a href="#set_memory_management_functions">set_memory_management_functions</a>; it modifies global variables and as such is not thread-safe. Its usage policy has more restrictions, see <a href="#dom.memory.custom">Custom memory allocation/deallocation functions</a>.</p>
@@ -6216,7 +6216,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-10-30 10:34:38 -0700
+Last updated 2024-11-05 07:43:48 -0800
 </div>
 </div>
 </body>
