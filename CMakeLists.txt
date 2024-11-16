@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5...3.30)
 
 # Policy configuration; this *MUST* be specified before project is defined
 if(POLICY CMP0091)
