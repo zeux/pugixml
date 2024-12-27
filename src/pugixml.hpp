@@ -114,17 +114,6 @@
 #	define PUGIXML_NOEXCEPT_IF_NOT_COMPACT PUGIXML_NOEXCEPT
 #endif
 
-// If C++ is 2011 or higher, add 'override' qualifiers
-#ifndef PUGIXML_OVERRIDE
-#	if __cplusplus >= 201103
-#		define PUGIXML_OVERRIDE override
-#	elif defined(_MSC_VER) && _MSC_VER >= 1700
-#		define PUGIXML_OVERRIDE override
-#	else
-#		define PUGIXML_OVERRIDE
-#	endif
-#endif
-
 // If C++ is 2011 or higher, use 'nullptr'
 #ifndef PUGIXML_NULL
 #	if __cplusplus >= 201103
@@ -360,7 +349,7 @@ namespace pugi
 		// Construct writer from a FILE* object; void* is used to avoid header dependencies on stdio
 		xml_writer_file(void* file);
 
-		virtual void write(const void* data, size_t size) PUGIXML_OVERRIDE;
+		virtual void write(const void* data, size_t size) override;
 
 	private:
 		void* file;
@@ -375,7 +364,7 @@ namespace pugi
 		xml_writer_stream(std::basic_ostream<char>& stream);
 		xml_writer_stream(std::basic_ostream<wchar_t>& stream);
 
-		virtual void write(const void* data, size_t size) PUGIXML_OVERRIDE;
+		virtual void write(const void* data, size_t size) override;
 
 	private:
 		std::basic_ostream<char>* narrow_stream;
@@ -1383,7 +1372,7 @@ namespace pugi
 		explicit xpath_exception(const xpath_parse_result& result);
 
 		// Get error message
-		virtual const char* what() const PUGIXML_NOEXCEPT PUGIXML_OVERRIDE;
+		virtual const char* what() const PUGIXML_NOEXCEPT override;
 
 		// Get parse result
 		const xpath_parse_result& result() const;

@@ -309,7 +309,7 @@ public:
 	{
 	}
 
-	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type, std::ios_base::seekdir, std::ios_base::openmode) PUGIXML_OVERRIDE
+	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type, std::ios_base::seekdir, std::ios_base::openmode) override
 	{
 		seeks++;
 
@@ -345,14 +345,14 @@ public:
 	{
 	}
 
-	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type, std::ios_base::seekdir dir, std::ios_base::openmode) PUGIXML_OVERRIDE
+	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type, std::ios_base::seekdir dir, std::ios_base::openmode) override
 	{
 		seeks++;
 
 		return seeks > 1 && dir == std::ios_base::cur ? -1 : 0;
 	}
 
-	typename std::basic_streambuf<T>::pos_type seekpos(typename std::basic_streambuf<T>::pos_type, std::ios_base::openmode) PUGIXML_OVERRIDE
+	typename std::basic_streambuf<T>::pos_type seekpos(typename std::basic_streambuf<T>::pos_type, std::ios_base::openmode) override
 	{
 		return 0;
 	}
@@ -380,7 +380,7 @@ TEST(document_load_stream_wide_seekable_fail_tell)
 template <typename T> class read_fail_buffer: public std::basic_streambuf<T>
 {
 public:
-    typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
+    typename std::basic_streambuf<T>::int_type underflow() override
 	{
 		throw std::runtime_error("underflow failed");
 
@@ -417,7 +417,7 @@ public:
     {
     }
 
-    typename std::basic_streambuf<T>::int_type underflow() PUGIXML_OVERRIDE
+    typename std::basic_streambuf<T>::int_type underflow() override
 	{
 		throw std::runtime_error("underflow failed");
 
@@ -426,7 +426,7 @@ public:
 	#endif
 	}
 
-	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type off, std::ios_base::seekdir dir, std::ios_base::openmode) PUGIXML_OVERRIDE
+	typename std::basic_streambuf<T>::pos_type seekoff(typename std::basic_streambuf<T>::off_type off, std::ios_base::seekdir dir, std::ios_base::openmode) override
 	{
 		switch (dir)
 		{
@@ -438,7 +438,7 @@ public:
 		return offset;
 	}
 
-	typename std::basic_streambuf<T>::pos_type seekpos(typename std::basic_streambuf<T>::pos_type pos, std::ios_base::openmode) PUGIXML_OVERRIDE
+	typename std::basic_streambuf<T>::pos_type seekpos(typename std::basic_streambuf<T>::pos_type pos, std::ios_base::openmode) override
 	{
 		offset = pos;
 		return pos;
