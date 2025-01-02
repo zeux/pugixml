@@ -51,7 +51,7 @@ option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
 mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
 
 if (APPLE)
-  option(PUGIXML_BUILD_APPLE_FRAMEWORKS "Build as Apple Frameworks" OFF)
+  option(PUGIXML_BUILD_APPLE_FRAMEWORK "Build as Apple Frameworks" OFF)
 endif()
 
 set(PUGIXML_PUBLIC_DEFINITIONS
@@ -178,7 +178,7 @@ set_target_properties(${libs}
     EXCLUDE_FROM_ALL OFF)
 set(install-targets pugixml ${libs})
 
-if (PUGIXML_BUILD_APPLE_FRAMEWORKS)
+if (PUGIXML_BUILD_APPLE_FRAMEWORK)
   set_target_properties(${libs} PROPERTIES
     FRAMEWORK TRUE
     FRAMEWORK_VERSION ${PROJECT_VERSION}
