@@ -2203,6 +2203,25 @@ Because of the differences in document object models, performance considerations
 
 :!numbered:
 
+[[v1.15]]
+=== v1.15 ^2024-01-10^
+
+Maintenance release. Changes:
+
+* Improvements:
+    . Many `xml_attribute::` and `xml_node::` functions now transparently support `std::string_view` and `std::string` when C++17 support is detected.
+
+* CMake improvements:
+    . Improve `pkg-config` file generation for NixOS
+    . `PUGIXML_BUILD_APPLE_FRAMEWORK` CMake option can be used to build pugixml as `.xcframework`
+    . `PUGIXML_INSTALL` CMake option can be used to disable installation targets
+
+* Compatibility improvements:
+    . Fix clang/gcc warnings `-Wzero-as-null-pointer-constant`, `-Wuseless-cast`, `-Wshorten-64-to-32`
+    . Fix unreferenced function warnings in `PUGIXML_NO_STL` configuration
+    . Fix CMake 3.31 deprecation warnings
+    . Stop using deprecated `throw()` when `noexcept` is available
+
 [[v1.14]]
 === v1.14 ^2023-10-01^
 
