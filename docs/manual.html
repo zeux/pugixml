@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.20">
 <meta name="author" content="website, repository">
-<title>pugixml 1.14 manual</title>
+<title>pugixml 1.15 manual</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -508,7 +508,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </head>
 <body class="article toc2 toc-right">
 <div id="header">
-<h1>pugixml 1.14 manual</h1>
+<h1>pugixml 1.15 manual</h1>
 <div class="details">
 <span id="author" class="author">website</span><br>
 <span id="email" class="email"><a href="https://pugixml.org" class="bare">https://pugixml.org</a></span><br>
@@ -603,6 +603,7 @@ pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
 </li>
 <li><a href="#changes">9. Changelog</a>
 <ul class="sectlevel2">
+<li><a href="#v1.15">v1.15 <sup>2024-01-10</sup></a></li>
 <li><a href="#v1.14">v1.14 <sup>2023-10-01</sup></a></li>
 <li><a href="#v1.13">v1.13 <sup>2022-11-01</sup></a></li>
 <li><a href="#v1.12">v1.12 <sup>2022-02-09</sup></a></li>
@@ -708,7 +709,7 @@ No documentation is perfect; neither is this one. If you find errors or omission
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>Copyright (c) 2006-2024 Arseny Kapoulkine
+<pre>Copyright (c) 2006-2025 Arseny Kapoulkine
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -738,7 +739,7 @@ OTHER DEALINGS IN THE SOFTWARE.</pre>
 <div class="literalblock">
 <div class="content">
 <pre>This software is based on pugixml library (https://pugixml.org).
-pugixml is Copyright (C) 2006-2024 Arseny Kapoulkine.</pre>
+pugixml is Copyright (C) 2006-2025 Arseny Kapoulkine.</pre>
 </div>
 </div>
 </div>
@@ -758,9 +759,9 @@ pugixml is Copyright (C) 2006-2024 Arseny Kapoulkine.</pre>
 <p>You can download the latest source distribution as an archive:</p>
 </div>
 <div class="paragraph">
-<p><a href="https://github.com/zeux/pugixml/releases/download/v1.14/pugixml-1.14.zip">pugixml-1.14.zip</a> (Windows line endings)
+<p><a href="https://github.com/zeux/pugixml/releases/download/v1.15/pugixml-1.15.zip">pugixml-1.15.zip</a> (Windows line endings)
 /
-<a href="https://github.com/zeux/pugixml/releases/download/v1.14/pugixml-1.14.tar.gz">pugixml-1.14.tar.gz</a> (Unix line endings)</p>
+<a href="https://github.com/zeux/pugixml/releases/download/v1.15/pugixml-1.15.tar.gz">pugixml-1.15.tar.gz</a> (Unix line endings)</p>
 </div>
 <div class="paragraph">
 <p>The distribution contains library source, documentation (the manual you&#8217;re reading now and the quick start guide) and some code examples. After downloading the distribution, install pugixml by extracting all files from the compressed archive.</p>
@@ -781,7 +782,7 @@ pugixml is Copyright (C) 2006-2024 Arseny Kapoulkine.</pre>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="bash">git clone https://github.com/zeux/pugixml
 cd pugixml
-git checkout v1.14</code></pre>
+git checkout v1.15</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -798,7 +799,7 @@ git checkout v1.14</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.14 pugixml</code></pre>
+<pre class="pygments highlight"><code data-lang="bash">svn checkout https://github.com/zeux/pugixml/tags/v1.15 pugixml</code></pre>
 </div>
 </div>
 </div>
@@ -4129,6 +4130,61 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <h2 id="changes"><a class="anchor" href="#changes"></a><a class="link" href="#changes">9. Changelog</a></h2>
 <div class="sectionbody">
 <div class="sect2">
+<h3 id="v1.15"><a class="anchor" href="#v1.15"></a><a class="link" href="#v1.15">v1.15 <sup>2024-01-10</sup></a></h3>
+<div class="paragraph">
+<p>Maintenance release. Changes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Improvements:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Many <code>xml_attribute::</code> and <code>xml_node::</code> functions now transparently support <code>std::string_view</code> and <code>std::string</code> when C++17 support is detected.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>CMake improvements:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Improve <code>pkg-config</code> file generation for NixOS</p>
+</li>
+<li>
+<p><code>PUGIXML_BUILD_APPLE_FRAMEWORK</code> CMake option can be used to build pugixml as <code>.xcframework</code></p>
+</li>
+<li>
+<p><code>PUGIXML_INSTALL</code> CMake option can be used to disable installation targets</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Compatibility improvements:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Fix clang/gcc warnings <code>-Wzero-as-null-pointer-constant</code>, <code>-Wuseless-cast</code>, <code>-Wshorten-64-to-32</code></p>
+</li>
+<li>
+<p>Fix unreferenced function warnings in <code>PUGIXML_NO_STL</code> configuration</p>
+</li>
+<li>
+<p>Fix CMake 3.31 deprecation warnings</p>
+</li>
+<li>
+<p>Stop using deprecated <code>throw()</code> when <code>noexcept</code> is available</p>
+</li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
 <h3 id="v1.14"><a class="anchor" href="#v1.14"></a><a class="link" href="#v1.14">v1.14 <sup>2023-10-01</sup></a></h3>
 <div class="paragraph">
 <p>Maintenance release. Changes:</p>
@@ -6216,7 +6272,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-11-05 07:43:48 -0800
+Last updated 2025-01-10 11:20:55 -0800
 </div>
 </div>
 </body>
