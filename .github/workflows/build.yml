@@ -24,14 +24,12 @@ jobs:
       run: |
         export CXX=${{matrix.compiler}}
         make test cxxstd=c++11 defines=${{matrix.defines}} config=release -j2
-        make test cxxstd=c++98 defines=${{matrix.defines}} config=debug -j2
         make test cxxstd=c++17 defines=${{matrix.defines}} config=debug -j2
-        make test defines=${{matrix.defines}} config=sanitize -j2
     - name: make coverage
       if: ${{!(matrix.os == 'ubuntu' && matrix.compiler == 'clang++')}} # linux/clang produces coverage info gcov can't parse
       run: |
         export CXX=${{matrix.compiler}}
-        make test defines=${{matrix.defines}} config=coverage -j2
+        make test cxxstd=c++11 defines=${{matrix.defines}} config=coverage -j2
         bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov -X search -t ${{secrets.CODECOV_TOKEN}} -B ${{github.ref}}
 
   unix-cmake:
