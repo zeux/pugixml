@@ -135,15 +135,15 @@ TEST(xpath_variables_set_operations)
 
 	CHECK(set.add(STR("var1"), xpath_type_number) == v1);
 	CHECK(set.add(STR("var2"), xpath_type_string) == v2);
-	CHECK(set.add(STR("var2"), xpath_type_node_set) == 0);
+	CHECK(set.add(STR("var2"), xpath_type_node_set) == PUGIXML_NULL);
 
 	CHECK(set.get(STR("var1")) == v1);
 	CHECK(set.get(STR("var2")) == v2);
-	CHECK(set.get(STR("var")) == 0);
-	CHECK(set.get(STR("var11")) == 0);
+	CHECK(set.get(STR("var")) == PUGIXML_NULL);
+	CHECK(set.get(STR("var11")) == PUGIXML_NULL);
 
 	CHECK(static_cast<const xpath_variable_set&>(set).get(STR("var1")) == v1);
-	CHECK(static_cast<const xpath_variable_set&>(set).get(STR("var3")) == 0);
+	CHECK(static_cast<const xpath_variable_set&>(set).get(STR("var3")) == PUGIXML_NULL);
 }
 
 TEST_XML(xpath_variables_set_operations_set, "<node/>")
@@ -179,7 +179,7 @@ TEST(xpath_variables_set_out_of_memory)
 
 	xpath_variable_set set;
 
-	xpath_variable* var = 0;
+	xpath_variable* var = PUGIXML_NULL;
 	CHECK_ALLOC_FAIL(var = set.add(STR("target"), xpath_type_number));
 	CHECK(!var);
 }
