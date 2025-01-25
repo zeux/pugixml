@@ -1065,14 +1065,14 @@ TEST_XML(dom_internal_object, "<node attr='value'>value</node>")
 	xml_attribute attr = node.first_attribute();
 	xml_node value = node.first_child();
 
-	CHECK(xml_node().internal_object() == PUGIXML_NULL);
-	CHECK(xml_attribute().internal_object() == PUGIXML_NULL);
+	CHECK(xml_node().internal_object() == nullptr);
+	CHECK(xml_attribute().internal_object() == nullptr);
 
-    CHECK(node.internal_object() != PUGIXML_NULL);
-    CHECK(value.internal_object() != PUGIXML_NULL);
+    CHECK(node.internal_object() != nullptr);
+    CHECK(value.internal_object() != nullptr);
     CHECK(node.internal_object() != value.internal_object());
 
-    CHECK(attr.internal_object() != PUGIXML_NULL);
+    CHECK(attr.internal_object() != nullptr);
 
     xml_node node_copy = node;
     CHECK(node_copy.internal_object() == node.internal_object());
@@ -1184,24 +1184,24 @@ TEST_XML(dom_unspecified_bool_coverage, "<node attr='value'>text</node>")
 	xml_node node = doc.first_child();
 
 	CHECK(node);
-	static_cast<void (*)(xml_node***)>(node)(PUGIXML_NULL);
+	static_cast<void (*)(xml_node***)>(node)(nullptr);
 
 	CHECK(node.first_attribute());
-	static_cast<void (*)(xml_attribute***)>(node.first_attribute())(PUGIXML_NULL);
+	static_cast<void (*)(xml_attribute***)>(node.first_attribute())(nullptr);
 
 	CHECK(node.text());
-	static_cast<void (*)(xml_text***)>(node.text())(PUGIXML_NULL);
+	static_cast<void (*)(xml_text***)>(node.text())(nullptr);
 
 #ifndef PUGIXML_NO_XPATH
 	xpath_query q(STR("/node"));
 
 	CHECK(q);
-	static_cast<void (*)(xpath_query***)>(q)(PUGIXML_NULL);
+	static_cast<void (*)(xpath_query***)>(q)(nullptr);
 
 	xpath_node qn = q.evaluate_node(doc);
 
 	CHECK(qn);
-	static_cast<void (*)(xpath_node***)>(qn)(PUGIXML_NULL);
+	static_cast<void (*)(xpath_node***)>(qn)(nullptr);
 #endif
 }
 

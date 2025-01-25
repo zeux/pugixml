@@ -1,4 +1,3 @@
-#include "pugixml.hpp"
 #include "allocator.hpp"
 
 #include <string.h>
@@ -103,7 +102,7 @@ namespace
 		size_t aligned_size = align_to_page(size);
 
 		void* ptr = allocate_page_aligned(aligned_size + page_size);
-		if (!ptr) return PUGIXML_NULL;
+		if (!ptr) return nullptr;
 
 		char* end = static_cast<char*>(ptr) + aligned_size;
 
@@ -148,7 +147,7 @@ const size_t memory_alignment = sizeof(double) > sizeof(void*) ? sizeof(double) 
 void* memory_allocate(size_t size)
 {
 	void* result = allocate(size + memory_alignment);
-	if (!result) return PUGIXML_NULL;
+	if (!result) return nullptr;
 
 	memcpy(result, &size, sizeof(size_t));
 
