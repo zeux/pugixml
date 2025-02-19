@@ -264,7 +264,7 @@ PUGI_IMPL_NS_BEGIN
 
 		while (srclen && *dst && *src == *dst)
 		{
-			--srclen; ++dst; ++src; 
+			--srclen; ++dst; ++src;
 		}
 		return srclen == 0 && *dst == 0;
 	}
@@ -4779,6 +4779,9 @@ PUGI_IMPL_NS_BEGIN
 
 		// if convert_buffer below throws bad_alloc, we still need to deallocate contents if we own it
 		auto_deleter<void> contents_guard(own ? contents : NULL, xml_memory::deallocate);
+
+		// early-out for empty documents to avoid buffer allocation overhead
+		if (size == 0) return make_parse_result((options & parse_fragment) ? status_ok : status_no_document_element);
 
 		// get private buffer
 		char_t* buffer = NULL;
