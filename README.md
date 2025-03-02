@@ -70,3 +70,12 @@ int main()
 ## License
 
 This library is available to anybody free of charge, under the terms of MIT License (see LICENSE.md).
+
+This work is based on the pugxml parser, which carried the following Public Domain dedication:
+
+    // Pug XML Parser - Version 1.0002
+    // --------------------------------------------------------
+    // Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
+    // Released into the Public Domain. Use at your own risk.
+    // See pugxml.xml for further information, history, etc.
+    // Contributions by Neville Franks (readonly@getsoft.com).
