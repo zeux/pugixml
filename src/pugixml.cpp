@@ -5,8 +5,8 @@
  *
  * SPDX-FileCopyrightText: Copyright (C) 2006-2025, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * SPDX-License-Identifier: MIT
- * See LICENSE.md or notice at the end of this file.
  *
+ * See LICENSE.md or notice at the end of this file.
  */
 
 #ifndef SOURCE_PUGIXML_CPP
