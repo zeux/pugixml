@@ -4293,6 +4293,9 @@ PUGI_IMPL_NS_BEGIN
 				writer.write('>');
 				break;
 
+			case node_document: // fall-through
+			case node_element:  // fall-through
+			case node_null:     // fall-through
 			default:
 				assert(false && "Invalid node type"); // unreachable
 		}
@@ -6893,6 +6896,7 @@ namespace pugi
 		case node_doctype:
 			return _root->value && (_root->header & impl::xml_memory_page_value_allocated_or_shared_mask) == 0 ? _root->value - doc.buffer : -1;
 
+		case node_null: // fall-through
 		default:
 			assert(false && "Invalid node type"); // unreachable
 			return -1;
@@ -8554,6 +8558,9 @@ PUGI_IMPL_NS_BEGIN
 				return result;
 			}
 
+			case node_declaration: // fall-through
+			case node_doctype:     // fall-through
+			case node_null:        // fall-through
 			default:
 				return xpath_string();
 			}
@@ -9277,6 +9284,7 @@ PUGI_IMPL_NS_BEGIN
 		case xpath_type_boolean:
 			return new_xpath_variable<xpath_variable_boolean>(name);
 
+		case xpath_type_none: // fall-through
 		default:
 			return NULL;
 		}
@@ -9308,6 +9316,7 @@ PUGI_IMPL_NS_BEGIN
 			delete_xpath_variable(static_cast<xpath_variable_boolean*>(var));
 			break;
 
+		case xpath_type_none: // fall-through
 		default:
 			assert(false && "Invalid variable type"); // unreachable
 		}
@@ -9329,6 +9338,7 @@ PUGI_IMPL_NS_BEGIN
 		case xpath_type_boolean:
 			return lhs->set(static_cast<const xpath_variable_boolean*>(rhs)->value);
 
+		case xpath_type_none: // fall-through
 		default:
 			assert(false && "Invalid variable type"); // unreachable
 			return false;
@@ -10665,6 +10675,7 @@ PUGI_IMPL_NS_BEGIN
 				break;
 			}
 
+			case axis_namespace: // fall-through
 			default:
 				assert(false && "Unimplemented axis"); // unreachable
 			}
@@ -10746,6 +10757,12 @@ PUGI_IMPL_NS_BEGIN
 				break;
 			}
 
+			case axis_attribute:         // fall-through
+			case axis_child:             // fall-through
+			case axis_descendant:        // fall-through
+			case axis_following_sibling: // fall-through
+			case axis_namespace:         // fall-through
+			case axis_preceding_sibling: // fall-through
 			default:
 				assert(false && "Unimplemented axis"); // unreachable
 			}
@@ -12115,6 +12132,28 @@ PUGI_IMPL_NS_BEGIN
 				return parse_function(function, argc, args);
 			}
 
+			case lex_none:               // fall-through
+			case lex_equal:              // fall-through
+			case lex_not_equal:          // fall-through
+			case lex_less:               // fall-through
+			case lex_greater:            // fall-through
+			case lex_less_or_equal:      // fall-through
+			case lex_greater_or_equal:   // fall-through
+			case lex_plus:               // fall-through
+			case lex_minus:              // fall-through
+			case lex_multiply:           // fall-through
+			case lex_union:              // fall-through
+			case lex_close_brace:        // fall-through
+			case lex_slash:              // fall-through
+			case lex_double_slash:       // fall-through
+			case lex_open_square_brace:  // fall-through
+			case lex_close_square_brace: // fall-through
+			case lex_comma:              // fall-through
+			case lex_axis_attribute:     // fall-through
+			case lex_dot:                // fall-through
+			case lex_double_dot:         // fall-through
+			case lex_double_colon:       // fall-through
+			case lex_eof:                // fall-through
 			default:
 				return error("Unrecognizable primary expression");
 			}
@@ -12538,6 +12577,22 @@ PUGI_IMPL_NS_BEGIN
 				case lex_union:
 					return binary_op_t(ast_op_union, xpath_type_node_set, 7);
 
+				case lex_none:               // fall-through
+				case lex_var_ref:            // fall-through
+				case lex_open_brace:         // fall-through
+				case lex_close_brace:        // fall-through
+				case lex_quoted_string:      // fall-through
+				case lex_number:             // fall-through
+				case lex_slash:              // fall-through
+				case lex_double_slash:       // fall-through
+				case lex_open_square_brace:  // fall-through
+				case lex_close_square_brace: // fall-through
+				case lex_comma:              // fall-through
+				case lex_axis_attribute:     // fall-through
+				case lex_dot:                // fall-through
+				case lex_double_dot:         // fall-through
+				case lex_double_colon:       // fall-through
+				case lex_eof:                // fall-through
 				default:
 					return binary_op_t();
 				}
@@ -12942,6 +12997,7 @@ namespace pugi
 		case xpath_type_boolean:
 			return static_cast<const impl::xpath_variable_boolean*>(this)->name;
 
+		case xpath_type_none: // fall-through:
 		default:
 			assert(false && "Invalid variable type"); // unreachable
 			return NULL;
