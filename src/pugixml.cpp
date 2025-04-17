@@ -4785,7 +4785,6 @@ PUGI_IMPL_NS_BEGIN
 		char_t* buffer = NULL;
 		size_t length = 0;
 
-		// coverity[var_deref_model]
 		if (!impl::convert_buffer(buffer, length, buffer_encoding, contents, size, is_mutable)) return impl::make_parse_result(status_out_of_memory);
 
 		// after this we either deallocate contents (below) or hold on to it via doc->buffer, so we don't need to guard it
@@ -9517,10 +9516,10 @@ PUGI_IMPL_NS_BEGIN
 				size_t hash_size = 1;
 				while (hash_size < size_ + size_ / 2) hash_size *= 2;
 
-				const void** hash_data = static_cast<const void**>(alloc->allocate(hash_size * sizeof(void**)));
+				const void** hash_data = static_cast<const void**>(alloc->allocate(hash_size * sizeof(void*)));
 				if (!hash_data) return;
 
-				memset(hash_data, 0, hash_size * sizeof(const void**));
+				memset(hash_data, 0, hash_size * sizeof(void*));
 
 				xpath_node* write = _begin;
 
