@@ -13100,8 +13100,11 @@ namespace pugi
 
 		// look for existing variable
 		for (xpath_variable* var = _data[hash]; var; var = var->_next)
-			if (impl::strequal(var->name(), name))
+		{
+			const char_t* vn = var->name();
+			if (vn && impl::strequal(vn, name))
 				return var;
+		}
 
 		return NULL;
 	}
@@ -13152,8 +13155,11 @@ namespace pugi
 
 		// look for existing variable
 		for (xpath_variable* var = _data[hash]; var; var = var->_next)
-			if (impl::strequal(var->name(), name))
+		{
+			const char_t* vn = var->name();
+			if (vn && impl::strequal(vn, name))
 				return var->type() == type ? var : NULL;
+		}
 
 		// add new variable
 		xpath_variable* result = impl::new_xpath_variable(type, name);
