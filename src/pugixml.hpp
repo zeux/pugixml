@@ -420,6 +420,14 @@ namespace pugi
 		const char_t* name() const;
 		const char_t* value() const;
 
+		#ifdef PUGIXML_HAS_STRING_VIEW
+		// Get attribute name, or empty string_view if attribute is `empty()`
+		string_view_t name_sv() const;
+
+		// Get attribute value, or empty string_view if attribute is `empty()`
+		string_view_t value_sv() const;
+		#endif
+
 		// Get attribute value, or the default value if attribute is empty
 		const char_t* as_string(const char_t* def = PUGIXML_TEXT("")) const;
 
@@ -546,6 +554,15 @@ namespace pugi
 		// Get node value, or "" if node is empty or it has no value
 		// Note: For <node>text</node> node.value() does not return "text"! Use child_value() or text() methods to access text inside nodes.
 		const char_t* value() const;
+
+		#ifdef PUGIXML_HAS_STRING_VIEW
+		// Get node name, or empty string_view if node is `empty()` or if it has no name.
+		string_view_t name_sv() const;
+
+		// Get node value, or empty string_view if node is `empty()` or if it has no value.
+		// Note: For <node>text</node> `node.cvalue()` does not return "text"! Use `child_value()` or `text()` methods to access text inside nodes.
+		string_view_t value_sv() const;
+		#endif
 
 		// Get attribute list
 		xml_attribute first_attribute() const;
