@@ -154,6 +154,10 @@ struct dummy_fixture {};
 
 #define STR(text) PUGIXML_TEXT(text)
 
+#ifdef PUGIXML_HAS_STRING_VIEW
+#	define STRV(text) pugi::string_view_t(PUGIXML_TEXT(text))
+#endif
+
 #if defined(__DMC__) || defined(__BORLANDC__)
 #define U_LITERALS // DMC does not understand \x01234 (it parses first three digits), but understands \u01234
 #endif

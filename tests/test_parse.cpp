@@ -37,6 +37,13 @@ TEST(parse_pi_parse)
 	CHECK(pi2.type() == node_pi);
 	CHECK_STRING(pi2.name(), STR("pi2"));
 	CHECK_STRING(pi2.value(), STR("value"));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(pi1.name_sv() == STRV("pi1"));
+		CHECK(pi1.value_sv() == STRV(""));
+		CHECK(pi2.name_sv() == STRV("pi2"));
+		CHECK(pi2.value_sv() == STRV("value"));
+	#endif
 }
 
 TEST(parse_pi_parse_spaces)
@@ -122,6 +129,13 @@ TEST(parse_comments_parse)
 	CHECK(c2.type() == node_comment);
 	CHECK_STRING(c2.name(), STR(""));
 	CHECK_STRING(c2.value(), STR("value"));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(c1.name_sv() == string_view_t());
+		CHECK(c1.value_sv() == string_view_t());
+		CHECK(c2.name_sv() == string_view_t());
+		CHECK(c2.value_sv() == STRV("value"));
+	#endif
 }
 
 TEST(parse_comments_parse_no_eol)
@@ -132,6 +146,10 @@ TEST(parse_comments_parse_no_eol)
 	xml_node c = doc.first_child();
 	CHECK(c.type() == node_comment);
 	CHECK_STRING(c.value(), STR("\r\rval1\rval2\r\nval3\nval4\r\r"));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(c.value_sv() == STRV("\r\rval1\rval2\r\nval3\nval4\r\r"));
+	#endif
 }
 
 TEST(parse_comments_parse_eol)
@@ -142,6 +160,10 @@ TEST(parse_comments_parse_eol)
 	xml_node c = doc.first_child();
 	CHECK(c.type() == node_comment);
 	CHECK_STRING(c.value(), STR("\n\nval1\nval2\nval3\nval4\n\n"));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(c.value_sv() == STRV("\n\nval1\nval2\nval3\nval4\n\n"));
+	#endif
 }
 
 TEST(parse_comments_error)
@@ -192,6 +214,13 @@ TEST(parse_cdata_parse)
 	CHECK(c2.type() == node_cdata);
 	CHECK_STRING(c2.name(), STR(""));
 	CHECK_STRING(c2.value(), STR("value"));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(c1.name_sv() == STRV(""));
+		CHECK(c1.value_sv() == STRV(""));
+		CHECK(c2.name_sv() == string_view_t());
+		CHECK(c2.value_sv() == STRV("value"));
+	#endif
 }
 
 TEST(parse_cdata_parse_no_eol)
@@ -212,6 +241,10 @@ TEST(parse_cdata_parse_eol)
 	xml_node c = doc.first_child();
 	CHECK(c.type() == node_cdata);
 	CHECK_STRING(c.value(), STR("\n\nval1\nval2\nval3\nval4\n\n"));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(c.value_sv() == STRV("\n\nval1\nval2\nval3\nval4\n\n"));
+	#endif
 }
 
 TEST(parse_cdata_error)
@@ -275,6 +308,12 @@ TEST(parse_ws_pcdata_parse)
 	CHECK(c2.first_child() == c2.last_child());
 	CHECK(c2.first_child().type() == node_pcdata);
 	CHECK_STRING(c2.first_child().value(), STR("  "));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(c1.value_sv() == STRV("  "));
+		CHECK(c2.first_child().value_sv() == STRV("  "));
+		CHECK(c3.value_sv() == STRV("  "));
+	#endif
 }
 
 static int get_tree_node_count(xml_node n)
@@ -474,8 +513,12 @@ TEST(parse_pcdata_trim)
         xml_document doc;
         CHECK(doc.load_string(td.source, td.flags | parse_trim_pcdata));
 
-        const char_t* value = doc.child(STR("node")) ? doc.child_value(STR("node")) : doc.text().get();
-        CHECK_STRING(value, td.result);
+		xml_node node = doc.child(STR("node")) ? doc.child(STR("node")) : doc;
+        CHECK_STRING(node.first_child().value(), td.result);
+
+		#ifdef PUGIXML_HAS_STRING_VIEW
+			CHECK(node.first_child().value_sv() == string_view_t(td.result));
+		#endif
     }
 }
 
@@ -498,36 +541,63 @@ TEST(parse_escapes_skip)
 {
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node id='&lt;&gt;&amp;&apos;&quot;'>&lt;&gt;&amp;&apos;&quot;</node>"), parse_minimal));
-	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("&lt;&gt;&amp;&apos;&quot;"));
+
+	xml_attribute attr = doc.child(STR("node")).attribute(STR("id"));
+	CHECK_STRING(attr.value(), STR("&lt;&gt;&amp;&apos;&quot;"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(attr.value_sv() == STRV("&lt;&gt;&amp;&apos;&quot;"));
+	#endif
 }
 
 TEST(parse_escapes_parse)
 {
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node id='&lt;&gt;&amp;&apos;&quot;'>&lt;&gt;&amp;&apos;&quot;</node>"), parse_minimal | parse_escapes));
-	CHECK_STRING(doc.child_value(STR("node")), STR("<>&'\""));
-	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("<>&'\""));
+
+	xml_node node = doc.child(STR("node"));
+	xml_attribute attr = node.attribute(STR("id"));
+
+	CHECK_STRING(node.child_value(), STR("<>&'\""));
+	CHECK_STRING(attr.value(), STR("<>&'\""));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(node.first_child().value_sv() == STRV("<>&'\""));
+		CHECK(attr.value_sv() == STRV("<>&'\""));
+	#endif
 }
 
 TEST(parse_escapes_code)
 {
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node>&#1;&#32;&#x20;</node>"), parse_minimal | parse_escapes));
-	CHECK_STRING(doc.child_value(STR("node")), STR("\01  "));
+
+	xml_node node = doc.child(STR("node"));
+	CHECK_STRING(node.child_value(), STR("\01  "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(node.first_child().value_sv() == STRV("\01  "));
+	#endif
 }
 
 TEST(parse_escapes_code_exhaustive_dec)
 {
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node>&#/;&#01;&#2;&#3;&#4;&#5;&#6;&#7;&#8;&#9;&#:;&#a;&#A;&#XA;</node>"), parse_minimal | parse_escapes));
-	CHECK_STRING(doc.child_value(STR("node")), STR("&#/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#:;&#a;&#A;&#XA;"));
+
+	xml_node node = doc.child(STR("node"));
+	CHECK_STRING(node.child_value(), STR("&#/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#:;&#a;&#A;&#XA;"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(node.first_child().value_sv() == STRV("&#/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#:;&#a;&#A;&#XA;"));
+	#endif
 }
 
 TEST(parse_escapes_code_exhaustive_hex)
 {
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node>&#x/;&#x01;&#x2;&#x3;&#x4;&#x5;&#x6;&#x7;&#x8;&#x9;&#x:;&#x@;&#xA;&#xB;&#xC;&#xD;&#xE;&#xF;&#xG;&#x`;&#xa;&#xb;&#xc;&#xd;&#xe;&#xf;&#xg;</node>"), parse_minimal | parse_escapes));
+
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#x/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#x:;&#x@;\xa\xb\xc\xd\xe\xf&#xG;&#x`;\xa\xb\xc\xd\xe\xf&#xg;"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&#x/;\x1\x2\x3\x4\x5\x6\x7\x8\x9&#x:;&#x@;\xa\xb\xc\xd\xe\xf&#xG;&#x`;\xa\xb\xc\xd\xe\xf&#xg;"));
+	#endif
 }
 
 TEST(parse_escapes_code_restore)
@@ -535,6 +605,9 @@ TEST(parse_escapes_code_restore)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node>&#1&#32;&#x1&#32;&#1-&#32;&#x1-&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#1 &#x1 &#1- &#x1- "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&#1 &#x1 &#1- &#x1- "));
+	#endif
 }
 
 TEST(parse_escapes_char_restore)
@@ -543,18 +616,33 @@ TEST(parse_escapes_char_restore)
 
 	CHECK(doc.load_string(STR("<node>&q&#32;&qu&#32;&quo&#32;&quot&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&q &qu &quo &quot "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&q &qu &quo &quot "));
+	#endif
 
 	CHECK(doc.load_string(STR("<node>&a&#32;&ap&#32;&apo&#32;&apos&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&a &ap &apo &apos "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&a &ap &apo &apos "));
+	#endif
 
 	CHECK(doc.load_string(STR("<node>&a&#32;&am&#32;&amp&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&a &am &amp "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&a &am &amp "));
+	#endif
 
 	CHECK(doc.load_string(STR("<node>&l&#32;&lt&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&l &lt "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&l &lt "));
+	#endif
 
 	CHECK(doc.load_string(STR("<node>&g&#32;&gt&#32;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&g &gt "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&g &gt "));
+	#endif
 }
 
 TEST(parse_escapes_unicode)
@@ -594,25 +682,32 @@ TEST(parse_escapes_code_invalid)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node>&#;&#x;&;&#x-;&#-;</node>"), parse_minimal | parse_escapes));
 	CHECK_STRING(doc.child_value(STR("node")), STR("&#;&#x;&;&#x-;&#-;"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("&#;&#x;&;&#x-;&#-;"));
+	#endif
 }
 
 TEST(parse_escapes_attribute)
 {
 	xml_document doc;
 
-	for (int wnorm = 0; wnorm < 2; ++wnorm)
-		for (int eol = 0; eol < 2; ++eol)
-			for (int wconv = 0; wconv < 2; ++wconv)
-			{
-				unsigned int flags = parse_escapes;
+	for (int wnorm = 0; wnorm < 2; ++wnorm){
+	for (int eol = 0  ; eol < 2  ; ++eol){
+	for (int wconv = 0; wconv < 2; ++wconv){
+		unsigned int flags = parse_escapes;
 
-				flags |= (wnorm ? parse_wnorm_attribute : 0);
-				flags |= (eol ? parse_eol : 0);
-				flags |= (wconv ? parse_wconv_attribute : 0);
+		flags |= (wnorm ? parse_wnorm_attribute : 0);
+		flags |= (eol ? parse_eol : 0);
+		flags |= (wconv ? parse_wconv_attribute : 0);
 
-				CHECK(doc.load_string(STR("<node id='&quot;'/>"), flags));
-				CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("\""));
-			}
+		CHECK(doc.load_string(STR("<node id='&quot;'/>"), flags));
+		xml_attribute attr = doc.child(STR("node")).attribute(STR("id"));
+		
+		CHECK_STRING(attr.value(), STR("\""));
+		#ifdef PUGIXML_HAS_STRING_VIEW
+			CHECK(attr.value_sv() == STRV("\""));
+		#endif
+	}}}
 }
 
 TEST(parse_attribute_spaces)
@@ -624,6 +719,9 @@ TEST(parse_attribute_spaces)
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id3")).value(), STR("v3"));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id4")).value(), STR("v4"));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id5")).value(), STR("v5"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).attribute(STR("id5")).value_sv() == STRV("v5"));
+	#endif
 }
 
 TEST(parse_attribute_quot)
@@ -632,6 +730,10 @@ TEST(parse_attribute_quot)
 	CHECK(doc.load_string(STR("<node id1='v1' id2=\"v2\"/>"), parse_minimal));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id1")).value(), STR("v1"));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id2")).value(), STR("v2"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).attribute(STR("id1")).value_sv() == STRV("v1"));
+		CHECK(doc.child(STR("node")).attribute(STR("id2")).value_sv() == STRV("v2"));
+	#endif
 }
 
 TEST(parse_attribute_no_eol_no_wconv)
@@ -639,6 +741,9 @@ TEST(parse_attribute_no_eol_no_wconv)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR(" \t\r\rval1  \rval2\r\nval3\nval4\r\r"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).attribute(STR("id")).value_sv() == STRV(" \t\r\rval1  \rval2\r\nval3\nval4\r\r"));
+	#endif
 }
 
 TEST(parse_attribute_eol_no_wconv)
@@ -646,6 +751,9 @@ TEST(parse_attribute_eol_no_wconv)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_eol));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR(" \t\n\nval1  \nval2\nval3\nval4\n\n"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).attribute(STR("id")).value_sv() == STRV(" \t\n\nval1  \nval2\nval3\nval4\n\n"));
+	#endif
 }
 
 TEST(parse_attribute_no_eol_wconv)
@@ -653,6 +761,9 @@ TEST(parse_attribute_no_eol_wconv)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_wconv_attribute));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("    val1   val2 val3 val4  "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).attribute(STR("id")).value_sv() == STRV("    val1   val2 val3 val4  "));
+	#endif
 }
 
 TEST(parse_attribute_eol_wconv)
@@ -660,40 +771,48 @@ TEST(parse_attribute_eol_wconv)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), parse_minimal | parse_eol | parse_wconv_attribute));
 	CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("    val1   val2 val3 val4  "));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).attribute(STR("id")).value_sv() == STRV("    val1   val2 val3 val4  "));
+	#endif
 }
 
 TEST(parse_attribute_wnorm)
 {
 	xml_document doc;
 
-	for (int eol = 0; eol < 2; ++eol)
-		for (int wconv = 0; wconv < 2; ++wconv)
-		{
-			unsigned int flags = parse_minimal | parse_wnorm_attribute | (eol ? parse_eol : 0) | (wconv ? parse_wconv_attribute : 0);
-			CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), flags));
-			CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("val1 val2 val3 val4"));
-		}
+	for (int eol = 0; eol < 2; ++eol){
+	for (int wconv = 0; wconv < 2; ++wconv){
+		unsigned int flags = parse_minimal | parse_wnorm_attribute | (eol ? parse_eol : 0) | (wconv ? parse_wconv_attribute : 0);
+		CHECK(doc.load_string(STR("<node id=' \t\r\rval1  \rval2\r\nval3\nval4\r\r'/>"), flags));
+		
+		CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("val1 val2 val3 val4"));
+		#ifdef PUGIXML_HAS_STRING_VIEW
+			CHECK(doc.child(STR("node")).attribute(STR("id")).value_sv() == STRV("val1 val2 val3 val4"));
+		#endif
+	}}
 }
 
 TEST(parse_attribute_variations)
 {
 	xml_document doc;
 
-	for (int wnorm = 0; wnorm < 2; ++wnorm)
-		for (int eol = 0; eol < 2; ++eol)
-			for (int wconv = 0; wconv < 2; ++wconv)
-				for (int escapes = 0; escapes < 2; ++escapes)
-				{
-					unsigned int flags = parse_minimal;
+	for (int wnorm = 0; wnorm < 2; ++wnorm){
+	for (int eol = 0; eol < 2; ++eol){
+	for (int wconv = 0; wconv < 2; ++wconv){
+	for (int escapes = 0; escapes < 2; ++escapes){
+		unsigned int flags = parse_minimal;
+		flags |= (wnorm ? parse_wnorm_attribute : 0);
+		flags |= (eol ? parse_eol : 0);
+		flags |= (wconv ? parse_wconv_attribute : 0);
+		flags |= (escapes ? parse_escapes : 0);
 
-					flags |= (wnorm ? parse_wnorm_attribute : 0);
-					flags |= (eol ? parse_eol : 0);
-					flags |= (wconv ? parse_wconv_attribute : 0);
-					flags |= (escapes ? parse_escapes : 0);
-
-					CHECK(doc.load_string(STR("<node id='1'/>"), flags));
-					CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
-				}
+		CHECK(doc.load_string(STR("<node id='1'/>"), flags));
+		
+		CHECK_STRING(doc.child(STR("node")).attribute(STR("id")).value(), STR("1"));
+		#ifdef PUGIXML_HAS_STRING_VIEW
+			CHECK(doc.child(STR("node")).attribute(STR("id")).value_sv() == STRV("1"));
+		#endif
+	}}}}
 }
 
 
@@ -742,20 +861,24 @@ TEST(parse_attribute_quot_inside)
 {
 	xml_document doc;
 
-	for (int wnorm = 0; wnorm < 2; ++wnorm)
-		for (int eol = 0; eol < 2; ++eol)
-			for (int wconv = 0; wconv < 2; ++wconv)
-			{
-				unsigned int flags = parse_escapes;
+	for (int wnorm = 0; wnorm < 2; ++wnorm){
+	for (int eol = 0; eol < 2; ++eol){
+	for (int wconv = 0; wconv < 2; ++wconv){
+		unsigned int flags = parse_escapes;
 
-				flags |= (wnorm ? parse_wnorm_attribute : 0);
-				flags |= (eol ? parse_eol : 0);
-				flags |= (wconv ? parse_wconv_attribute : 0);
+		flags |= (wnorm ? parse_wnorm_attribute : 0);
+		flags |= (eol ? parse_eol : 0);
+		flags |= (wconv ? parse_wconv_attribute : 0);
 
-				CHECK(doc.load_string(STR("<node id1='\"' id2=\"'\"/>"), flags));
-				CHECK_STRING(doc.child(STR("node")).attribute(STR("id1")).value(), STR("\""));
-				CHECK_STRING(doc.child(STR("node")).attribute(STR("id2")).value(), STR("'"));
-			}
+		CHECK(doc.load_string(STR("<node id1='\"' id2=\"'\"/>"), flags));
+		CHECK_STRING(doc.child(STR("node")).attribute(STR("id1")).value(), STR("\""));
+		CHECK_STRING(doc.child(STR("node")).attribute(STR("id2")).value(), STR("'"));
+		
+		#ifdef PUGIXML_HAS_STRING_VIEW
+			CHECK(doc.child(STR("node")).attribute(STR("id1")).value_sv() == STRV("\""));
+			CHECK(doc.child(STR("node")).attribute(STR("id2")).value_sv() == STRV("'"));
+		#endif
+	}}}
 }
 
 TEST(parse_attribute_wnorm_coverage)
@@ -763,9 +886,23 @@ TEST(parse_attribute_wnorm_coverage)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<n a1='v' a2=' ' a3='x y' a4='x  y' a5='x   y' />"), parse_wnorm_attribute));
 	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"\" a3=\"x y\" a4=\"x y\" a5=\"x y\"/>"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.first_child().attribute(STR("a1")).value_sv() == STRV("v"));
+		CHECK(doc.first_child().attribute(STR("a2")).value_sv() == STRV(""));
+		CHECK(doc.first_child().attribute(STR("a3")).value_sv() == STRV("x y"));
+		CHECK(doc.first_child().attribute(STR("a4")).value_sv() == STRV("x y"));
+		CHECK(doc.first_child().attribute(STR("a5")).value_sv() == STRV("x y"));
+	#endif
 
 	CHECK(doc.load_string(STR("<n a1='v' a2=' ' a3='x y' a4='x  y' a5='x   y' />"), parse_wnorm_attribute | parse_escapes));
 	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"\" a3=\"x y\" a4=\"x y\" a5=\"x y\"/>"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.first_child().attribute(STR("a1")).value_sv() == STRV("v"));
+		CHECK(doc.first_child().attribute(STR("a2")).value_sv() == STRV(""));
+		CHECK(doc.first_child().attribute(STR("a3")).value_sv() == STRV("x y"));
+		CHECK(doc.first_child().attribute(STR("a4")).value_sv() == STRV("x y"));
+		CHECK(doc.first_child().attribute(STR("a5")).value_sv() == STRV("x y"));
+	#endif
 }
 
 TEST(parse_attribute_wconv_coverage)
@@ -773,9 +910,21 @@ TEST(parse_attribute_wconv_coverage)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_wconv_attribute));
 	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\" \" a3=\"  \" a4=\" \"/>"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("n")).attribute(STR("a1")).value_sv() == STRV("v"));
+		CHECK(doc.child(STR("n")).attribute(STR("a2")).value_sv() == STRV(" "));
+		CHECK(doc.child(STR("n")).attribute(STR("a3")).value_sv() == STRV("  "));
+		CHECK(doc.child(STR("n")).attribute(STR("a4")).value_sv() == STRV(" "));
+	#endif
 
 	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_wconv_attribute | parse_escapes));
 	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\" \" a3=\"  \" a4=\" \"/>"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("n")).attribute(STR("a1")).value_sv() == STRV("v"));
+		CHECK(doc.child(STR("n")).attribute(STR("a2")).value_sv() == STRV(" "));
+		CHECK(doc.child(STR("n")).attribute(STR("a3")).value_sv() == STRV("  "));
+		CHECK(doc.child(STR("n")).attribute(STR("a4")).value_sv() == STRV(" "));
+	#endif
 }
 
 TEST(parse_attribute_eol_coverage)
@@ -783,10 +932,32 @@ TEST(parse_attribute_eol_coverage)
 	xml_document doc;
 	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_eol));
 	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"&#10;\" a3=\"&#10;&#10;\" a4=\"&#10;\"/>"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("n")).attribute(STR("a1")).value_sv() == STRV("v"));
+		CHECK(doc.child(STR("n")).attribute(STR("a2")).value_sv() == STRV("\n"));
+		CHECK(doc.child(STR("n")).attribute(STR("a3")).value_sv() == STRV("\n\n"));
+		CHECK(doc.child(STR("n")).attribute(STR("a4")).value_sv() == STRV("\n"));
+	#endif
 
 	CHECK(doc.load_string(STR("<n a1='v' a2='\r' a3='\r\n\n' a4='\n' />"), parse_eol | parse_escapes));
 	CHECK_NODE(doc, STR("<n a1=\"v\" a2=\"&#10;\" a3=\"&#10;&#10;\" a4=\"&#10;\"/>"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("n")).attribute(STR("a1")).value_sv() == STRV("v"));
+		CHECK(doc.child(STR("n")).attribute(STR("a2")).value_sv() == STRV("\n"));
+		CHECK(doc.child(STR("n")).attribute(STR("a3")).value_sv() == STRV("\n\n"));
+		CHECK(doc.child(STR("n")).attribute(STR("a4")).value_sv() == STRV("\n"));
+	#endif
 }
+
+#ifdef PUGIXML_HAS_STRING_VIEW
+TEST(parse_attribute_escapes)
+{
+	xml_document doc;
+	CHECK(doc.load_string(STR("<node attr='value1 &amp; value2'></node>"), parse_escapes));
+	CHECK(doc.first_child().first_attribute().value_sv() == STRV("value1 & value2"));
+}
+#endif
+
 
 TEST(parse_tag_single)
 {
@@ -880,6 +1051,12 @@ TEST(parse_declaration_parse)
 	CHECK(d2.type() == node_declaration);
 	CHECK_STRING(d2.name(), STR("xml"));
 	CHECK_STRING(d2.attribute(STR("version")).value(), STR("1.0"));
+
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(d1.name_sv() == STR("xml"));
+		CHECK(d2.name_sv() == STR("xml"));
+		CHECK(d2.attribute(STR("version")).value_sv() == STRV("1.0"));
+	#endif
 }
 
 TEST(parse_declaration_error)
@@ -1144,6 +1321,9 @@ TEST(parse_pcdata_gap_fragment)
 	xml_document doc;
 	CHECK(doc.load_string(STR("a&amp;b"), parse_fragment | parse_escapes));
 	CHECK_STRING(doc.text().get(), STR("a&b"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.first_child().value_sv() == STRV("a&b"));
+	#endif
 }
 
 TEST(parse_name_end_eof)
@@ -1271,24 +1451,42 @@ TEST(parse_merge_pcdata)
 			CHECK_STRING(child.first_child().value(), STR("First text"));
 			CHECK(child.first_child().next_sibling().type() == node_comment);
 			CHECK_NODE(doc, STR("<node>First text<!-- here is a mesh node -->Second textsome more textLast text</node>"));
+			#ifdef PUGIXML_HAS_STRING_VIEW
+				CHECK(child.first_child().value_sv() == STRV("First text"));
+				CHECK(child.first_child().next_sibling().value_sv() == STRV(" here is a mesh node "));
+				CHECK(child.first_child().next_sibling().next_sibling().value_sv() == STRV("Second textsome more textLast text"));
+			#endif
 		}
 		else if (flags & parse_cdata)
 		{
 			CHECK_STRING(child.first_child().value(), STR("First textSecond text"));
 			CHECK(child.first_child().next_sibling().type() == node_cdata);
 			CHECK_NODE(doc, STR("<node>First textSecond text<![CDATA[someothertext]]>some more textLast text</node>"));
+			#ifdef PUGIXML_HAS_STRING_VIEW
+				CHECK(child.first_child().value_sv() == STRV("First textSecond text"));
+				CHECK(child.first_child().next_sibling().value_sv() == STRV("someothertext"));
+				CHECK(child.first_child().next_sibling().next_sibling().value_sv() == STRV("some more textLast text"));
+			#endif
 		}
 		else if (flags & parse_pi)
 		{
 			CHECK_STRING(child.first_child().value(), STR("First textSecond textsome more text"));
 			CHECK(child.first_child().next_sibling().type() == node_pi);
 			CHECK_NODE(doc, STR("<node>First textSecond textsome more text<?include somedata?>Last text</node>"));
+			#ifdef PUGIXML_HAS_STRING_VIEW
+				CHECK(child.first_child().value_sv() == STRV("First textSecond textsome more text"));
+				CHECK(child.first_child().next_sibling().value_sv() == STRV("somedata"));
+				CHECK(child.first_child().next_sibling().next_sibling().value_sv() == STRV("Last text"));
+			#endif
 		}
 		else
 		{
 			CHECK(child.first_child() == child.last_child());
 			CHECK(child.first_child().type() == node_pcdata);
 			CHECK_NODE(doc, STR("<node>First textSecond textsome more textLast text</node>"));
+			#ifdef PUGIXML_HAS_STRING_VIEW
+				CHECK(child.first_child().value_sv() == STRV("First textSecond textsome more textLast text"));
+			#endif
 		}
 
 		CHECK(child.last_child().type() == node_pcdata);
@@ -1302,6 +1500,9 @@ TEST(parse_merge_pcdata_escape)
 	CHECK(res);
 
 	CHECK_STRING(doc.child(STR("node")).child_value(), STR("First &lt;  Second &gt;  Third &quot;"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("First &lt;  Second &gt;  Third &quot;"));
+	#endif
 }
 
 TEST(parse_merge_pcdata_whitespace)
@@ -1320,16 +1521,27 @@ TEST(parse_merge_pcdata_whitespace)
 		{
 			CHECK_STRING(doc.child(STR("node")).child(STR("child1")).child_value(), STR("  \t\n"));
 			CHECK_STRING(doc.child(STR("node")).child(STR("child2")).child_value(), STR("text\t end"));
+			#ifdef PUGIXML_HAS_STRING_VIEW
+				CHECK(doc.child(STR("node")).child(STR("child1")).first_child().value_sv() == STRV("  \t\n"));
+				CHECK(doc.child(STR("node")).child(STR("child2")).first_child().value_sv() == STRV("text\t end"));
+			#endif
 		}
 		else if (flags & parse_ws_pcdata_single)
 		{
 			CHECK_STRING(doc.child(STR("node")).child(STR("child1")).child_value(), STR("\n"));
 			CHECK_STRING(doc.child(STR("node")).child(STR("child2")).child_value(), STR("text end"));
+			#ifdef PUGIXML_HAS_STRING_VIEW
+				CHECK(doc.child(STR("node")).child(STR("child1")).first_child().value_sv() == STRV("\n"));
+				CHECK(doc.child(STR("node")).child(STR("child2")).first_child().value_sv() == STRV("text end"));
+			#endif
 		}
 		else
 		{
 			CHECK(!doc.child(STR("node")).child(STR("child1")).first_child());
 			CHECK_STRING(doc.child(STR("node")).child(STR("child2")).child_value(), STR("text end"));
+			#ifdef PUGIXML_HAS_STRING_VIEW
+				CHECK(doc.child(STR("node")).child(STR("child2")).first_child().value() == STRV("text end"));
+			#endif
 		}
 	}
 }
@@ -1356,6 +1568,9 @@ TEST(parse_merge_pcdata_overlap)
 	xml_parse_result res = doc.load_string(STR("<node>short <!-- --> this string is very long so long that copying it will overlap itself</node>"), parse_merge_pcdata);
 	CHECK(res);
 	CHECK_STRING(doc.child_value(STR("node")), STR("short  this string is very long so long that copying it will overlap itself"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(doc.child(STR("node")).first_child().value_sv() == STRV("short  this string is very long so long that copying it will overlap itself"));
+	#endif
 }
 
 TEST(parse_encoding_detect)
