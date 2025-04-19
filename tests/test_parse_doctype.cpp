@@ -307,6 +307,9 @@ TEST_XML_FLAGS(parse_doctype_value, "<!DOCTYPE doc [ <!ELEMENT doc (#PCDATA)> <!
 
     CHECK(n.type() == node_doctype);
     CHECK_STRING(n.value(), STR("doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]"));
+	#ifdef PUGIXML_HAS_STRING_VIEW
+		CHECK(n.value_sv() == STRV("doc [ <!ELEMENT doc (#PCDATA)> <!ENTITY e \"<![CDATA[Tim & Michael]]>\"> ]"));
+	#endif
 }
 
 TEST(parse_doctype_error_toplevel)

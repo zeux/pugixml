@@ -3326,7 +3326,7 @@ PUGI_IMPL_NS_BEGIN
 			xml_node_struct* cursor = root;
 			char_t* mark = s;
 			char_t* merged_pcdata = s;
-			size_t* merged_pcdata_len = nullptr;
+			size_t* merged_pcdata_len = NULL;
 
 			while (*s != 0)
 			{
@@ -3533,7 +3533,7 @@ PUGI_IMPL_NS_BEGIN
 						else if (PUGI_IMPL_OPTSET(parse_merge_pcdata) && cursor->first_child && PUGI_IMPL_NODETYPE(cursor->first_child->prev_sibling_c) == node_pcdata)
 						{
 							assert(merged_pcdata >= cursor->first_child->prev_sibling_c->value);
-							assert(merged_pcdata_len != nullptr);
+							assert(merged_pcdata_len != NULL);
 
 							// Must use memmove instead of memcpy as this move may overlap
 							memmove(merged_pcdata, parsed_pcdata, (parsed_pcdata_len + 1) * sizeof(char_t));
