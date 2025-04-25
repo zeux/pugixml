@@ -1,14 +1,12 @@
 /**
  * pugixml parser - version 1.15
  * --------------------------------------------------------
- * Copyright (C) 2006-2025, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
  * Report bugs and download new versions at https://pugixml.org/
  *
- * This library is distributed under the MIT License. See notice at the end
- * of this file.
+ * SPDX-FileCopyrightText: Copyright (C) 2006-2025, by Arseny Kapoulkine (arseny.kapoulkine@gmail.com)
+ * SPDX-License-Identifier: MIT
  *
- * This work is based on the pugxml parser, which is:
- * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
+ * See LICENSE.md or notice at the end of this file.
  */
 
 // Define version macro; evaluates to major * 1000 + minor * 10 + patch so that it's safe to use in less-than comparisons

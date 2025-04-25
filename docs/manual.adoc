@@ -251,7 +251,7 @@ NOTE: In that example `PUGIXML_API` is inconsistent between several source files
 
 pugixml is written in standard-compliant C{plus}{plus} with some compiler-specific workarounds where appropriate. pugixml is compatible with the C{plus}{plus}11 standard, but does not require C{plus}{plus}11 support. Each version is tested with a unit test suite with code coverage exceeding 99%.
 
-pugixml runs on a variety of desktop platforms (including Microsoft Windows, Linux, FreeBSD, Apple MacOSX and Sun Solaris), game consoles (inclusing Microsoft Xbox 360, Microsoft Xbox One, Nintendo Wii, Sony Playstation Portable and Sony Playstation 3) and mobile platforms (including Android, iOS, BlackBerry, Samsung bada and Microsoft Windows CE).
+pugixml runs on a variety of desktop platforms (including Microsoft Windows, Linux, FreeBSD, Apple MacOSX and Sun Solaris), game consoles (including Microsoft Xbox 360, Microsoft Xbox One, Nintendo Wii, Sony Playstation Portable and Sony Playstation 3) and mobile platforms (including Android, iOS, BlackBerry, Samsung bada and Microsoft Windows CE).
 
 pugixml supports various architectures, such as x86/x86-64, PowerPC, ARM, MIPS and SPARC. In general it should run on any architecture since it does not use architecture-specific code and does not rely on features such as unaligned memory access.
 

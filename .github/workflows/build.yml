@@ -19,7 +19,7 @@ jobs:
     name: ${{matrix.os}} (${{matrix.compiler}}, ${{matrix.defines}})
     runs-on: ${{matrix.os}}-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: make test
       run: |
         export CXX=${{matrix.compiler}}
@@ -41,7 +41,7 @@ jobs:
     name: ${{matrix.os}} cmake
     runs-on: ${{matrix.os}}-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: cmake configure
       run: |
         mkdir cmake && cd cmake
@@ -57,7 +57,7 @@ jobs:
         arch: [Win32, x64]
         defines: [standard, PUGIXML_WCHAR_MODE, PUGIXML_COMPACT, PUGIXML_NO_EXCEPTIONS]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: cmake configure
       run: cmake . -DPUGIXML_BUILD_TESTS=ON -D${{matrix.defines}}=ON -A ${{matrix.arch}}
     - name: cmake test
