@@ -31,6 +31,12 @@ cmake_dependent_option(PUGIXML_BUILD_TESTS
 set(PUGIXML_BUILD_DEFINES CACHE STRING "Build defines for custom options")
 separate_arguments(PUGIXML_BUILD_DEFINES)
 
+# Public headers
+set(PUGIXML_HEADERS
+    ${PROJECT_SOURCE_DIR}/src/pugiconfig.hpp
+    ${PROJECT_SOURCE_DIR}/src/pugixml.hpp
+)
+
 # Technically not needed for this file. This is builtin CMAKE global variable.
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 
@@ -106,7 +112,8 @@ set(libs)
 if (BUILD_SHARED_LIBS)
   add_library(pugixml-shared SHARED
     ${PROJECT_SOURCE_DIR}/scripts/pugixml_dll.rc
-    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
+    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp
+    ${PUGIXML_HEADERS})
   add_library(pugixml::shared ALIAS pugixml-shared)
   list(APPEND libs pugixml-shared)
   string(CONCAT pugixml.msvc $<OR:
@@ -135,7 +142,8 @@ endif()
 
 if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
   add_library(pugixml-static STATIC
-    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
+    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp
+    ${PUGIXML_HEADERS})
   add_library(pugixml::static ALIAS pugixml-static)
   list(APPEND libs pugixml-static)
 
@@ -182,10 +190,17 @@ if (PUGIXML_BUILD_APPLE_FRAMEWORK)
   set_target_properties(${libs} PROPERTIES
     FRAMEWORK TRUE
     FRAMEWORK_VERSION ${PROJECT_VERSION}
-    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER com.zeux.pugixml
-    MACOSX_FRAMEWORK_IDENTIFIER com.zeux.pugixml
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "github.com/zeux/pugixml"
+    XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+    XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+    XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+    XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
+    PUBLIC_HEADER "${PUGIXML_HEADERS}"
+    MACOSX_FRAMEWORK_IDENTIFIER "github.com/zeux/pugixml"
     MACOSX_FRAMEWORK_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR})
+    MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}
+    MACOSX_RPATH TRUE
+  )
 endif()
 
 configure_package_config_file(
@@ -249,7 +264,8 @@ if(PUGIXML_INSTALL)
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_LIBRARY_COMPONENT} ${namelink-component}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT}
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir}
-    FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT runtime OPTIONAL)
+    FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT runtime OPTIONAL
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
   install(EXPORT pugixml-targets
     NAMESPACE pugixml::
@@ -263,12 +279,8 @@ if(PUGIXML_INSTALL)
   install(FILES ${PROJECT_BINARY_DIR}/pugixml.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
 
-  install(
-    FILES
-      "${PROJECT_SOURCE_DIR}/src/pugiconfig.hpp"
-      "${PROJECT_SOURCE_DIR}/src/pugixml.hpp"
-    DESTINATION
-      ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  install(FILES ${PUGIXML_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
 endif()
 
 if (PUGIXML_BUILD_TESTS)
