@@ -1,5 +1,5 @@
-/build/
-/_build/
+/build*/
+
 /.vscode/
 
 .DS_Store
