@@ -237,7 +237,7 @@ struct test_writer: xml_writer
 {
 	std::basic_string<char_t> contents;
 
-	virtual void write(const void* data, size_t size) PUGIXML_OVERRIDE
+	void write(const void* data, size_t size) PUGIXML_OVERRIDE
 	{
 		CHECK(size % sizeof(char_t) == 0);
 		contents.append(static_cast<const char_t*>(data), size / sizeof(char_t));
@@ -687,7 +687,7 @@ TEST(write_flush_coverage)
 #ifndef PUGIXML_NO_EXCEPTIONS
 struct throwing_writer: xml_writer
 {
-	virtual void write(const void*, size_t) PUGIXML_OVERRIDE
+	void write(const void*, size_t) PUGIXML_OVERRIDE
 	{
 		throw std::runtime_error("write failed");
 	}
