@@ -16,9 +16,9 @@ module;
 #define PUGIXML_EXPORT_MODULE
 
 #ifndef PUGIXML_USE_STD_MODULE
-# ifdef __cpp_lib_modules
-#  define PUGIXML_USE_STD_MODULE
-# endif
+#	ifdef __cpp_lib_modules
+#		define PUGIXML_USE_STD_MODULE
+#	endif
 #endif
 
 #include <pugiconfig.hpp>
@@ -64,6 +64,9 @@ import std.compat;
 #if defined(__clang__)
 #	pragma clang diagnostic push
 #	pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
+#elif defined(_MSC_VER)
+#	pragma warning(push)
+#	pragma warning(disable:5244)
 #endif
 #if !defined(PUGIXML_HEADER_ONLY)
 extern "C++" {
@@ -74,8 +77,9 @@ extern "C++" {
 #endif
 #if defined(__clang__)
 #	pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#	pragma warning(pop)
 #endif
-
 
 module :private;
 

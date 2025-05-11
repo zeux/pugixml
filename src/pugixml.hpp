@@ -21,21 +21,19 @@
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
-#ifndef PUGIXML_EXPORT_MODULE
 // Include stddef.h for size_t and ptrdiff_t
-#	include <stddef.h>
+#include <stddef.h>
 
 // Include exception header for XPath
-#	if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
-#		include <exception>
-#	endif
+#if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
+#	include <exception>
+#endif
 
 // Include STL headers
-#	ifndef PUGIXML_NO_STL
-#		include <iterator>
-#		include <iosfwd>
-#		include <string>
-#	endif
+#ifndef PUGIXML_NO_STL
+#	include <iterator>
+#	include <iosfwd>
+#	include <string>
 #endif
 
 // Check if std::string_view is available
@@ -48,10 +46,8 @@
 #endif
 
 // Include string_view if appropriate
-#ifndef PUGIXML_EXPORT_MODULE
-#	ifdef PUGIXML_HAS_STRING_VIEW
-#		include <string_view>
-#	endif
+#ifdef PUGIXML_HAS_STRING_VIEW
+#	include <string_view>
 #endif
 
 // Macro for deprecated features
@@ -138,27 +134,25 @@
 #	endif
 #endif
 
-#ifndef PUGIXML_CONSTEXPR11
+// If C++ is 2011 or higher, add 'constexpr' qualifiers
+#ifndef PUGIXML_CONSTEXPR
 #	if __cplusplus >= 201103
-#		define PUGIXML_CONSTEXPR11 constexpr
+#		define PUGIXML_CONSTEXPR constexpr
 #	elif defined(_MSC_VER) && _MSC_VER >= 1910
-#		define PUGIXML_CONSTEXPR11 constexpr
+#		define PUGIXML_CONSTEXPR constexpr
 #	else
-#		define PUGIXML_CONSTEXPR11
+#		define PUGIXML_CONSTEXPR const
 #	endif
 #endif
 
-// If C++ is 2011 or higher, add 'constexpr' qualifiers to constants
-// If C++ is 2017 or higher, add 'inline' qualifiers to constants
-// inline constexpr is required for C++20 module
+// If C++ is 2017 or higher, add 'inline' qualifiers for constants
+// required for C++20 module
 #ifndef PUGIXML_CONSTANT
 #	if __cplusplus >= 201703
-#		define PUGIXML_CONSTANT inline PUGIXML_CONSTEXPR11
-#	elif __cplusplus >= 201103
-#		define PUGIXML_CONSTANT PUGIXML_CONSTEXPR11
+#		define PUGIXML_CONSTANT inline PUGIXML_CONSTEXPR
 #	else
-#		define PUGIXML_CONSTANT const
-#	endif
+#		define PUGIXML_CONSTANT PUGIXML_CONSTEXPR
+# endif
 #endif
 
 // Character interface macros
@@ -168,10 +162,6 @@
 #else
 #	define PUGIXML_TEXT(t) t
 #	define PUGIXML_CHAR char
-#endif
-
-#ifndef PUGIXML_MODULE_EXPORT
-#	define PUGIXML_MODULE_EXPORT
 #endif
 
 namespace pugi
@@ -191,7 +181,7 @@ namespace pugi
 }
 
 // The PugiXML namespace
-PUGIXML_MODULE_EXPORT namespace pugi
+namespace pugi
 {
 	// Tree node types
 	enum xml_node_type
@@ -260,7 +250,7 @@ PUGIXML_MODULE_EXPORT namespace pugi
 	// the document; this flag is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments.
 	// This flag is off by default.
 	PUGIXML_CONSTANT unsigned int parse_embed_pcdata = 0x2000;
-	
+
 	// This flag determines whether determines whether the the two pcdata should be merged or not, if no intermediatory data are parsed in the document.
 	// This flag is off by default.
 	PUGIXML_CONSTANT unsigned int parse_merge_pcdata = 0x4000;
