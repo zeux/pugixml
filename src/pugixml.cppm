@@ -15,6 +15,12 @@ module;
 
 #define PUGIXML_EXPORT_MODULE
 
+#ifndef PUGIXML_USE_STD_MODULE
+# ifdef __cpp_lib_modules
+#  define PUGIXML_USE_STD_MODULE
+# endif
+#endif
+
 #include <pugiconfig.hpp>
 
 #ifndef PUGIXML_USE_STD_MODULE
