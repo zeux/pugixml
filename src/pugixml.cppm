@@ -68,14 +68,14 @@ import std.compat;
 #	pragma warning(push)
 #	pragma warning(disable:5244)
 #endif
-#if !defined(PUGIXML_HEADER_ONLY)
+#ifndef PUGIXML_HEADER_ONLY
 extern "C++" {
 #endif
 #include <pugixml.hpp>
-#if !defined(PUGIXML_HEADER_ONLY)
+#ifndef PUGIXML_HEADER_ONLY
 }
 #endif
-#if defined(__clang__)
+#ifdef __clang__
 #	pragma clang diagnostic pop
 #elif defined(_MSC_VER)
 #	pragma warning(pop)
@@ -83,7 +83,9 @@ extern "C++" {
 
 module :private;
 
-#if defined(PUGIXML_HEADER_ONLY) && !defined(PUGIXML_SOURCE)
-#	define PUGIXML_SOURCE "pugixml.cpp"
+#ifdef PUGIXML_HEADER_ONLY
+#	ifdef PUGIXML_SOURCE
+#		define PUGIXML_SOURCE "pugixml.cpp"
+#	endif
 #	include PUGIXML_SOURCE
 #endif
