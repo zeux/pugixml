@@ -4473,7 +4473,10 @@ PUGI_IMPL_NS_BEGIN
 				source_header |= xml_memory_page_contents_shared_mask;
 			}
 			else
-				strcpy_insitu(dest, header, header_mask, source, strlength(source));
+			{
+				// if strcpy_insitu fails (out of memory) we just leave the destination name/value empty
+				(void)strcpy_insitu(dest, header, header_mask, source, strlength(source));
+			}
 		}
 	}
 
@@ -11117,13 +11120,7 @@ PUGI_IMPL_NS_BEGIN
 				return eval_boolean(c, stack) ? 1 : 0;
 
 			case xpath_type_string:
-			{
-				xpath_allocator_capture cr(stack.result);
-
-				return convert_string_to_number(eval_string(c, stack).c_str());
-			}
-
-			case xpath_type_node_set:
+			case xpath_type_node_set: // implicit conversion to string
 			{
 				xpath_allocator_capture cr(stack.result);
 
