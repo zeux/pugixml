@@ -21,19 +21,21 @@
 #ifndef HEADER_PUGIXML_HPP
 #define HEADER_PUGIXML_HPP
 
+#ifndef PUGIXML_EXPORT_MODULE
 // Include stddef.h for size_t and ptrdiff_t
-#include <stddef.h>
+#	include <stddef.h>
 
 // Include exception header for XPath
-#if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
-#	include <exception>
-#endif
+#	if !defined(PUGIXML_NO_XPATH) && !defined(PUGIXML_NO_EXCEPTIONS)
+#		include <exception>
+#	endif
 
 // Include STL headers
-#ifndef PUGIXML_NO_STL
-#	include <iterator>
-#	include <iosfwd>
-#	include <string>
+#	ifndef PUGIXML_NO_STL
+#		include <iterator>
+#		include <iosfwd>
+#		include <string>
+#	endif
 #endif
 
 // Check if std::string_view is available
@@ -45,9 +47,11 @@
 #	endif
 #endif
 
+#ifndef PUGIXML_EXPORT_MODULE
 // Include string_view if appropriate
-#ifdef PUGIXML_HAS_STRING_VIEW
-#	include <string_view>
+#	ifdef PUGIXML_HAS_STRING_VIEW
+#		include <string_view>
+#	endif
 #endif
 
 // Macro for deprecated features
@@ -164,6 +168,10 @@
 #	define PUGIXML_CHAR char
 #endif
 
+#ifndef PUGIXML_MODULE_EXPORT
+#	define PUGIXML_MODULE_EXPORT
+#endif
+
 namespace pugi
 {
 	// Character type used for all internal storage and operations; depends on PUGIXML_WCHAR_MODE
@@ -181,7 +189,7 @@ namespace pugi
 }
 
 // The PugiXML namespace
-namespace pugi
+PUGIXML_MODULE_EXPORT namespace pugi
 {
 	// Tree node types
 	enum xml_node_type
