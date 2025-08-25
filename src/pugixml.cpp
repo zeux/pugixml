@@ -9226,8 +9226,6 @@ PUGI_IMPL_NS_BEGIN
 		char_t name[1];
 	};
 
-	static const xpath_node_set dummy_node_set;
-
 	PUGI_IMPL_FN PUGI_IMPL_UNSIGNED_OVERFLOW unsigned int hash_string(const char_t* str)
 	{
 		// Jenkins one-at-a-time hash (http://en.wikipedia.org/wiki/Jenkins_hash_function#one-at-a-time)
@@ -12967,7 +12965,10 @@ namespace pugi
 
 	PUGI_IMPL_FN const xpath_node_set& xpath_variable::get_node_set() const
 	{
-		return (_type == xpath_type_node_set) ? static_cast<const impl::xpath_variable_node_set*>(this)->value : impl::dummy_node_set;
+		if (_type == xpath_type_node_set)
+			return static_cast<const impl::xpath_variable_node_set*>(this)->value;
+		static const xpath_node_set dummy_node_set;
+		return dummy_node_set;
 	}
 
 	PUGI_IMPL_FN bool xpath_variable::set(bool value)
