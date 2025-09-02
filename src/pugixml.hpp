@@ -1048,6 +1048,8 @@ namespace pugi
 
 		// Callback that is called for each node traversed
 		virtual bool for_each(xml_node& node) = 0;
+		// Callback that is called after each node traversed
+		virtual void out(const xml_node& ){}
 
 		// Callback that is called when traversal ends
 		virtual bool end(xml_node& node);
