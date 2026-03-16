@@ -3,3 +3,9 @@
 /.vscode/
 
 .DS_Store
+
+**/.vs
+scripts/nuget/build/native/lib
+scripts/nuget/build/native/include
+scripts/vs20*
+**/*.nupkg
