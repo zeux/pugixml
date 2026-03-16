@@ -7259,6 +7259,8 @@ namespace pugi
 		assert(_wrap._root);
 #if defined(__BORLANDC__) && __BORLANDC__ <= 0x0670 // XE5
 		return const_cast<xml_node*>(&_wrap);
+#else
+		return &_wrap;
 #endif
 	}
 
@@ -7322,6 +7324,8 @@ namespace pugi
 		assert(_wrap._attr);
 #if defined(__BORLANDC__) && __BORLANDC__ <= 0x0670 // XE5
 		return const_cast<xml_attribute*>(&_wrap);
+#else
+		return &_wrap;
 #endif
 	}
 
@@ -7383,8 +7387,10 @@ namespace pugi
 	PUGI_IMPL_FN xml_node* xml_named_node_iterator::operator->() const
 	{
 		assert(_wrap._root);
-#ifdef __BORLANDC__ && __BORLANDC__ <= 0x0670 // XE5
+#if defined(__BORLANDC__) && __BORLANDC__ <= 0x0670 // XE5
 		return const_cast<xml_node*>(&_wrap);
+#else
+		return &_wrap;
 #endif
 	}
 
