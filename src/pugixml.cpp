@@ -6811,17 +6811,28 @@ namespace pugi
 					cur = cur->first_child;
 				}
 				else if (cur->next_sibling)
+				{
 					cur = cur->next_sibling;
+					walker.out(arg_for_each);
+				}
 				else
 				{
 					while (!cur->next_sibling && cur != _root && cur->parent)
 					{
+						xml_node arg_out(cur);
+
 						--walker._depth;
 						cur = cur->parent;
+
+						walker.out(arg_out);
 					}
 
 					if (cur != _root)
+					{
+						xml_node arg_out(cur);
 						cur = cur->next_sibling;
+						walker.out(arg_out);
+					}
 				}
 			}
 			while (cur && cur != _root);
