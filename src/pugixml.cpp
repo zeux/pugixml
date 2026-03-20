@@ -14,33 +14,35 @@
 
 #include "pugixml.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <limits.h>
+#ifndef PUGIXML_EXPORT_MODULE
+#	include <stdlib.h>
+#	include <stdio.h>
+#	include <string.h>
+#	include <assert.h>
+#	include <limits.h>
 
-#ifdef PUGIXML_WCHAR_MODE
-#	include <wchar.h>
-#endif
+#	ifdef PUGIXML_WCHAR_MODE
+#		include <wchar.h>
+#	endif
 
-#ifndef PUGIXML_NO_XPATH
-#	include <math.h>
-#	include <float.h>
-#endif
+#	ifndef PUGIXML_NO_XPATH
+#		include <math.h>
+#		include <float.h>
+#	endif
 
-#ifndef PUGIXML_NO_STL
-#	include <istream>
-#	include <ostream>
-#	include <string>
-#endif
+#	ifndef PUGIXML_NO_STL
+#		include <istream>
+#		include <ostream>
+#		include <string>
+#	endif
 
 // For placement new
-#include <new>
+#	include <new>
 
 // For load_file
-#if defined(__linux__) || defined(__APPLE__)
-#include <sys/stat.h>
+#	if defined(__linux__) || defined(__APPLE__)
+#		include <sys/stat.h>
+#	endif
 #endif
 
 #ifdef _MSC_VER
@@ -194,7 +196,9 @@ namespace pugi
 	typedef unsigned __int32 uint32_t;
 }
 #else
-#	include <stdint.h>
+#	ifndef PUGIXML_EXPORT_MODULE
+#		include <stdint.h>
+#	endif
 #endif
 
 // Memory allocation
