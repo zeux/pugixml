@@ -2154,6 +2154,19 @@ PUGI_IMPL_NS_BEGIN
 
 	template <typename D> PUGI_IMPL_FN bool convert_buffer_generic(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, D)
 	{
+		// copy to aligned buffer if input is misaligned for the source type
+		auto_deleter<void> aligned_guard(NULL, xml_memory::deallocate);
+
+		if (reinterpret_cast<uintptr_t>(contents) % sizeof(typename D::type) != 0)
+		{
+			void* aligned = xml_memory::allocate(size);
+			if (!aligned) return false;
+
+			memcpy(aligned, contents, size);
+			contents = aligned;
+			aligned_guard.data = aligned;
+		}
+
 		const typename D::type* data = static_cast<const typename D::type*>(contents);
 		size_t data_length = size / sizeof(typename D::type);
 
@@ -2224,6 +2237,19 @@ PUGI_IMPL_NS_BEGIN
 #else
 	template <typename D> PUGI_IMPL_FN bool convert_buffer_generic(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, D)
 	{
+		// copy to aligned buffer if input is misaligned for the source type
+		auto_deleter<void> aligned_guard(NULL, xml_memory::deallocate);
+
+		if (reinterpret_cast<uintptr_t>(contents) % sizeof(typename D::type) != 0)
+		{
+			void* aligned = xml_memory::allocate(size);
+			if (!aligned) return false;
+
+			memcpy(aligned, contents, size);
+			contents = aligned;
+			aligned_guard.data = aligned;
+		}
+
 		const typename D::type* data = static_cast<const typename D::type*>(contents);
 		size_t data_length = size / sizeof(typename D::type);
 
