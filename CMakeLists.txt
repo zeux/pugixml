@@ -37,6 +37,8 @@ set(PUGIXML_HEADERS
     ${PROJECT_SOURCE_DIR}/src/pugixml.hpp
 )
 
+set(PUGIXML_SOURCE ${PROJECT_SOURCE_DIR}/src/pugixml.cpp)
+
 # Technically not needed for this file. This is builtin CMAKE global variable.
 option(BUILD_SHARED_LIBS "Build shared instead of static library" OFF)
 
@@ -45,10 +47,14 @@ cmake_dependent_option(PUGIXML_BUILD_SHARED_AND_STATIC_LIBS
   "Build both shared and static libraries" OFF
   "BUILD_SHARED_LIBS" OFF)
 
+option(PUGIXML_INSTALL "Enable installation rules" ON)
+cmake_dependent_option(PUGIXML_INSTALL_SOURCE
+  "Install pugixml.cpp alongside headers" OFF
+  "PUGIXML_INSTALL" OFF)
+
 # Expose options from the pugiconfig.hpp
 option(PUGIXML_WCHAR_MODE "Enable wchar_t mode" OFF)
 option(PUGIXML_COMPACT "Enable compact mode" OFF)
-option(PUGIXML_INSTALL "Enable installation rules" ON)
 
 # Advanced options from pugiconfig.hpp
 option(PUGIXML_NO_XPATH "Disable XPath" OFF)
@@ -112,7 +118,7 @@ set(libs)
 if (BUILD_SHARED_LIBS)
   add_library(pugixml-shared SHARED
     ${PROJECT_SOURCE_DIR}/scripts/pugixml_dll.rc
-    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp
+    ${PUGIXML_SOURCE}
     ${PUGIXML_HEADERS})
   add_library(pugixml::shared ALIAS pugixml-shared)
   list(APPEND libs pugixml-shared)
@@ -142,7 +148,7 @@ endif()
 
 if (NOT BUILD_SHARED_LIBS OR PUGIXML_BUILD_SHARED_AND_STATIC_LIBS)
   add_library(pugixml-static STATIC
-    ${PROJECT_SOURCE_DIR}/src/pugixml.cpp
+    ${PUGIXML_SOURCE}
     ${PUGIXML_HEADERS})
   add_library(pugixml::static ALIAS pugixml-static)
   list(APPEND libs pugixml-static)
@@ -281,6 +287,11 @@ if(PUGIXML_INSTALL)
 
   install(FILES ${PUGIXML_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+
+  if (PUGIXML_INSTALL_SOURCE)
+    install(FILES ${PUGIXML_SOURCE}
+      DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}${versioned-dir} COMPONENT ${PUGIXML_DEVELOPMENT_COMPONENT})
+  endif()
 endif()
 
 if (PUGIXML_BUILD_TESTS)
