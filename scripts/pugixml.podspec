@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "pugixml"
-  s.version      = "1.14"
+  s.version      = "1.15"
   s.summary      = "C++ XML parser library."
   s.homepage     = "https://pugixml.org"
   s.license      = "MIT"

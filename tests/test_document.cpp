@@ -473,6 +473,17 @@ TEST(document_load_string)
 	CHECK_NODE(doc, STR("<node/>"));
 }
 
+TEST(document_load_string_empty)
+{
+	xml_document doc;
+
+	CHECK(doc.load_string(STR("")).status == status_no_document_element);
+	CHECK(!doc.first_child());
+
+	CHECK(doc.load_string(STR(""), parse_fragment));
+	CHECK(!doc.first_child());
+}
+
 TEST(document_load_file)
 {
 	xml_document doc;
@@ -862,6 +873,19 @@ TEST(document_load_buffer_inplace_own)
 
 	CHECK(doc.load_buffer_inplace_own(text, size));
 	CHECK_NODE(doc, STR("<node/>"));
+}
+
+TEST(document_load_buffer_inplace_own_empty)
+{
+	allocation_function alloc = get_memory_allocation_function();
+
+	void* text1 = alloc(1);
+	void* text2 = alloc(1);
+	CHECK(text1 && text2);
+
+	xml_document doc;
+	CHECK(doc.load_buffer_inplace_own(text1, 0, parse_fragment));
+	CHECK(doc.load_buffer_inplace_own(text2, 0).status == status_no_document_element);
 }
 
 TEST(document_parse_result_bool)

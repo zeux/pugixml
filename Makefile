@@ -3,15 +3,14 @@ MAKEFLAGS+=-r
 
 config=debug
 defines=standard
-cxxstd=c++11
-# set cxxstd=any to disable use of -std=...
+cxxstd=any
 
 BUILD=build/make-$(firstword $(CXX))-$(config)-$(defines)-$(cxxstd)
 
 SOURCES=src/pugixml.cpp $(filter-out tests/fuzz_%,$(wildcard tests/*.cpp))
 EXECUTABLE=$(BUILD)/test
 
-VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p' src/pugiconfig.hpp)
+VERSION=$(shell sed -n 's/.*version \(.*\).*/\1/p; /version/q' src/pugiconfig.hpp)
 RELEASE=$(filter-out scripts/archive.py docs/%.adoc,$(shell git ls-files docs scripts src CMakeLists.txt LICENSE.md readme.txt))
 
 CXXFLAGS=-g -Wall -Wextra -Werror -pedantic -Wundef -Wshadow -Wcast-align -Wcast-qual -Wold-style-cast -Wdouble-promotion
@@ -27,7 +26,7 @@ ifeq ($(config),coverage)
 endif
 
 ifeq ($(config),sanitize)
-	CXXFLAGS+=-fsanitize=address,undefined -fno-sanitize=float-divide-by-zero,float-cast-overflow -fno-sanitize-recover=all
+	CXXFLAGS+=-fsanitize=address,undefined -fno-sanitize-recover=all
 	LDFLAGS+=-fsanitize=address,undefined
 endif
 
@@ -66,7 +65,7 @@ endif
 
 fuzz_%: $(BUILD)/fuzz_%
 	@mkdir -p build/$@
-	$< build/$@ tests/data_fuzz_$* -max_len=1024 -dict=tests/fuzz_$*.dict
+	$< build/$@ tests/data_fuzz_$* -max_len=1024 -dict=tests/fuzz_$*.dict -fork=16
 
 clean:
 	rm -rf $(BUILD)
