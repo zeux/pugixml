@@ -1716,6 +1716,30 @@ TEST(dom_node_copy_stackless)
 	CHECK_NODE(doc, data.c_str());
 }
 
+TEST(dom_node_remove_child_stackless)
+{
+	unsigned int count = 20000;
+	std::basic_string<char_t> data = STR("<root>");
+
+	for (unsigned int i = 0; i < count; ++i)
+		data += STR("<a>");
+
+	data += STR("text");
+
+	for (unsigned int j = 0; j < count; ++j)
+		data += STR("</a>");
+
+	data += STR("<tail/></root>");
+
+	xml_document doc;
+	CHECK(doc.load_string(data.c_str()));
+
+	xml_node root = doc.child(STR("root"));
+	CHECK(root.remove_child(root.child(STR("a"))));
+
+	CHECK_NODE(doc, STR("<root><tail/></root>"));
+}
+
 TEST(dom_node_copy_copyless)
 {
 	std::basic_string<char_t> data;
