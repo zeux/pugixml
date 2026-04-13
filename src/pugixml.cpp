@@ -97,6 +97,13 @@
 #	define PUGI_IMPL_NO_INLINE
 #endif
 
+// Unaligned memory access attribute
+#if defined(__GNUC__) && !defined(__c2__)
+#	define PUGI_IMPL_UNALIGNED __attribute__((aligned(1)))
+#else
+#	define PUGI_IMPL_UNALIGNED
+#endif
+
 // Branch weight controls
 #if defined(__GNUC__) && !defined(__c2__)
 #	define PUGI_IMPL_UNLIKELY(cond) __builtin_expect(cond, 0)
@@ -1736,9 +1743,9 @@ PUGI_IMPL_NS_BEGIN
 
 	template <typename opt_swap> struct utf16_decoder
 	{
-		typedef uint16_t type;
+		typedef uint16_t type PUGI_IMPL_UNALIGNED;
 
-		template <typename Traits> static inline typename Traits::value_type process(const uint16_t* data, size_t size, typename Traits::value_type result, Traits)
+		template <typename Traits> static inline typename Traits::value_type process(const type* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			while (size)
 			{
@@ -1788,9 +1795,9 @@ PUGI_IMPL_NS_BEGIN
 
 	template <typename opt_swap> struct utf32_decoder
 	{
-		typedef uint32_t type;
+		typedef uint32_t type PUGI_IMPL_UNALIGNED;
 
-		template <typename Traits> static inline typename Traits::value_type process(const uint32_t* data, size_t size, typename Traits::value_type result, Traits)
+		template <typename Traits> static inline typename Traits::value_type process(const type* data, size_t size, typename Traits::value_type result, Traits)
 		{
 			while (size)
 			{
@@ -13512,6 +13519,7 @@ namespace pugi
 
 // Undefine all local macros (makes sure we're not leaking macros in header-only mode)
 #undef PUGI_IMPL_NO_INLINE
+#undef PUGI_IMPL_UNALIGNED
 #undef PUGI_IMPL_UNLIKELY
 #undef PUGI_IMPL_STATIC_ASSERT
 #undef PUGI_IMPL_DMC_VOLATILE
