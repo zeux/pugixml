@@ -1253,16 +1253,36 @@ PUGI_IMPL_NS_BEGIN
 			attr = next;
 		}
 
-		for (xml_node_struct* child = n->first_child; child; )
+		alloc.deallocate_memory(n, sizeof(xml_node_struct), PUGI_IMPL_GETPAGE(n));
+	}
+
+	inline void destroy_tree(xml_node_struct* n, xml_allocator& alloc)
+	{
+		xml_node_struct* cur = n;
+
+		while (cur->first_child)
+			cur = cur->first_child;
+
+		while (cur != n)
 		{
-			xml_node_struct* next = child->next_sibling;
+			// loop invariant: cur is inside the subtree rooted at n, cur's subtree is destroyed
+			xml_node_struct* parent = cur->parent;
+			xml_node_struct* next = cur->next_sibling;
 
-			destroy_node(child, alloc);
+			destroy_node(cur, alloc);
 
-			child = next;
+			if (next)
+			{
+				cur = next;
+
+				while (cur->first_child)
+					cur = cur->first_child;
+			}
+			else
+				cur = parent;
 		}
 
-		alloc.deallocate_memory(n, sizeof(xml_node_struct), PUGI_IMPL_GETPAGE(n));
+		destroy_node(n, alloc);
 	}
 
 	inline void append_node(xml_node_struct* child, xml_node_struct* node)
@@ -6599,7 +6619,7 @@ namespace pugi
 		if (!alloc.reserve()) return false;
 
 		impl::remove_node(n._root);
-		impl::destroy_node(n._root, alloc);
+		impl::destroy_tree(n._root, alloc);
 
 		return true;
 	}
@@ -6615,7 +6635,7 @@ namespace pugi
 		{
 			xml_node_struct* next = cur->next_sibling;
 
-			impl::destroy_node(cur, alloc);
+			impl::destroy_tree(cur, alloc);
 
 			cur = next;
 		}
