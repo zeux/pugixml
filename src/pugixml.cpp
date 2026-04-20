@@ -113,7 +113,7 @@
 #endif
 
 // Simple static assertion
-#define PUGI_IMPL_STATIC_ASSERT(cond) { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; }
+#define PUGI_IMPL_STATIC_ASSERT(cond) do { static const char condition_failed[(cond) ? 1 : -1] = {0}; (void)condition_failed[0]; } while (0)
 
 // Digital Mars C++ bug workaround for passing char loaded from memory via stack
 #ifdef __DMC__
@@ -1996,8 +1996,8 @@ PUGI_IMPL_NS_BEGIN
 
 	PUGI_IMPL_FN bool parse_declaration_encoding(const uint8_t* data, size_t size, const uint8_t*& out_encoding, size_t& out_length)
 	{
-	#define PUGI_IMPL_SCANCHAR(ch) { if (offset >= size || data[offset] != ch) return false; offset++; }
-	#define PUGI_IMPL_SCANCHARTYPE(ct) { while (offset < size && PUGI_IMPL_IS_CHARTYPE(data[offset], ct)) offset++; }
+	#define PUGI_IMPL_SCANCHAR(ch) do { if (offset >= size || data[offset] != ch) return false; offset++; } while (0)
+	#define PUGI_IMPL_SCANCHARTYPE(ct) do { while (offset < size && PUGI_IMPL_IS_CHARTYPE(data[offset], ct)) offset++; } while (0)
 
 		// check if we have a non-empty XML declaration
 		if (size < 6 || !((data[0] == '<') & (data[1] == '?') & (data[2] == 'x') & (data[3] == 'm') & (data[4] == 'l') && PUGI_IMPL_IS_CHARTYPE(data[5], ct_space)))
@@ -2666,16 +2666,16 @@ PUGI_IMPL_NS_BEGIN
 
 	// Parser utilities
 	#define PUGI_IMPL_ENDSWITH(c, e)        ((c) == (e) || ((c) == 0 && endch == (e)))
-	#define PUGI_IMPL_SKIPWS()              { while (PUGI_IMPL_IS_CHARTYPE(*s, ct_space)) ++s; }
+	#define PUGI_IMPL_SKIPWS()              do { while (PUGI_IMPL_IS_CHARTYPE(*s, ct_space)) ++s; } while (0)
 	#define PUGI_IMPL_OPTSET(OPT)           ( optmsk & (OPT) )
-	#define PUGI_IMPL_PUSHNODE(TYPE)        { cursor = append_new_node(cursor, *alloc, TYPE); if (!cursor) PUGI_IMPL_THROW_ERROR(status_out_of_memory, s); }
-	#define PUGI_IMPL_POPNODE()             { cursor = cursor->parent; }
-	#define PUGI_IMPL_SCANFOR(X)            { while (*s != 0 && !(X)) ++s; }
-	#define PUGI_IMPL_SCANWHILE(X)          { while (X) ++s; }
-	#define PUGI_IMPL_SCANWHILE_UNROLL(X)   { for (;;) { char_t ss = s[0]; if (PUGI_IMPL_UNLIKELY(!(X))) { break; } ss = s[1]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 1; break; } ss = s[2]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 2; break; } ss = s[3]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 3; break; } s += 4; } }
-	#define PUGI_IMPL_ENDSEG()              { ch = *s; *s = 0; ++s; }
+	#define PUGI_IMPL_PUSHNODE(TYPE)        do { cursor = append_new_node(cursor, *alloc, TYPE); if (!cursor) PUGI_IMPL_THROW_ERROR(status_out_of_memory, s); } while (0)
+	#define PUGI_IMPL_POPNODE()             do { cursor = cursor->parent; } while (0)
+	#define PUGI_IMPL_SCANFOR(X)            do { while (*s != 0 && !(X)) ++s; } while (0)
+	#define PUGI_IMPL_SCANWHILE(X)          do { while (X) ++s; } while (0)
+	#define PUGI_IMPL_SCANWHILE_UNROLL(X)   do { for (;;) { char_t ss = s[0]; if (PUGI_IMPL_UNLIKELY(!(X))) { break; } ss = s[1]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 1; break; } ss = s[2]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 2; break; } ss = s[3]; if (PUGI_IMPL_UNLIKELY(!(X))) { s += 3; break; } s += 4; } } while (0)
+	#define PUGI_IMPL_ENDSEG()              do { ch = *s; *s = 0; ++s; } while (0)
 	#define PUGI_IMPL_THROW_ERROR(err, m)   return error_offset = m, error_status = err, static_cast<char_t*>(NULL)
-	#define PUGI_IMPL_CHECK_ERROR(err, m)   { if (*s == 0) PUGI_IMPL_THROW_ERROR(err, m); }
+	#define PUGI_IMPL_CHECK_ERROR(err, m)   do { if (*s == 0) PUGI_IMPL_THROW_ERROR(err, m); } while (0)
 
 	PUGI_IMPL_FN char_t* strconv_comment(char_t* s, char_t endch)
 	{
