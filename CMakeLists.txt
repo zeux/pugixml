@@ -33,7 +33,7 @@ separate_arguments(PUGIXML_BUILD_DEFINES)
 
 # Public headers
 set(PUGIXML_HEADERS
-    ${PROJECT_SOURCE_DIR}/src/pugiconfig.hpp
+    "${CMAKE_CURRENT_BINARY_DIR}/generated/pugiconfig.hpp"
     ${PROJECT_SOURCE_DIR}/src/pugixml.hpp
 )
 
@@ -65,6 +65,12 @@ mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
 if (APPLE)
   option(PUGIXML_BUILD_APPLE_FRAMEWORK "Build as Apple Frameworks" OFF)
 endif()
+
+# Create a fitting include file for installation
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/pugiconfig.hpp" PUGIXML_CONFIG_CONTENT)
+string(REPLACE "// #define PUGIXML_" "#cmakedefine PUGIXML_" PUGIXML_CONFIG_CONTENT "${PUGIXML_CONFIG_CONTENT}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/pugiconfig.hpp.tmp" "${PUGIXML_CONFIG_CONTENT}")
+configure_file("${CMAKE_CURRENT_BINARY_DIR}/pugiconfig.hpp.tmp" "${CMAKE_CURRENT_BINARY_DIR}/generated/pugiconfig.hpp")
 
 set(PUGIXML_PUBLIC_DEFINITIONS
   $<$<BOOL:${PUGIXML_WCHAR_MODE}>:PUGIXML_WCHAR_MODE>
