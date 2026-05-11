@@ -572,12 +572,36 @@ TEST(write_pcdata_null)
 	xml_document doc;
 	doc.append_child(STR("node")).append_child(node_pcdata);
 
-	CHECK_NODE(doc, STR("<node></node>"));
-	CHECK_NODE_EX(doc, STR("<node></node>\n"), STR("\t"), format_indent);
+	CHECK_NODE(doc, STR("<node/>"));
+	CHECK_NODE_EX(doc, STR("<node />\n"), STR("\t"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node></node>"), STR("\t"), format_raw | format_no_empty_element_tags);
+	CHECK_NODE_EX(doc, STR("<node></node>\n"), STR("\t"), format_indent | format_no_empty_element_tags);
 
 	doc.first_child().append_child(node_pcdata);
 
+	CHECK_NODE(doc, STR("<node></node>"));
 	CHECK_NODE_EX(doc, STR("<node></node>\n"), STR("\t"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node></node>\n"), STR("\t"), format_indent | format_no_empty_element_tags);
+}
+
+TEST(write_pcdata_basic)
+{
+	xml_document doc;
+	doc.append_child(STR("node")).append_child(node_pcdata).set_value(STR("text"));
+
+	CHECK_NODE(doc, STR("<node>text</node>"));
+	CHECK_NODE_EX(doc, STR("<node>text</node>\n"), STR("\t"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node>text</node>"), STR("\t"), format_raw | format_no_empty_element_tags);
+}
+
+TEST(write_pcdata_empty_text)
+{
+	xml_document doc;
+	doc.append_child(STR("node")).text().set(STR(""));
+
+	CHECK_NODE(doc, STR("<node/>"));
+	CHECK_NODE_EX(doc, STR("<node />\n"), STR("\t"), format_indent);
+	CHECK_NODE_EX(doc, STR("<node></node>"), STR("\t"), format_raw | format_no_empty_element_tags);
 }
 
 TEST(write_pcdata_whitespace_fixedpoint)

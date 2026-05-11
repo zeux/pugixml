@@ -236,7 +236,7 @@ TEST_XML(dom_text_set, "<node/>")
 
     t.set(STR(""));
     CHECK(node.first_child().type() == node_pcdata);
-    CHECK_NODE(node, STR("<node></node>"));
+    CHECK_NODE(node, STR("<node/>"));
 
     t.set(STR("boo"));
     CHECK(node.first_child().type() == node_pcdata);
@@ -250,7 +250,7 @@ TEST_XML(dom_text_set, "<node/>")
 
     t.set(STR(""));
     CHECK(node.first_child().type() == node_pcdata);
-    CHECK_NODE(node, STR("<node></node>"));
+    CHECK_NODE(node, STR("<node/>"));
 }
 
 TEST_XML(dom_text_set_with_size, "<node/>")
@@ -260,7 +260,7 @@ TEST_XML(dom_text_set_with_size, "<node/>")
 
     t.set(STR(""), 0);
     CHECK(node.first_child().type() == node_pcdata);
-    CHECK_NODE(node, STR("<node></node>"));
+    CHECK_NODE(node, STR("<node/>"));
 
     t.set(STR("boo"), 3);
     CHECK(node.first_child().type() == node_pcdata);
@@ -274,7 +274,7 @@ TEST_XML(dom_text_set_with_size, "<node/>")
 
     t.set(STR(""), 0);
     CHECK(node.first_child().type() == node_pcdata);
-    CHECK_NODE(node, STR("<node></node>"));
+    CHECK_NODE(node, STR("<node/>"));
 }
 
 TEST_XML(dom_text_set_partially_with_size, "<node/>")
@@ -284,7 +284,7 @@ TEST_XML(dom_text_set_partially_with_size, "<node/>")
 
     t.set(STR("foo"), 0);
     CHECK(node.first_child().type() == node_pcdata);
-    CHECK_NODE(node, STR("<node></node>"));
+    CHECK_NODE(node, STR("<node/>"));
 
     t.set(STR("boofoo"), 3);
     CHECK(node.first_child().type() == node_pcdata);
@@ -298,7 +298,7 @@ TEST_XML(dom_text_set_partially_with_size, "<node/>")
 
     t.set(STR("foo"), 0);
     CHECK(node.first_child().type() == node_pcdata);
-    CHECK_NODE(node, STR("<node></node>"));
+    CHECK_NODE(node, STR("<node/>"));
 }
 
 #ifdef PUGIXML_HAS_STRING_VIEW
@@ -309,7 +309,7 @@ TEST_XML(dom_text_set_with_string_view, "<node/>")
 
 	t.set(string_view_t(STR("")));
 	CHECK(node.first_child().type() == node_pcdata);
-	CHECK_NODE(node, STR("<node></node>"));
+	CHECK_NODE(node, STR("<node/>"));
 
 	t.set(string_view_t(STR("boo")));
 	CHECK(node.first_child().type() == node_pcdata);
@@ -323,7 +323,7 @@ TEST_XML(dom_text_set_with_string_view, "<node/>")
 
 	t.set(string_view_t(STR("")));
 	CHECK(node.first_child().type() == node_pcdata);
-	CHECK_NODE(node, STR("<node></node>"));
+	CHECK_NODE(node, STR("<node/>"));
 
 	t.set(string_view_t(STR("something")));
 	CHECK(node.first_child().type() == node_pcdata);
@@ -332,7 +332,7 @@ TEST_XML(dom_text_set_with_string_view, "<node/>")
 	// empty string view (null data pointer)
 	t.set(string_view_t());
 	CHECK(node.first_child().type() == node_pcdata);
-	CHECK_NODE(node, STR("<node></node>"));
+	CHECK_NODE(node, STR("<node/>"));
 
 	t.set(string_view_t(STR("afternulldata")));
 	CHECK(node.first_child().type() == node_pcdata);
@@ -346,7 +346,7 @@ TEST_XML(dom_text_set_partially_with_string_view, "<node/>")
 
 	t.set(string_view_t(STR("foo"), 0));
 	CHECK(node.first_child().type() == node_pcdata);
-	CHECK_NODE(node, STR("<node></node>"));
+	CHECK_NODE(node, STR("<node/>"));
 
 	t.set(string_view_t(STR("boofoo"), 3));
 	CHECK(node.first_child().type() == node_pcdata);
@@ -360,7 +360,7 @@ TEST_XML(dom_text_set_partially_with_string_view, "<node/>")
 
 	t.set(string_view_t(STR("foo"), 0));
 	CHECK(node.first_child().type() == node_pcdata);
-	CHECK_NODE(node, STR("<node></node>"));
+	CHECK_NODE(node, STR("<node/>"));
 }
 #endif
 

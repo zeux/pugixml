@@ -4198,6 +4198,13 @@ PUGI_IMPL_NS_BEGIN
 		}
 	}
 
+	PUGI_IMPL_FN bool node_output_empty(xml_node_struct* node)
+	{
+		xml_node_struct* child = node->first_child;
+
+		return !child || (!child->next_sibling && PUGI_IMPL_NODETYPE(child) == node_pcdata && (!child->value || !child->value[0]));
+	}
+
 	PUGI_IMPL_FN bool node_output_start(xml_buffered_writer& writer, xml_node_struct* node, const char_t* indent, size_t indent_length, unsigned int flags, unsigned int depth)
 	{
 		const char_t* default_name = PUGIXML_TEXT(":anonymous");
@@ -4212,7 +4219,7 @@ PUGI_IMPL_NS_BEGIN
 		// element nodes can have value if parse_embed_pcdata was used
 		if (!node->value)
 		{
-			if (!node->first_child)
+			if (!node->first_child || node_output_empty(node))
 			{
 				if (flags & format_no_empty_element_tags)
 				{

@@ -1928,7 +1928,7 @@ TEST_XML(dom_node_set_deallocate, "<node attr='value'>text</node>")
 	node.set_name(STR(""));
 	node.text().set(STR(""));
 
-	CHECK_NODE(doc, STR("<:anonymous :anonymous=\"\"></:anonymous>"));
+	CHECK_NODE(doc, STR("<:anonymous :anonymous=\"\"/>"));
 }
 
 TEST(dom_node_copy_declaration_empty_name)
