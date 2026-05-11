@@ -228,6 +228,8 @@ pugixml uses several defines to control the compilation process. There are two w
 
 [[PUGIXML_WCHAR_MODE]]`PUGIXML_WCHAR_MODE` define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use `char` as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on `wchar_t` size, most functions use `wchar_t` as character type). See <<dom.unicode>> for more details.
 
+[[PUGIXML_CHARCONV_FLOAT]]`PUGIXML_CHARCONV_FLOAT` will use https://en.cppreference.com/cpp/header/charconv[<charconv>] for floating-point number formatting instead of `<stdio.h>` functions, which requires C++17 and UTF-8 interface. Note that the conversion will then ignore the locale and always act as if the default `C` locale is used.
+
 [[PUGIXML_COMPACT]]`PUGIXML_COMPACT` define activates a different internal representation of document storage that is much more memory efficient for documents with a lot of markup (i.e. nodes and attributes), but is slightly slower to parse and access. For details see <<dom.memory.compact>>.
 
 [[PUGIXML_NO_XPATH]]`PUGIXML_NO_XPATH` define disables XPath. Both XPath interfaces and XPath implementation are excluded from compilation. This option is provided in case you do not need XPath functionality and need to save code space.
