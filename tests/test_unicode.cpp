@@ -1,5 +1,3 @@
-#ifndef PUGIXML_NO_STL
-
 #include "test.hpp"
 
 #include <string>
@@ -8,6 +6,7 @@ using namespace pugi;
 
 // letters taken from http://www.utf8-chartable.de/
 
+#ifndef PUGIXML_NO_STL
 TEST(as_wide_empty)
 {
 	CHECK(as_wide("") == L"");
