@@ -2187,6 +2187,7 @@ PUGI_IMPL_NS_BEGIN
 
 		// first pass: get length in wchar_t units
 		size_t length = D::process(data, data_length, 0, wchar_counter());
+		if (static_cast<size_t>(-1) / sizeof(char_t) <= length) return false;
 
 		// allocate buffer of suitable length
 		char_t* buffer = static_cast<char_t*>(xml_memory::allocate((length + 1) * sizeof(char_t)));
@@ -4933,6 +4934,7 @@ PUGI_IMPL_NS_BEGIN
 		if (size_status != status_ok) return make_parse_result(size_status);
 
 		size_t max_suffix_size = sizeof(char_t);
+		if (static_cast<size_t>(-1) - max_suffix_size < size) return make_parse_result(status_out_of_memory);
 
 		// allocate buffer for the whole file
 		char* contents = static_cast<char*>(xml_memory::allocate(size + max_suffix_size));
@@ -5022,6 +5024,7 @@ PUGI_IMPL_NS_BEGIN
 		}
 
 		size_t max_suffix_size = sizeof(char_t);
+		if (static_cast<size_t>(-1) - max_suffix_size < total) return status_out_of_memory;
 
 		// copy chunk list to a contiguous buffer
 		char* buffer = static_cast<char*>(xml_memory::allocate(total + max_suffix_size));
@@ -5061,6 +5064,7 @@ PUGI_IMPL_NS_BEGIN
 		if (static_cast<std::streamsize>(read_length) != length || length < 0) return status_out_of_memory;
 
 		size_t max_suffix_size = sizeof(char_t);
+		if ((static_cast<size_t>(-1) - max_suffix_size) / sizeof(T) < read_length) return status_out_of_memory;
 
 		// read stream data into memory (guard against stream exceptions with buffer holder)
 		auto_deleter<void> buffer(xml_memory::allocate(read_length * sizeof(T) + max_suffix_size), xml_memory::deallocate);
