@@ -6786,6 +6786,8 @@ namespace pugi
 
 	PUGI_IMPL_FN xml_node xml_node::first_element_by_path(const char_t* path_, char_t delimiter) const
 	{
+		if (delimiter == 0) return xml_node();
+		
 		xml_node context = path_[0] == delimiter ? root() : *this;
 
 		if (!context._root) return xml_node();
