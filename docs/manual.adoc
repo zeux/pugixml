@@ -1698,7 +1698,7 @@ void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsi
 `save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with <<encoding_wchar,encoding_wchar>> encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
 
 [[xml_writer_stream]]
-Calling `save` with stream target is equivalent to creating an `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see <<saving.writer>> for writer interface details.
+Calling `save` with stream target is equivalent to creating an `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see <<saving.writer>> for writer interface details. When using `xml_writer_stream` with wide-character streams, you must pass `encoding_wchar` explicitly, as the wide writer expects wide-character data.
 
 This is a simple example of saving XML document to standard output (link:samples/save_stream.cpp[]):
 
