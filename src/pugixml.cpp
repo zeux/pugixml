@@ -4807,7 +4807,7 @@ PUGI_IMPL_NS_BEGIN
 	{
 		char buf[128];
 	#ifdef PUGIXML_CHARCONV_FLOAT
-		std::to_chars_result result = std::to_chars(std::begin(buf), std::end(buf), value, std::chars_format::general, precision);
+		std::to_chars_result result = std::to_chars(std::begin(buf), std::end(buf) - 1, value, std::chars_format::general, precision);
 		*result.ptr = '\0';
 	#else
 		PUGI_IMPL_SNPRINTF(buf, "%.*g", precision, double(value));
@@ -4820,7 +4820,7 @@ PUGI_IMPL_NS_BEGIN
 	{
 		char buf[128];
 	#ifdef PUGIXML_CHARCONV_FLOAT
-		std::to_chars_result result = std::to_chars(std::begin(buf), std::end(buf), value, std::chars_format::general, precision);
+		std::to_chars_result result = std::to_chars(std::begin(buf), std::end(buf) - 1, value, std::chars_format::general, precision);
 		*result.ptr = '\0';
 	#else
 		PUGI_IMPL_SNPRINTF(buf, "%.*g", precision, value);
