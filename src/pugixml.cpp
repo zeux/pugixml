@@ -4709,6 +4709,7 @@ PUGI_IMPL_NS_BEGIN
 			value++;
 		if (*value == '+')
 			value++;
+		// return code is intentionally ignored to let libc++/MSVC STL correctly handle underflow/overflow
 		double result = 0.0;
 		std::from_chars(value, value + strlen(value), result);
 		return result;
@@ -4726,6 +4727,7 @@ PUGI_IMPL_NS_BEGIN
 			value++;
 		if (*value == '+')
 			value++;
+		// return code is intentionally ignored to let libc++/MSVC STL correctly handle underflow/overflow
 		float result = 0.0f;
 		std::from_chars(value, value + strlen(value), result);
 		return result;
@@ -4807,7 +4809,8 @@ PUGI_IMPL_NS_BEGIN
 	{
 		char buf[128];
 	#ifdef PUGIXML_CHARCONV_FLOAT
-		std::to_chars_result result = std::to_chars(std::begin(buf), std::end(buf) - 1, value, std::chars_format::general, precision);
+		std::to_chars_result result = std::to_chars(buf, buf + sizeof(buf) - 1, value, std::chars_format::general, precision);
+		if (result.ec != std::errc()) return false;
 		*result.ptr = '\0';
 	#else
 		PUGI_IMPL_SNPRINTF(buf, "%.*g", precision, double(value));
@@ -4820,7 +4823,8 @@ PUGI_IMPL_NS_BEGIN
 	{
 		char buf[128];
 	#ifdef PUGIXML_CHARCONV_FLOAT
-		std::to_chars_result result = std::to_chars(std::begin(buf), std::end(buf) - 1, value, std::chars_format::general, precision);
+		std::to_chars_result result = std::to_chars(buf, buf + sizeof(buf) - 1, value, std::chars_format::general, precision);
+		if (result.ec != std::errc()) return false;
 		*result.ptr = '\0';
 	#else
 		PUGI_IMPL_SNPRINTF(buf, "%.*g", precision, value);
@@ -8894,7 +8898,8 @@ PUGI_IMPL_NS_BEGIN
 	PUGI_IMPL_FN void convert_number_to_mantissa_exponent(double value, char (&buffer)[32], char** out_mantissa, int* out_exponent)
 	{
 	#ifdef PUGIXML_CHARCONV_FLOAT
-		std::to_chars_result res = std::to_chars(std::begin(buffer), std::end(buffer) - 1, value, std::chars_format::scientific, DBL_DIG);
+		std::to_chars_result res = std::to_chars(buffer, buffer + sizeof(buffer) - 1, value, std::chars_format::scientific, DBL_DIG);
+		assert(res.ec == std::errc());
 		*res.ptr = '\0';
 	#else
 		// get a scientific notation value with IEEE DBL_DIG decimals
@@ -9034,6 +9039,7 @@ PUGI_IMPL_NS_BEGIN
 	#ifdef PUGIXML_WCHAR_MODE
 		return wcstod(string, NULL);
 	#elif defined(PUGIXML_CHARCONV_FLOAT)
+		// return code is intentionally ignored to let libc++/MSVC STL correctly handle underflow/overflow
 		double result = 0.0;
 		std::from_chars(string, string + strlen(string), result);
 		return result;
