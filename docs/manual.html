@@ -604,7 +604,7 @@ pre.pygments .tok-il { color: #666 } /* Literal.Number.Integer.Long */
 </li>
 <li><a href="#changes">9. Changelog</a>
 <ul class="sectlevel2">
-<li><a href="#v1.15">v1.15 <sup>2024-01-10</sup></a></li>
+<li><a href="#v1.15">v1.15 <sup>2025-01-10</sup></a></li>
 <li><a href="#v1.14">v1.14 <sup>2023-10-01</sup></a></li>
 <li><a href="#v1.13">v1.13 <sup>2022-11-01</sup></a></li>
 <li><a href="#v1.12">v1.12 <sup>2022-02-09</sup></a></li>
@@ -2142,7 +2142,7 @@ In many cases attribute values have types that are not strings - i.e. an attribu
 <p><code>as_int</code>, <code>as_uint</code>, <code>as_llong</code>, <code>as_ullong</code>, <code>as_double</code> and <code>as_float</code> convert attribute values to numbers. If attribute handle is null <code>def</code> argument is returned (which is 0 by default). Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as an integer number in either decimal or hexadecimal form (applicable to <code>as_int</code>, <code>as_uint</code>, <code>as_llong</code> and <code>as_ullong</code>; hexadecimal format is used if the number has <code>0x</code> or <code>0X</code> prefix) or as a floating point number in either decimal or scientific form (<code>as_double</code> or <code>as_float</code>).</p>
 </div>
 <div class="paragraph">
-<p>In case the input string contains a non-numeric character sequence or a number that is out of the target numeric range, the result is undefined.</p>
+<p>For integer conversions, non-numeric character sequences return 0 and out of range values are clamped to the closest representable value; for floating-point conversions, the result depends on implementation (CRT or STL depending on whether <code>PUGIXML_CHARCONV_FLOAT</code> is used).</p>
 </div>
 <div class="admonitionblock caution">
 <table>
@@ -2151,7 +2151,7 @@ In many cases attribute values have types that are not strings - i.e. an attribu
 <div class="title">Caution</div>
 </td>
 <td class="content">
-Number conversion functions depend on current C locale as set with <code>setlocale</code>, so may return unexpected results if the locale is different from <code>"C"</code>.
+Floating-point conversion functions depend on the current C locale as set with <code>setlocale</code>, so may return unexpected results if the locale is different from <code>"C"</code>. This does not apply when pugixml is built with <code>PUGIXML_CHARCONV_FLOAT</code>.
 </td>
 </tr>
 </table>
@@ -2166,7 +2166,7 @@ Number conversion functions depend on current C locale as set with <code>setloca
 <div class="title">Note</div>
 </td>
 <td class="content">
-<code>as_llong</code> and <code>as_ullong</code> are only available if your platform has reliable support for the <code>long long</code> type, including string conversions.
+<code>as_llong</code> and <code>as_ullong</code> are only available if your platform has support for the <code>long long</code> type.
 </td>
 </tr>
 </table>
@@ -2752,7 +2752,7 @@ All attributes have name and value, both of which are strings (value may be empt
 <div class="title">Caution</div>
 </td>
 <td class="content">
-Number conversion functions depend on current C locale as set with <code>setlocale</code>, so may generate unexpected results if the locale is different from <code>"C"</code>.
+Floating-point conversion functions depend on the current C locale as set with <code>setlocale</code>, so may generate unexpected results if the locale is different from <code>"C"</code>. This does not apply when pugixml is built with <code>PUGIXML_CHARCONV_FLOAT</code>.
 </td>
 </tr>
 </table>
@@ -2764,7 +2764,7 @@ Number conversion functions depend on current C locale as set with <code>setloca
 <div class="title">Note</div>
 </td>
 <td class="content">
-<code>set_value</code> overloads with <code>long long</code> type are only available if your platform has reliable support for the type, including string conversions.
+<code>set_value</code> overloads with <code>long long</code> type are only available if your platform has support for the type.
 </td>
 </tr>
 </table>
@@ -3888,7 +3888,7 @@ Calling <code>node.select_nodes("query")</code> is equivalent to calling <code>x
 <div class="title">Note</div>
 </td>
 <td class="content">
-The variable set pointer is stored in the query object; you have to ensure that the lifetime of the set exceeds that of query object.
+The variable set pointer is stored in the query object, along with pointers to the variables it references; you have to ensure that the lifetime of the set exceeds that of the query object, and that the set is not assigned to or moved into while the query is live.
 </td>
 </tr>
 </table>
@@ -4134,7 +4134,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 <h2 id="changes"><a class="anchor" href="#changes"></a><a class="link" href="#changes">9. Changelog</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="v1.15"><a class="anchor" href="#v1.15"></a><a class="link" href="#v1.15">v1.15 <sup>2024-01-10</sup></a></h3>
+<h3 id="v1.15"><a class="anchor" href="#v1.15"></a><a class="link" href="#v1.15">v1.15 <sup>2025-01-10</sup></a></h3>
 <div class="paragraph">
 <p>Maintenance release. Changes:</p>
 </div>
@@ -6276,7 +6276,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-05-15 13:19:50 -0700
+Last updated 2026-05-16 09:10:25 -0700
 </div>
 </div>
 </body>

@@ -936,13 +936,13 @@ unsigned long long xml_attribute::as_ullong(unsigned long long def = 0) const;
 
 `as_int`, `as_uint`, `as_llong`, `as_ullong`, `as_double` and `as_float` convert attribute values to numbers. If attribute handle is null `def` argument is returned (which is 0 by default). Otherwise, all leading whitespace characters are truncated, and the remaining string is parsed as an integer number in either decimal or hexadecimal form (applicable to `as_int`, `as_uint`, `as_llong` and `as_ullong`; hexadecimal format is used if the number has `0x` or `0X` prefix) or as a floating point number in either decimal or scientific form (`as_double` or `as_float`).
 
-In case the input string contains a non-numeric character sequence or a number that is out of the target numeric range, the result is undefined.
+For integer conversions, non-numeric character sequences return 0 and out of range values are clamped to the closest representable value; for floating-point conversions, the result depends on implementation (CRT or STL depending on whether `PUGIXML_CHARCONV_FLOAT` is used).
 
-CAUTION: Number conversion functions depend on current C locale as set with `setlocale`, so may return unexpected results if the locale is different from `"C"`.
+CAUTION: Floating-point conversion functions depend on the current C locale as set with `setlocale`, so may return unexpected results if the locale is different from `"C"`. This does not apply when pugixml is built with `PUGIXML_CHARCONV_FLOAT`.
 
 `as_bool` converts attribute value to boolean as follows: if attribute handle is null, `def` argument is returned (which is `false` by default). If attribute value is empty, `false` is returned. Otherwise, `true` is returned if the first character is one of `'1', 't', 'T', 'y', 'Y'`. This means that strings like `"true"` and `"yes"` are recognized as `true`, while strings like `"false"` and `"no"` are recognized as `false`. For more complex matching you'll have to write your own function.
 
-NOTE: `as_llong` and `as_ullong` are only available if your platform has reliable support for the `long long` type, including string conversions.
+NOTE: `as_llong` and `as_ullong` are only available if your platform has support for the `long long` type.
 
 [[code_traverse_base_data]]
 This is an example of using these functions, along with node data retrieval ones (link:samples/traverse_base.cpp[]):
@@ -1351,9 +1351,9 @@ bool xml_attribute::set_value(unsigned long long rhs);
 
 The above functions convert the argument to string and then call the base `set_value` function. Integers are converted to a decimal form, floating-point numbers are converted to either decimal or scientific form, depending on the number magnitude, boolean values are converted to either `"true"` or `"false"`.
 
-CAUTION: Number conversion functions depend on current C locale as set with `setlocale`, so may generate unexpected results if the locale is different from `"C"`.
+CAUTION: Floating-point conversion functions depend on the current C locale as set with `setlocale`, so may generate unexpected results if the locale is different from `"C"`. This does not apply when pugixml is built with `PUGIXML_CHARCONV_FLOAT`.
 
-NOTE: `set_value` overloads with `long long` type are only available if your platform has reliable support for the type, including string conversions.
+NOTE: `set_value` overloads with `long long` type are only available if your platform has support for the type.
 
 [[xml_attribute::assign]]
 
@@ -2043,7 +2043,7 @@ xpath_node_set xml_node::select_nodes(const char_t* query, xpath_variable_set* v
 
 If you're using query objects, you can change the variable values before `evaluate`/`select` calls to change the query behavior.
 
-NOTE: The variable set pointer is stored in the query object; you have to ensure that the lifetime of the set exceeds that of query object.
+NOTE: The variable set pointer is stored in the query object, along with pointers to the variables it references; you have to ensure that the lifetime of the set exceeds that of the query object, and that the set is not assigned to or moved into while the query is live.
 
 [[xpath_variable_set]]
 Variable sets correspond to `xpath_variable_set` type, which is essentially a variable container.
@@ -2206,7 +2206,7 @@ Because of the differences in document object models, performance considerations
 :!numbered:
 
 [[v1.15]]
-=== v1.15 ^2024-01-10^
+=== v1.15 ^2025-01-10^
 
 Maintenance release. Changes:
 
