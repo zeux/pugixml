@@ -463,6 +463,16 @@ TEST_XML(xpath_variables_copy, "<node />")
 	CHECK(!set3.get(STR("a")));
 }
 
+TEST(xpath_variables_copy_unset_string)
+{
+	xpath_variable_set set1;
+	CHECK(set1.add(STR("v"), xpath_type_string));
+
+	xpath_variable_set set2 = set1;
+	CHECK(set2.get(STR("v")));
+	CHECK_STRING(set2.get(STR("v"))->get_string(), STR(""));
+}
+
 TEST_XML(xpath_variables_copy_out_of_memory, "<node1 /><node2 />")
 {
 	xpath_variable_set set1;

@@ -9415,6 +9415,8 @@ PUGI_IMPL_NS_BEGIN
 
 	PUGI_IMPL_FN bool copy_xpath_variable(xpath_variable* lhs, const xpath_variable* rhs)
 	{
+		assert(lhs->type() == rhs->type());
+
 		switch (rhs->type())
 		{
 		case xpath_type_node_set:
@@ -9424,7 +9426,11 @@ PUGI_IMPL_NS_BEGIN
 			return lhs->set(static_cast<const xpath_variable_number*>(rhs)->value);
 
 		case xpath_type_string:
-			return lhs->set(static_cast<const xpath_variable_string*>(rhs)->value);
+		{
+			const char_t* value = static_cast<const xpath_variable_string*>(rhs)->value;
+			assert(!static_cast<xpath_variable_string*>(lhs)->value); // null copy is a no-op
+			return !value || lhs->set(value);
+		}
 
 		case xpath_type_boolean:
 			return lhs->set(static_cast<const xpath_variable_boolean*>(rhs)->value);
