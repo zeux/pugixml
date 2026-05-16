@@ -12,26 +12,34 @@ jobs:
       matrix:
         os: [ubuntu, macos]
         compiler: [g++, clang++]
-        defines: [standard, PUGIXML_WCHAR_MODE, PUGIXML_COMPACT, PUGIXML_NO_EXCEPTIONS]
+        defines: [standard, PUGIXML_WCHAR_MODE, PUGIXML_COMPACT, PUGIXML_NO_EXCEPTIONS, PUGIXML_CHARCONV_FLOAT]
         exclude:
           - os: macos
             compiler: g++
+          - os: macos
+            defines: PUGIXML_CHARCONV_FLOAT # std::charconv is not supported until Xcode 26
     name: ${{matrix.os}} (${{matrix.compiler}}, ${{matrix.defines}})
     runs-on: ${{matrix.os}}-latest
     steps:
     - uses: actions/checkout@v4
     - name: make test
+      if: matrix.defines != 'PUGIXML_CHARCONV_FLOAT' # std::charconv requires C++17, tested below
       run: |
         export CXX=${{matrix.compiler}}
         make test cxxstd=c++11 defines=${{matrix.defines}} config=release -j2
         make test cxxstd=c++98 defines=${{matrix.defines}} config=debug -j2
         make test cxxstd=c++17 defines=${{matrix.defines}} config=debug -j2
         make test defines=${{matrix.defines}} config=sanitize -j2
+    - name: make test charconv
+      if: matrix.defines == 'PUGIXML_CHARCONV_FLOAT'
+      run: |
+        export CXX=${{matrix.compiler}}
+        make test cxxstd=c++17 defines=${{matrix.defines}} config=sanitize -j2
     - name: make coverage
       if: ${{!(matrix.os == 'ubuntu' && matrix.compiler == 'clang++')}} # linux/clang produces coverage info gcov can't parse
       run: |
         export CXX=${{matrix.compiler}}
-        make test defines=${{matrix.defines}} config=coverage -j2
+        make test cxxstd=c++17 defines=${{matrix.defines}} config=coverage -j2
         bash <(curl -s https://codecov.io/bash) -f pugixml.cpp.gcov -X search -t ${{secrets.CODECOV_TOKEN}} -B ${{github.ref}}
 
   unix-cmake:
@@ -55,7 +63,7 @@ jobs:
     strategy:
       matrix:
         arch: [Win32, x64]
-        defines: [standard, PUGIXML_WCHAR_MODE, PUGIXML_COMPACT, PUGIXML_NO_EXCEPTIONS]
+        defines: [standard, PUGIXML_WCHAR_MODE, PUGIXML_COMPACT, PUGIXML_NO_EXCEPTIONS, PUGIXML_CHARCONV_FLOAT]
     steps:
     - uses: actions/checkout@v4
     - name: cmake configure

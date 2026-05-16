@@ -996,6 +996,9 @@ can include pugixml.cpp in your project (see <a href="#install.building.embed">B
 <p><a id="PUGIXML_WCHAR_MODE"></a><code>PUGIXML_WCHAR_MODE</code> define toggles between UTF-8 style interface (the in-memory text encoding is assumed to be UTF-8, most functions use <code>char</code> as character type) and UTF-16/32 style interface (the in-memory text encoding is assumed to be UTF-16/32, depending on <code>wchar_t</code> size, most functions use <code>wchar_t</code> as character type). See <a href="#dom.unicode">Unicode interface</a> for more details.</p>
 </div>
 <div class="paragraph">
+<p><a id="PUGIXML_CHARCONV_FLOAT"></a><code>PUGIXML_CHARCONV_FLOAT</code> will use <a href="https://en.cppreference.com/cpp/header/charconv">&lt;charconv&gt;</a> for floating-point number formatting instead of <code>&lt;stdio.h&gt;</code> functions, which requires C++17 and UTF-8 interface. Note that the conversion will then ignore the locale and always act as if the default <code>C</code> locale is used.</p>
+</div>
+<div class="paragraph">
 <p><a id="PUGIXML_COMPACT"></a><code>PUGIXML_COMPACT</code> define activates a different internal representation of document storage that is much more memory efficient for documents with a lot of markup (i.e. nodes and attributes), but is slightly slower to parse and access. For details see <a href="#dom.memory.compact">Compact mode</a>.</p>
 </div>
 <div class="paragraph">
@@ -6273,7 +6276,7 @@ If exceptions are disabled, then in the event of parsing failure the query is in
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-05-15 00:37:51 -0700
+Last updated 2026-05-15 13:19:50 -0700
 </div>
 </div>
 </body>
