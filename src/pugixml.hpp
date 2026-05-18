@@ -493,6 +493,12 @@ namespace pugi
 		xml_attribute& operator=(unsigned long long rhs);
 	#endif
 
+	#ifdef __cpp_char8_t
+		// Delete char8_t overloads to prevent accidental conversion to bool
+		void set_value(const char8_t* rhs) = delete;
+		xml_attribute& operator=(const char8_t* rhs) = delete;
+	#endif
+
 		// Get next/previous attribute in the attribute list of the parent node
 		xml_attribute next_attribute() const;
 		xml_attribute previous_attribute() const;
@@ -814,6 +820,7 @@ namespace pugi
 	{
 		friend class xml_node;
 
+	private:
 		xml_node_struct* _root;
 
 		typedef void (*unspecified_bool_type)(xml_text***);
@@ -896,6 +903,12 @@ namespace pugi
 	#ifdef PUGIXML_HAS_LONG_LONG
 		xml_text& operator=(long long rhs);
 		xml_text& operator=(unsigned long long rhs);
+	#endif
+
+	#ifdef __cpp_char8_t
+		// Delete char8_t overloads to prevent accidental conversion to bool
+		void set(const char8_t* rhs) = delete;
+		xml_text& operator=(const char8_t* rhs) = delete;
 	#endif
 
 		// Get the data node (node_pcdata or node_cdata) for this object
