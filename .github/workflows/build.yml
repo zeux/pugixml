@@ -29,6 +29,7 @@ jobs:
         make test cxxstd=c++11 defines=${{matrix.defines}} config=release -j2
         make test cxxstd=c++98 defines=${{matrix.defines}} config=debug -j2
         make test cxxstd=c++17 defines=${{matrix.defines}} config=debug -j2
+        make test cxxstd=c++20 defines=${{matrix.defines}} config=debug -j2
         make test defines=${{matrix.defines}} config=sanitize -j2
     - name: make test charconv
       if: matrix.defines == 'PUGIXML_CHARCONV_FLOAT'
