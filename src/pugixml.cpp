@@ -1142,8 +1142,9 @@ namespace pugi
 {
 	struct xml_attribute_struct
 	{
-		xml_attribute_struct(impl::xml_memory_page* page): header(PUGI_IMPL_GETHEADER_IMPL(this, page, 0)), name(NULL), value(NULL), prev_attribute_c(NULL), next_attribute(NULL)
+		xml_attribute_struct(impl::xml_memory_page* page): name(NULL), value(NULL), prev_attribute_c(NULL), next_attribute(NULL)
 		{
+			header = PUGI_IMPL_GETHEADER_IMPL(this, page, 0);
 		}
 
 		uintptr_t header;
@@ -1157,8 +1158,9 @@ namespace pugi
 
 	struct xml_node_struct
 	{
-		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): header(PUGI_IMPL_GETHEADER_IMPL(this, page, type)), name(NULL), value(NULL), parent(NULL), first_child(NULL), prev_sibling_c(NULL), next_sibling(NULL), first_attribute(NULL)
+		xml_node_struct(impl::xml_memory_page* page, xml_node_type type): name(NULL), value(NULL), parent(NULL), first_child(NULL), prev_sibling_c(NULL), next_sibling(NULL), first_attribute(NULL)
 		{
+			header = PUGI_IMPL_GETHEADER_IMPL(this, page, type);
 		}
 
 		uintptr_t header;
