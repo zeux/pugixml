@@ -7672,6 +7672,12 @@ namespace pugi
 	}
 
 #ifdef PUGIXML_HAS_MOVE
+	// CRAN patch: GCC 16 -Wuninitialized false positive — it cannot trace that other->header
+	// is initialized via xml_node_struct(page, node_document) through the inheritance chain.
+#	if defined(__GNUC__) && !defined(__clang__)
+#		pragma GCC diagnostic push
+#		pragma GCC diagnostic ignored "-Wuninitialized"
+#	endif
 	PUGI_IMPL_FN void xml_document::_move(xml_document& rhs) PUGIXML_NOEXCEPT_IF_NOT_COMPACT
 	{
 		impl::xml_document_struct* doc = static_cast<impl::xml_document_struct*>(_root);
@@ -7780,6 +7786,9 @@ namespace pugi
 		new (other) impl::xml_document_struct(PUGI_IMPL_GETPAGE(other));
 		rhs._buffer = NULL;
 	}
+#	if defined(__GNUC__) && !defined(__clang__)
+#		pragma GCC diagnostic pop
+#	endif
 #endif
 
 #ifndef PUGIXML_NO_STL
