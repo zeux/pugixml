@@ -7774,7 +7774,7 @@ namespace pugi
 		}
 
 		// reset other document
-		new (other) impl::xml_document_struct(PUGI_IMPL_GETPAGE(other));
+		new (other) impl::xml_document_struct(other_page);
 		rhs._buffer = NULL;
 	}
 #endif
