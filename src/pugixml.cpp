@@ -1138,11 +1138,6 @@ namespace pugi
 	};
 }
 #else
-// CRAN patch: header is moved to the initializer list in xml_attribute_struct and
-// xml_node_struct below. GCC 16 -Wuninitialized flags PUGI_IMPL_GETPAGE(other)
-// as reading an uninitialized header when it is assigned in the constructor body.
-// PUGI_IMPL_GETHEADER_IMPL only does pointer arithmetic on `this`, so the move is safe.
-// Re-apply this patch after each pugixml vendor update.
 namespace pugi
 {
 	struct xml_attribute_struct
