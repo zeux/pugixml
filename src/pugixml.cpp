@@ -10325,6 +10325,13 @@ PUGI_IMPL_NS_BEGIN
 			}
 			else if (lt != xpath_type_node_set && rt == xpath_type_node_set)
 			{
+				if (rhs->_type == ast_opt_select_attribute)
+				{
+					xml_attribute attr = c.n.node().attribute(rhs->_data.nodetest);
+
+					return attr && comp(lhs->eval_number(c, stack), convert_string_to_number(attr.value()));
+				}
+
 				xpath_allocator_capture cr(stack.result);
 
 				double l = lhs->eval_number(c, stack);
@@ -10342,6 +10349,13 @@ PUGI_IMPL_NS_BEGIN
 			}
 			else if (lt == xpath_type_node_set && rt != xpath_type_node_set)
 			{
+				if (lhs->_type == ast_opt_select_attribute)
+				{
+					xml_attribute attr = c.n.node().attribute(lhs->_data.nodetest);
+
+					return attr && comp(convert_string_to_number(attr.value()), rhs->eval_number(c, stack));
+				}
+
 				xpath_allocator_capture cr(stack.result);
 
 				xpath_node_set_raw ls = lhs->eval_node_set(c, stack, nodeset_eval_all);
