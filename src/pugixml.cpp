@@ -8594,6 +8594,39 @@ PUGI_IMPL_NS_BEGIN
 		return static_cast<unsigned int>(ch - 'A') < 26 ? static_cast<char_t>(ch | ' ') : ch;
 	}
 
+	PUGI_IMPL_FN xpath_string string_value_element(xml_node_struct* n, xpath_allocator* alloc)
+	{
+		xpath_string result;
+
+		// element nodes can have value if parse_embed_pcdata was used
+		if (n->value)
+			result.append(xpath_string::from_const(n->value), alloc);
+
+		xml_node_struct* cur = n->first_child;
+
+		while (cur && cur != n)
+		{
+			xml_node_type type = PUGI_IMPL_NODETYPE(cur);
+
+			if ((type == node_pcdata || type == node_cdata) && cur->value)
+				result.append(xpath_string::from_const(cur->value), alloc);
+
+			if (cur->first_child)
+				cur = cur->first_child;
+			else if (cur->next_sibling)
+				cur = cur->next_sibling;
+			else
+			{
+				while (!cur->next_sibling && cur != n)
+					cur = cur->parent;
+
+				if (cur != n) cur = cur->next_sibling;
+			}
+		}
+
+		return result;
+	}
+
 	PUGI_IMPL_FN xpath_string string_value(const xpath_node& na, xpath_allocator* alloc)
 	{
 		if (na.attribute())
@@ -8612,35 +8645,7 @@ PUGI_IMPL_NS_BEGIN
 
 			case node_document:
 			case node_element:
-			{
-				xpath_string result;
-
-				// element nodes can have value if parse_embed_pcdata was used
-				if (n.value()[0])
-					result.append(xpath_string::from_const(n.value()), alloc);
-
-				xml_node cur = n.first_child();
-
-				while (cur && cur != n)
-				{
-					if (cur.type() == node_pcdata || cur.type() == node_cdata)
-						result.append(xpath_string::from_const(cur.value()), alloc);
-
-					if (cur.first_child())
-						cur = cur.first_child();
-					else if (cur.next_sibling())
-						cur = cur.next_sibling();
-					else
-					{
-						while (!cur.next_sibling() && cur != n)
-							cur = cur.parent();
-
-						if (cur != n) cur = cur.next_sibling();
-					}
-				}
-
-				return result;
-			}
+				return string_value_element(n.internal_object(), alloc);
 
 			default:
 				return xpath_string();
