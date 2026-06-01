@@ -256,9 +256,9 @@ PUGI_IMPL_NS_BEGIN
 		assert(src && dst);
 
 	#ifdef PUGIXML_WCHAR_MODE
-		return wcscmp(src, dst) == 0;
+		return *src == *dst && wcscmp(src, dst) == 0;
 	#else
-		return strcmp(src, dst) == 0;
+		return *src == *dst && strcmp(src, dst) == 0;
 	#endif
 	}
 
