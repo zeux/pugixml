@@ -10109,6 +10109,7 @@ PUGI_IMPL_NS_BEGIN
 		ast_step_root,					// select root node
 
 		ast_opt_translate_table,		// translate(left, right, third) where right/third are constants
+		ast_opt_select_attribute,		// @name
 		ast_opt_compare_attribute		// @name = 'string'
 	};
 
@@ -10324,6 +10325,13 @@ PUGI_IMPL_NS_BEGIN
 			}
 			else if (lt != xpath_type_node_set && rt == xpath_type_node_set)
 			{
+				if (rhs->_type == ast_opt_select_attribute)
+				{
+					xml_attribute attr = c.n.node().attribute(rhs->_data.nodetest);
+
+					return attr && comp(lhs->eval_number(c, stack), convert_string_to_number(attr.value()));
+				}
+
 				xpath_allocator_capture cr(stack.result);
 
 				double l = lhs->eval_number(c, stack);
@@ -10341,6 +10349,13 @@ PUGI_IMPL_NS_BEGIN
 			}
 			else if (lt == xpath_type_node_set && rt != xpath_type_node_set)
 			{
+				if (lhs->_type == ast_opt_select_attribute)
+				{
+					xml_attribute attr = c.n.node().attribute(lhs->_data.nodetest);
+
+					return attr && comp(convert_string_to_number(attr.value()), rhs->eval_number(c, stack));
+				}
+
 				xpath_allocator_capture cr(stack.result);
 
 				xpath_node_set_raw ls = lhs->eval_node_set(c, stack, nodeset_eval_all);
@@ -11055,13 +11070,20 @@ PUGI_IMPL_NS_BEGIN
 				return false;
 			}
 
+			case ast_opt_select_attribute:
+			{
+				xml_attribute attr = c.n.node().attribute(_data.nodetest);
+
+				return !attr.empty();
+			}
+
 			case ast_opt_compare_attribute:
 			{
 				const char_t* value = (_right->_type == ast_string_constant) ? _right->_data.string : _right->_data.variable->get_string();
 
 				xml_attribute attr = c.n.node().attribute(_left->_data.nodetest);
 
-				return attr && strequal(attr.value(), value) && is_xpath_attribute(attr.name());
+				return attr && strequal(attr.value(), value);
 			}
 
 			case ast_variable:
@@ -11201,6 +11223,13 @@ PUGI_IMPL_NS_BEGIN
 
 			case ast_func_round:
 				return round_nearest_nzero(_left->eval_number(c, stack));
+
+			case ast_opt_select_attribute:
+			{
+				xml_attribute attr = c.n.node().attribute(_data.nodetest);
+
+				return attr ? convert_string_to_number(attr.value()) : gen_nan();
+			}
 
 			case ast_variable:
 			{
@@ -11482,6 +11511,13 @@ PUGI_IMPL_NS_BEGIN
 				return xpath_string::from_heap_preallocated(begin, end);
 			}
 
+			case ast_opt_select_attribute:
+			{
+				xml_attribute attr = c.n.node().attribute(_data.nodetest);
+
+				return attr ? xpath_string::from_const(attr.value()) : xpath_string();
+			}
+
 			case ast_variable:
 			{
 				assert(_rettype == _data.variable->type());
@@ -11616,11 +11652,21 @@ PUGI_IMPL_NS_BEGIN
 				assert(!_right); // root step can't have any predicates
 
 				xpath_node_set_raw ns;
-
 				ns.set_type(xpath_node_set::type_sorted);
 
 				if (c.n.node()) ns.push_back(c.n.node().root(), stack.result);
 				else if (c.n.attribute()) ns.push_back(c.n.parent().root(), stack.result);
+
+				return ns;
+			}
+
+			case ast_opt_select_attribute:
+			{
+				xpath_node_set_raw ns;
+				ns.set_type(xpath_node_set::type_sorted);
+
+				xml_attribute attr = c.n.node().attribute(_data.nodetest);
+				if (attr) ns.push_back(xpath_node(attr, c.n.node()), stack.result);
 
 				return ns;
 			}
@@ -11723,11 +11769,17 @@ PUGI_IMPL_NS_BEGIN
 				}
 			}
 
-			// Use optimized path for @attr = 'value' or @attr = $value
+			// Use optimized path for simple attribute selection (@attr)
+			// coverity[mixed_enums]
+			if (_type == ast_step && _axis == axis_attribute && _test == nodetest_name && !_left && !_right && is_xpath_attribute(_data.nodetest))
+			{
+				_type = ast_opt_select_attribute;
+			}
+
+			// Use optimized path for @attr = 'value' or @attr = $value (relies on attribute selection optimization for matching)
 			if (_type == ast_op_equal &&
 				_left && _right && // workaround for clang static analyzer and Coverity (_left and _right are never null for ast_op_equal)
-                // coverity[mixed_enums]
-				_left->_type == ast_step && _left->_axis == axis_attribute && _left->_test == nodetest_name && !_left->_left && !_left->_right &&
+				_left->_type == ast_opt_select_attribute &&
 				(_right->_type == ast_string_constant || (_right->_type == ast_variable && _right->_rettype == xpath_type_string)))
 			{
 				_type = ast_opt_compare_attribute;
