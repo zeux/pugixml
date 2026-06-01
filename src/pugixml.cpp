@@ -10591,18 +10591,42 @@ PUGI_IMPL_NS_BEGIN
 			{
 			case axis_attribute:
 			{
-				for (xml_attribute_struct* a = n->first_attribute; a; a = a->next_attribute)
-					if (step_push(ns, a, n, alloc) & once)
-						return;
+				if (_test == nodetest_name)
+				{
+					for (xml_attribute_struct* a = n->first_attribute; a; a = a->next_attribute)
+						if (a->name && strequal(a->name, _data.nodetest) && is_xpath_attribute(a->name))
+						{
+							ns.push_back(xpath_node(xml_attribute(a), xml_node(n)), alloc);
+							return; // once=true by construction
+						}
+				}
+				else
+				{
+					for (xml_attribute_struct* a = n->first_attribute; a; a = a->next_attribute)
+						if (step_push(ns, a, n, alloc) & once)
+							return;
+				}
 
 				break;
 			}
 
 			case axis_child:
 			{
-				for (xml_node_struct* c = n->first_child; c; c = c->next_sibling)
-					if (step_push(ns, c, alloc) & once)
-						return;
+				if (_test == nodetest_name)
+				{
+					for (xml_node_struct* c = n->first_child; c; c = c->next_sibling)
+						if (c->name && strequal(c->name, _data.nodetest) && PUGI_IMPL_NODETYPE(c) == node_element)
+						{
+							ns.push_back(xml_node(c), alloc);
+							if (once) return;
+						}
+				}
+				else
+				{
+					for (xml_node_struct* c = n->first_child; c; c = c->next_sibling)
+						if (step_push(ns, c, alloc) & once)
+							return;
+				}
 
 				break;
 			}
