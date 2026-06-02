@@ -119,7 +119,7 @@ TEST_XML(dom_text_as_integer_space, "<node><text1> \t\n1234</text1><text2>\n\t 0
     CHECK(node.child(STR("text4")).text().as_int() == 0);
 }
 
-TEST_XML(dom_text_as_float, "<node><text1>0</text1><text2>1</text2><text3>0.12</text3><text4>-5.1</text4><text5>3e-4</text5><text6>3.14159265358979323846</text6></node>")
+TEST_XML(dom_text_as_float, "<node><text1>0</text1><text2>1</text2><text3>0.12</text3><text4>-5.1</text4><text5>3e-4</text5><text6>3.14159265358979323846</text6><text7> \t\n+2.5</text7></node>")
 {
 	xml_node node = doc.child(STR("node"));
 
@@ -130,9 +130,10 @@ TEST_XML(dom_text_as_float, "<node><text1>0</text1><text2>1</text2><text3>0.12</
 	CHECK_DOUBLE(double(node.child(STR("text4")).text().as_float()), -5.1);
 	CHECK_DOUBLE(double(node.child(STR("text5")).text().as_float()), 3e-4);
 	CHECK_DOUBLE(double(node.child(STR("text6")).text().as_float()), 3.14159265358979323846);
+	CHECK_DOUBLE(double(node.child(STR("text7")).text().as_float()), 2.5);
 }
 
-TEST_XML(dom_text_as_double, "<node><text1>0</text1><text2>1</text2><text3>0.12</text3><text4>-5.1</text4><text5>3e-4</text5><text6>3.14159265358979323846</text6></node>")
+TEST_XML(dom_text_as_double, "<node><text1>0</text1><text2>1</text2><text3>0.12</text3><text4>-5.1</text4><text5>3e-4</text5><text6>3.14159265358979323846</text6><text7> \t\n+2.5</text7></node>")
 {
 	xml_node node = doc.child(STR("node"));
 
@@ -143,6 +144,7 @@ TEST_XML(dom_text_as_double, "<node><text1>0</text1><text2>1</text2><text3>0.12<
 	CHECK_DOUBLE(node.child(STR("text4")).text().as_double(), -5.1);
 	CHECK_DOUBLE(node.child(STR("text5")).text().as_double(), 3e-4);
 	CHECK_DOUBLE(node.child(STR("text6")).text().as_double(), 3.14159265358979323846);
+	CHECK_DOUBLE(node.child(STR("text7")).text().as_double(), 2.5);
 }
 
 TEST_XML(dom_text_as_bool, "<node><text1>0</text1><text2>1</text2><text3>true</text3><text4>True</text4><text5>Yes</text5><text6>yes</text6><text7>false</text7></node>")
@@ -157,6 +159,9 @@ TEST_XML(dom_text_as_bool, "<node><text1>0</text1><text2>1</text2><text3>true</t
 	CHECK(node.child(STR("text5")).text().as_bool());
 	CHECK(node.child(STR("text6")).text().as_bool());
 	CHECK(!node.child(STR("text7")).text().as_bool());
+
+	xml_node text = node.append_child(node_pcdata);
+	CHECK(text.text().as_bool(true) == true);
 }
 
 #ifdef PUGIXML_HAS_LONG_LONG

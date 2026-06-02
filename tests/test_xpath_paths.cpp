@@ -639,9 +639,13 @@ TEST_XML(xpath_paths_unsorted_child, "<node><foo><bar/></foo><node><foo><bar/></
 
 TEST_XML(xpath_paths_optimize_compare_attribute, "<node id='1' /><node id='2' /><node xmlns='3' />")
 {
+	xml_node node = doc.first_child();
+
 	CHECK_XPATH_NODESET(doc, STR("node[@id = '1']")) % 2;
 	CHECK_XPATH_NODESET(doc, STR("node[@id = '2']")) % 4;
 	CHECK_XPATH_NODESET(doc, STR("node[@id = 2]")) % 4;
+	CHECK_XPATH_BOOLEAN(node, STR("@id < 2"), true);
+	CHECK_XPATH_BOOLEAN(node, STR("2 > @id"), true);
 	CHECK_XPATH_NODESET(doc, STR("node[@id[. > 3] = '2']"));
 	CHECK_XPATH_NODESET(doc, STR("node['1' = @id]")) % 2;
 

@@ -183,6 +183,9 @@ TEST_XML(dom_attr_as_bool, "<node attr1='0' attr2='1' attr3='true' attr4='True' 
 	CHECK(node.attribute(STR("attr5")).as_bool());
 	CHECK(node.attribute(STR("attr6")).as_bool());
 	CHECK(!node.attribute(STR("attr7")).as_bool());
+
+	xml_attribute attr = node.append_attribute(STR("attr8"));
+	CHECK(attr.as_bool(true) == true);
 }
 
 #ifdef PUGIXML_HAS_LONG_LONG
