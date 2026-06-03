@@ -2123,6 +2123,7 @@ PUGI_IMPL_NS_BEGIN
 	PUGI_IMPL_FN bool get_mutable_buffer(char_t*& out_buffer, size_t& out_length, const void* contents, size_t size, bool is_mutable)
 	{
 		size_t length = size / sizeof(char_t);
+		assert(contents || length == 0);
 
 		if (is_mutable)
 		{
@@ -2136,8 +2137,6 @@ PUGI_IMPL_NS_BEGIN
 
 			if (contents)
 				memcpy(buffer, contents, length * sizeof(char_t));
-			else
-				assert(length == 0);
 
 			buffer[length] = 0;
 
@@ -10496,14 +10495,7 @@ PUGI_IMPL_NS_BEGIN
 
 			switch (_test)
 			{
-			case nodetest_name:
-				if (strequal(name, _data.nodetest) && is_xpath_attribute(name))
-				{
-					ns.push_back(xpath_node(xml_attribute(a), xml_node(parent)), alloc);
-					return true;
-				}
-				break;
-
+			// nodetest_name is handled at a higher level
 			case nodetest_type_node:
 			case nodetest_all:
 				if (is_xpath_attribute(name))
