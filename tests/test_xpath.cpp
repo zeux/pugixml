@@ -210,6 +210,24 @@ TEST(xpath_sort_random_large)
 	for (unsigned int i = 2; i < 129; ++i) tester % i;
 }
 
+TEST_XML(xpath_sort_coverage, "<node><a/><b/></node>")
+{
+	xml_node a = doc.child(STR("node")).child(STR("a"));
+	xml_node b = doc.child(STR("node")).child(STR("b"));
+
+	xpath_node nodes[17];
+	for (size_t i = 0; i < sizeof(nodes) / sizeof(nodes[0]); ++i)
+		nodes[i] = (i == 0 || i == 8 || i == 16) ? a : b;
+
+	xpath_node_set ns(nodes, nodes + sizeof(nodes) / sizeof(nodes[0]), xpath_node_set::type_unsorted);
+	ns.sort();
+
+	CHECK(ns.type() == xpath_node_set::type_sorted);
+
+	for (size_t i = 0; i < ns.size(); ++i)
+		CHECK(ns[i].node() == (i < 3 ? a : b));
+}
+
 TEST(xpath_long_numbers_parse)
 {
 	const char_t* str_flt_max = STR("340282346638528860000000000000000000000");

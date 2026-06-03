@@ -405,6 +405,18 @@ TEST(xpath_parse_depth_limit)
 	CHECK_XPATH_FAIL((STR("/foo") + rep(STR("//x"), limit / 2)).c_str());
 }
 
+TEST(xpath_parse_depth_limit_coverage)
+{
+	const size_t almost_limit = 1023;
+
+	CHECK_XPATH_FAIL((rep(STR("("), almost_limit) + STR("string(1)") + rep(STR(")"), almost_limit)).c_str());
+	CHECK_XPATH_FAIL((rep(STR("("), almost_limit) + STR("foo[1]") + rep(STR(")"), almost_limit)).c_str());
+
+	xpath_variable_set vars;
+	CHECK(vars.set(STR("x"), xpath_node_set()));
+	CHECK_XPATH_FAIL_VAR((rep(STR("("), almost_limit) + STR("$x[1]") + rep(STR(")"), almost_limit)).c_str(), &vars);
+}
+
 TEST_XML(xpath_parse_location_path, "<node><child/></node>")
 {
 	CHECK_XPATH_NODESET(doc, STR("/node")) % 2;
