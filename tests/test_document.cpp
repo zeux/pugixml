@@ -616,6 +616,13 @@ TEST(document_load_file_special_device)
 	xml_parse_result result = doc.load_file("/dev/tty");
 	CHECK(result.status == status_file_not_found || result.status == status_io_error);
 }
+
+TEST(document_load_file_special_sysfs)
+{
+	xml_document doc;
+	xml_parse_result result = doc.load_file("/sys/kernel/fscaps");
+	CHECK(result.status == status_file_not_found || result.status == status_io_error);
+}
 #endif
 
 TEST_XML(document_save, "<node/>")
