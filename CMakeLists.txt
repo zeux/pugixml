@@ -60,7 +60,7 @@ option(PUGIXML_COMPACT "Enable compact mode" OFF)
 option(PUGIXML_NO_XPATH "Disable XPath" OFF)
 option(PUGIXML_NO_STL "Disable STL" OFF)
 option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
-option(PUGIXML_HAS_STRING_VIEW "Enable support for std::string_view" OFF)
+option(PUGIXML_HAS_STRING_VIEW "Enable std::string_view even without C++17 or with STL disabled" OFF)
 mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS PUGIXML_HAS_STRING_VIEW)
 
 if (APPLE)
