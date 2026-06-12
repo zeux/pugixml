@@ -83,7 +83,7 @@ include::samples/load_error_handling.cpp[tags=code]
 
 Sometimes XML data should be loaded from some other source than file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from gzip-compressed files. These scenarios either require loading document from memory, in which case you should prepare a contiguous memory block with all XML data and to pass it to one of buffer loading functions, or loading document from C{plus}{plus} IOstream, in which case you should provide an object which implements `std::istream` or `std::wistream` interface.
 
-There are different functions for loading document from memory; they treat the passed buffer as either an immutable one (`load_buffer`), a mutable buffer which is owned by the caller (`load_buffer_inplace`), or a mutable buffer which ownership belongs to pugixml (`load_buffer_inplace_own`). There is also a simple helper function, `xml_document::load`, for cases when you want to load the XML document from null-terminated character string.
+There are different functions for loading document from memory; they treat the passed buffer as either an immutable one (`load_buffer`), a mutable buffer which is owned by the caller (`load_buffer_inplace`), or a mutable buffer which ownership belongs to pugixml (`load_buffer_inplace_own`). There is also a simple helper function, `xml_document::load_string`, for cases when you want to load the XML document from null-terminated character string.
 
 This is an example of loading XML document from memory using one of these functions (link:samples/load_memory.cpp[]); read the sample code for more examples:
 
@@ -139,7 +139,7 @@ Here is an example of using iterators for document traversal (link:samples/trave
 include::samples/traverse_iter.cpp[tags=code]
 ----
 
-If your C{plus}{plus} compiler supports range-based for-loop (this is a C{plus}{plus}11 feature, at the time of writing it's supported by Microsoft Visual Studio 11 Beta, GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with http://www.boost.org/libs/foreach/[Boost Foreach], and possibly other pre-C{plus}{plus}11 foreach facilities.
+If your C{plus}{plus} compiler supports range-based for-loop (this is a C{plus}{plus}11 feature, supported by Microsoft Visual Studio 2012+, GCC 4.6+ and Clang 3.0+), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with http://www.boost.org/libs/foreach/[Boost Foreach], and possibly other pre-C{plus}{plus}11 foreach facilities.
 
 Here is an example of using C{plus}{plus}11 range-based for loop for document traversal (link:samples/traverse_rangefor.cpp[]):
 
@@ -231,7 +231,7 @@ This is a simple example of saving XML document to standard output (link:samples
 include::samples/save_stream.cpp[tags=code]
 ----
 
-All of the above saving functions are implemented in terms of writer interface. This is a simple interface with a single function, which is called several times during output process with chunks of document data as input. In order to output the document via some custom transport, for example sockets, you should create an object which implements `xml_writer_file` interface and pass it to `xml_document::save` function.
+All of the above saving functions are implemented in terms of writer interface. This is a simple interface with a single function, which is called several times during output process with chunks of document data as input. In order to output the document via some custom transport, for example sockets, you should create an object which implements `xml_writer` interface and pass it to `xml_document::save` function.
 
 This is a simple example of custom writer for saving document data to STL string (link:samples/save_custom_writer.cpp[]); read the sample code for more complex examples:
 

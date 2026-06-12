@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.23">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <meta name="author" content="website, repository">
 <title>pugixml 1.15 quick start guide</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -117,7 +117,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -220,6 +219,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -438,9 +438,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f8f8f8; }
 pre.pygments .tok-c { color: #3D7B7B; font-style: italic } /* Comment */
-pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-err { border: 1px solid #F00 } /* Error */
 pre.pygments .tok-k { color: #008000; font-weight: bold } /* Keyword */
-pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-o { color: #666 } /* Operator */
 pre.pygments .tok-ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
 pre.pygments .tok-cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
 pre.pygments .tok-cp { color: #9C6500 } /* Comment.Preproc */
@@ -457,34 +457,34 @@ pre.pygments .tok-go { color: #717171 } /* Generic.Output */
 pre.pygments .tok-gp { color: #000080; font-weight: bold } /* Generic.Prompt */
 pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
 pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
-pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-gt { color: #04D } /* Generic.Traceback */
 pre.pygments .tok-kc { color: #008000; font-weight: bold } /* Keyword.Constant */
 pre.pygments .tok-kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
 pre.pygments .tok-kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
 pre.pygments .tok-kp { color: #008000 } /* Keyword.Pseudo */
 pre.pygments .tok-kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
 pre.pygments .tok-kt { color: #B00040 } /* Keyword.Type */
-pre.pygments .tok-m { color: #666666 } /* Literal.Number */
+pre.pygments .tok-m { color: #666 } /* Literal.Number */
 pre.pygments .tok-s { color: #BA2121 } /* Literal.String */
 pre.pygments .tok-na { color: #687822 } /* Name.Attribute */
 pre.pygments .tok-nb { color: #008000 } /* Name.Builtin */
-pre.pygments .tok-nc { color: #0000FF; font-weight: bold } /* Name.Class */
-pre.pygments .tok-no { color: #880000 } /* Name.Constant */
-pre.pygments .tok-nd { color: #AA22FF } /* Name.Decorator */
+pre.pygments .tok-nc { color: #00F; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #800 } /* Name.Constant */
+pre.pygments .tok-nd { color: #A2F } /* Name.Decorator */
 pre.pygments .tok-ni { color: #717171; font-weight: bold } /* Name.Entity */
 pre.pygments .tok-ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
-pre.pygments .tok-nf { color: #0000FF } /* Name.Function */
+pre.pygments .tok-nf { color: #00F } /* Name.Function */
 pre.pygments .tok-nl { color: #767600 } /* Name.Label */
-pre.pygments .tok-nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nn { color: #00F; font-weight: bold } /* Name.Namespace */
 pre.pygments .tok-nt { color: #008000; font-weight: bold } /* Name.Tag */
 pre.pygments .tok-nv { color: #19177C } /* Name.Variable */
-pre.pygments .tok-ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
-pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
-pre.pygments .tok-mb { color: #666666 } /* Literal.Number.Bin */
-pre.pygments .tok-mf { color: #666666 } /* Literal.Number.Float */
-pre.pygments .tok-mh { color: #666666 } /* Literal.Number.Hex */
-pre.pygments .tok-mi { color: #666666 } /* Literal.Number.Integer */
-pre.pygments .tok-mo { color: #666666 } /* Literal.Number.Oct */
+pre.pygments .tok-ow { color: #A2F; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #BBB } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #666 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #666 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #666 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #666 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #666 } /* Literal.Number.Oct */
 pre.pygments .tok-sa { color: #BA2121 } /* Literal.String.Affix */
 pre.pygments .tok-sb { color: #BA2121 } /* Literal.String.Backtick */
 pre.pygments .tok-sc { color: #BA2121 } /* Literal.String.Char */
@@ -499,12 +499,12 @@ pre.pygments .tok-sr { color: #A45A77 } /* Literal.String.Regex */
 pre.pygments .tok-s1 { color: #BA2121 } /* Literal.String.Single */
 pre.pygments .tok-ss { color: #19177C } /* Literal.String.Symbol */
 pre.pygments .tok-bp { color: #008000 } /* Name.Builtin.Pseudo */
-pre.pygments .tok-fm { color: #0000FF } /* Name.Function.Magic */
+pre.pygments .tok-fm { color: #00F } /* Name.Function.Magic */
 pre.pygments .tok-vc { color: #19177C } /* Name.Variable.Class */
 pre.pygments .tok-vg { color: #19177C } /* Name.Variable.Global */
 pre.pygments .tok-vi { color: #19177C } /* Name.Variable.Instance */
 pre.pygments .tok-vm { color: #19177C } /* Name.Variable.Magic */
-pre.pygments .tok-il { color: #666666 } /* Literal.Number.Integer.Long */
+pre.pygments .tok-il { color: #666 } /* Literal.Number.Integer.Long */
 </style>
 </head>
 <body class="article toc2 toc-right">
@@ -688,7 +688,7 @@ All pugixml classes and functions are located in <code>pugi</code> namespace; yo
 <p>Sometimes XML data should be loaded from some other source than file, i.e. HTTP URL; also you may want to load XML data from file using non-standard functions, i.e. to use your virtual file system facilities or to load XML from gzip-compressed files. These scenarios either require loading document from memory, in which case you should prepare a contiguous memory block with all XML data and to pass it to one of buffer loading functions, or loading document from C&#43;&#43; IOstream, in which case you should provide an object which implements <code>std::istream</code> or <code>std::wistream</code> interface.</p>
 </div>
 <div class="paragraph">
-<p>There are different functions for loading document from memory; they treat the passed buffer as either an immutable one (<code>load_buffer</code>), a mutable buffer which is owned by the caller (<code>load_buffer_inplace</code>), or a mutable buffer which ownership belongs to pugixml (<code>load_buffer_inplace_own</code>). There is also a simple helper function, <code>xml_document::load</code>, for cases when you want to load the XML document from null-terminated character string.</p>
+<p>There are different functions for loading document from memory; they treat the passed buffer as either an immutable one (<code>load_buffer</code>), a mutable buffer which is owned by the caller (<code>load_buffer_inplace</code>), or a mutable buffer which ownership belongs to pugixml (<code>load_buffer_inplace_own</code>). There is also a simple helper function, <code>xml_document::load_string</code>, for cases when you want to load the XML document from null-terminated character string.</p>
 </div>
 <div class="paragraph">
 <p>This is an example of loading XML document from memory using one of these functions (<a href="samples/load_memory.cpp" class="bare">samples/load_memory.cpp</a>); read the sample code for more examples:</p>
@@ -791,7 +791,7 @@ All pugixml classes and functions are located in <code>pugi</code> namespace; yo
 </div>
 </div>
 <div class="paragraph">
-<p>If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43;11 feature, at the time of writing it&#8217;s supported by Microsoft Visual Studio 11 Beta, GCC 4.6 and Clang 3.0), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with <a href="http://www.boost.org/libs/foreach/">Boost Foreach</a>, and possibly other pre-C&#43;&#43;11 foreach facilities.</p>
+<p>If your C&#43;&#43; compiler supports range-based for-loop (this is a C&#43;&#43;11 feature, supported by Microsoft Visual Studio 2012+, GCC 4.6+ and Clang 3.0+), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with <a href="http://www.boost.org/libs/foreach/">Boost Foreach</a>, and possibly other pre-C&#43;&#43;11 foreach facilities.</p>
 </div>
 <div class="paragraph">
 <p>Here is an example of using C&#43;&#43;11 range-based for loop for document traversal (<a href="samples/traverse_rangefor.cpp" class="bare">samples/traverse_rangefor.cpp</a>):</p>
@@ -1014,7 +1014,7 @@ XPath functions throw <code>xpath_exception</code> objects on error; the sample 
 </div>
 </div>
 <div class="paragraph">
-<p>All of the above saving functions are implemented in terms of writer interface. This is a simple interface with a single function, which is called several times during output process with chunks of document data as input. In order to output the document via some custom transport, for example sockets, you should create an object which implements <code>xml_writer_file</code> interface and pass it to <code>xml_document::save</code> function.</p>
+<p>All of the above saving functions are implemented in terms of writer interface. This is a simple interface with a single function, which is called several times during output process with chunks of document data as input. In order to output the document via some custom transport, for example sockets, you should create an object which implements <code>xml_writer</code> interface and pass it to <code>xml_document::save</code> function.</p>
 </div>
 <div class="paragraph">
 <p>This is a simple example of custom writer for saving document data to STL string (<a href="samples/save_custom_writer.cpp" class="bare">samples/save_custom_writer.cpp</a>); read the sample code for more complex examples:</p>
@@ -1100,7 +1100,7 @@ pugixml is Copyright (C) 2006-2026 Arseny Kapoulkine.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-01-02 09:51:54 -0800
+Last updated 2026-06-12 14:06:53 -0700
 </div>
 </div>
 </body>

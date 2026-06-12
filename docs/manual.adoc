@@ -274,7 +274,7 @@ The XML document is represented with a tree data structure. The root of the tree
 [[xml_node_type]]
 The tree nodes can be of one of the following types (which together form the enumeration `xml_node_type`):
 
-* Document node ([[node_document]]`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to <<xml_document,xml_document>> class; note that <<xml_document,xml_document>> is a sub-class of <<xml_node,xml_node>>, so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation. Document generally has one child element node (see [[xml_document::document_element]]`document_element()`), although documents parsed from XML fragments (see [[parse_fragment]]`parse_fragment`) can have more than one.
+* Document node ([[node_document]]`node_document`) - this is the root of the tree, which consists of several child nodes. This node corresponds to <<xml_document,xml_document>> class; note that <<xml_document,xml_document>> is a sub-class of <<xml_node,xml_node>>, so the entire node interface is also available. However, document node is special in several ways, which are covered below. There can be only one document node in the tree; document node does not have any XML representation. Document generally has one child element node (see <<xml_document::document_element,document_element()>>), although documents parsed from XML fragments (see <<parse_fragment,parse_fragment>>) can have more than one.
 
 * Element/tag node ([[node_element]]`node_element`) - this is the most common type of node, which represents XML elements. Element nodes have a name, a collection of attributes and a collection of child nodes (both of which may be empty). The attribute is a simple name/value pair. The example XML representation of element nodes is as follows:
 +
@@ -487,7 +487,7 @@ pugixml requests the memory needed for document storage in big chunks, and alloc
 ==== Custom memory allocation/deallocation functions
 
 [[allocation_function]][[deallocation_function]]
-All memory for tree structure, tree data and XPath objects is allocated via globally specified functions, which default to malloc/free. You can set your own allocation functions with set_memory_management function. The function interfaces are the same as that of malloc/free:
+All memory for tree structure, tree data and XPath objects is allocated via globally specified functions, which default to malloc/free. You can set your own allocation functions with `set_memory_management_functions` function. The function interfaces are the same as that of malloc/free:
 
 [source]
 ----
@@ -542,7 +542,7 @@ Constructing a document object using the default constructor does not result in 
 
 When the document is loaded from file/buffer, unless an inplace loading function is used (see <<loading.memory>>), a complete copy of character stream is made; all names/values of nodes and attributes are allocated in this buffer. This buffer is allocated via a single large allocation and is only freed when document memory is reclaimed (i.e. if the <<xml_document,xml_document>> object is destroyed or if another document is loaded in the same object). Also when loading from file or stream, an additional large allocation may be performed if encoding conversion is required; a temporary buffer is allocated, and it is freed before load function returns.
 
-All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 Kb; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and them removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
+All additional memory, such as memory for document structure (node/attribute objects) and memory for node/attribute names/values is allocated in pages on the order of 32 Kb; actual objects are allocated inside the pages using a memory management scheme optimized for fast allocation/deallocation of many small objects. Because of the scheme specifics, the pages are only destroyed if all objects inside them are destroyed; also, generally destroying an object does not mean that subsequent object creation will reuse the same memory. This means that it is possible to devise a usage scheme which will lead to higher memory usage than expected; one example is adding a lot of nodes, and then removing all even numbered ones; not a single page is reclaimed in the process. However this is an example specifically crafted to produce unsatisfying behavior; in all practical usage scenarios the memory consumption is less than that of a general-purpose allocator because allocation meta-data is very small in size.
 
 [[dom.memory.compact]]
 ==== Compact mode
@@ -655,7 +655,7 @@ xml_parse_result xml_document::load(std::wistream& stream, unsigned int options 
 
 `load` with `std::istream` argument loads the document from stream from the current read position to the end, treating the stream contents as a byte stream of the specified encoding (with encoding autodetection as necessary). Thus calling `xml_document::load` on an opened `std::ifstream` object is equivalent to calling `xml_document::load_file`.
 
-`load` with `std::wstream` argument treats the stream contents as a wide character stream (encoding is always <<encoding_wchar,encoding_wchar>>). Because of this, using `load` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to load documents from non-Unicode encodings, i.e. you can load Shift-JIS encoded data if you set the correct locale.
+`load` with `std::wistream` argument treats the stream contents as a wide character stream (encoding is always <<encoding_wchar,encoding_wchar>>). Because of this, using `load` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you the ability to load documents from non-Unicode encodings, i.e. you can load Shift-JIS encoded data if you set the correct locale.
 
 This is a simple example of loading XML document from file using streams (link:samples/load_stream.cpp[]); read the sample code for more complex examples involving wide streams and locales:
 
@@ -689,7 +689,7 @@ Parsing status is represented as the `xml_parse_status` enumeration and can be o
 * [[status_ok]]`status_ok` means that no error was encountered during parsing; the source stream represents the valid XML document which was fully parsed and converted to a tree.
 
 * [[status_file_not_found]]`status_file_not_found` is only returned by `load_file` function and means that file could not be opened.
-* [[status_io_error]]`status_io_error` is returned by `load_file` function and by `load` functions with `std::istream`/`std::wstream` arguments; it means that some I/O error has occurred during reading the file/stream.
+* [[status_io_error]]`status_io_error` is returned by `load_file` function and by `load` functions with `std::istream`/`std::wistream` arguments; it means that some I/O error has occurred during reading the file/stream.
 * [[status_out_of_memory]]`status_out_of_memory` means that there was not enough memory during some allocation; any allocation failure during parsing results in this error.
 * [[status_internal_error]]`status_internal_error` means that something went horribly wrong; currently this error does not occur
 
@@ -750,10 +750,10 @@ These flags control the resulting tree contents:
 
 * [[parse_ws_pcdata_single]]`parse_ws_pcdata_single` determines if whitespace-only PCDATA nodes that have no sibling nodes are to be put in DOM tree. In some cases application needs to parse the whitespace-only contents of nodes, i.e. `<node>  </node>`, but is not interested in whitespace markup elsewhere. It is possible to use <<parse_ws_pcdata,parse_ws_pcdata>> flag in this case, but it results in excessive allocations and complicates document processing; this flag can be used to avoid that. As an example, after parsing XML string `<node> <a>  </a> </node>` with `parse_ws_pcdata_single` flag set, `<node>` element will have one child `<a>`, and `<a>` element will have one child with type <<node_pcdata,node_pcdata>> and value `"  "`. This flag has no effect if <<parse_ws_pcdata,parse_ws_pcdata>> is enabled. This flag is *off* by default.
 
-* [[parse_embed_pcdata]]`parse_embed_pcdata` determines if PCDATA contents is to be saved as element values. Normally element nodes have names but not values; this flag forces the parser to store the contents as a value if PCDATA is the first child of the element node (otherwise PCDATA node is created as usual). This can significantly reduce the memory required for documents with many PCDATA nodes. To retrieve the data you can use `xml_node::value()` on the element nodes or any of the higher-level functions like `child_value` or `text`. This flag is *off* by default.
+* [[parse_embed_pcdata]]`parse_embed_pcdata` determines if PCDATA contents is to be saved as element values. Normally element nodes have names but not values; this flag forces the parser to store the contents as a value if PCDATA is the first child of the element node (otherwise PCDATA node is created as usual). This can significantly reduce the memory required for documents with many PCDATA nodes. To retrieve the data you can use `xml_node::value()` on the element nodes or any of the higher-level functions like `child_value` or `text`.
 Since this flag significantly changes the DOM structure it is only recommended for parsing documents with many PCDATA nodes in memory-constrained environments. This flag is *off* by default.
 
-* [[parse_merge_pcdata]]`parse_merge_pcdata` determines if PCDATA contents is to be merged with the previous PCDATA node when no intermediary nodes are present between them. If the PCDATA contains CDATA sections, PI nodes, or comments in between, and either of the flags <<parse_cdata,parse_cdata>> ,<<parse_pi,parse_pi>> ,<<parse_comments,parse_comments>> is not set, the contents of the PCDATA node will be merged with the previous one. This flag is *off* by default. Note that this flag is not compatible with `parse_embed_pcdata`.
+* [[parse_merge_pcdata]]`parse_merge_pcdata` determines if PCDATA contents is to be merged with the previous PCDATA node when no intermediary nodes are present between them. If the PCDATA contains CDATA sections, PI nodes, or comments in between, and either of the flags <<parse_cdata,parse_cdata>>, <<parse_pi,parse_pi>>, <<parse_comments,parse_comments>> is not set, the contents of the PCDATA node will be merged with the previous one. This flag is *off* by default. Note that this flag is not compatible with `parse_embed_pcdata`.
 
 * [[parse_fragment]]`parse_fragment` determines if document should be treated as a fragment of a valid XML. Parsing document as a fragment leads to top-level PCDATA content (i.e. text that is not located inside a node) to be added to a tree, and additionally treats documents without element nodes as valid and permits multiple top-level element nodes (currently multiple top-level element nodes are also permitted when the flag is off, but that behavior should not be relied on). This flag is *off* by default.
 
@@ -1026,7 +1026,7 @@ include::samples/traverse_base.cpp[tags=contents]
 === Range-based for-loop support
 
 [[xml_node::children]][[xml_node::attributes]]
-If your C{plus}{plus} compiler supports range-based for-loop (this is a C{plus}{plus}11 feature, at the time of writing it's supported by Microsoft Visual Studio 2012+, GCC 4.6+ and Clang 3.0+), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with http://www.boost.org/libs/foreach/[Boost Foreach], and possibly other pre-C{plus}{plus}11 foreach facilities.
+If your C{plus}{plus} compiler supports range-based for-loop (this is a C{plus}{plus}11 feature, supported by Microsoft Visual Studio 2012+, GCC 4.6+ and Clang 3.0+), you can use it to enumerate nodes/attributes. Additional helpers are provided to support this; note that they are also compatible with http://www.boost.org/libs/foreach/[Boost Foreach], and possibly other pre-C{plus}{plus}11 foreach facilities.
 
 [source,subs="+quotes"]
 ----
@@ -1415,17 +1415,17 @@ xml_node xml_node::insert_child_before(const char_t* name, const xml_node& node)
 xml_node xml_node::insert_child_before(string_view_t name, const xml_node& node);
 ----
 
-`append_attribute` and `append_child` create a new node/attribute at the end of the corresponding list of the node the method is called on; `prepend_attribute` and `prepend_child` create a new node/attribute at the beginning of the list; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_attribute_before` add the node/attribute before or after the specified node/attribute.
+`append_attribute` and `append_child` create a new node/attribute at the end of the corresponding list of the node the method is called on; `prepend_attribute` and `prepend_child` create a new node/attribute at the beginning of the list; `insert_attribute_after`, `insert_attribute_before`, `insert_child_after` and `insert_child_before` add the node/attribute before or after the specified node/attribute.
 
 Attribute functions create an attribute with the specified name; you can specify the empty name and change the name later if you want to. Node functions with the `type` argument create the node with the specified type; since node type can't be changed, you have to know the desired type beforehand. Also note that not all types can be added as children; see below for clarification. Node functions with the `name` argument create the element node (<<node_element,node_element>>) with the specified name.
 
 All functions return the handle to the created object on success, and null handle on failure. There are several reasons for failure:
 
 * Adding fails if the target node is null;
-* Only <<node_element,node_element>> nodes can contain attributes, so attribute adding fails if node is not an element;
+* Only <<node_element,node_element>> and <<node_declaration,node_declaration>> nodes can contain attributes, so attribute adding fails if node is not an element or a declaration;
 * Only <<node_document,node_document>> and <<node_element,node_element>> nodes can contain children, so child node adding fails if the target node is not an element or a document;
 * <<node_document,node_document>> and <<node_null,node_null>> nodes can not be inserted as children, so passing <<node_document,node_document>> or <<node_null,node_null>> value as `type` results in operation failure;
-* <<node_declaration,node_declaration>> nodes can only be added as children of the document node; attempt to insert declaration node as a child of an element node fails;
+* <<node_declaration,node_declaration>> and <<node_doctype,node_doctype>> nodes can only be added as children of the document node; attempt to insert them as children of an element node fails;
 * Adding node/attribute results in memory allocation, which may fail;
 * Insertion functions fail if the specified node or attribute is null or is not in the target node's children/attribute list.
 
@@ -1496,7 +1496,7 @@ bool xml_text::set(const char_t* rhs, size_t size);
 bool xml_text::set(string_view_t rhs);
 ----
 
-This function tries to set the contents to the specified string, and returns the operation result. The operation fails if the text object was retrieved from a node that can not have a value and is not an element node (i.e. it is a <<node_declaration,node_declaration>> node), if the text object is empty, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to this function). Note that if the text object was retrieved from an element node, this function creates the PCDATA child node if necessary (i.e. if the element node does not have a PCDATA/CDATA child already).
+This function tries to set the contents to the specified string, and returns the operation result. The operation fails if the text object was retrieved from a node that can not have a value and is not an element node (i.e. it is a <<node_declaration,node_declaration>> node), if the node handle is null, or if there is insufficient memory to handle the request. The provided string is copied into document managed memory and can be destroyed after the function returns (for example, you can safely pass stack-allocated buffers to this function). Note that if the text object was retrieved from an element node, this function creates the PCDATA child node if necessary (i.e. if the element node does not have a PCDATA/CDATA child already).
 
 [[xml_text::set_value]]
 In addition to a string function, several functions are provided for handling text with numbers and booleans as contents:
@@ -1622,6 +1622,8 @@ bool append_fragment(pugi::xml_node target, const char* buffer, size_t size)
 
     for (pugi::xml_node child = doc.first_child(); child; child = child.next_sibling())
         target.append_copy(child);
+
+    return true;
 }
 ----
 
@@ -1629,7 +1631,7 @@ bool append_fragment(pugi::xml_node target, const char* buffer, size_t size)
 +
 [source]
 ----
-bool append_fragment(pugi::xml_node target, const pugi::xml_document& cached_fragment)
+void append_fragment(pugi::xml_node target, const pugi::xml_document& cached_fragment)
 {
     for (pugi::xml_node child = cached_fragment.first_child(); child; child = child.next_sibling())
         target.append_copy(child);
@@ -1697,7 +1699,7 @@ void xml_document::save(std::ostream& stream, const char_t* indent = "\t", unsig
 void xml_document::save(std::wostream& stream, const char_t* indent = "\t", unsigned int flags = format_default) const;
 ----
 
-`save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wstream` argument saves the document to the wide stream with <<encoding_wchar,encoding_wchar>> encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
+`save` with `std::ostream` argument saves the document to the stream in the same way as `save_file` (i.e. with requested header and with encoding conversions). On the other hand, `save` with `std::wostream` argument saves the document to the wide stream with <<encoding_wchar,encoding_wchar>> encoding.  Because of this, using `save` with wide character streams requires careful (usually platform-specific) stream setup (i.e. using the `imbue` function). Generally use of wide streams is discouraged, however it provides you with the ability to save documents to non-Unicode encodings, i.e. you can save Shift-JIS encoded data if you set the correct locale.
 
 [[xml_writer_stream]]
 Calling `save` with stream target is equivalent to creating an `xml_writer_stream` object with stream as the only constructor argument and then calling `save`; see <<saving.writer>> for writer interface details. When using `xml_writer_stream` with wide-character streams, you must pass `encoding_wchar` explicitly, as the wide writer expects wide-character data.
@@ -1789,7 +1791,7 @@ These flags control the additional output information:
 * [[format_write_bom]]`format_write_bom` enables Byte Order Mark (BOM) output. By default, no BOM is output, so in case of non UTF-8 encodings the resulting document's encoding may not be recognized by some parsers and text editors, if they do not implement sophisticated encoding detection. Enabling this flag adds an encoding-specific BOM to the output. This flag has no effect in `xml_node::print` functions: they never output the BOM. This flag is *off* by default.
 
 * [[format_save_file_text]]`format_save_file_text` changes the file mode when using `save_file` function. By default, file is opened in binary mode, which means that the output file will
-contain platform-independent newline `\n` (ASCII 10). If this flag is on, file is opened in text mode, which on some systems changes the newline format (i.e. on Windows you can use this flag to output XML documents with `\r\n` (ASCII 13 10) newlines. This flag is *off* by default.
+contain platform-independent newline `\n` (ASCII 10). If this flag is on, file is opened in text mode, which on some systems changes the newline format (i.e. on Windows you can use this flag to output XML documents with `\r\n` (ASCII 13 10) newlines). This flag is *off* by default.
 
 Additionally, there is one predefined option mask:
 
@@ -2137,7 +2139,7 @@ include::samples/xpath_variables.cpp[tags=code]
 There are two different mechanisms for error handling in XPath implementation; the mechanism used depends on whether exception support is disabled (this is controlled with <<PUGIXML_NO_EXCEPTIONS,PUGIXML_NO_EXCEPTIONS>> define).
 
 [[xpath_exception]][[xpath_exception::result]][[xpath_exception::what]]
-By default, XPath functions throw `xpath_exception` object in case of errors; additionally, in the event any memory allocation fails, an `std::bad_alloc` exception is thrown. Also `xpath_exception` is thrown if the query is evaluated to a node set, but the return type is not node set. If the query constructor succeeds (i.e. no exception is thrown), the query object is valid. Otherwise you can get the error details via one of the following functions:
+By default, XPath functions throw `xpath_exception` object in case of errors; additionally, in the event any memory allocation fails, an `std::bad_alloc` exception is thrown. Also `xpath_exception` is thrown if the query is evaluated as a node set, but the return type is not node set. If the query constructor succeeds (i.e. no exception is thrown), the query object is valid. Otherwise you can get the error details via one of the following functions:
 
 [source]
 ----
@@ -2933,7 +2935,9 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(long rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(unsigned long rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(double rhs);
+    bool +++<a href="#xml_attribute::set_value">set_value</a>+++(double rhs, int precision);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(float rhs);
+    bool +++<a href="#xml_attribute::set_value">set_value</a>+++(float rhs, int precision);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(bool rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(long long rhs);
     bool +++<a href="#xml_attribute::set_value">set_value</a>+++(unsigned long long rhs);
@@ -2948,7 +2952,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(float rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(bool rhs);
     xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(long long rhs);
-    xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(unsnigned long long rhs);
+    xml_attribute& +++<a href="#xml_attribute::assign">operator=</a>+++(unsigned long long rhs);
 
 +++<span class="tok-k">class</span> <a href="#xml_node">xml_node</a>+++
     +++<a href="#xml_node::ctor">xml_node</a>+++();
@@ -3017,7 +3021,7 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     template <typename Predicate> xml_node +++<a href="#xml_node::find_node">find_node</a>+++(Predicate pred) const;
 
     string_t +++<a href="#xml_node::path">path</a>+++(char_t delimiter = '/') const;
-    xml_node +++<a href="#xml_node::first_element_by_path">xml_node::first_element_by_path</a>+++(const char_t* path, char_t delimiter = '/') const;
+    xml_node +++<a href="#xml_node::first_element_by_path">first_element_by_path</a>+++(const char_t* path, char_t delimiter = '/') const;
     xml_node +++<a href="#xml_node::root">root</a>+++() const;
     ptrdiff_t +++<a href="#xml_node::offset_debug">offset_debug</a>+++() const;
 
@@ -3135,9 +3139,9 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
 
 +++<span class="tok-k">class</span> <a href="#xml_text">xml_text</a>+++
     bool +++<a href="#xml_text::empty">empty</a>+++() const;
-    operator +++<a href="#xml_text::unspecified_bool_type">xml_text::unspecified_bool_type</a>+++() const;
+    operator +++<a href="#xml_text::unspecified_bool_type">unspecified_bool_type</a>+++() const;
 
-    const char_t* +++<a href="#xml_text::get">xml_text::get</a>+++() const;
+    const char_t* +++<a href="#xml_text::get">get</a>+++() const;
 
     const char_t* +++<a href="#xml_text::as_string">as_string</a>+++(const char_t* def = "") const;
     int +++<a href="#xml_text::as_int">as_int</a>+++(int def = 0) const;
@@ -3157,7 +3161,9 @@ const unsigned int +++<a href="#parse_wnorm_attribute">parse_wnorm_attribute</a>
     bool +++<a href="#xml_text::set_value">set</a>+++(long rhs);
     bool +++<a href="#xml_text::set_value">set</a>+++(unsigned long rhs);
     bool +++<a href="#xml_text::set_value">set</a>+++(double rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(double rhs, int precision);
     bool +++<a href="#xml_text::set_value">set</a>+++(float rhs);
+    bool +++<a href="#xml_text::set_value">set</a>+++(float rhs, int precision);
     bool +++<a href="#xml_text::set_value">set</a>+++(bool rhs);
     bool +++<a href="#xml_text::set_value">set</a>+++(long long rhs);
     bool +++<a href="#xml_text::set_value">set</a>+++(unsigned long long rhs);
