@@ -11,6 +11,13 @@ image:
 
 version: "{branch}-{build}"
 
+for:
+  - matrix:
+      only:
+        - image: Visual Studio 2026
+    install:
+      - pip install --upgrade cmake
+
 build_script:
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2017") { .\scripts\nuget_build.ps1 2017}
   - ps: if ($env:APPVEYOR_BUILD_WORKER_IMAGE -eq "Visual Studio 2019") { .\scripts\nuget_build.ps1 2019}
