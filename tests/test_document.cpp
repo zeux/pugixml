@@ -1318,6 +1318,15 @@ TEST(document_load_buffer_empty_fragment)
 	}
 }
 
+TEST(document_load_buffer_empty_encoding)
+{
+	xml_document doc;
+	xml_parse_result result = doc.load_buffer(0, 0, parse_fragment);
+
+	CHECK(result.status == status_ok);
+	CHECK(result.encoding == encoding_utf8);
+}
+
 TEST(document_load_buffer_null)
 {
 	xml_document doc;
