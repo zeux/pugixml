@@ -171,6 +171,47 @@ TEST_XML(dom_attr_as_double, "<node attr1='0' attr2='1' attr3='0.12' attr4='-5.1
 	CHECK_DOUBLE(node.attribute(STR("attr6")).as_double(), 3.14159265358979323846);
 }
 
+TEST(dom_as_floating_point_sign)
+{
+    const struct
+    {
+        const char_t* value;
+        double expected;
+    } cases[] = {
+        {STR("1.25"), 1.25},
+        {STR("+1.25"), 1.25},
+        {STR("-1.25"), -1.25},
+        {STR(" \t\r\n+1.25"), 1.25},
+        {STR("+.5"), 0.5},
+        {STR("+1e+2"), 100},
+        {STR("+-1.25"), 0},
+        {STR(" \t\r\n+-1.25"), 0},
+        {STR("+-1e+2"), 0},
+        {STR("++1.25"), 0},
+        {STR("--1.25"), 0},
+        {STR("-+1.25"), 0},
+        {STR("+ -1.25"), 0},
+        {STR("+"), 0},
+        {STR("-"), 0},
+        {STR(""), 42}
+    };
+
+    xml_document doc;
+    xml_node node = doc.append_child(STR("node"));
+    xml_attribute attr = node.append_attribute(STR("attr"));
+
+    for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i)
+    {
+        CHECK(attr.set_value(cases[i].value));
+        CHECK(node.text().set(cases[i].value));
+
+        CHECK(attr.as_double(42) == cases[i].expected);
+        CHECK(double(attr.as_float(42)) == cases[i].expected);
+        CHECK(node.text().as_double(42) == cases[i].expected);
+        CHECK(double(node.text().as_float(42)) == cases[i].expected);
+    }
+}
+
 TEST_XML(dom_attr_as_bool, "<node attr1='0' attr2='1' attr3='true' attr4='True' attr5='Yes' attr6='yes' attr7='false'/>")
 {
 	xml_node node = doc.child(STR("node"));

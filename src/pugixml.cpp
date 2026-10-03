@@ -4706,7 +4706,7 @@ PUGI_IMPL_NS_BEGIN
 	#elif defined(PUGIXML_CHARCONV_FLOAT)
 		while (PUGI_IMPL_IS_CHARTYPE(*value, ct_space))
 			value++;
-		if (*value == '+')
+		if (*value == '+' && value[1] != '-')
 			value++;
 		// return code is intentionally ignored to let libc++/MSVC STL correctly handle underflow/overflow
 		double result = 0.0;
@@ -4724,7 +4724,7 @@ PUGI_IMPL_NS_BEGIN
 	#elif defined(PUGIXML_CHARCONV_FLOAT)
 		while (PUGI_IMPL_IS_CHARTYPE(*value, ct_space))
 			value++;
-		if (*value == '+')
+		if (*value == '+' && value[1] != '-')
 			value++;
 		// return code is intentionally ignored to let libc++/MSVC STL correctly handle underflow/overflow
 		float result = 0.0f;
