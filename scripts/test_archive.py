@@ -25,6 +25,7 @@ class ArchiveTest(unittest.TestCase):
                         with zipfile.ZipFile(target) as archive:
                             contents = {path: archive.read('release/' + path) for path in sources}
                     else:
+                        self.assertEqual(int.from_bytes(target.read_bytes()[4:8], 'little'), 1700000000)
                         with tarfile.open(target) as archive:
                             contents = {
                                 path: archive.extractfile('release/' + path).read()

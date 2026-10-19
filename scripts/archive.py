@@ -42,6 +42,7 @@ if len(sys.argv) < 5:
 	raise RuntimeError('Usage: python archive.py <target> <archive prefix> <timestamp> <source files>')
 
 target, arcprefix, timestamp = sys.argv[1:4]
+timestamp = int(timestamp)
 sources = sys.argv[4:]
 
 # tarfile._Stream._init_write_gz always writes current time to gzip header
