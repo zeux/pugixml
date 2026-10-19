@@ -22,7 +22,15 @@ The distribution contains the following folders:
 
 	src/ - header and source files
 
+	tests/ - unit tests and test data
+
 	readme.txt - this file.
+
+To build and run the unit tests from an extracted distribution:
+
+	cmake -S . -B build -DPUGIXML_BUILD_TESTS=ON
+	cmake --build build --config Debug
+	ctest --test-dir build -C Debug --output-on-failure
 
 This library is distributed under the MIT License:
 

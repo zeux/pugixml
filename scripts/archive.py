@@ -9,7 +9,8 @@ def read_file(path, use_crlf):
 	with open(path, 'rb') as file:
 		data = file.read()
 
-	if b'\0' not in data:
+	# Test fixtures include byte offsets and encodings that must remain unchanged.
+	if not path.startswith('tests/data/') and b'\0' not in data:
 		data = data.replace(b'\r', b'')
 		if use_crlf:
 			data = data.replace(b'\n', b'\r\n')

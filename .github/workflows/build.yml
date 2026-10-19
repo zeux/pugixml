@@ -50,6 +50,8 @@ jobs:
     runs-on: ${{matrix.os}}-latest
     steps:
     - uses: actions/checkout@v4
+    - name: test archive contents
+      run: python3 scripts/test_archive.py
     - name: cmake configure
       run: |
         mkdir cmake && cd cmake
