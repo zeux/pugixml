@@ -85,3 +85,7 @@ To honor the license agreement, please include attribution into the user-facing 
     // See pugxml.xml for further information, history, etc.
     // Contributions by Neville Franks (readonly@getsoft.com).
 </details>
+
+## AI policy
+
+AI-generated issues or pull requests (including pull request descriptions), will be closed. Repeat submissions may result in a ban.
