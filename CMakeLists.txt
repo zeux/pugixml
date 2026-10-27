@@ -61,7 +61,8 @@ option(PUGIXML_CHARCONV_FLOAT "Enable charconv number conversion" OFF)
 option(PUGIXML_NO_XPATH "Disable XPath" OFF)
 option(PUGIXML_NO_STL "Disable STL" OFF)
 option(PUGIXML_NO_EXCEPTIONS "Disable Exceptions" OFF)
-mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS)
+option(PUGIXML_HAS_STRING_VIEW "Enable std::string_view even without C++17 or with STL disabled" OFF)
+mark_as_advanced(PUGIXML_NO_XPATH PUGIXML_NO_STL PUGIXML_NO_EXCEPTIONS PUGIXML_HAS_STRING_VIEW)
 
 if (APPLE)
   option(PUGIXML_BUILD_APPLE_FRAMEWORK "Build as Apple Frameworks" OFF)
@@ -74,6 +75,7 @@ set(PUGIXML_PUBLIC_DEFINITIONS
   $<$<BOOL:${PUGIXML_NO_XPATH}>:PUGIXML_NO_XPATH>
   $<$<BOOL:${PUGIXML_NO_STL}>:PUGIXML_NO_STL>
   $<$<BOOL:${PUGIXML_NO_EXCEPTIONS}>:PUGIXML_NO_EXCEPTIONS>
+  $<$<BOOL:${PUGIXML_HAS_STRING_VIEW}>:PUGIXML_HAS_STRING_VIEW>
 )
 
 # This is used to backport a CMake 3.15 feature, but is also forwards compatible
