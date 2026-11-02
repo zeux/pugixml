@@ -6859,40 +6859,50 @@ namespace pugi
 
 		xml_node context = path_[0] == delimiter ? root() : *this;
 
-		if (!context._root) return xml_node();
-
 		const char_t* path_segment = path_;
 
-		while (*path_segment == delimiter) ++path_segment;
-
-		const char_t* path_segment_end = path_segment;
-
-		while (*path_segment_end && *path_segment_end != delimiter) ++path_segment_end;
-
-		if (path_segment == path_segment_end) return context;
-
-		const char_t* next_segment = path_segment_end;
-
-		while (*next_segment == delimiter) ++next_segment;
-
-		if (*path_segment == '.' && path_segment + 1 == path_segment_end)
-			return context.first_element_by_path(next_segment, delimiter);
-		else if (*path_segment == '.' && *(path_segment+1) == '.' && path_segment + 2 == path_segment_end)
-			return context.parent().first_element_by_path(next_segment, delimiter);
-		else
+		// self (.) and parent (..) components are resolved iteratively; recursing on
+		// them overflows the stack on paths with many such components (e.g. "././.../.")
+		for (;;)
 		{
-			for (xml_node_struct* j = context._root->first_child; j; j = j->next_sibling)
+			if (!context._root) return xml_node();
+
+			while (*path_segment == delimiter) ++path_segment;
+
+			const char_t* path_segment_end = path_segment;
+
+			while (*path_segment_end && *path_segment_end != delimiter) ++path_segment_end;
+
+			if (path_segment == path_segment_end) return context;
+
+			const char_t* next_segment = path_segment_end;
+
+			while (*next_segment == delimiter) ++next_segment;
+
+			if (*path_segment == '.' && path_segment + 1 == path_segment_end)
 			{
-				const char_t* jname = j->name;
-				if (jname && impl::strequalrange(jname, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
-				{
-					xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
-
-					if (subsearch) return subsearch;
-				}
+				path_segment = next_segment;
 			}
+			else if (*path_segment == '.' && *(path_segment+1) == '.' && path_segment + 2 == path_segment_end)
+			{
+				context = context.parent();
+				path_segment = next_segment;
+			}
+			else
+			{
+				for (xml_node_struct* j = context._root->first_child; j; j = j->next_sibling)
+				{
+					const char_t* jname = j->name;
+					if (jname && impl::strequalrange(jname, path_segment, static_cast<size_t>(path_segment_end - path_segment)))
+					{
+						xml_node subsearch = xml_node(j).first_element_by_path(next_segment, delimiter);
 
-			return xml_node();
+						if (subsearch) return subsearch;
+					}
+				}
+
+				return xml_node();
+			}
 		}
 	}
 

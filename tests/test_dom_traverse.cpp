@@ -869,6 +869,24 @@ TEST_XML(dom_node_first_element_by_path, "<node><child1>text<child2/></child1></
 	CHECK(doc.first_element_by_path(STR("//node")) == doc.child(STR("node")));
 }
 
+TEST_XML(dom_node_first_element_by_path_long, "<node/>")
+{
+	// a path made of many self/parent components must not recurse per component (stack overflow)
+	size_t count = 500000;
+	char_t* path = new char_t[count * 2 + 1];
+
+	for (size_t i = 0; i < count; ++i)
+	{
+		path[i * 2 + 0] = '.';
+		path[i * 2 + 1] = '/';
+	}
+	path[count * 2] = 0;
+
+	CHECK(doc.first_element_by_path(path) == doc);
+
+	delete[] path;
+}
+
 struct test_walker: xml_tree_walker
 {
 	std::basic_string<char_t> log;
